@@ -295,7 +295,7 @@ class LateDays extends AbstractModel {
 
     /**
      * Gets the gradeables with a provided status
-     * @param $status
+     * @param int $status
      * @return string[] Array of gradeable ids
      */
     public function getGradeableIdsByStatus($status) {

@@ -5,8 +5,6 @@ namespace app\libraries;
 use League\CommonMark\Inline\Element\AbstractInline;
 use League\CommonMark\Inline\Renderer\InlineRendererInterface;
 use League\CommonMark\ElementRendererInterface;
-use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
-use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
 use League\CommonMark\Inline\Renderer\CodeRenderer;
 

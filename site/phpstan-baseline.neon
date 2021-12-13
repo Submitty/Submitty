@@ -1,410 +1,572 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$show_all\\)\\: Unexpected token \"\\$show_all\", expected type at offset 18$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/controllers/NotificationController.php
+			path: app/controllers/AbstractController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$nid\\)\\: Unexpected token \"\\$nid\", expected type at offset 18$#"
+			message: "#^Strict comparison using \\=\\=\\= between non\\-empty\\-string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
-			path: app/controllers/NotificationController.php
+			path: app/controllers/AuthenticationController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$seen\\)\\: Unexpected token \"\\$seen\", expected type at offset 37$#"
-			count: 1
-			path: app/controllers/NotificationController.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gradeable$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Variable \\$repo_paths in isset\\(\\) always exists and is not nullable\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Call to an undefined method app\\\\libraries\\\\Core\\:\\:buildNewCourseUrl\\(\\)\\.$#"
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
 			count: 2
+			path: app/controllers/DockerInterfaceController.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 4
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$config_path\\)\\: Unexpected token \"\\$config_path\", expected type at offset 18$#"
-			count: 1
-			path: app/controllers/admin/AutogradingConfigController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected type at offset 18$#"
+			message: "#^Negated boolean expression is always true\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: "#^Variable \\$gg in PHPDoc tag @var does not match any variable in the foreach loop\\: \\$user_id$#"
-			count: 1
-			path: app/controllers/admin/ReportController.php
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 2
+			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected variable at offset 127$#"
+			message: "#^Strict comparison using \\=\\=\\= between mixed and '' will always evaluate to false\\.$#"
 			count: 1
-			path: app/controllers/admin/ReportController.php
+			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected variable at offset 192$#"
-			count: 1
-			path: app/controllers/admin/ReportController.php
-
-		-
-			message: "#^Variable \\$file in isset\\(\\) is always null\\.$#"
+			message: "#^Variable \\$file in empty\\(\\) always exists and is always falsy\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Offset 4 does not exist on null\\.$#"
-			count: 5
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(integer\\(0/1/2\\) \\$modifyType \\- 0 \\=\\> delete, 1 \\=\\> edit content, 2 \\=\\> undelete\\)\\: Unexpected token \"\\(\", expected variable at offset 200$#"
+			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/controllers/forum/ForumController.php
+			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: "#^Variable \\$content might not be defined\\.$#"
+			message: "#^Elseif condition is always true\\.$#"
 			count: 1
-			path: app/controllers/forum/ForumController.php
+			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$subject might not be defined\\.$#"
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
-			path: app/controllers/forum/ForumController.php
+			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$original_creator might not be defined\\.$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and false will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Elseif condition is always true\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$course is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$created is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$email_address is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$error is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$semester is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$sent is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$subject is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
-			path: app/controllers/forum/ForumController.php
+			path: app/libraries/Access.php
 
 		-
-			message: "#^Variable \\$graded_component might not be defined\\.$#"
+			message: "#^Call to function is_subclass_of\\(\\) with non\\-empty\\-string and 'app\\\\\\\\authentication…' will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
 			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/libraries/Core.php
 
 		-
-			message: "#^Variable \\$team_users might not be defined\\.$#"
+			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$authentication is never written, only read\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/libraries/Core.php
 
 		-
-			message: "#^Variable \\$all_teams might not be defined\\.$#"
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
+			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/libraries/Core.php
 
 		-
-			message:
-				"""
-					#^PHPDoc tag @param has invalid value \\(\\$from This is the user that was being viewed when a navigation button was clicked on the TA grading
-					                 interface\\.  Knowing who we were viewing allows us to decide who to view next\\.\\)\\: Unexpected token "\\$from", expected type at offset 236$#
-				"""
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/libraries/Core.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$to Used to determine the direction to move in, either 'prev' or 'next'\\)\\: Unexpected token \"\\$to\", expected type at offset 452$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$to_ungraded Should the next student we go to be the next submission or next ungraded submission\\?\\)\\: Unexpected token \"\\$to_ungraded\", expected type at offset 538$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message:
-				"""
-					#^PHPDoc tag @param has invalid value \\(\\$who_id This is the user we wish to view, this field will only be passed on when the request originates
-					                 on the grading index page\\)\\: Unexpected token "\\$who_id", expected type at offset 68$#
-				"""
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Variable \\$goToStudent might not be defined\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$full_sets$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 4
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$section\\)\\: Unexpected token \"\\$section\", expected type at offset 46$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$section_type\\)\\: Unexpected token \"\\$section_type\", expected type at offset 69$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected type at offset 97$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected type at offset 66$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view\\)\\: Unexpected token \"\\$view\", expected type at offset 46$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 5
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$body might not be defined\\.$#"
-			count: 5
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$subject might not be defined\\.$#"
+			message: "#^Unsafe access to private property app\\\\libraries\\\\DateUtils\\:\\:\\$timezone through static\\:\\:\\.$#"
 			count: 3
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$notifications might not be defined\\.$#"
-			count: 1
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$emails might not be defined\\.$#"
-			count: 1
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$teams might not be defined\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Variable \\$uploaded_file might not be defined\\.$#"
-			count: 6
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Variable \\$uploaded_file in isset\\(\\) always exists and is not nullable\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Variable \\$team might not be defined\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
-			count: 1
 			path: app/libraries/DateUtils.php
 
 		-
-			message: "#^Call to an undefined method Throwable\\:\\:getDetails\\(\\)\\.$#"
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$has_difference is never read, only written\\.$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\ExceptionHandler\\:\\:\\$display_exceptions through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Unsafe access to private property app\\\\libraries\\\\ExceptionHandler\\:\\:\\$log_exceptions through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^Unsafe call to private method app\\\\libraries\\\\ExceptionHandler\\:\\:parseArgs\\(\\) through static\\:\\:\\.$#"
 			count: 1
 			path: app/libraries/ExceptionHandler.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$mode\\)\\: Unexpected token \"\\$mode\", expected type at offset 38$#"
+			message: "#^Property app\\\\libraries\\\\GradingQueue\\:\\:\\$grading_remaining is never read, only written\\.$#"
 			count: 1
-			path: app/libraries/FileUtils.php
+			path: app/libraries/GradingQueue.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$path\\)\\: Unexpected token \"\\$path\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/FileUtils.php
+			message: "#^Unsafe access to private property app\\\\libraries\\\\Logger\\:\\:\\$log_path through static\\:\\:\\.$#"
+			count: 5
+			path: app/libraries/Logger.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$zipname\\)\\: Unexpected token \"\\$zipname\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/FileUtils.php
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:getFilename\\(\\) through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/Logger.php
 
 		-
-			message: "#^PHPDoc tag @param for parameter \\$type with type app\\\\libraries\\\\GradeableType\\|int is not subtype of native type int\\.$#"
-			count: 1
-			path: app/libraries/GradeableType.php
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:getTimestamp\\(\\) through static\\:\\:\\.$#"
+			count: 2
+			path: app/libraries/Logger.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/GradeableType.php
+			message: "#^Unsafe call to private method app\\\\libraries\\\\Logger\\:\\:logMessage\\(\\) through static\\:\\:\\.$#"
+			count: 3
+			path: app/libraries/Logger.php
 
 		-
-			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
+			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
 			count: 1
-			path: app/libraries/socket/Server.php
+			path: app/libraries/database/AbstractDatabase.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
+			message: "#^Call to function is_null\\(\\) with DateTime will always evaluate to false\\.$#"
+			count: 2
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between array\\<int\\> and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/database/QueryIdentifier.php
+
+		-
+			message: "#^Right side of && is always true\\.$#"
+			count: 1
+			path: app/libraries/database/QueryIdentifier.php
+
+		-
+			message: "#^PHPDoc tag @var for constant app\\\\libraries\\\\plagiarism\\\\PlagiarismUtils\\:\\:SUPPORTED_LANGUAGES with type int is incompatible with value array\\{plaintext\\: array\\{hash_size\\: 14\\}, python\\: array\\{hash_size\\: 14\\}, java\\: array\\{hash_size\\: 14\\}, cpp\\: array\\{hash_size\\: 14\\}, mips\\: array\\{hash_size\\: 5\\}\\}\\.$#"
+			count: 1
+			path: app/libraries/plagiarism/PlagiarismUtils.php
+
+		-
+			message: "#^Instanceof between bool and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
+			count: 2
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Call to function is_subclass_of\\(\\) with object and 'app\\\\\\\\Models…' will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/AbstractModel.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$object\\)\\: Unexpected token \"\\$object\", expected type at offset 328$#"
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
-			path: app/models/AbstractModel.php
+			path: app/models/Config.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$arguments\\)\\: Unexpected token \"\\$arguments\", expected type at offset 451$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/models/AbstractModel.php
+			path: app/models/Config.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$name\\)\\: Unexpected token \"\\$name\", expected type at offset 431$#"
-			count: 1
-			path: app/models/AbstractModel.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$course_path\\)\\: Unexpected token \"\\$course_path\", expected type at offset 112$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 89$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$idx\\)\\: Unexpected token \"\\$idx\", expected type at offset 202$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$results_path\\)\\: Unexpected token \"\\$results_path\", expected type at offset 139$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$results_public_path\\)\\: Unexpected token \"\\$results_public_path\", expected type at offset 167$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$component_id\\)\\: Unexpected token \"\\$component_id\", expected type at offset 89$#"
-			count: 1
-			path: app/models/GradingOrder.php
-
-		-
-			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getPrevSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
+			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
 			count: 2
 			path: app/models/GradingOrder.php
 
 		-
-			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getNextSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
-			count: 2
-			path: app/models/GradingOrder.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$direction Direction of sort \\(ASC or DESC\\)\\)\\: Unexpected token \"\\$direction\", expected type at offset 225$#"
+			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
 			count: 1
-			path: app/models/GradingOrder.php
+			path: app/models/RainbowCustomization.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$sort Sort type\\)\\: Unexpected token \"\\$sort\", expected type at offset 195$#"
+			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$sections is never read, only written\\.$#"
 			count: 1
-			path: app/models/GradingOrder.php
+			path: app/models/RainbowCustomization.php
 
 		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
+			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
-			path: app/models/Notification.php
+			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @return has invalid value \\(\\$trimmed_message\\)\\: Unexpected token \"\\$trimmed_message\", expected type at offset 119$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
+			count: 6
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/models/Notification.php
+			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutogradingTestcase and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/models/RainbowCustomizationJSON.php
+			path: app/models/gradeable/AutoGradedTestcase.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$label The label you would like to assign to the sectionID\\)\\: Unexpected token \"\\$label\", expected type at offset 91$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$sectionID The sectionID\\)\\: Unexpected token \"\\$sectionID\", expected type at offset 52$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Argument of an invalid type app\\\\models\\\\RainbowCustomizationJSON supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Comparison operation \"\\=\\=\" between \\(array\\|float\\|int\\) and 0 results in an error\\.$#"
+			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 108$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setBatchRegrade\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradeTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradingBegan\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setGradingFinished\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setQueueTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setVcsRevision\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedVersionHistory\\:\\:setWaitTime\\(\\) is unused\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between array and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 69$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gc_id int Gradeable Component id\\)\\: Unexpected token \"\\$gc_id\", expected type at offset 95$#"
+			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Result of && is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\TaGradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected type at offset 68$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Submitter and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/models/gradeable/LateDays.php
+			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 103$#"
+			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
 			path: app/models/gradeable/Mark.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$popup_css_file\\)\\: Unexpected token \"\\$popup_css_file\", expected type at offset 211$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
 			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\Team\\|app\\\\models\\\\User and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 2
 			path: app/views/AutoGradingView.php
 
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns false\\.$#"
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/views/AutoGradingView.php
+			path: app/views/GlobalView.php
 
 		-
-			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
+			message: "#^Ternary operator condition is always true\\.$#"
 			count: 1
-			path: app/views/AutoGradingView.php
+			path: app/views/GlobalView.php
 
 		-
-			message: "#^Variable \\$row might not be defined\\.$#"
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getDeleteButton\\(\\) never returns null so it can be removed from the return type\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getEditButton\\(\\) never returns null so it can be removed from the return type\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Method app\\\\views\\\\NavigationView\\:\\:getGradeButton\\(\\) never returns null so it can be removed from the return type\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between float and 0 will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between float and 1 will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: "#^Call to function is_array\\(\\) with app\\\\entities\\\\course\\\\CourseMaterial will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
+			count: 2
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'false' will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Offset string on array\\{\\} in isset\\(\\) does not exist\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
 			count: 2
 			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
 

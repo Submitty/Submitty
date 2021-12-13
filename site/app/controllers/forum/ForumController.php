@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -18,6 +19,8 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
+ *
+ * @Enabled("forum")
  */
 class ForumController extends AbstractController {
     /**
@@ -178,7 +181,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }
@@ -187,7 +190,7 @@ class ForumController extends AbstractController {
             $result["new_ids"] = [];
             foreach ($category as $categoryName) {
                 if (!$this->isValidCategories(-1, [$categoryName])) {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName, $_POST["rank"]);
                     $result["new_ids"][] = $newCategoryId;
                 }
             }
@@ -556,7 +559,7 @@ class ForumController extends AbstractController {
      *
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
      *
-     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
      *
      * @Route("/courses/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
@@ -675,6 +678,10 @@ class ForumController extends AbstractController {
                     $post_content = $_POST["thread_post_content"];
                     $subject = "Thread Edited: " . Notification::textShortner($thread_title);
                     $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
+                }
+                else {
+                    $subject = "Thread Edited: " . Notification::textShortner($thread_title);
+                    $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title;
                 }
 
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -838,9 +845,7 @@ class ForumController extends AbstractController {
 
             $post_id = $_POST["edit_post_id"];
             $original_post = $this->core->getQueries()->getPost($post_id);
-            if (!empty($original_post)) {
-                $original_creator = $original_post['author_user_id'];
-            }
+            $original_creator = !empty($original_post) ? $original_post['author_user_id'] : null;
             $anon = (!empty($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
             if (!$this->modifyAnonymous($original_creator)) {
@@ -951,7 +956,6 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
-
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? [$_POST['thread_category']] : [];
