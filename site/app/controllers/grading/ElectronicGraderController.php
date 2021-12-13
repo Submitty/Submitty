@@ -958,6 +958,179 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Get attachments for a gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/attachments", methods={"GET"})
+     */
+    public function ajaxGetAttachments($gradeable_id) {
+        $anon_id = $_POST['anon_id'] ?? '';
+        $grader_id = $_POST['grader_id'] ?? '';
+
+        $grader = $this->core->getQueries()->getUserById($grader_id);
+        if ($grader === null) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
+            return;
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
+            return;
+        }
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("path.read.attachments", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
+            return;
+        }
+
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+
+        if ($ta_graded_gradeable !== null) {
+            $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getAttachments($grader));
+        }
+        else {
+            $this->core->getOutput()->renderJsonSuccess([]);
+        }
+    }
+
+    /**
+     * Upload an attachment for a grader
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/attachments/upload", methods={"POST"})
+     */
+    public function uploadAttachment($gradeable_id) {
+        $anon_id = $_POST['anon_id'] ?? '';
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
+
+        // Check access
+        if (!$this->core->getAccess()->canI("path.write.attachments", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
+
+        if (empty($_FILES) || empty($_FILES['attachment']) || empty($_FILES['attachment']['tmp_name'])) {
+            $this->core->getOutput()->renderJsonFail('Missing attachment to save.');
+            return;
+        }
+
+        $attachment = $_FILES['attachment'];
+        $status = FileUtils::validateUploadedFiles($attachment);
+        if (!$status[0]["success"]) {
+            $this->core->getOutput()->renderJsonFail('Failed to validate upload: ' . $status[0]["error"]);
+            return;
+        }
+        $attachment_path_folder = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId());
+        FileUtils::createDir($attachment_path_folder, true);
+        $attachment_path = FileUtils::joinPaths($attachment_path_folder, $attachment['name']);
+        if (!move_uploaded_file($attachment["tmp_name"], $attachment_path)) {
+            $this->core->getOutput()->renderJsonFail('Failed to upload file.');
+        }
+        else {
+            // Get the TA graded gradeable
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+            // New info, so reset the user viewed date
+            $ta_graded_gradeable->resetUserViewedDate();
+
+            // Finally, save the changes to the database
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+            if ($submitter->isTeam()) {
+                $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+            }
+            $this->core->getOutput()->renderJsonSuccess(
+                [
+                    "name" => $attachment['name'],
+                    "path" => $attachment_path
+                ]
+            );
+        }
+    }
+
+    /**
+     * Delete an attachment for a grader
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/attachments/delete", methods={"POST"})
+     */
+    public function deleteAttachment($gradeable_id) {
+        $anon_id = $_POST['anon_id'] ?? '';
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete attachments.');
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete attachments.');
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete attachment.');
+            return;
+        }
+
+        // Check access
+        if (!$this->core->getAccess()->canI("path.write.attachments", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete attachments.');
+            return;
+        }
+
+        if (empty($_POST['attachment'])) {
+            $this->core->getOutput()->renderJsonFail('Missing attachment to delete.');
+            return;
+        }
+
+        $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId(), $_POST["attachment"]);
+        if (is_file($attachment_path)) {
+            if (@unlink($attachment_path)) {
+                $this->core->getOutput()->renderJsonSuccess();
+            }
+            else {
+                $this->core->getOutput()->renderJsonFail('Failed to remove file.');
+            }
+        }
+        else {
+            $this->core->getOutput()->renderJsonFail('File not found.');
+        }
+    }
+
+    /**
      * Imports teams from a csv file upload
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/import", methods={"POST"})
      */
@@ -3049,7 +3222,8 @@ class ElectronicGraderController extends AbstractController {
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }
         $ta_graded_gradeable->removeOverallComment($peer_id);
-        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $gradeable->isTeamAssignment());
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id);
+        $this->core->getQueries()->deleteTaGradedGradeableByIds($gradeable_id, $peer_id);
         $ta_graded_gradeable->resetUserViewedDate();
 
         // Finally, save the graded gradeable

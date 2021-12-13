@@ -984,6 +984,8 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
+            // ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data
+            $uploaded_data[$row_num] = $vals;
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
