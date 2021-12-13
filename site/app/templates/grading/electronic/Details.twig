@@ -58,7 +58,7 @@
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% endif %}
-    {% if can_regrade and not is_vcs %}
+    {% if can_regrade %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
