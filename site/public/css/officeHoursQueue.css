@@ -51,7 +51,7 @@ th {
 }
 
 .filter-buttons {
-    color: var(--btn-text-black)!important;
+    color: var(--btn-text-black);
 }
 
 .filter-buttons:hover,
