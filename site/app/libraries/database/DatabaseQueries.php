@@ -1445,9 +1445,9 @@ WHERE semester=? AND course=? AND user_id=?",
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
-                    (" . $user_or_team . ", g_id, g_title, late_day_date, late_days_allowed, submission_days_late, 
+                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
                     late_day_exceptions, late_days_remaining, late_day_status, late_days_change) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
     }
 
