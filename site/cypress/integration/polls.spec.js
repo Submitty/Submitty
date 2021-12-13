@@ -154,7 +154,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll Cypress Test');
         cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').type('1970-01-01');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();
