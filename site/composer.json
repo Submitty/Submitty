@@ -18,7 +18,7 @@
   },
   "require": {
     "aptoma/twig-markdown": "3.4.0",
-    "cboden/ratchet": "0.4.3",
+    "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.13.2",
     "doctrine/orm": "2.10.3",
     "egulias/email-validator": "3.1.2",
