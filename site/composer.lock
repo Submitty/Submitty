@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "22f56822434a530b8fc01cc7efbc6436",
+    "content-hash": "37a5ce0537c454fecc7ce10a8ae8a96e",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
-            "version": "3.4.0",
+            "version": "3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aptoma/twig-markdown.git",
-                "reference": "6612cb6543896ddd741b12db149cb69211997263"
+                "reference": "849248b26f0079f380e6559017e69114c57ef52a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/6612cb6543896ddd741b12db149cb69211997263",
-                "reference": "6612cb6543896ddd741b12db149cb69211997263",
+                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/849248b26f0079f380e6559017e69114c57ef52a",
+                "reference": "849248b26f0079f380e6559017e69114c57ef52a",
                 "shasum": ""
             },
             "require": {
@@ -65,9 +65,9 @@
             ],
             "support": {
                 "issues": "https://github.com/aptoma/twig-markdown/issues",
-                "source": "https://github.com/aptoma/twig-markdown/tree/3.4.0"
+                "source": "https://github.com/aptoma/twig-markdown/tree/3.4.1"
             },
-            "time": "2021-01-08T11:44:05+00:00"
+            "time": "2021-12-14T11:12:21+00:00"
         },
         {
             "name": "brick/math",
