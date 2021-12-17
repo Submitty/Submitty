@@ -1423,7 +1423,7 @@ class SubmissionController extends AbstractController {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
             $vcs_path = $gradeable->getVcsSubdirectory();
 
-            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1 || $gradeable->getVcsHostType() == 4) {
+            if ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1 || $gradeable->getVcsHostType() === 4) {
                 $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
                 $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
                 $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
