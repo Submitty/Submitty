@@ -319,6 +319,11 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->niceNames[$name] ?? $name;
     }
 
+    /**
+     * function to return an associative array where keys are open queues and values
+     * are the number of people in each queue.
+     * @return array
+     */
     public function getQueueOccupancy() {
         return $this->queue_occupancy;
     }
