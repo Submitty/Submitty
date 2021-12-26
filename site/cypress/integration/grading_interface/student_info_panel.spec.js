@@ -2,9 +2,9 @@ describe('Test cases involving the files panel', () => {
     beforeEach(() => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
-        cy.get('.btn').contains('View All').click()
-        cy.get('#details-table').contains('reynoa').siblings().eq(6).click()
-        cy.get('#student_info_btn').click()
+        cy.get('.btn').contains('View All').click();
+        cy.get('#details-table').contains('reynoa').siblings().eq(6).click();
+        cy.get('#student_info_btn').click();
     });
 
     it('test cancelling and reinstating assignment', () => {
