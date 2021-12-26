@@ -19,7 +19,7 @@ describe('Test cases involving the files panel', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
         cy.get('.btn').contains('View All').click()
-        cy.get('#details-table').contains('aphacker').parent().children().eq(7).click()
+        cy.get('#details-table').contains('aphacker').siblings().eq(6).click()
         cy.get('#submission_browser_btn').click()
     });
 
