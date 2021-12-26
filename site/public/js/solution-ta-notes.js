@@ -14,7 +14,7 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
         success: function (res) {
             res = JSON.parse(res);
             if (res.status === 'success') {
-                displaySuccessMessage('Solution has been updated successfully...');
+                displaySuccessMessage('Solution has been updated successfully');
                 // Dom manipulation after the Updating/adding the solution note
                 $(`#solution-box-${component_id}`).attr('data-first-edit', 0);
 
@@ -24,11 +24,9 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 $(`#solution-box-${component_id} .last-edit i.last-edit-author`).text(
                     res.data.current_user_id === res.data.author ? `${res.data.author} (You)` : res.data.author,
                 );
-                // Updating the saved notes with the latest solution
-                $(`#sol-textbox-cont-${component_id}-saved .solution-notes-text`).text(res.data.solution_text);
             }
             else {
-                displayErrorMessage('Something went wrong while updating the solution...');
+                displayErrorMessage('Something went wrong while updating the solution');
             }
         },
         error: function(err) {
@@ -43,11 +41,11 @@ function detectSolutionChange() {
     const solution_div = textarea.closest('.solution-cont');
     const save_button = solution_div.find('.solution-save-btn');
     if (textarea.val() !== solution_div.attr('data-original-solution')) {
-        save_button.removeClass('btn-default');
-        save_button.addClass('btn-primary');
+        save_button.removeClass('disabled');
+        save_button.prop('disabled', false);
     }
     else {
-        save_button.removeClass('btn-primary');
-        save_button.addClass('btn-default');
+        save_button.addClass('disabled');
+        save_button.prop('disabled', true);
     }
 }

@@ -30,12 +30,8 @@
               Last edit @ <i class="last-edit-time">{{ last_edit }}</i> by <i class="last-edit-author">{{ author }}{% if current_user_id == author %} (You) {% endif %}</i>
             </div>
         </div>
-        <div class="row divider"></div>
         <div class="solution-cont" data-component_id="{{component_id}}" data-original-solution="{{ solution_notes|default('') }}">
-            <span class="solution-notes-text solution-notes-text-{{ component_id }} {% if not is_first_edit %} hide {% endif %}">
-                No Solutions or TA notes for  "{{ component_title}}" Component  {% if is_itempool_linked %} (student having {{ itempool_item }}) {% endif %}
-            </span>
-            <div class="solution-edit" id="sol-textbox-cont-{{ component_id }}-edit">
+            <div id="sol-textbox-cont-{{ component_id }}-edit">
                 <label for="textbox-solution-{{ component_id }}" tabIndex="0" class="screen-reader">Solution for {{ component_title }}</label>
                 {% include "misc/MarkdownArea.twig" with {
                     "markdown_area_id" : "textbox-solution-" ~ component_id,
@@ -51,13 +47,10 @@
                     "initialize_preview" : is_first_edit != true,
                     "textarea_onkeyup" : "detectSolutionChange.call(this)"
                 } only %}
-                <div>
-                    <button type="primary"
-                            id="save-solution"
-                            class="btn btn-default solution-save-btn"
-                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}', '{{ itempool_item }}');"
-                    >Save</button>
-                </div>
+                <button type="primary" disabled
+                        class="btn btn-primary solution-save-btn disabled"
+                        onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}', '{{ itempool_item }}');"
+                >Save Changes</button>
             </div>
         </div>
     </div>
