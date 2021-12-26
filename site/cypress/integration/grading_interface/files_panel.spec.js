@@ -13,7 +13,7 @@ describe('Test cases involving the files panel', () => {
     }
 
     function assertResultsBrowserOpen() {
-        // have to increase timeout so that the file can be loaded properly in the CI 
+        // have to increase timeout so that the file can be loaded properly in the CI
         cy.get('#div_viewer_rd1').should('be.visible', { timeout: 20000 });
     }
 
