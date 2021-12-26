@@ -5,7 +5,7 @@ describe('Test cases involving the files panel', () => {
 
     function assertSubmissionsBrowserOpen() {
         // have to increase timeout so that the file can be loaded properly in the CI
-        cy.get('#div_viewer_sd1').should('be.visible', { timeout: 20000 });
+        cy.get('#div_viewer_sd1', { timeout: 20000 }).should('be.visible');
     }
 
     function assertResultsBrowserClosed() {
@@ -14,7 +14,7 @@ describe('Test cases involving the files panel', () => {
 
     function assertResultsBrowserOpen() {
         // have to increase timeout so that the file can be loaded properly in the CI
-        cy.get('#div_viewer_rd1').should('be.visible', { timeout: 20000 });
+        cy.get('#div_viewer_rd1', { timeout: 20000 }).should('be.visible');
     }
 
     beforeEach(() => {
