@@ -9,23 +9,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class MarkdownController extends AbstractController {
 
     /**
-     * @Route("/courses/{_semester}/{_course}/markdown/preview", methods={"POST"})
-     * @return WebResponse
-     */
-    public function displayMarkdownPreview() {
-        return new WebResponse(MarkdownView::class, 'renderMarkdownPreview', $_POST['enablePreview'], $_POST['content']);
-    }
-
-    /**
      * @Route("/markdown", methods={"POST"})
      * @return WebResponse
      */
     public function displayMarkdown() {
-        return new WebResponse(MarkdownView::class, 'renderMarkdownPreview', true, $_POST['content']);
+        return new WebResponse(MarkdownView::class, 'renderMarkdown', $_POST['content']);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/markdown/area", methods={"POST"})
+     * @Route("/markdown/area", methods={"POST"})
      * @return WebResponse
      */
     public function displayMarkdownArea() {

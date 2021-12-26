@@ -19,7 +19,8 @@
                     <span>
                         {% if thread.pinned %}
                             {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
-                            <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned to the top" aria-label="Pinned to the top"></i>
+                            {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
+                            <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
                         {% endif %}
                         {% if thread.favorite %}
                             <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>

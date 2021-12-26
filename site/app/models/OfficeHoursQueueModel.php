@@ -130,6 +130,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getAllQueues();
     }
 
+    public function getAllOpenQueues() {
+        return $this->core->getQueries()->getAllOpenQueues();
+    }
+
     public function timeToHM($time) {
         $date_time = new \DateTime($time);
         $date_time->setTimezone($this->core->getConfig()->getTimezone());

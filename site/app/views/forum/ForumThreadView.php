@@ -7,11 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
-
-    public function forumAccess() {
-        return $this->core->getConfig()->isForumEnabled();
-    }
-
     private function getSavedForumCategories($current_course, $categories) {
         $category_ids_array = array_column($categories, 'category_id');
         $cookieSelectedCategories = [];
@@ -142,11 +137,6 @@ class ForumThreadView extends AbstractView {
      */
 
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false, $thread_announced = true) {
-
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl([]));
-            return;
-        }
         $threadExists = $this->core->getQueries()->threadExists();
         $filteredThreadExists = (count($threadsHead) > 0);
         $currentThread = -1;
@@ -1151,11 +1141,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function createThread($category_colors) {
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
-
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
 
@@ -1211,12 +1196,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function showCategories($category_colors) {
-
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl([]));
-            return;
-        }
-
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
@@ -1266,11 +1245,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function statPage($users) {
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
-
         if (!$this->core->getUser()->accessFullGrading()) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;

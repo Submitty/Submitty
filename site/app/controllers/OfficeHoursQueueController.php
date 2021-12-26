@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -10,6 +9,7 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\socket\Client;
 use app\libraries\Logger;
 use WebSocket;
@@ -17,24 +17,14 @@ use WebSocket;
 /**
  * Class OfficeHoursQueueController
  *
+ * @Enabled("queue")
  */
 class OfficeHoursQueueController extends AbstractController {
-
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue", methods={"GET"})
      * @return MultiResponse
      */
     public function showQueue($full_history = false) {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
-        }
-
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',
@@ -537,12 +527,6 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function showCurrentQueue() {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
-        }
-
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return MultiResponse::webOnlyResponse(
@@ -559,12 +543,6 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function showQueueHistory($full_history = false) {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
-        }
-
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return MultiResponse::webOnlyResponse(
@@ -581,12 +559,6 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function showNewStatus() {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
-        }
-
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return MultiResponse::webOnlyResponse(
@@ -630,11 +602,6 @@ class OfficeHoursQueueController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
      */
     public function showQueueStats() {
-        if (!$this->core->getConfig()->isQueueEnabled()) {
-            $this->core->addErrorMessage("Office hours queue disabled");
-            return new RedirectResponse($this->core->buildCourseUrl(['home']));
-        }
-
         $viewer = new OfficeHoursQueueModel($this->core);
         return new WebResponse(
             'OfficeHoursQueue',

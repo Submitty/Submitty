@@ -1,0 +1,59 @@
+<div id="leaderboard" class="content">
+    <h1>Leaderboards for {{gradeable_name}}</h1>
+    <p>
+        Ranking is based on the sum of points for testcases where a student got full credit.
+        Ties in overall score are broken based on the sum of the overall time it took to pass
+        all the full credit testcases followed by the sum of the memory used for those testcases.
+    </p>
+    <br><br>
+    <div style="margin-bottom: 1rem">
+        Show my name to other students in the leaderboard:
+        <input type="checkbox" aria-label="Toggle Anonymity" id="toggle-self-anonymity" onchange="toggleSelfAnonymity()" {% if not studentIsAnonymous %} checked {% endif %}/>
+    </div>
+    <div class="leaderboard-tab-bar-wrapper">
+        <div class="btn-group" role="group" aria-label="Switch leaderboards">
+            {% for leaderboard in leaderboards %}
+                <button type="button" class="leaderboard-nav key_to_click btn btn-secondary" id="{{leaderboard.getTag}}_nav" onclick="onChangeLeaderboard('{{leaderboard.getTag}}');">{{leaderboard.getTitle}}</button>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="leaderboard-table"></div>
+</div>
+<script>
+    let current_leaderboard_tag = '{{ initial_leaderboard_tag }}';
+
+    function onChangeLeaderboard(leaderboard_tag) {
+        current_leaderboard_tag = leaderboard_tag;
+        $("#leaderboard-table").load("{{ base_url }}/leaderboard_data/" + leaderboard_tag);
+
+        $(".leaderboard-nav").removeClass("active-btn");
+        $(".leaderboard-nav").addClass("unselected-btn");
+
+        $("#" + leaderboard_tag + "_nav").addClass("active-btn");
+        $("#" + leaderboard_tag + "_nav").removeClass("unselected-btn");
+    }
+
+    function toggleSelfAnonymity() {
+        const current_state = $('#toggle-self-anonymity').is(':checked');
+        $.post('{{ base_url }}/set_self_anonymity', {
+            csrf_token: window.csrfToken,
+            anonymity_state: !$('#toggle-self-anonymity').is(':checked')
+        }).done(function(res) {
+            const res_json = JSON.parse(res);
+            if(res_json.status !== "success"){
+                // Revert checkbox because request failed
+                $('#toggle-self-anonymity').prop('checked', !current_state);
+                alert(`Error updating anonymity: ${res_json.message}`);
+            }
+            onChangeLeaderboard(current_leaderboard_tag);
+        }).fail(function() {
+            // Revert checkbox because request failed
+            $('#toggle-self-anonymity').prop('checked', !current_state);
+            alert("Error updating anonymity");
+        })
+    }
+
+    $(document).ready(function() {
+        onChangeLeaderboard(current_leaderboard_tag);
+    });
+</script>

@@ -32,6 +32,7 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalModuleJs('submission.js');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;
@@ -108,6 +109,10 @@ class HomeworkView extends AbstractView {
                     break;
                 }
             }
+        }
+
+        if ($gradeable->hasLeaderboard()) {
+            $return .= $this->renderLeaderboardBox($graded_gradeable);
         }
 
         if ($submission_count > 0 && $num_parts > 1) {
@@ -691,6 +696,24 @@ class HomeworkView extends AbstractView {
             'team_assignment' => $team_assignment,
             'member_list' => $member_list,
             'team_name' => $team_name
+        ]);
+    }
+
+     /**
+      * @param GradedGradeable $graded_gradeable
+      * @return string
+      */
+    private function renderLeaderboardBox(GradedGradeable $graded_gradeable): string {
+        $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return "";
+        }
+
+        $leaderboards = $autograding_config->getLeaderboards();
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/LeaderboardBox.twig', [
+          'leaderboard_count' => count($leaderboards),
+          'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
 
