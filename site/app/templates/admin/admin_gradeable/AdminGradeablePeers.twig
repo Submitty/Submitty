@@ -1,80 +1,88 @@
 <div id="peer-control">
-    <h1> Options for Peer Matrix </h1>
-        <div class="row">
-            <div class="card col-md-6" style="margin:0px">
-                <div class="content" style="margin:0px">Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column: <BR><hr>
-                    <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list">
-                </div>
-            </div>
-            <div class="card col-md-6" style="margin:0px">
-                <div class="content" style="margin:0px">Enter number of peers for one student to grade and randomly assign peer grading in class. <br>
-                    <hr>
-                    <input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections</input>
-                    {% if not gradeable.isTeamAssignment() %}
-                        <input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading</input>
-                    {% endif %}
-                    <div class="btn-container" >
-                        <input type="text" id="number_to_peer_grade" placeholder="Number of Students">
-                        <input type="checkbox" id="all_grade" name="all_grade" class= "ignore" value="All Grade All"> All Grade All
-                        <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></input>
-                    </div>
-                </div>
+    <h2> Options for Peer Matrix </h2>
+    <div class="row">
+        <div class="col-md-6 pl-md-0">
+            <div>
+                Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a
+                labelled 'student' column and a 'grader' column:<hr>
+                <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list">
             </div>
         </div>
-        <div class="row">
-            <div class="card col-md-12" style="margin:0px">
-                <div class="content"style="margin:0px">
-                    <p>Other Controls: </p>
-                    <div class="btn-wrapper" >
-                        <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
-                         <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')"></input>
-                    </div>
-                    <br>
+        <div class="col-md-6 pr-md-0">
+            <div>
+                Enter number of peers for one student to grade and randomly assign peer grading in class.
+                <hr>
+                <input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections
+                {% if not gradeable.isTeamAssignment() %}
+                    <br><input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading
+                {% endif %}
+                <br>
+                <input type="radio" id="all_grade" name="all_grade" class= "ignore" value="All Grade All" checked> All Grade All<br>
+                <input type="radio" name="all_grade" class="ignore" value="Number of Students">
+                <input type="number" id="number_to_peer_grade" placeholder="Number of Students"><br><br>
+                <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-12 pl-0">
+            <div>
+                Other Controls:
+                <div class="">
+                    <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix">
+                    <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')">
                 </div>
+                <br>
             </div>
         </div>
-        <div class="row">
-            <div class="card col-md-12" style="margin:0px">
-                <div class="content"style="margin:0px">
-                    Enter any file wildcards that should not be viewable by students. Seperate wildcards with commas <br>
-                    <input type="text" id="hidden_files" name = "hidden_files" class="auto_save" placeholder="" value = "{{hidden_files}}">
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-12 pl-0">
+            <div>
+                Enter any file wildcards that should not be viewable by students. Seperate wildcards with commas <br>
+                <input type="text" id="hidden_files" name = "hidden_files" class="auto_save" placeholder="" value = "{{hidden_files}}">
             </div>
+            <br>
         </div>
-</div>
-    <div id="peer_loader" class="loader hide"></div>
+    </div>
+    <div class="row">
+        <div id="peer_loader" class="loader hide"></div>
         <div class="table-wrapper">
             <table id="peer-table" class="table table-striped mobile-table directory-table">
                 <thead>
-                    <tr>
-                        <th>Grader</th>
-                        <th>Students</th>
-                        <th>Edit Students</th>
-                        <th>Remove</th>
-                    </tr>
+                <tr>
+                    <th>Grader</th>
+                    <th>Students</th>
+                    <th>Edit Students</th>
+                    <th>Remove</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for key,value in peer_grader_pairs %}
-                        <tr>
-                            <td class="peer-table-grader">{{key}}</td>
-                            <td class="peer-table-students">
-                                {% for entry in value %}
-                                    <span>{{entry}} </span>
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <a aria-label="edit {{key}}'s students"><i class="fas fa-pencil-alt"></i></a>
-                            </td>
-                            <td>
-                                <a aria-label="remove grader"><i class="fas fa-trash-alt" onclick="removeGraderAlert('{{key}}')"></i></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
+                {% for key,value in peer_grader_pairs %}
+                    <tr>
+                        <td class="peer-table-grader">{{key}}</td>
+                        <td class="peer-table-students">
+                            {% for entry in value %}
+                                <span>{{entry}} </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a aria-label="edit {{key}}'s students"><i class="fas fa-pencil-alt"></i></a>
+                        </td>
+                        <td>
+                            <a aria-label="remove grader"><i class="fas fa-trash-alt" onclick="removeGraderAlert('{{key}}')"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div id="add-grader-btn-container" class="btn-container">
-            <input type="button" name="add-peer-grader" class="btn btn-primary key_to_click" id="add-peer-grader" tabindex="0" value="Add New Grader to Matrix"></input>
-        </div>
+    </div>
+    <br>
+    <div id="add-grader-btn-container" class="btn-container">
+        <input type="button" name="add-peer-grader" class="btn btn-primary key_to_click" id="add-peer-grader" tabindex="0" value="Add New Grader to Matrix"></input>
     </div>
 <script>
     function removeGraderAlert($grader_to_edit) {
