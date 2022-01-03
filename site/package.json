@@ -42,7 +42,7 @@
     "esbuild": "^0.14.10",
     "eslint": "^8.5.0",
     "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-jest": "^25.3.3",
+    "eslint-plugin-jest": "^25.3.4",
     "jest": "^27.4.5",
     "regenerator-runtime": "^0.13.9",
     "stylelint": "^14.2.0",
