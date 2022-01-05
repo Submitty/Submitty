@@ -31,7 +31,7 @@
     "symfony/cache": "4.4.36",
     "symfony/config": "4.4.36",
     "symfony/http-foundation": "4.4.36",
-    "symfony/polyfill-php80": "1.23.1",
+    "symfony/polyfill-php80": "1.24.0",
     "symfony/routing": "4.4.34",
     "textalk/websocket": "1.5.5",
     "twig/twig": "2.14.10"
