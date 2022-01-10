@@ -204,7 +204,7 @@
                     </tr>
                 </tbody>
                 {# /Section header #}
-                <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
+                <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}" data-section="{{ section_id }}">
                     {% for grade in section.rows %}
                         {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric) }}
                     {% endfor %}

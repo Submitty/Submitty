@@ -551,22 +551,23 @@ function setupNumericTextCells() {
                                             for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
                                                 value_temp_str = value_str + y;
                                                 status_temp_str = status_str + y;
-                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
+                                                let elem = $('#cell-'+$(this).parent().parent().data("section")+'-'+$(this).parent().data("row")+'-'+(z-starting_index2));
+                                                elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff");
+                                                    elem.css("background-color", "#ffffff");
                                                 }
                                                 else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
+                                                    elem.css("background-color", "#ff7777");
                                                 }
 
-                                                if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
+                                                if(elem.val() == 0) {
+                                                    elem.css("color", "#bbbbbb");
                                                 }
                                                 else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
+                                                    elem.css("color", "");
                                                 }
 
-                                                total += Number($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val());
+                                                total += Number(elem.val());
                                             }
                                             $('#total-'+$(this).parent().data("row")).val(total);
                                             z++;
@@ -643,16 +644,17 @@ function setupSimpleGrading(action) {
     function movement(direction){
         var prev_cell = $(".cell-grade:focus");
         if(prev_cell.length) {
-            // ids have the format cell-ROW#-COL#
+            // ids have the format cell-#SECTION-ROW#-COL#
             var new_selector_array = prev_cell.attr("id").split("-");
             new_selector_array[1] = parseInt(new_selector_array[1]);
             new_selector_array[2] = parseInt(new_selector_array[2]);
+            new_selector_array[3] = parseInt(new_selector_array[3]);
 
             // update row and col to get new val
-            if (direction == "up") new_selector_array[1] -= 1;
-            else if (direction == "down") new_selector_array[1] += 1;
-            else if (direction == "left") new_selector_array[2] -= 1;
-            else if (direction == "right") new_selector_array[2] += 1;
+            if (direction == "up") new_selector_array[2] -= 1;
+            else if (direction == "down") new_selector_array[2] += 1;
+            else if (direction == "left") new_selector_array[3] -= 1;
+            else if (direction == "right") new_selector_array[3] += 1;
 
             // get new cell
             var new_cell = $("#" + new_selector_array.join("-"));
@@ -668,34 +670,34 @@ function setupSimpleGrading(action) {
         }
     }
 
-    // default key movement
-    $(document).on("keydown", function(event) {
-        // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("input.cell-grade:focus");
+    // // default key movement
+    // $(document).on("keydown", function(event) {
+    //     // if input cell selected, use this to check if cursor is in the right place
+    //     var input_cell = $("input.cell-grade:focus");
 
-        // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.code === "ArrowLeft" && (!input_cell.length || (
-                input_cell[0].selectionStart == 0 &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("left");
-        }
-        else if(event.code === "ArrowUp") {
-            event.preventDefault();
-            movement("up");
-        }
-        // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.code === "ArrowRight" && (!input_cell.length || (
-                input_cell[0].selectionEnd == input_cell[0].value.length &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
-            event.preventDefault();
-            movement("right");
-        }
-        else if(event.code === "ArrowDown") {
-            event.preventDefault();
-            movement("down");
-        }
-    });
+    //     // if there is no selection OR there is a selection to the far left with 0 length
+    //     if(event.code === "ArrowLeft" && (!input_cell.length || (
+    //             input_cell[0].selectionStart == 0 &&
+    //             input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+    //         event.preventDefault();
+    //         movement("left");
+    //     }
+    //     else if(event.code === "ArrowUp") {
+    //         event.preventDefault();
+    //         movement("up");
+    //     }
+    //     // if there is no selection OR there is a selection to the far right with 0 length
+    //     else if(event.code === "ArrowRight" && (!input_cell.length || (
+    //             input_cell[0].selectionEnd == input_cell[0].value.length &&
+    //             input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+    //         event.preventDefault();
+    //         movement("right");
+    //     }
+    //     else if(event.code === "ArrowDown") {
+    //         event.preventDefault();
+    //         movement("down");
+    //     }
+    // });
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
