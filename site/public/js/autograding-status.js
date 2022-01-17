@@ -170,33 +170,20 @@ function updateStackTrace() {
             error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>');
             const wrapper = $('.stack-trace-wrapper');
             const info = $('.stack-trace-info');
-            // Empty 'Exception' object used to break out of foreach
-            const BreakException = {};
-            try {
-                Object.keys(json.data).forEach((key, i) => {
-                    // Work around to break not working in foreach, throw and catch the error to exit the foreach
-                    if (i === 7) {
-                        throw BreakException;
-                    }
-                    const new_tab = $('<a class="tab"></a>').text(key);
-                    if (i === 0) {
-                        new_tab.addClass('active-tab');
-                        info.text(json.data[key]);
-                    }
-                    wrapper.append(new_tab);
-                    new_tab.attr('data', json.data[key]);
-                    new_tab.on('click', () => {
-                        $('.active-tab').removeClass('active-tab');
-                        new_tab.addClass('active-tab');
-                        $('.stack-trace-info').text(new_tab.attr('data'));
-                    });
-                });
-            }
-            catch (e) {
-                if (e !== BreakException) {
-                    throw e;
+            Object.keys(json.data).forEach((key, i) => {
+                const new_tab = $('<a class="tab"></a>').text(key);
+                if (i === 0) {
+                    new_tab.addClass('active-tab');
+                    info.text(json.data[key]);
                 }
-            }
+                wrapper.append(new_tab);
+                new_tab.attr('data', json.data[key]);
+                new_tab.on('click', () => {
+                    $('.active-tab').removeClass('active-tab');
+                    new_tab.addClass('active-tab');
+                    $('.stack-trace-info').text(new_tab.attr('data'));
+                });
+            });
         },
     });
 }

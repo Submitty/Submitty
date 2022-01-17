@@ -58,7 +58,8 @@ class AutogradingStatusController extends AbstractController {
         if (!is_readable($stack_trace_path)) {
             return JsonResponse::getFailResponse("Could not access the stack trace path.");
         }
-        $files = scandir($stack_trace_path, SCANDIR_SORT_DESCENDING);
+        // Grab only the information of the 7 most recent stacktrace
+        $files = array_slice(scandir($stack_trace_path, SCANDIR_SORT_DESCENDING), 0, 7);
         $info = [];
         foreach ($files as $f) {
             if ($f === '.' || $f === '..') {
