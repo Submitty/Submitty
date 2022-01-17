@@ -170,7 +170,20 @@ function updateStackTrace() {
             error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>');
             const wrapper = $('.stack-trace-wrapper');
             const info = $('.stack-trace-info');
-            Object.keys(json.data).forEach((key, i) => {
+            // Shouldn't be needed if the files follow the same timestamp format, but it's here just in case
+            let keys = Object.keys(json.data);
+            keys.sort(
+                function compareFunction(a, b) {
+                    if (a === b) {
+                        return 0;
+                    }
+                    if (a < b) {
+                        return 1;
+                    }
+                    return -1;
+                }
+            )
+            keys.forEach((key, i) => {
                 const new_tab = $('<a class="tab"></a>').text(key);
                 if (i === 0) {
                     new_tab.addClass('active-tab');
