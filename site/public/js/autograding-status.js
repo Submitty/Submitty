@@ -173,7 +173,7 @@ function updateStackTrace() {
             // Shouldn't be needed if the files follow the same timestamp format, but it's here just in case
             const keys = Object.keys(json.data);
             keys.sort(
-                function compareFunction(a, b) {
+                (a, b) => {
                     if (a === b) {
                         return 0;
                     }
@@ -181,8 +181,8 @@ function updateStackTrace() {
                         return 1;
                     }
                     return -1;
-                }
-            )
+                },
+            );
             keys.forEach((key, i) => {
                 const new_tab = $('<a class="tab"></a>').text(key);
                 if (i === 0) {
