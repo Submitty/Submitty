@@ -171,7 +171,7 @@ function updateStackTrace() {
             const wrapper = $('.stack-trace-wrapper');
             const info = $('.stack-trace-info');
             // Shouldn't be needed if the files follow the same timestamp format, but it's here just in case
-            let keys = Object.keys(json.data);
+            const keys = Object.keys(json.data);
             keys.sort(
                 function compareFunction(a, b) {
                     if (a === b) {
