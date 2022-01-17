@@ -175,13 +175,9 @@ function updateStackTrace() {
                         if (i === 7) {
                             throw BreakException;
                         }
-                        let new_tab = null;
+                        const new_tab = $('<a class="tab"></a>').text(key);
                         if (i === 0) {
-                            new_tab = $('<a class="tab active-tab"></a>').text(key);
-                            info.text(json.data[key]);
-                        }
-                        else {
-                            new_tab = $('<a class="tab"></a>').text(key);
+                          new_tab.addClass('active-tab');
                         }
                         wrapper.append(new_tab);
                         new_tab.attr('data', json.data[key]);
