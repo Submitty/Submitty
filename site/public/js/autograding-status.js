@@ -159,10 +159,11 @@ function updateStackTrace() {
         type: 'GET',
         success: function (response) {
             $('.stack-refresh-btn').prop('disabled', false);
+            const json = JSON.parse(response);
             if (json.status !== 'success') {
                 displayErrorMessage(json.message);
+                return;
             }
-            const json = JSON.parse(response);
             const error_log = $('.stack-trace');
             error_log.empty();
             error_log.append('<div class="stack-trace-wrapper"></div>');
