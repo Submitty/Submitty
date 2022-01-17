@@ -159,9 +159,9 @@ function updateStackTrace() {
         type: 'GET',
         success: function (response) {
             $('.stack-refresh-btn').prop('disabled', false);
-            const json = JSON.parse(response);
-            const error_log = $('.stack-trace');
             if (json.status === 'success') {
+                const json = JSON.parse(response);
+                const error_log = $('.stack-trace');
                 error_log.empty();
                 error_log.append('<div class="stack-trace-wrapper"></div>');
                 error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>');
@@ -178,6 +178,7 @@ function updateStackTrace() {
                         const new_tab = $('<a class="tab"></a>').text(key);
                         if (i === 0) {
                           new_tab.addClass('active-tab');
+                          info.text(json.data[key]);
                         }
                         wrapper.append(new_tab);
                         new_tab.attr('data', json.data[key]);
