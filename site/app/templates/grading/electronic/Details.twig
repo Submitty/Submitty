@@ -54,7 +54,9 @@
             </div>
         </div>
     </div>
-    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% if not is_student %}
+        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% endif %}
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% endif %}
