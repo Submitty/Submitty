@@ -62,3 +62,14 @@ input[type="radio"][disabled=""]:checked::before {
 form {
     display: inline;
 }
+
+#poll-name-container {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+}
+
+#poll-name {
+    flex-grow: 100;
+    margin-left: 0.5em;
+}
