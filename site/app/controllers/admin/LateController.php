@@ -64,7 +64,6 @@ class LateController extends AbstractController {
                 );
             }
             else {
-
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
