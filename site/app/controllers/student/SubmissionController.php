@@ -785,8 +785,6 @@ class SubmissionController extends AbstractController {
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
-        // TO DO: Update late day cache for new split submission
-        $late_day_status = null;
         // FIXME: Add this as part of the graded gradeable saving query
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
@@ -1603,8 +1601,6 @@ class SubmissionController extends AbstractController {
             $_COOKIE['submitty_token'],
             "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
-        // TO DO: Update late day cache for new submission
-        $late_day_status = null;
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();

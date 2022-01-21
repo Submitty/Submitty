@@ -45,19 +45,13 @@ class LateDayInfoTester extends BaseUnitTest {
         $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
         $graded_gradeable->method('getLateDayException')->willReturn($late_day_exception);
 
-        return new LateDayInfo($core, $user, $graded_gradeable, $late_days_remaining);
+        return LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, $late_days_remaining);
     }
 
     public function testNegativeLateDaysRemaining() {
-        $core = $this->createMock(Core::class);
-        $user = $this->createMock(User::class);
-        $submitter = $this->createMock(Submitter::class);
-        $submitter->method('hasUser')->willReturn(true);
-        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
-        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
-
+        $due_date = '';
         $this->expectException(\InvalidArgumentException::class);
-        $ldi = new LateDayInfo($core, $user, $graded_gradeable, -1);
+        $ldi = $this->makeLateDayInfo($due_date, 0, $due_date, 0, -1);
     }
 
     public function testBadUserForSubmitter() {
@@ -67,9 +61,15 @@ class LateDayInfoTester extends BaseUnitTest {
         $submitter->method('hasUser')->willReturn(false);
         $graded_gradeable = $this->createMockModel(GradedGradeable::class);
         $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getLateDays')->willReturn(0);
+        $graded_gradeable->method('getGradeable')->willReturn($gradeable);
+        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
+        $auto_graded_gradeable->method('hasActiveVersion')->willReturn(false);
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
 
         $this->expectException(\InvalidArgumentException::class);
-        $ldi = new LateDayInfo($core, $user, $graded_gradeable, 0);
+        $ldi = LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, 0);
     }
 
     public function testGetLateDaysAllowed() {
@@ -120,7 +120,6 @@ class LateDayInfoTester extends BaseUnitTest {
         $ldi = $this->makeLateDayInfo($due_date, 0, $due_date_d2, 4, 0);
         $this->assertEquals(LateDayInfo::STATUS_GOOD, $ldi->getStatus(), "Extended good submission");
         $this->assertEquals($good_message, $ldi->getStatusMessage());
-
 
         $ldi = $this->makeLateDayInfo($due_date, 4, $due_date_d2, 0, 3);
         $this->assertEquals(LateDayInfo::STATUS_LATE, $ldi->getStatus(), "Normal late submission");
