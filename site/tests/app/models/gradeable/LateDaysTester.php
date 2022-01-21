@@ -61,6 +61,7 @@ class LateDaysTester extends BaseUnitTest {
 
         $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
         $queries->method('getLateDayUpdates')->willReturn($updates);
+        $queries->method('getLateDayCacheForUser')->willReturn([]);
         $core->method('getQueries')->willReturn($queries);
         return $core;
     }

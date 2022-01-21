@@ -205,6 +205,11 @@ class ConfigurationController extends AbstractController {
             );
         }
 
+        // All late day cache now invalid
+        if ($name == 'default_student_late_days') {
+            $this->core->getQueries()->flushAllLateDayCache();
+        }
+
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
         );
