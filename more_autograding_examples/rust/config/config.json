@@ -1,0 +1,36 @@
+{
+  "autograding_method": "docker",
+  "grading_parameters": {
+    "TOTAL_POINTS": 15,
+    "AUTO_POINTS": 15,
+    "TA_POINTS": 0,
+    "EXTRA_CREDIT_POINTS": 0
+  },
+
+  "autograding": {
+    "submission_to_compilation": ["Cargo.toml", "src/*"]
+  }
+
+  "testcases": [{
+      "type": "Compilation",
+      "title": "Compilation",
+      "containers": [{
+        "container_image": "rust:slim",
+        "commands": ["cargo build", "mv target/debug/example a.out"]
+      }],
+      "executable_name": "a.out",
+      "points": 5
+    },
+    {
+      // Notice how this doesn't need to be in a container since Rust statically links binaries
+      "title": "Output validation",
+      "command": "./a.out",
+      "points": 10,
+      "validation": [{
+        "method": "diff",
+        "actual_file": "STDOUT.txt",
+        "expected_file": "hello_world.txt"
+      }]
+    }
+  ]
+}
