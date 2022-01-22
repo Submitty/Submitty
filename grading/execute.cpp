@@ -127,6 +127,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
 
+    // for Rust
+    { "cargo",                   "/usr/local/cargo/bin/cargo" },
+
     // for Network Programming
     { "timeout",                 "/usr/bin/timeout" },
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },

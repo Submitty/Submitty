@@ -221,6 +221,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   ALLOW_SYSCALL(stat64);
   ALLOW_SYSCALL(statfs);
   ALLOW_SYSCALL(statfs64);
+  ALLOW_SYSCALL(statx);
   ALLOW_SYSCALL(sync);
   ALLOW_SYSCALL(sync_file_range);
   ALLOW_SYSCALL(syncfs);
