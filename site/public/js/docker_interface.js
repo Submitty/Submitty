@@ -51,7 +51,7 @@ function showAll() {
 
 function addFieldOnChange() {
     const command = $(this).val();
-    const regex = new RegExp('^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
+    const regex = new RegExp('/^([a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/)?[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/');
     if (!regex.test(command)) {
         $('#send-button').attr('disabled',true);
         if (command !== '') {
