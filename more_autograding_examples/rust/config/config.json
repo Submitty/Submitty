@@ -15,7 +15,7 @@
       "type": "Compilation",
       "title": "Compilation",
       "containers": [{
-        "container_image": "rust:slim",
+        "container_image": "rust:1.58-slim",
         "commands": ["cargo build", "mv target/debug/example a.out"]
       }],
       "executable_name": "a.out",
