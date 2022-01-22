@@ -5,9 +5,11 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
+use app\models\gradeable\LateDays;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -43,6 +45,48 @@ class LateController extends AbstractController {
                 'displayExtensions',
                 $this->core->getQueries()->getAllElectronicGradeablesIds()
             )
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days")
+     * @return MultiResponse
+     */
+    public function viewLateDayCache() {
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['admin', 'LateDay'],
+                'displayLateDayCache',
+                $this->core->getQueries()->getAllUsers(),
+                $this->core->getConfig()->getDefaultStudentLateDays()
+            )
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
+     * @return MultiResponse
+     */
+    public function flushLateDayCache() {
+        $this->core->getQueries()->flushAllLateDayCache();
+        $this->core->addSuccessMessage("Late day cache flushed!");
+
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['late_day_cache']))
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
+     * @return MultiResponse
+     */
+    public function calculateLateDayCache() {
+        $this->core->getQueries()->generateLateDayCacheForUsers();
+
+        $this->core->addSuccessMessage("Late day cache calculated!");
+
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']))
         );
     }
 
