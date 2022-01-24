@@ -1539,61 +1539,9 @@ WHERE semester=? AND course=? AND user_id=?",
         }
     }
 
-    public function flushLateDayCacheForUserFromContext(User $user, \DateTime $context) {
-        $params = [$user->getId(), $context];
-        $query = "DELETE FROM late_day_cache
-                    WHERE user_id=? AND late_day_date>=?";
-        $this->course_db->query($query, $params);
-    }
-
-    public function flushLateDayCacheForUser(User $user) {
-        $params = [$user->getId()];
-        $query = "DELETE FROM late_day_cache
-                    WHERE user_id=?";
-        $this->course_db->query($query, $params);
-    }
-
     public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
-    }
-
-    public function getLateDayUpdateTimestamps() {
-        $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
-        $this->course_db->query($query);
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new \DateTime($row['since_timestamp']);
-        }
-        return $return;
-    }
-
-    public function getLastLateDayUpdatesForUsers() {
-        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
-        $this->course_db->query($query);
-        $return = [];
-
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['user_id']] = new \DateTime($row['max']);
-        }
-        return $return;
-    }
-
-    public function bulkUploadLateDayCache(array $late_day_cache) {
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT 
-                      (value->>'g_id') AS g_id,
-                      (value->>'user_id') AS user_id,
-                      (value->>'team_id') AS team_id,
-                      (value->>'late_day_date')::timestamp AS late_day_date,
-                      (value->>'late_days_remaining')::integer AS late_days_remaining,
-                      (value->>'late_days_allowed')::integer AS late_days_allowed,
-                      (value->>'submission_days_late')::integer AS submission_days_late,
-                      (value->>'late_day_exceptions')::integer AS late_day_exceptions,
-                      (value->>'late_day_status')::integer AS late_day_status,
-                      (value->>'late_days_change')::integer AS late_days_change
-                    FROM json_array_elements(?))";
-        $this->course_db->query($query, [json_encode($late_day_cache)]);
     }
 
     /**
