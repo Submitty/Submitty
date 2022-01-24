@@ -85,42 +85,6 @@ class LateDayInfo extends AbstractModel {
         }
     }
 
-    /**
-     * Create a new LateDay instance for a given user
-     * @param Core $core
-     * @param User $user
-     * @param GradedGradeable $graded_gradeable
-     * @param int $late_days_remaining the late days remaining before this gradeable was submitted
-     * @return LateDayInfo
-     */
-    public static function fromGradeableLateDaysRemaining(Core $core, User $user, GradedGradeable $graded_gradeable, int $late_days_remaining) {
-        $late_days_allowed = $graded_gradeable->getGradeable()->getLateDays();
-        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
-        $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
-        $exceptions = $graded_gradeable->getLateDayException($user);
-
-        $late_days_charged = 0;
-        $assignment_budget = min($late_days_allowed, $late_days_remaining) + $exceptions;
-        if ($submission_days_late <= $assignment_budget) {
-            // clamp the days charged to be the days late minus exceptions above zero.
-            $late_days_charged = max(0, min($submission_days_late, $assignment_budget) - $exceptions);
-        }
-        $late_days_remaining -= $late_days_charged;
-
-        $event_info = [
-            'id' => $graded_gradeable->getGradeableId(),
-            'graded_gradeable' => $graded_gradeable,
-            'late_days_allowed' => $late_days_allowed,
-            'late_day_date' => $graded_gradeable->getGradeable()->getSubmissionDueDate(),
-            'submission_days_late' => $submission_days_late,
-            'late_day_exceptions' => $exceptions,
-            'late_days_remaining' => $late_days_remaining,
-            'late_days_change' => -$late_days_charged
-        ];
-
-        return new LateDayInfo($core, $user, $event_info);
-    }
-
     public function toArray() {
         return [
             'gradeable_title' => $this->graded_gradeable->getGradeable()->getTitle(),
