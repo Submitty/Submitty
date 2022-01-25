@@ -1500,47 +1500,6 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
-    public function addLateDayCacheForGradeable(string $user_id, LateDayInfo $late_day_info) {
-        $params = [$user_id];
-        $params[] = $late_day_info->getId();
-        $params[] = $late_day_info->getEventTitle();
-        $params[] = $late_day_info->getLateDayEventTime();
-        $params[] = $late_day_info->getAssignmentAllowedLateDays();
-        $params[] = $late_day_info->getDaysLate();
-        $params[] = $late_day_info->getLateDayException();
-        $params[] = $late_day_info->getLateDaysRemaining();
-        $params[] = $late_day_info->getStatus();
-        $params[] = $late_day_info->getLateDaysChange();
-
-        $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
-        $query = "INSERT INTO late_day_cache
-                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $this->course_db->query($query, $params);
-    }
-
-    public function addLateDayCacheForLateDayUpdate(string $user_id, LateDayInfo $late_day_info) {
-        $params = [$user_id];
-        $params[] = $late_day_info->getLateDayEventTime();
-        $params[] = $late_day_info->getLateDaysRemaining();
-        $params[] = $late_day_info->getLateDaysChange();
-
-        $query = "INSERT INTO late_day_cache
-                    (user_id, late_day_date, late_days_remaining, late_days_change) 
-                    VALUES (?, ?, ?, ?)";
-        $this->course_db->query($query, $params);
-    }
-
-    public function addLateDayCacheForUser(User $user, LateDayInfo $late_day_info) {
-        if ($late_day_info->isLateDayUpdate()) {
-            $this->addLateDayCacheForLateDayUpdate($user->getId(), $late_day_info);
-        }
-        else {
-            $this->addLateDayCacheForGradeable($user->getId(), $late_day_info);
-        }
-    }
-
     public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
