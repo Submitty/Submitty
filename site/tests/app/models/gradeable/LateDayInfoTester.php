@@ -48,7 +48,7 @@ class LateDayInfoTester extends BaseUnitTest {
             'graded_gradeable' => $graded_gradeable,
             'late_days_allowed' => $gradeable->getLateDays(),
             'late_day_date' => $graded_gradeable->getGradeable()->getSubmissionDueDate(),
-            'submission_days_late' => $auto_graded_gradeable->getDaysLate(),
+            'submission_days_late' => $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0,
             'late_day_exceptions' => $graded_gradeable->getLateDayException(),
             'late_days_remaining' => $late_days_remaining,
             'late_days_change' => -$auto_graded_gradeable->getDaysLate()
@@ -78,7 +78,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->makeLateDayInfo('10-10-2010 11:59:59', 0, '', 0, 0);
+        $ldi = $this->makeLateDayInfo('10-10-2010 11:59:59', 0, '', 0, 0);
         // $ldi = LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, 0);
     }
 
