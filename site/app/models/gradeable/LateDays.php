@@ -44,7 +44,7 @@ class LateDays extends AbstractModel {
         $ggs = [];
         foreach ($graded_gradeables as $gg) {
             $ggs[$gg->getGradeableId()] = $gg;
-        };
+        }
 
         // Get the late day information from the database
         $this->core->getQueries()->generateLateDayCacheForUser($user->getId());
