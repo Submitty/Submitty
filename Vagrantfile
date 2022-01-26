@@ -134,5 +134,6 @@ Vagrant.configure(2) do |config|
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
     config.ssh.insert_key = 'true'
+    config.ssh.timeout = 20
   end
 end
