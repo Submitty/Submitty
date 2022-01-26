@@ -48,11 +48,12 @@ class LateDayInfoTester extends BaseUnitTest {
         $submission_days_late = $auto_gg->hasActiveVersion() ? $auto_gg->getActiveVersionInstance()->getDaysLate() : 0;
         $late_day_exceptions = $graded_gradeable->getLateDayException();
         $assignment_budget = min($graded_gradeable->getGradeable()->getLateDays(), $late_days_remaining) + $late_day_exceptions;
-        
+
         $late_days_change = 0;
-        if ($submission_days_late <= $assignment_budget)
-            // clamp the days charged to be the days late minus exceptions above zero.
+        // clamp the days charged to be the days late minus exceptions above zero.
+        if ($submission_days_late <= $assignment_budget) {
             $late_days_change = -max(0, min($submission_days_late, $assignment_budget) - $late_day_exceptions);
+        }
 
         $event_info = [
             'graded_gradeable' => $graded_gradeable,
