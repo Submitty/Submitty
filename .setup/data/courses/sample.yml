@@ -60,7 +60,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -128,7 +128,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -194,7 +194,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -266,7 +266,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -334,7 +334,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -402,7 +402,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -496,7 +496,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -571,7 +571,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -645,7 +645,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -720,7 +720,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -742,7 +742,7 @@ gradeables:
   g_bucket: homework
   g_grader_assignment_method: 2
 
-  
+
 - g_id: closed_team_homework
   eg_peer_grading: true
   components:
@@ -791,7 +791,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -861,7 +861,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -929,7 +929,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1261,7 +1261,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1330,7 +1330,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1398,7 +1398,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1466,7 +1466,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1534,7 +1534,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1605,7 +1605,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1673,7 +1673,7 @@ gradeables:
     gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    marks: 
+    marks:
       - gcm_note: No Credit
         gcm_points: 0
       - gcm_note: Extra credit done poorly
@@ -1714,26 +1714,3 @@ gradeables:
   eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   eg_has_due_date: true
   eg_has_release_date: true
-
-- gradeable_config: rust
-  components:
-  - gc_lower_clamp: 0
-    gc_default: 11
-    gc_max_value: 11
-    gc_upper_clamp: 11
-    gc_title: Question 1
-    marks:
-      - gcm_note: Full Credit
-        gcm_points : 0
-  eg_submission_due_date: 1972-01-01 23:59:59
-  eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_due_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9998-12-31 23:59:59
-  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
-  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
-  eg_has_due_date: true
-  eg_has_release_date: true
-  g_grade_start_date: 9997-12-31 23:59:59
-  g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Rust example
-  g_bucket: homework
