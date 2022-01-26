@@ -110,7 +110,7 @@ class LateDaysTester extends BaseUnitTest {
         $late_days_remaining = $late_days;
         $late_days_used = 0;
 
-        usort($updates, function (array $a, array $b) { 
+        usort($updates, function (array $a, array $b) {
             return $b['since_timestamp'] - $a['since_timestamp'];
         });
 
@@ -135,17 +135,18 @@ class LateDaysTester extends BaseUnitTest {
 
                 continue;
             }
-            
+
             $auto_gg = $gg->getAutoGradedGradeable();
             $submission_days_late = $auto_gg->hasActiveVersion() ? $auto_gg->getActiveVersionInstance()->getDaysLate() : 0;
             $late_day_exceptions = $gg->getLateDayException();
             $assignment_budget = min($gg->getGradeable()->getLateDays(), $late_days_remaining) + $late_day_exceptions;
-            
+
             $late_days_change = 0;
-            if ($submission_days_late <= $assignment_budget)
-                // clamp the days charged to be the days late minus exceptions above zero.
+            // clamp the days charged to be the days late minus exceptions above zero.
+            if ($submission_days_late <= $assignment_budget) {
                 $late_days_change = -max(0, min($submission_days_late, $assignment_budget) - $late_day_exceptions);
-        
+            }
+
             $late_day_cache[$gg->getGradeableId()] = [
                 'late_days_allowed' => $gg->getGradeable()->getLateDays(),
                 'late_day_date' => $gg->getGradeable()->getSubmissionDueDate(),
