@@ -24,6 +24,8 @@ class LateDays extends AbstractModel {
     protected $late_day_info = [];
     /** @prop @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
+    /** @prop @var array All entries for the user in the `late_days` table */
+    protected $ldc = [];
 
     /**
      * LateDays constructor.
@@ -52,6 +54,7 @@ class LateDays extends AbstractModel {
         // Get the late day information from the database
         $this->core->getQueries()->generateLateDayCacheForUser($user->getId());
         $late_day_cache = $this->core->getQueries()->getLateDayCacheForUser($user->getId());
+        $this->ldc = $late_day_cache;
 
         // Construct late days info for each gradeable
         foreach ($late_day_cache as $id => $ldc) {
@@ -63,6 +66,10 @@ class LateDays extends AbstractModel {
             );
             $this->late_day_info[$id] = $info;
         }
+    }
+
+    public function getLdc() {
+        return $this->ldc;
     }
 
     /**
