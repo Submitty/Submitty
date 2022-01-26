@@ -465,7 +465,7 @@ if [ ${WORKER} == 0 ]; then
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
-xdebug.remote_host=10.0.2.2
+xdebug.remote_connect_back=1
 EOF
         fi
 
