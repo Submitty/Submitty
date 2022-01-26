@@ -510,45 +510,55 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-
+        // NOTE: redo data form options; shouldn't we throw an error if it's not specified?
         if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], ['random', 'alphabetically'])) {
             $type = $_POST['rotating_type'];
         }
         else {
             $type = 'random';
         }
-
+        // NOTE: I think this next two parts is only relevant for $POST['sort_type'] = "fewest"
         $section_count = intval($_POST['sections']);
         if ($section_count < 1) {
             $this->core->addErrorMessage("You must have at least one rotating section");
             $this->core->redirect($return_url);
         }
-
+        // NOTE: checking sort type -- redo or fewest; shouldn't we throw an error if it's not specified?
         if (in_array($_POST['sort_type'], ['redo', 'fewest']) && $type == "random") {
             $sort = $_POST['sort_type'];
         }
         else {
             $sort = 'redo';
         }
-
+        // NOTE: # students each rotating section (section represented by an index in array)
         $section_counts = array_fill(0, $section_count, 0);
+        // NOTE: 2d array
+            // top level is a gradeable id
+            // bottom level is # teams in each rotating section (rotating section represented by an index)
         $team_section_counts = [];
         if ($sort === 'redo') {
             $users = $this->core->getQueries()->getRegisteredUserIds();
             $teams = $this->core->getQueries()->getTeamIdsAllGradeables();
             $users_with_reg_section = $this->core->getQueries()->getAllUsers();
-
+            // NOTE: making array of excluded sections; why can't we just take excluded sections directly from selecting checkboxes
+            // https://stackoverflow.com/questions/4688880/html-element-array-name-something-or-name-something
             $exclude_sections = [];
             $reg_sections = $this->core->getQueries()->getRegistrationSections();
             foreach ($reg_sections as $row) {
-                $test = $row['sections_registration_id'];
-                if (isset($_POST[$test])) {
+                $reg_section_id = $row['sections_registration_id'];
+                if (isset($_POST[$reg_section_id])) {
                     array_push($exclude_sections, $_POST[$row['sections_registration_id']]);
                 }
             }
-            //remove people who should not be added to rotating sections
+            // remove people who should not be added to rotating sections
+            // NOTE: what the fuck this is so performance-inefficient. instead:
+                // get all unique users that are in sections in $exclude_sections 
+                    // --> use array_merge (n = size of excluded users) + array_unique (nlogn)
+                // can just be an array_diff (O(n)) of $users - unique excluded users
             for ($j = 0; $j < count($users_with_reg_section);) {
+                // NOTE: this double for loop can be an array_diff
                 for ($i = 0; $i < count($exclude_sections); ++$i) {
+                    // NOTE: this for loop can be an array_in
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
                         array_splice($users_with_reg_section, $j, 1);
                         $j--;
@@ -571,28 +581,33 @@ class UsersController extends AbstractController {
                 }
                 ++$i;
             }
+            // NOTE: shuffling order of user + team id's for "random" radio button - ok
             if ($type === 'random') {
                 shuffle($users);
                 foreach ($teams as $g_id => $team_ids) {
                     shuffle($teams[$g_id]);
                 }
             }
+            // NOTE: deleting current rotating sections and creating new ones
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->getQueries()->deleteAllRotatingSections();
             for ($i = 1; $i <= $section_count; $i++) {
                 $this->core->getQueries()->insertNewRotatingSection($i);
             }
-
+            // NOTE: reassigning the filtered users to their sections; therefore updating $section_count array
             for ($i = 0; $i < count($users); $i++) {
                 $section = $i % $section_count;
                 $section_counts[$section]++;
             }
+            // NOTE: reassigning the teams to their sections
             foreach ($teams as $g_id => $team_ids) {
                 for ($i = 0; $i < count($team_ids); $i++) {
                     $section = $i % $section_count;
 
                     if (!array_key_exists($g_id, $team_section_counts)) {
+                        // NOTE: this is an array because it's keeping track of rotating section
+                        // counts within each specific gradeable
                         $team_section_counts[$g_id] = array_fill(0, $section_count, 0);
                     }
 
@@ -606,17 +621,22 @@ class UsersController extends AbstractController {
             if ($max_section === null) {
                 $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
             }
+            // NOTE: $section_count isn't set in this radio button, so let's remove this piece of logic
             elseif ($max_section != $section_count) {
                 $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
                 $this->core->redirect($return_url);
             }
             $users = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
             $teams = $this->core->getQueries()->getTeamIdsWithNullRotating();
-            // only random sort can use 'fewest' type
+            // 'fewest' rotating section setup option can only use random sort
             shuffle($users);
             foreach ($teams as $g_id => $team_ids) {
                 shuffle($teams[$g_id]);
             }
+            // NOTE: is this logic flawed? will the rotating sections always be apart by 1 at most in count
+                // this assumes that we do a 'redo' rotating section setup first
+                // we can also redo this so that we recount $sections completely like in 'redo'
+                // or we can do a while loop to keep adding to sections until == $max
             $sections = $this->core->getQueries()->getCountUsersRotatingSections();
             $use_section = 0;
             $max = $sections[0]['count'];
@@ -626,11 +646,15 @@ class UsersController extends AbstractController {
                     break;
                 }
             }
-
             for ($i = 0; $i < count($users); $i++) {
                 $section_counts[$use_section]++;
+                // NOTE: why is $section_count reusable here? instead, let's use $max_section ($this->core->getQueries()->getMaxRotatingSection();)
                 $use_section = ($use_section + 1) % $section_count;
             }
+            // ****************************************
+            // NOTE: why is $section_count reusable here? instead, let's use $max_section ($this->core->getQueries()->getMaxRotatingSection();)
+            // perhaps set a common variable name, and do this part outside the for loop, looks like repeated logic
+            // logic flawed -- how is this adding to the 'fewest' rotating sections either??
             foreach ($teams as $g_id => $team_ids) {
                 for ($i = 0; $i < count($team_ids); $i++) {
                     $use_section = ($use_section + 1) % $section_count;
@@ -644,6 +668,7 @@ class UsersController extends AbstractController {
             }
         }
 
+        // NOTE: update each user's rotating section assignments using $section_count array
         for ($i = 0; $i < $section_count; $i++) {
             $update_users = array_splice($users, 0, $section_counts[$i]);
             if (count($update_users) == 0) {
@@ -651,6 +676,11 @@ class UsersController extends AbstractController {
             }
             $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
         }
+
+
+        // NOTE future to-do: is there a way to do all this logic directly from DatabaseQueries ******
+        // but actually, I see how it makes sense to have the data error-checking be in Gradeable.php
+        // and then the actual database modification to be in DatabaseQueries.php, seems to follow MVC well
 
         //update graders' access for gradeables with all access grading for limited
         //access graders now that rotating sections are set up
@@ -674,17 +704,21 @@ class UsersController extends AbstractController {
             $update_gradeable->setRotatingGraderSections($new_graders);
             $this->core->getQueries()->updateGradeable($update_gradeable);
         }
+        // *****************************************************************************
 
+        // NOTE: update each team's rotating section assignments using $team_section_counts array
+        // why don't we have to do all the checks that we did for gradeables?
         foreach ($team_section_counts as $g_id => $counts) {
             for ($i = 0; $i < $section_count; $i++) {
                 $update_teams = array_splice($teams[$g_id], 0, $team_section_counts[$g_id][$i]);
-
+                // NOTE: do this like we did updateUsers so we avoid a triple for loop
                 foreach ($update_teams as $team_id) {
                     $this->core->getQueries()->updateTeamRotatingSection($team_id, $i + 1);
                 }
             }
         }
 
+        // NOTE: give a more specific success message
         $this->core->addSuccessMessage("Rotating sections setup");
         $this->core->redirect($return_url);
     }

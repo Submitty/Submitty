@@ -2473,6 +2473,12 @@ ORDER BY user_id ASC"
         }
     }
 
+    /**
+     * Updates all given Users in $users array to have rotating section $section
+     * 
+     * @param integer $section
+     * @param User[] $users
+     */
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge([$section], $users);
         $update_string = $this->createParamaterList(count($users));
@@ -2876,7 +2882,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         foreach ($tmp as $row) {
             $new_graders[$row['user_id']] = $all_sections;
         }
-        $final_new_graders = [];
 
         return $new_graders;
     }
