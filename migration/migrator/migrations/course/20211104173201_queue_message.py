@@ -30,4 +30,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    sql = "ALTER TABLE queue_settings DROP COLUMN message"
+    database.execute(sql)
     pass

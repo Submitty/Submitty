@@ -35,7 +35,7 @@
         <br>
         <br>
         <button type="submit" class="btn btn-primary">Clear Message</button>
-        <button  type="button" class="btn btn-primary" onclick="toggleQueueMessageTable()">View Messages</button>
+        <button  type="button" class="btn btn-primary" id="view_queue_message_btn"   onclick="toggleQueueMessageTable()">View Messages</button>
     </form>
     <div class="container queue_message_table" style="display: none">
         <br>
@@ -48,8 +48,10 @@
             </tr>
             </thead>
             <tbody>
+            {% set count = 0 %}
             {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
                 {% if queue['message'] %}
+                    {% set count = count+1 %}
                     <tr>
                         <td>{{queue['code']}}</td>
                         <td>{{queue['message']}}</td>
@@ -57,11 +59,22 @@
                     </tr>
                 {% endif %}
             {% endfor %}
+            {% if count == 0 %}
+                <tr>
+                    <td>No messages to display</td>
+                </tr>
+            {% endif %}
             </tbody>
         </table>
     </div>
     <script>
         function toggleQueueMessageTable(){
+            if ($('.queue_message_table').is(':hidden')) {
+                $('#view_queue_message_btn').text('Hide Messages');
+            }
+            else {
+                $('#view_queue_message_btn').text('View Messages');
+            }
             $('.queue_message_table').toggle();
         }
     </script>

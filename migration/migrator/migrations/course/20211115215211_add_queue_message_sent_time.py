@@ -14,8 +14,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE queue_settings ADD IF NOT EXISTS message_sent_time timestamp with time zone default null");
-
+    sql = "ALTER TABLE queue_settings ADD IF NOT EXISTS message_sent_time timestamp with time zone default null"
+    database.execute(sql)
 
 def down(config, database, semester, course):
     """
@@ -30,4 +30,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    sql = "ALTER TABLE queue_settings DROP COLUMN message_sent_time"
+    database.execute(sql)
     pass
