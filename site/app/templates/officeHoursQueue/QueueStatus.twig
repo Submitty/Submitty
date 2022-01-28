@@ -219,15 +219,20 @@
 <script>
 
     function queueMessage(message) {
+        let title = "SUBMITTY - New Message From Office Hours Queue Staff: ";
+        let options = {
+            body: message,
+            icon: "{{ base_url }}/img/favicon.ico"
+        }
         if (Notification.permission === "granted") {
             // If it's okay let's create a notification
-            let notification = new Notification("SUBMITTY - New Message From Office Hours Queue Staff: " + message);
+            let notification = new Notification(title, options);
         }
         // Otherwise, we need to ask the user for permission
         else if (Notification.permission !== 'denied' || Notification.permission === "default") {
             Notification.requestPermission(function (permission) {
                 if (permission === "granted") {
-                    let notification = new Notification("SUBMITTY - New Message From Office Hours Queue Staff: " + message);
+                    let notification = new Notification(title, options);
                 }
             });
         //if notification permissions are denied
