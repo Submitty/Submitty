@@ -539,7 +539,7 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $top_match_percent = $rankings[0][0];
+                        $top_match_percent = $rankings[0][2];
                         $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
@@ -809,7 +809,7 @@ class PlagiarismController extends AbstractController {
                 return new RedirectResponse($return_url);
             }
             $regex_directories = $_POST["regex_dir"];
-            $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
+            $regex_for_selecting_files = explode(',', str_replace(' ', '', $_POST['regex_to_select_files']));
 
 
             // Language ////////////////////////////////////////////////////////////

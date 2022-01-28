@@ -332,7 +332,7 @@ body::-webkit-scrollbar-track {
 
 [data-theme="dark"] .drop-down-options {
     background-color: var(--standard-medium-dark-gray);
-    border: 1px solid var(--standard-focus-cornflowe-blue);
+    border: 1px solid var(--standard-focus-cornflower-blue);
 }
 
 #config_search {

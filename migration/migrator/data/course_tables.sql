@@ -631,6 +631,26 @@ CREATE TABLE public.grading_rotating (
 
 
 --
+-- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.late_day_cache (
+    g_id character varying(255),
+    user_id character varying(255),
+    team_id character varying(255),
+    late_day_date timestamp without time zone NOT NULL,
+    late_days_remaining integer NOT NULL,
+    late_days_allowed integer,
+    submission_days_late integer,
+    late_day_exceptions integer,
+    late_day_status integer,
+    late_days_change integer NOT NULL,
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
+    CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1612,6 +1632,22 @@ ALTER TABLE ONLY public.late_days
 
 
 --
+-- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
+
+
+--
+-- Name: late_day_cache ldc_g_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+
+
+--
 -- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2227,6 +2263,30 @@ ALTER TABLE ONLY public.grading_rotating
 
 ALTER TABLE ONLY public.grading_rotating
     ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_g_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
