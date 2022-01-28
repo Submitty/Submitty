@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     database.execute('''
         CREATE TABLE IF NOT EXISTS late_day_cache (
             g_id VARCHAR(255),
-            user_id VARCHAR(255), 
+            user_id VARCHAR(255) NOT NULL, 
             team_id VARCHAR(255),
             late_day_date TIMESTAMP WITHOUT TIME zone NOT NULL,
             late_days_remaining INTEGER NOT NULL,
@@ -25,13 +25,12 @@ def up(config, database, semester, course):
             submission_days_late INTEGER,
             late_day_exceptions INTEGER, 
             late_day_status INTEGER,
-            late_days_change INTEGER NOT NULL,
-            CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+            late_days_change INTEGER NOT NULL
         );
     ''')
 
-    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);')
-    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);')
+    database.execute('CREATE UNIQUE INDEX ldc_g_user_id_unique ON late_day_cache(g_id, user_id) WHERE team_id IS NULL;')
+    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);')
     # Make sure that all gradeable info is present if g_id is not null
     database.execute('''ALTER TABLE late_day_cache ADD CONSTRAINT ldc_gradeable_info CHECK (
         g_id IS NULL

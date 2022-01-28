@@ -34,7 +34,7 @@ SET default_tablespace = '';
 
 CREATE TABLE public.late_day_cache (
     g_id character varying(255),
-    user_id character varying(255),
+    user_id character varying(255) NOT NULL,
     team_id character varying(255),
     late_day_date timestamp without time zone NOT NULL,
     late_days_remaining integer NOT NULL,
@@ -43,8 +43,7 @@ CREATE TABLE public.late_day_cache (
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
-    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
-    CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
 
@@ -157,60 +156,60 @@ $_$;
 CREATE FUNCTION public.csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader_id text) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
-  DECLARE
-    -- Size of first array after splitting
-    size INTEGER;
-    -- Array of individual line after splitting
-    line TEXT[];
-    -- Variable to store each line in the array
-    i TEXT;
-    -- Array of gc_ids for this gradeable
-    gcids INTEGER[];
-    -- gradeable_data id for this gradeable for this student
-    gdid INTEGER;
-    -- Array counter
-    j INTEGER;
-    -- Is this gradeable component text?
-    istext BOOLEAN[];
-    --Score to be inserted
-    score NUMERIC;
-  BEGIN
-    gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
-    istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
-    -- Get the number of gradeable components for this gradeable. Will be used to test
-    -- for uniform sized arrays
-    size := array_length(gcids, 1);
-    FOREACH i IN ARRAY vcode
-      LOOP
-        -- Split the current line
-        line := string_to_array(i, ',');
-        -- Check for uniform size
-        IF array_length(line, 1) <> size + 1 THEN
-          RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
-        END IF;
-
-        -- Remove any existing record for this student for this gradeable
-        DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
-
-        INSERT INTO gradeable_data(g_id, gd_user_id) VALUES (gradeable_id, line[1]);
-
-        SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
-
-        FOR j IN 1..size
+    DECLARE
+        -- Size of first array after splitting
+        size INTEGER;
+        -- Array of individual line after splitting
+        line TEXT[];
+        -- Variable to store each line in the array
+        i TEXT;
+        -- Array of gc_ids for this gradeable
+        gcids INTEGER[];
+        -- gradeable_data id for this gradeable for this student
+        gdid INTEGER;
+        -- Array counter
+        j INTEGER;
+        -- Is this gradeable component text?
+        istext BOOLEAN[];
+        --Score to be inserted
+        score NUMERIC;
+    BEGIN
+        gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
+        istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
+        -- Get the number of gradeable components for this gradeable. Will be used to test
+        -- for uniform sized arrays
+        size := array_length(gcids, 1);
+        FOREACH i IN ARRAY vcode
         LOOP
-          IF istext[j] THEN
-          --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
-          ELSE
-            score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
-          END IF;
-        END LOOP;
+            -- Split the current line
+            line := string_to_array(i, ',');
+            -- Check for uniform size
+            IF array_length(line, 1) <> size + 1 THEN
+            RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
+            END IF;
 
-      END LOOP;
-    RETURN TRUE ;
-  END;
-  $$;
+            -- Remove any existing record for this student for this gradeable
+            DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
+
+            INSERT INTO gradeable_data(g_id, gd_user_id) VALUES (gradeable_id, line[1]);
+
+            SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
+
+            FOR j IN 1..size
+            LOOP
+            IF istext[j] THEN
+            --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            ELSE
+                score := CAST(line[j+1] AS NUMERIC);
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            END IF;
+            END LOOP;
+
+        END LOOP;
+        RETURN TRUE ;
+    END;
+    $$;
 
 
 --
@@ -277,59 +276,61 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
     BEGIN
         FOR var_row in (
             SELECT
-                g.g_id,
-                u.user_id,
-                g.g_title,
-                eg.eg_submission_due_date AS late_day_date,
-                eg.eg_late_days AS late_days_allowed,
-                CASE
-                    WHEN egd.submission_time IS NULL THEN 0
-                    WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
-                    WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
-                        THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
-                    ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
-                END AS submission_days_late,
-                CASE
-                    WHEN lde.late_day_exceptions IS NULL THEN 0
-                    ELSE lde.late_day_exceptions
-                END AS late_day_exceptions
-            FROM gradeable g
-            LEFT JOIN electronic_gradeable eg
-                ON g.g_id=eg.g_id
-            LEFT JOIN users u
-            ON u.user_id=user_id
-            LEFT JOIN (
-                SELECT egd.submission_time, egd.g_id, egd.user_id
-                FROM electronic_gradeable_data egd
-                RIGHT JOIN electronic_gradeable_version egv
-                    ON egv.g_id=egd.g_id 
-                    AND egv.user_id=egd.user_id
-                    AND egv.active_version=egd.g_version
-            ) as egd
-                ON egd.user_id = u.user_id
-                AND g.g_id=egd.g_id
-            LEFT JOIN late_day_exceptions lde
-                ON u.user_id = lde.user_id
-                AND g.g_id = lde.g_id
-            WHERE 
-                eg.eg_submission_due_date IS NOT NULL
-                and eg.eg_has_due_date = TRUE
-                and eg.eg_student_submit = TRUE
-                and g.g_gradeable_type = 0
-                and eg.eg_allow_late_submission = TRUE
-                and eg.eg_team_assignment = FALSE
-            ORDER BY late_day_date, g_id
-        ) LOOP
-            returnrow.g_id = var_row.g_id;
-            returnrow.user_id = var_row.user_id;
-            returnrow.g_title = var_row.g_title;
-            returnrow.late_days_allowed = var_row.late_days_allowed;
-            returnrow.late_day_date = var_row.late_day_date;
-            returnrow.submission_days_late = var_row.submission_days_late;
-            returnrow.late_day_exceptions = var_row.late_day_exceptions;
-            RETURN NEXT returnrow;
+			g.g_id,
+			u.user_id,
+			t.team_id,
+			g.g_title,
+			eg.eg_submission_due_date AS late_day_date,
+			eg.eg_late_days AS late_days_allowed,
+			CASE
+				WHEN egd.submission_time IS NULL THEN 0
+				WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
+				WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
+					OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
+					OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
+					THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
+				ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
+			END AS submission_days_late,
+			CASE
+				WHEN lde.late_day_exceptions IS NULL THEN 0
+				ELSE lde.late_day_exceptions
+			END AS late_day_exceptions
+		FROM gradeable g
+		LEFT JOIN electronic_gradeable eg
+			ON g.g_id=eg.g_id
+		LEFT JOIN users u
+		ON u.user_id=user_id
+		LEFT JOIN teams t
+		ON t.user_id=u.user_id
+		LEFT JOIN (
+			SELECT egd.submission_time, egd.g_id, egd.user_id, egd.team_id
+			FROM electronic_gradeable_data egd
+			RIGHT JOIN electronic_gradeable_version egv
+				ON egv.g_id=egd.g_id 
+				AND (egv.user_id=egd.user_id OR egv.team_id=egd.team_id)
+				AND egv.active_version=egd.g_version
+		) as egd
+			ON (egd.user_id = u.user_id OR egd.team_id = t.team_id)
+			AND g.g_id=egd.g_id
+		LEFT JOIN late_day_exceptions lde
+			ON u.user_id = lde.user_id
+			AND g.g_id = lde.g_id
+		WHERE 
+			eg.eg_submission_due_date IS NOT NULL
+			and eg.eg_has_due_date = TRUE
+			and eg.eg_student_submit = TRUE
+			and g.g_gradeable_type = 0
+			and eg.eg_allow_late_submission = TRUE
+		ORDER BY late_day_date, g_id
+	) LOOP
+		returnrow.g_id = var_row.g_id;
+		returnrow.team_id = var_row.team_id;
+		returnrow.user_id = var_row.user_id;
+		returnrow.late_days_allowed = var_row.late_days_allowed;
+		returnrow.late_day_date = var_row.late_day_date;
+		returnrow.submission_days_late = var_row.submission_days_late;
+		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+		RETURN NEXT returnrow;
         END LOOP;
         RETURN;	
     END;
@@ -1962,15 +1963,7 @@ ALTER TABLE ONLY public.late_days
 --
 
 ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
-
-
---
--- Name: late_day_cache ldc_g_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);
 
 
 --
@@ -2206,6 +2199,13 @@ CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree
 --
 
 CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+
+
+--
+-- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
 
 
 --
