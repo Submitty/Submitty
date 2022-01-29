@@ -202,9 +202,38 @@
     </form>
   </div>
 {% endif %}
+<br>
+<a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
+<a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-primary">Close Table</button></a>
+<br><br>
+<div class="container queue_occupancy" style="display: none">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Queue</th>
+                <th scope="col">People In Queue</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for name, number in viewer.getQueueOccupancy() %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ number }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 <script>
+    function toggleQueueOccupancy(){
+        $('.queue_occupancy').toggle();
+        $('#close_queue_occupancy').toggle();
+        $('#view_queue_occupancy').toggle();
+    }
+
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
     }
 </script>
+
 
