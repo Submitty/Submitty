@@ -7513,6 +7513,7 @@ AND gc_id IN (
         $query = <<<SQL
 SELECT
     po.option_id,
+    po.correct,
     COALESCE(pr.count, 0) AS count
 FROM
     poll_options AS po
@@ -7526,7 +7527,10 @@ ORDER BY
 SQL;
         $this->course_db->query($query, [$poll_id, $poll_id]);
         foreach ($this->course_db->rows() as $row) {
-            $results[$row["option_id"]] = $row['count'];
+            $results[$row["option_id"]] = [
+                'count' => $row['count'],
+                'is_correct' => $row['correct']
+            ];
         }
         return $results;
     }
