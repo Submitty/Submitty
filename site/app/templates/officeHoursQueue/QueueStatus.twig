@@ -241,10 +241,10 @@
 <script>
 
     function queueMessage(message) {
-        let title = "SUBMITTY - New Message From Office Hours Queue Staff: ";
+        let title = "Submitty - New Message From Office Hours Queue Staff: ";
         let options = {
             body: message,
-            icon: "{{ base_url }}/img/favicon.ico"
+            icon: buildUrl(['img', 'favicon.ico'])
         }
         if (Notification.permission === "granted") {
             // If it's okay let's create a notification

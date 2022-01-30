@@ -345,7 +345,7 @@ class OfficeHoursQueueModel extends AbstractModel {
             return $sent_time->format("h:i");
         }
         return null;
-
+    }
     /**
      * function to return an associative array where keys are open queues and values
      * are the number of people in each queue.
