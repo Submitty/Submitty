@@ -108,7 +108,7 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewPoll() {
-        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'release_histogram'];
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'release_histogram', 'show_correct_answer'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
                 $this->core->addErrorMessage("Error occured in adding poll");
@@ -142,6 +142,8 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
+        //add a check here not sure what it means tho
 
         $response_count = intval($_POST["response_count"]);
         $responses = [];
@@ -197,7 +199,7 @@ class PollController extends AbstractController {
             );
         }
 
-        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $_POST["release_histogram"]);
+        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $_POST["release_histogram"], $_POST["show_correct_answer"]);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             // validate the uploaded file size
