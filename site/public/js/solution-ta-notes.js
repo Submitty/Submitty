@@ -24,6 +24,10 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 $(`#solution-box-${component_id} .last-edit i.last-edit-author`).text(
                     res.data.current_user_id === res.data.author ? `${res.data.author} (You)` : res.data.author,
                 );
+
+                const save_button = $(`#solution-box-${component_id}`).find('.solution-save-btn');
+                save_button.addClass('disabled');
+                save_button.prop('disabled', true);
             }
             else {
                 displayErrorMessage('Something went wrong while updating the solution');
