@@ -95,7 +95,7 @@
     }
 
     function removeStudent(i, $grader_to_edit) {
-        var form = $("#admin-gradeable-edit-peers-form");
+        let form = $("#admin-gradeable-edit-peers-form");
         $('#edit_user_id_'+i+'', form).remove();
     }
 
@@ -147,7 +147,7 @@
         let curr_students_div = $("#students-to-edit");
         curr_students_div.empty();
         curr_students_div.append("Edit Current Students:<br />")
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             curr_students_div.append('<p class="edit_user_ids" id="edit_user_id_' + i + '"><input class="readonly peerstudents" type="text" name="edit_user_id_' + i + '" readonly="readonly" value="' + peer_grader_pairs[grader_to_edit][i] + '" /> <input id="remove_student_'+i+'" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeStudent('+i+',\''+grader_to_edit+'\');" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br /></p>');
         }
         //set right panel to allow removing grader completely
@@ -201,7 +201,7 @@
         let self_grading = grader_id === user_input.val();
         // if all 3 above conditions are met, allow user to press submit
         let index = Number(user_input.attr('name').substr(12));
-        if (user_input.val() == '') {
+        if (user_input.val() === '') {
             valid_students[index] = undefined;
         } else if (valid_entry && !already_exists && !self_grading) {
             valid_students[index] = true;
@@ -212,7 +212,6 @@
 
     function submitFormAjax() {
         let url = $('#peers-submit-url').val();
-        let form = $("#admin-gradeable-edit-peers-form");
         let grader_id = $("#admin-gradeable-edit-peers-title").text().substr(18);
         let fd = new FormData();
         fd.append('csrf_token', $("#csrf-token").val());
@@ -220,13 +219,13 @@
         fd.append('remove_grader', $('#removed-all').text());
         let curr_student_ids = [];
         $(".edit_user_ids :input.peerstudents").each(function() {
-            if ($(this).val() != "") curr_student_ids.push($(this).val());
+            if ($(this).val() !== "") curr_student_ids.push($(this).val());
         });
         fd.append('curr_student_ids', JSON.stringify(curr_student_ids));
         // set to check for duplicate user entries
         let add_student_ids = new Set();
         $(".add_user_ids").each(function() {
-            if ($(this).val() != "") add_student_ids.add($(this).val());
+            if ($(this).val() !== "") add_student_ids.add($(this).val());
         });
         fd.append('add_student_ids', JSON.stringify(Array.from(add_student_ids)));
         $.ajax({
@@ -339,7 +338,7 @@
         // set to check for duplicate user entries
         let add_student_ids = new Set();
         $(".add_user_ids", form).each(function() {
-            if ($(this).val() != "") add_student_ids.add($(this).val());
+            if ($(this).val() !== "") add_student_ids.add($(this).val());
         });
         let add_student_ids_arr = JSON.stringify(Array.from(add_student_ids));
         fd.append('add_student_ids', add_student_ids_arr);
@@ -399,15 +398,16 @@
     let rows = document.querySelectorAll('table#' + table_id + ' tr');
     // Construct csv
     let csv = [];
-    header=['grader','student'];
+    header = ['grader','student'];
     csv.push(header.join(','));
     for (let i = 1; i < rows.length; i++) {
         let row = [], cols = rows[i].querySelectorAll('td');
         for (let j = 0; j < cols.length-1; j++) {
             // Clean innertext to remove multiple spaces and jumpline (break csv)
             let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
-            for(let it=0;it<cols[j].innerText.length;++it){
-            data = data.replace(" ", '\n'+cols[0].innerText+",");}
+            for (let it=0; it<cols[j].innerText.length; ++it){
+                data = data.replace(" ", '\n'+cols[0].innerText+",");
+            }
             row.push(data);
         }
         csv.push(row.join(','));
