@@ -12,14 +12,16 @@
             <div>
                 Enter number of peers for one student to grade and randomly assign peer grading in class.
                 <hr>
+                <input type="radio" id="all_grade" name="all_grade" class= "ignore" value="All Grade All" checked> All Grade All<br>
+                <input type="radio" name="all_grade" class="ignore" value="Number of Students">
+                <input type="number" id="number_to_peer_grade" placeholder="Number of Students">
+                <br>
+                <br>
                 <input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections
                 {% if not gradeable.isTeamAssignment() %}
                     <br><input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading
                 {% endif %}
-                <br>
-                <input type="radio" id="all_grade" name="all_grade" class= "ignore" value="All Grade All" checked> All Grade All<br>
-                <input type="radio" name="all_grade" class="ignore" value="Number of Students">
-                <input type="number" id="number_to_peer_grade" placeholder="Number of Students"><br><br>
+                <br><br>
                 <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate">
             </div>
         </div>
@@ -82,7 +84,7 @@
     </div>
     <br>
     <div id="add-grader-btn-container" class="btn-container">
-        <input type="button" name="add-peer-grader" class="btn btn-primary key_to_click" id="add-peer-grader" tabindex="0" value="Add New Grader to Matrix"></input>
+        <input type="button" name="add-peer-grader" class="btn btn-primary key_to_click" id="add-peer-grader" tabindex="0" value="Add New Grader to Matrix">
     </div>
 </div>
 <script>
