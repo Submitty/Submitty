@@ -24,6 +24,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     */
 
     private $code_to_index = [];//an array maps queue codes to their index (this is used to give each queue a color)
+    private $queue_occupancy = []; //an array where keys are open queues and values are the number of people in that queue
     private $current_queue;
     private $full_history;
     private $current_queue_state;
@@ -66,6 +67,9 @@ class OfficeHoursQueueModel extends AbstractModel {
         $index = 0;
         foreach ($this->core->getQueries()->getAllQueues() as $queue) {
             $this->code_to_index[$queue['code']] = $index;
+            if ($queue['open']) {
+                $this->queue_occupancy[$queue['code']] = $this->core->getQueries()->getCurrentNumberInQueue($queue['code']);
+            }
             $index += 1;
         }
 
@@ -341,5 +345,13 @@ class OfficeHoursQueueModel extends AbstractModel {
             return $sent_time->format("h:i");
         }
         return null;
+
+    /**
+     * function to return an associative array where keys are open queues and values
+     * are the number of people in each queue.
+     * @return array
+     */
+    public function getQueueOccupancy() {
+        return $this->queue_occupancy;
     }
 }
