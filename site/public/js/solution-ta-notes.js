@@ -25,6 +25,9 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                     res.data.current_user_id === res.data.author ? `${res.data.author} (You)` : res.data.author,
                 );
 
+                $(`#solution-box-${component_id}`).find('.solution-cont')
+                    .attr('data-original-solution', $(`#textbox-solution-${component_id}`).val());
+
                 const save_button = $(`#solution-box-${component_id}`).find('.solution-save-btn');
                 save_button.addClass('disabled');
                 save_button.prop('disabled', true);
