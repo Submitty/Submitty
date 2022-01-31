@@ -96,7 +96,6 @@ jobs:
             - uses: shivammathur/setup-php@2.7.0
               with:
                 php-version: ${{ env.PHP_VER }}
-                tools: composer:2.1.14
             - name: Cache Composer
               id: composer-cache
               run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -132,7 +131,6 @@ jobs:
           - uses: shivammathur/setup-php@2.7.0
             with:
               php-version: ${{ env.PHP_VER }}
-              tools: composer:2.1.14
               extensions: imagick
               coverage: pcov
           - name: Cache Composer
@@ -283,7 +281,6 @@ jobs:
           - uses: shivammathur/setup-php@2.7.0
             with:
               php-version: ${{ env.PHP_VER }}
-              tools: composer:2.1.14
               extensions: imagick
 
           - name: Set Timezone
