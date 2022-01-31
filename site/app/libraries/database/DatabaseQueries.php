@@ -7491,9 +7491,9 @@ AND gc_id IN (
         return $answers;
     }
 
-    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path, $release_histogram) {
+    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path, $release_histogram, $show_correct_answer) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ?, release_histogram = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $release_histogram, $poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ?, release_histogram = ?, show_correct_answer = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $release_histogram, $show_correct_answer, $poll_id]);
         foreach ($responses as $order_id => $response) {
             $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
         }

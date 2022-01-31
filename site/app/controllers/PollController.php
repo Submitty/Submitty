@@ -398,14 +398,14 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
         }
-        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'removed_responses', 'release_histogram'];
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'removed_responses', 'release_histogram', 'show_correct_answer'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
                 $this->core->addErrorMessage("Error occured in editing poll");
                 return new RedirectResponse($returnUrl);
             }
         }
-        if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
+        if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "" || $_POST["show_correct_answer"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
             return new RedirectResponse($returnUrl);
         }
@@ -420,6 +420,10 @@ class PollController extends AbstractController {
         }
         if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
             $this->core->addErrorMessage("Invalid student histogram release setting");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if (!in_array($_POST["show_correct_answer"], PollUtils::getShowCorrectAnswerSettings())) {
+            $this->core->addErrorMessage("Invalid student histogram correct answer setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $file_path = null;
@@ -511,7 +515,7 @@ class PollController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path, $_POST["release_histogram"]);
+        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path, $_POST["release_histogram"], $_POST["show_correct_answer"]);
         return new RedirectResponse($returnUrl);
     }
 
