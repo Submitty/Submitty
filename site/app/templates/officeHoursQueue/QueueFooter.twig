@@ -339,7 +339,6 @@
               async: false,
               url: buildCourseUrl(['office_hours_queue', 'get_queue_message']),
               data: {
-                  'csrf_token': csrfToken,
                   'code' : queue_code
               },
               success: function (response) {
