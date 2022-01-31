@@ -335,7 +335,7 @@
   function ajaxGetQueueMessage(queue_code) {
       return new Promise(function (resolve, reject) {
           $.getJSON({
-              type: "POST",
+              type: "GET",
               async: false,
               url: buildCourseUrl(['office_hours_queue', 'get_queue_message']),
               data: {

@@ -546,7 +546,7 @@ class OfficeHoursQueueController extends AbstractController {
             }
             $message = trim($_POST['socket-message']);
             $this->core->getQueries()->setQueueMessage($code, $message);
-            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => true, 'message' => $message, 'course' => $this->core->getDisplayedCourseName()]);
+            $this->sendSocketMessage(['type' => 'update_message', 'queue_code' => $code, 'alert' => true]);
             $this->core->addSuccessMessage("Message Sent To Queue");
         }
 
@@ -554,11 +554,11 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods={"GET"})
      */
     public function getQueueMessage() {
-        if (!empty($_POST['code'])) {
-            $row = $this->core->getQueries()->getQueueMessage(trim($_POST['code']));
+        if (!empty($_GET['code'])) {
+            $row = $this->core->getQueries()->getQueueMessage(trim($_GET['code']));
             if ($row['message'] != null) {
                 $results = $row['message'];
                 $this->core->getOutput()->renderJsonSuccess($results);
