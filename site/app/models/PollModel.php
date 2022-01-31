@@ -36,8 +36,10 @@ class PollModel extends AbstractModel {
     protected $image_path;
     /** @prop-read string */
     protected $release_histogram;
+    /** @prop-read string */
+    protected $show_correct_answer;
 
-    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path, $release_histogram) {
+    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path, $release_histogram, $show_correct_answer) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -50,6 +52,7 @@ class PollModel extends AbstractModel {
         $this->release_date = $release_date;
         $this->image_path = $image_path;
         $this->release_histogram = $release_histogram;
+        $this->show_correct_answer = $show_correct_answer;
     }
 
     public function getResponses() {
@@ -146,5 +149,21 @@ class PollModel extends AbstractModel {
 
     public function isHistogramAvailable() {
         return ($this->isHistogramAvailableAlways() && !$this->isClosed()) || ($this->isHistogramAvailableWhenEnded() && $this->isEnded());
+    }
+
+    public function isShowCorrectNever() {
+        return $this->release_histogram == "never";
+    }
+
+    public function isShowCorrectWhenEnded() {
+        return $this->release_histogram == "when_ended";
+    }
+
+    public function isShowCorrectAlways() {
+        return $this->release_histogram == "always";
+    }
+
+    public function isShowCorrect() {
+        return ($this->isShowCorrectAlways() && !$this->isClosed()) || ($this->isShowCorrectWhenEnded() && $this->isEnded());
     }
 }

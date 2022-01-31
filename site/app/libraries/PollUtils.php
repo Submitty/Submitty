@@ -29,7 +29,8 @@ class PollUtils {
                 "release_date" => $poll->getReleaseDate(),
                 "status" => $poll->getStatus(),
                 "image_path" => $poll->getImagePath(),
-                "release_histogram" => $poll->getReleaseHistogram()
+                "release_histogram" => $poll->getReleaseHistogram(),
+                "show_correct_answer" => $poll->getShowCorrectAnswer()
             ];
         }
         return $data;
@@ -53,6 +54,14 @@ class PollUtils {
     }
 
     public static function getReleaseHistogramSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
+    }
+
+    public static function getShowCorrectAnswerSettings(): array {
         return [
             "never",
             "when_ended",
