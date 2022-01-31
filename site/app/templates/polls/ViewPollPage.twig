@@ -77,7 +77,7 @@
             {% for option_id, attributes in results %}
                 data[0].x.push("{{ poll.getResponseString(option_id)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
                 data[0].y.push({{ attributes['count'] }});
-                data[0].marker.color.push("{{ attributes['is_correct'] ? '#2ca02c' : '#1f77b4' }}");
+                data[0].marker.color.push("{{ attributes['is_correct'] and poll.isShowCorrect() ? '#2ca02c' : '#1f77b4' }}");
 			{% endfor %}
 			const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
 			const width = Math.max(300, window.innerWidth * 0.5);

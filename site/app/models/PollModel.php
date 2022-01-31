@@ -152,15 +152,15 @@ class PollModel extends AbstractModel {
     }
 
     public function isShowCorrectNever() {
-        return $this->release_histogram == "never";
+        return $this->show_correct_answer == "never";
     }
 
     public function isShowCorrectWhenEnded() {
-        return $this->release_histogram == "when_ended";
+        return $this->show_correct_answer == "when_ended";
     }
 
     public function isShowCorrectAlways() {
-        return $this->release_histogram == "always";
+        return $this->show_correct_answer == "always";
     }
 
     public function isShowCorrect() {

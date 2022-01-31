@@ -7445,7 +7445,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"], $row["show_correct_answer"]);
     }
 
     public function getResponses($poll_id) {
