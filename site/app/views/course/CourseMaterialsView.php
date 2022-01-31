@@ -148,8 +148,9 @@ class CourseMaterialsView extends AbstractView {
                 if ($this->removeEmptyFolders($course_material)) {
                     unset($course_materials[$path]);
                 }
-            } else {
-                return false;   
+            }
+            else {
+                return false;
             }
         }
         return true;
