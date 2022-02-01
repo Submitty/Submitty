@@ -1488,7 +1488,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Get the late day infomration for a specific user (graded gradeable information)
      * @param string $user_id
      * @param string $g_id
-     * @return array $return = [
+     * @return null|array $return = [
      *      'g_id' => string,
      *      'user_id' => string,
      *      'team_id' => string,
