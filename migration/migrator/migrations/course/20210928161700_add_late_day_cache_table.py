@@ -19,7 +19,7 @@ def up(config, database, semester, course):
             g_id VARCHAR(255),
             user_id VARCHAR(255) NOT NULL, 
             team_id VARCHAR(255),
-            late_day_date TIMESTAMP WITHOUT TIME zone NOT NULL,
+            late_day_date TIMESTAMP WITH TIME zone NOT NULL,
             late_days_remaining INTEGER NOT NULL,
             late_days_allowed INTEGER,
             submission_days_late INTEGER,
