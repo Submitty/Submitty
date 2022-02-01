@@ -36,7 +36,7 @@ CREATE TABLE public.late_day_cache (
     g_id character varying(255),
     user_id character varying(255) NOT NULL,
     team_id character varying(255),
-    late_day_date timestamp without time zone NOT NULL,
+    late_day_date timestamp with time zone NOT NULL,
     late_days_remaining integer NOT NULL,
     late_days_allowed integer,
     submission_days_late integer,
@@ -58,7 +58,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
     DECLARE
         var_row RECORD;
         return_cache late_day_cache%rowtype;
-        latestDate timestamp without time zone;
+        latestDate timestamp with time zone;
         late_days_remaining integer;
         late_days_change integer;
         assignment_budget integer;
@@ -270,7 +270,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
     AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
@@ -346,7 +346,7 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
     AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN

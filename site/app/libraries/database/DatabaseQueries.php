@@ -1407,6 +1407,26 @@ WHERE semester=? AND course=? AND user_id=?",
         return $this->course_db->rows();
     }
 
+    /**
+     * Get all of the late day cache ordered by date and g_id
+     * @return array $return = [
+     *  $user_id' => [
+     *      $event_title => [
+     *          $cache_row => [
+     *              'g_id' => string,
+     *              'user_id' => string,
+     *              'team_id' => string,
+     *              'late_days_allowed' => int,
+     *              'late_day_date' => DateTime,
+     *              'submission_days_late' => int,
+     *              'late_day_exceptions' => int,
+     *              'late_days_remaining' => int,
+     *              'late_day_status' => int,
+     *              'late_days_change' => int
+     *          ]
+     *      ]
+     *  ]
+     */
     public function getLateDayCache() {
         $query = "SELECT * FROM 
                     late_day_cache AS ldc
@@ -1425,6 +1445,24 @@ WHERE semester=? AND course=? AND user_id=?",
         return $return;
     }
 
+    /**
+     * Get the late day cache for a specific user
+     * @param string $user_id
+     * @return array $return = [
+     *      $id => [
+     *          'g_id' => string,
+     *          'user_id' => string,
+     *          'team_id' => string,
+     *          'late_days_allowed' => int,
+     *          'late_day_date' => DateTime,
+     *          'submission_days_late' => int,
+     *          'late_day_exceptions' => int,
+     *          'late_days_remaining' => int,
+     *          'late_day_status' => int,
+     *          'late_days_change' => int
+     *      ]
+     * ]
+     */
     public function getLateDayCacheForUser($user_id) {
         $params = [$user_id];
         $query = "SELECT * FROM late_day_cache
@@ -1448,6 +1486,23 @@ WHERE semester=? AND course=? AND user_id=?",
         return $late_day_events;
     }
 
+    /**
+     * Get the late day infomration for a specific user (graded gradeable information)
+     * @param string $user_id
+     * @param string $g_id
+     * @return array $return = [
+     *      'g_id' => string,
+     *      'user_id' => string,
+     *      'team_id' => string,
+     *      'late_days_allowed' => int,
+     *      'late_day_date' => DateTime,
+     *      'submission_days_late' => int,
+     *      'late_day_exceptions' => int,
+     *      'late_days_remaining' => int,
+     *      'late_day_status' => int,
+     *      'late_days_change' => int
+     * ]
+     */
     public function getLateDayCacheForUserGradeable($user_id, $g_id) {
         $params = [$user_id, $g_id];
         $query = "SELECT * FROM late_day_cache
@@ -1473,6 +1528,9 @@ WHERE semester=? AND course=? AND user_id=?",
         return $row;
     }
 
+    /**
+     * Generate and update the late day cache for all of the students in the course
+     */
     public function generateLateDayCacheForUsers() {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
@@ -1489,6 +1547,10 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
+    /**
+     * Generate and update the late day cache for a student
+     * @param string $user_id
+     */
     public function generateLateDayCacheForUser($user_id) {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
@@ -1499,6 +1561,9 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
+    /**
+     * Remove all of the late day information cached
+     */
     public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);

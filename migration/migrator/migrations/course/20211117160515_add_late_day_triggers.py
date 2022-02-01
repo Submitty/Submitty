@@ -29,7 +29,7 @@ def up(config, database, semester, course):
         AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
@@ -102,7 +102,7 @@ def up(config, database, semester, course):
         AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
@@ -134,7 +134,7 @@ def up(config, database, semester, course):
     DECLARE
         var_row RECORD;
         return_cache late_day_cache%rowtype;
-        latestDate timestamp without time zone;
+        latestDate timestamp with time zone;
         late_days_remaining integer;
         late_days_change integer;
         assignment_budget integer;
