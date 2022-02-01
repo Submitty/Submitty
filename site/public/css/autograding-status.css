@@ -32,7 +32,8 @@
     overflow-y: scroll;
     height: 100vh;
     padding: 1em;
-    background-color: var(--standard-dark-gray);
+    background-color: var(--code-box-background-light-gray);
+    color: var(--code-box-font-color-dark-gray);
 }
 
 div.stack-trace-wrapper {
