@@ -1407,7 +1407,13 @@ WHERE semester=? AND course=? AND user_id=?",
         return $this->course_db->rows();
     }
 
-
+    /**
+     * Fetches all students from the given registration sections, $sections.
+     *
+     * @param  string[] $sections
+     * @param  string $orderBy
+     * @return User[]
+     */
     public function getUsersByRegistrationSections($sections, $orderBy = "registration_section") {
         $return = [];
         if (count($sections) > 0) {
@@ -2258,14 +2264,29 @@ ORDER BY g.sections_rotating_id, g.user_id",
      *
      * @return array
      */
-    public function getCountUsersRotatingSections() {
+    public function getUsersCountByRotatingSections() {
         $this->course_db->query(
             "
-SELECT rotating_section, count(*) as count
-FROM users
-WHERE registration_section IS NOT NULL
-GROUP BY rotating_section
-ORDER BY rotating_section"
+            SELECT rotating_section, count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL
+            GROUP BY rotating_section
+            ORDER BY rotating_section"
+        );
+        return $this->course_db->rows();
+    }
+
+    /**
+     * Returns the count of all users in course that are in a non-null registration section.
+     *
+     * @return integer
+     */
+    public function getTotalRegisteredUsersCount() {
+        $this->course_db->query(
+            "
+            SELECT count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL"
         );
         return $this->course_db->rows();
     }
@@ -2345,13 +2366,19 @@ ORDER BY rotating_section"
         return $this->course_db->rows();
     }
 
+    /**
+     * Get newly registered students (registration section != NULL) that have not yet been
+     * assigned to a rotating section.
+     *
+     * @return string[] user id's
+     */
     public function getRegisteredUserIdsWithNullRotating() {
         $this->course_db->query(
             "
-SELECT user_id
-FROM users
-WHERE rotating_section IS NULL AND registration_section IS NOT NULL
-ORDER BY user_id ASC"
+            SELECT user_id
+            FROM users
+            WHERE rotating_section IS NULL AND registration_section IS NOT NULL
+            ORDER BY user_id ASC"
         );
         return array_map(
             function ($elem) {
@@ -2361,6 +2388,11 @@ ORDER BY user_id ASC"
         );
     }
 
+     /**
+     * Return an array of user id's for users that have been assigned a registration section
+     *
+     * @return string[] user id's
+     */
     public function getRegisteredUserIds() {
         $this->course_db->query(
             "
@@ -2423,6 +2455,10 @@ ORDER BY user_id ASC"
         $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
 
+    /**
+     * Remove unregistered students (registration section = NULL) from rotating sections
+     *
+     */
     public function setNonRegisteredUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
@@ -2446,6 +2482,11 @@ ORDER BY user_id ASC"
         return $this->course_db->row()['cnt'];
     }
 
+    /**
+     * Adds given rotating section to the database
+     * 
+     * @param integer $section
+     */
     public function insertNewRotatingSection($section) {
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", [$section]);
     }
@@ -2481,8 +2522,8 @@ ORDER BY user_id ASC"
      */
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge([$section], $users);
-        $update_string = $this->createParamaterList(count($users));
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$update_string}", $update_array);
+        $placeholders = $this->createParamaterList(count($users));
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
     }
 
     /**
