@@ -1480,7 +1480,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $late_day_events[$row['g_id']] = $row;
             }
             else { // Late day update event
-                $late_day_events[$index++] = $row;
+                $late_day_events[$index] = $row;
+                $index++;
             }
         }
         return $late_day_events;
@@ -1503,7 +1504,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *      'late_days_change' => int
      * ]
      */
-    public function getLateDayCacheForUserGradeable($user_id, $g_id) {
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id) {
         $params = [$user_id, $g_id];
         $query = "SELECT * FROM late_day_cache
                     WHERE user_id=?
@@ -1551,7 +1552,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Generate and update the late day cache for a student
      * @param string $user_id
      */
-    public function generateLateDayCacheForUser($user_id) {
+    public function generateLateDayCacheForUser(string $user_id) {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
 
