@@ -2389,10 +2389,10 @@ ORDER BY rotating_section"
     }
 
      /**
-     * Return an array of user id's for users that have been assigned a registration section
-     *
-     * @return string[] user id's
-     */
+      * Return an array of user id's for users that have been assigned a registration section
+      *
+      * @return string[] user id's
+      */
     public function getRegisteredUserIds() {
         $this->course_db->query(
             "
@@ -2484,7 +2484,7 @@ ORDER BY user_id ASC"
 
     /**
      * Adds given rotating section to the database
-     * 
+     *
      * @param integer $section
      */
     public function insertNewRotatingSection($section) {
@@ -2516,7 +2516,7 @@ ORDER BY user_id ASC"
 
     /**
      * Updates all given Users in $users array to have rotating section $section
-     * 
+     *
      * @param integer $section
      * @param User[] $users
      */

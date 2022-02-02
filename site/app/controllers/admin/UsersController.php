@@ -522,7 +522,8 @@ class UsersController extends AbstractController {
                 $this->core->addErrorMessage("Must specify a positive number of sections to redo rotating sections");
                 $this->core->redirect($return_url);
             }
-        } else {
+        }
+        else {
             // $_POST['rotating_assignment_type'] === "fewest"
             $num_rotating_sections = $this->core->getQueries()->getMaxRotatingSection();
             if ($num_rotating_sections === null) {
@@ -572,7 +573,8 @@ class UsersController extends AbstractController {
                     $gradeables_section_assignment_counts[$g_id][$section]++;
                 }
             }
-        } elseif ($_POST['rotating_assignment_type'] === "fewest") {
+        }
+        elseif ($_POST['rotating_assignment_type'] === "fewest") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
             $unassigned_gradeable_teams = $this->core->getQueries()->getTeamIdsWithNullRotating();
