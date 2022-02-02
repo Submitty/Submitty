@@ -1,7 +1,6 @@
 <script>
 
     $( document ).ready(function(){
-        enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         thread_post_handler();
         var b = $('#nav-buttons li a');
@@ -106,6 +105,7 @@
                     "userGroup" : generate_post_content.userGroup,
                     "activeThread" : generate_post_content.activeThread,
                     "activeThreadAnnouncement" : generate_post_content.activeThreadAnnouncement,
+                    "expiring" : generate_post_content.expiring,
                     "isCurrentFavorite": generate_post_content.isCurrentFavorite,
                     "display_option" : generate_post_content.display_option,
                     "post_data" : generate_post_content.post_data,

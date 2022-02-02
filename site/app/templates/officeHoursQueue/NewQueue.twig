@@ -13,21 +13,22 @@
             </a><br>
             <p>NOTE: Access Codes are optional</p>
         </div>
-    {% if viewer.isContactInfoEnabled() %}
+    <br>
+    Require contact information
+    <input type="checkbox" name="require_contact_information" onclick="toggleQueueRegex()"><br>
+    <div class="contact-information-regex" style="display: none">
         <input type="text" id="regex" name="regex" placeholder="Contact Info Regex Pattern" aria-label="Regex" style="min-width: 45%; margin-top: 1rem;">
-
         <div class="regex-help">
             <br>You may optionally specify a regular expression to ensure your students enter the requested
             format for the contact information.  For example: <br>
-            <b>Gmail:&nbsp;&nbsp;</b> <tt>.+@gmail.com</tt><br>
-            <b>Email:&nbsp;&nbsp;</b> <tt>.+@.+\..+</tt><br>
-            <b>Webex Personal Room:&nbsp;&nbsp;</b> <tt>^https:\/\/.+\.webex\.com\/meet\/.*</tt><br>
-            <b>Webex Meeting:&nbsp;&nbsp;</b> <tt>^https:\/\/.+\.webex\.com\/.*</tt><br>
-            <b>Skype link:&nbsp;&nbsp;</b> <tt>.*join\.skype\.com.*</tt><br>
-            <b>Zoom link:&nbsp;&nbsp;</b> <tt>.*zoom\.us.*</tt><br><br>
+            <b>Gmail:&nbsp;&nbsp;</b> .+@gmail.com<br>
+            <b>Email:&nbsp;&nbsp;</b> .+@.+\..+<br>
+            <b>Webex Personal Room:&nbsp;&nbsp;</b> ^https:\/\/.+\.webex\.com\/.+\/.*<br>
+            <b>Webex Meeting:&nbsp;&nbsp;</b> ^https:\/\/.+\.webex\.com\/.*<br>
+            <b>Skype link:&nbsp;&nbsp;</b> .*join\.skype\.com.*<br>
+            <b>Zoom link:&nbsp;&nbsp;</b> .*zoom\.us.* <br><br>
         </div>
-    {% endif %}
-    <br>
+    </div>
     <button id="open_new_queue_btn" type="submit" class="btn btn-primary" >Open New Queue</button>
     </form>
     <script>
@@ -38,6 +39,10 @@
         }).mouseup(function(ev) {
             queueDraggable.draggable('enable');
         });
+
+        function toggleQueueRegex(){
+            $('.contact-information-regex').toggle();
+        }
     </script>
 {% endblock %}
 {% block form %}

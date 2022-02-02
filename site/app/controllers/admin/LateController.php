@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\exceptions\DatabaseException;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
@@ -48,7 +47,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
+     * @param string|null $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
      * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse
@@ -65,6 +64,9 @@ class LateController extends AbstractController {
                 );
             }
             else {
+                // TO DO: Update late day cache for late days (bulk)
+                $late_day_status = null;
+
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
@@ -99,6 +101,9 @@ class LateController extends AbstractController {
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
+            // TO DO: Update late day cache for late day change
+            $late_day_status = null;
+
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
@@ -130,6 +135,9 @@ class LateController extends AbstractController {
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
         $this->core->addSuccessMessage("Late days entry removed");
 
+        // TO DO: Update late day cache for late day removal
+        $late_day_status = null;
+
         return $this->getLateDays();
     }
 
@@ -149,6 +157,8 @@ class LateController extends AbstractController {
                 );
             }
             else {
+                // TO DO: Update late day cache for late day extension (bulk)
+                $late_day_status = null;
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
@@ -241,6 +251,9 @@ class LateController extends AbstractController {
                 }
             }
             else {
+                // TO DO: Update late day cache for late day extension (user)
+                $late_day_status = null;
+
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());

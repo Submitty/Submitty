@@ -11,9 +11,6 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
-use app\libraries\DateUtils;
-use app\libraries\NumberUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -120,7 +117,7 @@ class AutoGradingView extends AbstractView {
      * @param \app\models\gradeable\GradedGradeable $graded_gradeable
      * @param AutoGradedVersion $version version to display
      * @param AutoGradedTestcase $testcase testcase to display
-     * @param $popup_css_file
+     * @param string $popup_css_file
      * @param string $who
      * @param bool $show_hidden
      * @return string
@@ -226,6 +223,15 @@ class AutoGradingView extends AbstractView {
                     ];
                 }
 
+                $autogradingConfig = $gradeable->getAutogradingConfig();
+                if (!is_null($autogradingConfig) && $autogradingConfig->getDisplayTestcaseRuntimeMemory()) {
+                    $metrics = $this->core->getQueries()->getMetrics($who, $gradeable->getId(), sprintf('test%02d', $testcase->getTestcase()->getIndex() + 1), $version->getVersion());
+                    $check["metrics"] = [
+                        "elapsed_time" => $metrics['elapsed_time'] ?? null,
+                        "max_rss_size" => $metrics['max_rss_size'] ?? null
+                    ];
+                }
+
                 $checks[] = $check;
             }
 
@@ -249,9 +255,9 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param string $display
-     * @return string
+     * @return bool
      */
-    private function autoShouldDisplayPopup(string $display): string {
+    private function autoShouldDisplayPopup(string $display): bool {
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
         $arr_count = count($tmp_array_string);
@@ -445,10 +451,22 @@ class AutoGradingView extends AbstractView {
         }
 
         // Update overall comments to have display names
-        $overall_comments = [];
+        $grader_info = [];
+
+        foreach ($ta_graded_gradeable->getAttachments() as $user_name => $attachments) {
+            $user = $this->core->getQueries()->getUserById($user_name);
+            if ($gradeable->hasPeerComponent() && !$user->accessGrading()) {
+                continue;
+            }
+
+            $grader_info[$user_name] = [];
+            $grader_info[$user_name]["attachments"] = $attachments;
+            $grader_info[$user_name]["display_name"] = $user->getDisplayedFirstName();
+            $grader_info[$user_name]["comment"] = "";
+        }
+
         foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
             $comment_user = $this->core->getQueries()->getUserById($user_name);
-            $display_name = $comment_user->getDisplayedFirstName();
 
             // Skip peers.
             if ($gradeable->hasPeerComponent() && !$comment_user->accessGrading()) {
@@ -457,15 +475,18 @@ class AutoGradingView extends AbstractView {
 
             // Skip empty comments
             if (strlen(trim($comment)) > 0) {
-                $overall_comments[$display_name] = $comment;
+                if (!isset($grader_info[$user_name])) {
+                    $grader_info[$user_name] = [];
+                    $grader_info[$user_name]["attachments"] = [];
+                    $grader_info[$user_name]["display_name"] = $comment_user->getDisplayedFirstName();
+                }
+                $grader_info[$user_name]["comment"] = $comment;
             }
         }
-
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
             'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate(),
             'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate(),
@@ -489,7 +510,8 @@ class AutoGradingView extends AbstractView {
             'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
             "annotated_file_names" =>  $annotated_file_names,
             "annotation_paths" => $annotation_paths,
-            "annotated_pdf_paths" => $annotated_pdf_paths
+            "annotated_pdf_paths" => $annotated_pdf_paths,
+            "grader_info" => $grader_info
         ]);
     }
 
@@ -689,18 +711,34 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
-        $overall_comments = [];
-        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
-            $comment_user = $this->core->getQueries()->getUserById($user_id);
 
-            // Skip non-peers.
-            if ($gradeable->hasPeerComponent() && $comment_user->accessGrading()) {
+        $peer_graders = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $id);
+        $grader_info = [];
+
+        foreach ($ta_graded_gradeable->getAttachments() as $user_name => $attachments) {
+            if (!in_array($user_name, $unique_graders, true)) {
+                continue;
+            }
+
+            $grader_info[$user_name] = [];
+            $grader_info[$user_name]["attachments"] = $attachments;
+            $grader_info[$user_name]["display_name"] = $user_name;
+            $grader_info[$user_name]["comment"] = "";
+        }
+
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
+            if (!in_array($user_name, $unique_graders, true)) {
                 continue;
             }
 
             // Skip empty comments
             if (strlen(trim($comment)) > 0) {
-                $overall_comments[$user_id] = $comment;
+                if (!isset($grader_info[$user_name])) {
+                    $grader_info[$user_name] = [];
+                    $grader_info[$user_name]["attachments"] = [];
+                    $grader_info[$user_name]["display_name"] = $user_name;
+                }
+                $grader_info[$user_name]["comment"] = $comment;
             }
         }
 
@@ -712,7 +750,7 @@ class AutoGradingView extends AbstractView {
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            'overall_comments' => $overall_comments,
+            'grader_info' => $grader_info,
             'is_peer' => $gradeable->hasPeerComponent(),
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,

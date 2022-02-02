@@ -68,7 +68,7 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        if ($mime_type === "application/pdf" || (Utils::startsWith($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
@@ -125,7 +125,7 @@ class CourseMaterialsController extends AbstractController {
         $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
 
         foreach ($all_files as $file) {
-            if (Utils::startsWith($file->getPath(), $path)) {
+            if (str_starts_with($file->getPath(), $path)) {
                 $this->core->getCourseEntityManager()->remove($file);
             }
         }
@@ -244,7 +244,7 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (Utils::startsWith($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                if (str_starts_with($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -296,7 +296,7 @@ class CourseMaterialsController extends AbstractController {
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         foreach ($course_materials as $course_material) {
             if (
-                Utils::startsWith($course_material->getPath(), $main_course_material->getPath())
+                str_starts_with($course_material->getPath(), $main_course_material->getPath())
                 && $course_material->getPath() != $main_course_material->getPath()
             ) {
                 if ($course_material->isDir()) {
@@ -602,7 +602,7 @@ class CourseMaterialsController extends AbstractController {
                             $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                                 $name = strtolower($entry);
                                 foreach ($disallowed_folders as $folder) {
-                                    if (Utils::startsWith($folder, $name)) {
+                                    if (str_starts_with($folder, $name)) {
                                         return false;
                                     }
                                 }

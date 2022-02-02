@@ -62,6 +62,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
+export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -78,6 +79,10 @@ while :; do
             export NO_SUBMISSIONS=1
             echo 'no_submissions'
             ;;
+        --worker-pair)
+            export WORKER_PAIR=1
+            echo "worker_pair"
+            ;;
         *) # No more options, so break out of the loop.
             break
     esac
@@ -85,12 +90,12 @@ while :; do
     shift
 done
 
-
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
-
     export DEBIAN_FRONTEND=noninteractive
+fi
 
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
@@ -164,6 +169,13 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
+        # Setting it up to allow SSH as root by default
+        mkdir -p -m 700 /root/.ssh
+        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+        sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+    fi
     echo "Installing Submitty in worker mode."
 else
     echo "Installing primary Submitty."
@@ -190,7 +202,7 @@ apt-get install libzbar0 --yes
 
 pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
     pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
@@ -206,7 +218,7 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
@@ -250,7 +262,7 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -287,6 +299,13 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
+    if [ ${WORKER_PAIR} == 1 ]; then
+        echo -e "attempting to create ssh key for submitty_daemon..."
+        su submitty_daemon -c "cd ~/"
+        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
+        su submitty_daemon -c "echo 'successfully created ssh key'"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@172.18.2.8"
+    fi
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -431,6 +450,10 @@ if [ ${WORKER} == 0 ]; then
         sed -i '25s/^/\#/' /etc/pam.d/common-password
         sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
+        # Create folder and give permissions to PHP user for xdebug profiling
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+        usermod -aG vagrant ${PHP_USER}
+
         # Enable xdebug support for debugging
         phpenmod xdebug
 
@@ -442,7 +465,7 @@ if [ ${WORKER} == 0 ]; then
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
-xdebug.remote_host=10.0.2.2
+xdebug.remote_connect_back=1
 EOF
         fi
 
@@ -484,9 +507,9 @@ EOF
     # post_max_filesize
 
     sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
@@ -611,8 +634,12 @@ echo Beginning Submitty Setup
 
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
-    echo  Running configure submitty in worker mode
-    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    echo "Running configure submitty in worker mode"
+    if [ ${VAGRANT} == 1]; then
+        "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    else
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    fi
 else
     if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
@@ -639,7 +666,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -731,7 +758,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -775,7 +802,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""
