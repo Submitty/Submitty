@@ -6,6 +6,7 @@ namespace app\controllers\admin;
 
 use app\entities\plagiarism\PlagiarismRunAccess;
 use app\exceptions\DatabaseException;
+use app\exceptions\FileNotFoundException;
 use app\exceptions\FileWriteException;
 use app\exceptions\ValidationException;
 use app\libraries\response\ResponseInterface;
@@ -105,6 +106,21 @@ class PlagiarismController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+    }
+
+    /**
+     * Returns the user group associated with the current signed-in user
+     *
+     * @return int
+     */
+    private function getCurrentUserGroup(): int {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $semester, $course));
+        if (!$group) {
+            throw new FileNotFoundException("Error: Unable to find course directory for current user");
+        }
+        return $group;
     }
 
     /**
@@ -210,9 +226,13 @@ class PlagiarismController extends AbstractController {
 
         $content = file_get_contents($file_path);
         $content = trim($content);
-        $rankings = preg_split('/\s+/', $content);
-        $rankings = array_chunk($rankings, 3);
-        return $rankings;
+        $ranking = preg_split('/\R/', $content);
+        $ranking_array = [];
+        foreach ($ranking as $row) {
+            $ranking_array[] = preg_split('/\s+/', $row);
+        }
+
+        return $ranking_array;
     }
 
     /**
@@ -232,9 +252,12 @@ class PlagiarismController extends AbstractController {
 
         $content = file_get_contents($file_path);
         $content = trim($content);
-        $rankings = preg_split('/\s+/', $content);
-        $rankings = array_chunk($rankings, 4);
-        return $rankings;
+        $ranking = preg_split('/\R/', $content);
+        $ranking_array = [];
+        foreach ($ranking as $row) {
+            $ranking_array[] = preg_split('/\s+/', $row);
+        }
+        return $ranking_array;
     }
 
 
@@ -324,28 +347,13 @@ class PlagiarismController extends AbstractController {
         }
 
         if ($job === "RunLichen") {
-            $json_data = [
-                "semester" => $semester,
-                "course" => $course,
-                "gradeable" => $gradeable_id,
-                "config_id" => $config_id,
-                "version" => $config->getVersionStatus(),
-                "regex" => $config->getRegexArray(),
-                "regex_dirs" => $regex_dirs,
-                "language" => $config->getLanguage(),
-                "threshold" => $config->getThreshold(),
-                "hash_size" => $config->getHashSize(),
-                "other_gradeables" => $config->getOtherGradeables(),
-                "ignore_submissions" => $config->getIgnoredSubmissions()
-            ];
-
             $lichen_job_data = [
                 "job" => $job,
                 "semester" => $semester,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id,
-                "config_data" => $json_data
+                "config_data" => $this->getJsonForConfig($gradeable_id, $config_id)
             ];
         }
         else {
@@ -379,12 +387,9 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
+        /** @var PlagiarismConfig $config */
         $config = $em->getRepository(PlagiarismConfig::class)
             ->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
-
-        if ($config === null) {
-            throw new DatabaseException("Error: Unable to find plagiarism configuration");
-        }
 
         $regex_dirs = [];
         if ($config->isRegexDirSubmissionsSelected()) {
@@ -397,7 +402,7 @@ class PlagiarismController extends AbstractController {
             $regex_dirs[] = "checkout";
         }
 
-        return [
+        $json = [
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id,
@@ -411,6 +416,11 @@ class PlagiarismController extends AbstractController {
             "other_gradeables" => $config->getOtherGradeables(),
             "ignore_submissions" => $config->getIgnoredSubmissions()
         ];
+        if ($config->hasOtherGradeablePaths()) {
+            $json["other_gradeable_paths"] = $config->getOtherGradeablePaths();
+        }
+
+        return $json;
     }
 
 
@@ -529,7 +539,7 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $top_match_percent = $rankings[0][0];
+                        $top_match_percent = $rankings[0][2];
                         $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
@@ -618,7 +628,7 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($rankings_data as $item) {
-                $user_ids[$item[1]] = null;
+                $user_ids[$item[0]] = null;
             }
             $user_ids = array_keys($user_ids);
 
@@ -633,13 +643,14 @@ class PlagiarismController extends AbstractController {
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
             }
             $temp = [
-                "percent" => $item[0],
-                "user_id" => $item[1],
+                "percent" => $item[2],
+                "match_count" => $item[3],
+                "user_id" => $item[0],
                 "display_name" => $display_name,
-                "version" => $item[2],
+                "version" => $item[1],
             ];
             array_push($rankings, $temp);
         }
@@ -748,6 +759,8 @@ class PlagiarismController extends AbstractController {
                     $data["threshold"],
                     $data["hash_size"],
                     $data["other_gradeables"],
+                    $data["other_gradeable_paths"] ?? [],
+                    $this->getCurrentUserGroup(),
                     $data["ignore_submissions"]
                 );
                 $em->persist($plagiarism_config);
@@ -773,6 +786,8 @@ class PlagiarismController extends AbstractController {
                     $source_config->getThreshold(),
                     $source_config->getHashSize(),
                     $source_config->getOtherGradeables(),
+                    $source_config->getOtherGradeablePaths(),
+                    $this->getCurrentUserGroup(),
                     $source_config->getIgnoredSubmissions()
                 );
                 $em->persist($plagiarism_config);
@@ -794,7 +809,7 @@ class PlagiarismController extends AbstractController {
                 return new RedirectResponse($return_url);
             }
             $regex_directories = $_POST["regex_dir"];
-            $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
+            $regex_for_selecting_files = explode(',', str_replace(' ', '', $_POST['regex_to_select_files']));
 
 
             // Language ////////////////////////////////////////////////////////////
@@ -816,7 +831,7 @@ class PlagiarismController extends AbstractController {
                     $this->core->addErrorMessage("Invalid input provided for other gradeables");
                     $this->core->redirect($return_url);
                 }
-                foreach ($_POST["other_semester_course"] as $index => $sem_course) {
+                foreach ($_POST["other_semester_course"] ?? [] as $index => $sem_course) {
                     if (!isset($_POST["other_gradeable"][$index])) {
                         $this->core->addErrorMessage("Invalid input provided for other term gradeables");
                         $this->core->redirect($return_url);
@@ -854,6 +869,14 @@ class PlagiarismController extends AbstractController {
                             return new RedirectResponse($return_url);
                         }
                         $other_gradeables[] = $to_append;
+                    }
+                }
+
+                if (isset($_POST["other-gradeable-paths"])) {
+                    $paths = explode(",", $_POST["other-gradeable-paths"]);
+                    $other_gradeable_paths = [];
+                    foreach ($paths as $path) {
+                        $other_gradeable_paths[] = trim($path);
                     }
                 }
             }
@@ -906,6 +929,8 @@ class PlagiarismController extends AbstractController {
                         $threshold,
                         $hash_size,
                         $other_gradeables,
+                        $other_gradeable_paths ?? [],
+                        $this->getCurrentUserGroup(),
                         $ignore_submission_option
                     );
                 }
@@ -921,6 +946,7 @@ class PlagiarismController extends AbstractController {
                     $plagiarism_config->setThreshold($threshold);
                     $plagiarism_config->setHashSize($hash_size);
                     $plagiarism_config->setOtherGradeables($other_gradeables);
+                    $plagiarism_config->setOtherGradeablePaths($other_gradeable_paths ?? [], $this->getCurrentUserGroup());
                     $plagiarism_config->setIgnoredSubmissions($ignore_submission_option);
                 }
             }
@@ -1028,6 +1054,7 @@ class PlagiarismController extends AbstractController {
         $config["has_other_gradeables"] = false;
         $config["other_semester_courses"] = $this->getOtherSemesterCourses();
         $config["other_gradeables"] = [];
+        $config["other_gradeable_paths"] = "";
         $config["ignore_submissions"] = [];
         $config["ignore_submissions_list"] = "";
 
@@ -1112,9 +1139,10 @@ class PlagiarismController extends AbstractController {
         $config["language"][$plagiarism_config->getLanguage()] = "selected";
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["hash_size"] = $plagiarism_config->getHashSize();
-        $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0;
+        $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0 || count($plagiarism_config->getOtherGradeablePaths()) > 0;
         $config["other_semester_courses"] = $this->getOtherSemesterCourses();
         $config["other_gradeables"] = $other_gradeables_array;
+        $config["other_gradeable_paths"] = implode(",\n", $plagiarism_config->getOtherGradeablePaths());
         $config["ignore_submissions"] = $ignore[0];
         $config["ignore_submissions_list"] = implode(", ", $ignore[1]);
 
@@ -1342,8 +1370,8 @@ class PlagiarismController extends AbstractController {
 
         $max_matching_version = 0;
         foreach ($rankings as $ranking) {
-            if ($ranking[1] == $user_id_1) {
-                $max_matching_version = $ranking[2];
+            if ($ranking[0] == $user_id_1) {
+                $max_matching_version = $ranking[1];
                 break;
             }
         }
@@ -1549,7 +1577,7 @@ class PlagiarismController extends AbstractController {
         if (!$is_team_assignment) {
             $user_ids = [];
             foreach ($ranking as $item) {
-                $user_ids[$item[1]] = null;
+                $user_ids[$item[0]] = null;
             }
             $user_ids = array_keys($user_ids);
 
@@ -1563,14 +1591,14 @@ class PlagiarismController extends AbstractController {
         foreach ($ranking as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[1]]->getDisplayedFirstName()} {$user_ids_and_names[$item[1]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
             }
             $temp = [
-                "percent" => $item[0],
-                "user_id" => $item[1],
+                "percent" => $item[3],
+                "user_id" => $item[0],
                 "display_name" => $display_name,
-                "version" => $item[2],
-                "source_gradeable" => $item[3]
+                "version" => $item[1],
+                "source_gradeable" => $item[2]
             ];
             array_push($return, $temp);
         }

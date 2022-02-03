@@ -699,6 +699,9 @@ class UsersController extends AbstractController {
      * @return array $contents  Data rows and columns read from xlsx or csv file
      */
     private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        $csv_file = '';
+        $xlsx_file = '';
+
         // Data is confidential, and therefore must be deleted immediately after
         // this process ends, regardless if process completes successfully or not.
         register_shutdown_function(
@@ -984,6 +987,8 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
+            // ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data
+            $uploaded_data[$row_num] = $vals;
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
