@@ -37,6 +37,9 @@
                                         "content" : poll.getResponseString(response),
                                         "style": "display: inline-block"
                                     } only %}
+                                {% if poll.isShowCorrect() and response in poll.getAnswers() %}
+                                    <p style="color: #00bd00; margin-left: 1rem ">correct</p>
+                                {% endif %}
 								<br/>
 								<br/>
 							</div>
