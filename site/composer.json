@@ -39,7 +39,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.4.2",
+    "phpstan/phpstan": "1.4.5",
     "phpunit/phpunit": "8.5.23",
     "submitty/php-codesniffer": "2.5.0"
   },
