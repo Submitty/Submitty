@@ -34,7 +34,7 @@
     "@babel/preset-typescript": "^7.16.7",
     "@cypress/skip-test": "^2.6.1",
     "@types/jquery": "^3.5.13",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "babel-jest": "^27.2.5",
     "cypress": "^9.3.1",
