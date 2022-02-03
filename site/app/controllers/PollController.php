@@ -144,7 +144,7 @@ class PollController extends AbstractController {
         }
 
         if (!in_array($_POST["release_histogram"], PollUtils::getShowCorrectAnswerSettings())) {
-            $this->core->addErrorMessage("Invalid student histogram correct answer setting");
+            $this->core->addErrorMessage("Invalid settings for displaying correct answers on student histogram");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
