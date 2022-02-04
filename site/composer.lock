@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "27d4a652d72f722867a2fd5b5bdacbed",
+    "content-hash": "b8fa17c3c6cd0de7083c4159122700be",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2903,16 +2903,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v4.4.36",
+            "version": "v4.4.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "1caa6c63f0ebf3022b88263a2b90260cff33f6dc"
+                "reference": "7613787f68c5eaad98f0bd21d694e6d639b07bf0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/1caa6c63f0ebf3022b88263a2b90260cff33f6dc",
-                "reference": "1caa6c63f0ebf3022b88263a2b90260cff33f6dc",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/7613787f68c5eaad98f0bd21d694e6d639b07bf0",
+                "reference": "7613787f68c5eaad98f0bd21d694e6d639b07bf0",
                 "shasum": ""
             },
             "require": {
@@ -2978,7 +2978,7 @@
                 "psr6"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache/tree/v4.4.36"
+                "source": "https://github.com/symfony/cache/tree/v4.4.37"
             },
             "funding": [
                 {
@@ -2994,7 +2994,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-12-28T10:59:50+00:00"
+            "time": "2022-01-26T15:03:25+00:00"
         },
         {
             "name": "symfony/cache-contracts",
@@ -4273,16 +4273,16 @@
         },
         {
             "name": "symfony/var-exporter",
-            "version": "v4.4.34",
+            "version": "v4.4.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-exporter.git",
-                "reference": "75a297f25a87ce9343d39241679578886f3fd458"
+                "reference": "70efd494974592a6581ad44e962238e3f76baea4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/75a297f25a87ce9343d39241679578886f3fd458",
-                "reference": "75a297f25a87ce9343d39241679578886f3fd458",
+                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/70efd494974592a6581ad44e962238e3f76baea4",
+                "reference": "70efd494974592a6581ad44e962238e3f76baea4",
                 "shasum": ""
             },
             "require": {
@@ -4326,7 +4326,7 @@
                 "serialize"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-exporter/tree/v4.4.34"
+                "source": "https://github.com/symfony/var-exporter/tree/v4.4.37"
             },
             "funding": [
                 {
@@ -4342,7 +4342,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-11-22T10:04:59+00:00"
+            "time": "2022-01-02T09:41:36+00:00"
         },
         {
             "name": "textalk/websocket",
