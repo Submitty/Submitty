@@ -2288,7 +2288,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
             FROM users
             WHERE registration_section IS NOT NULL"
         );
-        return $this->course_db->rows();
+        return $this->course_db->rows()[0]['count'];
     }
 
     /**
