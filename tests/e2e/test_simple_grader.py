@@ -101,7 +101,7 @@ class TestSimpleGrader(BaseTestCase):
         def template_func():
             self.driver.refresh()
             # grade the first cell (as good as any other)
-            grade_elem = self.driver.find_element(By.ID, "cell-1-0-0")
+            grade_elem = self.driver.find_element(By.ID, "cell-4-0-0")
             # attribute where data is stored is different for lab/numeric
             attribute = "data-score" if is_lab else "value"
             score = grade_elem.get_attribute(attribute)
@@ -118,10 +118,10 @@ class TestSimpleGrader(BaseTestCase):
             # wait until ajax is done, then refresh the page and wait until the element comes back with the updated data
             self.wait_after_ajax()
             self.driver.refresh()
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-1-0-0' and @{}='{}']".format(attribute, next_score))))
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-4-0-0' and @{}='{}']".format(attribute, next_score))))
             # if numeric, reset value so that test will continue to work as expected
             if next_score == "3.4":
-                grade_elem = self.driver.find_element(By.ID, "cell-1-0-0")
+                grade_elem = self.driver.find_element(By.ID, "cell-4-0-0")
                 grade_elem.clear()
                 grade_elem.send_keys("3.3")
                 grade_elem.send_keys(Keys.ARROW_RIGHT)
