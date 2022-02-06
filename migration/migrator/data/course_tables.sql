@@ -338,7 +338,7 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL
 );
 
 
@@ -800,8 +800,8 @@ CREATE TABLE public.notifications (
     content text NOT NULL,
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    seen_at timestamp with time zone
+    created_at timestamp(0) with time zone NOT NULL,
+    seen_at timestamp(0) with time zone
 );
 
 
@@ -918,7 +918,7 @@ CREATE TABLE public.posts (
     parent_id integer DEFAULT '-1'::integer,
     author_user_id character varying NOT NULL,
     content text NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     anonymous boolean NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
     endorsed_by character varying,
@@ -1034,7 +1034,7 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 CREATE TABLE public.regrade_discussion (
     id integer NOT NULL,
     regrade_id integer NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255) NOT NULL,
     content text,
     deleted boolean DEFAULT false NOT NULL,
@@ -1069,7 +1069,7 @@ ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.regrade_discussi
 CREATE TABLE public.regrade_requests (
     id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255),
     team_id character varying(255),
     status integer DEFAULT 0 NOT NULL,
@@ -1135,7 +1135,7 @@ CREATE TABLE public.solution_ta_notes (
     component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
-    edited_at timestamp with time zone NOT NULL,
+    edited_at timestamp(0) with time zone NOT NULL,
     itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
@@ -1270,7 +1270,7 @@ CREATE TABLE public.users (
 CREATE TABLE public.viewed_responses (
     thread_id integer NOT NULL,
     user_id character varying NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL
 );
 
 
