@@ -4,5 +4,9 @@
     "*/*.spec.js",
 		"*.spec.js"
 	],
-	"pageLoadTimeout" : 120000
+	"pageLoadTimeout" : 120000,
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  }
 }

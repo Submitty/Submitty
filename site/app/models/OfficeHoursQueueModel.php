@@ -5,7 +5,6 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use DateTime;
-use DateInterval;
 
 class OfficeHoursQueueModel extends AbstractModel {
 
@@ -25,6 +24,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     */
 
     private $code_to_index = [];//an array maps queue codes to their index (this is used to give each queue a color)
+    private $queue_occupancy = []; //an array where keys are open queues and values are the number of people in that queue
     private $current_queue;
     private $full_history;
     private $current_queue_state;
@@ -67,6 +67,9 @@ class OfficeHoursQueueModel extends AbstractModel {
         $index = 0;
         foreach ($this->core->getQueries()->getAllQueues() as $queue) {
             $this->code_to_index[$queue['code']] = $index;
+            if ($queue['open']) {
+                $this->queue_occupancy[$queue['code']] = $this->core->getQueries()->getCurrentNumberInQueue($queue['code']);
+            }
             $index += 1;
         }
 
@@ -125,6 +128,10 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getAllQueues() {
         return $this->core->getQueries()->getAllQueues();
+    }
+
+    public function getAllOpenQueues() {
+        return $this->core->getQueries()->getAllOpenQueues();
     }
 
     public function timeToHM($time) {
@@ -238,10 +245,6 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->colors[$this->getIndexFromCode($code)];
     }
 
-    public function isContactInfoEnabled() {
-        return $this->core->getConfig()->getQueueContactInfo();
-    }
-
     public function getQueueMessage() {
         return $this->core->getConfig()->getQueueMessage();
     }
@@ -318,5 +321,14 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function statNiceName($name): string {
         return $this->niceNames[$name] ?? $name;
+    }
+
+    /**
+     * function to return an associative array where keys are open queues and values
+     * are the number of people in each queue.
+     * @return array
+     */
+    public function getQueueOccupancy() {
+        return $this->queue_occupancy;
     }
 }

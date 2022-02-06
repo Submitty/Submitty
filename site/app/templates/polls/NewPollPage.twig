@@ -7,10 +7,12 @@
             <input type="hidden" name="response_count" id="response-count" value="0"/>
             <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
-            <label for="poll-name" class="option-title">
-                Poll Name:
-            </label>
-            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            <div id="poll-name-container">
+                <label for="poll-name" class="option-title">
+                    Poll Name:
+                </label>
+                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            </div>
             <br/> <br/>
 
             <p class="option-title">Question:</p>
@@ -21,8 +23,7 @@
                 "placeholder" : "Enter question here...",
                 "preview_div_id" : "poll_preview_new",
                 "preview_div_name" : "poll_preview_new",
-                "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true
+                "render_header" : true
             } only %}
             <br/><br/>
 
@@ -84,10 +85,12 @@
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
             <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
-            <label for="poll-name" class="option-title">
-                Poll Name:
-            </label>
-            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            <div id="poll-name-container">
+                <label for="poll-name" class="option-title">
+                    Poll Name:
+                </label>
+                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            </div>
             <br/> <br/>
 
             <p class="option-title">Question:</p>
@@ -96,8 +99,7 @@
                 "markdown_area_name" : "question",
                 "markdown_area_value" : poll.getQuestion(),
                 "preview_div_id" : "poll_preview_edit",
-                "onclick" : "previewPollMarkdown.call(this)",
-                "render_buttons" : true
+                "render_header" : true
             } only %}
             <br/><br/>
 
@@ -400,6 +402,16 @@
     }
 
     $(document).ready(function() {
+        {% if poll is not defined %}
+            const today = new Date();
+            const year = today.getFullYear().toString().padStart(4, '0');
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            const date_string = `${year}-${month}-${day}`;
+            $("#poll-date").flatpickr({
+                defaultDate: date_string
+            });
+        {% endif %}
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
         $("#edit-poll-form").on("change click", submitErrorChecks);

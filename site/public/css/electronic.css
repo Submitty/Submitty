@@ -532,7 +532,7 @@ progress::-webkit-progress-value {
     -webkit-appearance: none;
     width: 7px;
 }
-  
+
 #grading-panel-student-name::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, .5);
@@ -1207,7 +1207,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container.mark-publish {
-    background-color: #bbddee;
+    background-color: var(--alert-border-blue);
 }
 
 .gradeable .mark-disabled span {
@@ -1453,16 +1453,12 @@ tr.is_publish {
     display: flex;
 }
 
-.solution-box button {
-    max-width: 90px;
-}
-
 .solution-box button.hide {
     display: none !important;
 }
 
 [id^=textbox-solution-] {
-    min-height: 120px;
+    min-height: 150px;
     max-height: 400px;
     margin-bottom: 10px;
     resize: none;

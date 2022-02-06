@@ -43,7 +43,7 @@
                 {% endif %}
                 <a class="btn btn-default"
                    href="{{ order_toggle_url }}">
-                    {{ sort == 'random' ? "Default Order" : "Random Order" }}
+                    {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
                 <a class="btn btn-default" id="toggle-anon-button"
@@ -54,11 +54,13 @@
             </div>
         </div>
     </div>
-    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% if not is_student %}
+        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% endif %}
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% endif %}
-    {% if can_regrade and not is_vcs %}
+    {% if can_regrade %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -393,7 +395,7 @@
                             circle grader-NULL }}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Hidden)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% endif %}
                     {% else %}
                         {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
@@ -405,7 +407,7 @@
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] < 4   %}
                             {# Indicates Non-Peer Component (Hidden) #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% else %}
                             {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>

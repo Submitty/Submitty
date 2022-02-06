@@ -12,7 +12,7 @@
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id" id="gradeable_id">
                             {% for gradeable_id_title in config["gradeable_ids_titles"] %}
-                                <option value="{{ gradeable_id_title['g_id'] }}">[{{ gradeable_id_title['g_id'] }}] {{ gradeable_id_title['g_title'] }} ({{ gradeable_id_title['g_grade_due_date'] }})</option>
+                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} [{{ gradeable_id_title['g_id'] }}] ({{ gradeable_id_title['g_grade_due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
@@ -48,204 +48,282 @@
                 {% endif %}
             </div>
             {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Version:</div>
-                <div class="plag-data">
-                    <span class="radio-label-pair">
-                        <input type="radio" id="all-version-id" value="all_versions" name="version_option" {{ config["version"] == "all_versions" ? "checked" : "" }} >
-                        <label for="all-version-id">All Versions</label>
-                    </span>
-                    <span class="radio-label-pair">
-                        <input type="radio" id="active-version-id" value="active_version" name="version_option" {{ config["version"] == "all_versions" ? "" : "checked" }}>
-                        <label for="active-version-id">Only Active Version</label>
-                    </span>
-                </div>
-            </div>
-            {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Files to be Compared:</div>
-                <div class="plag-data">
-                    <div id="files-to-be-compared">
-                        <span class="option-alt">
-                            <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism#files-to-be-compared">How do I specify a regex expression?
-                                <i style="font-style: normal;" class="fa-question-circle"></i>
-                            </a>
-                        </span>
-                        <span class="right">
-                            <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-submissions-dir" name="regex_dir[]" value="submissions" {{ "submissions" in config["regex_dirs"] ? "checked" : ""}} />
-                                <label for="regex-submissions-dir">Submissions</label>
-                            </span>
-                            <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-results-dir" name="regex_dir[]" value="results" {{ "results" in config["regex_dirs"] ? "checked" : "" }} />
-                                <label for="regex-results-dir">Results</label>
-                            </span>
-                            <span class="radio-label-pair">
-                                <input type="checkbox" id="regex-checkout-dir" name="regex_dir[]" value="checkout" {{ "checkout" in config["regex_dirs"] ? "checked" : "" }} />
-                                <label for="regex-checkout-dir">Checkout</label>
-                            </span>
-                        </span>
-                        <input type="text" id="regex-to-select-files" name="regex_to_select_files" class="low-margin-top" value="{{ config["regex"] }}" placeholder="Leave blank to select all files"/>
+            {% if new_or_edit == "new" %}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Configuration Source:</div>
+                    <div class="plag-data radio-label-pair" style="margin-left: 0;">
+                        <input type="radio" id="manual-config-id" value="manual_config" name="config_option" checked>
+                        <label for="manual-config-id">Manual configuration</label>
+                    </div>
+                    <div class="plag-data radio-label-pair" style="margin-left: 0;">
+                        <input type="radio" id="upload-config-id" value="upload_config" name="config_option">
+                        <label for="upload-config-id">Upload configuration file</label>
+                    </div>
+                    <div class="plag-data radio-label-pair" style="margin-left: 0;">
+                        <input type="radio" id="import-config-id" value="import_config" name="config_option">
+                        <label for="import-config-id">Use parameters from existing configuration</label>
                     </div>
                 </div>
-            </div>
-            {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Language:</div>
-                <div class="plag-data">
-                    <select name="language">
-                        <option value="plaintext" {{ config["language"]["plaintext"] }}>Plain Text</option>
-                        <option value="python" {{ config["language"]["python"] }}>Python</option>
-                        <option value="cpp" {{ config["language"]["cpp"] }}>C++</option>
-                        <option value="java" {{ config["language"]["java"] }}>Java</option>
-                        <option value="mips" {{ config["language"]["mips"] }}>MIPS Assembly</option>
-                    </select>
+                <div id="upload-config-container" class="plag-data-group">
+                    <div class="plag-data-label">Upload config.json file:</div>
+                    <div class="plag-data">
+                        <input id="upload-config-file" type="file" name="upload_config_file" accept=".json">
+                    </div>
                 </div>
-            </div>
-            {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Common Code Threshold:</div>
-                <label for="threshold">More than this number of students with matching code will be considered common code</label>
-                <div class="plag-data">
-                    <input type="number" id="threshold" name="threshold" value="{{ config["threshold"] }}" min="2"/>
+                <div id="import-config-container" class="plag-data-group">
+                    <div class="plag-data-label">Import Configuration:</div>
+                    <div class="plag-data">
+                        <select id="import-config-gradeable" name="import-config-gradeable">
+                            {% for gradeable, configs in gradeables_with_plag_configs %}
+                                <option value="{{ gradeable }}">{{ gradeable }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="import-config-config-id" name="import-config-config-id">
+                            <option value="Loading">Loading...</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
             {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Sequence Length:</div>
-                <label for="sequence-length">Matching regions smaller than this limit won't be marked as plagiarism</label>
-                <div class="plag-data">
-                    <input type="number" id="sequence-length" name="sequence_length" value="{{ config["sequence_length"] }}" placeholder="(Required)" min="1"/>
+            <div class="manual-config-container">
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Version:</div>
+                    <div class="plag-data">
+                        <span class="radio-label-pair">
+                            <input type="radio" id="all-version-id" value="all_versions" name="version_option" {{ config["version"] == "all_versions" ? "checked" : "" }}>
+                            <label for="all-version-id">All Versions</label>
+                        </span>
+                        <span class="radio-label-pair">
+                            <input type="radio" id="active-version-id" value="active_version" name="version_option" {{ config["version"] == "all_versions" ? "" : "checked" }}>
+                            <label for="active-version-id">Only Active Version</label>
+                        </span>
+                    </div>
                 </div>
-            </div>
-            {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Other Gradeables:</div>
-                <label>Add gradeables from current or prior courses to compare against</label>
-                <div class="plag-data">
-                    <span class="radio-label-pair">
-                        <input type="radio" id="no-past-terms-id" value="no_past_terms" name="past_terms_option" {{ config["prior_terms"] ? "" : "checked" }}>
-                        <label for="no-past-terms-id">No</label>
-                    </span>
-                    <span class="radio-label-pair">
-                        <input type="radio" id="past-terms-id" value="past_terms" name="past_terms_option" {{ config["prior_terms"] ? "checked" : "" }}>
-                        <label for="past-terms-id">Yes</label>
-                    </span>
-                    <div class="past-terms-wrapper" id="prev-gradeable-div">
-                        <div id="past-terms-content">
-                            {% if new_or_edit == "edit" %}
-                                {% for row in config["prior_term_gradeables"] %}
-                                    <div id="prior-g-option-{{ loop.index0 }}" class="prior-gradeable-wrapper">
-                                        <select name='prior_semester_course[]' onchange='getGradeables(this)'>
-                                            {% for semester_course in config["prior_semester_courses"] %}
-                                                {% set tokens = semester_course|split(' ') %}
-                                                <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["prior_semester"] and tokens[1] == row["prior_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <select name='prior_gradeable[]'>
-                                            {% for other_gradeable in row["other_gradeables"] %}
-                                                <option value="{{ other_gradeable }}" {{ other_gradeable == row["prior_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
-                                            <i class="fas fa-trash"></i>
-                                        </span>
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <div id="add-more-prev-gradeable" class="add-more" aria-label="Add more">
-                            <i class="fas fa-plus-square"></i>Add more
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Files to be Compared:</div>
+                    <div class="plag-data">
+                        <div id="files-to-be-compared">
+                            <span class="option-alt">
+                                <a target=_blank href="https://submitty.org/instructor/course_management/plagiarism#files-to-be-compared">How do I specify a regex expression?
+                                    <i style="font-style: normal;" class="fa-question-circle"></i>
+                                </a>
+                            </span>
+                            <span class="right">
+                                <span class="radio-label-pair">
+                                    <input type="checkbox" id="regex-submissions-dir" name="regex_dir[]" value="submissions" {{ "submissions" in config["regex_dirs"] ? "checked" : ""}} />
+                                    <label for="regex-submissions-dir">Submissions</label>
+                                </span>
+                                <span class="radio-label-pair">
+                                    <input type="checkbox" id="regex-results-dir" name="regex_dir[]" value="results" {{ "results" in config["regex_dirs"] ? "checked" : "" }} />
+                                    <label for="regex-results-dir">Results</label>
+                                </span>
+                                <span class="radio-label-pair">
+                                    <input type="checkbox" id="regex-checkout-dir" name="regex_dir[]" value="checkout" {{ "checkout" in config["regex_dirs"] ? "checked" : "" }} />
+                                    <label for="regex-checkout-dir">Checkout</label>
+                                </span>
+                            </span>
+                            <input type="text" id="regex-to-select-files" name="regex_to_select_files" class="low-margin-top" value="{{ config["regex"] }}" placeholder="Leave blank to select all files"/>
                         </div>
                     </div>
                 </div>
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Language:</div>
+                    <div class="plag-data">
+                        <select name="language">
+                            <option value="plaintext" {{ config["language"]["plaintext"] }}>Plain Text</option>
+                            <option value="python" {{ config["language"]["python"] }}>Python</option>
+                            <option value="cpp" {{ config["language"]["cpp"] }}>C/C++</option>
+                            <option value="java" {{ config["language"]["java"] }}>Java</option>
+                            <option value="mips" {{ config["language"]["mips"] }}>MIPS Assembly</option>
+                        </select>
+                    </div>
+                </div>
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Common Code Threshold:</div>
+                    <label for="threshold">More than this number of students with matching code will be considered common code.<br>
+                                           It is recommended that you set this to 10-20% of your class size.</label>
+                    <div class="plag-data">
+                        <input type="number" id="threshold" name="threshold" value="{{ config["threshold"] }}" min="2"/>
+                    </div>
+                </div>
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Hash Size:</div>
+                    <label for="hash-size">Matching regions smaller than this limit won't be marked as plagiarism.<br>
+                                                 The default value is sufficient in most cases.</label>
+                    <div class="plag-data">
+                        <input type="number" id="hash-size" name="hash_size" value="{{ config["hash_size"] }}" placeholder="(Required)" min="1"/>
+                    </div>
+                </div>
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Other Gradeables:</div>
+                    <label>Add gradeables from current or prior courses to compare against</label>
+                    <div class="plag-data">
+                        <span class="radio-label-pair">
+                            <input type="radio" id="no-other-gradeables-id" value="no_other_gradeables" name="other_gradeables_option" {{ config["has_other_gradeables"] ? "" : "checked" }}>
+                            <label for="no-other-gradeables-id">No</label>
+                        </span>
+                        <span class="radio-label-pair">
+                            <input type="radio" id="other-gradeables-id" value="has_other_gradeables" name="other_gradeables_option" {{ config["has_other_gradeables"] ? "checked" : "" }}>
+                            <label for="other-gradeables-id">Yes</label>
+                        </span>
+                        <div class="other-gradeables-wrapper" id="other-gradeable-div">
+                            <span id="add-more-other-gradeable" aria-label="Add more"><i class="fas fa-plus-square"></i>&nbsp;Add more</span>
+                            <div id="other-gradeables-content">
+                                {% if new_or_edit == "edit" %}
+                                    {% for row in config["other_gradeables"] %}
+                                        <div id="other-g-option-{{ loop.index0 }}" class="other-gradeable-wrapper">
+                                            <select name='other_semester_course[]' onchange='getGradeables(this)'>
+                                                {% for semester_course in config["other_semester_courses"] %}
+                                                    {% set tokens = semester_course|split(' ') %}
+                                                    <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["other_semester"] and tokens[1] == row["other_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <select name='other_gradeable[]'>
+                                                {% for other_gradeable in row["other_gradeables"] %}
+                                                    <option value="{{ other_gradeable }}" {{ other_gradeable == row["other_gradeable"] ? "selected" : "" }}>{{ other_gradeable }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <span class="remove-other-gradeable" onclick="deleteOtherGradeable(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <textarea id="other-gradeable-paths" name="other-gradeable-paths" class="low-margin-top" placeholder="Optionally specify gradeable paths by entering a list of comma-separated paths.  Whitespace will be removed."
+                            >{{ config["other_gradeable_paths"] }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                {##################################################################}
+                <div class="plag-data-group">
+                    <div class="plag-data-label">Users to be Ignored:</div>
+                    <div class="plag-data radio-label-pair">
+                        <input type="checkbox" id="ignore-instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in config["ignore_submissions"] ? "checked" : "" }}>
+                        <label for="ignore-instructors">Instructors</label>
+                    </div>
+                    <div class="plag-data radio-label-pair">
+                        <input type="checkbox" id="ignore-full-access-graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
+                        <label for="ignore-full-access-graders">Full Access Graders</label>
+                    </div>
+                    <div class="plag-data radio-label-pair">
+                        <input type="checkbox" id="ignore-limited-access-graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
+                        <label for="ignore-limited-access-graders">Limited Access Graders</label>
+                    </div>
+                    <div class="plag-data radio-label-pair" id="ignore-others-container">
+                        <input type="checkbox" id="ignore-others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in config["ignore_submissions"] ? "checked" : "" }}>
+                        <label for="ignore-others">Others:</label>
+                        <input type="text" id="ignore-others-list" value="{{ config["ignore_submissions_list"] }}" placeholder="List user ID's separated by commas and spaces" name="ignore_others_list">
+                    </div>
+                </div>
+                {##################################################################}
             </div>
-            {##################################################################}
-            <div class="plag-data-group">
-                <div class="plag-data-label">Users to be Ignored:</div>
-                <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-instructors" value="ignore_instructors" name="ignore_submission_option[]" {{ "instructors" in config["ignore_submissions"] ? "checked" : "" }}>
-                    <label for="ignore-instructors">Instructors</label>
-                </div>
-                <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-full-access-graders" value="ignore_full_access_graders" name="ignore_submission_option[]" {{ "full_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
-                    <label for="ignore-full-access-graders">Full Access Graders</label>
-                </div>
-                <div class="plag-data radio-label-pair">
-                    <input type="checkbox" id="ignore-limited-access-graders" value="ignore_limited_access_graders" name="ignore_submission_option[]" {{ "limited_access_graders" in config["ignore_submissions"] ? "checked" : "" }}>
-                    <label for="ignore-limited-access-graders">Limited Access Graders</label>
-                </div>
-                <div class="plag-data radio-label-pair" id="ignore-others-container">
-                    <input type="checkbox" id="ignore-others" value="ignore_others" name="ignore_submission_option[]" {{ "others" in config["ignore_submissions"] ? "checked" : "" }}>
-                    <label for="ignore-others">Others:</label>
-                    <input type="text" id="ignore-others-list" value="{{ config["ignore_submissions_list"] }}" placeholder="List user ID's separated by commas and spaces" name="ignore_others_list">
-                </div>
-            </div>
-            {##################################################################}
+            <hr/>
             <div>
                 <a href="{{ plagiarism_link }}" class="btn btn-danger">Cancel</a>
-                <input id="submit-form" class="btn btn-primary" type="submit" value="Save Configuration"/>
+                <input id="submit-form" class="btn btn-primary" type="submit" value="{% if new_or_edit == "new" %} Create {% else %} Save {% endif %} Configuration"/>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    const form = $("#save-configuration-form");
-    const prior_semester_course_list = JSON.parse(`{{ config["prior_semester_courses"] | json_encode() | raw }}`);
+    const other_semester_course_list = JSON.parse(`{{ config["other_semester_courses"] | json_encode() | raw }}`);
+    const gradeables_with_plag_configs = JSON.parse(`{{ gradeables_with_plag_configs | json_encode() | raw }}`);
 
     // SUBMIT FORM /////////////////////////////////////////////////////////////
-    $(document).ready(function() {
-        form.submit(function () {
+    $(document).ready(() => {
+        form.submit(() => {
             $('#submit-form').attr('disabled', true);
         });
     });
 
     // PROVIDED CODE ///////////////////////////////////////////////////////////
-    $("#no-code-provided-id").change(function() {
+    $("#no-code-provided-id").change(() => {
         $("#current-code-file").hide();
         $("#provided-code-file").hide();
     });
 
-    $("#code-provided-id").change(function() {
+    $("#code-provided-id").change(() => {
         $("#current-code-file").show();
         $("#provided-code-file").show();
     });
 
-    $(document).ready(function() {
+    $(document).ready(() => {
         if ({{ config["provided_code"] ? "true" : "false" }} && $("#code-provided-id").is(":checked")) {
             $("#current-code-file").show();
             $("#provided-code-file").show();
         }
     });
 
-    // PRIOR TERM GRADEABLES ///////////////////////////////////////////////////
+    // UPLOAD CONFIG ///////////////////////////////////////////////////////////
+    function reloadConfigs(gradeable_id) {
+        $("#import-config-config-id").empty();
+        $.each(gradeables_with_plag_configs[gradeable_id], function(index, item) {
+            $("#import-config-config-id").append(`<option value="${item}">Config: ${item}</option>`);
+        });
+    }
+
+    $("#manual-config-id").change(function() {
+        $(".manual-config-container").show();
+        $("#upload-config-container").hide();
+        $("#import-config-container").hide();
+    });
+
+    $("#upload-config-id").change(function() {
+        $(".manual-config-container").hide();
+        $("#upload-config-container").show();
+        $("#import-config-container").hide();
+    });
+
+    $("#import-config-id").change(function() {
+        $(".manual-config-container").hide();
+        $("#upload-config-container").hide();
+        $("#import-config-container").show();
+    });
+
+    $("#import-config-gradeable").change(function() {
+        reloadConfigs($("#import-config-gradeable").val());
+    });
+
     $(document).ready(function() {
-        if ({{ config["prior_terms"] ? "true" : "false" }} && $("#past-terms-id").is(":checked")) {
-            $("#prev-gradeable-div").show();
-        }
+        $("#upload-config-container").hide();
+        $("#import-config-container").hide();
+        reloadConfigs($("#import-config-gradeable").val());
     });
 
-    $('#add-more-prev-gradeable', form).on('click', function(){
-        addMorePriorTermGradeable();
+    // OTHER GRADEABLES ////////////////////////////////////////////////////////
+    {% if config["has_other_gradeables"] %}
+        $(document).ready(() => {
+            $("#other-gradeable-div").show();
+        });
+    {% endif %}
+
+    $('#add-more-other-gradeable').on('click', () => {
+        addMoreOtherGradeable();
     });
 
-    $("#no-past-terms-id").change(function() {
-        $(".past-terms-wrapper").hide();
-        $('#past-terms-content', form).html('');
+    $("#no-other-gradeables-id").change(() => {
+        $(".other-gradeables-wrapper").hide();
+        $('#other-gradeables-content').html('');
     });
 
-    $("#past-terms-id").change(function() {
-        $(".past-terms-wrapper").show();
-        addMorePriorTermGradeable();
+    $('#other-gradeables-id').change(() => {
+        $('.other-gradeables-wrapper').show();
+        addMoreOtherGradeable();
     });
 
-    function deletePrevGradeable(clickedElement) {
+    function deleteOtherGradeable(clickedElement) {
         // remove element
         $($(clickedElement).parent()).remove();
         // renumber the rest of the rows
-        for (let i = 0; i < $(".prior-gradeable-wrapper").length; i++) {
-            $($(".prior-gradeable-wrapper")[i]).attr("id", "prior-g-option-" + i);
+        for (let i = 0; i < $(".other-gradeable-wrapper").length; i++) {
+            $($(".other-gradeable-wrapper")[i]).attr("id", "other-g-option-" + i);
         }
     }
 
@@ -256,14 +334,14 @@
         gradeable_dropdown.empty();
         gradeable_dropdown.append("<option value=''>Loading...</option>");
         $.ajax({
-            url: `{{ base_url }}/getPriorGradeables`,
+            url: `{{ base_url }}/getOtherGradeables`,
             type: "POST",
             data: {
                 csrf_token: csrfToken,
                 semester_course: semester_course_dropdown.val(),
                 this_gradeable: {{ new_or_edit == "edit" ? ("'" ~ config["gradeable_id"] ~ "'")|raw : "$('#gradeable_id').val()" }}
             },
-            success: function(data) {
+            success: (data) => {
                 data = JSON.parse(data);
                 if (data.status !== 'success') {
                     alert(data.message);
@@ -271,35 +349,35 @@
                 }
 
                 gradeable_dropdown.empty();
-                $.each(data.data, function(index, gradeable) {
+                $.each(data.data, (index, gradeable) => {
                     gradeable_dropdown.append(`<option value='${gradeable}'>${gradeable}</option>`);
                 });
             },
-            error: function(e) {
+            error: (e) => {
                 gradeable_dropdown.empty();
                 gradeable_dropdown.append("<option value=''>Error: Ajax request failed</option>");
             }
         });
     }
 
-    function addMorePriorTermGradeable() {
+    function addMoreOtherGradeable() {
         const form = $("#save-configuration-form");
         // add a new row with the next index, with empty dropdowns
-        let first_free_index = $(".prior-gradeable-wrapper").length;
-        $('#past-terms-content', form).append(`
-            <div id='prior-g-option-${first_free_index}' class='prior-gradeable-wrapper'>
-                <select name='prior_semester_course[]' onchange='getGradeables(this)'>
+        let first_free_index = $(".other-gradeable-wrapper").length;
+        $('#other-gradeables-content', form).append(`
+            <div id='other-g-option-${first_free_index}' class='other-gradeable-wrapper'>
+                <select name='other_semester_course[]' onchange='getGradeables(this)'>
                 </select>
-                <select name='prior_gradeable[]'>
+                <select name='other_gradeable[]'>
                 </select>
-                <span class="remove-prev-gradeable" onclick="deletePrevGradeable(this)">
+                <span class="remove-other-gradeable" onclick="deleteOtherGradeable(this)">
                     <i class="fas fa-trash"></i>
                 </span>
             </div>
         `);
         // fill in the left dropdown
-        let semester_course_dropdown = $(`#prior-g-option-${first_free_index}`).children().first();
-        $.each(prior_semester_course_list, function(index, semester_course) {
+        let semester_course_dropdown = $(`#other-g-option-${first_free_index}`).children().first();
+        $.each(other_semester_course_list, (index, semester_course) => {
             let tokens_array = semester_course.split(" ");
             semester_course_dropdown.append(`<option value='${semester_course}'>${tokens_array[0]}/${tokens_array[1]}</option>`);
         });
@@ -307,38 +385,22 @@
         getGradeables(semester_course_dropdown[0]);
     }
 
-    // LANGUAGE, SEQUENCE LENGTH, THRESHOLD ////////////////////////////////////
-    $('[name="threshold"], [name="sequence_length"]').change(function(){
-        if($(this).val().length === 0){
-            $(this)[0].setCustomValidity('Input is required');
-        }
-        else if(!(/^[\d]+$/g).test($(this).val())) {
-            $(this)[0].setCustomValidity('Input must only contain numeric characters');
-        } else {
-            $(this)[0].setCustomValidity('');
-        }
-    });
+    // HASH SIZE + LANGUAGE ////////////////////////////////////////////////////
 
-    $("select[name='language']").change(function() {
-        var form = $("#save-configuration-form")
+    function updateHashSizeForLanguage() {
+        const form = $("#save-configuration-form")
         // Following code is used to set default window size for different languages
         // that will appear in 'configureNewGradeableForPlagiarismForm'
         // to change the default values, just change the val attribute for the language.
 
-        if ($('[name="language"]', form).val() == "python") {
-            $('[name="sequence_length"]', form).val('10');
-        }
-        else if ($('[name="language"]', form).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
-        }
-        else if ($('[name="language"]', form).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
-        }
-        else if ($('[name="language"]', form).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
-        }
-        else if ($('[name="language"]', form).val() == "mips") {
-            $('[name="sequence_length"]', form).val('5');
-        }
+        {% for key, value in supported_languages %}
+            if ($('[name="language"]', form).val() === '{{ key }}') {
+                $('[name="hash_size"]', form).val({{ supported_languages[key]["hash_size"] }});
+            }
+        {% endfor %}
+    }
+
+    $("select[name='language']").change(() => {
+        updateHashSizeForLanguage();
     });
 </script>

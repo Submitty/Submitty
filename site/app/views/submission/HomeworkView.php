@@ -6,21 +6,16 @@ use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
-use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
-use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 /* Notebook */
 use app\models\notebook\AbstractNotebookInput;
-use app\models\notebook\UserSpecificNotebook;
-use app\models\notebook\SubmissionMultipleChoice;
 
 class HomeworkView extends AbstractView {
 
@@ -37,6 +32,7 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalModuleJs('submission.js');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;
@@ -48,10 +44,11 @@ class HomeworkView extends AbstractView {
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+        $is_team_assignment = $gradeable->isTeamAssignment();
 
         // Only show the late banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
-        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
@@ -112,6 +109,10 @@ class HomeworkView extends AbstractView {
                     break;
                 }
             }
+        }
+
+        if ($gradeable->hasLeaderboard()) {
+            $return .= $this->renderLeaderboardBox($graded_gradeable);
         }
 
         if ($submission_count > 0 && $num_parts > 1) {
@@ -440,6 +441,7 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
+        $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -499,7 +501,9 @@ class HomeworkView extends AbstractView {
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
-            'can_student_submit' => $canStudentSubmit
+            'can_student_submit' => $canStudentSubmit,
+            'is_grader_view' => false,
+            'recent_version_url' => $recent_version_url
         ]);
     }
 
@@ -692,6 +696,24 @@ class HomeworkView extends AbstractView {
             'team_assignment' => $team_assignment,
             'member_list' => $member_list,
             'team_name' => $team_name
+        ]);
+    }
+
+     /**
+      * @param GradedGradeable $graded_gradeable
+      * @return string
+      */
+    private function renderLeaderboardBox(GradedGradeable $graded_gradeable): string {
+        $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return "";
+        }
+
+        $leaderboards = $autograding_config->getLeaderboards();
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/LeaderboardBox.twig', [
+          'leaderboard_count' => count($leaderboards),
+          'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
 
