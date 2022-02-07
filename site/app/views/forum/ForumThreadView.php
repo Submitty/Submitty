@@ -114,7 +114,7 @@ class ForumThreadView extends AbstractView {
                     "visible_username" => $visible_username,
                     "posted_on" => $posted_on
                 ];
-                
+
                 $count++;
             }
             $thread_list[] = [
