@@ -81,11 +81,9 @@ class ForumThreadView extends AbstractView {
 
         foreach ($threadArray as $thread_id => $data) {
             $thread_title = $fromIdtoTitle[$thread_id];
-
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
 
-            $thread_list[$count - 1] = ["thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => []];
-
+            $thread_posts = [];
             foreach ($data as $post) {
                 $author = $post['author'];
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
@@ -109,18 +107,22 @@ class ForumThreadView extends AbstractView {
 
                 $posted_on = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp_post'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
-                $thread_list[$count - 1]["posts"][] = [
+                $thread_posts[] = [
                     "post_link" => $post_link,
                     "count" => $count,
                     "post_content" => $post_content,
                     "visible_username" => $visible_username,
                     "posted_on" => $posted_on
                 ];
-
+                
                 $count++;
             }
+            $thread_list[] = [
+                "thread_title" => $thread_title,
+                "thread_link" => $thread_link,
+                "posts" => $thread_posts
+            ];
         }
-
 
         return $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
             "buttons" => $buttons,
