@@ -3,8 +3,8 @@ declare global {
     interface Window{
         file_array: File[][];
         num_submission_boxes: number;
-        deleteFiles(Number): void;
-        addFile(File, Number, Boolean):void;
+        deleteFiles(part: Number): void;
+        addFile(file: File, part: Number, check_duplicate_zip: Boolean):void;
         loadPreviousFilesOnDropBoxes():void;
     }
 }
@@ -15,7 +15,7 @@ function init(){
     document.getElementsByName('submission-type')
         .forEach(radio_btn => radio_btn.addEventListener('change', changeSubmissionMode));
 
-    warning_banner.textContent = '';
+    warning_banner!.textContent = '';
 }
 
 
@@ -50,12 +50,12 @@ function changeSubmissionMode(event: Event){
 
     }
 
-    if (!warning_banner.hasChildNodes()){
-        const child = warning_banner.appendChild( document.createElement('h2') );
+    if (!warning_banner!.hasChildNodes()){
+        const child = warning_banner!.appendChild( document.createElement('h2') );
         child.classList.add('warning');
     }
 
-    warning_banner.firstChild.textContent = message;
+    warning_banner!.firstChild!.textContent = message;
 }
 
 

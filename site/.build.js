@@ -4,7 +4,9 @@ const module_path = path.join(__dirname, 'ts');
 
 function getAllFiles(dir) {
     return fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
-        if (!entry.isDirectory() && entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
+        if (entry.isDirectory()) {
+            acc.push(...getAllFiles(path.join(dir, entry.name)));
+        } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
             acc.push(path.join(dir, entry.name));
         }
         
