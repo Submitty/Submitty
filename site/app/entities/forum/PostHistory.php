@@ -32,7 +32,7 @@ class PostHistory {
     protected $content;
 
     /**
-     * @ORM\Column(type="datetimetzmicro")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $edit_timestamp;

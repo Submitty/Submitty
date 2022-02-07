@@ -77,19 +77,19 @@ class Thread {
     protected $status;
 
     /**
-     * @ORM\Column(type="datetimetzmicro")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $lock_thread_date;
 
     /**
-     * @ORM\Column(type="datetimetzmicro")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $pinned_expiration;
 
     /**
-     * @ORM\Column(type="datetimetzmicro")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $announced;

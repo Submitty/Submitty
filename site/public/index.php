@@ -10,7 +10,6 @@ use app\libraries\routers\WebRouter;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpFoundation\Request;
 
 /*
@@ -35,8 +34,6 @@ AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 $request = Request::createFromGlobals();
 
 $core = new Core();
-
-Type::addType('datetimetzmicro', 'app\entities\forum\DateTimeTzMicrosecondsType');
 
 /**
  * Register custom expection and error handlers that will get run anytime our application

@@ -59,7 +59,7 @@ class Post {
     protected $content;
 
     /**
-     * @ORM\Column(type="datetimetzmicro")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $timestamp;
