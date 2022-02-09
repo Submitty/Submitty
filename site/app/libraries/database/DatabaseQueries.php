@@ -2985,7 +2985,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param int      $section
      * @param string   $g_id
      */
-    public function updateTeamsRotatingSection($team_ids, $section, $g_id) {
+    public function updateTeamRotatingSection($team_ids, $section, $g_id) {
         $update_array = array_merge([$section, $g_id], $team_ids);
         $placeholders = $this->createParamaterList(count($team_ids));
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE g_id=? AND team_id IN {$placeholders}", $update_array);

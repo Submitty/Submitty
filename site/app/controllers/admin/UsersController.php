@@ -514,7 +514,7 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        elseif ($_POST['rotating_assignment_type'] === "redo") {
+        if ($_POST['rotating_assignment_type'] === "redo") {
             $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIds();
             $unassigned_gradeable_teams = $this->core->getQueries()->getTeamIdsAllGradeables();
             // Find the number of rotating sections to create or update during section assignments
@@ -566,7 +566,7 @@ class UsersController extends AbstractController {
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
                     $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
-                    $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
+                    $this->core->getQueries()->updateTeamRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
         }
