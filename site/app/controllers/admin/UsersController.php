@@ -566,7 +566,7 @@ class UsersController extends AbstractController {
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
                     $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
-                    $this->core->getQueries()->updateTeamRotatingSection($update_teams, $i + 1, $g_id);
+                    $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
         }
