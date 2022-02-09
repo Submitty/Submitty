@@ -67,10 +67,10 @@
 
   {% if not viewer.isGrader() %}
     {% include 'officeHoursQueue/QueueStatus.twig' %}
-      <br><br>
+      <br>
       <a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button  type="button" class="btn btn-primary">View Queue Occupancy</button></a>
       <a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button  type="button" class="btn btn-primary">Close Table</button></a>
-      <br><br>
+      <br>
       <div class="container queue_occupancy" style="display: none">
           <table class="table">
               <thead>
