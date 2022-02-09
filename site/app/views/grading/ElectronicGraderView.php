@@ -963,17 +963,25 @@ HTML;
                 ];
             }
         }
-        elseif ($rollbackSubmission != -1) {
+        elseif ($late_status == LateDayInfo::STATUS_LATE) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
+                "message" => "Late Submission"
             ];
         }
-        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-            $error_message = [
-                "color" => "var(--standard-red-orange)", // fire engine red
-                "message" => "Late Submission (No on time submission available)"
-            ];
+        elseif ($late_status == LateDayInfo::STATUS_BAD) {
+            if ($rollbackSubmission === -1) {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (no valid submission available)"
+                ];
+            } else {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (submitter has valid submission - Version #" . $rollbackSubmission . ")"
+                ];
+            }
+            
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
             $pattern1 = "upload.pdf";
