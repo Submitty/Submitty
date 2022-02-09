@@ -2430,27 +2430,6 @@ ORDER BY user_id ASC"
         return $gradeable_ids;
     }
 
-    /**
-     * Get all team ids for all gradeables where the teams are in rotating section NULL
-     *
-     * @return string[][] Map of gradeable_id => [ team ids ]
-     */
-    public function getTeamIdsWithNullRotating() {
-        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams WHERE rotating_section IS NULL");
-
-        $gradeable_ids = [];
-        $rows = $this->course_db->rows();
-        foreach ($rows as $row) {
-            $g_id = $row['g_id'];
-            $team_id = $row['team_id'];
-            if (!array_key_exists($g_id, $gradeable_ids)) {
-                $gradeable_ids[$g_id] = [];
-            }
-            $gradeable_ids[$g_id][] = $team_id;
-        }
-        return $gradeable_ids;
-    }
-
     public function setAllUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
@@ -2999,8 +2978,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $this->course_db->query("UPDATE gradeable_teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
     }
 
-    public function updateTeamRotatingSection($team_id, $section) {
-        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
+    /**
+     * Set teams' (array $team_ids) rotating section ($section) for given gradeable id ($g_id)
+     *
+     * @param string[] $team_ids
+     * @param int      $section
+     * @param string   $g_id
+     */
+    public function updateTeamsRotatingSection($team_ids, $section, $g_id) {
+        $update_array = array_merge([$section, $g_id], $team_ids);
+        $placeholders = $this->createParamaterList(count($team_ids));
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE g_id=? AND team_id IN {$placeholders}", $update_array);
     }
 
     /**

@@ -514,10 +514,7 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        // $gradeables_section_assignment_counts 2d array represents the number of gradeable teams to add to each rotating section
-        // array's top level is a gradeable id + bottom level is # teams to add to each rotating section (section represented by an index)
-        $gradeables_section_assignment_counts = [];
-        if ($_POST['rotating_assignment_type'] === "redo") {
+        elseif ($_POST['rotating_assignment_type'] === "redo") {
             $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIds();
             $unassigned_gradeable_teams = $this->core->getQueries()->getTeamIdsAllGradeables();
             // Find the number of rotating sections to create or update during section assignments
@@ -554,6 +551,9 @@ class UsersController extends AbstractController {
             for ($section = 0; $section < count($unassigned_user_ids) % $num_rotating_sections; $section++) {
                 $section_assignment_counts[$section]++;
             }
+            // $gradeables_section_assignment_counts 2d array represents the number of gradeable teams to add to each rotating section
+            // array's top level is a gradeable id + bottom level is # teams to add to each rotating section (section represented by an index)
+            $gradeables_section_assignment_counts = [];
             // distribute gradeable teams to their new rotating sections and update $gradeables_section_assignment_counts array
             foreach ($unassigned_gradeable_teams as $g_id => $team_ids) {
                 $gradeables_section_assignment_counts[$g_id] = array_fill(0, $num_rotating_sections, floor(count($team_ids) / $num_rotating_sections));
@@ -561,11 +561,18 @@ class UsersController extends AbstractController {
                     $gradeables_section_assignment_counts[$g_id][$section]++;
                 }
             }
+            // update each team's rotating section assignments using $gradeables_section_assignment_counts array
+            // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
+            foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
+                for ($i = 0; $i < $num_rotating_sections; $i++) {
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
+                }
+            }
         }
         else { // $_POST['rotating_assignment_type'] === "fewest"
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
-            $unassigned_gradeable_teams = $this->core->getQueries()->getTeamIdsWithNullRotating();
             // Find the number of rotating sections to create or update during section assignments
             $num_rotating_sections = $this->core->getQueries()->getMaxRotatingSection();
             if ($num_rotating_sections === null) {
@@ -575,9 +582,6 @@ class UsersController extends AbstractController {
             }
             // 'fewest' rotating section setup option can only use random sort
             shuffle($unassigned_user_ids);
-            foreach ($unassigned_gradeable_teams as $g_id => $team_ids) {
-                shuffle($unassigned_gradeable_teams[$g_id]);
-            }
             // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
             // $section_assigment_counts array represents the number of students to add to each rotating section (section represented by an index in array)
             $total_users_count = $this->core->getQueries()->getTotalRegisteredUsersCount();
@@ -589,14 +593,6 @@ class UsersController extends AbstractController {
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
                 return $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
-            // TODO: logic flawed -- how is this adding to the 'fewest' rotating sections either??
-            // distribute newly registered teams ($unassigned_gradeable_teams) to rotating sections and update $gradeables_section_assignment_counts array
-            foreach ($unassigned_gradeable_teams as $g_id => $team_ids) {
-                $gradeables_section_assignment_counts[$g_id] = array_fill(0, $num_rotating_sections, floor(count($team_ids) / $num_rotating_sections));
-                for ($section = 0; $section < count($team_ids) % $num_rotating_sections; $section++) {
-                    $gradeables_section_assignment_counts[$g_id][$section]++;
-                }
-            }
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
@@ -621,17 +617,6 @@ class UsersController extends AbstractController {
         foreach ($update_graders_gradeables as $update_gradeable) {
             $update_gradeable->setRotatingGraderSections($new_graders);
             $this->core->getQueries()->updateGradeable($update_gradeable);
-        }
-        // update each team's rotating section assignments using $gradeables_section_assignment_counts array
-        // TODO: why don't we have to do all the checks that we did for gradeables?
-        foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
-            for ($i = 0; $i < $num_rotating_sections; $i++) {
-                $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
-                // NOTE: do this like we did updateUsers so we avoid a triple for loop
-                foreach ($update_teams as $team_id) {
-                    $this->core->getQueries()->updateTeamRotatingSection($team_id, $i + 1);
-                }
-            }
         }
 
         $this->core->addSuccessMessage("Rotating sections reassigned successfully");
