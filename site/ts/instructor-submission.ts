@@ -19,18 +19,20 @@ const warning_banner = document.getElementById('submission-mode-warning');
 
 function init(){
     document.getElementsByName('submission-type')
-        .forEach(radio_btn =>radio_btn.addEventListener('click', changeSubmissionMode));
+        .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
 
     warning_banner.textContent = '';
 
     //load previous setting if any
     const prevSetting = sessionStorage.getItem(`${window.gradeable_id}-submission_mode`);
-    if(prevSetting){
-        if(prevSetting === 'normal'){
+    if (prevSetting){
+        if (prevSetting === 'normal'){
             document.getElementById('radio-normal').click();
-        }else if(prevSetting === 'for-student'){
+        }
+        else if (prevSetting === 'for-student'){
             document.getElementById('radio-student').click();
-        }else if(prevSetting === 'bulk-upload'){
+        }
+        else if (prevSetting === 'bulk-upload'){
             document.getElementById('radio-bulk').click();
         }
     }
@@ -40,27 +42,27 @@ function init(){
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement;
 
-    qrPrefixInput.addEventListener('change', (event: Event) => {  
-        sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );  
+    qrPrefixInput.addEventListener('change', (event: Event) => {
+        sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
     });
-    qrSuffixInput.addEventListener('change', (event: Event) => {  
-        sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );  
+    qrSuffixInput.addEventListener('change', (event: Event) => {
+        sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
     });
 
     useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
-    useScanIdsCheckBox.addEventListener('click', (event: Event) => { 
-        sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString()); 
+    useScanIdsCheckBox.addEventListener('click', (event: Event) => {
+        sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
     });
 
-    
+
     const prevQRPrefix = sessionStorage.getItem(`${window.gradeable_id}-qr-prefix`);
     const prevQRSuffix = sessionStorage.getItem(`${window.gradeable_id}-qr-suffix`);
 
-    if(prevQRSuffix){
+    if (prevQRPrefix){
         qrPrefixInput.value = prevQRSuffix;
     }
 
-    if(prevQRSuffix){
+    if (prevQRSuffix){
         qrSuffixInput.value = prevQRSuffix;
     }
 }
@@ -95,33 +97,34 @@ function changeSubmissionMode(event: Event){
         window.deleteFiles(idx);
     }
 
+    const prevBulkSetting = sessionStorage.getItem(`${window.gradeable_id}-bulk_setting`);
+
     let message = '';
     switch (element.id){
         case 'radio-normal':
             window.loadPreviousFilesOnDropBoxes();
-            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, "normal");
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'normal');
             message = '';
             break;
         case 'radio-student':
             submitForStudentOpts.style.display = 'block';
-            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, "for-student");
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'for-student');
             message = 'Warning: Submitting files for a student!';
             break;
         case 'radio-bulk':
             bulkUploadOpts.style.display = 'block';
-    
-            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, "bulk-upload");
+
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
             message = 'Warning: Submitting files for bulk upload!';
 
-            const prevBulkSetting = sessionStorage.getItem(`${window.gradeable_id}-bulk_setting`);
-            const prevScanSetting = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`)
-            if(prevBulkSetting && prevBulkSetting === "qr"){
-                qrUploadOpts.style.display = "inline";
+            if (prevBulkSetting && prevBulkSetting === 'qr'){
+                qrUploadOpts.style.display = 'inline';
                 useQRCheckBox.click();
-            }else{
-                numericUploadOpts.style.display = "inline";
-                scanIdsOpts.style.display = "none";
-                sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, "numeric");
+            }
+            else {
+                numericUploadOpts.style.display = 'inline';
+                scanIdsOpts.style.display = 'none';
+                sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
             }
     }
 
@@ -145,11 +148,12 @@ function switchBulkUploadOptions(event : Event){
 
 
     useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
-    if(element.checked){
+    if (element.checked){
         qrUploadOpts.style.display = 'block';
         scanIdsOpts.style.display = 'inline';
         numericUploadOpts.style.display = 'none';
-    }else{
+    }
+    else {
         qrUploadOpts.style.display = 'none';
         numericUploadOpts.style.display = 'inline';
         scanIdsOpts.style.display = 'none';
