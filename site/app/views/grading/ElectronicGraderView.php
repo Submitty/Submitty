@@ -975,13 +975,13 @@ HTML;
                     "color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Bad Submission (no valid submission available)"
                 ];
-            } else {
+            }
+            else {
                 $error_message = [
                     "color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Bad Submission (submitter has valid submission - Version #" . $rollbackSubmission . ")"
                 ];
             }
-            
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
             $pattern1 = "upload.pdf";
