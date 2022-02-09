@@ -32,6 +32,7 @@ class DockerView extends AbstractView {
         $no_image_capabilities = [];
         $image_to_capability = [];
         $machine_docker_version = [];
+        $machine_system_details = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
             $worker_temp = [];
             $worker_temp['name'] = $name;
@@ -127,11 +128,32 @@ class DockerView extends AbstractView {
                     $current_machine = $matches[1];
                 }
 
+                $is_match = preg_match("/Distributor ID:(.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["Distributor"] = $matches[0];
+                }
+
+                $is_match = preg_match("/Description:(.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["Description"] = $matches[0];
+                }
+
+                $is_match = preg_match("/Release:(.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["Release"] = $matches[0];
+                }
+                
+                $is_match = preg_match("/Codename:(.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["Codename"] = $matches[0];
+                }
+
                 // Parse the docker version
                 $is_match = preg_match("/Docker Version: (.+)/", $buffer, $matches);
                 if ($is_match) {
                     $machine_docker_version[$current_machine] = $matches[1];
                 }
+
                 // Check if the log entry is describing a machine
                 $is_match = preg_match("/Tag: (.+)/", $buffer, $matches);
                 if ($is_match) {
@@ -207,6 +229,7 @@ class DockerView extends AbstractView {
                 "machine_to_update" => $machine_to_update,
                 "image_info" => $image_info,
                 "machine_docker_version" => $machine_docker_version,
+                "machine_system_details" => $machine_system_details,
                 "aliases" => $aliases,
                 "fail_images" => $fail_images ?? [],
                 "error_logs" => $error_logs

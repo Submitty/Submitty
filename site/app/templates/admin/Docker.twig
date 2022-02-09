@@ -25,6 +25,7 @@
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">OS Info</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
@@ -37,6 +38,11 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th>{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
+            <td>
+            {% for info in machine_system_details[worker['name']] %}
+                {{info}} <br>
+            {% endfor %}
+            </td>
             <td>{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
                 {% if capability in worker['capabilities'] %}

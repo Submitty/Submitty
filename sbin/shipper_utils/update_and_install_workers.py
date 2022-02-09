@@ -65,13 +65,14 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_images_obj = client.images.list()
         #print the details of the image
         get_docker_info.printDockerInfo()
-        
+        os.system('lsb_release -a')
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
         commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_docker_info.py')}")
+        commands.append('lsb_release -a')
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success
@@ -83,14 +84,12 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
         return True
     else:
         success = False
-        timed_out = False
         try:
             (target_connection,
              intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
         except Exception as e:
             if str(e) == "timed out":
                 print(f"WARNING: Timed out when trying to ssh to {user}@{host}\nskipping {host} machine...")
-                timed_out = True
             else:
                 print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False
@@ -98,7 +97,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             success = True
             for command in commands:
                 print(f'{host}: performing {command}')
-                (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=60)
+                (_, stdout, _) = target_connection.exec_command(command, timeout=60)
                 print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
@@ -155,7 +154,7 @@ def parse_arguments():
 
 def update_machine(machine,stats,args):
 
-    print(f"UPDATE MACHINE: {machine}")
+    os.system(f"echo UPDATE MACHINE: {machine}")
 
     user = stats['username']
     host = stats['address']
@@ -185,8 +184,6 @@ def update_machine(machine,stats,args):
     if success == False:
         print(f"ERROR: Failed to pull one or more required docker images on {machine}")
         return False
-
-    print(f"finished updating machine: {machine}")
     return True
 
 
