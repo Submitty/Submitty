@@ -56,6 +56,6 @@
     "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\"",
     "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\" --fix",
     "test": "jest",
-    "build": "tsc -noEmit -p . && node .build.js"
+    "build": "tsc -p . && node .build.js"
   }
 }
