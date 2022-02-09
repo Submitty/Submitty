@@ -3,8 +3,8 @@ declare global {
     interface Window{
         file_array: File[][];
         num_submission_boxes: number;
-        deleteFiles(part: Number): void;
-        addFile(file: File, part: Number, check_duplicate_zip: Boolean):void;
+        deleteFiles(part: number): void;
+        addFile(file: File, part: number, check_duplicate_zip: boolean):void;
         loadPreviousFilesOnDropBoxes():void;
     }
 }
