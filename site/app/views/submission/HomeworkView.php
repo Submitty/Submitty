@@ -45,7 +45,7 @@ class HomeworkView extends AbstractView {
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
 
-        if($is_admin) {
+        if ($is_admin) {
             $this->core->getOutput()->addInternalModuleJs('instructor-submission.js');
         }
 
