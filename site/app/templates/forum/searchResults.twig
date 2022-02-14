@@ -3,9 +3,9 @@
     {%  include "forum/ForumBar.twig" with {
         "forum_bar_buttons_right" : buttons,
         "forum_bar_buttons_left" : [],
-        "show_threads" : False,
-        "thread_exists" : True,
-        "show_more" : False,
+        "show_threads" : false,
+        "thread_exists" : false,
+        "show_more" : false,
         "show_filter": false
     } %}
 
@@ -27,7 +27,7 @@
                         <tr title="Go to post" class="cursor-pointer key_to_click" tabindex="0" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
                             <td align="left"><pre style="max-width: 67vw">
                                     <p class="post_content pre-wrap" style="word-wrap: break-word;">
-                                        {% include "forum/RenderPost.twig" with { "post_content": post.post_content } only %}
+                                        {% include "forum/RenderPost.twig" with { "post_content": post.post_content, "render_markdown": true } only %}
                                     </p></pre></td>
                             <td>{{ post.visible_username }}</td>
                             <td>{{ post.posted_on }}</td>

@@ -1,0 +1,84 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}queue-socket-message{% endblock %}
+{% block title_tag %}<h1>Send Message To Queue</h1>
+    Note: This message will appear on the student's queue page for 2 hours. The message will no longer be visible when they leave or are removed.
+{% endblock %}
+
+{% block body %}
+    <form method="post" id="send_socket_message_form" action="{{base_url}}/send_queue_message" style="height:auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <select id="queue_code_send" class="form-control" name="code" aria-label="Access Code" required="required">
+            <option value="">Queue Name</option>
+            {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+                <option value="{{queue['code']}}">{{queue['code']}}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <br>
+        <textarea name="socket-message" id="socket-msg" rows="15" cols="50" placeholder="Message"></textarea>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
+    <hr>
+    <h3>Clear Queue Message</h3>
+    <br>
+    <form method="post" id="clear_socket_message_form" action="{{base_url}}/send_queue_message" style="height:auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="clear_message" value="true"/>
+        <select id="queue_code_clear" class="form-control" name="code" aria-label="Access Code" required="required">
+            <option value="">Queue Name</option>
+            {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+                <option value="{{queue['code']}}">{{queue['code']}}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-primary">Clear Message</button>
+        <button  type="button" class="btn btn-primary" id="view_queue_message_btn"   onclick="toggleQueueMessageTable()">View Messages</button>
+    </form>
+    <div class="container queue_message_table" style="display: none">
+        <br>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Queue</th>
+                <th scope="col">Message</th>
+                <th scope="col">Sent Time</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% set count = 0 %}
+            {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+                {% if queue['message'] %}
+                    {% set count = count+1 %}
+                    <tr>
+                        <td>{{queue['code']}}</td>
+                        <td>{{queue['message']}}</td>
+                        <td>{{ queue['message_sent_time'] }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            {% if count == 0 %}
+                <tr>
+                    <td colspan="3">No messages to display</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function toggleQueueMessageTable(){
+            if ($('.queue_message_table').is(':hidden')) {
+                $('#view_queue_message_btn').text('Hide Messages');
+            }
+            else {
+                $('#view_queue_message_btn').text('View Messages');
+            }
+            $('.queue_message_table').toggle();
+        }
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}

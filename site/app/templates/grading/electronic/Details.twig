@@ -60,7 +60,7 @@
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% endif %}
-    {% if can_regrade and not is_vcs %}
+    {% if can_regrade %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -431,11 +431,6 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
-        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
@@ -454,19 +449,17 @@
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
-
-
             {% endif %}
         {% endif %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
-        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
+        {% set contents = contents ~ " + Grade Inquiry" %}
+        {% set btn_class = "btn-danger" %}
+        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
+    {%  endif %}
     <td style="text-align: center;">
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
@@ -488,11 +481,6 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
-        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
@@ -510,15 +498,15 @@
             {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
-        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
+        {% set contents = contents ~ " + Grade Inquiry" %}
+        {% set btn_class = "btn-danger" %}
+        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
+    {%  endif %}
     <td>
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}

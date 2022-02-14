@@ -43,6 +43,11 @@
     display: inline;
 }
 
+.radio-label-pair {
+    display: flex;
+    align-items: flex-start;
+}
+
 input[type="radio"][disabled=""]:checked::before {
     content: "";
     display: block;
