@@ -342,7 +342,9 @@
         // set to check for duplicate user entries
         let add_student_ids = new Set();
         $(".add_user_ids", form).each(function() {
-            if ($(this).val() !== "") add_student_ids.add($(this).val());
+            if ($(this).val() !== "") {
+                add_student_ids.add($(this).val());
+            }
         });
         let add_student_ids_arr = JSON.stringify(Array.from(add_student_ids));
         fd.append('add_student_ids', add_student_ids_arr);
