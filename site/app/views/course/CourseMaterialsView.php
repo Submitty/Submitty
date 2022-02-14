@@ -132,6 +132,8 @@ class CourseMaterialsView extends AbstractView {
                 [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
+        $this->removeEmptyFolders($final_structure);
+
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
@@ -152,6 +154,20 @@ class CourseMaterialsView extends AbstractView {
         ]);
     }
 
+    private function removeEmptyFolders(array &$course_materials): bool {
+        foreach ($course_materials as $path => $course_material) {
+            if (is_array($course_material)) {
+                if ($this->removeEmptyFolders($course_material)) {
+                    unset($course_materials[$path]);
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
         $has_unseen = false;
         foreach ($course_materials as $path => $course_material) {
@@ -159,6 +175,7 @@ class CourseMaterialsView extends AbstractView {
             if (is_array($course_material)) {
                 if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path))) {
                     $seen[FileUtils::joinPaths($cur_path, $path)] = false;
+                    $has_unseen = true;
                 }
                 else {
                     $seen[FileUtils::joinPaths($cur_path, $path)] = true;
