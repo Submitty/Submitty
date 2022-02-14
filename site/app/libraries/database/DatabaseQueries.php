@@ -29,6 +29,7 @@ use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\LateDayInfo;
 
 /**
  * DatabaseQueries
@@ -1527,6 +1528,12 @@ WHERE semester=? AND course=? AND user_id=?",
         return $row;
     }
 
+    /**
+     * Get the Late Day Info for each user associated with a user and gradeable
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo
+     */
     public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
         $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
         $cache['graded_gradeable'] = $graded_gradeable;
@@ -1539,31 +1546,40 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Calculates the remaining cache for all the users. If a g_id is procided,
-     * it will only calculate the cache for the uses who DO NOT already have
-     * late day cache calculated
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Submitter $submitter
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array
      */
-    public function generateLateDayCacheForUsers($g_id = null) {
-        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
-        $params = [$g_id, $default_late_days];
+    public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
+        // Collect Late Day Info for each user associated with the submitter
+        if ($submitter->isTeam()) {
+            $late_day_info = [];
+            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                $late_day_info[$member->getId()] = $this->getLateDayInfoForUserGradeable($member, $graded_gradeable);
+            }
+            return $late_day_info;
+        }
+        else {
+            return $this->getLateDayInfoForUserGradeable($submitter->getUser(), $graded_gradeable);
+        }
+    }
 
-        $query = "WITH existing_cache AS (
-                    SELECT DISTINCT user_id
-                    FROM late_day_cache
-                    WHERE g_id=?
-                )
-                (SELECT (cache_row).* 
-                FROM 
-                    (SELECT
-                        public.calculate_remaining_cache_for_user(users.user_id::text, ?) as cache_row
+    /**
+     * Generate and update the late day cache for all of the students in the course
+     */
+    public function generateLateDayCacheForUsers() {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    (SELECT (cache_row).* 
                     FROM 
-                        users
-                        LEFT JOIN existing_cache
-                        ON existing_cache.user_id = users.user_id
-                    WHERE 
-                        existing_cache.user_id IS NULL
-                    ) calculated_cache
-                );";
+                        (SELECT
+                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
+                        FROM users
+                        ) calculated_cache
+                    )";
 
         $this->course_db->query($query, $params);
     }

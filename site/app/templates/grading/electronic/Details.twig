@@ -432,7 +432,7 @@
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
-        {% if info.late_day_info.isOnTimeSubmission() %}
+        {% if graded_gradeable.getGradeable().isTeamAssignment() or info.late_day_info.isOnTimeSubmission() %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
         {% else %}
@@ -592,7 +592,12 @@
 
 {# Total Point Summary #}
 {% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
-    {% set box_background = (info.late_day_info.isOnTimeSubmission() == false) ? "late-box" : "" %}
+    {% set box_background = "" %}
+    
+    {# Add late red box if submission is bad (and not a team assignment #}
+    {% if not graded_gradeable.getGradeable().isTeamAssignment() and not info.late_day_info.isOnTimeSubmission() %}
+        {% set box_background = "late-box" %}
+    {% endif %}
 
     {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
 

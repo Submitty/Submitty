@@ -618,7 +618,7 @@ HTML;
         }
 
         // Generate late days
-        $this->core->getQueries()->generateLateDayCacheForUsers($gradeable->getId());
+        $this->core->getQueries()->generateLateDayCacheForUsers();
         // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
@@ -628,7 +628,7 @@ HTML;
             //Extra info for the template
             $info = [
                 "graded_gradeable" => $row,
-                "late_day_info" => $this->core->getQueries()->getLateDayInfoForUserGradeable($row->getSubmitter()->getUser(), $row)
+                "late_day_info" => $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row)
             ];
 
             if ($peer) {
