@@ -284,8 +284,10 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 					eg.eg_submission_due_date IS NOT NULL
 					and eg.eg_has_due_date = TRUE
 					and eg.eg_student_submit = TRUE
+					and eg.eg_student_view = TRUE
 					and g.g_gradeable_type = 0
 					and eg.eg_allow_late_submission = TRUE
+					and eg.eg_submission_open_date <= NOW()
 			),
 			submitted_gradeables AS (
 				SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
