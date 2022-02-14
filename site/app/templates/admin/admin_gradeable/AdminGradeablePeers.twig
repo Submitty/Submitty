@@ -219,13 +219,17 @@
         fd.append('remove_grader', $('#removed-all').text());
         let curr_student_ids = [];
         $(".edit_user_ids :input.peerstudents").each(function() {
-            if ($(this).val() !== "") curr_student_ids.push($(this).val());
+            if ($(this).val() !== "") {
+                curr_student_ids.push($(this).val());
+            }
         });
         fd.append('curr_student_ids', JSON.stringify(curr_student_ids));
         // set to check for duplicate user entries
         let add_student_ids = new Set();
         $(".add_user_ids").each(function() {
-            if ($(this).val() !== "") add_student_ids.add($(this).val());
+            if ($(this).val() !== "") {
+                add_student_ids.add($(this).val());
+            }
         });
         fd.append('add_student_ids', JSON.stringify(Array.from(add_student_ids)));
         $.ajax({
