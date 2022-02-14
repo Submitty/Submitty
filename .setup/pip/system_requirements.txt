@@ -48,7 +48,7 @@ docker==5.0.3
 parso==0.8.3
 
 # Python3 implementation of python-clang bindings (may not work < 6.0)
-clang==11.0
+clang==14.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.8
