@@ -142,7 +142,7 @@ class DockerView extends AbstractView {
                 if ($is_match) {
                     $machine_system_details[$current_machine]["Release"] = $matches[0];
                 }
-                
+
                 $is_match = preg_match("/Codename:(.+)/", $buffer, $matches);
                 if ($is_match) {
                     $machine_system_details[$current_machine]["Codename"] = $matches[0];
