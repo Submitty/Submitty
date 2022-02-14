@@ -1,5 +1,5 @@
 import docker
-import os
+
 
 def printDockerInfo():
     try:
