@@ -275,52 +275,63 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
     returnrow late_day_cache%rowtype;
     BEGIN
         FOR var_row in (
-            SELECT
-			g.g_id,
-			u.user_id,
-			t.team_id,
-			g.g_title,
-			eg.eg_submission_due_date AS late_day_date,
-			eg.eg_late_days AS late_days_allowed,
-			CASE
-				WHEN egd.submission_time IS NULL THEN 0
-				WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
-				WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
-					OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
-					OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
-					THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
-				ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
-			END AS submission_days_late,
-			CASE
-				WHEN lde.late_day_exceptions IS NULL THEN 0
-				ELSE lde.late_day_exceptions
-			END AS late_day_exceptions
-		FROM gradeable g
-		LEFT JOIN electronic_gradeable eg
-			ON g.g_id=eg.g_id
-		LEFT JOIN users u
-		ON u.user_id=user_id
-		LEFT JOIN teams t
-		ON t.user_id=u.user_id
-		LEFT JOIN (
-			SELECT egd.submission_time, egd.g_id, egd.user_id, egd.team_id
-			FROM electronic_gradeable_data egd
-			RIGHT JOIN electronic_gradeable_version egv
-				ON egv.g_id=egd.g_id 
-				AND (egv.user_id=egd.user_id OR egv.team_id=egd.team_id)
-				AND egv.active_version=egd.g_version
-		) as egd
-			ON (egd.user_id = u.user_id OR egd.team_id = t.team_id)
-			AND g.g_id=egd.g_id
-		LEFT JOIN late_day_exceptions lde
-			ON u.user_id = lde.user_id
-			AND g.g_id = lde.g_id
-		WHERE 
-			eg.eg_submission_due_date IS NOT NULL
-			and eg.eg_has_due_date = TRUE
-			and eg.eg_student_submit = TRUE
-			and g.g_gradeable_type = 0
-			and eg.eg_allow_late_submission = TRUE
+            WITH valid_gradeables AS (
+				SELECT g.g_id, g.g_title, eg.eg_submission_due_date, eg.eg_late_days
+				FROM gradeable g
+				JOIN electronic_gradeable eg
+					ON eg.g_id=g.g_id
+				WHERE 
+					eg.eg_submission_due_date IS NOT NULL
+					and eg.eg_has_due_date = TRUE
+					and eg.eg_student_submit = TRUE
+					and g.g_gradeable_type = 0
+					and eg.eg_allow_late_submission = TRUE
+			),
+			submitted_gradeables AS (
+				SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
+				FROM electronic_gradeable_version egv
+				JOIN electronic_gradeable_data egd
+					ON egv.g_id=egd.g_id 
+					AND egv.active_version=egd.g_version
+					AND (
+						CASE
+							when egd.team_id IS NOT NULL THEN egv.team_id=egd.team_id
+							else egv.user_id=egd.user_id
+						END
+					)
+				LEFT JOIN teams t
+					ON t.team_id=egd.team_id
+				LEFT JOIN users u
+					ON u.user_id=t.user_id
+					OR u.user_id=egd.user_id
+				WHERE u.user_id=user_id
+			)
+			SELECT
+				vg.g_id,
+				vg.g_title,
+				COALESCE(sg.user_id, user_id) as user_id,
+				sg.team_id,
+				vg.eg_submission_due_date AS late_day_date,
+				vg.eg_late_days AS late_days_allowed,
+				CASE
+					WHEN sg.submission_time IS NULL THEN 0
+					WHEN DATE_PART('day', sg.submission_time - vg.eg_submission_due_date) < 0 THEN 0
+					WHEN DATE_PART('hour', sg.submission_time - vg.eg_submission_due_date) > 0
+						OR DATE_PART('minute', sg.submission_time - vg.eg_submission_due_date) > 0
+						OR DATE_PART('second', sg.submission_time - vg.eg_submission_due_date) > 0
+						THEN DATE_PART('day', sg.submission_time - vg.eg_submission_due_date) + 1
+					ELSE DATE_PART('day', sg.submission_time - vg.eg_submission_due_date)
+				END AS submission_days_late,
+				CASE
+					WHEN lde.late_day_exceptions IS NULL THEN 0
+					ELSE lde.late_day_exceptions
+				END AS late_day_exceptions
+			FROM valid_gradeables vg
+			LEFT JOIN submitted_gradeables sg
+				ON vg.g_id=sg.g_id
+			LEFT JOIN late_day_exceptions lde
+				ON lde.user_id=user_id
+				AND vg.g_id=lde.g_id
 		ORDER BY late_day_date, g_id
 	) LOOP
 		returnrow.g_id = var_row.g_id;
@@ -462,6 +473,86 @@ CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
             DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= OLD.since_timestamp AND ldc.user_id = OLD.user_id;
         END IF ;
         RETURN NEW;
+    END;
+    $$;
+
+
+--
+-- Name: tester(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.tester(user_id text) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+    latestDate timestamp with time zone ;
+    var_row RECORD;
+    returnrow late_day_cache%rowtype;
+    BEGIN
+        FOR var_row in (
+            SELECT
+			g.g_id,
+			u.user_id,
+			t.team_id,
+			g.g_title,
+			eg.eg_submission_due_date AS late_day_date,
+			eg.eg_late_days AS late_days_allowed,
+			CASE
+				WHEN egd.submission_time IS NULL THEN 0
+				WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
+				WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
+					OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
+					OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
+					THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
+				ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
+			END AS submission_days_late,
+			CASE
+				WHEN lde.late_day_exceptions IS NULL THEN 0
+				ELSE lde.late_day_exceptions
+			END AS late_day_exceptions
+		FROM gradeable g
+		JOIN electronic_gradeable eg
+			ON eg.g_id=g.g_id
+		JOIN electronic_gradeable_data egd
+			ON egd.g_id=g.g_id
+		JOIN electronic_gradeable_version egv
+			ON egv.g_id=g.g_id 
+		AND (
+			CASE
+				when eg.eg_team_assignment IS true THEN egv.team_id=egd.team_id
+				else egv.user_id=egd.user_id
+			END
+		)
+		AND egv.active_version=egd.g_version
+		LEFT JOIN late_day_exceptions lde
+			ON egd.user_id=lde.user_id
+			AND g.g_id=lde.g_id
+		LEFT JOIN users u
+			ON u.user_id=egd.user_id
+		LEFT JOIN teams t
+			ON t.team_id=egd.team_id
+			AND t.user_id=u.user_id
+		WHERE 
+			(u.user_id=user_id OR u.user_id IS NULL)
+			and eg.eg_submission_due_date IS NOT NULL
+			and eg.eg_has_due_date = TRUE
+			and eg.eg_student_submit = TRUE
+			and g.g_gradeable_type = 0
+			and eg.eg_allow_late_submission = TRUE
+-- 			and eg.eg_team_assignment = TRUE
+		ORDER BY late_day_date, g_id
+	) LOOP
+		returnrow.g_id = var_row.g_id;
+		returnrow.team_id = var_row.team_id;
+		returnrow.user_id = var_row.user_id;
+		returnrow.late_days_allowed = var_row.late_days_allowed;
+		returnrow.late_day_date = var_row.late_day_date;
+		returnrow.submission_days_late = var_row.submission_days_late;
+		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+		RETURN NEXT returnrow;
+        END LOOP;
+        RETURN;	
     END;
     $$;
 
