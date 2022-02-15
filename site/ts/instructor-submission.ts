@@ -8,8 +8,8 @@ declare global {
     interface Window{
         file_array: File[][];
         num_submission_boxes: number;
-        deleteFiles(Number): void;
-        addFile(File, Number, Boolean):void;
+        deleteFiles(part: number): void;
+        addFile(file: File, part: Number, check_duplicate_zip: Boolean):void;
         loadPreviousFilesOnDropBoxes():void;
         gradeable_id: string;
     }
@@ -21,19 +21,19 @@ function init(){
     document.getElementsByName('submission-type')
         .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
 
-    warning_banner.textContent = '';
+    warning_banner!.textContent = '';
 
     //load previous setting if any
     const prevSetting = sessionStorage.getItem(`${window.gradeable_id}-submission_mode`);
     if (prevSetting){
         if (prevSetting === 'normal'){
-            document.getElementById('radio-normal').click();
+            document.getElementById('radio-normal')!.click();
         }
         else if (prevSetting === 'for-student'){
-            document.getElementById('radio-student').click();
+            document.getElementById('radio-student')!.click();
         }
         else if (prevSetting === 'bulk-upload'){
-            document.getElementById('radio-bulk').click();
+            document.getElementById('radio-bulk')!.click();
         }
     }
 
@@ -59,7 +59,7 @@ function init(){
     const prevQRSuffix = sessionStorage.getItem(`${window.gradeable_id}-qr-suffix`);
 
     if (prevQRPrefix){
-        qrPrefixInput.value = prevQRSuffix;
+        qrPrefixInput.value = prevQRPrefix;
     }
 
     if (prevQRSuffix){
@@ -107,33 +107,33 @@ function changeSubmissionMode(event: Event){
             message = '';
             break;
         case 'radio-student':
-            submitForStudentOpts.style.display = 'block';
+            submitForStudentOpts!.style.display = 'block';
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'for-student');
             message = 'Warning: Submitting files for a student!';
             break;
         case 'radio-bulk':
-            bulkUploadOpts.style.display = 'block';
+            bulkUploadOpts!.style.display = 'block';
 
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
             message = 'Warning: Submitting files for bulk upload!';
 
             if (prevBulkSetting && prevBulkSetting === 'qr'){
-                qrUploadOpts.style.display = 'inline';
+                qrUploadOpts!.style.display = 'inline';
                 useQRCheckBox.click();
             }
             else {
-                numericUploadOpts.style.display = 'inline';
-                scanIdsOpts.style.display = 'none';
+                numericUploadOpts!.style.display = 'inline';
+                scanIdsOpts!.style.display = 'none';
                 sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
             }
     }
 
-    if (!warning_banner.hasChildNodes()){
-        const child = warning_banner.appendChild( document.createElement('h2') );
+    if (!warning_banner!.hasChildNodes()){
+        const child = warning_banner!.appendChild( document.createElement('h2') );
         child.classList.add('warning');
     }
 
-    warning_banner.firstChild.textContent = message;
+    warning_banner!.firstChild!.textContent = message;
 }
 
 
@@ -149,14 +149,14 @@ function switchBulkUploadOptions(event : Event){
 
     useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
     if (element.checked){
-        qrUploadOpts.style.display = 'block';
-        scanIdsOpts.style.display = 'inline';
-        numericUploadOpts.style.display = 'none';
+        qrUploadOpts!.style.display = 'block';
+        scanIdsOpts!.style.display = 'inline';
+        numericUploadOpts!.style.display = 'none';
     }
     else {
-        qrUploadOpts.style.display = 'none';
-        numericUploadOpts.style.display = 'inline';
-        scanIdsOpts.style.display = 'none';
+        qrUploadOpts!.style.display = 'none';
+        numericUploadOpts!.style.display = 'inline';
+        scanIdsOpts!.style.display = 'none';
     }
 }
 
