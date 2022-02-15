@@ -569,7 +569,9 @@ function setupNumericTextCells() {
 
                                                 total += Number(elem.val());
                                             }
-                                            $('#total-'+$(this).parent().data("row")).val(total);
+                                            // $('#total-'+$(this).parent().data("row")).val(total);
+                                            const split_row = $(this).parent().attr("id").split('-');
+                                            $('#total-'+split_row[1]+'-'+split_row[2]).val(total);
                                             z++;
                                             var counter = 0;
                                             while (counter < num_text) {
@@ -656,15 +658,58 @@ function setupSimpleGrading(action) {
             else if (direction == "left") new_selector_array[3] -= 1;
             else if (direction == "right") new_selector_array[3] += 1;
 
-            // get new cell
-            var new_cell = $("#" + new_selector_array.join("-"));
-            if (new_cell.length) {
-                prev_cell.blur();
-                new_cell.focus();
-                new_cell.select(); // used to select text in input cells
+            // TODO: cannot move to NULL section (all cells with id 'cell--#-#')
+            if (new_selector_array[2] < 0 && direction == "up") {
+                // // Selection needs to move to above section, if one exists
+                new_selector_array[2] += 1;
+                // // Find the previous section visible to the grader
+                while (new_selector_array[1] >= 0) {
+                    new_selector_array[1] -= 1;
+                    let temp_cell = $("#" + new_selector_array.join("-"));
+                    if (temp_cell.length) break;
+                }
+                // Find the last cell in this section
+                let new_cell = $("#" + new_selector_array.join("-"));
+                while (new_cell.length) {
+                    new_selector_array[2] += 1;
+                    new_cell = $("#" + new_selector_array.join("-"));
+                }
+                new_selector_array[2] -= 1;
+                
+                new_cell = $("#" + new_selector_array.join("-"));
+                if (new_cell.length) {
+                    prev_cell.blur();
+                    new_cell.focus();
+                    new_cell.select(); // used to select text in input cells
 
-                if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
-                    $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                    if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
+                        $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                    }
+                }
+            }
+            else {
+                // Try once with the new cell generated above, otherwise try moving down to the next section
+                let tries;
+                for (tries = 0; tries < 2; tries++) {
+                    // get new cell
+                    var new_cell = $("#" + new_selector_array.join("-"));
+                    if (new_cell.length) {
+                        prev_cell.blur();
+                        new_cell.focus();
+                        new_cell.select(); // used to select text in input cells
+
+                        if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
+                            $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                        }
+                        break;
+                    }
+
+                    if (direction == "down") {
+                        // Check if cell needs to move to next section
+                        new_selector_array[1] += 1;
+                        new_selector_array[2] = 0;
+                        new_selector_array[3] = 0;
+                    } else break;
                 }
             }
         }
