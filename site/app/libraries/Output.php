@@ -554,7 +554,7 @@ HTML;
     public function setRenderFull($bool = true) {
         $this->render_full = $bool;
     }
-    
+
     public function getRenderFull() {
         return $this->render_full;
     }
