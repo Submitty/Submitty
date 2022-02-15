@@ -1230,29 +1230,6 @@ function openAutoGrading(num){
     $('#testcase_' + num)[0].style.display="block";
   }
 }
-// expand all outputs in Auto-Grading Testcases section
-function openAllAutoGrading() {
-  // show all divs whose id starts with testcase_
-  let clickable_divs  = $("[id^='tc_']");
-
-  for(let i = 0; i < clickable_divs.length; i++){
-    let clickable_div = clickable_divs[i];
-    let num = clickable_div.id.split("_")[1];
-    let content_div = $('#testcase_' + num);
-    if(content_div.css("display") == "none"){
-      clickable_div.click();
-    }
-  }
-}
-
-// close all outputs in Auto-Grading Testcases section
-function closeAllAutoGrading() {
-  // hide all divs whose id starts with testcase_
-  $("[id^='testcase_']").hide();
-  $("[id^='details_tc_']").find("span").hide();
-  $("[id^='details_tc_']").find(".loading-tools-show").show();
-}
-
 
 function openDiv(num) {
   let elem = $('#div_viewer_' + num);

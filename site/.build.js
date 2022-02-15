@@ -17,6 +17,7 @@ const files = getAllFiles(module_path);
 require('esbuild').build({
     entryPoints: files,
     bundle: true,
+    format: "esm",
     minify: true,
     sourcemap: true,
     outdir: path.join(__dirname, 'public', 'mjs'),

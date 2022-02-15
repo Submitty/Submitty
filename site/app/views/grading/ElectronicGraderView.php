@@ -1197,6 +1197,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $this->core->getOutput()->addModuleJs("grading.js");
         $gradeable = $graded_gradeable->getGradeable();
         //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
         if ($gradeable->isTeamAssignment()) {
@@ -1384,6 +1385,7 @@ HTML;
      * @return string
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
+        $this->core->getOutput()->addInternalModuleJs("grading.js");
         $gradeable = $graded_gradeable->getGradeable();
         $query = [];
         parse_str(parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY), $query);
