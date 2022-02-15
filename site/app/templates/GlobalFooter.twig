@@ -2,6 +2,7 @@
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
                 </main>
             </div> {# /#wrapper #}
+            {% if render_full %}
             <footer>
                 &copy; {{ "now"|date("Y") }}
                 <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
@@ -29,7 +30,9 @@
                     <a href="#" onClick="validateHtml();" class="black-btn key_to_click" tabindex="0">Validate HTML</a>
                 {% endif %}
             </footer>
+            {% endif %}
         </div> {# /#submitty-body #}
+    {% if render_full %}
         {% if wrapper_urls['right_sidebar.html'] is defined %}
             {# uploaded homepage redirect can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
@@ -37,6 +40,7 @@
     {% if wrapper_urls['bottom_bar.html'] is defined %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
+    {% endif %}
     {% endif %}
 {% if is_debug %}
     <div id='page-info'>

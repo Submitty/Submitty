@@ -50,6 +50,8 @@ class Output {
     private $use_footer = true;
     private $use_mobile_viewport = false;
 
+    private $render_full = true;
+
     private $start_time;
 
     /** @var \Twig\Environment $twig */
@@ -547,6 +549,14 @@ HTML;
 
     public function useFooter($bool = true) {
         $this->use_footer = $bool;
+    }
+
+    public function setRenderFull($bool = true) {
+        $this->render_full = $bool;
+    }
+    
+    public function getRenderFull() {
+        return $this->render_full;
     }
 
     public function enableMobileViewport(): void {

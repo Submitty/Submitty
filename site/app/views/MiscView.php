@@ -12,25 +12,23 @@ class MiscView extends AbstractView {
     }
 
     public function displayCode($file_type, $filename, $file_contents) {
-        $code_css = [];
-        $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'codemirror.css'), 'vendor');
-        $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'), 'vendor');
-        $code_css[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'), 'vendor');
+        $this->core->getOutput()->setRenderFull(false);
 
-        $code_js = [];
-        $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
-        $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'codemirror.js'), 'vendor');
-        $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'), 'vendor');
-        $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'), 'vendor');
-        $code_js[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'), 'vendor');
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
+        $this->core->getOutput()->setPageName($filename);
 
         return $this->core->getOutput()->renderTwigTemplate("misc/Code.twig", [
-            "filename" => $filename,
             "file_contents" => $file_contents,
-            "file_type" => $file_type,
-            "base_url" => $this->core->getConfig()->getBaseUrl(),
-            "code_css" => $code_css,
-            "code_js" => $code_js
+            "file_type" => $file_type
         ]);
     }
 
