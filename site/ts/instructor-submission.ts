@@ -82,7 +82,7 @@ function changeSubmissionMode(event: Event){
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
 
-    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element.style.display = 'none');
+    [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
     useQRCheckBox.checked = false;
     useScanIdsCheckBox.checked = false;
 
