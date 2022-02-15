@@ -770,13 +770,6 @@ function markViewed(ids, redirect) {
     });
 }
 
-function hideEmptyCourseMaterialFolders() {
-  // fetch all the folders and remove those one which have no `file` within.
-  $('.folder-container').each(function() {
-    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
-  });
-}
-
 function closeDivForCourseMaterials(num) {
     var elem = $('#div_viewer_' + num);
     elem.hide();
