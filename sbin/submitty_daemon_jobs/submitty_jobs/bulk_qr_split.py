@@ -41,8 +41,6 @@ def main(args):
         output = {"filename": filename, "is_qr": True, "use_ocr": use_ocr}
         json_file = os.path.join(split_path, "decoded.json")
 
-        output['qr_prefix'] = qr_prefix
-        output['qr_suffix'] = qr_suffix
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
             page = convert_from_bytes(
@@ -73,9 +71,6 @@ def main(args):
                 else:
                     pre = data[0:len(qr_prefix)]
                     suf = data[(len(data)-len(qr_suffix)):len(data)]
-
-                    output['pre'] = pre
-                    output['suf'] = suf
 
                     if qr_prefix != '' and pre == qr_prefix:
                         data = data[len(qr_prefix):]
