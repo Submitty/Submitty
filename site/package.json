@@ -36,7 +36,7 @@
     "@types/jquery": "^3.5.13",
     "@types/twig": "^1.12.8",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.11.0",
+    "@typescript-eslint/parser": "^5.12.0",
     "babel-jest": "^27.5.1",
     "cypress": "^9.4.1",
     "cypress-file-upload": "^5.0.8",
