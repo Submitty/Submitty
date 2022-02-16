@@ -24,7 +24,7 @@ class GlobalController extends AbstractController {
         $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
-        $content_only = $this->core->getOutput()->getContentOnly();
+        $content_only = $this->core->getOutput()->isContentOnly();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
             $css->add($wrapper_urls['override.css']);
@@ -541,7 +541,7 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
-        $content_only = $this->core->getOutput()->getContentOnly();
+        $content_only = $this->core->getOutput()->isContentOnly();
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
