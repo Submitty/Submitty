@@ -12,7 +12,7 @@ class MiscView extends AbstractView {
     }
 
     public function displayCode($file_type, $filename, $file_contents) {
-        $this->core->getOutput()->setRenderFull(false);
+        $this->core->getOutput()->setContentOnly(true);
 
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));

@@ -2,7 +2,7 @@
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
                 </main>
             </div> {# /#wrapper #}
-            {% if render_full %}
+            {% if not content_only %}
             <footer>
                 &copy; {{ "now"|date("Y") }}
                 <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
@@ -32,7 +32,7 @@
             </footer>
             {% endif %}
         </div> {# /#submitty-body #}
-    {% if render_full %}
+    {% if not content_only %}
         {% if wrapper_urls['right_sidebar.html'] is defined %}
             {# uploaded homepage redirect can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>

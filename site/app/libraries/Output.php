@@ -50,7 +50,7 @@ class Output {
     private $use_footer = true;
     private $use_mobile_viewport = false;
 
-    private $render_full = true;
+    private $content_only = false;
 
     private $start_time;
 
@@ -551,12 +551,12 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function setRenderFull($bool = true) {
-        $this->render_full = $bool;
+    public function setContentOnly($bool = false) {
+        $this->content_only = $bool;
     }
 
-    public function getRenderFull() {
-        return $this->render_full;
+    public function getContentOnly() {
+        return $this->content_only;
     }
 
     public function enableMobileViewport(): void {

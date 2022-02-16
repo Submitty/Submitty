@@ -3,7 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $render_full) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -56,11 +56,11 @@ class GlobalView extends AbstractView {
             "use_mobile_viewport" => $this->output->useMobileViewport(),
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false,
-            "render_full" => $render_full,
+            "content_only" => $content_only,
         ]);
     }
 
-    public function footer($runtime, $wrapper_urls, $footer_links, $render_full) {
+    public function footer($runtime, $wrapper_urls, $footer_links, $content_only) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
@@ -72,7 +72,7 @@ class GlobalView extends AbstractView {
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
             "footer_links" => $footer_links,
             "module_js" => $this->output->getModuleJs(),
-            "render_full" => $render_full,
+            "content_only" => $content_only,
         ]);
     }
 }
