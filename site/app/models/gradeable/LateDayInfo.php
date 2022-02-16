@@ -103,7 +103,7 @@ class LateDayInfo extends AbstractModel {
      * Gets information about this late day event in the format for the cache table
      * @return array
      */
-    public function generateEventInfo() {
+    public function generateEventInfo(): array {
         return [
             'g_id' => $this->isLateDayUpdate() ? null : $this->getId(),
             'user_id' => $this->user->getId(),
@@ -285,7 +285,7 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isRegradeAllowed() {
-        return $this->graded_gradeable !== null && $this->graded_gradeable->getGradeable()->isRegradeAllowed();
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
     }
 
     /**
@@ -293,6 +293,6 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getGradeInquiryCount() {
-        return $this->graded_gradeable !== null ? $this->graded_gradeable->getGradeInquiryCount() : null;
+        return $this->graded_gradeable->getGradeInquiryCount() ?? null;
     }
 }

@@ -104,7 +104,7 @@ class LateDaysTester extends BaseUnitTest {
         return [$late_exception, $bad_for_gradeable, $bad_for_term, $late, $on_time, $on_time_exceptions, $late1, $on_time1];
     }
 
-    private function createMockCache($graded_gradeables, $late_days, $updates) {
+    private function createMockCache(array $graded_gradeables, int $late_days, array $updates): array {
         $late_day_cache = [];
         $late_days_remaining = $late_days;
         $late_days_used = 0;
@@ -163,7 +163,7 @@ class LateDaysTester extends BaseUnitTest {
         return $late_day_cache;
     }
 
-    private function makeTestLateDays($initial_late_days = 5, $updates = []) {
+    private function makeTestLateDays(int $initial_late_days = 5, array $updates = []): LateDays {
         $graded_gradeables = $this->mockGradedGradeables();
         $cache = $this->createMockCache($graded_gradeables, $initial_late_days, $updates);
         $core = $this->mockCore($initial_late_days, $updates, $cache);
