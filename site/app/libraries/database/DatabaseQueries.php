@@ -1427,7 +1427,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *      ]
      *  ]
      */
-    public function getLateDayCache() {
+    public function getLateDayCache(): array {
         $query = "SELECT * FROM 
                     late_day_cache AS ldc
                     LEFT JOIN gradeable g ON g.g_id=ldc.g_id
@@ -1463,7 +1463,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *      ]
      * ]
      */
-    public function getLateDayCacheForUser($user_id) {
+    public function getLateDayCacheForUser(string $user_id): array {
         $params = [$user_id];
         $query = "SELECT * FROM late_day_cache
                     WHERE user_id=?
@@ -1504,7 +1504,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *      'late_days_change' => int
      * ]
      */
-    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id) {
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): array {
         $params = [$user_id, $g_id];
         $query = "SELECT * FROM late_day_cache
                     WHERE user_id=?
@@ -1532,7 +1532,7 @@ WHERE semester=? AND course=? AND user_id=?",
     /**
      * Generate and update the late day cache for all of the students in the course
      */
-    public function generateLateDayCacheForUsers() {
+    public function generateLateDayCacheForUsers(): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
 
@@ -1552,7 +1552,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Generate and update the late day cache for a student
      * @param string $user_id
      */
-    public function generateLateDayCacheForUser(string $user_id) {
+    public function generateLateDayCacheForUser(string $user_id): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
 
