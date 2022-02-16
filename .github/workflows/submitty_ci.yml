@@ -58,6 +58,8 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run eslint
+            - name: Run npm build (tsc and esbuild)
+              run: npm run build
 
 
     js-unit:

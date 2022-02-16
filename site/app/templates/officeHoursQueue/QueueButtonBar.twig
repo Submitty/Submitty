@@ -1,6 +1,7 @@
 {% include('officeHoursQueue/NewQueue.twig') %}
 {% include('officeHoursQueue/QueueFilter.twig') %}
 {% include('officeHoursQueue/QueueAnnouncement.twig') %}
+{% include('officeHoursQueue/QueueSocketMessage.twig') %}
 <br>
 <div>
 <button id="toggle_new_queue" class="btn btn-primary filter_btn" type="button" onclick="$('#new-queue').show()">
@@ -11,6 +12,9 @@
   </button>
   <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
     Edit Announcement
+  </button>
+  <button id="toggle_queue_message" class="btn btn-primary filter_btn" type="button" onclick="$('#queue-socket-message').show()">
+    Send Message
   </button>
   <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
     Enable Notifications

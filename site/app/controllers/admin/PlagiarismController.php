@@ -447,7 +447,7 @@ class PlagiarismController extends AbstractController {
             $configuration = [
                 "g_id" => $config->getGradeableID(),
                 "g_title" => $all_gradeables[$config->getGradeableID()],
-                "g_grade_due_date" => $this->core->getQueries()->getDateForGradeableById($config->getGradeableID()),
+                "due_date" => $this->core->getQueries()->getDueDateForGradeableById($config->getGradeableID()),
                 "g_config_version" => $config->getConfigID(),
                 "last_run_timestamp" => $config->getLastRunTimestamp(),
                 "has_been_viewed" => $config->userHasAccessed($user_id)
@@ -456,9 +456,13 @@ class PlagiarismController extends AbstractController {
         }
 
         usort($all_configurations, function ($a, $b) {
-            return $a['g_grade_due_date'] > $b['g_grade_due_date']
-                   || ($a["g_grade_due_date"] == $b["g_grade_due_date"] && $a["g_title"] > $b["g_title"])
-                   || ($a["g_grade_due_date"] == $b["g_grade_due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]);
+            if ($a['due_date'] == null) {
+                return false;
+            }
+
+            return $a['due_date'] > $b['due_date']
+                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] > $b["g_title"])
+                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]);
         });
 
         // TODO: return to this and enable later
@@ -539,7 +543,7 @@ class PlagiarismController extends AbstractController {
                 if ($has_results) {
                     try {
                         $rankings = $this->getOverallRankings($gradeable['g_id'], $gradeable['g_config_version']);
-                        $top_match_percent = $rankings[0][0];
+                        $top_match_percent = $rankings[0][2];
                         $matching_submission_count = count($rankings);
                         $ranking_available = true;
                     }
@@ -558,7 +562,7 @@ class PlagiarismController extends AbstractController {
                 'title' => $gradeable['g_title'],
                 'id' => $gradeable['g_id'],
                 'config_id' => $gradeable['g_config_version'],
-                'duedate' => $gradeable['g_grade_due_date']->format($gradeable_date_format),
+                'duedate' => $gradeable['due_date'] == null ? null : $gradeable['due_date']->format($gradeable_date_format),
                 'timestamp' => $timestamp,
                 'submissions' => $submissions,
                 'in_queue' => $in_queue,
@@ -809,7 +813,7 @@ class PlagiarismController extends AbstractController {
                 return new RedirectResponse($return_url);
             }
             $regex_directories = $_POST["regex_dir"];
-            $regex_for_selecting_files = preg_split('/\s+/', $_POST['regex_to_select_files']);
+            $regex_for_selecting_files = explode(',', str_replace(' ', '', $_POST['regex_to_select_files']));
 
 
             // Language ////////////////////////////////////////////////////////////
@@ -1016,12 +1020,19 @@ class PlagiarismController extends AbstractController {
                 unset($gradeable_ids_titles[$i]);
                 continue;
             }
-            $duedate = $this->core->getQueries()->getDateForGradeableById($gradeable_id_title['g_id']);
-            $gradeable_ids_titles[$i]['g_grade_due_date'] = $duedate->format($this->core->getConfig()->getDateTimeFormat()->getFormat('late_days_allowed'));
+            $duedate = $this->core->getQueries()->getDueDateForGradeableById($gradeable_id_title['g_id']);
+            $gradeable_ids_titles[$i]['due_date'] = $duedate == null ? 'no due date' : $duedate->format($this->core->getConfig()->getDateTimeFormat()->getFormat('late_days_allowed'));
         }
 
         usort($gradeable_ids_titles, function ($a, $b) {
-            return new DateTime($a['g_grade_due_date']) > new DateTime($b['g_grade_due_date']);
+            if ($a['due_date'] === 'no due date') {
+                return true;
+            }
+            if ($b['due_date'] === 'no due date') {
+                return false;
+            }
+
+            return new DateTime($a['due_date']) > new DateTime($b['due_date']);
         });
 
         $em = $this->core->getCourseEntityManager();

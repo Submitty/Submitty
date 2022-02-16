@@ -450,6 +450,10 @@ if [ ${WORKER} == 0 ]; then
         sed -i '25s/^/\#/' /etc/pam.d/common-password
         sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
+        # Create folder and give permissions to PHP user for xdebug profiling
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+        usermod -aG vagrant ${PHP_USER}
+
         # Enable xdebug support for debugging
         phpenmod xdebug
 
@@ -461,7 +465,7 @@ if [ ${WORKER} == 0 ]; then
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
-xdebug.remote_host=10.0.2.2
+xdebug.remote_connect_back=1
 EOF
         fi
 
