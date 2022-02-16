@@ -555,7 +555,7 @@ HTML;
         $this->content_only = $bool;
     }
 
-    public function getContentOnly() {
+    public function isContentOnly() {
         return $this->content_only;
     }
 
