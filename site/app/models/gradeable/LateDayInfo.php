@@ -294,6 +294,6 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getGradeInquiryCount() {
-        return $this->graded_gradeable->getGradeInquiryCount() ?? null;
+        return $this->graded_gradeable !== null ? $this->graded_gradeable->getGradeInquiryCount() : null;
     }
 }

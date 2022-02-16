@@ -1504,7 +1504,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *      'late_days_change' => int
      * ]
      */
-    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): array {
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
         $params = [$user_id, $g_id];
         $query = "SELECT * FROM late_day_cache
                     WHERE user_id=?
