@@ -8,6 +8,7 @@
 
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUPERVISOR_USER=submitty
+NO_RPI=0
 
 echo "checking ${SUPERVISOR_USER} user"
 # Create the submitty user here on the worker machine
