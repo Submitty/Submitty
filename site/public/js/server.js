@@ -689,13 +689,33 @@ function downloadCourseMaterialZip(id) {
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+    const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
+    
+    function inject() {
+        $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
+    }
+    function remove() {
+        $(document.body).find('#rainbow-mode').remove();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
         pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = JSON.parse(localStorage.getItem('rainbow-mode')) === true;
+            localStorage.setItem('rainbow-mode', !flag);
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
@@ -748,13 +768,6 @@ function markViewed(ids, redirect) {
         contentType: false,
         processData: false
     });
-}
-
-function hideEmptyCourseMaterialFolders() {
-  // fetch all the folders and remove those one which have no `file` within.
-  $('.folder-container').each(function() {
-    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
-  });
 }
 
 function closeDivForCourseMaterials(num) {

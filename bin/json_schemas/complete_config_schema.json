@@ -95,10 +95,19 @@
       "grading_parameters" : {
         "type" : "object",
         "properties" : {
+          "TOTAL_POINTS" : {
+            "type" : "number"
+          },
           "AUTO_POINTS" : {
             "type" : "number"
           },
+          "TA_POINTS" : {
+            "type" : "number"
+          },
           "EXTRA_CREDIT_POINTS" : {
+            "type" : "number"
+          },
+          "PENALTY_POINTS" : {
             "type" : "number"
           }
         }

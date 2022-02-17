@@ -26,7 +26,7 @@
 
 .poll-type-description {
     padding-left: 25px;
-    color: var(--standard-medium-gray);
+    color: var(--text-black);
 }
 
 .move-btn {
@@ -45,6 +45,11 @@
 
 .radio p {
     display: inline;
+}
+
+.radio-label-pair {
+    display: flex;
+    align-items: flex-start;
 }
 
 input[type="radio"][disabled=""]:checked::before {
@@ -79,4 +84,15 @@ form {
 
 .poll-view-wrapper.histogram-wrapper {
     flex-grow: 1;
+}
+
+#poll-name-container {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+}
+
+#poll-name {
+    flex-grow: 100;
+    margin-left: 0.5em;
 }

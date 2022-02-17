@@ -38,6 +38,9 @@ $( document ).ready(function() {
             {% for component in ta_components %}
                 {{ TAResultsFunctions.renderComponent(component, false, num_decimals) }}
             {% endfor %}
+        {% endif %}
+
+        {% if grader_info is not empty %}
         <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in grader_info | keys | sort %}
                 <div class="overall-comment-box">
@@ -68,6 +71,7 @@ $( document ).ready(function() {
                 </div>
             {% endfor %}
         </div>
+        {% endif %}
 
         {% if uploaded_pdfs|length >= 1 %}
             <div class = "no-border-box">
@@ -113,7 +117,6 @@ $( document ).ready(function() {
         </div>
         {# Overview #}
         {# /Component boxes #}
-    {% endif %}
     {% if is_grade_inquiry_yet_to_start %}
         <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
     {% elseif regrade_available %}
