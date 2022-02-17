@@ -1437,7 +1437,7 @@ WHERE semester=? AND course=? AND user_id=?",
         foreach ($this->course_db->rows() as $row) {
             $user_id = $row['user_id'] ?? $row['team_id'];
             // title = g_title or event date
-            $title = $row['g_title'] !== null ? $row['g_title'] : explode(" ", $row['late_day_date'])[0];
+            $title = $row['g_title'] ?? explode(" ", $row['late_day_date'])[0];
             $return[$user_id][$title] = $row;
         }
         return $return;
