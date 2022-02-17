@@ -15,6 +15,16 @@ def up(config, database, semester, course):
     :type course: str
     """
 
+    # Update late_day_cache table
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN user_id SET NOT NULL;')
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN late_days_change SET NOT NULL;')
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN late_day_date TYPE TIMESTAMP WITH TIME zone;')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_user_team_id_check')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_g_user_id_unique')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_g_team_id_unique')
+    database.execute('CREATE UNIQUE INDEX ldc_g_user_id_unique ON late_day_cache(g_id, user_id) WHERE team_id IS NULL;')
+    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);')
+
     # Drop triggers
     database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
     database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")
@@ -371,6 +381,9 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    # Remove all cache
+    database.execute("DELETE FROM late_day_cache")
+
     # Drop triggers
     database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
     database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")
