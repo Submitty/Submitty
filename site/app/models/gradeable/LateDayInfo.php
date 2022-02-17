@@ -257,11 +257,11 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
-     * Gets the number of late days charged from this event
+     * Gets the number of late days charged from this event (capped at zero)
      * @return int
      */
     public function getLateDaysCharged() {
-        return -$this->late_days_change;
+        return max(-$this->late_days_change, 0);
     }
 
     /**
