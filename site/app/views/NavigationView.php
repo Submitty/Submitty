@@ -59,8 +59,8 @@ class NavigationView extends AbstractView {
             "prefix" => "LATE SUBMIT"
         ],
         GradeableList::GRADING => [
-            "title" => "CLOSED",
-            "subtitle" => "being graded by TA/Instructor",
+            "title" => "GRADING",
+            "subtitle" => "IN PROGRESS",
             "section_id" => "items_being_graded",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-primary",
