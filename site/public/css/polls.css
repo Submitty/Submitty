@@ -39,6 +39,10 @@
     cursor: pointer;
 }
 
+.response-btn {
+    vertical-align: top;
+}
+
 .radio p {
     display: inline;
 }
@@ -63,11 +67,16 @@ form {
     display: inline;
 }
 
-.poll-info-table {
+.poll-view-table {
     display: flex;
     flex-wrap: wrap;
 }
 
-.poll-view-wrapper {
-    width: max-content;
+.poll-view-wrapper.info-wrapper {
+    flex-grow: 0;
+    max-width: 25%;
+}
+
+.poll-view-wrapper.histogram-wrapper {
+    flex-grow: 1;
 }
