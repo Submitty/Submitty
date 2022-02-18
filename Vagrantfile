@@ -133,6 +133,10 @@ Vagrant.configure(2) do |config|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
     mount_folders(override, ["dmode=775", "fmode=664"])
+
+    if ARGV.include?('ssh')
+      override.ssh.timeout = 20
+    end
   end
 
   config.vm.provider "parallels" do |prl, override|
@@ -155,6 +159,5 @@ Vagrant.configure(2) do |config|
     config.ssh.username = 'root'
     config.ssh.password = 'vagrant'
     config.ssh.insert_key = 'true'
-    config.ssh.timeout = 20
   end
 end
