@@ -934,7 +934,7 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
-            /* Grading assignments must be valid, comma-separated course registration sections, enclosed in double quotes.
+            /* Grading assignments must be valid, comma-separated course registration sections.
                Automatically validate if not set (this field is optional) */
             if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
                 if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
@@ -945,7 +945,7 @@ class UsersController extends AbstractController {
                     }
                 }
                 else {
-                    $grading_assignments = explode(',', trim($vals[$grading_assignments_idx], "\""));
+                    $grading_assignments = explode(',', $vals[$grading_assignments_idx]);
                     if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
                         // Prevent duplicate registration sections from being specified for assignment.
                         $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
@@ -1067,8 +1067,8 @@ class UsersController extends AbstractController {
                     $user->setPassword($row[5]);
                 }
                 if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
-                    $grading_assignments = explode(',', trim($row[$grading_assignments_idx], "\""));
-                    $sorted_grading_assignments = sort($grading_assignments);
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
                 }
                 $insert_or_update_user_function('insert', $user);
@@ -1093,8 +1093,8 @@ class UsersController extends AbstractController {
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
                 if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
-                    $grading_assignments = explode(',', trim($row[$grading_assignments_idx], "\""));
-                    $sorted_grading_assignments = sort($grading_assignments);
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
                 }
             }

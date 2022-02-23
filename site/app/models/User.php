@@ -505,7 +505,7 @@ class User extends AbstractModel {
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
             case 'grading_assignments':
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens), enclosed in double quotes.
-                return preg_match("~^\"[0-9a-z_\-]+(,[0-9a-z_\-]+)*\"$~i", $data) === 1;
+                return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";
