@@ -172,7 +172,7 @@ class HomeworkView extends AbstractView {
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysAllowed() : $late_days_allowed;
 
         $error = false;
         $messages = [];
