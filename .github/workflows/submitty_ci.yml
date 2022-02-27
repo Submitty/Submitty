@@ -372,6 +372,11 @@ jobs:
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
 
+          - name: Setup ldap
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+
           - name: Configure Test suite
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -384,11 +389,6 @@ jobs:
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
-
-          - name: Setup ldap
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
 
           - name: Set up apache
             run: |
