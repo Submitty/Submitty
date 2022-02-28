@@ -61,9 +61,8 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
         latestDate timestamp with time zone;
         late_days_remaining integer;
         late_days_change integer;
-        assignment_budget integer;
         late_days_used integer;
-        returnrow late_day_cache%rowtype;
+        returnedrow late_day_cache%rowtype;
     BEGIN
         -- Grab latest row of data available
         FOR var_row IN (
@@ -111,23 +110,44 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
                 return_cache.late_days_remaining = late_days_remaining;
             --is gradeable event
             ELSE
-                late_days_change = 0;
-                assignment_budget = LEAST(var_row.late_days_allowed, late_days_remaining) + var_row.late_day_exceptions;
-                IF var_row.submission_days_late <= assignment_budget THEN
-                    -- clamp the days charged to be the days late minus exceptions above zero.
-                    late_days_change = -GREATEST(0, LEAST(var_row.submission_days_late, assignment_budget) - var_row.late_day_exceptions);
-                END IF;
-                late_days_remaining = late_days_remaining + late_days_change;
-                late_days_used = late_days_used - late_days_change;
+                returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
+                late_days_used = late_days_used - returnedrow.late_days_change;
                 return_cache = var_row;
-                return_cache.late_days_change = late_days_change;
-                return_cache.late_days_remaining = late_days_remaining;
+                return_cache.late_days_change = returnedrow.late_days_change;
+                return_cache.late_days_remaining = returnedrow.late_days_remaining;
             END IF;
             RETURN NEXT return_cache;
         END LOOP;
         RETURN;
     END;
     $$;
+
+
+--
+-- Name: calculate_submission_days_late(timestamp with time zone, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.calculate_submission_days_late(submission_time timestamp with time zone, submission_due_date timestamp with time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+#variable_conflict use_variable
+DECLARE
+	return_row late_day_cache%rowtype;
+	late_days_change integer;
+	assignment_budget integer;
+BEGIN
+	RETURN 
+	CASE
+		WHEN submission_time IS NULL THEN 0
+		WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
+		WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
+			OR DATE_PART('minute', submission_time - submission_due_date) > 0
+			OR DATE_PART('second', submission_time - submission_due_date) > 0
+			THEN DATE_PART('day', submission_time - submission_due_date) + 1
+		ELSE DATE_PART('day', submission_time - submission_due_date)
+	END;
+END;
+$$;
 
 
 --
@@ -262,6 +282,44 @@ $_$;
 
 
 --
+-- Name: get_late_day_info_from_previous(integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late integer, late_days_allowed integer, late_day_exceptions integer, late_days_remaining integer) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+#variable_conflict use_variable
+DECLARE
+	return_row late_day_cache%rowtype;
+	late_days_change integer;
+	assignment_budget integer;
+BEGIN
+	late_days_change = 0;
+	assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+	IF submission_days_late <= assignment_budget THEN
+		-- clamp the days charged to be the days late minus exceptions above zero.
+		late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+	END IF;
+
+	return_row.late_day_status = 
+	CASE
+		-- BAD STATUS
+		WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+		-- LATE STATUS
+		WHEN submission_days_late > late_day_exceptions THEN 2
+		-- GOOD STATUS
+		ELSE 1
+	END;
+
+	return_row.late_days_change = late_days_change;
+	return_row.late_days_remaining = late_days_remaining + late_days_change;
+	RETURN NEXT return_row;
+	RETURN;
+END;
+$$;
+
+
+--
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -315,15 +373,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				sg.team_id,
 				vg.eg_submission_due_date AS late_day_date,
 				vg.eg_late_days AS late_days_allowed,
-				CASE
-					WHEN sg.submission_time IS NULL THEN 0
-					WHEN DATE_PART('day', sg.submission_time - vg.eg_submission_due_date) < 0 THEN 0
-					WHEN DATE_PART('hour', sg.submission_time - vg.eg_submission_due_date) > 0
-						OR DATE_PART('minute', sg.submission_time - vg.eg_submission_due_date) > 0
-						OR DATE_PART('second', sg.submission_time - vg.eg_submission_due_date) > 0
-						THEN DATE_PART('day', sg.submission_time - vg.eg_submission_due_date) + 1
-					ELSE DATE_PART('day', sg.submission_time - vg.eg_submission_due_date)
-				END AS submission_days_late,
+				calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
 				CASE
 					WHEN lde.late_day_exceptions IS NULL THEN 0
 					ELSE lde.late_day_exceptions
@@ -2212,13 +2262,6 @@ CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree
 --
 
 CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
-
-
---
--- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
 
 
 --
