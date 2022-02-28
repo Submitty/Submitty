@@ -938,7 +938,7 @@ class UsersController extends AbstractController {
                Automatically validate if not set (this field is optional) */
             if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
                 if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
-                    // Regex check for comma-separated registration sections enclosed in double quotes.
+                    // Regex check for comma-separated registration sections.
                     $bad_row_details[$row_num + 1][] = 'grading assignments format';
                     if (!in_array('grading_assignments_format', $bad_columns)) {
                         $bad_columns[] = 'grading_assignments_format';
