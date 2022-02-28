@@ -1571,6 +1571,37 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get the latest valid versrion for a gradeable (good or late status)
+     * @param string $g_id
+     * @param string $user_id
+     * @return int
+     */
+    public function getLatestValidGradeableVersion(string $g_id, string $user_id, int $late_days_remaining) {
+        $params = [$g_id, $user_id, $late_days_remaining];
+        $query = "SELECT
+                    egd.g_version
+                FROM electronic_gradeable eg
+                JOIN electronic_gradeable_data egd
+                ON eg.g_id=egd.g_id
+                LEFT JOIN late_day_exceptions lde
+                ON lde.g_id=eg.g_id AND lde.user_id=egd.user_id
+                WHERE eg.g_id=? AND egd.user_id=?
+                AND (
+                    SELECT late_day_status
+                    FROM get_late_day_info_from_previous(
+                        calculate_submission_days_late(egd.submission_time, eg.eg_submission_due_date),
+                        eg.eg_late_days,
+                        COALESCE(lde.late_day_exceptions, 0),
+                        ?
+                    )
+                ) != 3;"
+
+        $this->course_db->query($query);
+        return $this->course_db->row()['g_version'] ?? 0;
+
+    }
+
+    /**
      * Fetches all students from the given registration sections, $sections.
      *
      * @param  string[] $sections

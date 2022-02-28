@@ -205,6 +205,27 @@ class LateDays extends AbstractModel {
     }
 
     /**
+     * Gets the latest version # for the gradeable that is on time
+     * (0 if no valid version exists)
+     * @param Gradeable $gradeable
+     * @return int
+     */
+    public function getLatestValidVersion(Gradeable $gradeable, ): int {
+        $ldi = $this->getLateDayInfoByGradeable($gradeable);
+
+        // Get index of this gradeable within chronological ordering
+        $g_ids = array_keys($this->late_day_info);
+        $found_index = array_search($gradeable->getId(), $g_ids);
+
+        // If there was a previous late day event, use those late days remaining
+        // else use the default student late days
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $remaining_late_days = $found_index > 0 ? $ldi->getLateDaysRemaining() : $default_late_days;
+
+        return $this->core->getQueries()->getLatestValidGradeableVersion()
+    }
+
+    /**
      * Gets if the user has any late days to use
      * @return bool
      */
