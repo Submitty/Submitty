@@ -80,7 +80,7 @@ function prepConflictMarks(conflictMarks) {
 /**
  * Prompts the user with an array of conflict marks so they can individually resolve them
  * @param {int} component_id
- * @param {{domMark, serverMark, oldServerMark, localDeleted}[]} conflictMarks
+ * @param {{domMark, serverMark, oldServerMark, localDeleted}{}} conflictMarks
  * @return {Promise<Object>} Promise resolves with an array of marks to save indexed by mark id.
  *                              The mark will be null if it should be deleted
  */

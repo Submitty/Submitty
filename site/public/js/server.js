@@ -171,8 +171,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
+                console.error("Failed to parse response.  The server isn't playing nice...");
+                console.error(e);
             }
         })
     }

@@ -296,7 +296,7 @@ function renderEditComponent(component, precision, showMarkList) {
             'show_mark_list': showMarkList,
             'edit_marks_enabled': true,
             'itempool_available': isItempoolAvailable(),
-            'itempool_options': getItempoolOptions(),
+            'itempool_options': JSON.stringify(getItempoolOptions()), //TODO: NEEDS TESTING!!!
             'decimal_precision': DECIMAL_PRECISION,
             'peer_component' : component.peer_component,
         }));
