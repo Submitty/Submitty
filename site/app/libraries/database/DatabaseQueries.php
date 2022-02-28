@@ -1567,7 +1567,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
     }
-    
+
     public function getLateDayUpdateTimestamps() {
         $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
         $this->course_db->query($query);
