@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e4e5710de0fffc4ae47182cce85705b",
+    "content-hash": "477a2c7679be1c4dae9dd05f303f2c83",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2903,16 +2903,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v4.4.37",
+            "version": "v4.4.38",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "7613787f68c5eaad98f0bd21d694e6d639b07bf0"
+                "reference": "84a3a42d8f7a049e3a1dd363e35235426e274ddf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/7613787f68c5eaad98f0bd21d694e6d639b07bf0",
-                "reference": "7613787f68c5eaad98f0bd21d694e6d639b07bf0",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/84a3a42d8f7a049e3a1dd363e35235426e274ddf",
+                "reference": "84a3a42d8f7a049e3a1dd363e35235426e274ddf",
                 "shasum": ""
             },
             "require": {
@@ -2978,7 +2978,7 @@
                 "psr6"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache/tree/v4.4.37"
+                "source": "https://github.com/symfony/cache/tree/v4.4.38"
             },
             "funding": [
                 {
@@ -2994,7 +2994,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-01-26T15:03:25+00:00"
+            "time": "2022-02-21T12:59:00+00:00"
         },
         {
             "name": "symfony/cache-contracts",
@@ -3308,16 +3308,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.4.37",
+            "version": "v4.4.38",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "27782a72399b92f44624f801adc5c28fb3f9d6c7"
+                "reference": "cb2fe618293cf254e524f19b393e2e3eac083d02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/27782a72399b92f44624f801adc5c28fb3f9d6c7",
-                "reference": "27782a72399b92f44624f801adc5c28fb3f9d6c7",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/cb2fe618293cf254e524f19b393e2e3eac083d02",
+                "reference": "cb2fe618293cf254e524f19b393e2e3eac083d02",
                 "shasum": ""
             },
             "require": {
@@ -3356,7 +3356,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v4.4.37"
+                "source": "https://github.com/symfony/http-foundation/tree/v4.4.38"
             },
             "funding": [
                 {
@@ -3372,7 +3372,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-01-27T14:30:55+00:00"
+            "time": "2022-02-21T13:35:47+00:00"
         },
         {
             "name": "symfony/mime",
@@ -3565,12 +3565,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Intl\\Idn\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Intl\\Idn\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3650,12 +3650,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Intl\\Normalizer\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Intl\\Normalizer\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -3737,12 +3737,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3814,12 +3814,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php72\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php72\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3890,12 +3890,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php73\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php73\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -3969,12 +3969,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php80\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php80\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -4346,16 +4346,16 @@
         },
         {
             "name": "textalk/websocket",
-            "version": "1.5.5",
+            "version": "1.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Textalk/websocket-php.git",
-                "reference": "846542f82658132cd36acb7a7e8ce0f03960c295"
+                "reference": "569e7d467d80fe784eb6094cfa893d77e75b80a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/846542f82658132cd36acb7a7e8ce0f03960c295",
-                "reference": "846542f82658132cd36acb7a7e8ce0f03960c295",
+                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/569e7d467d80fe784eb6094cfa893d77e75b80a9",
+                "reference": "569e7d467d80fe784eb6094cfa893d77e75b80a9",
                 "shasum": ""
             },
             "require": {
@@ -4389,9 +4389,9 @@
             "description": "WebSocket client and server",
             "support": {
                 "issues": "https://github.com/Textalk/websocket-php/issues",
-                "source": "https://github.com/Textalk/websocket-php/tree/1.5.5"
+                "source": "https://github.com/Textalk/websocket-php/tree/1.5.6"
             },
-            "time": "2021-08-07T10:21:40+00:00"
+            "time": "2022-02-25T10:10:02+00:00"
         },
         {
             "name": "twig/twig",
