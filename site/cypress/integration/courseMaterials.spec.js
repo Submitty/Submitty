@@ -1,5 +1,4 @@
 import {buildUrl} from '../support/utils.js';
-import {skipOn} from '@cypress/skip-test';
 
 describe('Test cases revolving around course material uploading and access control', () => {
     before(() => {
