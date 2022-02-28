@@ -18,7 +18,7 @@ class RedirectTest(BaseTestCase):
         for url in url_formatted:
             redirect_from = url + '/'
             self.get(url)
-            redirected_to = self.driver.getCurrentUrl()
+            redirected_to = self.driver.current_url
             msg = "Redirection to remove trailing slash not accomplished"
             self.assertEqual(redirect_from, redirected_to, msg)
 
