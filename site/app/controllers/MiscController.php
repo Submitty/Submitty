@@ -179,8 +179,6 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
             }
             else {
-                $this->core->getOutput()->useHeader(false);
-                $this->core->getOutput()->useFooter(false);
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
             }
         }

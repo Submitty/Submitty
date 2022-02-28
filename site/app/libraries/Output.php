@@ -551,11 +551,11 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function setContentOnly($bool = false) {
+    public function setContentOnly($bool = false): void {
         $this->content_only = $bool;
     }
 
-    public function isContentOnly() {
+    public function isContentOnly(): bool {
         return $this->content_only;
     }
 

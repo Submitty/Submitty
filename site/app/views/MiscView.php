@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 
 class MiscView extends AbstractView {
     public function displayFile($file_contents) {
+        $this->core->getOutput()->setContentOnly(true);
         return $this->core->getOutput()->renderTwigTemplate("misc/File.twig", [
             "file_contents" => $file_contents
         ]);
