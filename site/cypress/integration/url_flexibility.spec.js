@@ -15,6 +15,6 @@ describe('Tests for auto removal of trailing slash in url', () => {
         it(`removes trailing slash for ${url}`, () => {
             cy.visit(`${ url }`);
             cy.location('pathname').should('eq', url);
-        });
+        })
     );
 });
