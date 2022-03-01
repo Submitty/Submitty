@@ -177,7 +177,7 @@ class AdminGradeableController extends AbstractController {
         //true if there are no students in any rotating sections.
         //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
         $no_rotating_sections = true;
-        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+        foreach ($this->core->getQueries()->getUsersCountByRotatingSections() as $section) {
             if ($section['rotating_section'] != null && $section['count'] > 0) {
                 $no_rotating_sections = false;
                 break;

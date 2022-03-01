@@ -1407,7 +1407,13 @@ WHERE semester=? AND course=? AND user_id=?",
         return $this->course_db->rows();
     }
 
-
+    /**
+     * Fetches all students from the given registration sections, $sections.
+     *
+     * @param  string[] $sections
+     * @param  string $orderBy
+     * @return User[]
+     */
     public function getUsersByRegistrationSections($sections, $orderBy = "registration_section") {
         $return = [];
         if (count($sections) > 0) {
@@ -2258,16 +2264,31 @@ ORDER BY g.sections_rotating_id, g.user_id",
      *
      * @return array
      */
-    public function getCountUsersRotatingSections() {
+    public function getUsersCountByRotatingSections() {
         $this->course_db->query(
             "
-SELECT rotating_section, count(*) as count
-FROM users
-WHERE registration_section IS NOT NULL
-GROUP BY rotating_section
-ORDER BY rotating_section"
+            SELECT rotating_section, count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL
+            GROUP BY rotating_section
+            ORDER BY rotating_section"
         );
         return $this->course_db->rows();
+    }
+
+    /**
+     * Returns the count of all users in course that are in a non-null registration section.
+     *
+     * @return integer
+     */
+    public function getTotalRegisteredUsersCount() {
+        $this->course_db->query(
+            "
+            SELECT count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL"
+        );
+        return $this->course_db->rows()[0]['count'];
     }
 
     /**
@@ -2345,13 +2366,19 @@ ORDER BY rotating_section"
         return $this->course_db->rows();
     }
 
+    /**
+     * Get newly registered students (registration section != NULL) that have not yet been
+     * assigned to a rotating section.
+     *
+     * @return string[] user id's
+     */
     public function getRegisteredUserIdsWithNullRotating() {
         $this->course_db->query(
             "
-SELECT user_id
-FROM users
-WHERE rotating_section IS NULL AND registration_section IS NOT NULL
-ORDER BY user_id ASC"
+            SELECT user_id
+            FROM users
+            WHERE rotating_section IS NULL AND registration_section IS NOT NULL
+            ORDER BY user_id ASC"
         );
         return array_map(
             function ($elem) {
@@ -2361,6 +2388,11 @@ ORDER BY user_id ASC"
         );
     }
 
+     /**
+      * Return an array of user id's for users that have been assigned a registration section
+      *
+      * @return string[] user id's
+      */
     public function getRegisteredUserIds() {
         $this->course_db->query(
             "
@@ -2398,31 +2430,14 @@ ORDER BY user_id ASC"
         return $gradeable_ids;
     }
 
-    /**
-     * Get all team ids for all gradeables where the teams are in rotating section NULL
-     *
-     * @return string[][] Map of gradeable_id => [ team ids ]
-     */
-    public function getTeamIdsWithNullRotating() {
-        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams WHERE rotating_section IS NULL");
-
-        $gradeable_ids = [];
-        $rows = $this->course_db->rows();
-        foreach ($rows as $row) {
-            $g_id = $row['g_id'];
-            $team_id = $row['team_id'];
-            if (!array_key_exists($g_id, $gradeable_ids)) {
-                $gradeable_ids[$g_id] = [];
-            }
-            $gradeable_ids[$g_id][] = $team_id;
-        }
-        return $gradeable_ids;
-    }
-
     public function setAllUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
 
+    /**
+     * Remove unregistered students (registration section = NULL) from rotating sections
+     *
+     */
     public function setNonRegisteredUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
@@ -2446,6 +2461,11 @@ ORDER BY user_id ASC"
         return $this->course_db->row()['cnt'];
     }
 
+    /**
+     * Adds given rotating section to the database
+     *
+     * @param integer $section
+     */
     public function insertNewRotatingSection($section) {
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", [$section]);
     }
@@ -2473,10 +2493,16 @@ ORDER BY user_id ASC"
         }
     }
 
+    /**
+     * Updates all given Users in $users array to have rotating section $section
+     *
+     * @param integer $section
+     * @param User[] $users
+     */
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge([$section], $users);
-        $update_string = $this->createParamaterList(count($users));
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$update_string}", $update_array);
+        $placeholders = $this->createParamaterList(count($users));
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
     }
 
     /**
@@ -2829,9 +2855,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $id
      * @return \DateTime
      */
-    public function getDateForGradeableById($id) {
-        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
-        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    public function getDueDateForGradeableById(string $id): ?\DateTime {
+        $this->course_db->query("SELECT eg_submission_due_date FROM electronic_gradeable WHERE g_id=? AND eg_has_due_date", [$id]);
+        if (count($this->course_db->rows()) > 0) { // the gradeable has a due date
+            return new \DateTime($this->course_db->rows()[0]['eg_submission_due_date']);
+        }
+        else {
+            return null;
+        }
     }
 
     public function getAllGradeablesIds() {
@@ -2876,7 +2907,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         foreach ($tmp as $row) {
             $new_graders[$row['user_id']] = $all_sections;
         }
-        $final_new_graders = [];
 
         return $new_graders;
     }
@@ -2953,8 +2983,27 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $this->course_db->query("UPDATE gradeable_teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
     }
 
+    /**
+     * Set a team's ($team_id) rotating section ($section)
+     *
+     * @param string $team_id
+     * @param int    $section
+     */
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
+    }
+
+    /**
+     * Set teams' (array $team_ids) rotating section ($section) for given gradeable id ($g_id)
+     *
+     * @param string[] $team_ids
+     * @param int      $section
+     * @param string   $g_id
+     */
+    public function updateTeamsRotatingSection($team_ids, $section, $g_id) {
+        $update_array = array_merge([$section, $g_id], $team_ids);
+        $placeholders = $this->createParamaterList(count($team_ids));
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE g_id=? AND team_id IN {$placeholders}", $update_array);
     }
 
     /**
@@ -6585,6 +6634,28 @@ AND gc_id IN (
             ORDER BY weeknum");
         return $this->course_db->rows();
     }
+
+    public function setQueueMessage($queue_code, $message) {
+        //clear the message
+        if ($message === 'null') {
+            $this->course_db->query("UPDATE queue_settings SET message = null WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$queue_code]);
+        }
+        else {
+            $current_date = $this->core->getDateTimeNow();
+            $this->course_db->query("UPDATE queue_settings SET message = ?, message_sent_time = ? WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$message, $current_date, $queue_code]);
+        }
+    }
+
+    public function getQueueMessage($queue_code) {
+        $this->course_db->query("SELECT message, message_sent_time from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
+        if (count($this->course_db->rows()) > 0) {
+            return $this->course_db->rows()[0];
+        }
+        else {
+            return null;
+        }
+    }
+
 
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
