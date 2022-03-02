@@ -21,7 +21,7 @@ describe('Test cases involving the late days allowed page', () => {
         });
 
         afterEach(() => {
-            cy.logout();
+            cy.logout(true);
         });
 
         it('make sure the form is blank', () => {
@@ -47,7 +47,7 @@ describe('Test cases involving the late days allowed page', () => {
 
         it('blank late days are invalid', () => {
             cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type('2021-01-01');
+            cy.get('#datestamp').type('2021-01-01', {'force': true});
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });
