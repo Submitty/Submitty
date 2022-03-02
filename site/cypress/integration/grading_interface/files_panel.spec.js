@@ -26,6 +26,10 @@ describe('Test cases involving the files panel', () => {
         cy.get('#submission_browser_btn').click();
     });
 
+    afterEach(() => {
+        cy.logout();
+    });
+
     it('test the open/close submissions and results buttons', () => {
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
