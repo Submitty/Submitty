@@ -101,14 +101,12 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#date_to_release_sf1').should('have.value', date);
         cy.get('#date_to_release_sf1').should('have.value', date);
 
-        cy.reload(); //dom elements become detatched after uploading?
-
         cy.get('.fa-pencil-alt').first().click();
         cy.get('#edit-picker').clear().type('9998-01-01 00:00:00');
-        cy.get('#submit-edit').click({force: true}); //div covering button
+        cy.waitPageChange(() => {
+            cy.get('#submit-edit').click({force: true}); //div covering button
+        });
         cy.get('#date_to_release_sf1').should('have.value', '9998-01-01 00:00:00');
-
-        cy.reload();
 
         cy.logout();
         cy.login('aphacker');
@@ -124,14 +122,12 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
         cy.visit(fileTgt2);
 
-        cy.reload(true);
         cy.get('.content').contains('Reason: You may not access this file until it is released');
 
         cy.logout();
         cy.login();
 
         cy.visit(['sample', 'course_materials']);
-        cy.reload();
 
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
@@ -149,8 +145,6 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.reload();
-
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('option1');
         cy.get('#upload1').attachFile('file2.txt' , { subjectType: 'drag-n-drop' });
@@ -158,8 +152,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
         });
-
-        cy.reload();
 
         cy.logout();
         cy.login('aphacker');
@@ -277,7 +269,6 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.visit('/');
         cy.logout();
-        cy.reload(true);
         cy.login();
 
         cy.visit(['sample', 'course_materials']);
@@ -301,7 +292,6 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.reload();
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
         cy.get('.fa-pencil-alt').eq(24).click();
         cy.get('#all-sections-showing-yes').click();
@@ -310,7 +300,6 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-edit').click();
         });
 
-        cy.reload(true);
         cy.logout();
         cy.login('browna');
         cy.visit(['sample', 'course_materials']);
@@ -322,7 +311,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.content').contains('Reason: Your section may not access this file');
         cy.visit('/');
         cy.logout();
-        cy.reload(true);
 
         cy.login();
         cy.visit(['sample', 'course_materials']);
