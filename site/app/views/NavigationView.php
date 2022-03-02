@@ -15,7 +15,6 @@ use app\models\gradeable\GradeableList;
 use app\libraries\FileUtils;
 
 class NavigationView extends AbstractView {
-
     const gradeableSections = [
         GradeableList::FUTURE => [
             //What title is displayed to the user for each category

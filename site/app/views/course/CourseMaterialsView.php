@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class CourseMaterialsView extends AbstractView {
-
     public function listCourseMaterials(array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
@@ -155,17 +154,16 @@ class CourseMaterialsView extends AbstractView {
     }
 
     private function removeEmptyFolders(array &$course_materials): bool {
+        $is_empty = true;
         foreach ($course_materials as $path => $course_material) {
-            if (is_array($course_material)) {
-                if ($this->removeEmptyFolders($course_material)) {
-                    unset($course_materials[$path]);
-                }
+            if (is_array($course_material) && $this->removeEmptyFolders($course_material)) {
+                unset($course_materials[$path]);
             }
             else {
-                return false;
+                $is_empty = false;
             }
         }
-        return true;
+        return $is_empty;
     }
 
     private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
