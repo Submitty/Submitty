@@ -8,7 +8,7 @@ describe('Test cases involving the files panel', () => {
     });
 
     afterEach(() => {
-        cy.logout();
+        cy.logout(true);
     });
 
     it('test cancelling and reinstating assignment', () => {

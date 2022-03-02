@@ -27,7 +27,7 @@ describe('Test cases involving the files panel', () => {
     });
 
     afterEach(() => {
-        cy.logout();
+        cy.logout(true);
     });
 
     it('test the open/close submissions and results buttons', () => {

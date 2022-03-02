@@ -6,7 +6,7 @@ describe('Test cases involving the late days allowed page', () => {
         });
 
         afterEach(() => {
-            cy.logout();
+            cy.logout(true);
         });
 
         it('should not allow access', () => {

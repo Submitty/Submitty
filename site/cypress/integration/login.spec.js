@@ -3,7 +3,7 @@ import {buildUrl} from '../support/utils.js';
 describe('Test cases revolving around the logging in functionality of the site', () => {
     describe('Test cases where the user should succesfully login', () => {
         afterEach(() => {
-            cy.logout();
+            cy.logout(true);
         });
 
         it('should log in through root endpoint', () => {

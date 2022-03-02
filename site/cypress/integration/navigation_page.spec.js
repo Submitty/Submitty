@@ -17,7 +17,7 @@ describe('navigation page', () => {
     });
 
     afterEach(() => {
-        cy.logout();
+        cy.logout(true);
     });
 
     it('should show instructor content for instructor', () => {

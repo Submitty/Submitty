@@ -13,7 +13,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         });
 
         afterEach(() => {
-            cy.logout();
+            cy.logout(true);
         });
 
         it('should show the gradeables being grading', () => {

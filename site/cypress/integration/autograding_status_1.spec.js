@@ -15,7 +15,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         });
 
         afterEach(() => {
-            cy.logout();
+            cy.logout(true);
         });
 
         it('Should start at pause update', () => {

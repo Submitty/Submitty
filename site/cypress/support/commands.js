@@ -44,9 +44,11 @@ Cypress.Commands.add('login', (username='instructor') => {
 /**
 * Log out of Submitty, assumes a user is already logged in
 */
-Cypress.Commands.add('logout', () => {
+Cypress.Commands.add('logout', (force = false) => {
     cy.waitPageChange(() => {
-        cy.get('#logout > .flex-line').click();
+        // Click without force fails when a test fails before afterEach
+        // https://github.com/cypress-io/cypress/issues/2831#issuecomment-712728988
+        cy.get('#logout > .flex-line').click({'force': force});
     });
 });
 
@@ -65,6 +67,7 @@ Cypress.Commands.add('waitPageChange', (fn) => {
     fn();
     cy.window().should('not.have.prop', '_cypress_beforeReload');
 });
+
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:

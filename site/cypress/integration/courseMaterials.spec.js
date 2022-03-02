@@ -7,7 +7,7 @@ describe('Test cases revolving around course material uploading and access contr
     });
 
     afterEach(() => {
-        cy.logout();
+        cy.logout(true);
     });
 
     it('Should upload a file and be able to view and download it', () => {
