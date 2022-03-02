@@ -163,6 +163,8 @@ class MiscController extends AbstractController {
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
         if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+            $this->core->getOutput()->useHeader(false);
+            $this->core->getOutput()->useFooter(false);
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
