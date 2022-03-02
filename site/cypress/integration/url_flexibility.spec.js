@@ -5,7 +5,7 @@ describe('Tests for auto removal of trailing slash in url', () => {
         cy.visit('/');
         cy.login();
     });
-    
+
     after(() => {
         cy.logout();
     });
