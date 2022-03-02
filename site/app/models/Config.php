@@ -82,7 +82,6 @@ use app\libraries\FileUtils;
  */
 
 class Config extends AbstractModel {
-
     /**
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never

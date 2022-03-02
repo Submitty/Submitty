@@ -8,7 +8,6 @@ use app\models\NavButton;
 use app\models\User;
 
 class GlobalController extends AbstractController {
-
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {

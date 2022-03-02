@@ -36,7 +36,6 @@ use app\models\notebook\Notebook;
  * @method void setDisplayTestcaseRuntimeMemory()
  */
 class AutogradingConfig extends AbstractModel {
-
     /** @prop @var string The id of the gradeable associated with this config */
     protected $gradeable_id;
     /** @prop @var int The maximum allowed size (in bytes) of a submission */
