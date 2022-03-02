@@ -40,7 +40,7 @@ describe('Test cases involving the late days allowed page', () => {
 
         it('check invalid datestamp', () => {
             cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type("this/isn't/a/date");
+            cy.get('#datestamp').type("this/isn't/a/date", {'force': true});
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });
@@ -54,7 +54,7 @@ describe('Test cases involving the late days allowed page', () => {
 
         it('negative late days are invalid', () => {
             cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type('2021-01-01');
+            cy.get('#datestamp').type('2021-01-01', {'force': true});
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').type('-1');
             cy.get('input[type=submit]').click();
@@ -64,7 +64,7 @@ describe('Test cases involving the late days allowed page', () => {
         it('correctly add a late day and then update it', () => {
             // add some late days for bitdiddle
             cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type('2021-01-01');
+            cy.get('#datestamp').type('2021-01-01', {'force': true});
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').type('3');
             cy.get('input[type=submit]').click();
@@ -91,7 +91,7 @@ describe('Test cases involving the late days allowed page', () => {
 
             // update the number of late days
             cy.get('#user_id').type('bitdiddle');
-            cy.get('#datestamp').type('2021-01-01');
+            cy.get('#datestamp').type('2021-01-01', {'force': true});
             cy.get('#user_id').click(); // dismiss the calendar view
             cy.get('#late_days').clear();
             cy.get('#late_days').type('5');
