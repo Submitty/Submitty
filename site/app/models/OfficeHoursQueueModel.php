@@ -7,8 +7,6 @@ use app\libraries\DateUtils;
 use DateTime;
 
 class OfficeHoursQueueModel extends AbstractModel {
-
-
     /*
     current_state values
         ('waiting'):Waiting
@@ -323,6 +321,29 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->niceNames[$name] ?? $name;
     }
 
+    public function getQueueSocketMessage() {
+        $row = $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']);
+        if ($row['message'] != null) {
+            $current_time = $this->core->getDateTimeNow();
+            $sent_time = new DateTime($row['message_sent_time']);
+            $elapsed_time = $current_time->diff($sent_time);
+            //see if message was sent today
+            if ($elapsed_time->days == 0 && $elapsed_time->h < 2) {
+                //if less than 2 hours have passed, show the message
+                return $row['message'];
+            }
+        }
+        return null;
+    }
+
+    public function getQueueSocketMessageSentTime() {
+        $row = $this->core->getQueries()->getQueueMessage($this->current_queue_state['queue_code']);
+        if ($row['message'] != null) {
+            $sent_time = new DateTime($row['message_sent_time']);
+            return $sent_time->format("h:i");
+        }
+        return null;
+    }
     /**
      * function to return an associative array where keys are open queues and values
      * are the number of people in each queue.

@@ -8,7 +8,6 @@ use app\models\NavButton;
 use app\models\User;
 
 class GlobalController extends AbstractController {
-
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
@@ -24,6 +23,7 @@ class GlobalController extends AbstractController {
         $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
+        $content_only = $this->core->getOutput()->isContentOnly();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
             $css->add($wrapper_urls['override.css']);
@@ -60,7 +60,7 @@ class GlobalController extends AbstractController {
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only);
     }
 
     // ==========================================================================================
@@ -540,6 +540,7 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
+        $content_only = $this->core->getOutput()->isContentOnly();
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
@@ -574,7 +575,7 @@ class GlobalController extends AbstractController {
         }
 
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
     }
 
     private function routeEquals(string $a, string $b) {

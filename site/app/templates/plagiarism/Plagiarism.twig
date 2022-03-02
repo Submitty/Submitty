@@ -92,7 +92,7 @@
                 {{ row['title'] }}
             {% endif %}
             <br/>
-            Due: {{ row['duedate'] }}
+            {% if row['duedate'] != null %} Due: {{ row['duedate'] }} {% endif %}
         </td>
         <td>
             {{ row['config_id'] }}

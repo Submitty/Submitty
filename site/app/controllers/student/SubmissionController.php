@@ -22,7 +22,6 @@ use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
-
     private $upload_details = [
         'version' => -1,
         'version_path' => null,
