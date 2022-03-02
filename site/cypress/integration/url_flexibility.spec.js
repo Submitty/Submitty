@@ -1,7 +1,7 @@
 import {getCurrentSemester} from '../support/utils.js';
 
 describe('Tests for auto removal of trailing slash in url', () => {
-    before(() => {
+    beforeEach(() => {
         cy.visit('/');
         cy.login();
     });
