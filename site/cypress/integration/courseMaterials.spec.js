@@ -178,9 +178,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.btn-danger').click();
         cy.get('.file-viewer').should('not.exist');
     });
-    // These are not run in the CI because they are extremely flaky.  There is no other technical reason why they can't
-    // be run on the CI and ultimately they should be uncommented.
-    // skipOn(Cypress.env('run_area') === 'CI', () => {
+
     it('Should upload and unzip zip files', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#expand-zip-checkbox').check();
@@ -368,5 +366,4 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
     });
-    // });
 });
