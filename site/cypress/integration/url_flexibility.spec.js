@@ -2,7 +2,12 @@ import {getCurrentSemester} from '../support/utils.js';
 
 describe('Tests for auto removal of trailing slash in url', () => {
     before(() => {
+        cy.visit('/');
         cy.login();
+    });
+    
+    after(() => {
+        cy.logout();
     });
 
     const BASE_URL = `/courses/${getCurrentSemester()}/sample`;
