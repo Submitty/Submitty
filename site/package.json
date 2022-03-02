@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.15.4",
+    "@fortawesome/fontawesome-free": "6.0.0",
     "@submitty/pdf-annotate.js": "2.4.0",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
