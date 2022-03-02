@@ -24,14 +24,25 @@ class CourseMaterialsView extends AbstractView {
         $directory_priorities = [];
         $seen = [];
         $folder_ids = [];
+        $links = [];
+        $base_view_url = $this->core->buildCourseUrl(['course_material']);
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
+            $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
             if ($course_material->isDir()) {
-                $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
+            }
+            else {
+                $path_parts = explode("/", $rel_path);
+                $fin_path = "";
+                foreach ($path_parts as $path_part) {
+                    $fin_path .= rawurlencode($path_part) . '/';
+                }
+                $fin_path = substr($fin_path, 0, strlen($fin_path) - 1);
+                $links[$course_material->getId()] = $base_view_url . "/" . $fin_path;
             }
         }
         $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
@@ -77,7 +88,7 @@ class CourseMaterialsView extends AbstractView {
             if ($course_material->isDir()) {
                 continue;
             }
-            if ($this->core->getUser()->getGroup() != 1 && $course_material->getReleaseDate() > $date_now) {
+            if (!$this->core->getUser()->accessGrading() && $course_material->getReleaseDate() > $date_now) {
                 continue;
             }
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -138,7 +149,8 @@ class CourseMaterialsView extends AbstractView {
             "materials_exist" => count($course_materials_db) != 0,
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
-            "folder_ids" => $folder_ids
+            "folder_ids" => $folder_ids,
+            "links" => $links
         ]);
     }
 

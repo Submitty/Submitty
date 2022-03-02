@@ -2855,9 +2855,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $id
      * @return \DateTime
      */
-    public function getDateForGradeableById($id) {
-        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
-        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    public function getDueDateForGradeableById(string $id): ?\DateTime {
+        $this->course_db->query("SELECT eg_submission_due_date FROM electronic_gradeable WHERE g_id=? AND eg_has_due_date", [$id]);
+        if (count($this->course_db->rows()) > 0) { // the gradeable has a due date
+            return new \DateTime($this->course_db->rows()[0]['eg_submission_due_date']);
+        }
+        else {
+            return null;
+        }
     }
 
     public function getAllGradeablesIds() {
