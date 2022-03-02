@@ -541,17 +541,16 @@ HTML;
 
     /**
      * Enable or disable whether to use the global header
-     * @param bool $bool
      */
-    public function useHeader($bool = true) {
+    public function useHeader(bool $bool = true): void {
         $this->use_header = $bool;
     }
 
-    public function useFooter($bool = true) {
+    public function useFooter(bool $bool = true): void {
         $this->use_footer = $bool;
     }
 
-    public function setContentOnly($bool = false): void {
+    public function setContentOnly(bool $bool = false): void {
         $this->content_only = $bool;
     }
 
