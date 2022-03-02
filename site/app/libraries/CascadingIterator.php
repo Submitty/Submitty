@@ -11,7 +11,6 @@ namespace app\libraries;
  * called until iterator1 has been exhausted.
  */
 class CascadingIterator implements \Iterator {
-
     /** @var \Iterator[] */
     private $iterators;
     /** @var int */

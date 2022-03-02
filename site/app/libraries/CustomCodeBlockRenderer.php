@@ -8,7 +8,6 @@ use League\CommonMark\ElementRendererInterface;
 use League\CommonMark\HtmlElement;
 
 class CustomCodeBlockRenderer implements BlockRendererInterface {
-
     /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
     protected $baseRenderer;
 

@@ -51,8 +51,6 @@ use app\models\gradeable\AutoGradedVersion;
  * @see \app\exceptions\NotImplementedException
  */
 class DatabaseQueries {
-
-
     /**
      * @var Core
      */

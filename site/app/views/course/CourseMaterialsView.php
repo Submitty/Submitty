@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class CourseMaterialsView extends AbstractView {
-
     public function listCourseMaterials(array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));

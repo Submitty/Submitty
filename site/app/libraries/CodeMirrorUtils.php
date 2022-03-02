@@ -3,7 +3,6 @@
 namespace app\libraries;
 
 class CodeMirrorUtils {
-
     const DEFAULT_CSS_FILES = [
         'codemirror/codemirror.css',
         'codemirror/theme/eclipse.css',

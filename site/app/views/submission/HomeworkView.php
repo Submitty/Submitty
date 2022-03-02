@@ -18,7 +18,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractNotebookInput;
 
 class HomeworkView extends AbstractView {
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
