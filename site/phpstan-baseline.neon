@@ -61,11 +61,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$file in empty\\(\\) always exists and is always falsy\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
@@ -181,27 +176,12 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
-			message: "#^Call to function is_subclass_of\\(\\) with non\\-empty\\-string and 'app\\\\\\\\authentication…' will always evaluate to false\\.$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^Negated boolean expression is always false\\.$#"
 			count: 2
 			path: app/libraries/Core.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$authentication is never written, only read\\.$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 1
 			path: app/libraries/Core.php
 
