@@ -18,6 +18,7 @@ class MiscView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addInternalCss('code-mirror-utils.css');
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
