@@ -1679,14 +1679,16 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
-        
+
         // Get the "worst" status from all users in the submission
         foreach ($late_days_users as $user) {
             $ld = LateDays::fromUser($this->core, $user);
             $ldi = $ld->getLateDayInfoByGradeable($gradeable);
-            
+
             // Skip null entries
-            if ($ldi === null) continue;
+            if ($ldi === null) {
+                continue;
+            }
 
             $late_status = max($ldi->getStatus(), $late_status);
         }
