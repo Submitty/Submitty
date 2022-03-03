@@ -4,7 +4,9 @@
     text-underline-position: under;
 }
 
-/* override monokai's highlighting to make it a bluish color with more contrast against text / background */
+/* override monokai's highlighting to make it a bluish color with more contrast against text and background */
+/* disabling stylelint as we're overriding CodeMirror, and have no control over how it's named its classes */
+/* stylelint-disable */
 .cm-s-monokai .CodeMirror-line::selection,
 .cm-s-monokai .CodeMirror-line > span::selection,
 .cm-s-monokai .CodeMirror-line > span > span::selection {
@@ -19,3 +21,4 @@
 .cm-s-monokai div.CodeMirror-selected {
     background: #3357a0;
 }
+/* stylelint-enable */
