@@ -1669,44 +1669,28 @@ class ElectronicGraderController extends AbstractController {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
 
-        $late_days_user = null;
+        $late_days_users = [];
         if ($gradeable->isTeamAssignment()) {
             // If its a team assignment, use the leader for late days...
-            $late_days_user = $this->core->getQueries()->getUserById($graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+            $late_days_users = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers();
         }
         else {
-            $late_days_user = $graded_gradeable->getSubmitter()->getUser();
+            $late_days_users[] = $graded_gradeable->getSubmitter()->getUser();
         }
 
-        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
-        if ($ldi === null) {
-            $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
-        }
-        else {
-            $late_status = $ldi->getStatus();
-        }
-        $rollbackSubmission = -1;
-        $previousVersion =  $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() - 1;
-        // check for rollback submission only if the Active version is greater than 1 and that too is late.
-        if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
-            while ($previousVersion) {
-                $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
-                if ($prevVersionInstance == null) {
-                    $rollbackSubmission = -1;
-                    break;
-                }
-                $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
-                $daysLate = $prevVersionInstance->getDaysLate();
+        $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        
+        // Get the "worst" status from all users in the submission
+        foreach ($late_days_users as $user) {
+            $ld = LateDays::fromUser($this->core, $user);
+            $ldi = $ld->getLateDayInfoByGradeable($gradeable);
+            
+            // Skip null entries
+            if ($ldi === null) continue;
 
-                // If this version is a good submission then it the rollback Submision
-                if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
-                    $rollbackSubmission = $previousVersion;
-                    break;
-                }
-                // applying same condition for previous version. i.e going back one version
-                $previousVersion -= 1;
-            }
+            $late_status = max($ldi->getStatus(), $late_status);
         }
+        $rollback_submission = $ld->getLatestValidVersion($graded_gradeable);
 
         $logger_params = [
             "course_semester" => $this->core->getConfig()->getSemester(),
@@ -1729,7 +1713,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
