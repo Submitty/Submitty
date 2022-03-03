@@ -87,7 +87,7 @@
     $(document).ready(function() {
         // Disable any nav-bar buttons with no content
         $('.nav-bar').each(function () {
-            if ($('#page_' + this.id.split('_')[1] + '_content').length == 0) {
+            if ($('#page_' + this.id.split('_')[1] + '_content').length === 0) {
                 $('#page_' + this.id.split('_')[1] + '_nav').hide();
             }
             $(this).addClass("normal-btn");
