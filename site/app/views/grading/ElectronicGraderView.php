@@ -963,7 +963,7 @@ HTML;
                 ];
             }
         }
-        elseif ($rollback_submission > 0 && !$gradeable->isTeamAssignment()) {
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE && $rollback_submission > 0 && !$gradeable->isTeamAssignment()) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
                 "message" => "Late Submission (Rollback to on-time submission - Version #" . $rollback_submission . ")"

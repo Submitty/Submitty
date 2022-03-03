@@ -1678,7 +1678,8 @@ class ElectronicGraderController extends AbstractController {
             $late_days_users[] = $graded_gradeable->getSubmitter()->getUser();
         }
 
-        $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        $late_status = null;  // Assume its good
+        $rollback_submission = PHP_INT_MAX;
 
         // Get the "worst" status from all users in the submission
         foreach ($late_days_users as $user) {
@@ -1690,9 +1691,13 @@ class ElectronicGraderController extends AbstractController {
                 continue;
             }
 
-            $late_status = max($ldi->getStatus(), $late_status);
+            $late_status = max($ldi->getStatus(), $late_status ?? 0);
+            $rollback_submission = min($rollback_submission, $ld->getLatestValidVersion($graded_gradeable));
         }
-        $rollback_submission = $ld->getLatestValidVersion($graded_gradeable);
+
+        if ($late_status === null) {
+            $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        }
 
         $logger_params = [
             "course_semester" => $this->core->getConfig()->getSemester(),

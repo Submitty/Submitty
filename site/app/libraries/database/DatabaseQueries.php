@@ -1572,7 +1572,7 @@ WHERE semester=? AND course=? AND user_id=?",
 
     /**
      * Get the latest valid versrion for a gradeable (good or late status)
-     * @param GradedGradeable $gradeable
+     * @param GradedGradeable $gg
      * @param string $submitter_id
      * @return int
      */
