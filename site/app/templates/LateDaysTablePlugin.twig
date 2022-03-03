@@ -34,28 +34,26 @@
     </tr>
     
     {% for late_day_info in late_days.getLateDayInfo() %}
-        {% set full_class = "" %}
         {% set class = "" %}
         {% set id = "" %}
-        {% if highlight_gradeable is defined and highlight_gradeable == late_day_info.getId() %}
-            {% set full_class = 'class="blue-background"' %}
+        {% if highlight_gradeable is defined and highlight_gradeable == late_day_info.getGradeableId() %}
             {% set class = 'blue-background' %}
             {% set id = 'id="curr-status"' %}
         {% endif %}
         {% set placeholder = late_day_info.isLateDayUpdate() ? empty_late_day : 'N/A' %}
 
-        <tr>
-            <td data-before-content="Event/Assignment" class="align-left {{ class }}">{{ late_day_info.getEventTitle() }}</td>
-            <td data-before-content="Event/Assignment Date" {{ full_class }}>{{ late_day_info.getLateDayEventTime()|date('m/d/Y') }}</td>
-            <td data-before-content="Max Late Days" {{ full_class }}>{{ late_day_info.getAssignmentAllowedLateDays() ?? placeholder }}</td>
-            <td data-before-content="Days Submitted Late" {{ full_class }}>{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : placeholder }}</td>
-            <td data-before-content="Days From Extensions" {{ full_class }}>{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : placeholder }}</td>
-            <td data-before-content="Status" {{ full_class }} {{ id }}>{{ late_day_info.isLateDayUpdate() ? placeholder : late_day_info.getStatusMessage() }}</td>
+        <tr class={{class}}>
+            <td data-before-content="Event/Assignment" class="align-left">{{ late_day_info.getEventTitle() }}</td>
+            <td data-before-content="Event/Assignment Date">{{ late_day_info.getLateDayEventTime()|date('m/d/Y') }}</td>
+            <td data-before-content="Max Late Days">{{ late_day_info.getAssignmentAllowedLateDays() ?? placeholder }}</td>
+            <td data-before-content="Days Submitted Late">{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : placeholder }}</td>
+            <td data-before-content="Days From Extensions">{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : placeholder }}</td>
+            <td data-before-content="Status" {{ id }}>{{ late_day_info.isLateDayUpdate() ? placeholder : late_day_info.getStatusMessage() }}</td>
             {% if grade_inquiry_enabled %}
-                <td data-before-content="Regrade Inquiry Count" {{ full_class }} {{ id }}>{{ late_day_info.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
+                <td data-before-content="Regrade Inquiry Count" {{ id }}>{{ late_day_info.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
             {% endif %}
-            <td data-before-content="Late Days Used Here" {{ full_class }}>{{ ((late_day_info.getLateDaysChange() > 0) ? '+' : '') ~ late_day_info.getLateDaysChange() }}</td>
-            <td data-before-content="Late Days Remaining" {{ full_class }}>{{ late_day_info.getLateDaysRemaining() }}</td>
+            <td data-before-content="Late Days Used Here">{{ ((late_day_info.getLateDaysChange() > 0) ? '+' : '') ~ late_day_info.getLateDaysChange() }}</td>
+            <td data-before-content="Late Days Remaining">{{ late_day_info.getLateDaysRemaining() }}</td>
         </tr>
     {% endfor %}
     </tbody>

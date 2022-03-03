@@ -40,12 +40,60 @@
                         Submitted: {{ submission_time|date("m/d/Y H:i:s T") }}<br/>
                     </b>
                 </div>
-                <div style="padding-left:10px; padding-right:10px;">
-                        {% for table in tables %}
-                            {{ table|raw }}
-                        {% endfor %}
-                </div>
+
+                </br>
+                {% if team_assignment %}
+                    <form id="late-days-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
+                        <div class="tab-bar-wrapper">
+                            {% for team_member in submitter.getTeam().getMemberUsers() %}
+                                <a class="nav-bar key_to_click" id="page_{{loop.index}}_nav" onclick="onChangeNavTab({{loop.index}});"> 
+                                    {{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})
+                                </a>
+                            {% endfor %}
+                        </div>
+                        </br>
+
+                        <div class="modal-body">
+                            {% for table in tables %}
+                                <div class="page-content" id="page_{{loop.index}}_content">{{ table|raw }}</div>
+                            {% endfor %}
+                        </div>                        
+                    </form>
+                {% else %}
+                    {{ tables|first|raw }}
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function onChangeNavTab(tab) {
+        const table_length = {{tables|length}};
+        if (tab > table_length || tab <= 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+
+        $('.nav-bar').each(function () {
+            $('#page_' + this.id.split('_')[1] + '_nav').removeClass('active-btn');
+            $('#page_' + this.id.split('_')[1] + '_content').hide();
+        });
+
+        $('#page_' + tab + '_nav').addClass('active-btn');
+        $('#page_' + tab + '_content').show();
+    }
+
+    $(document).ready(function() {
+        // Disable any nav-bar buttons with no content
+        $('.nav-bar').each(function () {
+            if ($('#page_' + this.id.split('_')[1] + '_content').length == 0) {
+                $('#page_' + this.id.split('_')[1] + '_nav').hide();
+            }
+            $(this).addClass("normal-btn");
+        });
+
+        // Click on tab 0
+        onChangeNavTab(1);
+    });
+</script>
