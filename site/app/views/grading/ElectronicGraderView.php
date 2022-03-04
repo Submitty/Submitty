@@ -430,7 +430,7 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param GradedGradeable[] $graded_gradeables,
+     * @param GradedGradeable[] $graded_gradeables
      * @param User[] $teamless_users
      * @param array $graders
      * @param Team[] $empty_teams
@@ -570,7 +570,6 @@ HTML;
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
-        /** @var GradedGradeable $row */
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
             $info = [
@@ -760,12 +759,11 @@ HTML;
 
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
-            /* @var Team $team */
-            $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
+            $user_assignment_setting_json = isset($row) ? json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable)) : '{}';
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
             $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-            $team_name = $row->getSubmitter()->getTeam()->getTeamName();
+            $team_name = isset($row) ? $row->getSubmitter()->getTeam()->getTeamName() : '';
 
             $empty_team_info[] = [
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}', '{$team_name}');"
@@ -857,7 +855,8 @@ HTML;
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),
-            "is_instructor" => $this->core->getUser()->getGroup() === 1,
+            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
+            "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
             "message" => $message,
             "message_warning" => $message_warning
         ]);

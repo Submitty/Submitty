@@ -17,7 +17,7 @@
                 <h2> Possible responses: </h2>
             </legend>
             {% if poll_type == "single-response" %}
-                <label class="radio" for="answer-no-response">
+                <label class="radio radio-label-pair" for="answer-no-response">
                     {% if poll.isOpen() %}
                         {% if poll.getUserResponse(user_id) is same as(null) %}
                             <input type="radio" value="-1" name="answers[]" id="answer-no-response" checked/>
@@ -32,12 +32,12 @@
                         {% endif %}
                     {% endif %}
                     No response
+                    <br/>
+                    <br/>
                 </label>
-                <br/>
-                <br/>
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
-                    <div class = "radio">
+                    <div class = "radio radio-label-pair">
                         {% if response in poll.getUserResponse(user_id) %}
                             {% if poll.isOpen() %}
                                 <input type=radio aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>
@@ -63,7 +63,7 @@
             {% else %} {# poll_type == "multiple-response" #}
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
-                    <div class = "radio">
+                    <div class = "radio radio-label-pair">
                         {% if response in poll.getUserResponse(user_id) %}
                             {% if poll.isOpen() %}
                                 <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" checked/>

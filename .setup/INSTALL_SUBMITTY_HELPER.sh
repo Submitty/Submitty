@@ -34,6 +34,7 @@ fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -248,6 +249,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 fi
 # ------------------------------------------------------------------------
 
@@ -290,6 +292,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/docker
+    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 
     # php & daemon needs to be able to read workers & containers config
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
@@ -464,7 +467,7 @@ fi
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -525,7 +528,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
 fi
 
 ################################################################################################################

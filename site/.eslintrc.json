@@ -37,13 +37,29 @@
     },
     "overrides": [
         {
-            "files": ["./public/mjs/*.js"],
+            "files": ["./ts/**/*.js"],
             "parserOptions": {
                 "sourceType": "module"
             }
         },
         {
-            "files": ["./tests/mjs/*.js"],
+            "files": ["./ts/**/*.ts"],
+            "extends" : [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended"
+            ],
+            "parser": "@typescript-eslint/parser",
+            "parserOptions": {
+                "sourceType": "module",
+                "project" : "./tsconfig.json"
+            },
+            "rules" : {
+                "@typescript-eslint/no-non-null-assertion" : "off"
+            }
+        },
+        {
+            "files": ["./tests/ts/*.js"],
             "plugins": ["jest"],
             "parserOptions": {
                 "sourceType": "module"

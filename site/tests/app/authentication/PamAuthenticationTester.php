@@ -6,8 +6,6 @@ use app\authentication\PamAuthentication;
 use app\exceptions\CurlException;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
 use tests\BaseUnitTest;

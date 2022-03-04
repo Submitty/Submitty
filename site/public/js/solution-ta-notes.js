@@ -1,5 +1,5 @@
-/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken, previewMarkdown */
-/* exported updateSolutionTaNotes, previewSolutionNotesMarkdown */
+/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
+/* exported updateSolutionTaNotes, detectSolutionChange */
 function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     const data = {
         solution_text: $(`#textbox-solution-${component_id}`).val().trim(),
@@ -37,12 +37,17 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     });
 }
 
-function previewSolutionNotesMarkdown() {
-    const component_id = $(this).closest('.solution-cont').data('component_id');
-    const markdown_textarea = $(`textarea#textbox-solution-${component_id}`);
-    const preview_element = $(`#solution_notes_preview_${component_id}`);
-    const preview_button = $(this);
-    const content = markdown_textarea.val();
-
-    previewMarkdown(markdown_textarea, preview_element, preview_button, {content: content});
+//set Save button class depending on if the solution has been altered from the previous solution
+function detectSolutionChange() {
+    const textarea = $(this);
+    const solution_div = textarea.closest('.solution-cont');
+    const save_button = solution_div.find('.solution-save-btn');
+    if (textarea.val() !== solution_div.attr('data-original-solution')) {
+        save_button.removeClass('btn-default');
+        save_button.addClass('btn-primary');
+    }
+    else {
+        save_button.removeClass('btn-primary');
+        save_button.addClass('btn-default');
+    }
 }
