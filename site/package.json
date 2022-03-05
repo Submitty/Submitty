@@ -47,6 +47,7 @@
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^26.1.1",
     "jest": "^27.5.1",
+    "node-fetch": "^3.2.1",
     "regenerator-runtime": "^0.13.9",
     "stylelint": "^14.5.3",
     "stylelint-config-standard": "^25.0.0",
@@ -58,6 +59,7 @@
     "eslint": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\"",
     "eslint:fix": "eslint \"public/js/**/*.js\" \"cypress/**/*.js\" \"ts/**/*.js\" \"ts/**/*.ts\" \"tests/ts/**/*.js\" --fix",
     "test": "jest",
+    "test:api": "jest --config jest.config.api.js",
     "build": "tsc -p . && node .build.js"
   }
 }
