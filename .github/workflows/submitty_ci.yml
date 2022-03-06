@@ -464,6 +464,8 @@ jobs:
           - name: Run API tests
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: npm run test:api
+            env:
+              BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
