@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
-
     /**
      * @param array $plagiarism_result_info
      * @param string $refresh_page

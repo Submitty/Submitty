@@ -16,7 +16,6 @@ use app\models\User;
  * @method int getCumulativeLateDaysUsed()
  */
 class LateDayInfo extends AbstractModel {
-
     const STATUS_NO_ACTIVE_VERSION = 0;
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
