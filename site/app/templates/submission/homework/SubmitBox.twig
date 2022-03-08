@@ -146,6 +146,11 @@
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+            {# Below will get uncommented once SAML is active #}
+            {# <p>You will need to use a Git auth token.</p> #}
+            <br><br>
+            <a href="/git_auth_tokens" class="btn btn-primary">Git Auth Tokens</a>
+            <br><br>
         {% endif %}
 
         {% if vcs_host_type == 2 or vcs_host_type == 3 %}

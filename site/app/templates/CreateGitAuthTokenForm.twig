@@ -1,0 +1,41 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-auth-token-form{% endblock %}
+{% block title %}Create Git Auth Token{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Below you can create a new Git auth token. Please read the documentation here to
+        learn more about how to use your auth token.
+    </p>
+
+    <div class="flex-col">
+        <input type="text" hidden name="csrf_token" value="{{ csrf_token }}" />
+        <label for="new-auth-token-name">Name:</label>
+        <input type="text" name="name" id="new-auth-token-name">
+
+        <label for="new-auth-token-expiration">Expiration (or leave blank to be indefinite)</label>
+        <input type="text" class="auth-token-date-picker" id="new-auth-token-expiration" name="expiration">
+    </div>
+
+    <script>
+        flatpickr('.auth-token-date-picker', {
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
+        })
+    </script>
+{% endblock %}
+{% block form %}
+    <form method="post">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

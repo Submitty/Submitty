@@ -1,0 +1,44 @@
+<div class="content">
+    <h1>Git Auth Tokens</h1>
+    <button class="btn btn-primary" id="new-auth-token-button">Add Git Auth Token</button>
+    <br><br>
+    {% if new_token_name is defined and new_token_val is defined %}
+        <p>Your new token:</p>
+        <P>Name: {{ new_token_name }}</P>
+        <p>Value (save this value as you won't be able to see it again): {{ new_token_val }}</p>
+    {% endif %}
+    {% if tokens|length != 0 %}
+    <table class="table mobile-table">
+        <tr>
+            <th>Name</th>
+            <th>Expiration</th>
+            <th>Action</th>
+        </tr>
+        {% for token in tokens %}
+            <tr>
+                <td>{{ token.getName() }}</td>
+                {% if token.getExpiration() is null %}
+                    <td>Doesn't expire</td>
+                {% else %}
+                    {% if token.isExpired(current_time) %}
+                        <td>EXPIRED on {{ token.getExpiration()|date }}</td>
+                    {% else %}
+                        <td>{{ token.getExpiration()|date }}</td>
+                    {% endif %}
+                {% endif %}
+                <td>
+                    <form action="/git_auth_tokens/revoke" method="POST">
+                        <input type="text" hidden name="csrf_token" value="{{ csrf_token }}">
+                        <input type="number" hidden name="id" value="{{ token.getId() }}">
+                        <input type="submit" class="btn btn-danger" value="Revoke">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>You don't have any auth tokens.</p>
+    {% endif %}
+</div>
+
+{% include('CreateGitAuthTokenForm.twig') %}
