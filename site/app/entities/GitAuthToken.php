@@ -39,7 +39,7 @@ class GitAuthToken {
 
     /**
      * @ORM\Column(type="datetimetz")
-     * @var \DateTime
+     * @var ?\DateTime
      */
     protected $expiration;
 
