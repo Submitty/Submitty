@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\repositories;
-
 
 use app\entities\GitAuthToken;
 use Doctrine\ORM\EntityRepository;

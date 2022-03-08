@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\views;
-
 
 use app\entities\GitAuthToken;
 use app\libraries\FileUtils;
