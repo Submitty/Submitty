@@ -218,7 +218,8 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+# stack is not available for non-x86_64 systems
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh

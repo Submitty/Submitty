@@ -9,7 +9,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
 class PDFController extends AbstractController {
-
     public function __construct(Core $core) {
         parent::__construct($core);
     }

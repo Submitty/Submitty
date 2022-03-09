@@ -13,7 +13,6 @@ use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
 class NotebookBuilderController extends AbstractController {
-
     /** @var string The username of the linux user who should own notebook builder files */
     private $expected_owner;
 

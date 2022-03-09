@@ -14,7 +14,6 @@ use app\models\User;
 use tests\BaseUnitTest;
 
 class LateDayInfoTester extends BaseUnitTest {
-
     protected function makeLateDayInfo(string $due_date, int $late_days, string $submission_date, int $late_day_exception, int $late_days_remaining) {
         $core = $this->createMock(Core::class);
 

@@ -13,7 +13,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class AutoGradingView extends AbstractView {
-
     /**
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden True to show the scores of hidden testcases

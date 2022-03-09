@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\models\PollModel;
 
 class PollModelTester extends \PHPUnit\Framework\TestCase {
-
     private $core;
     private $my_polls;
 

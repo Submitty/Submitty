@@ -10,7 +10,6 @@ use app\libraries\Core;
 use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
-
     // Holds the mapping between pages that have open socket clients and those clients
     /** @var array */
     private $clients = [];
