@@ -1,8 +1,4 @@
-import { autograding } from '../../../module/grading';
-
-let HIGHEST_VERSION: number;
-let GRADEABLE_ID: string;
-let USER_ID: string;
+import { getCsrfToken } from '../../../module/utils/server';
 
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
@@ -19,6 +15,18 @@ function openAllAutoGrading() {
     }
 }
 
+function regrade(single_regrade: number, highest_version: number, gradeable_id: string, user_id: string) {
+    //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
+    if (single_regrade) {
+        window.handleRegrade(highest_version, getCsrfToken(), gradeable_id, user_id, true);
+    }
+    //regrading all versions
+    else {
+        window.handleRegrade(highest_version, getCsrfToken(), gradeable_id, user_id, false, true);
+    }
+}
+
+
 // close all outputs in Auto-Grading Testcases section
 function closeAllAutoGrading() {
     // hide all divs whose id starts with testcase_
@@ -29,9 +37,9 @@ function closeAllAutoGrading() {
 
 $(() => {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
-    HIGHEST_VERSION = parseInt(autogradingResultsJQuery.attr('data-highest-version')!);
-    GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
-    USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
+    const HIGHEST_VERSION = parseInt(autogradingResultsJQuery.attr('data-highest-version')!);
+    const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
+    const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
 
     $('#autograding-results-open-all').on('click', () => {
         openAllAutoGrading();
@@ -40,10 +48,10 @@ $(() => {
         closeAllAutoGrading();
     });
     $('#autograding-results-regrade-active').on('click', () => {
-        autograding.regrade(1, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
+        regrade(1, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
     $('#autograding-results-regrade-all').on('click', () => {
-        autograding.regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
+        regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
 });
 
