@@ -1,4 +1,4 @@
-import {init} from '../../ts/team';
+import {init} from '../../ts/module/team';
 
 beforeEach(() => {
     document.body.innerHTML = `
