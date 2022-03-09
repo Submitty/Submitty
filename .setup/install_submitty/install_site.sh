@@ -280,9 +280,6 @@ chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-# for file in ${SUBMITTY_INSTALL_DIR}/site/public/mjs/**; do
-#     set_permissions $file
-# done
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
