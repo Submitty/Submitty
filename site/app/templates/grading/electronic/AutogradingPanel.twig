@@ -1,4 +1,5 @@
-<div id="autograding_results" class="rubric_panel">
+{{ add_twig_module_js('grading/electronic/AutogradingPanel.js') }}
+<div id="autograding_results" class="rubric_panel" data-highest-version="{{ highest_version }}" data-gradeable-id="{{ gradeable_id }}" data-user-id="{{ user_id }}">
     <div>
         <span class="grading_label">Autograding Testcases</span>
         <button id="autograding-results-open-all" class="btn btn-default key_to_click" tabindex="0">Expand All</button>
@@ -23,10 +24,3 @@
         </div>
     </div>
 </div>
-<script type="module">
-    import { autograding } from "/mjs/grading.js"
-    //used to calculate height for #grading-panel-student-name which requires that a panel has
-    //been loaded first
-    window.dispatchEvent(new Event('resize'));
-    autograding.init({{ highest_version }}, "{{ gradeable_id }}", "{{ user_id }}");
-</script>

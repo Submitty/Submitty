@@ -1,19 +1,8 @@
-import { getCsrfToken } from '../utils/server';
+import { autograding } from '../../../module/grading';
 
 let HIGHEST_VERSION: number;
 let GRADEABLE_ID: string;
 let USER_ID: string;
-
-function regrade(single_regrade: number) {
-    //if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
-    if (single_regrade) {
-        window.handleRegrade(HIGHEST_VERSION, getCsrfToken(), GRADEABLE_ID, USER_ID, true);
-    }
-    //regrading all versions
-    else {
-        window.handleRegrade(HIGHEST_VERSION, getCsrfToken(), GRADEABLE_ID, USER_ID, false, true);
-    }
-}
 
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
@@ -38,10 +27,11 @@ function closeAllAutoGrading() {
     $("[id^='details_tc_']").find('.loading-tools-show').show();
 }
 
-export function init(highest_version: number, gradeable_id: string, user_id: string) {
-    HIGHEST_VERSION = highest_version;
-    GRADEABLE_ID = gradeable_id;
-    USER_ID = user_id;
+$(() => {
+    const autogradingResultsJQuery: JQuery = $('#autograding_results');
+    HIGHEST_VERSION = parseInt(autogradingResultsJQuery.attr('data-highest-version')!);
+    GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
+    USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
 
     $('#autograding-results-open-all').on('click', () => {
         openAllAutoGrading();
@@ -50,9 +40,10 @@ export function init(highest_version: number, gradeable_id: string, user_id: str
         closeAllAutoGrading();
     });
     $('#autograding-results-regrade-active').on('click', () => {
-        regrade(1);
+        autograding.regrade(1, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
     $('#autograding-results-regrade-all').on('click', () => {
-        regrade(0);
+        autograding.regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
-}
+});
+

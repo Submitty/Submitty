@@ -3,8 +3,8 @@ function checkTaVersionChange(){
     return confirm(message);
 }
 
-export function init() {
+$(() => {
     $('#student-info-ta-version-form').on('submit', () => {
         return checkTaVersionChange();
     });
-}
+});

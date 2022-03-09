@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/electronic/StudentInformationPanel.js') }}
 <div id="student_info" class="rubric_panel">
     <div>
         <span class="grading_label">Student Information</span>
@@ -49,8 +50,3 @@
         </div>
     </div>
 </div>
-
-<script type="module">
-    import { studentInfo } from "/mjs/grading.js"
-    studentInfo.init();
-</script>
