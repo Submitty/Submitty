@@ -18,7 +18,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractNotebookInput;
 
 class HomeworkView extends AbstractView {
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -32,7 +31,6 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss('table.css');
-        $this->core->getOutput()->addInternalModuleJs('submission.js');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;
@@ -45,6 +43,10 @@ class HomeworkView extends AbstractView {
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
+
+        if ($is_admin) {
+            $this->core->getOutput()->addInternalModuleJs('instructor-submission.js');
+        }
 
         // Only show the late banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)

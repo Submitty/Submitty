@@ -98,29 +98,39 @@
             </div>
             <div class="sub hide" id="pdf-submit-button">
                 <div class="sub">
-                    <label for="use-qr">Split by QR code?</label>
-                    <input type="checkbox" id="use-qr">
 
-                    {% if feature_flag_enabled('submitty_ocr') %}
-                    <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
-                    <input type="checkbox" id="use-ocr">
-                    {% endif %}
+                    <div id="toggle-qr-split">
+                        <label for="use-qr">Split by QR code?</label>
+                        <input type="checkbox" id="use-qr">
 
+                        {% if feature_flag_enabled('submitty_ocr') %}
+                        <span id="toggle-id-scan">
+                            <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
+                            <input type="checkbox" id="use-ocr">
+                        </span>
+                        {% endif %}
+                    </div>
 
-                    <br>
+                    <div id="qr-split-opts">
+                        <br>
 
-                    <span id="prefix-prompt">QR code prefix/suffix:
-                        <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
-	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
-                    </span>
+                        <span id="prefix-prompt">QR code prefix/suffix:
+                            <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
+    	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
+                        </span>
 
-                    <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
-                    <input type="number" id= "num_pages" placeholder="required"/>
-                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
-                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
-                    <div id="expected-num-box">
-                        <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
-                        <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
+                        <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
+                        <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
+
+                    </div>
+
+                    <div id="numeric-split-opts">
+                        <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
+                        <input type="number" id= "num_pages" placeholder="required"/>
+                        <div id="expected-num-box">
+                            <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
+                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,131 +138,6 @@
 
         <div id="submission-mode-warning" class="text-center">
         </div>
-
-        <script>
-            $(function() {
-                students_full = {{ students_full|json_encode|raw }};
-                $('#qr_prefix').prop('hidden', true);
-                $('#qr_suffix').prop('hidden', true);
-                $('#prefix-prompt').prop('hidden', true);
-                $('#bulk_progress_box').prop('hidden', true);
-                $('#expected-num-box').prop('hidden', true);
-
-                //load what upload mode the user selected (if any)
-                if(sessionStorage.getItem('radio-bulk')){
-                    $('#radio-bulk').prop('checked', true);
-                    $('#bulk_progress_box').prop('hidden', false);
-                }
-                else if(sessionStorage.getItem('radio-student')){
-                    $('#radio-student').prop('checked',true);
-                }
-                else{
-                    $('#radio-normal').prop('checked',true);
-                }
-                //load if bulkupload with qr codes selected or not
-                if(sessionStorage.getItem('use-qr')){
-                    $('#qr_prefix').prop('hidden',false)
-                    $('#qr_suffix').prop('hidden',false)
-                    $('#prefix-prompt').prop('hidden', false);
-                    $('#pages-prompt').prop('hidden', true);
-                    $('#num_pages').prop('hidden', true);
-                    $('#use-qr').prop('checked',true);
-                    $('#expected-num-box').prop('hidden', false);
-                    $('#use-ocr').prop('hidden', false);
-                    $('#use-ocr-id').prop('hidden', false);
-                    //populate prefix textarea
-                    if(sessionStorage.getItem('qr_prefix')){
-                        $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
-                    }
-                    if(sessionStorage.getItem('qr_suffix')){
-                        $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
-                    }
-                    if(sessionStorage.getItem('use-ocr')){
-                        $('#use-ocr').prop('checked', true);
-                    }
-                }
-                if ($("#radio-student").is(":checked")) {
-                    $('#user-id-input').show();
-                }
-                if ($("#radio-bulk").is(":checked")) {
-                    $('#pdf-submit-button').show();
-                    $('#bulk_progress_box').prop('hidden', false);
-                }
-                else{
-                     $('#bulk_progress_box').prop('hidden', true);
-                }
-                if($('#use-qr').is(':checked')){
-                    //save qr_code prefix on textarea change
-                    $('#qr_prefix').change(function(){
-                        sessionStorage.setItem('qr_prefix', $('#qr_prefix').val());
-                    });
-                    $('#qr_suffix').change(function(){
-                        sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
-                    });
-
-                    $('#use-ocr').prop('hidden', false);
-                    $('#use-ocr-id').prop('hidden', false);
-
-                    if(sessionStorage.getItem('use-ocr'))
-                        $('#use-ocr').prop('checked', true);
-                    else
-                        $('#use-ocr').prop('checked', false);
-                }
-                $('#radio-normal').click(function() {
-                    sessionStorage.setItem('radio-normal', true);
-                    sessionStorage.removeItem('radio-student');
-                    sessionStorage.removeItem('radio-bulk');
-                    $('#pdf-submit-button').hide();
-                    $('#user-id-input').hide();
-                    $('#pdf-submit-button').hide();
-                    $('#user_id').val('');
-                    $('#bulk_progress_box').prop('hidden', true);
-                });
-                $('#radio-student').click(function() {
-                    sessionStorage.setItem('radio-student', true);
-                    sessionStorage.removeItem('radio-bulk');
-                    sessionStorage.removeItem('radio-normal');
-                    $('#pdf-submit-button').hide();
-                    $('#user-id-input').show();
-                    $('#bulk_progress_box').prop('hidden', true);
-                });
-                $('#radio-bulk').click(function()  {
-                    sessionStorage.setItem('radio-bulk', true);
-                    sessionStorage.removeItem('radio-student');
-                    sessionStorage.removeItem('radio-normal');
-                    $('#user-id-input').hide();
-                    $('#pdf-submit-button').show();
-                    $('#user_id').val('');
-                    $('#bulk_progress_box').prop('hidden', false);
-                });
-                $('#use-qr').click(function(){
-                    (sessionStorage.getItem('use-qr')) ? sessionStorage.removeItem('use-qr') : sessionStorage.setItem('use-qr', true);
-                    $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
-                    $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
-                    $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
-                    $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
-                    $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
-                    $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
-
-                    if(!$('#use-qr').is(":checked")){
-                        $('#use-ocr').prop('checked', false);
-                    }
-                });
-                $('#use-ocr').click(function(){
-                    sessionStorage.getItem('use-ocr') ? sessionStorage.removeItem('use-ocr') :
-                        sessionStorage.setItem('use-ocr', true);
-
-                    if( $('#use-qr').is(":checked") !== $('#use-ocr').is(":checked") ){
-                        $('#use-qr').click();
-                    }
-
-                });
-                $("#user_id").autocomplete({
-                    source: students_full
-                });
-
-            });
-        </script>
     {% endif %}
     {# /Admin submission type selector #}
 
@@ -461,7 +346,15 @@
 {% endif %}
 
 <script>
+    $(function() {
+        students_full = {{ students_full|json_encode|raw }};
+        $("#user_id").autocomplete({
+            source: students_full
+        });
+    });
+
     window.num_submission_boxes = {{ part_names | length }};
+    window.gradeable_id = "{{ gradeable_id }}";
 
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
@@ -527,12 +420,6 @@
                 use_ocr = $('#use-ocr').is(":checked");
                 qr_prefix = $('#qr_prefix').val();
                 qr_suffix = $('#qr_suffix').val();
-                if($('#use-qr').is(':checked')){
-                    if(!sessionStorage.getItem('qr_prefix'))
-                        sessionStorage.setItem('qr_prefix', qr_prefix );
-                    if(!sessionStorage.getItem('qr_suffix'))
-                        sessionStorage.setItem('qr_suffix', qr_suffix );
-                }
             };
             // vcs upload
             var git_user_id = "";

@@ -22,7 +22,6 @@ use app\models\AbstractModel;
  * @method isPublishActions()
  */
 class AutogradingTestcase extends AbstractModel {
-
     /** @prop @var string The index of this testcase in the autograding config */
     protected $index;
 

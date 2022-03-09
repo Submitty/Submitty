@@ -13,7 +13,6 @@ use LogicException;
  * @package app
  */
 class NotificationFactory {
-
     /**
      * @var Core $core
      */
