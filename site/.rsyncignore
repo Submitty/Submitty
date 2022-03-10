@@ -9,6 +9,7 @@ site/.eslintrc.json
 site/.rsyncignore
 site/.stylelintrc.json
 site/cypress.json
+site/jest.config.api.js
 site/jest.config.js
 site/phpcs.xml
 site/phpstan-baseline.neon
