@@ -26,7 +26,7 @@ opencv-python==3.4.9.33
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.3 # Submitty-util specific.
 
-python-pam==1.8.4
+python-pam==2.0.0
 ruamel.yaml==0.17.17
 psycopg2-binary==2.9.3
 sqlalchemy==1.4.29
