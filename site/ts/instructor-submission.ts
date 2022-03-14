@@ -40,7 +40,7 @@ function init(){
     const qrPrefixInput = document.getElementById('qr_prefix') as HTMLInputElement;
     const qrSuffixInput = document.getElementById('qr_suffix') as HTMLInputElement;
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
-    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement;
+    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
 
     qrPrefixInput.addEventListener('change', (event: Event) => {
         sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
@@ -50,9 +50,12 @@ function init(){
     });
 
     useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
-    useScanIdsCheckBox.addEventListener('click', (event: Event) => {
-        sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
-    });
+    if (useScanIdsCheckBox !== null) {
+        useScanIdsCheckBox.addEventListener('click', (event: Event) => {
+            sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
+        });
+    }
+
 
 
     const prevQRPrefix = sessionStorage.getItem(`${window.gradeable_id}-qr-prefix`);
@@ -84,7 +87,9 @@ function changeSubmissionMode(event: Event){
 
     [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
     useQRCheckBox.checked = false;
-    useScanIdsCheckBox.checked = false;
+    if (useScanIdsCheckBox !== null) {
+        useScanIdsCheckBox.checked = false;
+    }
 
     if (window.file_array[0].length > 0){
         if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')){
@@ -123,8 +128,11 @@ function changeSubmissionMode(event: Event){
             }
             else {
                 numericUploadOpts!.style.display = 'inline';
-                scanIdsOpts!.style.display = 'none';
                 sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
+
+                if (scanIdsOpts !== null) {
+                    scanIdsOpts.style.display = 'none';
+                }
             }
     }
 
@@ -146,17 +154,24 @@ function switchBulkUploadOptions(event : Event){
 
     sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, element.checked ? 'qr' : 'numeric' );
 
-
-    useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
+    if (useScanIdsCheckBox !== null) {
+        useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
+    }
     if (element.checked){
         qrUploadOpts!.style.display = 'block';
-        scanIdsOpts!.style.display = 'inline';
         numericUploadOpts!.style.display = 'none';
+
+        if (scanIdsOpts !== null) {
+            scanIdsOpts.style.display = 'inline';
+        }
     }
     else {
         qrUploadOpts!.style.display = 'none';
         numericUploadOpts!.style.display = 'inline';
-        scanIdsOpts!.style.display = 'none';
+
+        if (scanIdsOpts !== null) {
+            scanIdsOpts.style.display = 'none';
+        }
     }
 }
 
