@@ -466,9 +466,6 @@ HTML;
             else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
             }
-            if ($gradeable->isTaGrading()) {
-                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
-            }
             // NOTE/REDESIGN FIXME: We might have autograding that is
             // penalty only.  The available positive autograding
             // points might be zero.  Testing for autograding > 1 is
@@ -481,7 +478,9 @@ HTML;
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
+                }
+                if ($gradeable->isTaGrading()) {
+                    $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
                 }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
@@ -489,14 +488,23 @@ HTML;
                 else {
                     $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading_blind"];
                 }
+                if ($peer === false) {
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
+                }
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
+                if ($gradeable->isTaGrading()) {
+                    $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+                }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
                 }
                 else {
-                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                    $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading_blind"];
+                }
+                if ($peer === false) {
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
                 }
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
