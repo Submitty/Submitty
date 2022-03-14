@@ -302,7 +302,7 @@ function notebookScrollLoad() {
     }
     if (element !== null) {
       if (element.length !== 0) {
-        notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
+        notebookView.animate({scrollTop: (element.offset().top - notebookView.offset().top + notebookView.scrollTop())}, 100);
       } else {
         localStorage.removeItem('ta-grading-notebook-view-scroll-id');
         localStorage.removeItem('ta-grading-notebook-view-scroll-item');
@@ -809,7 +809,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $(id_str).toggleClass('active', eleVisibility);
-      $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
+      // $("#" + panel.str).find(".CodeMirror").each(function() {this.CodeMirror.refresh()});
 
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);

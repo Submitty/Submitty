@@ -18,6 +18,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
     // eslint-disable-next-line no-undef
     const editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
@@ -25,6 +26,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
 
     editor1.setSize('100%', '100%');

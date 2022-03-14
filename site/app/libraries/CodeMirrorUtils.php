@@ -12,6 +12,7 @@ class CodeMirrorUtils {
 
     const DEFAULT_JS_FILES = [
         'codemirror/codemirror.js',
+        'codemirror/addon/display/autorefresh.js',
         'codemirror/addon/display/placeholder.js',
         'codemirror/addon/mode/overlay.js',
         'codemirror/mode/clike/clike.js',
