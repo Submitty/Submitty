@@ -82,7 +82,7 @@ function changeSubmissionMode(event: Event){
     const qrUploadOpts = document.getElementById('qr-split-opts');
     const numericUploadOpts = document.getElementById('numeric-split-opts');
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
-    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement;
+    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
 
     [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
@@ -148,7 +148,7 @@ function changeSubmissionMode(event: Event){
 function switchBulkUploadOptions(event : Event){
     const element = event.target as HTMLInputElement;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
-    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement;
+    const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const numericUploadOpts = document.getElementById('numeric-split-opts');
     const qrUploadOpts = document.getElementById('qr-split-opts');
 
