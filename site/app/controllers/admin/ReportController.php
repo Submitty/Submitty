@@ -30,7 +30,6 @@ use app\exceptions\ValidationException;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
-
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
 
