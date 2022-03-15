@@ -65,7 +65,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_images_obj = client.images.list()
         #print the details of the image
         get_docker_info.printDockerInfo()
-        os.system('lsb_release -a')
+        subprocess.run(['lsb_release', '-a'], capture_output=True, check=True)
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
