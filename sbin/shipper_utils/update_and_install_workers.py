@@ -153,8 +153,7 @@ def parse_arguments():
 
 
 def update_machine(machine,stats,args):
-
-    os.system(f"echo UPDATE MACHINE: {machine}")
+    print(f"echo UPDATE MACHINE: {machine}")
 
     user = stats['username']
     host = stats['address']
