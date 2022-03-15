@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class CourseMaterialsView extends AbstractView {
-
     public function listCourseMaterials(array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
@@ -24,14 +23,25 @@ class CourseMaterialsView extends AbstractView {
         $directory_priorities = [];
         $seen = [];
         $folder_ids = [];
+        $links = [];
+        $base_view_url = $this->core->buildCourseUrl(['course_material']);
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
+            $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
             if ($course_material->isDir()) {
-                $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
+            }
+            else {
+                $path_parts = explode("/", $rel_path);
+                $fin_path = "";
+                foreach ($path_parts as $path_part) {
+                    $fin_path .= rawurlencode($path_part) . '/';
+                }
+                $fin_path = substr($fin_path, 0, strlen($fin_path) - 1);
+                $links[$course_material->getId()] = $base_view_url . "/" . $fin_path;
             }
         }
         $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
@@ -77,7 +87,7 @@ class CourseMaterialsView extends AbstractView {
             if ($course_material->isDir()) {
                 continue;
             }
-            if ($this->core->getUser()->getGroup() != 1 && $course_material->getReleaseDate() > $date_now) {
+            if (!$this->core->getUser()->accessGrading() && $course_material->getReleaseDate() > $date_now) {
                 continue;
             }
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -138,22 +148,22 @@ class CourseMaterialsView extends AbstractView {
             "materials_exist" => count($course_materials_db) != 0,
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
-            "folder_ids" => $folder_ids
+            "folder_ids" => $folder_ids,
+            "links" => $links
         ]);
     }
 
     private function removeEmptyFolders(array &$course_materials): bool {
+        $is_empty = true;
         foreach ($course_materials as $path => $course_material) {
-            if (is_array($course_material)) {
-                if ($this->removeEmptyFolders($course_material)) {
-                    unset($course_materials[$path]);
-                }
+            if (is_array($course_material) && $this->removeEmptyFolders($course_material)) {
+                unset($course_materials[$path]);
             }
             else {
-                return false;
+                $is_empty = false;
             }
         }
-        return true;
+        return $is_empty;
     }
 
     private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {

@@ -10,7 +10,6 @@ use app\models\User;
  * Utility functions for interacting with dates and times
  */
 class DateUtils {
-
     /** @var string $MAX_TIME Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
 

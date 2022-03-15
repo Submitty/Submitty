@@ -5,7 +5,6 @@ namespace app\libraries\database;
 use app\exceptions\DatabaseException;
 
 abstract class AbstractDatabase {
-
     /**
      * @var \PDO|null
      */

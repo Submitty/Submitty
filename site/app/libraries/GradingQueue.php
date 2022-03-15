@@ -12,7 +12,6 @@ use app\models\QueueItem;
  * A class to represent the status of the grading queue
  */
 class GradingQueue {
-
     /** @var string The prefix for each normal queue file */
     private $queue_file_prefix = '';
     /** @var string The path to the queue directory */

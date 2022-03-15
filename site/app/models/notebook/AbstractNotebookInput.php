@@ -9,7 +9,6 @@ use app\models\AbstractModel;
  * @method string getFileName()
  */
 class AbstractNotebookInput extends AbstractModel {
-
     /** @prop @var string The name of the file to save text box data to */
     protected $file_name;
 
