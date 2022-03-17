@@ -17,21 +17,25 @@
             </label>
             <br>
             <span id = "show-some-section-selection-edit" style="display: none">
+            <br>
+            <table>
             {% for section in reg_sections %}
-                <tr>
+                {% if loop.index0%5 == 0 %}
+                    <tr> 
+                {% endif %}
+                <td>
                     <span class = "inline">
-                        <td>
-                          <label for="section-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
-                        </td>
-                        <td>
-                            <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
+                    <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-edit-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </span>
-                </tr>
+                </td>
+
+                {% if ( loop.index%5 == 0  or loop.last) %}
+                    </tr>
+                {% endif %}
             {% endfor %}
+            </table>
             </span>
             <script>
                 function toggleRegistrationSectionsEdit(){
