@@ -16,7 +16,7 @@
                 Yes
             </label>
             <br>
-            <span id = "show-some-section-selection-edit" style="display: none">
+            <div id = "show-some-section-selection-edit" style="display: none">
             <br>
             <table>
             {% for section in reg_sections %}
@@ -36,7 +36,7 @@
                 {% endif %}
             {% endfor %}
             </table>
-            </span>
+            </div>
             <script>
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
