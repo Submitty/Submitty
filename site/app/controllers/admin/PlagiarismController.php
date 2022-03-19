@@ -17,7 +17,6 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
-use app\libraries\routers\FeatureFlag;
 use Exception;
 use DateTime;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,7 +28,6 @@ use app\entities\plagiarism\PlagiarismConfig;
  * Class PlagiarismController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
- * @FeatureFlag("plagiarism")
  */
 class PlagiarismController extends AbstractController {
     /**
