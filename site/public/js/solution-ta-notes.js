@@ -29,7 +29,6 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                     .attr('data-original-solution', $(`#textbox-solution-${component_id}`).val());
 
                 const save_button = $(`#solution-box-${component_id}`).find('.solution-save-btn');
-                save_button.addClass('disabled');
                 save_button.prop('disabled', true);
             }
             else {
@@ -48,11 +47,9 @@ function detectSolutionChange() {
     const solution_div = textarea.closest('.solution-cont');
     const save_button = solution_div.find('.solution-save-btn');
     if (textarea.val() !== solution_div.attr('data-original-solution')) {
-        save_button.removeClass('disabled');
         save_button.prop('disabled', false);
     }
     else {
-        save_button.addClass('disabled');
         save_button.prop('disabled', true);
     }
 }
