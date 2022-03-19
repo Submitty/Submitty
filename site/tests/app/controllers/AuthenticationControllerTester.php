@@ -13,7 +13,6 @@ use tests\BaseUnitTest;
  * @runTestsInSeparateProcesses
  */
 class AuthenticationControllerTester extends BaseUnitTest {
-
     public function setUp(): void {
         // set up variables that logger needs
         $_COOKIE['submitty_token'] = 'test';

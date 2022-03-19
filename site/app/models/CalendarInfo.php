@@ -14,7 +14,6 @@ use app\views\NavigationView;
  * Container of information used to fill the calendar.
  */
 class CalendarInfo extends AbstractModel {
-
     /**
      * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value

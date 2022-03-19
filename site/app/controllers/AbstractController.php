@@ -11,7 +11,6 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Mark;
 
 abstract class AbstractController {
-
     /** @var Core  */
     protected $core;
 
