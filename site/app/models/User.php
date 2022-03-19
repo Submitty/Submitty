@@ -46,7 +46,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isLoaded()
  */
 class User extends AbstractModel {
-
     /**
      * Access groups, lower is more access
      */

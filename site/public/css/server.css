@@ -854,7 +854,6 @@ tbody.collapse.in {
     cursor: not-allowed;
     background-color: transparent;
     background-image: none;
-    filter: progid:dximagetransform.microsoft.gradient(enabled = false);
 }
 
 .btn-primary {
@@ -1037,7 +1036,6 @@ div.full-height {
 .cat-buttons:hover,
 .cat-buttons:focus {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 .peer-feedback-negative-unselected {
@@ -1082,7 +1080,6 @@ div.full-height {
 
 #ui-category-list .handle {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 #ui-category-list .handle:hover {

@@ -5,7 +5,6 @@ namespace tests\app\libraries;
 use app\libraries\CodeMirrorUtils;
 
 class CodeMirrorUtilsTester extends \PHPUnit\Framework\TestCase {
-
     /**
      * @dataProvider codeMirrorModeDataProvider
      */

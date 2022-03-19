@@ -58,6 +58,12 @@ chmod 644 /tmp/index.html
 chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
 mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 
+# Delete all typescript code to prevent deleted files being left behind and potentially
+# causing compilation errors
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
+fi
+
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it

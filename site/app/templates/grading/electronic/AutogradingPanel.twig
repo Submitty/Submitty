@@ -3,7 +3,7 @@
         <span class="grading_label">Autograding Testcases</span>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default key_to_click" tabindex="0" onclick="closeAllAutoGrading()">Close All</button>
-        {% if can_regrade and not is_vcs%}
+        {% if can_regrade %}
             <div class="btn-group">
                 <button type="button" class="btn btn-primary" onclick="regrade(1)">Regrade Active Version</button>
                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

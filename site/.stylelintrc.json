@@ -8,6 +8,7 @@
   },
   "ignoreFiles": [
     "vendor/**",
+    "tests/report/**",
     "public/css/jquery-ui.min.css",
     "public/css/reset.css",
     "public/css/flatpickr.min.css",

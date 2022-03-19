@@ -11,7 +11,6 @@ use app\models\User;
 use tests\BaseUnitTest;
 
 class PamAuthenticationTester extends BaseUnitTest {
-
     private function getMockCore($curl_response) {
         $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
