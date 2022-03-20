@@ -22,6 +22,7 @@ class TestSidebar(BaseTestCase):
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
+            'Plagiarism Detection': 'Plagiarism Detection -- WORK IN PROGRESS',
             'My Late Days/Extensions': 'My Late Day Usage'
         }
 
