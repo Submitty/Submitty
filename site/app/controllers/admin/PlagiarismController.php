@@ -1194,6 +1194,13 @@ class PlagiarismController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
+        // Update the last run timestamp
+        $em = $this->core->getCourseEntityManager();
+        /** @var PlagiarismConfig $plagiarism_config */
+        $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+        $plagiarism_config->setLastRunToCurrentTime();
+        $em->flush();
+
         try {
             $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
         }
