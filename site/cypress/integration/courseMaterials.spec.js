@@ -289,7 +289,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#cm_path').click();
             cy.get('#submit-materials').click();
             cy.on('window:alert', (alert) => {
-                expect(alert).eq("Select at least one section");
+                expect(alert).eq('Select at least one section');
             });
         });
 
