@@ -461,6 +461,9 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sections']) && $sections_lock) {
             $sections = $_POST['sections'];
             $sections_exploded = @explode(",", $sections);
+            if (empty($sections_exploded)) {
+                return JsonResponse::getErrorResponse("Select at least one section");
+            }
             $details['sections'] = $sections_exploded;
         }
         else {
