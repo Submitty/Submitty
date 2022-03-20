@@ -145,10 +145,10 @@
                 if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
                     sections = null;
                 }
-                if(sections == null || sections.length > 0){
-                    var cmPath = document.getElementById('cm_path').innerHTML;
-                    var requestedPath = document.getElementById("input-provide-full-path").value;
-                    var sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
+                if(sections === null || sections.length > 0){
+                    const cmPath = document.getElementById('cm_path').innerHTML;
+                    const requestedPath = document.getElementById("input-provide-full-path").value;
+                    const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
                 }
                 else {
