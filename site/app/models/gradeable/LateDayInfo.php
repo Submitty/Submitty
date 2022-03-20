@@ -85,6 +85,46 @@ class LateDayInfo extends AbstractModel {
         }
     }
 
+    /**
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Core $core
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array
+     */
+    public static function fromUser(Core $core, User $user, GradedGradeable $graded_gradable): ?LateDayInfo {
+        $ldc = $core->getQueries()->getLateDayCacheForUserGradeable($user->getId(), $graded_gradable->getGradeableId());
+        $ldi = null;
+        
+        if ($ldc !== null) {
+            $ldi['graded_gradeable'] = $graded_gradable;
+            $ldi = new LateDayInfo($core, $user, $ldc);
+        }
+
+        return $ldi;
+    }
+
+    /**
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Core $core
+     * @param Submitter $submitter
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array
+     */
+    public static function fromSubmitter(Core $core, Submitter $submitter, $graded_gradeable) {
+        // Collect Late Day Info for each user associated with the submitter
+        if ($submitter->isTeam()) {
+            $late_day_info = [];
+            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                $late_day_info[$member->getId()] = self::fromUser($core, $member, $graded_gradeable);
+            }
+            return $late_day_info;
+        }
+        else {
+            return self::fromUser($core, $submitter->getUser(), $graded_gradeable);
+        }
+    }
+
     public function toArray() {
         return [
             'gradeable_title' => $this->graded_gradeable->getGradeable()->getTitle(),
