@@ -160,9 +160,6 @@ $(function () {
       checkNotebookScroll();
     }
   });
-  notebookScrollLoad();
-
-  checkNotebookScroll();
 
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
@@ -188,6 +185,9 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  notebookScrollLoad();
+  checkNotebookScroll();
 });
 
 function changeStudentArrowTooltips(data) {
@@ -302,7 +302,7 @@ function notebookScrollLoad() {
     }
     if (element !== null) {
       if (element.length !== 0) {
-        notebookView.animate({scrollTop: (element.offset().top - notebookView.offset().top + notebookView.scrollTop())}, 100);
+        notebookView.scrollTop(element.offset().top - notebookView.offset().top + notebookView.scrollTop());
       } else {
         localStorage.removeItem('ta-grading-notebook-view-scroll-id');
         localStorage.removeItem('ta-grading-notebook-view-scroll-item');
