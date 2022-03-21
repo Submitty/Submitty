@@ -894,7 +894,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -949,7 +949,7 @@ HTML;
                 "message" => "Overridden grades"
             ];
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $error_message = [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange
@@ -963,13 +963,13 @@ HTML;
                 ];
             }
         }
-        elseif ($late_status == LateDayInfo::STATUS_LATE) {
+        elseif ($late_status === LateDayInfo::STATUS_LATE) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
                 "message" => "Late Submission"
             ];
         }
-        elseif ($late_status == LateDayInfo::STATUS_BAD) {
+        elseif ($late_status === LateDayInfo::STATUS_BAD) {
             if ($rollbackSubmission === -1) {
                 $error_message = [
                     "color" => "var(--standard-red-orange)", // fire engine red
