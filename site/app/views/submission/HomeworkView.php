@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\LateDayInfo;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -431,6 +432,13 @@ class HomeworkView extends AbstractView {
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
+        
+        // Grab all team member late day information
+        $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
+        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+            $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
+            return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+        }, $team_ldi)) : 0;
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
@@ -473,6 +481,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
+            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
