@@ -235,6 +235,18 @@ jobs:
             files: autograder/coverage.xml
             flags: autograder
 
+        #submitty_daemon_jobs unit tests
+        - name: Run bulk upload unit tests
+          working-directory: sbin/submitty_daemon_jobs
+          run : |
+            coverage run -m unittest discover tests -t .
+            coverage xml
+        - name: Upload submitty_daemon_jobs Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: sbin/submitty_daemon_jobs/coverage.xml
+            flags: submitty_daemon_jobs
+
 
     e2e:
         needs:
