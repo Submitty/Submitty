@@ -17,7 +17,7 @@ function getTwigTSFiles(dir) {
 function getAllFiles(dir) {
     return getTwigTSFiles(path.join(dir, "twig")).concat(fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
         if (!entry.isDirectory() && entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
-            acc.push(path.join(dir, "module", entry.name));
+            acc.push(path.join(dir, entry.name));
         }
         
         return acc;
