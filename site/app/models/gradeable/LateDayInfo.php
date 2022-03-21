@@ -97,7 +97,7 @@ class LateDayInfo extends AbstractModel {
         $ldi = null;
 
         if ($ldc !== null) {
-            $ldi['graded_gradeable'] = $graded_gradable;
+            $ldi['graded_gradeable'] = $graded_gradeable;
             $ldi = new LateDayInfo($core, $user, $ldc);
         }
 
