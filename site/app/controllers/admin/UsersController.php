@@ -576,7 +576,7 @@ class UsersController extends AbstractController {
             // Find the number of rotating sections to create or update during section assignments
             $num_rotating_sections = $this->core->getQueries()->getMaxRotatingSection();
             if ($num_rotating_sections === null) {
-                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot put newly 
+                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot put newly
                     registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
@@ -633,7 +633,11 @@ class UsersController extends AbstractController {
      * @return array $contents  Data rows and columns read from xlsx or csv file
      */
     private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        // Need to provide a comment typehint on these two variables to avoid a phpstan error
+        // See: https://github.com/phpstan/phpstan/issues/6559
+        /** @var string */
         $csv_file = '';
+        /** @var string */
         $xlsx_file = '';
 
         // Data is confidential, and therefore must be deleted immediately after

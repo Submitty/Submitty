@@ -436,7 +436,7 @@ class CourseMaterialsController extends AbstractController {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $requested_path = "";
-        if (isset($_POST['requested_path']) && $_POST['requested_path'] !== "") {
+        if (!empty($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
             $tmp_path = $upload_path . "/" . $requested_path;
             $dirs = explode("/", $tmp_path);
@@ -493,7 +493,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Invalid url");
             }
             $url_url = $_POST['url_url'];
-            if (isset($requested_path) && $requested_path !== "") {
+            if ($requested_path !== "") {
                 $this->addDirs($requested_path, $upload_path, $dirs_to_make);
             }
         }

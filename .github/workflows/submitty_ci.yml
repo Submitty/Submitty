@@ -454,11 +454,18 @@ jobs:
               key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
               restore-keys: |
                  ${{ runner.os }}-cache-node-modules-dev
-          - name: Install Cypress
+
+          - name: Install node dependencies
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: |
               npm install file-saver --save
               npm install --production=false
+
+          - name: Run API tests
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            run: npm run test:api
+            env:
+              BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
