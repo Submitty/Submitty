@@ -281,7 +281,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         });
 
-        it('Should display warning alert when no section selected for restrict course materials', () => {
+        it('Should not upload file when no section selected for restrict course materials', () => {
             cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
             cy.get('#all_Sections_Showing_yes').click();
             cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
@@ -291,6 +291,9 @@ describe('Test cases revolving around course material uploading and access contr
             cy.on('window:alert', (alert) => {
                 expect(alert).eq('Select at least one section');
             });
+
+            cy.reload();
+            cy.get('.file-viewer').should('not.exist');
         });
 
         it('Should restrict course materials within folders', () => {
