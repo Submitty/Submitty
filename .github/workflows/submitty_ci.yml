@@ -239,6 +239,7 @@ jobs:
         - name: Run bulk upload unit tests
           working-directory: sbin/submitty_daemon_jobs
           run : |
+            sudo apt-get install -y poppler-utils
             coverage run -m unittest discover tests -t .
             coverage xml
         - name: Upload submitty_daemon_jobs Coverage
