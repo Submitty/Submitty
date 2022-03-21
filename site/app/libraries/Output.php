@@ -523,7 +523,7 @@ HTML;
     }
 
     public function addInternalModuleJs(string $file) {
-        $this->addModuleJs($this->timestampResource($file, 'mjs/module'));
+        $this->addModuleJs($this->timestampResource($file, 'mjs'));
     }
 
     public function addInternalJs($file, $folder = 'js') {
