@@ -1622,10 +1622,6 @@ class SubmissionController extends AbstractController {
                 return -1;
             };
 
-            var_dump(array_map(function ($member) {
-                return $member->getId();
-            }, $team_members));
-
             // Gather all members who have a BAD status as a result of the new submission
             $bad_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
                 $new_submission_ldi = LateDayInfo::fromUser($this->core, $member, $graded_gradeable);
@@ -1637,10 +1633,6 @@ class SubmissionController extends AbstractController {
                 return ($new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
-    
-            var_dump(array_map(function ($member) {
-                return $member->getId();
-            }, $team_members));
 
             // Gather all members who have been chared more late days as a result of the new submission
             $changed_members = array_filter($team_members, function ($member) use ($graded_gradeable, $previous_submission_ldi) {
@@ -1653,10 +1645,6 @@ class SubmissionController extends AbstractController {
                 return ($new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
-
-            var_dump(array_map(function ($member) {
-                return $member->getId();
-            }, $team_members));
 
             $notifications = [
                 'bad_submissions' => [
@@ -1681,7 +1669,7 @@ class SubmissionController extends AbstractController {
                 $members = array_map(function ($member) {
                     return $member->getId();
                 }, $notification['members']);
-                
+
                 $extra_message = $notification['extra_message'];
                 $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content . $extra_message, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
                 $this->core->getNotificationFactory()->onTeamEvent($event, array_values($members));
