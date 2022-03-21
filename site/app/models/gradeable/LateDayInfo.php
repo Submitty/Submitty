@@ -90,10 +90,10 @@ class LateDayInfo extends AbstractModel {
      * @param Core $core
      * @param User $user
      * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo|array
+     * @return LateDayInfo|null
      */
-    public static function fromUser(Core $core, User $user, GradedGradeable $graded_gradable): ?LateDayInfo {
-        $ldc = $core->getQueries()->getLateDayCacheForUserGradeable($user->getId(), $graded_gradable->getGradeableId());
+    public static function fromUser(Core $core, User $user, GradedGradeable $graded_gradeable): ?LateDayInfo {
+        $ldc = $core->getQueries()->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
         $ldi = null;
 
         if ($ldc !== null) {
