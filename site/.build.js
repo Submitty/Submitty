@@ -2,10 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const module_path = path.join(__dirname, 'ts');
 
-function getTwigFiles(dir) {
+function getTwigTSFiles(dir) {
     return fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
         if (entry.isDirectory()) {
-            acc.push(...getTwigFiles(path.join(dir, entry.name)));
+            acc.push(...getTwigTSFiles(path.join(dir, entry.name)));
         } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
             acc.push(path.join(dir, entry.name));
         }
@@ -15,7 +15,7 @@ function getTwigFiles(dir) {
 }
 
 function getAllFiles(dir) {
-    return getTwigFiles(path.join(dir, "twig")).concat(fs.readdirSync(path.join(dir, "module"), { withFileTypes: true }).reduce((acc, entry) => {
+    return getTwigTSFiles(path.join(dir, "twig")).concat(fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
         if (!entry.isDirectory() && entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
             acc.push(path.join(dir, "module", entry.name));
         }

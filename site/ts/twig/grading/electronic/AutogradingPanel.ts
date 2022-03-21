@@ -1,4 +1,4 @@
-import { getCsrfToken } from '../../../module/utils/server';
+import { getCsrfToken } from '../../../utils/server';
 
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
