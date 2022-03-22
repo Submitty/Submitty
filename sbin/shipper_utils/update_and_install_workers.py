@@ -49,6 +49,11 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
+        res = subprocess.run(['lsb_release', '-a'], capture_output=True, check=True, text=True)
+        if res.returncode != 0:
+            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
+        else:
+            print(res.stdout)
         client = docker.from_env()
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
@@ -63,18 +68,13 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_images_obj = client.images.list()
         #print the details of the image
         get_docker_info.printDockerInfo()
-        res = subprocess.run(['lsb_release', '-a'], capture_output=True, check=True, text=True)
-        if res.returncode != 0:
-            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
-        else:
-            print(res.stdout)
     else:
         commands = list()
+        commands.append('lsb_release -a')
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
         commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_docker_info.py')}")
-        commands.append('lsb_release -a')
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success
