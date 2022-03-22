@@ -72,7 +72,6 @@ def preprocess(img):
     # after upgrading the function only returns contours and hierarchy
     _, contours, hierarchy = cv2.findContours(img_final_bin, cv2.RETR_TREE,
                                               cv2.CHAIN_APPROX_SIMPLE)
-    print(contours)
     contours, boundingBoxes = sort_contours(contours)
 
     sub_boxes = []
