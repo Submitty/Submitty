@@ -7,10 +7,6 @@ describe('Test cases involving the files panel', () => {
         cy.get('#student_info_btn').click();
     });
 
-    afterEach(() => {
-        cy.logout(true);
-    });
-
     it('test cancelling and reinstating assignment', () => {
         cy.get('.rubric-title').should('contain', 'Alysha Reynolds (reynoa)');
         cy.get('.rubric-title').should('contain', 'Submission Number: 2 / 3');

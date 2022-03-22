@@ -16,10 +16,6 @@ describe('navigation page', () => {
         cy.viewport(1920,1200);
     });
 
-    afterEach(() => {
-        cy.logout(true);
-    });
-
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
         cy.visit(`/courses/${getCurrentSemester()}/sample`);

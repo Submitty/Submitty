@@ -5,10 +5,6 @@ describe('Test cases involving the late days allowed page', () => {
             cy.login('student');
         });
 
-        afterEach(() => {
-            cy.logout(true);
-        });
-
         it('should not allow access', () => {
             cy.get('.content').contains("You don't have access to this page");
         });
@@ -18,10 +14,6 @@ describe('Test cases involving the late days allowed page', () => {
         beforeEach(() => {
             cy.visit(['sample', 'late_days']);
             cy.login('instructor');
-        });
-
-        afterEach(() => {
-            cy.logout(true);
         });
 
         it('make sure the form is blank', () => {

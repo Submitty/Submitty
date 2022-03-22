@@ -14,10 +14,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit(autograding_status_path);
         });
 
-        afterEach(() => {
-            cy.logout(true);
-        });
-
         it('Should start at pause update', () => {
             cy.get('#toggle-btn').should('have.text', 'Pause Update').click().should('have.text', 'Resume Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');

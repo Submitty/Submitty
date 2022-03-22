@@ -6,10 +6,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login();
     });
 
-    afterEach(() => {
-        cy.logout(true);
-    });
-
     it('Should upload a file and be able to view and download it', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });

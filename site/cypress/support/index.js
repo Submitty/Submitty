@@ -16,3 +16,7 @@
 import './commands';
 
 require('@cypress/skip-test/support');
+
+afterEach(() => {
+    cy.logout(true);
+});

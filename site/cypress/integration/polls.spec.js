@@ -6,10 +6,6 @@
  */
 
 describe('Test cases revolving around polls functionality', () => {
-    afterEach(() => {
-        cy.logout(true);
-    });
-
     it('Should verify all existing polls are on the instructor page', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
