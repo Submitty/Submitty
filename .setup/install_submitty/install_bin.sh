@@ -55,7 +55,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/autograder
 mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 
 # copy all of the files
-rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
+rsync -rtz --exlcude tests  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
 rsync -rtz  ${SUBMITTY_REPOSITORY}/autograder/* ${SUBMITTY_INSTALL_DIR}/autograder/
 
 # most of the scripts should be root only
