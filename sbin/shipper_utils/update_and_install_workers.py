@@ -3,7 +3,6 @@
 import os
 from os import path
 import json
-from matplotlib.pyplot import text
 import subprocess
 import docker
 import traceback
@@ -157,7 +156,7 @@ def parse_arguments():
 
 
 def update_machine(machine,stats,args):
-    print(f"echo UPDATE MACHINE: {machine}")
+    print(f"UPDATE MACHINE: {machine}")
 
     user = stats['username']
     host = stats['address']
