@@ -49,7 +49,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        res = subprocess.run(['lsb_release', '-a'], capture_output=True, check=True, text=True)
+        res = subprocess.run('lsb_release -a', capture_output=True, check=True, text=True)
         if res.returncode != 0:
             print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
         else:
