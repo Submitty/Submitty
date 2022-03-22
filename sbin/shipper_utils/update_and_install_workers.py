@@ -2,9 +2,8 @@
 
 import os
 from os import path
-import sys
 import json
-import paramiko
+from matplotlib.pyplot import text
 import subprocess
 import docker
 import traceback
@@ -65,7 +64,11 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_images_obj = client.images.list()
         #print the details of the image
         get_docker_info.printDockerInfo()
-        subprocess.run(['lsb_release', '-a'], capture_output=True, check=True)
+        res = subprocess.run(['lsb_release', '-a'], capture_output=True, check=True, text=True)
+        if res.returncode != 0:
+            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
+        else:
+            print(res.stdout)
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
@@ -133,10 +136,11 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
     # If this becomes too slow, we can exculde directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
     command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
-    os.system(command)
-
-
-
+    res = subprocess.run(command, capture_output=True, check= True, text=True)
+    if res.returncode != 0:
+        print(f"rsync ended in error with code {res.returncode}\n {res.stderr}")
+    else:
+        print(res.stdout)
 
 def run_systemctl_command(machine, command, is_primary):
     command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
@@ -184,7 +188,6 @@ def update_machine(machine,stats,args):
         print(f"ERROR: Failed to pull one or more required docker images on {machine}")
         return False
     return True
-
 
 if __name__ == "__main__":
 
