@@ -81,11 +81,8 @@ class SubmissionController extends AbstractController {
             && (
                 !$gradeable->isSubmissionOpen()
                 || !$gradeable->isStudentView()
-                || (
-                    $gradeable->isStudentView()
-                    && $gradeable->isStudentViewAfterGrades()
-                    && !$gradeable->isTaGradeReleased()
-                )
+                || $gradeable->isStudentViewAfterGrades()
+                && !$gradeable->isTaGradeReleased()
             )
         ) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
