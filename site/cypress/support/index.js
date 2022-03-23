@@ -32,7 +32,8 @@ afterEach(() => {
     for (const title of Cypress.currentTest.titlePath) {
         if (title in currPath) {
             currPath = currPath[title];
-        } else {
+        }
+        else {
             currPath = null;
             break;
         }
