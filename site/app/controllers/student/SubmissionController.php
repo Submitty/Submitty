@@ -72,6 +72,7 @@ class SubmissionController extends AbstractController {
             // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
             // FIXME    to nav with an error
         }
+
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
@@ -80,9 +81,11 @@ class SubmissionController extends AbstractController {
             && (
                 !$gradeable->isSubmissionOpen()
                 || !$gradeable->isStudentView()
-                || $gradeable->isStudentView()
-                && $gradeable->isStudentViewAfterGrades()
-                && !$gradeable->isTaGradeReleased()
+                || (
+                    $gradeable->isStudentView()
+                    && $gradeable->isStudentViewAfterGrades()
+                    && !$gradeable->isTaGradeReleased()
+                )
             )
         ) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
