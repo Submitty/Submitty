@@ -28,20 +28,16 @@ const LOGOUT_EXCLUDE = {
 };
 
 afterEach(() => {
-    if (Cypress.currentTest.titlePath[0] in LOGOUT_EXCLUDE) {
-        let currPath = LOGOUT_EXCLUDE[Cypress.currentTest.titlePath[0]];
-        for (let i = 1; i < Cypress.currentTest.titlePath.length; i++) {
-            if (Cypress.currentTest.titlePath[i] in currPath) {
-                currPath = currPath[Cypress.currentTest.titlePath[i]];
-            }
-            else {
-                currPath = null;
-                break;
-            }
-        }
-        if (currPath !== null) {
-            return;
+    let currPath = LOGOUT_EXCLUDE;
+    for (const title of Cypress.currentTest.titlePath) {
+        if (title in currPath) {
+            currPath = currPath[title];
+        } else {
+            currPath = null;
+            break;
         }
     }
-    cy.logout(true);
+    if (currPath === null) {
+        cy.logout(true);
+    }
 });
