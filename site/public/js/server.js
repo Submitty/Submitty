@@ -1282,13 +1282,12 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    var size = $(document.body).width();
-    if (size < 1150) {
-        document.cookie = "collapse_sidebar=true;";
+    if ($(document.body).width() < 1150) {
+        document.cookie = "collapse_sidebar=true;path=/";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;";
+        document.cookie = "collapse_sidebar=false;path=/";
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1334,10 +1333,10 @@ $(document).ready(function() {
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("aside");
-    var shown = sidebar.hasClass("collapsed");
+    const sidebar = $("aside");
+    const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1356,11 +1355,6 @@ $(document).ready(function() {
                 return ""
             }
         }
-    });
-
-    //If they make their screen too small, collapse the sidebar to allow more horizontal space
-    $(document.body).resize(function() {
-        checkSidebarCollapse();
     });
 });
 
