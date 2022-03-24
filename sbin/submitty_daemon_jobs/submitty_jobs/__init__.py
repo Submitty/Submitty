@@ -22,7 +22,7 @@ try:
     DATA_DIR = JSON_FILE['submitty_data_dir']
     QUEUE_DIR = Path(DATA_DIR, 'daemon_job_queue')
 except Exception as err:
-    if os.environ.get('PYTEST') == None:
+    if os.environ.get('PYTEST') is None:
         raise err
     else:
         print(err)
@@ -34,7 +34,7 @@ try:
     DAEMON_USER = JSON_FILE['daemon_user']
     VERIFIED_ADMIN_USER = JSON_FILE['verified_submitty_admin_user']
 except Exception as err:
-    if os.environ.get('PYTEST') == None:
+    if os.environ.get('PYTEST') is None:
         raise err
     else:
         print(err)
