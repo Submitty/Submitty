@@ -1,5 +1,3 @@
-window.addEventListener("resize", checkSidebarCollapse);
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
@@ -1356,6 +1354,8 @@ $(document).ready(function() {
             }
         }
     });
+
+    window.addEventListener("resize", checkSidebarCollapse);
 });
 
 function checkBulkProgress(gradeable_id){
