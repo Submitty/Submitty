@@ -16,26 +16,15 @@
                 Yes
             </label>
             <br>
-            <div id = "show-some-section-selection-edit" style="display: none">
+            <div id = "show-some-section-selection-edit" class= "show-some-section-selection" style="display: none;">
             <br>
-            <table>
             {% for section in reg_sections %}
-                {% if loop.index0%5 == 0 %}
-                    <tr> 
-                {% endif %}
-                <td>
-                    <span class = "inline">
-                    <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
-                    <label for="section-edit-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    </span>
-                </td>
-
-                {% if ( loop.index%5 == 0  or loop.last) %}
-                    </tr>
-                {% endif %}
+                <div>
+                <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                <label for="section-edit-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
             {% endfor %}
-            </table>
             </div>
             <script>
                 function toggleRegistrationSectionsEdit(){

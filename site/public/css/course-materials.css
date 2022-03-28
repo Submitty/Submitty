@@ -20,3 +20,8 @@ a.popout-item:hover *,
 a.popout-item > .fas:hover {
     color: var(--external-link-hover);
 }
+
+.show-some-section-selection {
+    display: flex;
+    flex-wrap: wrap;
+}
