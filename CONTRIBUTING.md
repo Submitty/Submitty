@@ -8,4 +8,4 @@ Contact methods, including Slack, can be found [here](https://submitty.org/conta
 
 Please note, we will not "assign" any issues to any applicants. You must be a member
 of the Submitty organizations to be assigned. Additionally, However, feel free to comment or ask questions
-in an issue, and if you have a solution, please open a pull request from your fork for it.
+about an issue, and if you have a solution, please open a pull request from your fork for it.
