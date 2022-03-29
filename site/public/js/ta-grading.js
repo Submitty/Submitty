@@ -160,9 +160,6 @@ $(function () {
       checkNotebookScroll();
     }
   });
-  notebookScrollLoad();
-
-  checkNotebookScroll();
 
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
@@ -188,6 +185,9 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  notebookScrollLoad();
+  checkNotebookScroll();
 });
 
 function changeStudentArrowTooltips(data) {
