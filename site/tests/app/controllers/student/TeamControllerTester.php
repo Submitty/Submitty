@@ -13,7 +13,6 @@ use app\libraries\Utils;
 use ReflectionObject;
 
 class TeamControllerTester extends BaseUnitTest {
-
     private $core;
 
     private $config = [];

@@ -5,7 +5,6 @@ namespace app\views;
 use app\models\OfficeHoursQueueModel;
 
 class OfficeHoursQueueView extends AbstractView {
-
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
