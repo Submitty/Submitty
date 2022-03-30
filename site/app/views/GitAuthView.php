@@ -2,9 +2,6 @@
 
 namespace app\views;
 
-use app\entities\GitAuthToken;
-use app\libraries\FileUtils;
-
 class GitAuthView extends AbstractView {
     public function showGitAuthPage(array $tokens, $new_token = null, $new_token_val = null) {
         $this->core->getOutput()->addInternalCss('git-auth-tokens.css');
