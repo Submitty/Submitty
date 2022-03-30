@@ -3,32 +3,25 @@
 {% block title %}Create Git Auth Token{% endblock %}
 {% block body %}
     <p class="std-margin">
-        Below you can create a new Git auth token. Please read the documentation here to
-        learn more about how to use your auth token.
+        Below you can create a new Git auth token. Please read the documentation
+        <a href="https://submitty.org/student/submission/version_control" target="_blank">here</a>
+        to learn more about how to use your auth token.
     </p>
 
     <div class="flex-col">
         <input type="text" hidden name="csrf_token" value="{{ csrf_token }}" />
-        <label for="new-auth-token-name">Name:</label>
+        <label for="new-auth-token-name">Name (e.g. Laptop, Desktop, etc):</label>
         <input type="text" name="name" id="new-auth-token-name">
 
-        <label for="new-auth-token-expiration">Expiration (or leave blank to be indefinite)</label>
-        <input type="text" class="auth-token-date-picker" id="new-auth-token-expiration" name="expiration">
+        <label for="new-auth-token-expiration">Expiration</label>
+        <select name="expiration" id="new-auth-token-expiration">
+            <option value="1">1 Month</option>
+            <option value="6">6 Months</option>
+            <option value="12">1 Year</option>
+            <option value="0">Never Expire</option>
+        </select>
     </div>
 
-    <script>
-        flatpickr('.auth-token-date-picker', {
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
-            }
-        })
-    </script>
 {% endblock %}
 {% block form %}
     <form method="post">

@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class GitAuthToken
  * @package app\entities
  * @ORM\Entity(repositoryClass="\app\repositories\GitAuthTokenRepository")
- * @ORM\Table(name="auth_tokens")
+ * @ORM\Table(name="git_auth_tokens")
  */
 class GitAuthToken {
     /**
@@ -43,16 +43,11 @@ class GitAuthToken {
      */
     protected $expiration;
 
-    public function __construct(string $user_id, string $token, string $name, ?string $expiration) {
+    public function __construct(string $user_id, string $token, string $name, ?\DateTime $expiration) {
         $this->user_id = $user_id;
         $this->token = $token;
         $this->name = $name;
-        if ($expiration === null) {
-            $this->expiration = null;
-        }
-        else {
-            $this->expiration = new \DateTime($expiration);
-        }
+        $this->expiration = $expiration;
     }
 
     /**

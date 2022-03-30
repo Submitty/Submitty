@@ -38,9 +38,18 @@ class GitAuthController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
         }
         $name = $_POST['name'];
-        $expiration = $_POST['expiration'];
-        if ($expiration === '') {
+        $expiration = intval($_POST['expiration']);
+        $valid_expirations = [0, 1, 6, 12];
+        if (!in_array($expiration, $valid_expirations)) {
+            $this->core->addErrorMessage("Please pick a valid expiration time");
+            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+        }
+        if ($expiration === 0) {
             $expiration = null;
+        }
+        else {
+            $time_to_add = new \DateInterval("P{$expiration}M");
+            $expiration = $this->core->getDateTimeNow()->add($time_to_add);
         }
 
         $token = Utils::generateRandomString();
@@ -55,9 +64,7 @@ class GitAuthController extends AbstractController {
         $em = $this->core->getSubmittyEntityManager();
         $em->persist($auth_token);
         $em->flush();
-        $id = $auth_token->getId();
 
-        $em = $this->core->getSubmittyEntityManager();
         /** @var GitAuthTokenRepository $repo */
         $repo = $em->getRepository(GitAuthToken::class);
         $tokens = $repo->getAllByUser($this->core->getUser()->getId());
@@ -68,7 +75,8 @@ class GitAuthController extends AbstractController {
             GitAuthView::class,
             'showGitAuthPage',
             $tokens,
-            [$id => $token]
+            $auth_token,
+            $token
         );
     }
 

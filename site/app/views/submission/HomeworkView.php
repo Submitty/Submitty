@@ -505,7 +505,9 @@ class HomeworkView extends AbstractView {
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
-            'recent_version_url' => $recent_version_url
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['git_auth_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 

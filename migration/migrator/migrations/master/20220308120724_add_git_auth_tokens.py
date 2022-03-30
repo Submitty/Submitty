@@ -12,12 +12,12 @@ def up(config, database):
     """
     database.execute(
     """
-    CREATE TABLE IF NOT EXISTS auth_tokens (
+    CREATE TABLE IF NOT EXISTS git_auth_tokens (
         id serial NOT NULL PRIMARY KEY,
         user_id varchar NOT NULL,
         token varchar NOT NULL,
         name varchar NOT NULL,
-        expiration timestamptz,
+        expiration timestamptz(0),
         CONSTRAINT user_fk
             FOREIGN KEY(user_id)
                 REFERENCES users(user_id)
