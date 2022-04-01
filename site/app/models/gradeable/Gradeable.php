@@ -1258,12 +1258,151 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Given a file or directory it will validate if it can be read for autograding
+     *
+     * @param string $path
+     * @param array $group_map
+     * @param array $user_map
+     * @param bool $dir
+     * @return bool
+     */
+    private function checkValidPerms(string $path, array &$group_map, array &$user_map, bool $dir = false): bool {
+        $perms = @fileperms($path);
+        if ($perms === false) {
+            return false;
+        }
+        if ($perms & 0x0004) { // World readable check
+            if (($dir && ($perms & 0x0001)) || !$dir) { // World executable check if dir
+                return true;
+            }
+        }
+
+        $user = $this->core->getUser()->getId();
+        $group_id = @filegroup($path);
+        if ($group_id === false) {
+            return false;
+        }
+        if (!in_array($group_id, $group_map)) {
+            $group_map[$group_id] = posix_getgrgid($group_id)["members"];
+        }
+        $group_users = $group_map[$group_id];
+
+        $group_readable = false;
+
+        if ($perms & 0x0020) { // Group readable check
+            if (($dir && ($perms & 0x0008)) || !$dir) { // Group executable check if dir
+                $group_readable = true;
+            }
+        }
+
+        $instructor_check = in_array($user, $group_users) && $group_readable;
+        $submitty_daemon_check = in_array("submitty_daemon", $group_users) && $group_readable;
+
+        $owner_id = @fileowner($path);
+        if ($owner_id === false) {
+            return false;
+        }
+        if (!array_key_exists($owner_id, $user_map)) {
+            $user_map[$owner_id] = posix_getpwuid($owner_id)["name"];
+        }
+        $owner = $user_map[$owner_id];
+
+        $owner_readable = false;
+
+        if ($perms & 0x0100) {  // Owner readable check
+            if (($dir && ($perms & 0x0040)) || !$dir) { // Owner executable check if dir
+                $owner_readable = true;
+            }
+        }
+
+        if ($owner === "submitty_daemon") {
+            $submitty_daemon_check = $submitty_daemon_check || $owner_readable;
+        }
+
+        if ($owner === $user) {
+            $instructor_check = $instructor_check || $owner_readable;
+        }
+
+        if ($instructor_check && $submitty_daemon_check) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the path and all subdirectories/files are valid
+     * Returns a string if there was an error found
+     *
+     * @param string $path
+     * @return bool | string
+     */
+    private function checkPath(string $path) {
+        if (!is_readable($path)) {
+            return "Cannot read provided path.";
+        }
+        $group_map = [];
+        $user_map = [];
+        $dir = @scandir($path);
+        if (!is_array($dir)) {
+            return "Path provided is not a directory.";
+        }
+        // If the folder doesn't contain config.json then definitely isn't a valid path
+        if (!in_array("config.json", $dir)) {
+            return "Path provided does not contain a config.json.";
+        }
+        $cur_paths = [$path];
+        $next_paths = [];
+        $checked_paths = 1;
+        while ($checked_paths <= 1000 && count($cur_paths) !== 0) {
+            foreach ($cur_paths as $cur_path) {
+                $is_dir = is_dir($cur_path);
+                if (!$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
+                    return "Invalid permissions on a file or directory within specified path.";
+                }
+                if ($is_dir) {
+                    $next_paths_tmp = @scandir($cur_path);
+                    if (!is_array($next_paths_tmp)) {
+                        return "Invalid permissions on a file or directory within specified path.";
+                    }
+                    foreach ($next_paths_tmp as $next_path) {
+                        if ($next_path === "." || $next_path === "..") {
+                            continue;
+                        }
+                        $next_paths[] = FileUtils::joinPaths($cur_path, $next_path);
+                        $checked_paths++;
+                        if ($checked_paths >= 1000) {
+                            break;
+                        }
+                    }
+                    if ($checked_paths >= 1000) {
+                        break;
+                    }
+                }
+            }
+            $cur_paths = $next_paths;
+            $next_paths = [];
+        }
+
+        if ($checked_paths >= 1000) {
+            return "Path provided contains too many files.";
+        }
+
+        return true;
+    }
+
+    /**
      * Sets the path to the autograding config
      * @param string $path Must not be blank
      */
     public function setAutogradingConfigPath($path) {
         if ($path === '') {
             throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
+        }
+        $check = $this->checkPath($path);
+        if (!$this->core->isTesting() && is_string($check)) {
+            // String means an error was found
+            throw new \InvalidArgumentException($check);
         }
         $this->autograding_config_path = strval($path);
         $this->modified = true;
