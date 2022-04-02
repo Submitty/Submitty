@@ -286,7 +286,14 @@
         }
 
         // change the url so if the user refreshes the page, they stay on the same tab
-        window.history.replaceState("", "", buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'status']) + `?nav_tab=${tab}`);
+        let searchParams = new URLSearchParams(window.location.search);
+        if (!searchParams.has('nav_tab')) {
+            searchParams.append('nav_tab', tab);
+        }
+        else {
+            searchParams.set('nav_tab', tab);
+        }
+        window.history.replaceState("", "", buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'status']) + `?${searchParams.toString()}`);
         adminGradeableNavTab = tab;
 
         //$('.page-content').hide();

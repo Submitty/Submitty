@@ -53,7 +53,8 @@ class ElectronicGraderView extends AbstractView {
         string $section_type,
         int $regrade_requests,
         bool $show_warnings,
-        int $submissions_in_queue
+        int $submissions_in_queue,
+        $sort
     ) {
 
         $peer = $gradeable->hasPeerComponent();
@@ -262,6 +263,7 @@ class ElectronicGraderView extends AbstractView {
             }
         }
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $details_url = $sort === 'random' ? $details_url . '?' . http_build_query(['sort' => 'random']) : $details_url;
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
             "gradeable_id" => $gradeable->getId(),
@@ -815,6 +817,8 @@ HTML;
             }
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $stats_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
+        $stats_url = $sort === 'random' ? $stats_url . '?' . http_build_query(['sort' => 'random']) : $stats_url;
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
@@ -851,7 +855,7 @@ HTML;
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "is_team" => $gradeable->isTeamAssignment(),
             "is_vcs" => $gradeable->isVcs(),
-            "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
+            "stats_url" => $stats_url,
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),

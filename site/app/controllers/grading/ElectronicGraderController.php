@@ -483,7 +483,7 @@ class ElectronicGraderController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
-    public function showStatus($gradeable_id) {
+    public function showStatus($gradeable_id, $sort = null) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
@@ -830,7 +830,8 @@ class ElectronicGraderController extends AbstractController {
             $section_key,
             $regrade_requests,
             $show_warnings,
-            $submissions_in_queue
+            $submissions_in_queue,
+            $sort
         );
     }
 
