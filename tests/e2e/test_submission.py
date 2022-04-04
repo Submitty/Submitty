@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+import time
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -97,6 +98,7 @@ class TestSubmission(BaseTestCase):
             autograding_done = False
             for i in range(6):
                 try:
+                    time.sleep(0.1)
                     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[div/@id='tc_0']")))
                     autograding_done = True
                 except TimeoutException as ex:
