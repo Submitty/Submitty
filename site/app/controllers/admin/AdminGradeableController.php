@@ -157,7 +157,7 @@ class AdminGradeableController extends AbstractController {
 
         $type_string = 'UNKNOWN';
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            if ($gradeable->isScannedExam()) {
+            if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades()) {
                 $type_string = self::gradeable_type_strings['electronic_exam'];
             }
             elseif ($gradeable->isVcs()) {
@@ -283,7 +283,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
-            'is_exam' => $gradeable->isScannedExam()
+            'is_bulk_upload' => $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -804,6 +804,7 @@ class AdminGradeableController extends AbstractController {
             'autograding_config_path',
             'student_view',
             'student_view_after_grades',
+            'student_download',
             'student_submit',
             'late_days',
             'precision'
@@ -832,6 +833,7 @@ class AdminGradeableController extends AbstractController {
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'student_view' => true,
                 'student_view_after_grades' => false,
+                'student_download' => true,
                 'student_submit' => true,
                 'late_days' => $default_late_days,
                 'precision' => 0.5
@@ -918,7 +920,6 @@ class AdminGradeableController extends AbstractController {
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
-                'scanned_exam' => $details['scanned_exam'] === 'true',
                 'allow_custom_marks' => true,
 
                 //For discussion component
@@ -976,10 +977,12 @@ class AdminGradeableController extends AbstractController {
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Setup student permissions specially for scanned exams
-        if ($gradeable->isScannedExam()) {
+        if ($details['bulk_upload'] === 'true') {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
+            $gradeable->setStudentDownload(false);
+
             $gradeable->setAutogradingConfigPath(
                 FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
@@ -1047,9 +1050,9 @@ class AdminGradeableController extends AbstractController {
 
         $boolean_properties = [
             'ta_grading',
-            'scanned_exam',
             'student_view',
             'student_view_after_grades',
+            'student_download',
             'student_submit',
             'peer_grading',
             'late_submission_allowed',

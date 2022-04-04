@@ -5,7 +5,7 @@
     </div>
     <div>
         <fieldset>
-            <legend>View the gradeable on the course home page and download submitted files?</legend>
+            <legend>View the gradeable on the course home page?</legend>
             <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                     {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
             <input type="radio" id="no_student_view" name="student_view" value="false"
@@ -17,6 +17,16 @@
                     {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
             </div>
         </fieldset>
+    </div>
+
+    <div id="student_download_view">
+        <div>
+            <fieldset><legend>View and download submitted files?</legend>
+            <input type="radio" id="yes_student_download" name="student_download" value="true"
+                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
+            <input type="radio" id="no_student_download" name="student_download" value="false"
+                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> <label for="no_student_download">No</label></fieldset>
+        </div>
     </div>
 
     <div id="student_submit_view">
@@ -222,25 +232,31 @@
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
             disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
+            disableElementChildren('#student_download_view', !$('#no_student_view_after_grades').is(':checked'));
         }
         else {
             // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_view', true);
+            disableElementChildren('#student_download_view', true);
             let studentSubmit = $('#no_student_submit');
+            let studentDownload = $('#no_student_download');
 
             studentSubmit.prop('checked', true);
+            studentDownload.prop('checked', true);
             studentSubmit.change();
+            studentDownload.change();
 
             $('input[name=student_view_after_grades]').prop('checked', false);
+            $('input[name=student_download]').prop('checked', false);
         }
     }
 
     function onStudentSubmitChange() {
         let cont = $('#due_date_options_container');
-        let exam = {{ is_exam ? "true": "false" }};
+        let bulk_upload = {{ is_bulk_upload ? "true": "false" }};
 
         let no_due_date = $('#has_due_date_no');
-        if($('#yes_student_submit').is(':checked') || exam) {
+        if($('#yes_student_submit').is(':checked') || bulk_upload) {
             cont.show();
         }
         else {
@@ -308,6 +324,9 @@
             let elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
+            let download = $('#no_student_download');
+            download.prop('checked', true);
+            download.change();
             let sub = $('#no_student_submit');
             sub.prop('checked', true);
             sub.change();

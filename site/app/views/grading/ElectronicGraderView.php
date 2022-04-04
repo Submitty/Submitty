@@ -975,7 +975,7 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ];
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isStudentView() && $graded_gradeable->getGradeable()->isStudentViewAfterGrades()) {
             $pattern1 = "upload.pdf";
             $pattern2 = "/upload_page_\d+/";
             $pattern3 = "/upload_version_\d+_page\d+/";

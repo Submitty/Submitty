@@ -108,7 +108,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails()
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
         ]);
     }
 
@@ -410,13 +410,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
 
         $id = $this->core->getUser()->getId();
@@ -672,14 +666,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
