@@ -47,7 +47,7 @@ class AdminGradeableController extends AbstractController {
         'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
-        'electronic_exam' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
+        'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
     ];
 
     /**
@@ -158,7 +158,7 @@ class AdminGradeableController extends AbstractController {
         $type_string = 'UNKNOWN';
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades()) {
-                $type_string = self::gradeable_type_strings['electronic_exam'];
+                $type_string = self::gradeable_type_strings['electronic_bulk'];
             }
             elseif ($gradeable->isVcs()) {
                 $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
