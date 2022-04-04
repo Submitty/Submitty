@@ -89,7 +89,7 @@
             <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
             <span class="required_type" >(Required)</span>
         {% else %}
-            <fieldset><legend><b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span></legend>
+            <fieldset><legend><b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string" data-hw="{{ gradeable_type_strings['electronic_hw'] | e('html_attr') }}" data-bulk="{{ gradeable_type_strings['electronic_bulk'] | e ('html_attr') }}">{{ type_string }}</span></legend>
             <br />
         {% endif %}
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>

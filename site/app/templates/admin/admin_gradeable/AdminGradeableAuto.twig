@@ -229,6 +229,19 @@
     }
 
     function onStudentViewChange() {
+        if ($('#radio_ef_student_upload').is(':checked') || $('#radio_ef_bulk_upload').is(':checked')) {
+            if ($('#yes_student_view_after_grades').is(':checked')) {
+                $('#radio_ef_student_upload').prop('checked', false);
+                $('#radio_ef_bulk_upload').prop('checked', true);
+                let gradeableTypeString = $('#gradeable-type-string');
+                gradeableTypeString.html(gradeableTypeString.attr('data-bulk'));
+            } else {
+                $('#radio_ef_bulk_upload').prop('checked', false);
+                $('#radio_ef_student_upload').prop('checked', true);
+                let gradeableTypeString = $('#gradeable-type-string');
+                gradeableTypeString.html(gradeableTypeString.attr('data-hw'));
+            }
+        }
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
             disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
