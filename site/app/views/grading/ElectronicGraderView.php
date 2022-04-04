@@ -977,10 +977,10 @@ HTML;
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isStudentView() && $graded_gradeable->getGradeable()->isStudentViewAfterGrades()) {
             $pattern1 = "upload.pdf";
-            $pattern2 = "/upload_page_\d+/";
-            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern2 = "/\.upload_page_\d+/";
+            $pattern3 = "/\.upload_version_\d+_page\d+/";
             $pattern4 = ".submit.timestamp";
-            $pattern5 = "bulk_upload_data.json";
+            $pattern5 = ".bulk_upload_data.json";
 
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {

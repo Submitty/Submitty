@@ -126,7 +126,7 @@
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_bulk_upload" name="electronic_gradeable_presets" value="bulk_upload"
-                        {{ action != 'new' and gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}> <label for="radio_ef_bulk_upload"> {{ gradeable_type_strings['electronic_exam'] }} </label>
+                        {{ action != 'new' and gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}> <label for="radio_ef_bulk_upload"> {{ gradeable_type_strings['electronic_bulk'] }} </label>
             </div>
         </div>
         {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
