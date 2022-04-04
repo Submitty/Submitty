@@ -2254,7 +2254,7 @@ function setPdfPageAssignment(page) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(function () {
             return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
@@ -2668,11 +2668,11 @@ function scrollToPage(page_num){
             let page = $("#pageContainer" + page_num);
             if($("#file-view").is(":visible")){
                 if(page.length) {
-                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#submission_browser').scrollTop(page[0].offsetTop);
                 }
             }
             else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
+                viewFileFullPanel("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }
