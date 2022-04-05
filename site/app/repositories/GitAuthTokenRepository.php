@@ -8,22 +8,23 @@ use Doctrine\ORM\EntityRepository;
 class GitAuthTokenRepository extends EntityRepository {
     /**
      * @param string $user_id
+     * @param bool $expired
      * @return GitAuthToken[]
      */
     public function getAllByUser(string $user_id, bool $expired = false): array {
         $qb = $this->_em->createQueryBuilder();
-        $qb = $qb->select('a')
-            ->from('\app\entities\GitAuthToken', 'a');
+        $qb = $qb->select('g')
+            ->from('\app\entities\GitAuthToken', 'g');
         if (!$expired) {
             $qb = $qb->where(
                 $qb->expr()->orX(
-                    $qb->expr()->isNull('a.expiration'),
-                    $qb->expr()->gt('a.expiration', ':now')
+                    $qb->expr()->isNull('g.expiration'),
+                    $qb->expr()->gt('g.expiration', ':now')
                 )
             )->setParameter('now', new \DateTime());
         }
         $qb = $qb
-            ->andWhere('a.user_id = :user')
+            ->andWhere('g.user_id = :user')
             ->setParameter('user', $user_id);
         return $qb->getQuery()->execute();
     }

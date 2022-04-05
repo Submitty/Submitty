@@ -2,6 +2,7 @@
 
 namespace app\entities;
 
+use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -85,10 +86,10 @@ class GitAuthToken {
         return $this->user_id;
     }
 
-    public function isExpired(\DateTime $time): bool {
+    public function isExpired(): bool {
         if ($this->expiration === null) {
             return false;
         }
-        return $time >= $this->expiration;
+        return DateUtils::getDateTimeNow() >= $this->expiration;
     }
 }
