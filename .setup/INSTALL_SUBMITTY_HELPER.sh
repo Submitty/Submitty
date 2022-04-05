@@ -497,7 +497,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
 
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/configure.out
+chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/configure.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/configure.out
 
 
