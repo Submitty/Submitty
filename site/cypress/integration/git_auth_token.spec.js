@@ -1,4 +1,4 @@
-import {getCurrentSemester} from "../support/utils";
+import {getCurrentSemester} from '../support/utils';
 
 describe('Test cases revolving around git auth tokens', () => {
     beforeEach(() => {
@@ -29,7 +29,7 @@ describe('Test cases revolving around git auth tokens', () => {
         cy.clearCookies();
 
         cy.get('#new-token-banner > p:nth-child(5)').invoke('text').then(text => {
-            const token = text.trim().split(" ")[1];
+            const token = text.trim().split(' ')[1];
             // Verify the token works as a password
             cy.request({
                 method: 'POST',
@@ -39,8 +39,8 @@ describe('Test cases revolving around git auth tokens', () => {
                     user_id: 'instructor',
                     password: token,
                     gradeable_id: 'vcstest',
-                    id: 'instructor'
-                }
+                    id: 'instructor',
+                },
             }).then(res => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
@@ -56,8 +56,8 @@ describe('Test cases revolving around git auth tokens', () => {
                     user_id: 'instructor',
                     password: 'instructor',
                     gradeable_id: 'vcstest',
-                    id: 'instructor'
-                }
+                    id: 'instructor',
+                },
             }).then(res => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
@@ -73,8 +73,8 @@ describe('Test cases revolving around git auth tokens', () => {
                     user_id: 'instructor',
                     password: 'bad_password_or_token',
                     gradeable_id: 'vcstest',
-                    id: 'instructor'
-                }
+                    id: 'instructor',
+                },
             }).then(res => {
                 const body = JSON.parse(res.body);
                 expect(res.status).to.eq(200);
