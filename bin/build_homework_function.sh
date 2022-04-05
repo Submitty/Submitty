@@ -114,7 +114,6 @@ function build_homework {
 
     course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
     GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
-    JSONCODE=${SUBMITTY_INSTALL_DIR}/vendor/include
 
     # check that the user executing this script is in the course group
     course_group=`stat -c "%G" $course_dir`
@@ -185,18 +184,7 @@ function build_homework {
         exit 1
     fi
 
-    # Create the complete/build config using main_configure
-    g++ ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/load_config_json.cpp ${GRADINGCODE}/execute.cpp \
-        ${GRADINGCODE}/TestCase.cpp ${GRADINGCODE}/error_message.cpp ${GRADINGCODE}/window_utils.cpp \
-        ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/change.cpp ${GRADINGCODE}/difference.cpp \
-        ${GRADINGCODE}/tokenSearch.cpp ${GRADINGCODE}/tokens.cpp ${GRADINGCODE}/clean.cpp \
-        ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
-        ${GRADINGCODE}/empty_custom_function.cpp \
-        -I${JSONCODE} \
-        -pthread -g -std=c++11 -lseccomp -o configure.out
-
-
-    ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment
+    ${SUBMITTY_INSTALL_DIR}/bin/configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json $assignment
     configure_res=$?
 
     if (( $configure_res != 0 )); then
