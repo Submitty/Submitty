@@ -288,7 +288,7 @@ class Gradeable extends AbstractModel {
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->setAutogradingConfigPath($details['autograding_config_path']);
+            $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setVcsHostType($details['vcs_host_type']);
@@ -1395,14 +1395,16 @@ class Gradeable extends AbstractModel {
      * Sets the path to the autograding config
      * @param string $path Must not be blank
      */
-    public function setAutogradingConfigPath($path) {
+    public function setAutogradingConfigPath($path, $skip_path_check = false) {
         if ($path === '') {
             throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
         }
-        $check = $this->checkPath($path);
-        if (!$this->core->isTesting() && is_string($check)) {
-            // String means an error was found
-            throw new \InvalidArgumentException($check);
+        if (!$skip_path_check) {
+            $check = $this->checkPath($path);
+            if (!$this->core->isTesting() && is_string($check)) {
+                // String means an error was found
+                throw new \InvalidArgumentException($check);
+            }
         }
         $this->autograding_config_path = strval($path);
         $this->modified = true;
