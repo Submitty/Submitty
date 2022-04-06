@@ -198,7 +198,8 @@ class UsersController extends AbstractController {
             'user_updated' => $user->isUserUpdated(),
             'instructor_updated' => $user->isInstructorUpdated(),
             'manual_registration' => $user->isManualRegistration(),
-            'grading_registration_sections' => $user->getGradingRegistrationSections()
+            'grading_registration_sections' => $user->getGradingRegistrationSections(),
+            'registration_type' => $user->getRegistrationType(),
         ]);
     }
 
@@ -330,6 +331,7 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
+        $user->setRegistrationType($_POST['registration_type']);
         //Instructor updated flag tells auto feed to not clobber some of the users data.
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));

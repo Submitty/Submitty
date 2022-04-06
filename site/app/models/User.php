@@ -34,8 +34,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getGroup()
  * @method int getAccessLevel()
  * @method void setGroup(integer $group)
+ * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
  * @method int getRotatingSection()
+ * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method void setUserUpdated(bool $flag)
@@ -109,6 +111,8 @@ class User extends AbstractModel {
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
+    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn) for the course */
+    protected $registration_type;
 
     /**
      * @prop
@@ -213,6 +217,7 @@ class User extends AbstractModel {
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
+        $this->registration_type = $details['registration_type'] ?? 'graded';
     }
 
     /**

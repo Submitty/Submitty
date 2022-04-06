@@ -69,7 +69,11 @@ function newUserForm() {
     captureTabInModal("edit-user-form");
 }
 
-//opens modal with initial settings for edit user
+/**
+ * Opens modal with initial settings for edit user form.
+ * 
+ * @param {string} user_id
+ */
 function editUserForm(user_id) {
     var url = buildCourseUrl(['users', 'details']) + `?user_id=${user_id}`;
     $.ajax({
@@ -220,6 +224,11 @@ function autoCompleteOnUserId(user_information) {
     }
 }
 
+/**
+ * Fill in the given user's information on the edit user modal initial display.
+ * 
+ * @param {array} user
+ */
 function completeUserFormInformation(user) {
     var form = $("#edit-user-form");
 
@@ -257,6 +266,7 @@ function completeUserFormInformation(user) {
     if (user['already_in_course']) {
         $('[name="user_group"] option[value="' + user['user_group'] + '"]', form).prop('selected', true);
         $('[name="manual_registration"]', form).prop('checked', user['manual_registration']);
+        $('[name="registration_type"] option[value="' + user['registration_type'] + '"]', form).prop('selected', true);
     }
     $("[name='grading_registration_section[]']").prop('checked', false);
     if (user['grading_registration_sections'] !== null && user['grading_registration_sections'] !== undefined) {
