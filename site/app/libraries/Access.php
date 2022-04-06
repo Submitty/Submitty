@@ -491,7 +491,7 @@ class Access {
                     }
                 }
                 if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD)) {
-                    if (!$gradeable->isStudentDownload()) {
+                    if (!$gradeable->canStudentDownload()) {
                         return false;
                     }
                 }

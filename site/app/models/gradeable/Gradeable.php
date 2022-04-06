@@ -58,7 +58,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool isStudentDownload()
+ * @method bool canStudentDownload()
  * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()

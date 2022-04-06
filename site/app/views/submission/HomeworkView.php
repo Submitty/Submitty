@@ -373,7 +373,7 @@ class HomeworkView extends AbstractView {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 // If students do not have permission to download files then hide the old files
-                if ($this->core->getUser()->accessGrading() || $gradeable->isStudentDownload()) {
+                if ($this->core->getUser()->accessGrading() || $gradeable->canStudentDownload()) {
                     for ($i = 1; $i <= $num_parts; $i++) {
                         foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                             $old_files[] = [
@@ -1035,7 +1035,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => $gradeable->isStudentDownload(),
+            'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,

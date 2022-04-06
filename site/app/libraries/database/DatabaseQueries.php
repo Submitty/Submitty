@@ -2921,7 +2921,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             SELECT gradeable.g_id, g_title, eg_submission_due_date
             FROM gradeable INNER JOIN electronic_gradeable
                 ON gradeable.g_id = electronic_gradeable.g_id
-            WHERE g_gradeable_type=0 and eg_student_view=TRUE and eg_student_view_after_grades=TRUE and eg_has_due_date=TRUE
+            WHERE g_gradeable_type=0 and not (eg_student_view=TRUE and eg_student_view_after_grades=TRUE) and eg_has_due_date=TRUE
             ORDER BY g_grade_released_date DESC
         "
         );
@@ -5449,7 +5449,7 @@ AND gc_id IN (
                 $gradeable->isTaGrading(),
                 $gradeable->isStudentView(),
                 $gradeable->isStudentViewAfterGrades(),
-                $gradeable->isStudentDownload(),
+                $gradeable->canStudentDownload(),
                 $gradeable->isStudentSubmit(),
                 $gradeable->hasDueDate(),
                 $gradeable->getAutogradingConfigPath(),
@@ -5606,7 +5606,7 @@ AND gc_id IN (
                     $gradeable->isTaGrading(),
                     $gradeable->isStudentView(),
                     $gradeable->isStudentViewAfterGrades(),
-                    $gradeable->isStudentDownload(),
+                    $gradeable->canStudentDownload(),
                     $gradeable->isStudentSubmit(),
                     $gradeable->hasDueDate(),
                     $gradeable->hasReleaseDate(),
