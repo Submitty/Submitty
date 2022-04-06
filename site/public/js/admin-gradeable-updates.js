@@ -237,8 +237,8 @@ $(document).ready(function () {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if($('#all_grade').is(':checked')){
-                if ( confirm("Each student grades every other student! Continue?")) {
+            if($('input[name="all_grade"]:checked').val() === 'All Grade All'){
+                if (confirm("Each student grades every other student! Continue?")) {
                     let data = {'csrf_token': csrfToken};
                     data[this.name] = $(this).val();
                     setRandomGraders($('#g_id').val(), data, function (response_data) {

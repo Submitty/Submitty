@@ -819,12 +819,21 @@ class UsersController extends AbstractController {
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
+        $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
         $bad_columns = []; //Tracks columns in which errors occured
 
+        /* Used for validation of grading assignment for graders to registration sections. Graders cannot
+          be assigned to grade the (created-by-default) null registration section. */
+        $invalid_grading_assignments = [];
+        $valid_sections = $this->core->getQueries()->getRegistrationSections();
+        foreach ($valid_sections as $i => $section) {
+            $valid_sections[$i] = $section['sections_registration_id'];
+        }
+
         // Mapping column with its validation formats
         $column_formats = [
-            'column_count' => 'Only 5 to 9 columns are allowed',
+            'column_count' => 'Only 5 to 10 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
             'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
@@ -833,7 +842,11 @@ class UsersController extends AbstractController {
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
-            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.'
+            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
+            'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' .
+                'enclosed in double quotes (e.g. "1,3,STAFF").',
+            'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
+            'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
         ];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
@@ -844,7 +857,7 @@ class UsersController extends AbstractController {
                 continue;
             }
             // Bounds check to ensure minimum required number of rows is present.
-            if (count($vals) < 5 || count($vals) > 9) {
+            if (count($vals) < 5 || count($vals) > 10) {
                 $bad_row_details[$row_num + 1][] = 'column Count';
                 if (!in_array('column_count', $bad_columns)) {
                     $bad_columns[] = 'column_count';
@@ -925,7 +938,39 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
-            // ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data
+            /* Grading assignments must be valid, comma-separated course registration sections.
+               Automatically validate if not set (this field is optional) */
+            if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
+                if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
+                    // Regex check for comma-separated registration sections.
+                    $bad_row_details[$row_num + 1][] = 'grading assignments format';
+                    if (!in_array('grading_assignments_format', $bad_columns)) {
+                        $bad_columns[] = 'grading_assignments_format';
+                    }
+                }
+                else {
+                    $grading_assignments = explode(',', $vals[$grading_assignments_idx]);
+                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
+                        // Prevent duplicate registration sections from being specified for assignment.
+                        $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
+                        if (!in_array('grading_assignments_format', $bad_columns)) {
+                            $bad_columns[] = 'grading_assignments_duplicate';
+                        }
+                    }
+                    else {
+                        // Confirm entered registration sections are valid, pre-existing sections within the course.
+                        $unrecognized_sections = array_diff($grading_assignments, $valid_sections);
+                        if (count($unrecognized_sections) > 0) {
+                            $bad_row_details[$row_num + 1][] = 'grading assignment sections';
+                            if (!in_array('invalid_grading_assignments', $bad_columns)) {
+                                $bad_columns[] = 'invalid_grading_assignments';
+                            }
+                            $invalid_grading_assignments = array_unique(array_merge($invalid_grading_assignments, $unrecognized_sections));
+                        }
+                    }
+                }
+            }
+            // Ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data.
             $uploaded_data[$row_num] = $vals;
         }
 
@@ -939,6 +984,9 @@ class UsersController extends AbstractController {
             $msg .= "\n Format your data as per following standards";
             foreach ($bad_columns as $bad_col) {
                 $msg .= "\n " . $column_formats[$bad_col];
+                if ($bad_col === 'invalid_grading_assignments') {
+                    $msg .= ' Invalid registration sections specified:- ' . implode(', ', $invalid_grading_assignments) . '.';
+                }
             }
             $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
@@ -1022,6 +1070,11 @@ class UsersController extends AbstractController {
                 if ($use_database) {
                     $user->setPassword($row[5]);
                 }
+                if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
+                    $user->setGradingRegistrationSections($grading_assignments);
+                }
                 $insert_or_update_user_function('insert', $user);
             }
         }
@@ -1043,6 +1096,11 @@ class UsersController extends AbstractController {
                     $user->setRegistrationSection($row[$registration_section_idx]);
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
+                if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
+                    $user->setGradingRegistrationSections($grading_assignments);
+                }
             }
             $insert_or_update_user_function('update', $user);
         }
