@@ -55,7 +55,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
     describe('Test cases where the user should not be able to login', () => {
         it('should reject bad passwords', () => {
-            cy.disableAfterEachLogout();
+            cy.checkLogoutInAfterEach();
             cy.visit([]);
 
             cy.get('input[name=user_id]').type('instructor');
@@ -69,7 +69,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
         it('should reject bad usernames', () => {
-            cy.disableAfterEachLogout();
+            cy.checkLogoutInAfterEach();
             cy.visit([]);
 
             cy.get('input[name=user_id]').type('bad-username');

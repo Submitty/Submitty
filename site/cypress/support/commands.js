@@ -43,12 +43,18 @@ Cypress.Commands.add('login', (username='instructor') => {
 
 /**
 * Log out of Submitty, assumes a user is already logged in
+* If errorOnFail is false, it will check to see if the logout button exists before trying
+* to logout.
 */
-Cypress.Commands.add('logout', (force = false) => {
-    cy.waitPageChange(() => {
-        // Click without force fails when a test fails before afterEach
-        // https://github.com/cypress-io/cypress/issues/2831#issuecomment-712728988
-        cy.get('#logout > .flex-line').click({'force': force});
+Cypress.Commands.add('logout', (force = false, errorOnFail = true) => {
+    cy.get('body').then((body) => {
+        if (!errorOnFail || body.find('#logout > .flex-line').length > 0) {
+            cy.waitPageChange(() => {
+                // Click without force fails when a test fails before afterEach
+                // https://github.com/cypress-io/cypress/issues/2831#issuecomment-712728988
+                cy.get('#logout > .flex-line').click({'force': force});
+            });
+        }
     });
 });
 
@@ -95,8 +101,9 @@ Cypress.Commands.overwrite('visit', (originalFn, options) => {
 });
 
 /**
- * Disables the logout for the running test from the global afterEach hook.
+ * Sets checkLogout to true - logout in the global afterEach hook will check to
+ * see if the logout button is available before attempting to logout.
  */
-Cypress.Commands.add('disableAfterEachLogout', () => {
-    cy.wrap(false).as('shouldLogout');
+Cypress.Commands.add('checkLogoutInAfterEach', () => {
+    cy.wrap(true).as('checkLogout');
 });
