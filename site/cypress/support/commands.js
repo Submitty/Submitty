@@ -93,3 +93,10 @@ Cypress.Commands.overwrite('visit', (originalFn, options) => {
 
     return originalFn(url);
 });
+
+/**
+ * Disables the logout for the running test from the global afterEach hook.
+ */
+Cypress.Commands.add('disableAfterEachLogout', () => {
+    cy.wrap(true).as('disableLogout');
+});

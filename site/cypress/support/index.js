@@ -17,28 +17,9 @@ import './commands';
 
 require('@cypress/skip-test/support');
 
-const LOGOUT_EXCLUDE = {
-    // login.spec.js
-    'Test cases revolving around the logging in functionality of the site': {
-        'Test cases where the user should not be able to login': {
-            'should reject bad passwords': {},
-            'should reject bad usernames': {},
-        },
-    },
-};
-
-afterEach(() => {
-    let currPath = LOGOUT_EXCLUDE;
-    for (const title of Cypress.currentTest.titlePath) {
-        if (title in currPath) {
-            currPath = currPath[title];
-        }
-        else {
-            currPath = null;
-            break;
-        }
-    }
-    if (currPath === null) {
+// eslint-disable-next-line prefer-arrow-callback
+afterEach(function () {
+    if (!this.disableLogout) {
         cy.logout(true);
     }
 });
