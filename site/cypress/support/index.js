@@ -17,9 +17,15 @@ import './commands';
 
 require('@cypress/skip-test/support');
 
+beforeEach(() => {
+    cy.wrap(true).as('shouldLogout');
+})
+
 // eslint-disable-next-line prefer-arrow-callback
-afterEach(function () {
-    if (!this.disableLogout) {
-        cy.logout(true);
-    }
+afterEach(() => {
+    cy.get('@shouldLogout').then((disableLogout) => {
+        if (disableLogout) {
+            cy.logout(true);
+        }
+    });
 });
