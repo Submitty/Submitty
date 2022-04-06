@@ -19,7 +19,7 @@ require('@cypress/skip-test/support');
 
 beforeEach(() => {
     cy.wrap(true).as('shouldLogout');
-})
+});
 
 // eslint-disable-next-line prefer-arrow-callback
 afterEach(() => {
