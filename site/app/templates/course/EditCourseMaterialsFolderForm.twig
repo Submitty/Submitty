@@ -26,12 +26,10 @@
             </label>
             <br>
             <div id = "show-some-section-selection-folder-edit" class= "show-some-section-selection" style="display: none">
-            <br>
             {% for section in reg_sections %}
-                <div>
-                <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
-                <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class = "reg-section-item">
+                    <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
+                    <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
                 </div>
             {% endfor %}
             </div>

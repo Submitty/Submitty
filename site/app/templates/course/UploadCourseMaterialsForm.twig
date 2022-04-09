@@ -34,12 +34,10 @@
             </script>
             <br>
             <div id = "show_Some_Section_Selection" class= "show-some-section-selection" style="display: none">
-            <br>
             {% for section in reg_sections %}
-                <div>
-                <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
-                <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class = "reg-section-item">
+                    <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
                 </div>
             {% endfor %}
             </div>
