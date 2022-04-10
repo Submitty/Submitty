@@ -67,7 +67,7 @@ class GitAuthController extends AbstractController {
 
         /** @var GitAuthTokenRepository $repo */
         $repo = $em->getRepository(GitAuthToken::class);
-        $tokens = $repo->getAllByUser($this->core->getUser()->getId());
+        $tokens = $repo->getAllByUser($this->core->getUser()->getId(), true);
 
         $this->core->addSuccessMessage("New token created successfully");
 
