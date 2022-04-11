@@ -488,7 +488,7 @@ g++ ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/load_config_json.cpp ${GRAD
     ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
     ${GRADINGCODE}/empty_custom_function.cpp \
     -I${JSONCODE} \
-    -pthread -g -std=c++11 -lseccomp -o ${SUBMITTY_INSTALL_DIR}/bin/configure.out
+    -pthread -std=c++11 -lseccomp -o ${SUBMITTY_INSTALL_DIR}/bin/configure.out
 
 # set the permissions
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
