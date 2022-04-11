@@ -11,7 +11,7 @@
             <input type="radio" id="no_student_view" name="student_view" value="false"
                     {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
             <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
+                    {{ gradeable.isBulkUpload() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
             <div hidden>
                 <input type="radio" id="yes_student_view" name="student_view" value="true"
                     {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>

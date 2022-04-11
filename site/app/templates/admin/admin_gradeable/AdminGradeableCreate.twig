@@ -110,23 +110,23 @@
 
             {# Real input fields to back the exposed configurations options #}
             <div hidden>
-                <input id="bulk_upload" name="bulk_upload" value="{{ action != 'new' and gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'true' : 'false' }}" aria-label="bulk upload">
+                <input id="bulk_upload" name="bulk_upload" value="{{ action != 'new' and gradeable.isBulkUpload() ? 'true' : 'false' }}" aria-label="bulk upload">
                 <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" aria-label="vcs">
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                        {{ action != 'new' and not (gradeable.isStudentView() and gradeable.isStudentViewAfterGrades()) and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
+                        {{ action != 'new' and not gradeable.isBulkUpload() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                        {{ action != 'new' and not (gradeable.isStudentView() and gradeable.isStudentViewAfterGrades()) and gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_vcs_upload"> {{ gradeable_type_strings['electronic_hw_vcs'] }} </label>
+                        {{ action != 'new' and not gradeable.isBulkUpload() and gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_vcs_upload"> {{ gradeable_type_strings['electronic_hw_vcs'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_bulk_upload" name="electronic_gradeable_presets" value="bulk_upload"
-                        {{ action != 'new' and gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}> <label for="radio_ef_bulk_upload"> {{ gradeable_type_strings['electronic_bulk'] }} </label>
+                        {{ action != 'new' and gradeable.isBulkUpload() ? 'checked' : '' }}> <label for="radio_ef_bulk_upload"> {{ gradeable_type_strings['electronic_bulk'] }} </label>
             </div>
         </div>
         {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}

@@ -157,7 +157,7 @@ class AdminGradeableController extends AbstractController {
 
         $type_string = 'UNKNOWN';
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades()) {
+            if ($gradeable->isBulkUpload()) {
                 $type_string = self::gradeable_type_strings['electronic_bulk'];
             }
             elseif ($gradeable->isVcs()) {
@@ -283,7 +283,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
-            'is_bulk_upload' => $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades()
+            'is_bulk_upload' => $gradeable->isBulkUpload(),
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');

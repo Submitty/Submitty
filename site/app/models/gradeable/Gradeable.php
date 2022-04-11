@@ -58,7 +58,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool canStudentDownload()
  * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
@@ -900,6 +899,23 @@ class Gradeable extends AbstractModel {
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
+    }
+
+    /**
+     * Gets if the submitted files for this gradeable can be downloaded by students
+     * @return bool 
+     */
+    public function canStudentDownload() {
+        return $this->student_download;
+    }
+    
+    /**
+     * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
+     * grades are released)
+     * @return bool 
+     */
+    public function isBulkUpload() {
+        return $this->isStudentView() && $this->isStudentViewAfterGrades();
     }
 
     /**
