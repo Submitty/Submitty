@@ -1,10 +1,8 @@
+{{ add_twig_module_js('grading/electronic/RegradePanel.js') }}
 <div id="regrade_info" class="rubric_panel">
     <div id="regrade_inner_info" class="{{ graded_gradeable.hasActiveRegradeRequest() ? 'inquiry_alert' }}">
-<div class="inner-container" style="padding:20px;">
+        <div class="inner-container" style="padding:20px;">
             {{ render_template(['submission', 'Homework'], 'showRegradeDiscussion', graded_gradeable, can_inquiry) }}
         </div>
     </div>
 </div>
-<script>
-    $(initGradingInquirySocketClient);
-</script>

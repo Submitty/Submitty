@@ -17,6 +17,11 @@ export function getCsrfToken() : string{
     return document.body.dataset.csrfToken ?? '';
 }
 
+// https://stackoverflow.com/questions/3431512/javascript-equivalent-to-phps-urldecode
+export function urlDecode(url: string): string {
+    return decodeURIComponent(url.replace(/\+/g, ' '));
+}
+
 let messages = 0;
 
 export function displayErrorMessage(message: string){

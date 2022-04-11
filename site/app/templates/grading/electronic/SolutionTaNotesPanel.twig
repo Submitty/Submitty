@@ -1,4 +1,5 @@
 {% import _self as self %}
+{{ add_twig_module_js('grading/electronic/SolutionTaNotesPanel.js') }}
 <div id="solution_ta_notes" class="rubric_panel">
     <div class="row">
         <span class="grading_label">Solution/TA Notes</span>
@@ -48,8 +49,7 @@
                     "textarea_onkeyup" : "detectSolutionChange.call(this)"
                 } only %}
                 <button type="primary" disabled
-                        class="btn btn-primary solution-save-btn"
-                        onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}', '{{ itempool_item }}');"
+                        class="btn btn-primary solution-save-btn" data-gradeable-id="{{ gradeable_id }}" data-component-id="{{ component_id }}" data-itempool-item="{{ itempool_item }}"
                 >Save Changes</button>
             </div>
         </div>

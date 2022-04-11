@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/electronic/SubmissionPanel.js') }}
 <div id="submission_browser" class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
     <div >
         <div id="directory_view">
@@ -7,29 +8,14 @@
 
                 {# check if there are vcs files, if yes display the toggle button, else don't display it #}
                 {% if has_vcs_files %}
-                    <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
+                    <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="toggleCheckoutButton">Open/Close Checkout</button>
                 {% endif %}
 
                 <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
 
-                <script>
-                    $(document).ready(function(){
-                        //note the commented out code here along with the code where files are displayed that is commented out
-                        //is intended to allow open and close to change dynamically on click
-                        //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-                        $(".expand-button").on('click', function(){
-                            openAll( 'openable-element-', $(this).data('linked-type'))
-                        })
+                <button class="btn btn-default key_to_click" tabindex="0" id="submission-panel-download-zip" data-gradeable-id="{{ gradeable_id }}" data-anon-submitter-id="{{ anon_submitter_id }}" data-active-version="{{ active_version }}">Download Zip File</button>
 
-                        var currentCodeStyle = localStorage.getItem('theme');
-                        var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-                        $('#' + currentCodeStyleRadio).parent().addClass('active');
-                        $('#' + currentCodeStyleRadio).prop('checked', true);
-                    });
-                </script>
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
-
-                <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
+                <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
             <br />
             {# Files #}
@@ -72,13 +58,13 @@
 
 {% macro display_file(dir, path, id, indent, title) %}
     <div>
-        <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+        <div class="file-viewer" data-dir="{{ dir|url_encode }}" data-path="{{ path|url_encode }}" data-viewer-id="{{ id }}" data-title="{{ title|url_encode }}">
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click file-viewer-open' file-url="{{ path|url_encode }}" data-viewer_id="{{ id }}">
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
-            <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path|url_encode }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            <a id = 'open_file_{{ dir|url_encode }}' aria-label="Pop up the file in a new window" class="key_to_click file-viewer-popup" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a aria-label="Show file in full panel" class="key_to_click file-viewer-panel" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+            <a aria-label="Download the file" class="key_to_click file-viewer-download" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
@@ -86,8 +72,8 @@
 
 {% macro display_dir(dir, contents, id, indent, title) %}
     <div>
-        <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+        <div class="div-viewer" data-viewer-id="{{ id }}">
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click file-viewer-dir' id='{{ dir }}' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>

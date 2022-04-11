@@ -3,13 +3,14 @@
 {% block popup_id %}edit-peer-components-form{% endblock %}
 {% block title %}Edit Peer Components Form{% endblock %}
 {% block body %}
+{{ add_twig_module_js('grading/electronic/EditPeerComponentsForm.js') }}
 	<span>
 		Select the student whose marks you want to clear 
 		</br> WARNING this will remove all of the peer grading done by this student:
 		</br>
 		** WIP: Editting and deletion of individual components**
 	</span>
-	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
+	<select id="edit-peer-select">
 		{% for peer in peers %}
 			<option value = {{peer}}>{{peer}}</option>
 		{% endfor %}
@@ -22,7 +23,7 @@
 		{% else %}
 			<div id="edit-peer-components-form-{{peer}}" class = "edit-peer-components-block" style="display: none;">
 		{% endif %}
-	    	<button type="button" class="btn" onclick="clearPeerMarks('{{submitter_id}}', '{{gradeable_id}}', '{{csrf_token}}')">Clear All Grading</button>
+	    	<button type="button" class="btn form-edit-peer-components-clear-marks" data-submitter-id="{{ submitter_id }}" data-gradeable-id="{{ gradeable_id }}">Clear All Grading</button>
 	    	</br>
 	    	{% for component in components %}
 				{% if component_scores[component.id] is defined and component_scores[component.id][peer] is defined %}

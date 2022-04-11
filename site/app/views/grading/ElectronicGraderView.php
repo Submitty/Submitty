@@ -1528,7 +1528,6 @@ HTML;
      * @return string
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
-        $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         $is_student = $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];

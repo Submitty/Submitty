@@ -1193,24 +1193,6 @@ function checkOpenComponentMark(index) {
   }
 }
 
-
-// expand all files in Submissions and Results section
-function openAll(click_class, class_modifier) {
-
-  let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
-  
-  $("#submission_browser").find("." + click_class + class_modifier).each(function(){
-    // Check that the file is not a PDF before clicking on it
-    let viewerID = $(this).attr("data-viewer_id");
-    if(($(this).parent().hasClass("file-viewer") && $("#file_viewer_" + viewerID).hasClass("shown") === toClose) ||
-        ($(this).parent().hasClass("div-viewer") && $("#div_viewer_" + viewerID).hasClass("open") === toClose)) {
-      let innerText = Object.values($(this))[0].innerText;
-      if (innerText.slice(-4) !== ".pdf") {
-        $(this).click();
-      }
-    }
-  });
-}
 function updateValue(obj, option1, option2) {
   // Switches the value of an element between option 1 and two
   obj.text(function(i, oldText){
@@ -1348,40 +1330,6 @@ function getNonAnonPath(path, anon_submitter_id, user_ids){
     }
   }
   return nonAnonPath;
-}
-
-function changeCurrentPeer(){
-  let peer = $('#edit-peer-select').val();
-  $('.edit-peer-components-block').hide();
-  $('#edit-peer-components-form-'+peer).show();
-}
-
-function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
-  let peer_id = $("#edit-peer-select").val();
-  let url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
-  $.ajax({
-    url,
-    data: {
-      csrf_token,
-      peer_id,
-      submitter_id
-    },
-    type: "POST",
-    success: function(data) {
-      console.log("Successfully deleted peer marks");
-      window.location.reload(true);
-    },
-    error: function(e) {
-      console.log("Failed to delete");
-    }
-  });
-}
-
-function newEditPeerComponentsForm() {
-  $('.popup-form').css('display', 'none');
-  let form = $("#edit-peer-components-form");
-  form.css("display", "block");
-  captureTabInModal("edit-peer-components-form");
 }
 
 function rotateImage(url, rotateBy) {

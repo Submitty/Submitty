@@ -1,11 +1,17 @@
-/* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
-/* exported updateSolutionTaNotes, detectSolutionChange */
-function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
+import { getCsrfToken } from '../../../utils/server';
+
+declare global {
+    interface Window{
+        detectSolutionChange(this: HTMLElement): void;
+    }
+}
+
+function updateSolutionTaNotes(gradeable_id: string, component_id: string, itempool_item: string) {
     const data = {
-        solution_text: $(`#textbox-solution-${component_id}`).val().trim(),
+        solution_text: ($(`#textbox-solution-${component_id}`).val() as string).trim(),
         component_id,
         itempool_item,
-        csrf_token: csrfToken,
+        csrf_token: getCsrfToken(),
     };
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'solution_ta_notes']),
@@ -26,7 +32,7 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 );
 
                 $(`#solution-box-${component_id}`).find('.solution-cont')
-                    .attr('data-original-solution', $(`#textbox-solution-${component_id}`).val());
+                    .attr('data-original-solution', $(`#textbox-solution-${component_id}`).val() as string);
 
                 const save_button = $(`#solution-box-${component_id}`).find('.solution-save-btn');
                 save_button.prop('disabled', true);
@@ -42,7 +48,7 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
 }
 
 //set Save button class depending on if the solution has been altered from the previous solution
-function detectSolutionChange() {
+function detectSolutionChange(this: HTMLElement) {
     const textarea = $(this);
     const solution_div = textarea.closest('.solution-cont');
     const save_button = solution_div.find('.solution-save-btn');
@@ -53,3 +59,16 @@ function detectSolutionChange() {
         save_button.prop('disabled', true);
     }
 }
+
+$(() => {
+    $('#solution_ta_notes .solution-save-btn').on('click', (event: JQuery.TriggeredEvent) => {
+        const gradeable_id = $(event.currentTarget!).attr('data-gradeable-id')!;
+        const component_id = $(event.currentTarget!).attr('data-component-id')!;
+        const itempool_item = $(event.currentTarget!).attr('data-itempool-item')!;
+
+        updateSolutionTaNotes(gradeable_id, component_id, itempool_item);
+    });
+});
+
+// Needed for MarkdownArea call
+window.detectSolutionChange = detectSolutionChange;
