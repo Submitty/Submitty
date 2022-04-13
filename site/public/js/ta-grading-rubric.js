@@ -2665,6 +2665,7 @@ function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
         if(files[i].innerText.trim() == "upload.pdf"){
+            page_num = Math.min($("#viewer > .page").length, page_num);
             let page = $("#pageContainer" + page_num);
             if($("#file-view").is(":visible")){
                 if(page.length) {
