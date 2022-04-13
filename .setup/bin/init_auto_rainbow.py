@@ -65,52 +65,13 @@ if not os.path.exists(submitty_admin_file):
 with open(submitty_admin_file, 'r') as f:
     creds = json.load(f)
 
-# Construct request list
-request = [
-    'curl',
-    '-d',
-    'user_id={}&password={}'.format(creds['submitty_admin_username'],
-                                    creds['submitty_admin_password']),
-    '-X',
-    'POST',
-    '{}/api/token'.format(host_name)
-]
+response = subprocess.run([os.path.join(current_dir, '..', '..', 'sbin', 'php', 'api_token_generate.php'), creds['submitty_admin_username']], capture_output=True, text=True)
 
-# Using the credentials call the API to obtain an auth token
-print('Obtaining auth token', flush=True)
-response = subprocess.run(request, stdout=subprocess.PIPE)
-
-# Check the return code of the 'curl' execution
 if response.returncode != 0:
-
-    # Exiting is a work around to prevent travis integration test from failing
-    print('Failure during curl server call to obtain auth token.  Exiting...')
-    save_verified_submitty_admin_user("")
+    print("Failure to get token for submitty admin account")
     exit(0)
 
-try:
-
-    # Turn the response into a json
-    response_json = json.loads(response.stdout)
-
-except Exception:
-
-    # This path is a work around to prevent travis e2e test from failing
-    print('Failed parsing the response.  Exiting...')
-    save_verified_submitty_admin_user("")
-    exit(0)
-
-# Setup token string
-if response_json['status'] != 'success':
-
-    print('Failed to obtain an auth token.', flush=True)
-    print('Ask your sysadmin to confirm that ' + submitty_admin_file +
-          ' contains valid credentials', flush=True)
-    token = ''
-
-else:
-
-    token = response_json['data']['token']
+token = response.stdout
 
 # Add token string to submitty_admin json
 creds['token'] = token

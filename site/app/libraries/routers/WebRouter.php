@@ -404,13 +404,13 @@ class WebRouter {
             $access_test = false;
             switch ($access_control->getLevel()) {
                 case 'SUPERUSER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    $access_test = $user->isSuperUser();
                     break;
                 case 'FACULTY':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    $access_test = $user->accessFaculty();
                     break;
                 case 'USER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    $access_test = $user !== null;
                     break;
             }
             $access = $access && $access_test;
