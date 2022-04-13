@@ -79,9 +79,9 @@ class CourseMaterial {
      * @ORM\Column(type="string")
      * @var string
      */
-    protected $url_title;
+    protected $display_name;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $url_title) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $display_name) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -89,7 +89,7 @@ class CourseMaterial {
         $this->setPriority($priority);
         $this->sections = new ArrayCollection();
         $this->url = $url;
-        $this->url_title = $url_title;
+        $this->display_name = $display_name;
     }
 
     /**
@@ -193,15 +193,15 @@ class CourseMaterial {
         return $this->url;
     }
 
-    public function getUrlTitle(): string {
-        return $this->url_title;
+    public function getDisplayName(): ?string {
+        return $this->display_name;
     }
 
     public function setUrl(string $url): void {
         $this->url = $url;
     }
 
-    public function setUrlTitle(string $url_title): void {
-        $this->url_title = $url_title;
+    public function setDisplayName(string $display_name): void {
+        $this->display_name = $display_name;
     }
 }

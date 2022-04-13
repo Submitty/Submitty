@@ -28,6 +28,7 @@ class CourseMaterialsController extends AbstractController {
     public function viewCourseMaterialsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
         /** @var CourseMaterialRepository $repo */
+
         $course_materials = $repo->getCourseMaterials();
         return new WebResponse(
             CourseMaterialsView::class,
@@ -390,7 +391,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
         if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
+            if ($_POST['link_title'] !== $course_material->getDisplayName()) {
                 $path = $course_material->getPath();
                 $dirs = explode("/", $path);
                 array_pop($dirs);
@@ -403,7 +404,7 @@ class CourseMaterialsController extends AbstractController {
                 }
                 FileUtils::writeFile($path, "");
                 unlink($course_material->getPath());
-                $course_material->setUrlTitle($_POST['link_title']);
+                $course_material->setDisplayName($_POST['link_title']);
                 $course_material->setPath($path);
             }
             $course_material->setUrl($_POST['link_url']);
@@ -412,6 +413,37 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
+        }
+
+        // TODO: TEST BETWEEN LINK, Dir, FILE
+        if (isset($_POST['file_path'])) {
+            $new_path = $_POST['file_path'];
+            if ($course_material->isFile) {
+                $path = $course_material->getPath();
+                $new_path = explode("/", $path);
+                array_pop($new_path);
+                $new_path = implode("/", $new_path);
+                $new_path = FileUtils::joinPaths($new_path, $new_name);
+
+                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $new_path]);
+                    if ($tmp_course_material !== null) {
+                        return JsonResponse::getErrorResponse("Path already exits. Choose new title");
+                    }
+                FileUtils::writeFile($path, "");
+                unlink($path);
+                $course_material->setUrl($new_path);
+            } elseif ($course_material->isLink){
+                
+                // $course_material->setPath($new_path);
+            }
+        }
+
+        if (isset($_POST['display_name'])){
+            if ( !$course_material->isLink ) {
+                $display_name = $_POST['display_name']; 
+                $course_material->setDisplayName($display_name);
+            }
         }
 
         if ($flush) {

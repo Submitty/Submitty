@@ -1219,6 +1219,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
               }
 
               formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+
               filesToBeAdded = true;
           }
       }
@@ -1271,7 +1272,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, file_path, display_name) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1297,6 +1298,13 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
     }
+    if(file_path !== null && file_path !== ""){
+        formData.append('file_path', file_path);
+    }
+
+    // if(display_name !== null) {
+
+    // }
 
     $.ajax({
         url: edit_url,

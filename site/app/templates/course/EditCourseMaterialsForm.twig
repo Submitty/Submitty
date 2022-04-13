@@ -3,6 +3,23 @@
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
+    
+        <label>
+            <span>
+                <strong>File/URL Path:</strong>
+            </span>
+            <input type="text" id="new-file-name" class="full-width" />
+        </label>
+
+        <div>
+            <label>
+                <span>
+                    <strong>Display File Name (What students/mentors/ta see) :</strong>
+                </span>
+                <input type="text" id="display-name" class="full-width"/>
+            </label>
+        </div>
+
         <fieldset id="edit_sections">
             <legend class="black-message">
                 Do you want to restrict this course material to some sections?
@@ -55,23 +72,28 @@
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
+
         <label hidden id="edit-url-title-label">
             <span>
                 <strong>Edit link title:</strong>
             </span>
             <input id="edit-url-title" type="text" size="26" disabled>
         </label>
+
         <label hidden id="edit-url-url-label">
             <span>
                 <strong>Edit link url:</strong>
             </span>
             <input id="edit-url-url" type="text" size="26" disabled>
         </label>
+
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
+                let file_path = document.getElementById("new-file-name").value;
+                let display_name = document.getElementById("display-name").value;
                 let cmTime = document.getElementById("edit-picker").value;
                 let sort = document.getElementById("edit-sort").value;
                 let id = document.getElementById("material-edit-form").getAttribute("data-id");
@@ -95,7 +117,7 @@
                 let url_url = document.getElementById("edit-url-url");
                 let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val, file_path, display_name);
         };
 
         flatpickr('.edit-picker', {
