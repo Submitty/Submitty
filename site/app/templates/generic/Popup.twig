@@ -9,7 +9,10 @@
                     <div class="form-title">
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
-                            <i class="fas fa-times fa-2x popup-close-icon" onclick="closePopup('{{ block('popup_id') }}')"></i>
+                            <a
+                                onclick="closePopup('{{ block('popup_id') }}')"
+                                class="btn btn-default close-button key_to_click"
+                            >Close</a>
                         {% endblock %}
                     </div>
                 {% endblock %}
