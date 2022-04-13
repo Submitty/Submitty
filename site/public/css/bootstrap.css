@@ -551,6 +551,10 @@ input[type="button"].btn-block {
     color: var(--alert-success-green);
 }
 
+.alert-warning {
+    color: var(--alert-warning-yellow);
+}
+
 .alert-danger,
 .alert-error {
     color: var(--alert-danger-red);
