@@ -903,16 +903,16 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets if the submitted files for this gradeable can be downloaded by students
-     * @return bool 
+     * @return bool
      */
     public function canStudentDownload() {
         return $this->student_download;
     }
-    
+
     /**
      * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
      * grades are released)
-     * @return bool 
+     * @return bool
      */
     public function isBulkUpload() {
         return $this->isStudentView() && $this->isStudentViewAfterGrades();
