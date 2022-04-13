@@ -82,7 +82,7 @@ $(() => {
     });
 
     const currentCodeStyle = localStorage.getItem('theme');
-    const currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == 'light') ? 'style_light' : 'style_dark';
+    const currentCodeStyleRadio = (currentCodeStyle === null || currentCodeStyle === 'light') ? 'style_light' : 'style_dark';
     $(`#${currentCodeStyleRadio}`).parent().addClass('active');
     $(`#${currentCodeStyleRadio}`).prop('checked', true);
 });
