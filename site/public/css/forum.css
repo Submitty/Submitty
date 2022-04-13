@@ -30,6 +30,10 @@
     height: 81vh;
 }
 
+#discussion_browser #posts_list {
+    min-width: -webkit-fill-available;
+}
+
 #posts_list {
     overflow-y: auto;
 }
