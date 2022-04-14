@@ -167,7 +167,7 @@
         {% if vcs_host_type == 4 %}
             <h3>Repository to be graded:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
-            <span>Repository: <samp>{{ repository_path }}</samp></span><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
         {% endif %}
 
         <input type="submit" id="submit" class="submit-gradeable btn btn-primary" value="Grade My Repository" />
