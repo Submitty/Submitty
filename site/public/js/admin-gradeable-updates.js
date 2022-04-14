@@ -15,6 +15,12 @@ function updateErrorMessage() {
 }
 
 function setError(name, err) {
+    if (name === 'autograding_config_path') {
+        name = 'autograding_config_path_displayed';
+        const error_elem = $('#autograding_config_error');
+        error_elem.text(err);
+        error_elem.show();
+    }
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = err;
         elem.setCustomValidity("Invalid field.");
@@ -23,6 +29,12 @@ function setError(name, err) {
 }
 
 function clearError(name, update) {
+    if (name === 'autograding_config_path') {
+        name = 'autograding_config_path_displayed';
+        const error_elem = $('#autograding_config_error');
+        error_elem.text('');
+        error_elem.hide();
+    }
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.setCustomValidity('');
@@ -357,23 +369,23 @@ function ajaxCheckBuildStatus() {
             if (response['data'] == 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display','none');
-                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'processing') {
                 $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display','none');
-                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'warnings') {
                 $('#rebuild-status').html('Gradeable built with warnings');
             }
             else if (response['data'] == true) {
+                $('.config_search_error').hide();
                 $('#rebuild-status').html('Gradeable build complete');
             }
             else if (response['data'] == false) {
                 $('#rebuild-status').html('Gradeable build failed');
+                $('#autograding_config_error').text('The current path is not valid, selecting Rebuild Gradeable without changing it will fail.');
                 $('.config_search_error').show();
             }
             else {
