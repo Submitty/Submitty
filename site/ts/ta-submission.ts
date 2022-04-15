@@ -1,5 +1,5 @@
 /**
- * instructor-submission.ts contains logic for special submission modes available to instructors
+ * ta-submission.ts contains logic for special submission modes available to TAs and instructors
  */
 
 
