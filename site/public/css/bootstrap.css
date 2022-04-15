@@ -553,6 +553,12 @@ input[type="button"].btn-block {
 
 .alert-warning {
     color: var(--alert-warning-yellow);
+    background-color: var(--alert-background-warning-yellow);
+    border-color: var(--alert-border-yellow);
+}
+
+.alert-warning h4 {
+    color: var(--alert-warning-yellow);
 }
 
 .alert-danger,
@@ -564,7 +570,8 @@ input[type="button"].btn-block {
 
 .alert-danger a,
 .alert-error a,
-.alert-success a {
+.alert-success a,
+.alert-warning a {
     color: inherit;
 }
 

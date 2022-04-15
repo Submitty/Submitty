@@ -12,7 +12,6 @@ import string
 import tzlocal
 import tempfile
 
-
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
 

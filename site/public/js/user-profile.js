@@ -39,6 +39,21 @@ function getAvailableTimeZones() {
     return $('#time_zone_selector_label').data('available_time_zones').split(',')
 }
 
+/**
+ * Get the UTC offset of the user's local time zone
+ * 
+ * @return {string} of the user's local time zone UTC offset, for example for example '+9:30' or '-4:00'
+ */
+function getCurrentUTCOffset() {
+  let date = new Date()
+  let sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
+  let offset = Math.abs(date.getTimezoneOffset());
+  let hours = Math.floor(offset / 60);
+  hours = (hours < 10 ? '0' + hours : hours);
+
+  return sign + hours + ":00";
+}
+
 function updateUserPreferredNames () {
   const first_name_field = $("#user-firstname-change");
   const last_name_field = $("#user-lastname-change");
@@ -235,6 +250,12 @@ $(document).ready(function() {
                     $('#user_utc_offset').text(response.data.utc_offset);
                     $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
                     displaySuccessMessage("Time-zone updated succesfully!");
+  
+                    // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
+                    var offset = getCurrentUTCOffset();
+                    if(response.data.utc_offset != offset) {
+                      displayWarningMessage("Selected time-zone does not match system time-zone.")
+                    }
                 }
                 else {
                     console.log(response);
