@@ -278,13 +278,11 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
-
     element._flatpickr.setDate(release_time);
 
     if(this_hide_from_students === "1"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
-
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
@@ -306,10 +304,14 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     }
 
     const path = $("#new-file-name");
-    path.val(file_path);
+    path.val(file_path.substring(1));
     const displayName = $("#display-name");
     displayName.val(display_name);
-    
+
+    if ( !display_name ) {
+        displayName.val(file_path.split("/").pop());
+    } 
+
     if (is_link === "1") {
         const title_label = $("#edit-url-title-label", form);
         const url_label = $("#edit-url-url-label", form);
@@ -318,7 +320,7 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         title_label.css('display', 'block');
         url_label.css('display', 'block');
 
-        // still need
+        // still need ??
         const title = $("#edit-url-title");
         title.prop('disabled', false);
         title.val(link_title);

@@ -417,33 +417,43 @@ class CourseMaterialsController extends AbstractController {
 
         // TODO: TEST BETWEEN LINK, Dir, FILE
         if (isset($_POST['file_path'])) {
-            $new_path = $_POST['file_path'];
-            if ($course_material->isFile) {
-                $path = $course_material->getPath();
-                $new_path = explode("/", $path);
-                array_pop($new_path);
-                $new_path = implode("/", $new_path);
-                $new_path = FileUtils::joinPaths($new_path, $new_name);
+            $path = $course_material->getPath();
+            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            $requested_path = $_POST['file_path'];
 
+            if ($course_material->isFile()) {
+                if (!$this->checkValidPath($requested_path, $upload_path)) {
+                    return JsonResponse::getErrorResponse("Invalid requested path");
+                }
+                $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+
+                // check valid directory
+                $dir = explode("/", $new_path);
+                array_pop($dir);
+                $dir = implode("/", $dir);                
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['path' => $dir]);
+                if ($cm == null) {
+                    return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                }
+                // check unique file
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $new_path]);
-                    if ($tmp_course_material !== null) {
-                        return JsonResponse::getErrorResponse("Path already exits. Choose new title");
-                    }
+                        ->findOneBy(['path' => $new_path]);
+                if ($tmp_course_material !== null) {
+                    return JsonResponse::getErrorResponse("File already exists in current directory. Please rename file or put under different directory");
+                }
                 FileUtils::writeFile($path, "");
                 unlink($path);
-                $course_material->setUrl($new_path);
-            } elseif ($course_material->isLink){
-                
-                // $course_material->setPath($new_path);
+                $course_material->setPath($new_path);
             }
         }
 
         if (isset($_POST['display_name'])){
-            if ( !$course_material->isLink ) {
-                $display_name = $_POST['display_name']; 
-                $course_material->setDisplayName($display_name);
-            }
+            $display_name = $_POST['display_name']; 
+            $course_material->setDisplayName($display_name);
+            // if ( !$course_material->isLink() ) {
+            //     $course_material->setDisplayName($display_name);
+            // }
         }
 
         if ($flush) {
@@ -469,15 +479,12 @@ class CourseMaterialsController extends AbstractController {
 
         $requested_path = "";
         if (!empty($_POST['requested_path'])) {
-            $requested_path = $_POST['requested_path'];
-            $tmp_path = $upload_path . "/" . $requested_path;
-            $dirs = explode("/", $tmp_path);
-            for ($i = 1; $i < count($dirs); $i++) {
-                if ($dirs[$i] === "") {
-                    return JsonResponse::getErrorResponse("Invalid requested path");
-                }
+            $requested_path = $_POST['requested_path']; 
+            if ( !$this->checkValidPath($_POST['requested_path'], $upload_path) ){
+                return JsonResponse::getErrorResponse("Invalid requested path");
             }
         }
+
         $details['path'][0] = $requested_path;
 
         if (isset($_POST['release_time'])) {
@@ -762,5 +769,16 @@ class CourseMaterialsController extends AbstractController {
             }
             $j--;
         }
+    }
+
+    private function checkValidPath(string $requested_path, string $upload_path): bool {
+        $tmp_path = $upload_path . "/" . $requested_path;
+        $dirs = explode("/", $tmp_path);
+        for ($i = 1; $i < count($dirs); $i++) {
+            if ($dirs[$i] === "") {
+                return false;
+            }
+        }
+        return true;
     }
 }
