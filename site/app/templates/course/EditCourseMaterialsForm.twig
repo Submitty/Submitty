@@ -4,21 +4,15 @@
 {% block body %}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
     
-        <label>
-            <span>
-                <strong>File/URL Path:</strong>
-            </span>
+        <label id="file_path-label">
+            <span><strong>File Path / URL </strong></span>
             <input type="text" id="new-file-name" class="full-width" />
         </label>
 
-        <div>
-            <label>
-                <span>
-                    <strong>Display File Name (What students/mentors/ta see) :</strong>
-                </span>
-                <input type="text" id="display-name" class="full-width"/>
-            </label>
-        </div>
+        <label id="display_name-label">
+            <span><strong>Display File Name (What students/mentors/ta see) :</strong></span>
+            <input type="text" id="display-name" class="full-width"/>
+        </label>
 
         <fieldset id="edit_sections">
             <legend class="black-message">
@@ -113,11 +107,7 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                let url_title = document.getElementById("edit-url-title");
-                let url_url = document.getElementById("edit-url-url");
-                let url_title_val = url_title.disabled ? null : url_title.value;
-                let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val, file_path, display_name);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, file_path, display_name);
         };
 
         flatpickr('.edit-picker', {

@@ -1,4 +1,3 @@
-
 <div class="content">
 
     <script>
@@ -62,16 +61,17 @@
             <div class="file-viewer">
                 {% if course_material.isLink %}
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
-                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getDisplayName }}</a>
+                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getDisplayName  }}</a>
                 {% else %}
+                    {% set displayName = (user_group == 1) ? name : course_material.getDisplayName|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
                     {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                        <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ name }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                        <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ displayName }} in a new window" tabindex="0" style="text-decoration: none;">{{ displayName }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                     {% else %}
-                        {{ name }}
+                        {{ displayName }}
                     {% endif %}
-                    <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                    <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ displayName }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
                     {% if course_material.isLink %}
@@ -149,14 +149,13 @@
                     <span class="badge course-material-badge" >NEW</span>
                 {% endif %}
             </div>
-            <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ name }}" data-file_url="{{ course_material.getPath }}"></div>
         </div>
     {% endif %}
 {% endmacro %}
 
 {% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_name, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
     {% if indent == -1 %}
-        {# {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }} #}
+        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
     {% else %}
         <div class="folder-container">
             <div class="div-viewer">
@@ -166,7 +165,7 @@
                 </a>
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_ids[folder_path] }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}

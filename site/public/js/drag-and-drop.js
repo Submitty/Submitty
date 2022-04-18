@@ -1259,7 +1259,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
                 var jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    // window.location.href = return_url;
+                    window.location.href = return_url;
                 }
                 else {
                     alert(jsondata['message']);
@@ -1281,7 +1281,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, file_path, display_name) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate,  file_path, display_name) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1298,8 +1298,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
     formData.append('sections_lock', sections_lock);
-    formData.append('link_url', link_url);
-    formData.append('link_title', link_title);
     if (folderUpdate != null) {
         formData.append('folder_update', folderUpdate);
     }
@@ -1329,7 +1327,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 var jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    // window.location.href = return_url;
+                    window.location.href = return_url;
                 }
                 else {
                     alert(jsondata['message']);

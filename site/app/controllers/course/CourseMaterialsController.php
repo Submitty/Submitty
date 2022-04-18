@@ -390,52 +390,35 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            if ($_POST['link_title'] !== $course_material->getDisplayName()) {
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
-                $path = FileUtils::joinPaths($path, urlencode("link-" . $_POST['link_title']));
-                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $path]);
-                if ($tmp_course_material !== null) {
-                    return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
-                }
-                FileUtils::writeFile($path, "");
-                unlink($course_material->getPath());
-                $course_material->setDisplayName($_POST['link_title']);
-                $course_material->setPath($path);
-            }
-            $course_material->setUrl($_POST['link_url']);
-        }
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
         }
 
-        // TODO: TEST BETWEEN LINK, Dir, FILE
         if (isset($_POST['file_path'])) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
-
-            if ($course_material->isFile()) {
+            $new_path = $upload_path . "/" . $requested_path;
+            if ($course_material->isFile() && $path !== $new_path ) {
                 if (!$this->checkValidPath($requested_path, $upload_path)) {
                     return JsonResponse::getErrorResponse("Invalid requested path");
                 }
                 $new_path = FileUtils::joinPaths($upload_path, $requested_path);
-
                 // check valid directory
-                $dir = explode("/", $new_path);
-                array_pop($dir);
-                $dir = implode("/", $dir);                
-                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                ->findOneBy(['path' => $dir]);
-                if ($cm == null) {
-                    return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                $requested_path = explode("/", $requested_path);
+                if (count($requested_path) > 1){
+                    $dir = explode("/", $new_path);
+                    array_pop($dir);
+                    $dir = implode("/", $dir);                
+                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $dir]);
+                    if ($cm == null) {
+                        return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                    }
                 }
+                
                 // check unique file
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                         ->findOneBy(['path' => $new_path]);
@@ -446,14 +429,29 @@ class CourseMaterialsController extends AbstractController {
                 unlink($path);
                 $course_material->setPath($new_path);
             }
+            else if ($course_material->isLink()){
+                $course_material->setUrl($_POST['file_path']);
+            }
         }
 
         if (isset($_POST['display_name'])){
             $display_name = $_POST['display_name']; 
+            if ($course_material->isLink() && $display_name!== $course_material->getDisplayName() ){
+                $path = $course_material->getPath();
+                $dirs = explode("/", $path);
+                array_pop($dirs);
+                $path = implode("/", $dirs);
+                $path = FileUtils::joinPaths($path, urlencode("link-" . $display_name));
+                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+                if ($tmp_course_material !== null) {
+                    return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
+                }
+                FileUtils::writeFile($path, "");
+                unlink($course_material->getPath());
+                $course_material->setPath($path);
+            }
             $course_material->setDisplayName($display_name);
-            // if ( !$course_material->isLink() ) {
-            //     $course_material->setDisplayName($display_name);
-            // }
         }
 
         if ($flush) {

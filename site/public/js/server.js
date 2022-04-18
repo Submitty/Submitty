@@ -308,29 +308,12 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     const displayName = $("#display-name");
     displayName.val(display_name);
 
-    if ( !display_name ) {
-        displayName.val(file_path.split("/").pop());
-    } 
-
     if (is_link === "1") {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
-        title_label.css('display', 'block');
-        url_label.css('display', 'block');
-
-        // still need ??
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
-        const url = $("#edit-url-url");
-        url.prop('disabled', false);
-        url.val(link_url);
-
         // TODO: change contents of path, displayname 
         path.val(link_url);
         displayName.val(link_title);
+    } else if (!display_name){
+        displayName.val(file_path.split("/").pop());
     }
 
     $("#material-edit-form", form).attr('data-id', id);
