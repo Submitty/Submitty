@@ -15,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class NotificationController extends AbstractController {
-
     const NOTIFICATION_SELECTIONS = [
         'merge_threads',
         'all_new_threads',

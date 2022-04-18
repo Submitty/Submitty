@@ -7,8 +7,6 @@ use app\libraries\DateUtils;
 use DateTime;
 
 class OfficeHoursQueueModel extends AbstractModel {
-
-
     /*
     current_state values
         ('waiting'):Waiting

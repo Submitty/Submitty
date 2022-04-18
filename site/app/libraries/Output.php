@@ -50,6 +50,8 @@ class Output {
     private $use_footer = true;
     private $use_mobile_viewport = false;
 
+    private $content_only = false;
+
     private $start_time;
 
     /** @var \Twig\Environment $twig */
@@ -124,6 +126,10 @@ HTML;
             }
             return $plural;
         }, ["is_safe" => ["html"]]));
+
+        $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
+            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+        }));
 
         if ($full_load) {
             if ($this->core->getConfig()->wrapperEnabled()) {
@@ -512,6 +518,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleTwigJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs/twig'));
+    }
+
     public function addInternalModuleJs(string $file) {
         $this->addModuleJs($this->timestampResource($file, 'mjs'));
     }
@@ -539,14 +549,21 @@ HTML;
 
     /**
      * Enable or disable whether to use the global header
-     * @param bool $bool
      */
-    public function useHeader($bool = true) {
+    public function useHeader(bool $bool = true): void {
         $this->use_header = $bool;
     }
 
-    public function useFooter($bool = true) {
+    public function useFooter(bool $bool = true): void {
         $this->use_footer = $bool;
+    }
+
+    public function setContentOnly(bool $bool = false): void {
+        $this->content_only = $bool;
+    }
+
+    public function isContentOnly(): bool {
+        return $this->content_only;
     }
 
     public function enableMobileViewport(): void {

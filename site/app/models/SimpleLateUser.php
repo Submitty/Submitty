@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 
 class SimpleLateUser extends AbstractModel {
-
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 

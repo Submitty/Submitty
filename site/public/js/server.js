@@ -1,5 +1,3 @@
-window.addEventListener("resize", checkSidebarCollapse);
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
@@ -622,11 +620,6 @@ function checkVersionChange(days_late, late_days_allowed){
         return confirm(message);
     }
     return true;
-}
-
-function checkTaVersionChange(){
-    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
-    return confirm(message);
 }
 
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
@@ -1282,13 +1275,12 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    var size = $(document.body).width();
-    if (size < 1150) {
-        document.cookie = "collapse_sidebar=true;";
+    if ($(document.body).width() < 1150) {
+        document.cookie = "collapse_sidebar=true;path=/";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;";
+        document.cookie = "collapse_sidebar=false;path=/";
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1334,10 +1326,10 @@ $(document).ready(function() {
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("aside");
-    var shown = sidebar.hasClass("collapsed");
+    const sidebar = $("aside");
+    const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1358,10 +1350,7 @@ $(document).ready(function() {
         }
     });
 
-    //If they make their screen too small, collapse the sidebar to allow more horizontal space
-    $(document.body).resize(function() {
-        checkSidebarCollapse();
-    });
+    window.addEventListener("resize", checkSidebarCollapse);
 });
 
 function checkBulkProgress(gradeable_id){
