@@ -9,7 +9,7 @@
  * Usage: ./api_token_generate.php <User ID>
  */
 
-require_once __DIR__ . "/../../site/vendor/autoload.php";
+require_once __DIR__ . "/../site/vendor/autoload.php";
 
 use app\libraries\Core;
 use app\libraries\TokenManager;
