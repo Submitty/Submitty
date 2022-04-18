@@ -65,7 +65,7 @@ if not os.path.exists(submitty_admin_file):
 with open(submitty_admin_file, 'r') as f:
     creds = json.load(f)
 
-response = subprocess.run([os.path.join(current_dir, '..', '..', 'sbin', 'php', 'api_token_generate.php'), creds['submitty_admin_username']], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+response = subprocess.run([os.path.join(current_dir, '..', '..', 'sbin', 'api_token_generate.php'), creds['submitty_admin_username']], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
 
 if response.returncode != 0:
     print("Failure to get token for submitty admin account")
