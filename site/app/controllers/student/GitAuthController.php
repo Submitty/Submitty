@@ -90,7 +90,12 @@ class GitAuthController extends AbstractController {
         }
         $id = $_POST['id'];
         $em = $this->core->getSubmittyEntityManager();
+        /** @var GitAuthToken $token */
         $token = $em->getRepository(GitAuthToken::class)->find($id);
+        if ($token === null || $token->getUserId() !== $this->core->getUser()->getId()) {
+            $this->core->addErrorMessage("Unknown token");
+            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+        }
         $em->remove($token);
         $em->flush();
         $this->core->addSuccessMessage("Token revoked");
