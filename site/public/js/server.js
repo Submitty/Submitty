@@ -337,7 +337,7 @@ function captureTabInModal(formName, resetFocus=true){
     form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
-    var inputs = form.find(':focusable').filter(':visible');
+    var inputs = form.find(':tabbable').filter(':visible');
     var firstInput = inputs.first();
     var lastInput = inputs.last();
 
