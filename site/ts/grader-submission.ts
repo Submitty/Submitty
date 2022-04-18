@@ -1,5 +1,5 @@
 /**
- * ta-submission.ts contains logic for special submission modes available to TAs and instructors
+ * grader-submission.ts contains logic for special submission modes available to full access graders and instructors
  */
 
 

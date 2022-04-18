@@ -45,7 +45,7 @@ class HomeworkView extends AbstractView {
         $is_team_assignment = $gradeable->isTeamAssignment();
 
         if ($this->core->getUser()->accessFullGrading()) {
-            $this->core->getOutput()->addInternalModuleJs('ta-submission.js');
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
         // Only show the late banner if the submission has a due date
