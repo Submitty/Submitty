@@ -12,7 +12,7 @@ def up(config):
     authentication_file = config.config_path / 'authentication.json'
     with authentication_file.open('r+') as auth_file:
         auth_info = json.load(auth_file, object_pairs_hook=OrderedDict)
-        if auth_info['ldap_options'] == []:
+        if not isinstance(auth_info['ldap_options'], dict):
             auth_info['ldap_options'] = {}
             auth_file.seek(0)
             auth_file.truncate()
