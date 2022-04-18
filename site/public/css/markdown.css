@@ -242,3 +242,8 @@
 #peer-table th {
     border: 1px solid var(--standard-light-gray);
 }
+
+.markdown img {
+    background-color: white;
+    max-width: 100%;
+}
