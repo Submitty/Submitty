@@ -153,7 +153,7 @@
                 {# Section heading #}
                 <tbody class="details-info-header panel-head-active">
                     <tr class="info">
-                        {% if core.getUser().getGroup() < 4 %}
+                        {% if core.getUser().accessGrading() %}
                             <td colspan="{{ columns|length }}" style="text-align: center">
                                 <i class="collapse-icon fas fa-caret-right"></i>
                                 <i class="expand-icon fas fa-caret-down"></i>
@@ -369,7 +369,7 @@
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
-            {% if core.getUser().getGroup() < 4 %}
+            {% if core.getUser().accessGrading() %}
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                     {% else %}
@@ -438,7 +438,7 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
@@ -446,7 +446,7 @@
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
@@ -488,7 +488,7 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
@@ -496,7 +496,7 @@
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
