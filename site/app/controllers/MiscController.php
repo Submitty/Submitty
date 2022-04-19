@@ -273,7 +273,7 @@ class MiscController extends AbstractController {
             }
         }
 
-        if ($display_name !== null && $display_name !== "") {
+        if (isset($display_name) && $display_name !== "") {
             $filename = $display_name;
         }
         else {
