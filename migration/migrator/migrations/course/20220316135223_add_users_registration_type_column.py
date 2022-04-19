@@ -15,8 +15,9 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS registration_type VARCHAR(255) DEFAULT 'graded';")
+    database.execute("UPDATE users SET registration_type = 'staff' WHERE user_group < 4 AND user_group >= 1")
     database.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS check_registration_type;")
-    database.execute("ALTER TABLE users ADD CONSTRAINT check_registration_type CHECK (registration_type in ('graded','audit','withdrawn'));")
+    database.execute("ALTER TABLE users ADD CONSTRAINT check_registration_type CHECK (registration_type in ('graded','audit','withdrawn','staff'));")
 
 
 def down(config, database, semester, course):

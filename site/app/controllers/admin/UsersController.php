@@ -331,7 +331,7 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
-        $user->setRegistrationType($_POST['registration_type']);
+        $user->setRegistrationType(intval($_POST['user_group']) == 4 ? $_POST['registration_type'] : 'staff');
         //Instructor updated flag tells auto feed to not clobber some of the users data.
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));

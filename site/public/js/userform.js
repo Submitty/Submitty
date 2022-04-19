@@ -27,6 +27,8 @@ $("#edit-user-form").ready(function() {
 function newStudentForm() {
     $('[name="user_group"] option[value="4"]').prop('selected', true);
     $('#user-form-assigned-sections').hide();
+    $('[name="registration_type"]').show();
+    $('label[for="registration_type"]').show();
     $('#user-form-student-error-message').show();
     $("#new-student-modal-title").css('display','block');
     $("#new-grader-modal-title").css('display','none');
@@ -38,6 +40,8 @@ function newGraderForm() {
     $('[name="user_group"] option[value="3"]').prop('selected', true);
     $('#user-form-student-error-message').hide();
     $('#user-form-assigned-sections').show();
+    $('[name="registration_type"]').hide();
+    $('label[for="registration_type"]').hide();
     $("#new-student-modal-title").css('display','none');
     $("#new-grader-modal-title").css('display','block');
     newUserForm();
@@ -138,9 +142,13 @@ function userFormChange() {
     }
     if(is_student) {
         $("#user-form-assigned-sections").hide();
+        $('[name="registration_type"]').show();
+        $('label[for="registration_type"]').show();
     }
     else {
         $("#user-form-assigned-sections").show();
+        $('[name="registration_type"]').hide();
+        $('label[for="registration_type"]').hide();
     }
 }
 
@@ -266,7 +274,6 @@ function completeUserFormInformation(user) {
     if (user['already_in_course']) {
         $('[name="user_group"] option[value="' + user['user_group'] + '"]', form).prop('selected', true);
         $('[name="manual_registration"]', form).prop('checked', user['manual_registration']);
-        $('[name="registration_type"] option[value="' + user['registration_type'] + '"]', form).prop('selected', true);
     }
     $("[name='grading_registration_section[]']").prop('checked', false);
     if (user['grading_registration_sections'] !== null && user['grading_registration_sections'] !== undefined) {
@@ -282,9 +289,14 @@ function completeUserFormInformation(user) {
     }
     if ($('[name="user_group"] option[value="4"]', form).prop('selected')) {
         $('#user-form-assigned-sections').hide();
+        $('[name="registration_type"]').show();
+        $('label[for="registration_type"]').show();
+        $('[name="registration_type"] option[value="' + (user['registration_type'] ?? 'graded') + '"]', form).prop('selected', true);
     }
     else {
         $('#user-form-assigned-sections').show();
+        $('[name="registration_type"]').hide();
+        $('label[for="registration_type"]').hide();
     }
 }
 

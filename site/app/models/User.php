@@ -111,7 +111,7 @@ class User extends AbstractModel {
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
-    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn) for the course */
+    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
     protected $registration_type;
 
     /**
@@ -217,7 +217,9 @@ class User extends AbstractModel {
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
-        $this->registration_type = $details['registration_type'] ?? 'graded';
+
+        $default_registration_type = $this->group == 4 ? 'graded' : 'staff';
+        $this->registration_type = $details['registration_type'] ?? $default_registration_type;
     }
 
     /**
