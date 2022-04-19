@@ -447,7 +447,8 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($path, "");
                 unlink($course_material->getPath());
                 $course_material->setPath($path);
-            }elseif ($course_material->isFile() && $display_name !== $course_material->getDisplayName()) {
+            }
+            elseif ($course_material->isFile() && $display_name !== $course_material->getDisplayName()) {
                 $files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findDisplayName($path, $display_name);
                 if (count($files) > 0) {
