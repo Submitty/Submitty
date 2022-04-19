@@ -400,17 +400,17 @@ class CourseMaterialsController extends AbstractController {
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
             $new_path = $upload_path . "/" . $requested_path;
-            if ($course_material->isFile() && $path !== $new_path ) {
+            if ($course_material->isFile() && $path !== $new_path) {
                 if (!$this->checkValidPath($requested_path, $upload_path)) {
                     return JsonResponse::getErrorResponse("Invalid requested path");
                 }
                 $new_path = FileUtils::joinPaths($upload_path, $requested_path);
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
-                if (count($requested_path) > 1){
+                if (count($requested_path) > 1) {
                     $dir = explode("/", $new_path);
                     array_pop($dir);
-                    $dir = implode("/", $dir);                
+                    $dir = implode("/", $dir);
                     $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $dir]);
                     if ($cm == null) {
@@ -426,18 +426,18 @@ class CourseMaterialsController extends AbstractController {
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
             }
-            else if ($course_material->isLink()){
+            elseif ($course_material->isLink()) {
                 $course_material->setUrl($_POST['file_path']);
             }
         }
 
-        if (isset($_POST['display_name'])){
-            $display_name = $_POST['display_name']; 
+        if (isset($_POST['display_name'])) {
+            $display_name = $_POST['display_name'];
             $path = $course_material->getPath();
             $dirs = explode("/", $path);
             array_pop($dirs);
             $path = implode("/", $dirs);
-            if ($course_material->isLink() && $display_name!== $course_material->getDisplayName() ){
+            if ($course_material->isLink() && $display_name !== $course_material->getDisplayName()) {
                 $path = FileUtils::joinPaths($path, urlencode("link-" . $display_name));
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
@@ -447,13 +447,12 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($path, "");
                 unlink($course_material->getPath());
                 $course_material->setPath($path);
-            } else if ($course_material->isFile()&& $display_name!== $course_material->getDisplayName()){
+            } elseif ($course_material->isFile() && $display_name !== $course_material->getDisplayName()) {
                 $files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findDisplayName($path, $display_name);
                 if (count($files) > 0) {
                     return JsonResponse::getErrorResponse("Display name already used in specified directory. Please rename or put under different directory");
                 }
-
             }
             $course_material->setDisplayName($display_name);
         }
@@ -481,8 +480,8 @@ class CourseMaterialsController extends AbstractController {
 
         $requested_path = "";
         if (!empty($_POST['requested_path'])) {
-            $requested_path = $_POST['requested_path']; 
-            if ( !$this->checkValidPath($_POST['requested_path'], $upload_path) ){
+            $requested_path = $_POST['requested_path'];
+            if (!$this->checkValidPath($_POST['requested_path'], $upload_path)) {
                 return JsonResponse::getErrorResponse("Invalid requested path");
             }
         }

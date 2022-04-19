@@ -273,11 +273,12 @@ class MiscController extends AbstractController {
             }
         }
 
-        if ($display_name !== null && $display_name !== ""){
+        if ($display_name !== null && $display_name !== "") {
             $filename = $display_name;
         } else {
             $filename = pathinfo($path, PATHINFO_BASENAME);
         }
+        
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
