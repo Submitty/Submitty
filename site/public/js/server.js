@@ -659,6 +659,7 @@ function downloadFile(path, dir) {
 }
 
 function downloadCourseMaterial(id) {
+    console.log(buildCourseUrl(['download']) + `?course_material_id=${id}`);
     window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
 }
 

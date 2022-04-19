@@ -236,6 +236,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
+                $display_name = $cm->getDisplayName();
             }
         }
 
@@ -272,7 +273,11 @@ class MiscController extends AbstractController {
             }
         }
 
-        $filename = pathinfo($path, PATHINFO_BASENAME);
+        if ($display_name !== null && $display_name !== ""){
+            $filename = $display_name;
+        } else {
+            $filename = pathinfo($path, PATHINFO_BASENAME);
+        }
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');

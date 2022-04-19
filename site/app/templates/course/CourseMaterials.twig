@@ -82,19 +82,9 @@
                         {% set url_url = "" %}
                     {% endif %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm(
-                        "{{ course_material.getId }}", 
-                        "{{ course_material.getPriority }}", 
-                        {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, 
-                        "{{course_material.isHiddenFromStudents}}", 
-                        "{{ course_material.getReleaseDate|date(date_format) }}", 
-                        "{{ path }}",
-                        "{{ course_material.getDisplayName }}",
-                        "{{ course_material.isLink }}", 
-                        "{{ url_title }}", 
-                        "{{ url_url }}",
-                        )',
-                    > 
-                    <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                        "{{ course_material.getId }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ path }}","{{ course_material.getDisplayName }}","{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}",)'> 
+                        <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>
+                    </a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>

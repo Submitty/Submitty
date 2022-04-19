@@ -28,7 +28,6 @@ class CourseMaterialsController extends AbstractController {
     public function viewCourseMaterialsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
         /** @var CourseMaterialRepository $repo */
-
         $course_materials = $repo->getCourseMaterials();
         return new WebResponse(
             CourseMaterialsView::class,
@@ -418,15 +417,13 @@ class CourseMaterialsController extends AbstractController {
                         return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
                     }
                 }
-                
-                // check unique file
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                         ->findOneBy(['path' => $new_path]);
                 if ($tmp_course_material !== null) {
                     return JsonResponse::getErrorResponse("File already exists in current directory. Please rename file or put under different directory");
                 }
-                FileUtils::writeFile($path, "");
-                unlink($path);
+                FileUtils::writeFile($new_path, "");
+                rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
             }
             else if ($course_material->isLink()){
@@ -436,11 +433,11 @@ class CourseMaterialsController extends AbstractController {
 
         if (isset($_POST['display_name'])){
             $display_name = $_POST['display_name']; 
+            $path = $course_material->getPath();
+            $dirs = explode("/", $path);
+            array_pop($dirs);
+            $path = implode("/", $dirs);
             if ($course_material->isLink() && $display_name!== $course_material->getDisplayName() ){
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
                 $path = FileUtils::joinPaths($path, urlencode("link-" . $display_name));
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
@@ -450,6 +447,13 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($path, "");
                 unlink($course_material->getPath());
                 $course_material->setPath($path);
+            } else if ($course_material->isFile()&& $display_name!== $course_material->getDisplayName()){
+                $files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findDisplayName($path, $display_name);
+                if (count($files) > 0) {
+                    return JsonResponse::getErrorResponse("Display name already used in specified directory. Please rename or put under different directory");
+                }
+
             }
             $course_material->setDisplayName($display_name);
         }
