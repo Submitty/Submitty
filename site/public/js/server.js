@@ -278,11 +278,13 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
+    
     element._flatpickr.setDate(release_time);
 
     if(this_hide_from_students === "1"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
+
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
@@ -309,7 +311,6 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     displayName.val(display_name);
 
     if (is_link === "1") {
-        // TODO: change contents of path, displayname 
         path.val(link_url);
         displayName.val(link_title);
     } else if (!display_name){
@@ -659,7 +660,6 @@ function downloadFile(path, dir) {
 }
 
 function downloadCourseMaterial(id) {
-    console.log(buildCourseUrl(['download']) + `?course_material_id=${id}`);
     window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
 }
 
