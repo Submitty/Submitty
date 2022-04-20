@@ -25,23 +25,14 @@
                 Yes
             </label>
             <br>
-            <span id = "show-some-section-selection-folder-edit" style="display: none">
+            <div id = "show-some-section-selection-folder-edit" class= "show-some-section-selection" style="display: none">
             {% for section in reg_sections %}
-                <tr>
-                    <span class = "inline">
-                        <td>
-                          <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
-                        </td>
-                        <td>
-                            <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                    </span>
-                </tr>
+                <div class = "reg-section-item">
+                    <input id="section-folder-edit-{{section['sections_registration_id']}}" type="checkbox" value="off" onchange="enableFullUpdate()"/>
+                    <label for="section-folder-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
+                </div>
             {% endfor %}
-            </span>
+            </div>
             <script>
                 function toggleRegistrationSectionsFolderEdit(){
                     $("#show-some-section-selection-folder-edit").toggle();
