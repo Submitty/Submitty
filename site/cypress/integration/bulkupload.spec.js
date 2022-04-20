@@ -1,4 +1,3 @@
-import {buildUrl, getCurrentSemester} from '../support/utils.js';
 
 describe('Test cases revolving around bulk uploading', () => {
     ['ta', 'instructor'].forEach((user) => {
