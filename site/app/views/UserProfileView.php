@@ -36,7 +36,7 @@ class UserProfileView extends AbstractView {
             User::LEVEL_FACULTY     => "Faculty",
             User::LEVEL_SUPERUSER   => "Superuser"
         ];
-        
+
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
