@@ -7,10 +7,12 @@
             <input type="hidden" name="response_count" id="response-count" value="0"/>
             <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
-            <label for="poll-name" class="option-title">
-                Poll Name:
-            </label>
-            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            <div id="poll-name-container">
+                <label for="poll-name" class="option-title">
+                    Poll Name:
+                </label>
+                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            </div>
             <br/> <br/>
 
             <p class="option-title">Question:</p>
@@ -83,10 +85,12 @@
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
             <input type="hidden" name="removed_responses" id="removed-responses" value=""/>
 
-            <label for="poll-name" class="option-title">
-                Poll Name:
-            </label>
-            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            <div id="poll-name-container">
+                <label for="poll-name" class="option-title">
+                    Poll Name:
+                </label>
+                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            </div>
             <br/> <br/>
 
             <p class="option-title">Question:</p>

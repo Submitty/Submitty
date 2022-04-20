@@ -855,7 +855,8 @@ HTML;
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),
-            "is_instructor" => $this->core->getUser()->getGroup() === 1,
+            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
+            "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
             "message" => $message,
             "message_warning" => $message_warning
         ]);
@@ -893,7 +894,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -948,7 +949,7 @@ HTML;
                 "message" => "Overridden grades"
             ];
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $error_message = [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange
@@ -962,17 +963,25 @@ HTML;
                 ];
             }
         }
-        elseif ($rollbackSubmission != -1) {
+        elseif ($late_status === LateDayInfo::STATUS_LATE) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
+                "message" => "Late Submission"
             ];
         }
-        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-            $error_message = [
-                "color" => "var(--standard-red-orange)", // fire engine red
-                "message" => "Late Submission (No on time submission available)"
-            ];
+        elseif ($late_status === LateDayInfo::STATUS_BAD) {
+            if ($rollbackSubmission === -1) {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (no valid submission available)"
+                ];
+            }
+            else {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (submitter has valid submission - Version #" . $rollbackSubmission . ")"
+                ];
+            }
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
             $pattern1 = "upload.pdf";

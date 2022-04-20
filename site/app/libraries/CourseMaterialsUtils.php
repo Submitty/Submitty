@@ -8,7 +8,6 @@ use app\exceptions\MalformedDataException;
 use app\models\User;
 
 class CourseMaterialsUtils {
-
     /**
      * Determine if a course materials file has been released.
      *

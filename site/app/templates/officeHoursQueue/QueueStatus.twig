@@ -1,3 +1,5 @@
+
+<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -47,6 +49,18 @@
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+    {% if viewer.getQueueSocketMessage() %}
+        <div class = "queue-message">
+            <p id="queue-message-msg-time" style="position: relative; float: right;">Today at {{ viewer.getQueueSocketMessageSentTime() }} </p>
+            <h3 id="queue-message-prompt">
+                Message From Queue Admins:<br>
+            </h3>
+            <p id="queue-message-msg">
+                {{ viewer.getQueueSocketMessage() }}
+            </p>
+        </div>
+    {% endif %}
+<br>
   <div id="queue_status">
   <h2>My Queue Status</h2>
     <p>
@@ -202,9 +216,65 @@
     </form>
   </div>
 {% endif %}
+<br>
+<a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
+<a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-primary">Close Table</button></a>
+<br><br>
+<div class="container queue_occupancy" style="display: none">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Queue</th>
+                <th scope="col">People In Queue</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for name, number in viewer.getQueueOccupancy() %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ number }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 <script>
+
+    function queueMessage(message) {
+        let title = "Submitty - New Message From Office Hours Queue Staff: ";
+        let options = {
+            body: message,
+            icon: buildUrl(['img', 'favicon.ico'])
+        }
+        if (Notification.permission === "granted") {
+            // If it's okay let's create a notification
+            let notification = new Notification(title, options);
+        }
+        // Otherwise, we need to ask the user for permission
+        else if (Notification.permission !== 'denied' || Notification.permission === "default") {
+            Notification.requestPermission(function (permission) {
+                if (permission === "granted") {
+                    let notification = new Notification(title, options);
+                }
+            });
+        //if notification permissions are denied
+        }else{
+            alert('New Message From Office Hours Queue Staff');
+        }
+    }
+
+
+    function toggleQueueOccupancy(){
+        $('.queue_occupancy').toggle();
+        $('#close_queue_occupancy').toggle();
+        $('#view_queue_occupancy').toggle();
+    }
+
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
     }
+
+
 </script>
+
 

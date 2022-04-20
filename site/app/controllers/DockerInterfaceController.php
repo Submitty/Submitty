@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
-
     /**
      * @Route("/admin/docker", methods={"GET"})
      * @Route("/api/docker", methods={"GET"})

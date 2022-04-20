@@ -16,7 +16,6 @@ use app\libraries\FileUtils;
  */
 
 class UserSpecificNotebook extends Notebook {
-
     /** @prop @var array array of items where the notebook selects from */
     protected $item_pool = [];
     /** @prop @var array testcases config */

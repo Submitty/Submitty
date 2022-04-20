@@ -23,10 +23,6 @@ bash ${GIT_PATH}/.setup/install_system.sh --worker --vagrant ${@} 2>&1 | tee ${G
 echo "--- FINISHED INSTALLING SYSTEM ---"
 echo "installing worker..."
 
-if [ ${NO_RPI} == 0 ]; then
-    sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/distro_setup/ubuntu/rpi.sh
-fi
-
 sudo usermod -a -G submitty_daemon ${SUPERVISOR_USER}
 sudo usermod -a -G submitty_daemonphp ${SUPERVISOR_USER}
 sudo usermod -a -G docker ${SUPERVISOR_USER}

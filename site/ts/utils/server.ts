@@ -14,7 +14,7 @@ export function buildCourseUrl(parts: string[] = []) : string{
  * @returns string
  */
 export function getCsrfToken() : string{
-    return document.body.dataset.csrfToken;
+    return document.body.dataset.csrfToken ?? '';
 }
 
 let messages = 0;

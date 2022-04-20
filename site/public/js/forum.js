@@ -1121,7 +1121,8 @@ function generateCodeMirrorBlocks(container_element) {
             lineNumbers: true,
             readOnly: true,
             cursorHeight: 0.0,
-            lineWrapping: true
+            lineWrapping: true,
+            autoRefresh: true,
         });
 
         var lineCount = editor0.lineCount();

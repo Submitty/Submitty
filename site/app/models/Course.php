@@ -15,7 +15,6 @@ use app\libraries\FileUtils;
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-
     /** @property string $semester the semester (or term) code in which the course is taking place. */
     protected $semester;
     /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
