@@ -1096,7 +1096,8 @@ class UsersController extends AbstractController {
                 }
                 if ($list_type === 'classlist') {
                     $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
-                } else {
+                }
+                else {
                     $user->setRegistrationType('staff');
                 }
                 $insert_or_update_user_function('insert', $user);
@@ -1127,7 +1128,8 @@ class UsersController extends AbstractController {
                 }
                 if ($list_type === 'classlist') {
                     $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
-                } else {
+                }
+                else {
                     $user->setRegistrationType('staff');
                 }
             }
