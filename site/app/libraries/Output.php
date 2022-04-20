@@ -127,6 +127,10 @@ HTML;
             return $plural;
         }, ["is_safe" => ["html"]]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
+            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+        }));
+
         if ($full_load) {
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
@@ -512,6 +516,10 @@ HTML;
 
     public function addCss(string $url): void {
         $this->css->add($url);
+    }
+
+    public function addInternalModuleTwigJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs/twig'));
     }
 
     public function addInternalModuleJs(string $file) {
