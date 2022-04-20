@@ -1,9 +1,8 @@
-window.addEventListener("resize", checkSidebarCollapse);
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
+  loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
 
@@ -15,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadInBreadcrumbLinks(){
-  mobileHomeLink = $("#home-button").attr('href');
-  desktopHomeLink = $("#desktop_home_link").attr('href');
+  mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
+  desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
 }
 
 function adjustBreadcrumbLinks(){
@@ -337,7 +336,7 @@ function captureTabInModal(formName, resetFocus=true){
     form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
-    var inputs = form.find(':focusable').filter(':visible');
+    var inputs = form.find(':tabbable').filter(':visible');
     var firstInput = inputs.first();
     var lastInput = inputs.last();
 
@@ -624,11 +623,6 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
-function checkTaVersionChange(){
-    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
-    return confirm(message);
-}
-
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
@@ -689,13 +683,33 @@ function downloadCourseMaterialZip(id) {
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+    const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
+    
+    function inject() {
+        $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
+    }
+    function remove() {
+        $(document.body).find('#rainbow-mode').remove();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
         pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = JSON.parse(localStorage.getItem('rainbow-mode')) === true;
+            localStorage.setItem('rainbow-mode', !flag);
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
@@ -748,13 +762,6 @@ function markViewed(ids, redirect) {
         contentType: false,
         processData: false
     });
-}
-
-function hideEmptyCourseMaterialFolders() {
-  // fetch all the folders and remove those one which have no `file` within.
-  $('.folder-container').each(function() {
-    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
-  });
 }
 
 function closeDivForCourseMaterials(num) {
@@ -831,6 +838,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             else if (url.includes("checkout")) {
                 directory = "checkout";
+            }
+            else if (url.includes("attachments")) {
+                directory = "attachments";
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
@@ -1266,13 +1276,12 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    var size = $(document.body).width();
-    if (size < 1150) {
-        document.cookie = "collapse_sidebar=true;";
+    if ($(document.body).width() < 1150) {
+        document.cookie = "collapse_sidebar=true;path=/";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;";
+        document.cookie = "collapse_sidebar=false;path=/";
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1318,10 +1327,10 @@ $(document).ready(function() {
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("aside");
-    var shown = sidebar.hasClass("collapsed");
+    const sidebar = $("aside");
+    const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1342,10 +1351,7 @@ $(document).ready(function() {
         }
     });
 
-    //If they make their screen too small, collapse the sidebar to allow more horizontal space
-    $(document.body).resize(function() {
-        checkSidebarCollapse();
-    });
+    window.addEventListener("resize", checkSidebarCollapse);
 });
 
 function checkBulkProgress(gradeable_id){
@@ -1460,6 +1466,9 @@ function popOutSubmittedFile(html_file, url_file) {
     }
     else if (url_file.includes("split_pdf")) {
       directory = "split_pdf";
+    }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
     }
     window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;

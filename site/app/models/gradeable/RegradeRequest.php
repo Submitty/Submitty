@@ -15,7 +15,6 @@ use app\models\AbstractModel;
  * @method int getGcId()
  */
 class RegradeRequest extends AbstractModel {
-
     const STATUS_RESOLVED = 0;
     const STATUS_ACTIVE = -1;
 

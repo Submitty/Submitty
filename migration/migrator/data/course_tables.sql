@@ -86,7 +86,7 @@ CREATE FUNCTION public.csv_to_numeric_gradeable(vcode text[], gradeable_id text,
         -- Remove any existing record for this student for this gradeable
         DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
 
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_overall_comment) VALUES (gradeable_id, line[1], '', 1);
+        INSERT INTO gradeable_data(g_id, gd_user_id) VALUES (gradeable_id, line[1]);
 
         SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
 
@@ -285,9 +285,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_peer_blind integer DEFAULT 3,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     eg_hidden_files character varying(1024),
-    eg_has_release_date boolean DEFAULT true NOT NULL,
     eg_depends_on character varying(255) DEFAULT NULL::character varying,
     eg_depends_on_points integer,
+    eg_has_release_date boolean DEFAULT true NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -338,7 +338,7 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL
 );
 
 
@@ -538,7 +538,6 @@ CREATE TABLE public.gradeable_data (
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255),
     gd_team_id character varying(255),
-    gd_overall_comment character varying NOT NULL,
     gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );
 
@@ -632,6 +631,26 @@ CREATE TABLE public.grading_rotating (
 
 
 --
+-- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.late_day_cache (
+    g_id character varying(255),
+    user_id character varying(255),
+    team_id character varying(255),
+    late_day_date timestamp without time zone NOT NULL,
+    late_days_remaining integer NOT NULL,
+    late_days_allowed integer,
+    submission_days_late integer,
+    late_day_exceptions integer,
+    late_day_status integer,
+    late_days_change integer NOT NULL,
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
+    CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -671,8 +690,9 @@ CREATE TABLE public.lichen (
     hash_size smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
-    last_run_timestamp timestamp without time zone DEFAULT now(),
+    last_run_timestamp timestamp with time zone DEFAULT now(),
     has_provided_code boolean DEFAULT false NOT NULL,
+    other_gradeable_paths text,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
     CONSTRAINT lichen_hash_size_check CHECK ((hash_size > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
@@ -707,7 +727,7 @@ CREATE TABLE public.lichen_run_access (
     id integer NOT NULL,
     lichen_run_id integer NOT NULL,
     user_id character varying(255) NOT NULL,
-    "timestamp" timestamp without time zone NOT NULL
+    "timestamp" timestamp with time zone NOT NULL
 );
 
 
@@ -780,8 +800,8 @@ CREATE TABLE public.notifications (
     content text NOT NULL,
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    seen_at timestamp with time zone
+    created_at timestamp(0) with time zone NOT NULL,
+    seen_at timestamp(0) with time zone
 );
 
 
@@ -898,7 +918,7 @@ CREATE TABLE public.posts (
     parent_id integer DEFAULT '-1'::integer,
     author_user_id character varying NOT NULL,
     content text NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     anonymous boolean NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
     endorsed_by character varying,
@@ -983,7 +1003,9 @@ CREATE TABLE public.queue_settings (
     code text NOT NULL,
     token text,
     regex_pattern character varying,
-    contact_information boolean DEFAULT true NOT NULL
+    contact_information boolean DEFAULT true NOT NULL,
+    message character varying(400) DEFAULT NULL::character varying,
+    message_sent_time timestamp with time zone
 );
 
 
@@ -1014,7 +1036,7 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 CREATE TABLE public.regrade_discussion (
     id integer NOT NULL,
     regrade_id integer NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255) NOT NULL,
     content text,
     deleted boolean DEFAULT false NOT NULL,
@@ -1049,7 +1071,7 @@ ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.regrade_discussi
 CREATE TABLE public.regrade_requests (
     id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255),
     team_id character varying(255),
     status integer DEFAULT 0 NOT NULL,
@@ -1115,7 +1137,7 @@ CREATE TABLE public.solution_ta_notes (
     component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
-    edited_at timestamp with time zone NOT NULL,
+    edited_at timestamp(0) with time zone NOT NULL,
     itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
@@ -1250,7 +1272,7 @@ CREATE TABLE public.users (
 CREATE TABLE public.viewed_responses (
     thread_id integer NOT NULL,
     user_id character varying NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL
 );
 
 
@@ -1612,6 +1634,22 @@ ALTER TABLE ONLY public.late_days
 
 
 --
+-- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
+
+
+--
+-- Name: late_day_cache ldc_g_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+
+
+--
 -- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1966,18 +2004,18 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
--- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_allowed_minutes_override
-    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
 -- Name: course_materials_access fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: gradeable_allowed_minutes_override fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_allowed_minutes_override
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
@@ -2227,6 +2265,30 @@ ALTER TABLE ONLY public.grading_rotating
 
 ALTER TABLE ONLY public.grading_rotating
     ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_g_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

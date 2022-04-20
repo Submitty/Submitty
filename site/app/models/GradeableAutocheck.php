@@ -19,7 +19,6 @@ use app\libraries\Utils;
  * @method boolean getPublic()
  */
 class GradeableAutocheck extends AbstractModel {
-
     /** @prop @var string */
     protected $index;
 

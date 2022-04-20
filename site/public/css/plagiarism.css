@@ -45,9 +45,7 @@ td {
 }
 
 .unviewed td:first-child {
-    border-left-color: var(--actionable-blue);
-    border-left-width: 3px;
-    border-left-style: solid;
+    border-left: 3px solid var(--actionable-blue);
 }
 
 .run-log-data pre {
@@ -80,27 +78,24 @@ input[type="radio"] {
     flex: 1;
 }
 
-input[type="text"] {
+input[type="text"],
+textarea {
     width: 100%;
 }
 
-.deletable-text {
-    width: calc(100% - 2em) !important;
-}
-
 .delete-btn {
-    padding-left: 5px;
+    padding-left: 0.5em;
 }
 
-input[type=text]:invalid {
+input[type="text"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
 
-[data-theme="dark"] input[type=text]:invalid {
+[data-theme="dark"] input[type="text"]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-[data-theme="dark"] input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type="text"]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }
 
@@ -114,15 +109,12 @@ input[type=text]:invalid {
 
 #other-gradeable-div select {
     width: calc(100% / 3 - 10px);
-    margin: 5px;
+    margin-right: 0.2em;
+    margin-top: 0.5em;
 }
 
-#other-gradeable-div select:nth-child(3n+2) {
-    margin-left: 0;
-}
-
-#other-gradeable-div select:nth-child(3n+1) {
-    margin-right: 0;
+#other-gradeable-paths {
+    height: 4em;
 }
 
 #current-code-file,
@@ -161,12 +153,12 @@ input[type=text]:invalid {
 /* ==== Results Page ======================================================== */
 .match-style {
     background-color: yellow;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .specific-match-style {
     background-color: orange;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .common-code-style {
@@ -245,7 +237,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .loading-animation {
     border: 5px solid var(--standard-dark-gray);
-    border-top: 5px solid rgba(0, 0, 0, 0);
+    border-top: 5px solid rgb(0 0 0 / 0%);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     width: 3em;

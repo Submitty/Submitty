@@ -160,9 +160,6 @@ $(function () {
       checkNotebookScroll();
     }
   });
-  notebookScrollLoad();
-
-  checkNotebookScroll();
 
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
@@ -188,6 +185,9 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  notebookScrollLoad();
+  checkNotebookScroll();
 });
 
 function changeStudentArrowTooltips(data) {
@@ -1230,29 +1230,6 @@ function openAutoGrading(num){
     $('#testcase_' + num)[0].style.display="block";
   }
 }
-// expand all outputs in Auto-Grading Testcases section
-function openAllAutoGrading() {
-  // show all divs whose id starts with testcase_
-  let clickable_divs  = $("[id^='tc_']");
-
-  for(let i = 0; i < clickable_divs.length; i++){
-    let clickable_div = clickable_divs[i];
-    let num = clickable_div.id.split("_")[1];
-    let content_div = $('#testcase_' + num);
-    if(content_div.css("display") == "none"){
-      clickable_div.click();
-    }
-  }
-}
-
-// close all outputs in Auto-Grading Testcases section
-function closeAllAutoGrading() {
-  // hide all divs whose id starts with testcase_
-  $("[id^='testcase_']").hide();
-  $("[id^='details_tc_']").find("span").hide();
-  $("[id^='details_tc_']").find(".loading-tools-show").show();
-}
-
 
 function openDiv(num) {
   let elem = $('#div_viewer_' + num);
@@ -1517,6 +1494,9 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
     else if (url_file.includes("checkout")) {
       directory = "checkout";
     }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
     // handle pdf
     if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
       viewFileFullPanel(html_file, url_file, 0, panel).then(function(){
@@ -1653,4 +1633,111 @@ function collapseFile(panel = "submission"){
     $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
     $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
+}
+
+Twig.twig({
+  id: "Attachments",
+  href: "/templates/grading/Attachments.twig",
+  async: true
+});
+
+var uploadedAttachmentIndex = 1;
+
+function uploadAttachment() {
+  let fileInput = $("#attachment-upload");
+  if (fileInput[0].files.length === 1) {
+    let formData = new FormData();
+    formData.append('attachment', fileInput[0].files[0]);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    let callAjax = true;
+    let userAttachmentList = $("#attachments-list").children().first();
+    let origAttachment = userAttachmentList.find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
+    if (origAttachment.length !== 0) {
+      callAjax = confirm("The file '" + fileInput[0].files[0].name + "' already exists; do you want to overwrite it?");
+    }
+    if (callAjax) {
+      fileInput.prop("disabled", true);
+      $.ajax({
+        url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "upload"]),
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function(data) {
+          if (!("status" in data) || data["status"] !== "success") {
+            alert("An error has occured trying to upload the attachment: " + data["message"]);
+          } else {
+            let renderedData = Twig.twig({
+              ref: "Attachments"
+            }).render({
+                file: data["data"],
+                id: "a-up-" + uploadedAttachmentIndex,
+                is_grader_view: true,
+                can_modify: true
+            });
+            uploadedAttachmentIndex++;
+            if (origAttachment.length === 0) {
+              userAttachmentList.append(renderedData);
+            } else {
+              origAttachment.first().parent().replaceWith(renderedData);
+            }
+            if (userAttachmentList.children().length === 0) {
+              userAttachmentList.css("display", "none")
+              $("#attachments-header").css("display", "none");
+            } else {
+              userAttachmentList.css("display", "")
+              $("#attachments-header").css("display", "");
+            }
+          }
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          alert("An error has occured trying to upload the attachment: " + errorThrown);
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        }
+      });
+    } else {
+      fileInput[0].value = "";
+    }
+  }
+}
+
+function deleteAttachment(target, file_name) {
+  let confirmation = confirm("Are you sure you want to delete attachment '" + decodeURIComponent(file_name) +"'?");
+  if (confirmation) {
+    let formData = new FormData();
+    formData.append('attachment', file_name);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    $.ajax({
+      url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "delete"]),
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function(data) {
+        if (!("status" in data) || data["status"] !== "success") {
+          alert("An error has occured trying to delete the attachment: " + data["message"]);
+        } else {
+          $(target).parent().parent().remove();
+          let userAttachmentList = $("#attachments-list").children().first();
+          if (userAttachmentList.children().length === 0) {
+            userAttachmentList.css("display", "none")
+            $("#attachments-header").css("display", "none");
+          } else {
+            userAttachmentList.css("display", "")
+            $("#attachments-header").css("display", "");
+          }
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert("An error has occured trying to upload the attachment: " + errorThrown);
+      }
+    });
+  }
 }

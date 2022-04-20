@@ -18,6 +18,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
     // eslint-disable-next-line no-undef
     const editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
@@ -25,6 +26,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
 
     editor1.setSize('100%', '100%');
@@ -305,10 +307,10 @@ function recreateUser1Dropdown(state) {
         if (state.anon_mode_enabled) {
             const hashedDisplayName = element.display_name !== '' ? hashString(element.display_name) : '';
             const hashedUserID = hashString(element.user_id);
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(${element.percent}, ${element.match_count} hashes) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
         }
         else {
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(${element.percent}, ${element.match_count} hashes) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
         }
     });
 }
@@ -348,10 +350,10 @@ function refreshUser2Dropdown(state) {
         if (state.anon_mode_enabled) {
             const hashedDisplayName = users.display_name !== '' ? hashString(users.display_name) : '';
             const hashedUserID = hashString(users.user_id);
-            append_options += `>(${users.percent} Match) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version: ${users.version}) `;
+            append_options += `>(${users.percent} hashes) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version ${users.version}) `;
         }
         else {
-            append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `;
+            append_options += `>(${users.percent} hashes) ${users.display_name} &lt;${users.user_id}&gt; (version ${users.version}) `;
         }
 
         if (users.source_gradeable !== state.this_term_course_gradeable) {
