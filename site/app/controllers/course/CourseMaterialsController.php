@@ -433,11 +433,11 @@ class CourseMaterialsController extends AbstractController {
 
         if (isset($_POST['display_name'])) {
             $display_name = $_POST['display_name'];
-            $path = $course_material->getPath();
-            $dirs = explode("/", $path);
-            array_pop($dirs);
-            $path = implode("/", $dirs);
             if ($course_material->isLink() && $display_name !== $course_material->getDisplayName()) {
+                $path = $course_material->getPath();
+                $dirs = explode("/", $path);
+                array_pop($dirs);
+                $path = implode("/", $dirs);
                 $path = FileUtils::joinPaths($path, urlencode("link-" . $display_name));
                 $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
