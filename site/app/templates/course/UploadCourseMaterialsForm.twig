@@ -33,23 +33,14 @@
                 }
             </script>
             <br>
-            <span id = "show_Some_Section_Selection" style="display: none">
+            <div id = "show_Some_Section_Selection" class= "show-some-section-selection" style="display: none">
             {% for section in reg_sections %}
-                <tr>
-                    <span class = "inline">
-                        <td>
-                          <label for="section-{{ section['sections_registration_id'] }}">Section&nbsp;{{section['sections_registration_id']}}</label>
-                        </td>
-                        <td>
-                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                    </span>
-                </tr>
+                <div class = "reg-section-item">
+                    <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                </div>
             {% endfor %}
-          </span>
+            </div>
         </fieldset>
         <label id="upload_dt">
             <span>
