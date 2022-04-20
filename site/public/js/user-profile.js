@@ -50,7 +50,6 @@ function getCurrentUTCOffset() {
   let offset = Math.abs(date.getTimezoneOffset());
   let hours = Math.floor(offset / 60);
   hours = (hours < 10 ? '0' + hours : hours);
-  console.log("test")
   return sign + hours + ":00";
 }
 
