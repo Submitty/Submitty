@@ -448,14 +448,6 @@ class CourseMaterialsController extends AbstractController {
                 unlink($course_material->getPath());
                 $course_material->setPath($path);
             }
-            elseif ($course_material->isFile() && $display_name !== $course_material->getDisplayName()) {
-                $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
-                /** @var CourseMaterialRepository $repo */
-                $files = $repo->findDisplayName($path, $display_name);
-                if (count($files) > 0) {
-                    return JsonResponse::getErrorResponse("Display name already used in specified directory. Please rename or put under different directory");
-                }
-            }
             $course_material->setDisplayName($display_name);
         }
 
