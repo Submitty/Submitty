@@ -38,6 +38,17 @@ set_permissions () {
     esac
 }
 
+set_mjs_permission () {
+    for file in $1/*; do
+        if [ -d "$file" ]; then
+            chmod 551 $file
+            set_mjs_permission $file
+        else
+            set_permissions $file
+        fi
+    done
+}
+
 echo -e "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
@@ -268,9 +279,7 @@ chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-for file in ${SUBMITTY_INSTALL_DIR}/site/public/mjs/*; do
-    set_permissions $file
-done
+set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;

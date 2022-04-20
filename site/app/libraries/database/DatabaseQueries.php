@@ -4399,6 +4399,9 @@ AND gc_id IN (
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];
 
+        if (count($params) === 0) {
+            return [];
+        }
         $question_marks = $this->createParamaterList(count($params));
         $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN {$question_marks}", $params);
         $return = [];

@@ -80,8 +80,8 @@ class SubmissionController extends AbstractController {
             !$this->core->getUser()->accessGrading()
             && (
                 !$gradeable->isSubmissionOpen()
-                || $gradeable->isStudentView()
-                && $gradeable->isStudentViewAfterGrades()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
                 && !$gradeable->isTaGradeReleased()
             )
         ) {
