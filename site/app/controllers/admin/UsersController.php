@@ -820,6 +820,7 @@ class UsersController extends AbstractController {
         // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
+        $registration_type_idx = $pref_firstname_idx + 2;
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
         $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
@@ -849,6 +850,7 @@ class UsersController extends AbstractController {
                 'enclosed in double quotes (e.g. "1,3,STAFF").',
             'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
             'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
+            'user_registration_type' => 'Student registration type must be one of either "graded", "audit", or "withdrawn".',
         ];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
@@ -940,8 +942,8 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
-            /* Grading assignments must be valid, comma-separated course registration sections.
-               Automatically validate if not set (this field is optional) */
+            /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
+               Automatically validate if not set (this field is optional). */
             if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
                 if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
                     // Regex check for comma-separated registration sections.
@@ -969,6 +971,16 @@ class UsersController extends AbstractController {
                             }
                             $invalid_grading_assignments = array_unique(array_merge($invalid_grading_assignments, $unrecognized_sections));
                         }
+                    }
+                }
+            }
+            /* Check valid registration type for classlist uploads; automatically validate if not set (this field is optional).
+               Graderlist uploads default to 'staff' registration type. */
+            if ($list_type === 'classlist' && !(empty($vals[$registration_type_idx]))) {
+                if (!User::validateUserData('student_registration_type', $vals[$registration_type_idx])) {
+                    $bad_row_details[$row_num + 1][] = 'registration type';
+                    if (!in_array('user_registration_type', $bad_columns)) {
+                        $bad_columns[] = 'user_registration_type';
                     }
                 }
             }
@@ -1003,7 +1015,7 @@ class UsersController extends AbstractController {
             foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
                     // Validate if this user has any data to update.
-                    // Did student registration section or grader group change?
+                    // Did student registration section, grader group, or registration type change?
                     if (count($row) === 1) {
                         $users_to_update[] = $row;
                     }
@@ -1011,6 +1023,9 @@ class UsersController extends AbstractController {
                         $users_to_update[] = $row;
                     }
                     elseif ($list_type === 'graderlist' && $row[4] !== (string) $existing_user->getGroup()) {
+                        $users_to_update[] = $row;
+                    }
+                    elseif ($list_type === 'classlist' && !empty($row[$registration_type_idx]) && $row[$registration_type_idx] !== $existing_user->getRegistrationType()) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -1048,6 +1063,8 @@ class UsersController extends AbstractController {
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
                 $user_group = $list_type === 'classlist' ? '4' : '3';
                 $user->setGroup($user_group);
+                $user_registration_type = $list_type === 'classlist' ? 'graded' : 'staff';
+                $user->setRegistrationType($user_registration_type);
                 $insert_or_update_user_function('insert', $user);
             }
             else {
@@ -1077,6 +1094,11 @@ class UsersController extends AbstractController {
                     sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
                 }
+                if ($list_type === 'classlist') {
+                    $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
+                } else {
+                    $user->setRegistrationType('staff');
+                }
                 $insert_or_update_user_function('insert', $user);
             }
         }
@@ -1102,6 +1124,11 @@ class UsersController extends AbstractController {
                     $grading_assignments = explode(',', $row[$grading_assignments_idx]);
                     sort($grading_assignments);
                     $user->setGradingRegistrationSections($grading_assignments);
+                }
+                if ($list_type === 'classlist') {
+                    $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
+                } else {
+                    $user->setRegistrationType('staff');
                 }
             }
             $insert_or_update_user_function('update', $user);

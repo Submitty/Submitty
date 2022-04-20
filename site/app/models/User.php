@@ -512,6 +512,9 @@ class User extends AbstractModel {
             case 'grading_assignments':
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
                 return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
+            case 'student_registration_type':
+                // Student registration type must be one of either 'graded','audit', or 'withdrawn
+                return preg_match("~^(graded|audit|withdrawn)$~", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";
