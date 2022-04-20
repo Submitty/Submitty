@@ -387,27 +387,27 @@ def up(config, database, semester, course):
     # Create triggers
     database.execute("""
     CREATE TRIGGER gradeable_version_change AFTER INSERT OR UPDATE OR DELETE ON electronic_gradeable_version
-        FOR EACH ROW EXECUTE FUNCTION gradeable_version_change();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_version_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_days_allowed_change AFTER INSERT OR UPDATE OR DELETE ON late_days
-        FOR EACH ROW EXECUTE FUNCTION late_days_allowed_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_days_allowed_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_day_extension_change AFTER INSERT OR UPDATE OR DELETE ON late_day_exceptions
-        FOR EACH ROW EXECUTE FUNCTION late_day_extension_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_day_extension_change();
     """)
 
     database.execute("""
     CREATE TRIGGER electronic_gradeable_change AFTER INSERT OR UPDATE OF eg_submission_due_date, eg_has_due_date, eg_allow_late_submission, eg_late_days ON electronic_gradeable
-        FOR EACH ROW EXECUTE FUNCTION electronic_gradeable_change();
+        FOR EACH ROW EXECUTE PROCEDURE electronic_gradeable_change();
     """)
 
     database.execute("""
     CREATE TRIGGER gradeable_delete BEFORE DELETE ON gradeable
-        FOR EACH ROW EXECUTE FUNCTION gradeable_delete();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_delete();
     """)
     pass
 
