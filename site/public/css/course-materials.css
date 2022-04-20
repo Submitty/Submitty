@@ -20,3 +20,15 @@ a.popout-item:hover *,
 a.popout-item > .fas:hover {
     color: var(--external-link-hover);
 }
+
+.show-some-section-selection {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 2px;
+}
+
+.reg-section-item {
+    display: flex;
+    flex-wrap: nowrap;
+}
