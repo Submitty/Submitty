@@ -33,6 +33,7 @@ function showUpdateSecondaryEmailForm() {
 
 /**
  * Gets the list of all available time zones as an array
+ * Referenced from https://stackoverflow.com/questions/9149556/how-to-get-utc-offset-in-javascript-analog-of-timezoneinfo-getutcoffset-in-c
  * @returns {string[]}
  */
 function getAvailableTimeZones() {
