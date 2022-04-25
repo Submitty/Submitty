@@ -433,21 +433,6 @@ class CourseMaterialsController extends AbstractController {
 
         if (isset($_POST['display_name'])) {
             $display_name = $_POST['display_name'];
-            if ($course_material->isLink() && $display_name !== $course_material->getDisplayName()) {
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
-                $path = FileUtils::joinPaths($path, urlencode("link-" . $display_name));
-                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $path]);
-                if ($tmp_course_material !== null) {
-                    return JsonResponse::getErrorResponse("Link already exists with that title in that directory.");
-                }
-                FileUtils::writeFile($path, "");
-                unlink($course_material->getPath());
-                $course_material->setPath($path);
-            }
             $course_material->setDisplayName($display_name);
         }
 
