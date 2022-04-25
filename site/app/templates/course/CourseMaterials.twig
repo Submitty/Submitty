@@ -63,7 +63,7 @@
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
                     <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getDisplayName  }}</a>
                 {% else %}
-                    {% set displayName = (user_group == 1) ? name : course_material.getDisplayName|default(name) %}
+                    {% set displayName = course_material.getDisplayName|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
                     {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
