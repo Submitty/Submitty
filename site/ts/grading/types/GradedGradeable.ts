@@ -7,7 +7,7 @@ export interface GradedGradeable {
     itempool_items: {[id: number]: string}
     // If there is autograding
     auto_grading_total?: number,
-    // If the user has a grade
+    // If there is autograding and the user has a grade
     auto_grading_earned?: number,
     // If peer_gradeable is true
     see_peer_grade?: number,

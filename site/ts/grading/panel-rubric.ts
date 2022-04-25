@@ -3,6 +3,7 @@ import { Component } from './types/Component';
 import { GradedComponent } from './types/GradedComponent';
 import { GradedGradeable } from './types/GradedGradeable';
 import { Mark } from './types/Mark';
+import { MarkStats } from './types/MarkStats';
 import { RubricTotal } from './types/RubricTotal';
 import { Score } from './types/Score';
 
@@ -152,7 +153,7 @@ function ajaxGetGradeableRubric(gradeable_id: string): Promise<GradeableRubric> 
  * @param {string} itempool_option
  * @returns {Promise}
  */
-function ajaxSaveComponent(gradeable_id: string, component_id: number, title: string, ta_comment: string, student_comment: string, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | undefined): Promise<null> {
+function ajaxSaveComponent(gradeable_id: string, component_id: number, title: string, ta_comment: string, student_comment: string, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | undefined): Promise<void> {
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -180,7 +181,7 @@ function ajaxSaveComponent(gradeable_id: string, component_id: number, title: st
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -299,7 +300,7 @@ function ajaxGetGradedComponent(gradeable_id: string, component_id: number, anon
  * @param {int[]} mark_ids
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveGradedComponent(gradeable_id: string, component_id: number, anon_id: string, graded_version: number, custom_points: number, custom_message: string, silent_edit: boolean, mark_ids: number[]): Promise<null> {
+function ajaxSaveGradedComponent(gradeable_id: string, component_id: number, anon_id: string, graded_version: number, custom_points: number, custom_message: string, silent_edit: boolean, mark_ids: number[]): Promise<void> {
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -322,7 +323,7 @@ function ajaxSaveGradedComponent(gradeable_id: string, component_id: number, ano
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -374,7 +375,7 @@ function ajaxGetOverallComment(gradeable_id: string, anon_id: string): Promise<O
  * @param {string} overall_comment
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveOverallComment(gradeable_id: string, anon_id: string, overall_comment: string): Promise<null> {
+function ajaxSaveOverallComment(gradeable_id: string, anon_id: string, overall_comment: string): Promise<void> {
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -393,7 +394,7 @@ function ajaxSaveOverallComment(gradeable_id: string, anon_id: string, overall_c
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -455,7 +456,7 @@ function ajaxAddNewMark(gradeable_id: string, component_id: number, title: strin
  * @param {number} mark_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxDeleteMark(gradeable_id: string, component_id: number, mark_id: number): Promise<null> {
+function ajaxDeleteMark(gradeable_id: string, component_id: number, mark_id: number): Promise<void> {
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -473,7 +474,7 @@ function ajaxDeleteMark(gradeable_id: string, component_id: number, mark_id: num
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -494,7 +495,7 @@ function ajaxDeleteMark(gradeable_id: string, component_id: number, mark_id: num
  * @param {boolean} publish
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveMark(gradeable_id: string, component_id: number, mark_id: number, title: string, points: number, publish: boolean): Promise<null> {
+function ajaxSaveMark(gradeable_id: string, component_id: number, mark_id: number, title: string, points: number, publish: boolean): Promise<void> {
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -515,7 +516,7 @@ function ajaxSaveMark(gradeable_id: string, component_id: number, mark_id: numbe
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -551,7 +552,7 @@ function ajaxGetMarkStats(gradeable_id: string, component_id: number, mark_id: n
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data);
+                    resolve(response.data as MarkStats);
                 }
             },
             error: function (err) {
@@ -569,7 +570,7 @@ function ajaxGetMarkStats(gradeable_id: string, component_id: number, mark_id: n
  * @param {*} order format: { <mark0-id> : <order0>, <mark1-id> : <order1>, ... }
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveMarkOrder(gradeable_id: string, component_id: number, order: {[key: number]: number|undefined}): Promise<null> { //TODO: UPDATE
+function ajaxSaveMarkOrder(gradeable_id: string, component_id: number, order: {[key: number]: number|undefined}): Promise<void> { //TODO: UPDATE
     return new Promise((resolve, reject) =>  {
         $.ajax({
             type: 'POST',
@@ -587,7 +588,7 @@ function ajaxSaveMarkOrder(gradeable_id: string, component_id: number, order: {[
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as null);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -620,7 +621,7 @@ function ajaxSaveComponentPages(gradeable_id: string, pages: {[key: number]: num
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -654,7 +655,7 @@ function ajaxSaveComponentOrder(gradeable_id: string, order: {[key: number]: num
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -722,7 +723,7 @@ function ajaxDeleteComponent(gradeable_id: string, component_id: number): Promis
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as void);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -758,7 +759,7 @@ function ajaxVerifyComponent(gradeable_id: string, component_id: number, anon_id
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as void);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -792,7 +793,7 @@ function ajaxVerifyAllComponents(gradeable_id: string, anon_id: string): Promise
                     reject(new Error(response.message));
                 }
                 else {
-                    resolve(response.data as void);
+                    resolve();
                 }
             },
             error: function (err) {
@@ -1006,7 +1007,7 @@ function isItempoolAvailable(): boolean {
  * Returns the itempool options
  * @return array|string
  */
-function getItempoolOptions() { //TODO: change?
+function getItempoolOptions(): string[] { //TODO: change?
     try {
         return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options') as string) : [];
     }
@@ -1638,12 +1639,12 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
 
     popup.find('.question-title').html(component_title);
     popup.find('.mark-title').html(mark_title);
-    popup.find('.section-submitter-count').html(stats.section_submitter_count);
-    popup.find('.total-submitter-count').html(stats.total_submitter_count);
-    popup.find('.section-graded-component-count').html(stats.section_graded_component_count);
-    popup.find('.total-graded-component-count').html(stats.total_graded_component_count);
-    popup.find('.section-total-component-count').html(stats.section_total_component_count);
-    popup.find('.total-total-component-count').html(stats.total_total_component_count);
+    popup.find('.section-submitter-count').html(stats.section_submitter_count.toString());
+    popup.find('.total-submitter-count').html(stats.total_submitter_count.toString());
+    popup.find('.section-graded-component-count').html(stats.section_graded_component_count.toString());
+    popup.find('.total-graded-component-count').html(stats.total_graded_component_count.toString());
+    popup.find('.section-total-component-count').html(stats.section_total_component_count.toString());
+    popup.find('.total-total-component-count').html(stats.total_total_component_count.toString());
 
     // Create an array of links for each submitter
     const submitterHtmlElements: string[] = [];
@@ -2196,7 +2197,7 @@ function onMarkPublishChange(me: HTMLElement): void {
  * @param {number} component_id
  * @returns {Promise}
  */
-function verifyComponent(component_id: number): Promise<void> {
+function verifyComponent(component_id: number) : Promise<void>{
     const gradeable_id = getGradeableId();
     return ajaxVerifyComponent(gradeable_id, component_id, getAnonId())
         .then(() =>  {
@@ -2245,12 +2246,12 @@ function deleteComponent(component_id: number): Promise<void> {
  * @param {number} page PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
  * @return {Promise}
  */
-function setPdfPageAssignment(page: number) {
+function setPdfPageAssignment(page: number): Promise<void> {
     if (page === PDF_PAGE_INSTRUCTOR) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(() =>  {
             return ajaxSaveComponentPages(getGradeableId(), { 'page': page });
         })
@@ -2283,21 +2284,21 @@ function getMarkFromMarkArray(marks: Mark[], mark_id: number): Mark | null {
  * @param {string} anon_id
  * @return {Promise}
  */
-function reloadGradingRubric(gradeable_id: string, anon_id: string) {
-    let gradeable_tmp: unknown = null;
+function reloadGradingRubric(gradeable_id: string, anon_id: string): Promise<void> {
+    let gradeable_tmp: GradeableRubric | null = null;
     return ajaxGetGradeableRubric(gradeable_id)
         .catch((err) =>  {
             alert(`Could not fetch gradeable rubric: ${err.message}`);
         })
         .then((gradeable) =>  {
-            gradeable_tmp = gradeable;
+            gradeable_tmp = gradeable!;
             return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
         })
         .catch((err) =>  {
             alert(`Could not fetch graded gradeable: ${err.message}`);
         })
-        .then((graded_gradeable) =>  {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+        .then((graded_gradeable) =>  { //TODO: verify void
+            return renderGradingGradeable(getGraderId(), gradeable_tmp!, graded_gradeable!,
                 isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         })
         .then((elements) =>  {
@@ -2371,7 +2372,7 @@ function reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void> 
         })
         .then((elements) => {
             const gradingBox = $('#peer-grading-box');
-            gradingBox.html(elements);
+            gradingBox.html(elements!);
         });
 }
 
@@ -2379,7 +2380,7 @@ function reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void> 
  * Call this once on page load to load the rubric instructor editing
  * @return {Promise}
  */
-function reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: string[]) {
+function reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: string[]): Promise<void> {
     return ajaxGetGradeableRubric(gradeable_id)
         .catch((err) =>  {
             alert(`Could not fetch gradeable rubric: ${err.message}`);
@@ -2407,7 +2408,7 @@ function reloadInstructorEditRubric(gradeable_id: string, itempool_available: bo
  * @param {boolean} showMarkList True to show mark list as open
  * @returns {Promise}
  */
-function reloadGradingComponent(component_id: number, editable = false, showMarkList = false) {
+function reloadGradingComponent(component_id: number, editable = false, showMarkList = false): Promise<void> {
     let component_tmp: Component | null = null;
     const gradeable_id = getGradeableId();
     //TODO: check why this is here
@@ -2451,7 +2452,7 @@ function openCookieComponent(): Promise<void> {
  * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
  * @return {Promise<void>}
  */
-function closeAllComponents(save_changes: boolean, edit_mode = false) {
+function closeAllComponents(save_changes: boolean, edit_mode = false): Promise<void> {
     let sequence = Promise.resolve();
 
     // Close all open components.  There shouldn't be more than one,
@@ -2550,7 +2551,7 @@ function open_overall_comment_tab(user: string): void {
  * @param {number} component_id
  * @return {Promise}
  */
-function addNewMark(component_id: number) {
+function addNewMark(component_id: number): Promise<void> {
     const component = getComponentFromDOM(component_id);
     component.marks.push({
         id: getNewMarkId(),
@@ -2578,7 +2579,7 @@ function addNewMark(component_id: number) {
  * Toggles the state of a mark in grade mode
  * @return {Promise}
  */
-function toggleCommonMark(component_id: number, mark_id: number) {
+function toggleCommonMark(component_id: number, mark_id: number): Promise<void> {
     return isMarkChecked(mark_id) ? unCheckMark(component_id, mark_id) : checkMark(component_id, mark_id);
 }
 
@@ -2587,7 +2588,7 @@ function toggleCommonMark(component_id: number, mark_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function updateCustomMark(component_id: number) {
+function updateCustomMark(component_id: number): Promise<void> {
     if (hasCustomMark(component_id)) {
         // Check the mark if it isn't already
         checkDOMCustomMark(component_id);
@@ -2609,7 +2610,7 @@ function updateCustomMark(component_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function toggleCustomMark(component_id: number) {
+function toggleCustomMark(component_id: number): Promise<void> {
     if (isCustomMarkChecked(component_id)) {
         // Uncheck the first mark just in case it's checked
         return unCheckFirstMark(component_id);
@@ -2625,7 +2626,7 @@ function toggleCustomMark(component_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function openComponentInstructorEdit(component_id: number) {
+function openComponentInstructorEdit(component_id: number): Promise<void> {
     const gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then((component) =>  {
@@ -2644,7 +2645,7 @@ function openComponentInstructorEdit(component_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function openComponentGrading(component_id: number) {
+function openComponentGrading(component_id: number): Promise<void> {
     return reloadGradingComponent(component_id, isEditModeEnabled(), true)
         .then(() =>  {
             const page = getComponentPageNumber(component_id);
@@ -2664,14 +2665,15 @@ function scrollToPage(page_num: number): void {
     const files = $('.openable-element-submissions');
     for (let i = 0; i < files.length; i++) {
         if (files[i].innerText.trim() == 'upload.pdf') {
+            page_num = Math.min($('#viewer > .page').length, page_num);
             const page = $(`#pageContainer${page_num}`);
             if ($('#file-view').is(':visible')) {
                 if (page.length) {
-                    $('#file-content').animate({ scrollTop: page[0].offsetTop }, 500);
+                    $('#submission_browser').scrollTop(page[0].offsetTop);
                 }
             }
             else {
-                expandFile('upload.pdf', files[i].getAttribute('file-url'), page_num - 1);
+                viewFileFullPanel('upload.pdf', files[i].getAttribute('file-url'), page_num - 1);
             }
         }
     }
@@ -2824,7 +2826,7 @@ function scrollToOverallComment(): void {
  * @param {number} mark_id
  * @return {Promise}
  */
-function checkMark(component_id: number, mark_id: number) {
+function checkMark(component_id: number, mark_id: number): Promise<void> {
     // Don't let them check a disabled mark
     if (isMarkDisabled(mark_id)) {
         return Promise.resolve();
@@ -2853,7 +2855,7 @@ function checkMark(component_id: number, mark_id: number) {
  * @param {number} mark_id
  * @return {Promise}
  */
-function unCheckMark(component_id: number, mark_id: number) {
+function unCheckMark(component_id: number, mark_id: number): Promise<void> {
     // First fetch the necessary information from the DOM
     const gradedComponent = getGradedComponentFromDOM(component_id);
 
@@ -2874,7 +2876,7 @@ function unCheckMark(component_id: number, mark_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function unCheckFirstMark(component_id: number) {
+function unCheckFirstMark(component_id: number): Promise<void> {
     return unCheckMark(component_id, getComponentFirstMarkId(component_id));
 }
 
@@ -2891,7 +2893,7 @@ export interface ConflictMark {
  * @param {number} component_id
  * @return {Promise}
  */
-function saveMarkList(component_id: number) {
+function saveMarkList(component_id: number): Promise<void> { //TODO: verify
     const gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then((component) =>  {
@@ -2963,7 +2965,7 @@ function marksEqual(mark0: Mark, mark1: Mark): boolean {
  *  before edits, the DOM mark, and the server's up-to-date mark
  *  @return {Promise<boolean>} Resolves true on success, false on conflict
  */
-function tryResolveMarkSave(gradeable_id: string, component_id: number, domMark: { id: number; title: string; points: number; publish: boolean; }, serverMark: Mark | null, oldServerMark: Mark | null) {
+function tryResolveMarkSave(gradeable_id: string, component_id: number, domMark: { id: number; title: string; points: number; publish: boolean; }, serverMark: Mark | null, oldServerMark: Mark | null): Promise<number | boolean> {
     const markDeleted = isMarkDeleted(domMark.id);
     if (oldServerMark !== null) {
         if (serverMark !== null) {
@@ -3079,7 +3081,7 @@ function gradedComponentsEqual(gcDOM: GradedComponent, gcOLD: GradedComponent | 
     }
 }
 
-function saveComponent(component_id: number) {
+function saveComponent(component_id: number): Promise<void> {
     // We are saving changes...
     if (isEditModeEnabled()) {
         // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
@@ -3108,7 +3110,7 @@ function saveComponent(component_id: number) {
  * @param {number} component_id
  * @return {Promise}
  */
-function saveGradedComponent(component_id: number) {
+function saveGradedComponent(component_id: number): Promise<void> {
     const gradeable_id = getGradeableId();
     const gradedComponent = getGradedComponentFromDOM(component_id);
     gradedComponent.graded_version = getDisplayVersion();
@@ -3128,7 +3130,7 @@ function saveGradedComponent(component_id: number) {
                 if (getMarkFromMarkArray(component.marks, mark_id) !== null) {
                     return;
                 }
-                missingMarks.push(getMarkFromMarkArray(domComponent.marks, mark_id));
+                missingMarks.push(getMarkFromMarkArray(domComponent.marks, mark_id)!);
             });
 
             // For each mark missing from the server, add it
@@ -3164,7 +3166,7 @@ function saveGradedComponent(component_id: number) {
  * @param {boolean} showMarkList Whether the header should be styled like the component is open
  * @return {Promise}
  */
-function refreshGradedComponentHeader(component_id: number, showMarkList: boolean) {
+function refreshGradedComponentHeader(component_id: number, showMarkList: boolean): Promise<void> {
     return injectGradingComponentHeader(
         getComponentFromDOM(component_id),
         getGradedComponentFromDOM(component_id), showMarkList);
@@ -3178,7 +3180,7 @@ function refreshGradedComponentHeader(component_id: number, showMarkList: boolea
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
-function refreshGradedComponent(component_id: number, showMarkList: boolean) {
+function refreshGradedComponent(component_id: number, showMarkList: boolean): Promise<void> {
     return injectGradingComponent(
         getComponentFromDOM(component_id),
         getGradedComponentFromDOM(component_id),
@@ -3191,7 +3193,7 @@ function refreshGradedComponent(component_id: number, showMarkList: boolean) {
  * @param {boolean} showMarkList Whether the header should be styled like the component is open
  * @return {Promise}
  */
-function refreshInstructorEditComponentHeader(component_id: number, showMarkList: boolean) {
+function refreshInstructorEditComponentHeader(component_id: number, showMarkList: boolean): Promise<void> {
     return injectInstructorEditComponentHeader(getComponentFromDOM(component_id), showMarkList);
 }
 
@@ -3201,7 +3203,7 @@ function refreshInstructorEditComponentHeader(component_id: number, showMarkList
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
-function refreshInstructorEditComponent(component_id: number, showMarkList: boolean) {
+function refreshInstructorEditComponent(component_id: number, showMarkList: boolean): Promise<void> {
     return injectInstructorEditComponent(getComponentFromDOM(component_id), showMarkList);
 }
 
@@ -3211,7 +3213,7 @@ function refreshInstructorEditComponent(component_id: number, showMarkList: bool
  * @param {boolean} showMarkList Whether the header should be styled like the component is open
  * @return {Promise}
  */
-function refreshComponentHeader(component_id: number, showMarkList: boolean) {
+function refreshComponentHeader(component_id: number, showMarkList: boolean): Promise<void> {
     return isInstructorEditEnabled() ? refreshInstructorEditComponentHeader(component_id, showMarkList) : refreshGradedComponentHeader(component_id, showMarkList);
 }
 
@@ -3221,7 +3223,7 @@ function refreshComponentHeader(component_id: number, showMarkList: boolean) {
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
-function refreshComponent(component_id: number, showMarkList: boolean) {
+function refreshComponent(component_id: number, showMarkList: boolean): Promise<void> {
     return isInstructorEditEnabled() ? refreshInstructorEditComponent(component_id, showMarkList) : refreshGradedComponent(component_id, showMarkList);
 }
 
@@ -3267,8 +3269,8 @@ function injectInstructorEditComponent(component: Component, showMarkList: boole
  * @param {boolean} showMarkList Whether to style the header like the mark list is open
  * @return {Promise}
  */
-function injectInstructorEditComponentHeader(component: Component, showMarkList: boolean) {
-    return renderEditComponentHeader(component, getPointPrecision(), showMarkList)
+function injectInstructorEditComponentHeader(component: Component, showMarkList: boolean): Promise<void> {
+    return renderEditComponentHeader(component, showMarkList)
         .then((elements) =>  {
             setComponentHeaderContents(component.id, elements);
         })
@@ -3335,7 +3337,7 @@ function addItempoolOptions(componentId: number): void {
     let itempool_options = '<option value="null">NONE</option>';
 
     for (const key in itempools) {
-        itempool_options += `<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`;
+        itempool_options += `<option value='${key}'>${key} (${itempools[key]})</option>`;
     }
     //TODO: Test
     // select_ele.html(itempool_options);
