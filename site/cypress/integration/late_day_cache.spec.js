@@ -107,7 +107,6 @@ describe('Test cases involving late day cache updates', () => {
             });
 
             it('should have days submitted late > 0', () => {
-                cy.log();
                 for (const user_id in all_late_users[g_id]) {
                     cy.visit([]);
                     cy.wait(3000);
@@ -128,7 +127,6 @@ describe('Test cases involving late day cache updates', () => {
                             all_late_users[g_id][user_id] = days_late;
 
                             // Generate predicted status
-                            cy.log(`days_allowed: ${days_allowed}, days_late: ${days_late}, late_gays_remaining: 0`);
                             const status = predictedStatus(days_allowed, days_late, 0);
 
                             // Find late day status within the row in the late day usage table
@@ -162,9 +160,6 @@ describe('Test cases involving late day cache updates', () => {
         it('should grant students with 2 late days', () => {
             cy.visit(['sample', 'late_days']);
             cy.login('instructor');
-
-            cy.log(all_user_ids);
-            cy.log(all_late_users);
 
             for (const user_id of all_user_ids) {
                 const days = Math.floor(Math.random() * 2) + 1;
@@ -214,7 +209,6 @@ describe('Test cases involving late day cache updates', () => {
                     // Wait for login change to take place
                     cy.wait(3000);
 
-                    cy.log(`days_allowed: ${days_allowed}, days_late: ${late_users[user_id]}, late_gays_remaining: ${late_days_remaining[user_id]}`);
                     const status = predictedStatus(days_allowed, late_users[user_id], late_days_remaining[user_id]);
 
                     // Find late day status within the row in the late day usage table
@@ -330,7 +324,6 @@ describe('Test cases involving late day cache updates', () => {
                 const { g_id, g_title, days_allowed } = test_case;
                 const late_users = all_late_users[g_id];
 
-                cy.log(late_day_exception);
                 for (const user_id in late_users) {
                     cy.visit([]);
                     cy.wait(3000);
@@ -340,7 +333,6 @@ describe('Test cases involving late day cache updates', () => {
                     // Wait for login change to take place
                     cy.wait(3000);
 
-                    cy.log(`days_allowed: ${days_allowed}, days_late: ${late_users[user_id] - late_day_exception[g_id][user_id]}, remaining: ${0}`);
                     const status = predictedStatus(days_allowed, late_users[user_id] - late_day_exception[g_id][user_id], 0);
 
                     // Find late day status within the row in the late day usage table
