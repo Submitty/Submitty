@@ -1,5 +1,5 @@
 /**
- * instructor-submission.ts contains logic for special submission modes available to instructors
+ * grader-submission.ts contains logic for special submission modes available to full access graders and instructors
  */
 
 
