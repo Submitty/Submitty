@@ -6,3 +6,7 @@ export interface Mark {
     deleted?: boolean,
     order?: number;
 }
+
+export interface AddNewMarkResponse {
+    mark_id: number
+}

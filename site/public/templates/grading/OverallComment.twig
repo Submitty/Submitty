@@ -11,6 +11,7 @@ Required Parameters:
   - attachments["logged_in_user"]["attachments"] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
   - attachments["other_graders"][<user_id>] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
 #}
+{{ add_twig_module_js('grading/OverallComment.js') }}
 <div class="box general-comment container key_to_click" tabindex="0">
     <div class="row overall-comment-top-row">
         <div class="col-6">
@@ -22,14 +23,14 @@ Required Parameters:
     </div>
     <div class="row">
         <div class="tab-bar-wrapper" id="overall-comment-tabs">
-            <a class="nav-bar key_to_click normal-btn active-btn" id="overall-comment-tab-{{overall_comment["logged_in_user"]["user_id"]|escape}}" onclick="open_overall_comment_tab('{{overall_comment["logged_in_user"]["user_id"]|escape}}');">{{overall_comment["logged_in_user"]["user_id"]|escape}}</a>
+            <a class="nav-bar key_to_click normal-btn active-btn" id="overall-comment-tab-{{overall_comment["logged_in_user"]["user_id"]|escape}}" data-user-id="{{ overall_comment["logged_in_user"]["user_id"]|escape }}">{{overall_comment["logged_in_user"]["user_id"]|escape}}</a>
 
             {% for user, comment in overall_comment["other_graders"] %}
-                <a class="nav-bar key_to_click normal-btn" id="overall-comment-tab-{{user}}" onclick="open_overall_comment_tab('{{user}}');">{{user}}</a>
+                <a class="nav-bar key_to_click normal-btn" id="overall-comment-tab-{{user}}" data-user-id="{{ user }}">{{user}}</a>
             {% endfor %}
         </div>
     </div>
-    <div class="row" id="overall-comments">
+    <div class="row" id="overall-comments" data-logged-in-user-id="{{ overall_comment["logged_in_user"]["user_id"] | escape('js') }}">
         {% include "../misc/MarkdownArea.twig" with {
             markdown_area_id : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
             markdown_area_name : '',
@@ -61,7 +62,7 @@ Required Parameters:
         <form id="attachment-upload-form" name="attachment-upload-form" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <label for="attachment-upload">Upload an attachment: </label>
-            <input type="file" id="attachment-upload" name="attachment-upload" onchange="uploadAttachment();">
+            <input type="file" id="attachment-upload" name="attachment-upload">
         </form>
         <h4 id="attachments-header" {% if attachments["logged_in_user"]["attachments"]|length == 0 %}style="display: none;"{% endif %}>
             Current Attachments
@@ -93,26 +94,6 @@ Required Parameters:
         </div>
         </div>
     </div>
-    <script>
-        $(document).ready(function(){
-            $('.overall-comment-other').each(function() {
-                const content = $(this).html().trim();
-                const url = buildURL(["markdown"]);
-                renderMarkdown($(this), url, content);
-            });
-        });
-        var grader = "{{overall_comment["logged_in_user"]["user_id"] | escape('js') }}";
-        $(document).on('input','#overall-comment-' + grader,function () {
-            var currentOverallComment  = $('textarea#overall-comment-' + grader).val();
-            var previousOverallComment = $('textarea#overall-comment-' + grader).data("previous-comment");
-            if (currentOverallComment != previousOverallComment) {
-                $(".overall-comment-status").text("Unsaved Changes");
-            }
-            else {
-                $(".overall-comment-status").text("All Changes Saved");
-            }
-      });
-    </script>
 </div>
 
 

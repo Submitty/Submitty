@@ -1,5 +1,5 @@
 {% import "Functions.twig" as functions %}
-
+{{ add_twig_module_js('grading/GradingComponentHeader.js') }}
 <span class=
     {% if component.peer %}'peer-graded-component-data'
     {% else %}'graded-component-data' 
@@ -35,7 +35,7 @@
     {# Saving status #}
     {% include "SavingTools.twig" with {
         'show_save_tools': show_mark_list,
-        'cancel_on_click': 'onCancelComponent(this)'
+        'cancel_on_click': 'cancel-component'
     } only %}
 </span>
 {% if component_version_conflict is same as(true) and not grading_disabled %}
@@ -45,7 +45,7 @@
 {% else %}
     {% if show_verify_grader %}
         <span class="verify-container col-no-gutters">
-            <input type="button" class="btn btn-default key_to_click" tabindex="0" onclick="onVerifyComponent(this); event.stopPropagation()" value="Verify Grader"/>
+            <input type="button" class="btn btn-default key_to_click grading-component-verify" tabindex="0" value="Verify Grader"/>
         </span>
     {% endif %}
 {% endif %}

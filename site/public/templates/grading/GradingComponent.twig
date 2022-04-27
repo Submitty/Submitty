@@ -14,12 +14,13 @@ Required inputs:
 {% set show_verify_grader = can_verify_graders and graded_component is defined and graded_component.grader_id|length != 0 and grader_id != graded_component.grader_id and graded_component.verifier_id is not defined %}
 
 {% block component_click %}
-    {{ grading_disabled ? '' : 'onClickComponent(this, true)' }}
+    {{ grading_disabled ? '' : 'component-click' }}
 {% endblock %}
  
 {# This is causing a lot of console errros in edit gradeable #}
  
 {% block header_block %}
+    {{ add_twig_module_js('grading/GradingComponent.js') }}
     {% include 'GradingComponentHeader.twig' %}
 {% endblock %}
 
@@ -61,24 +62,9 @@ Required inputs:
         <div class="custom-mark-container mark-container row"
              data-mark_id="0">
             <span class="mark-selector-container">
-                <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters key_to_click" tabindex="0"
-                      data-mark_id="0"
-                      onclick="onToggleCustomMark(this)">
+                <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector mark-selector-grading-component col-no-gutters key_to_click" tabindex="0" data-mark_id="0">
                 </span>
             </span>
-            <script>
-                function changeExtraColor(ref,me){
-                    if(ref == "Full Credit" && me.value > 0){
-                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
-                    }
-                    else if(ref == "No Credit" && me.value<0){
-                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
-                    }
-                    else{
-                        me.style.backgroundColor = "var(--default-white)";
-                    }
-                }
-            </script>
             <span class="col-no-gutters mark-points">
                 <label for="extra-mark-{{ component.id }}" tabIndex="0" class="screen-reader">Extra Mark</label>
                 <input id = "extra-mark-{{ component.id }}"
@@ -86,40 +72,15 @@ Required inputs:
                        type="number"
                        step="{{ precision }}"
                        style="background-color:var(--default-white)"
-                       onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
-                       value="{{ graded_component.score | default('0')}}">
-                <div class="plus-minus">
-                    <i onclick="increment(this)"class="fa fa-caret-up custom-mark-arrow-icon"></i>
-                    <i onclick="decrement(this)"class="fa fa-caret-down custom-mark-arrow-icon"></i>
+                       value="{{ graded_component.score | default('0')}}" data-mark-title='{{ f_mark.title }}'>
+                <div class="plus-minus" data-component-id="{{ component.id }}" data-precision="{{ precision }}">
+                    <i class="fa fa-caret-up custom-mark-arrow-icon custom-mark-arrow-up"></i>
+                    <i class="fa fa-caret-down custom-mark-arrow-icon custom-mark-arrow-down"></i>
                 </div>
-                        <script>
-                             function increment(me) {
-                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() + {{ precision }});
-                                 return onCustomMarkChange(me);
-                             }
-
-                             function decrement(me) {
-                                 $("#extra-mark-{{ component.id }}").val(+$("#extra-mark-{{ component.id }}").val() - {{ precision }});
-                                 return onCustomMarkChange(me);
-                             }
-
-                            {% if f_mark.title == "Full Credit" %}
-                                if(document.getElementById("extra-mark-{{ component.id }}").value>0){
-                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                                }
-                            {% elseif f_mark.title == "No Credit" %}
-                                if(document.getElementById("extra-mark-{{ component.id }}").value<0){
-                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                                }
-                            {% endif %}
-                        </script>
-
             </span>
             <span class="col-sm mark-title">
                 Custom:
-                <textarea onchange="onCustomMarkChange(this)"
-                          onkeyup="auto_grow(this)"
-                          rows="1"
+                <textarea rows="1"
                           placeholder="Custom message for student..."
                           class="mark-note-custom noscroll"
                 >{{ graded_component.comment|escape }}</textarea>

@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/EditComponentHeader.js') }}
 <span class="col-no-gutters badge-container edit-mode">
     <strong class="badge green-background">
         {{ component.max_value|round(decimal_precision) }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points|round(decimal_precision) ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points|round(decimal_precision) ~ ')' : '' }}
@@ -20,13 +21,13 @@
     {# Saving status #}
     {% include "SavingTools.twig" with {
         'show_save_tools': show_mark_list,
-        'cancel_on_click': 'onCancelEditRubricComponent(this)'
+        'cancel_on_click': 'edit-rubric-component'
     } only %}
 </span>
 
-<span class="col-no-gutters reorder-component-container" tabindex="0" onclick="event.stopPropagation()">
+<span class="col-no-gutters reorder-component-container" tabindex="0">
     <i class="fas fa-grip-lines" title="Click and drag to reorder components"></i>
 </span>
-<span class="col-no-gutters key_to_click" tabindex="0" onclick="onDeleteComponent(this); event.stopPropagation()">
+<span class="col-no-gutters delete-component-container key_to_click" tabindex="0">
     <i class="fas fa-trash" title="Delete this component"></i>
 </span>

@@ -4,10 +4,11 @@
 {% set penalty_points = 0-component.lower_clamp %}
 
 {% block component_click %}
-    onClickComponent(this, true)
+    component-click
 {% endblock %}
 
 {% block header_block %}
+    {{ add_twig_module_js('grading/EditComponent.js') }}
     {% include 'EditComponentHeader.twig' %}
 {% endblock %}
 
@@ -21,14 +22,14 @@
                 <label for="component-title-{{component.id}}">Title</label>
             </div>
             <div class="col component-title-container">
-                <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
+                <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title"/>
             </div>
             {% if component.page > 0 %}
                 <div class="col-no-gutters page-label">
                     <label for="page-number-{{component.id}}">Page #</label>
                 </div>
                 <div class="col-no-gutters">
-                    <input id="page-number-{{component.id}}" class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
+                    <input id="page-number-{{component.id}}" class="page-number" type="number" step="1" min="1" value="{{ component.page }}">
                 </div>
             {% else %}
                 <input class="page-number" value="{{ component.page }}" aria-label="page number" hidden/>
@@ -41,7 +42,7 @@
                 <label for="ta-comment-{{component.id}}">Note to TAs</label>
             </div>
             <div class="col tight-right">
-                <textarea id="ta-comment-{{component.id}}" class="ta-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
+                <textarea id="ta-comment-{{component.id}}" class="ta-comment noscroll" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
             </div>
         </div>
 
@@ -51,7 +52,7 @@
                 <label for="student-comment-{{component.id}}">Note to Students</label>
             </div>
             <div class="col tight-right">
-                <textarea id="student-comment-{{component.id}}" class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
+                <textarea id="student-comment-{{component.id}}" class="student-comment noscroll" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
             </div>
         </div>
         {# Choose if this component should be linke with itempool questions or not #}
@@ -60,9 +61,9 @@
                 <legend>
                     Link this component with the item-pool?<br>
                 </legend>
-                <input data-component-id="{{ component.id }}" type="radio" id="yes-link-item-pool-{{ component.id }}" name="link-item-pool" value="true" onchange="onItemPoolOptionChange({{ component.id }})"
+                <input data-component-id="{{ component.id }}" type="radio" id="yes-link-item-pool-{{ component.id }}" name="link-item-pool" value="true" 
                         {% if component.is_itempool_linked %} checked {% endif %} /> <label for="yes-link-item-pool-{{ component.id }}">Yes</label>
-                <input data-component-id="{{ component.id }}" type="radio" id="no-link-item-pool-{{ component.id }}" name="link-item-pool" value="false" onchange="onItemPoolOptionChange({{ component.id }})"
+                <input data-component-id="{{ component.id }}" type="radio" id="no-link-item-pool-{{ component.id }}" name="link-item-pool" value="false" 
                         {% if not component.is_itempool_linked %} checked {% endif %} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
             </fieldset>
             {# Itempool question selector #}
@@ -85,9 +86,7 @@
                        class="max-points"
                        step="{{ precision }}"
                        type="number" min="0"
-                       value="{{ component.max_value|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"
-                       onmouseup="onComponentPointsChange(this)"/>
+                       value="{{ component.max_value|round(decimal_precision) }}"/>
             </div>
         </div>
         <div class="row point-input-row">
@@ -97,9 +96,7 @@
                        class="extra-credit-points"
                        step="{{ precision }}"
                        type="number" min="0"
-                       value="{{ extra_credit_points|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"
-                       onmouseup="onComponentPointsChange(this)"/>
+                       value="{{ extra_credit_points|round(decimal_precision) }}"/>
             </div>
             <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
         </div>
@@ -110,9 +107,7 @@
                        class="penalty-points"
                        step="{{ precision }}"
                        type="number" min="0"
-                       value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"
-                       onmouseup="onComponentPointsChange(this)"/>
+                       value="{{ component.lower_clamp|abs|round(decimal_precision) }}"/>
             </div>
             <div class="col"><i>Student scores will be clamped from below to min(0,-Negative Penalty Points)</i></div>
         </div>
@@ -123,15 +118,13 @@
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-up-selector count-type-selector key_to_click" tabindex="0"
-                           name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
-                           onclick="onClickCountUp(this)" id="grade_by_count_up_{{ component.id }}"> <label for="grade_by_count_up_{{ component.id }}">Grade by Count Up (from zero)</label>
+                           name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }} id="grade-by-count-up-{{ component.id }}"> <label for="grade-by-count-up-{{ component.id }}">Grade by Count Up (from zero)</label>
                 </span>
             </div>
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-down-selector count-type-selector key_to_click" tabindex="0"
-                           name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
-                           onclick="onClickCountDown(this)" id="grade_by_count_down_{{ component.id }}"> <label for="grade_by_count_down_{{ component.id }}">Grade by Count Down (from "Points")</label>
+                           name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }} id="grade-by-count-down-{{ component.id }}"> <label for="grade-by-count-down-{{ component.id }}">Grade by Count Down (from "Points")</label>
                 </span>
             </div>
         </fieldset>

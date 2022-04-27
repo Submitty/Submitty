@@ -6,7 +6,7 @@ Required Input:
     peer_component: boolean, defines what data is stored in the component.
     peer_panel: boolean, true if this component is being displayed in the peer panel.
 #}
-
+{{ add_twig_module_js('grading/Component.js') }}
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
 
 {% if peer_panel %}
@@ -35,7 +35,7 @@ Required Input:
 
     {# Title bar (only part that triggers collapse on click) #}
     <div class="box-title container">
-        <div class="row header-block key_to_click" tabindex="0" onclick="{% block component_click %}{% endblock %}">
+        <div class="row header-block key_to_click {% block component_click %}{% endblock %}" tabindex="0">
             {% block header_block %}
             {% endblock %}
         </div>
@@ -53,7 +53,7 @@ Required Input:
         {% endblock %}
         {% if edit_marks_enabled %}
             <div class="add-new-mark-container">
-                <input type="button" class="btn btn-primary add-new-mark key_to_click" tabindex="0" value="Add New Mark" onclick="onAddNewMark(this)"/>
+                <input type="button" class="btn btn-primary add-new-mark key_to_click" tabindex="0" value="Add New Mark"/>
             </div>
         {% endif %}
         {% block extra_mark_rows %}

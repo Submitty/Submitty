@@ -4,11 +4,12 @@ Renders the 'Save' 'Cancel' 'Saving...' and 'Done' bits that are on the right si
 
 Required Parameters:
 -show_save_tools: true to show the 'save/cancel' text, otherwise show 'done' text
--cancel_on_click: callback for the cancel button's on-click event
+-cancel_on_click: callback for the cancel button's on-click event; see SavingTools.ts for callbacks
 #}
+{{ add_twig_module_js('grading/SavingTools.js') }}
 <span class="save-tools">
     {% if show_save_tools %}
-        <span class="btn btn-default save-tools-cancel key_to_click" tabindex="0" onclick="{{ cancel_on_click }} ;event.stopPropagation()">
+        <span class="btn btn-default save-tools-cancel key_to_click" tabindex="0" data-cancel-on-click="{{ cancel_on_click }}">
             Cancel
         </span>
         <span class="btn btn-primary save-tools-save">

@@ -6,6 +6,8 @@ DECIMAL_PRECISION = 3;
 
 var itempool_items = {};
 
+const loadedModules = {};
+
 /**
  * Asynchronously load all of the templates
  * @return {Promise}
@@ -28,6 +30,12 @@ function loadTemplates() {
         {id: 'ConflictMarks', href: "/templates/grading/ConflictMarks.twig"},
         {id: 'RubricTotalBox', href: "/templates/grading/RubricTotalBox.twig"},
     ];
+    Twig.extendFunction('add_twig_module_js', async (name) => {
+        if (!loadedModules.hasOwnProperty(name)) {
+            let module = await import(buildUrl(['mjs', 'twig', name]));
+            loadedModules[name] = module;
+        }
+    })
     let promises = [];
     templates.forEach(function (template) {
         promises.push(new Promise(function (resolve, reject) {
@@ -132,7 +140,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
     }
 
     // TODO: i don't think this is async
-    return Twig.twig({ref: "GradingGradeable"}).render({
+    return Twig.twig({ref: "GradingGradeable"}).renderAsync({
         'gradeable': gradeable,
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
@@ -176,7 +184,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         });
     });
     // TODO: i don't think this is async
-    return Twig.twig({ref: "PeerGradeable"}).render({
+    return Twig.twig({ref: "PeerGradeable"}).renderAsync({
         'gradeable': gradeable,
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
@@ -215,7 +223,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             component.student_comment = "";
         }
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "GradingComponent"}).render({
+        resolve(Twig.twig({ref: "GradingComponent"}).renderAsync({
             'component': component,
             'graded_component': graded_component,
             'precision': precision,
@@ -250,7 +258,7 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "GradingComponentHeader"}).render({
+        resolve(Twig.twig({ref: "GradingComponentHeader"}).renderAsync({
             'component': component,
             'graded_component': graded_component,
             'show_verify_grader': canVerifyGraders && showVerifyComponent(graded_component, grader_id),
@@ -269,7 +277,7 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
  * @returns {Promise<string>} the html for the gradeable
  */
 function renderInstructorEditGradeable(gradeable, itempool_available, itempool_options) {
-    return Twig.twig({ref: "EditGradeable"}).render({
+    return Twig.twig({ref: "EditGradeable"}).renderAsync({
         'gradeable': gradeable,
         'edit_marks_enabled': true,
         'itempool_available': itempool_available,
@@ -290,7 +298,7 @@ function renderEditComponent(component, precision, showMarkList) {
 
     return new Promise(function (resolve, reject) {
         // TODO: I don't think this is async
-        resolve(Twig.twig({ref: "EditComponent"}).render({
+        resolve(Twig.twig({ref: "EditComponent"}).renderAsync({
             'component': component,
             'precision': precision,
             'show_mark_list': showMarkList,
@@ -313,7 +321,7 @@ function renderEditComponent(component, precision, showMarkList) {
 function renderEditComponentHeader(component, showMarkList) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "EditComponentHeader"}).render({
+        resolve(Twig.twig({ref: "EditComponentHeader"}).renderAsync({
             'component': component,
             'extra_credit_points': component.upper_clamp - component.max_value,
             'penalty_points': 0 - component.lower_clamp,
@@ -332,7 +340,7 @@ function renderEditComponentHeader(component, showMarkList) {
 function renderOverallComment(comment, editable) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "OverallComment"}).render({
+        resolve(Twig.twig({ref: "OverallComment"}).renderAsync({
             'overall_comment': comment,
             'editable': editable,
             'grading_disabled': false
@@ -349,7 +357,7 @@ function renderTotalScoreBox(scores) {
     return new Promise(function (resolve, reject) {
         scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "TotalScoreBox"}).render(scores));
+        resolve(Twig.twig({ref: "TotalScoreBox"}).renderAsync(scores));
     });
 }
 
@@ -362,7 +370,7 @@ function renderRubricTotalBox(scores) {
     return new Promise(function (resolve, reject) {
         scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "RubricTotalBox"}).render(scores));
+        resolve(Twig.twig({ref: "RubricTotalBox"}).renderAsync(scores));
     });
 }
 
@@ -374,7 +382,7 @@ function renderRubricTotalBox(scores) {
 function renderConflictMarks(conflict_marks) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "ConflictMarks"}).render({
+        resolve(Twig.twig({ref: "ConflictMarks"}).renderAsync({
             conflict_marks: conflict_marks,
             decimal_precision: DECIMAL_PRECISION
         }));

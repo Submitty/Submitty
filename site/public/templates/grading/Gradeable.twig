@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/Gradeable.js') }}
 <div id="gradeable-rubric" class="gradeable" data-gradeable_id="{{ gradeable.id }}"  data-gradeable_custom_marks="{{ gradeable.allow_custom_marks }}">
     {% block header_content %}
     {% endblock %}
@@ -22,30 +23,3 @@
     {% block footer_content %}
     {% endblock %}
 </div>
-
-<script>
-    //
-    // This is needed to resolve conflicts between Chrome and other browsers
-    //   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
-    //   and other browsers can only do synchronous ajax calls on 'onunload'
-    //
-    // Reference:
-    //    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
-    //
-    var __unloadRequestSent = false;
-    function unloadSave() {
-        if (!__unloadRequestSent) {
-            __unloadRequestSent = true;
-            AJAX_USE_ASYNC = false;
-            closeAllComponents(true)
-                .catch(function () {
-                    // Unable to save so try saving at a different time
-                    __unloadRequestSent = false;
-                });
-        }
-    }
-    // Will work for Chrome
-    window.onbeforeunload = unloadSave;
-    // Will work for other browsers
-    window.onunload = unloadSave;
-</script>

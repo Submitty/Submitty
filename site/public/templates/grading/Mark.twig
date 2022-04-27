@@ -8,12 +8,13 @@ Required Input:
     mark_disabled: True if the mark should appear uneditable in 'edit' mode
     show_publish: True to show the 'publish' option
 #}
+{{ add_twig_module_js('grading/Mark.js') }}
 <div id="mark-{{ mark.id }}"
      class="mark-container key_to_click row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}" tabindex="0"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      data-publish="{{ mark.publish }}"
-     onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
+     data-toggle-mark="{{ edit_marks_enabled or mark_disabled }}"
 >
     {% if edit_marks_enabled %}
         <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
@@ -32,32 +33,10 @@ Required Input:
         {% if edit_marks_enabled %}
             <input id="mark-editor-{{ mark.id }}"
                    type="number"
-                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
-                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    step="{{ precision }}"
                    aria-label="mark value"
                    value="{{ mark.points|round(decimal_precision) }}"
-                    {{ first_mark ? 'disabled' : '' }}/>
-            <script>
-                {% if first_mark %}
-                    var overall_title = "{{ mark.title  }}";
-                {% endif %}
-                document.getElementById("mark-editor-{{ mark.id }}").setAttribute("overall",overall_title);
-                if(document.getElementById("mark-editor-{{ mark.id }}").getAttribute("overall")=="Full Credit"){
-                    {% if mark.points > 0 %}
-                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                    {% else %}
-                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
-                    {% endif %}
-                }
-                else{
-                    {% if mark.points < 0 %}
-                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
-                    {% else %}
-                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
-                    {% endif %}
-                }
-            </script>
+                   {{ first_mark ? 'disabled' : '' }} data-first-mark={{ first_mark }} data-mark-title="{{ mark.title }}"/>
         {% else %}
             {{ mark.points }}
         {% endif %}
@@ -65,7 +44,7 @@ Required Input:
     <span class="col-sm mark-title"
           data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title"
+            <textarea class="noscroll mark-edit-textarea" aria-label="mark title"
                     {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
@@ -74,11 +53,11 @@ Required Input:
     {% if show_publish %}
         {% if not first_mark %}
             <span class="col-no-gutters mark-publish-container">
-                <label for="show_all_marks_{{mark.id}}">Show mark to all students:</label> <input id="show_all_marks_{{mark.id}}" type="checkbox" {{ mark.publish ? 'checked' : '' }} onchange="onMarkPublishChange(this)"/>
+                <label for="show-all-marks-{{mark.id}}">Show mark to all students:</label> <input id="show-all-marks-{{mark.id}}" type="checkbox" {{ mark.publish ? 'checked' : '' }}/>
             </span>
         {% endif %}
     {% endif %}
-    <span class="col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onGetMarkStats(this);event.stopPropagation()">
+    <span class="col-no-gutters mark-tools mark-see-who-got key_to_click" tabindex="0">
         <i class="fas fa-users icon-mark-stats" title="See who got this mark"></i>
     </span>
     {% if edit_marks_enabled %}
@@ -88,32 +67,12 @@ Required Input:
                 <i class="fas fa-trash hidden"></i>
             </span>
         {% else %}
-            <span class="delete-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onDeleteMark(this)" title="Tag for deletion">
+            <span class="delete-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" title="Tag for deletion">
                 <i class="fas fa-trash"></i>
             </span>
-            <span class="restore-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onRestoreMark(this)" title="Don't delete" hidden>
+            <span class="restore-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" title="Don't delete" hidden>
                 <i class="fas fa-undo"></i>
             </span>
         {% endif %}
     {% endif %}
 </div>
-<script>
-    function changeMarkColor(me,countUp) {
-        if(countUp=="No Credit"){
-            if(me.value<0){
-                me.style.backgroundColor="var(--standard-vibrant-yellow)";
-            }
-            else {
-                me.style.backgroundColor="var(--default-white)";
-            }
-        }
-        else {
-            if(me.value>0){
-                me.style.backgroundColor="var(--standard-vibrant-yellow)";
-            }
-            else{
-                me.style.backgroundColor="var(--default-white)";
-            }
-        }
-    }
-</script>

@@ -55,6 +55,19 @@ let settingsCallbacks = {
   }
 }
 
+//TODO: Remove this when this file is refactored
+/**
+ * A number to represent the id of no component
+ * @type {number}
+ */
+const NO_COMPONENT_ID = -1;
+
+/**
+ * The id of the custom mark for a component
+ * @type {number}
+ */
+const CUSTOM_MARK_ID = 0;
+
 // Grading Panel header width
 let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
@@ -257,11 +270,15 @@ function changeStudentArrowTooltips(data) {
 }
 
 let orig_toggleComponent = window.toggleComponent;
-window.toggleComponent = function(component_id, saveChanges) {
-  let ret = orig_toggleComponent(component_id, saveChanges);
-  return ret.then(function() {
-    changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
-  });
+if (orig_toggleComponent === 'function') {
+  window.toggleComponent = function(component_id, saveChanges) {
+    let ret = orig_toggleComponent(component_id, saveChanges);
+    return ret.then(function() {
+      changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+    });
+  }
+} else {
+  window.toggleComponent = changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
 }
 
 function checkNotebookScroll() {

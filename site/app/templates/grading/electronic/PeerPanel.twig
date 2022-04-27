@@ -1,23 +1,16 @@
+{{ add_twig_module_js('grading/electronic/PeerPanel.js') }}
 <div id="peer_info" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}">
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <span class="col grading_label">Peer Grading
-                    <a class="key_to_click" tabindex="0" title="Edit Peer Marks" aria-label="edit peer marks" onclick = "newEditPeerComponentsForm()">
+                    <a id="edit-peer-marks-btn" class="key_to_click" tabindex="0" title="Edit Peer Marks" aria-label="edit peer marks">
                         <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;">
                         </i>
                     </a>
                 </span>
-                <div class="inner-container" id="peer-grading-box">
-                    {% if has_active_version %}
-                        <script>
-                            $(document).ready(function () {
-                                loadTemplates().then(function() {
-                                    return reloadPeerRubric('{{ gradeable_id }}', '{{ anon_id }}');
-                                });
-                            });
-                        </script>
-                    {% else %}
+                <div class="inner-container" id="peer-grading-box" data-has-active-version="{{ has_active_version }}" data-gradeable-id="{{ gradeable_id }}" data-anon-id="{{ anon_id }}">
+                    {% if not has_active_version %}
                         <h4>No Submission</h4>
                     {% endif %}
                 </div>
