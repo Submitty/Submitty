@@ -69,6 +69,16 @@ chmod 644 /tmp/index.html
 chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
 mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 
+if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
+    mkdir -p ${SUBMITTY_DATA_DIR}/run/websocket
+fi
+
+chown root:root ${SUBMITTY_DATA_DIR}/run
+chmod 755 ${SUBMITTY_DATA_DIR}/run
+
+chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
+chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
+
 # Delete all typescript code to prevent deleted files being left behind and potentially
 # causing compilation errors
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
