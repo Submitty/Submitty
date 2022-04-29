@@ -781,7 +781,7 @@ class ElectronicGraderController extends AbstractController {
                     if (array_key_exists($key, $num_submitted)) {
                         $sections[$key] = [
                             'total_components' => $num_submitted[$key],
-                            'non_late_total_components' => ($num_submitted[$key] - $late_submitted[$key]),
+                            'non_late_total_components' => $num_submitted[$key] - (array_key_exists($key, $late_submitted) ? $late_submitted[$key] : 0),
                             'graded_components' => 0,
                             'non_late_graded_components' => 0,
                             'ta_graded_components' => 0,
