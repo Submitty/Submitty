@@ -41,6 +41,7 @@ CREATE TYPE public.notifications_component AS ENUM (
 
 SET default_tablespace = '';
 
+SET default_with_oids = false;
 
 --
 -- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
