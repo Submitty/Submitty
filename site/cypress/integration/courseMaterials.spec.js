@@ -231,7 +231,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
-        cy.get('#section-1').check();
+        cy.get('#section-upload-1').check();
         cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
         cy.get('#cm_path').click();
         cy.waitPageChange(() => {
@@ -294,7 +294,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile('zip.zip' , { subjectType: 'drag-n-drop' });
-        cy.get('#section-1').check();
+        cy.get('#section-upload-1').check();
         cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
         cy.get('#expand-zip-checkbox').check();
         cy.waitPageChange(() => {
