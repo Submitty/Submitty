@@ -696,12 +696,13 @@ class NavigationView extends AbstractView {
                 $date_text = 'grades due ';
                 $date_time = $gradeable->getGradeDueDate();
             }
+            elseif ($list_section === GradeableList::GRADING && !$gradeable->hasReleaseDate()) {
+                $title = 'GRADE';
+            }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';
-                if ($gradeable->hasReleaseDate()) {
-                    $date_text = 'grades will be released ';
-                    $date_time = $grades_released;
-                }
+                $date_text = 'grades will be released ';
+                $date_time = $grades_released;
             }
             else {
                 $title = 'REGRADE';
