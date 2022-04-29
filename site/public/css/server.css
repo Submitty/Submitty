@@ -1165,6 +1165,15 @@ div.full-height {
     margin-bottom: 10px;
 }
 
+.form-title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popup-close-icon:hover {
+    color: var(--external-link-blue);
+}
+
 .popup-form .form-body {
     flex-grow: 1;
     overflow-y: auto;

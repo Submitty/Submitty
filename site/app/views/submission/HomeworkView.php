@@ -44,8 +44,8 @@ class HomeworkView extends AbstractView {
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
 
-        if ($is_admin) {
-            $this->core->getOutput()->addInternalModuleJs('instructor-submission.js');
+        if ($this->core->getUser()->accessFullGrading()) {
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
         // Only show the late banner if the submission has a due date
@@ -172,7 +172,7 @@ class HomeworkView extends AbstractView {
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysAllowed() : $late_days_allowed;
 
         $error = false;
         $messages = [];
