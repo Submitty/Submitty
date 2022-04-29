@@ -12,10 +12,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit(autograding_status_path);
         });
 
-        afterEach(() => {
-            cy.logout();
-        });
-
         it('should show the gradeables being grading', () => {
             cy.viewport(1920,1200);
             cy.get('#machine-table tbody tr').eq(4).should('exist');
