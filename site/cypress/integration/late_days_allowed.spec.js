@@ -73,8 +73,9 @@ describe('Test cases involving the late days allowed page', () => {
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-history').contains('01/01/2021: Earned 3 late day(s)');
-            cy.get('.content').contains('Total late days remaining for future assignments: 3');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+3');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
 
             // logout and log back in as the instructor
             cy.logout();
@@ -101,8 +102,9 @@ describe('Test cases involving the late days allowed page', () => {
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-history').contains('01/01/2021: Earned 5 late day(s)');
-            cy.get('.content').contains('Total late days remaining for future assignments: 5');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+5');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('5');
 
             // logout and log back in as the instructor
             cy.logout();
@@ -121,7 +123,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
             cy.wait(1000); // just a quick pause to make sure the page has loaded fully
-            cy.get('.content').contains('Total late days remaining for future assignments: 0');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('0');
         });
     });
 });

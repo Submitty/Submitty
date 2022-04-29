@@ -14,6 +14,7 @@ use app\models\User;
  *
  * @method int getLateDaysRemaining()
  * @method int getCumulativeLateDaysUsed()
+ * @method string getId()
  */
 class LateDayInfo extends AbstractModel {
     const STATUS_NO_ACTIVE_VERSION = 0;
@@ -32,28 +33,56 @@ class LateDayInfo extends AbstractModel {
 
     /** @prop @var int The number of unused late days the user has as of this gradeable, not including exceptions */
     protected $late_days_remaining = null;
+    /** @prop @var int The number of late days allowed for this assignment */
+    protected $late_days_allowed = null;
+    /** @prop @var int The number of days late the current submission is */
+    protected $submission_days_late = null;
+    /** @prop @var int The number exceptions allowed for the user on this assignment */
+    protected $late_day_exceptions = null;
+    /** @prop @var int The update to late days remaining based on this late day event */
+    protected $late_days_change = null;
+    /** @prop @var bool True if the current submission has an active version and has late day info */
+    protected $has_late_day_info = null;
+    /** @prop @var bool True if the current gradeable has a submission */
+    protected $has_submission = null;
+    /** @prop @var \DateTime Time of late day event */
+    protected $late_day_date = null;
+    /** @prop @var string id of the late day event */
+    protected $id = null;
 
     /**
      * LateDayInfo constructor.
      * @param Core $core
      * @param User $user
-     * @param GradedGradeable $graded_gradeable
-     * @param int $late_days_remaining The number of late days remaining for use as of the time of this gradeable
+     * @param array $event_info The information for the given graded gradeable or late day update
      */
-    public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $late_days_remaining) {
+    public function __construct(Core $core, User $user, array $event_info) {
         parent::__construct($core);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user)) {
+
+        $this->user = $user;
+
+        $this->id = $event_info['id'] ?? null;
+        $this->graded_gradeable = $event_info['graded_gradeable'] ?? null;
+        $this->late_days_allowed = $event_info['late_days_allowed'] ?? null;
+        $this->late_day_date = $event_info['late_day_date'];
+        $this->submission_days_late = $event_info['submission_days_late'] ?? null;
+        $this->late_day_exceptions = $event_info['late_day_exceptions'] ?? null;
+        $this->late_days_remaining = $event_info['late_days_remaining'];
+        $this->late_days_change = $event_info['late_days_change'];
+
+        // Set Autograded gradeable info
+        $auto_graded_gradeable = $this->graded_gradeable !== null ? $this->graded_gradeable->getAutoGradedGradeable() : null;
+        $this->has_late_day_info = $auto_graded_gradeable !== null ? $auto_graded_gradeable->hasActiveVersion() : null;
+        $this->has_submission = $auto_graded_gradeable !== null ? $auto_graded_gradeable->hasSubmission() : null;
+
+        if ($this->graded_gradeable !== null && !$this->graded_gradeable->getSubmitter()->hasUser($user)) {
             throw new \InvalidArgumentException('Provided user did not match provided GradedGradeable');
         }
 
-        $this->user = $user;
-        $this->graded_gradeable = $graded_gradeable;
-
         // Get the late days available as of this gradeable's due date
-        if ($late_days_remaining < 0) {
+        if ($this->late_days_remaining < 0) {
             throw new \InvalidArgumentException('Late days remaining must be at least 0');
         }
-        $this->late_days_remaining = $late_days_remaining;
     }
 
     public function toArray() {
@@ -71,6 +100,51 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Gets information about this late day event in the format for the cache table
+     * @return array
+     */
+    public function generateEventInfo(): array {
+        return [
+            'g_id' => $this->isLateDayUpdate() ? null : $this->getId(),
+            'user_id' => $this->user->getId(),
+            'team_id' => null,
+            'g_title' => $this->isLateDayUpdate() ? null : $this->getEventTitle(),
+            'late_day_date' => $this->getLateDayEventTime()->format('Y-m-d H:i:s'),
+            'late_days_remaining' => $this->getLateDaysRemaining(),
+            'late_days_allowed' => $this->getAssignmentAllowedLateDays(),
+            'submission_days_late' => $this->getDaysLate(),
+            'late_day_exceptions' => $this->getLateDayException(),
+            'late_day_status' => $this->getStatus(),
+            'late_days_change' => $this->getLateDaysChange()
+        ];
+    }
+
+    /**
+     * Gets the time the late day event took place
+     * @return \DateTime
+     */
+    public function getLateDayEventTime() {
+        return $this->late_day_date;
+    }
+
+    /**
+     * Returns true if the late day event is a late day update
+     * (no associated graded gradeable)
+     * @return boolean
+     */
+    public function isLateDayUpdate() {
+        return $this->graded_gradeable === null;
+    }
+
+    /**
+     * Gets the event title for this event
+     * @return string
+     */
+    public function getEventTitle() {
+        return $this->isLateDayUpdate() ? '' : $this->graded_gradeable->getGradeable()->getTitle();
+    }
+
+    /**
      * Gets the GradedGradeable associated with this late day info
      * @return GradedGradeable
      */
@@ -83,7 +157,7 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getAssignmentAllowedLateDays() {
-        return $this->graded_gradeable->getGradeable()->getLateDays();
+        return $this->late_days_allowed;
     }
 
     /**
@@ -99,7 +173,7 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDayException() {
-        return $this->getGradedGradeable()->getLateDayException($this->user);
+        return $this->late_day_exceptions;
     }
 
     /**
@@ -108,7 +182,6 @@ class LateDayInfo extends AbstractModel {
      * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
     public function getStatus(int $days_late = null) {
-
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
             return self::STATUS_NO_ACTIVE_VERSION;
@@ -116,12 +189,14 @@ class LateDayInfo extends AbstractModel {
 
         $days = $days_late !== null ? $days_late : $this->getDaysLate();
 
-        // If the number of days late is more than the number allowed, then its BAD
-        if ($days > $this->getLateDaysAllowed()) {
+        // if the student submitted after the deadline (plus extensions),
+        // and there were no late days charged, then its bad
+        if ($days > $this->getLateDayException() && $this->getLateDaysCharged() <= 0) {
             return self::STATUS_BAD;
         }
 
         // if the student submitted after the deadline (plus extensions) then its late
+        // Note: Late days were charged
         if ($days > $this->getLateDayException()) {
             return self::STATUS_LATE;
         }
@@ -137,7 +212,7 @@ class LateDayInfo extends AbstractModel {
     public function getStatusMessage() {
         switch ($this->getStatus()) {
             case self::STATUS_NO_ACTIVE_VERSION:
-                if ($this->graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
+                if ($this->has_submission) {
                     return 'Cancelled Submission';
                 }
                 else {
@@ -161,24 +236,40 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Gets the status messages for this gradeable
+     * @return array
+     */
+    public static function getSimpleMessageFromSatus() {
+        return [
+            self::STATUS_NO_ACTIVE_VERSION => 'No Submission',
+            self::STATUS_GOOD => 'Good',
+            self::STATUS_LATE => 'Late',
+            self::STATUS_BAD => 'Bad'
+        ];
+    }
+
+    /**
      * Gets if this user has late days info available (if they have an active version)
      * @return bool
      */
     public function hasLateDaysInfo() {
-        return $this->graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
+        return $this->has_late_day_info;
     }
 
     /**
-     * Gets the number of late days charged for this assignment
+     * Gets the number of late days charged from this event (capped at zero)
      * @return int
      */
     public function getLateDaysCharged() {
-        if ($this->getStatus() === self::STATUS_BAD) {
-            // Don't charge late days for BAD status
-            return 0;
-        }
-        // clamp the days charged to be the days late minus exceptions above zero.
-        return max(0, min($this->getDaysLate(), $this->getLateDaysAllowed()) - $this->getLateDayException());
+        return max(-$this->late_days_change, 0);
+    }
+
+    /**
+     * Gets the number of late days increased from this event
+     * @return int
+     */
+    public function getLateDaysChange() {
+        return $this->late_days_change;
     }
 
     /**
@@ -186,10 +277,15 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getDaysLate() {
-        if (!$this->hasLateDaysInfo()) {
-            return 0;
-        }
-        return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
+        return $this->submission_days_late;
+    }
+
+    /**
+     * Returns true if this event is a graded gradeable charge with regrades allowed
+     * @return bool
+     */
+    public function isRegradeAllowed() {
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
     }
 
     /**
@@ -197,6 +293,6 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getGradeInquiryCount() {
-        return $this->graded_gradeable->getGradeInquiryCount();
+        return $this->graded_gradeable !== null ? $this->graded_gradeable->getGradeInquiryCount() : null;
     }
 }
