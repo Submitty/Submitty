@@ -36,7 +36,7 @@
     "symfony/http-foundation": "4.4.39",
     "symfony/polyfill-php80": "1.25.0",
     "symfony/routing": "4.4.37",
-    "textalk/websocket": "1.5.7",
+    "textalk/websocket": "1.5.8",
     "twig/twig": "2.14.13"
   },
   "require-dev": {
