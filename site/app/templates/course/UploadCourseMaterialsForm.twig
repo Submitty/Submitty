@@ -127,7 +127,7 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-' +element['sections_registration_id']
+                    var currentSection = '#section-upload-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
