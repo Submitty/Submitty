@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "29fa04601065b675fb8e244779368a69",
+    "content-hash": "e27fb235a1d07816d1db789a4fdd94e8",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -4346,16 +4346,16 @@
         },
         {
             "name": "textalk/websocket",
-            "version": "1.5.7",
+            "version": "1.5.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Textalk/websocket-php.git",
-                "reference": "1712325e99b6bf869ccbf9bf41ab749e7328ea46"
+                "reference": "d05dbaa97500176447ffb1f1800573f23085ab13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/1712325e99b6bf869ccbf9bf41ab749e7328ea46",
-                "reference": "1712325e99b6bf869ccbf9bf41ab749e7328ea46",
+                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/d05dbaa97500176447ffb1f1800573f23085ab13",
+                "reference": "d05dbaa97500176447ffb1f1800573f23085ab13",
                 "shasum": ""
             },
             "require": {
@@ -4389,9 +4389,9 @@
             "description": "WebSocket client and server",
             "support": {
                 "issues": "https://github.com/Textalk/websocket-php/issues",
-                "source": "https://github.com/Textalk/websocket-php/tree/1.5.7"
+                "source": "https://github.com/Textalk/websocket-php/tree/1.5.8"
             },
-            "time": "2022-03-29T09:46:59+00:00"
+            "time": "2022-04-26T06:28:24+00:00"
         },
         {
             "name": "twig/twig",
@@ -5185,16 +5185,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.5.2",
+            "version": "1.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "f32e95f571c9587b4e14be05253ae56fedd00b2c"
+                "reference": "6128620b98292e0b69ea6d799871d77163681c8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f32e95f571c9587b4e14be05253ae56fedd00b2c",
-                "reference": "f32e95f571c9587b4e14be05253ae56fedd00b2c",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6128620b98292e0b69ea6d799871d77163681c8e",
+                "reference": "6128620b98292e0b69ea6d799871d77163681c8e",
                 "shasum": ""
             },
             "require": {
@@ -5220,7 +5220,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.5.2"
+                "source": "https://github.com/phpstan/phpstan/tree/1.6.3"
             },
             "funding": [
                 {
@@ -5240,7 +5240,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-29T07:34:36+00:00"
+            "time": "2022-04-28T11:27:53+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
