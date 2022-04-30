@@ -76,7 +76,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
      * @return MultiResponse
      */
     public function calculateLateDayCache() {
