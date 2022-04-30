@@ -34,6 +34,7 @@ fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -58,7 +59,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
        && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
-    echo -e "   ./INSTALL_SUBMITTY.sh clean"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean quick"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
     echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
@@ -140,6 +141,7 @@ PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -177,13 +179,29 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
-    rm -rf ${SUBMITTY_INSTALL_DIR}/site
-    rm -rf ${SUBMITTY_INSTALL_DIR}/src
-    rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
+    if [[ "$#" -ge 1 && $1 == "quick" ]] ; then
+        # pop this argument from the list of arguments...
+        shift
+
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/app
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cache
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/config
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cypress
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/public
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/room_templates
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/socket
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site/tests
+        find ${SUBMITTY_INSTALL_DIR}/site -maxdepth 1 -type f -exec rm {} \;
+    else
+        rm -rf ${SUBMITTY_INSTALL_DIR}/site
+        rm -rf ${SUBMITTY_INSTALL_DIR}/src
+        rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
+        rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+    fi
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
-    rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
 # set the permissions of the top level directory
@@ -232,6 +250,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 fi
 # ------------------------------------------------------------------------
 
@@ -274,6 +293,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
     chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/docker
+    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
 
     # php & daemon needs to be able to read workers & containers config
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
@@ -448,7 +468,7 @@ fi
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -509,7 +529,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
 fi
 
 ################################################################################################################

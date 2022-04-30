@@ -5,7 +5,6 @@ namespace tests\app\libraries;
 use app\libraries\DiffViewer;
 
 class DiffViewerTester extends \PHPUnit\Framework\TestCase {
-
     /**
      * Get all of the various diff test cases we have, ensuring that we only take in a folder that has
      * necessary four files to have the test fixture be properly run

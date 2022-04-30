@@ -7,18 +7,17 @@
     <div id="result-title-bar">
         <h2 style="display:inline;">{{ gradeable_title }} <span class="config-id-title">#{{ config_id }}</span></h2>
         <span class="plag-results-header-right">
-            <a class="btn btn-primary" onclick="showPlagiarismHighKey()">View Key</a>
-            <a class="btn btn-primary" onclick="toggleFullScreenMode();">Toggle Full-Screen</a>
+            <button id="toggle-anon-mode-btn" class="btn btn-secondary">Enter Anonymous Mode</button>
+            <button id="show-plag-high-key-btn" class="btn btn-primary">View Key</button>
+            <button id="toggle-fullscreen-btn" class="btn btn-primary">Toggle Full-Screen</button>
         </span>
     </div>
     <hr />
-    <form id="users_with_plagiarism" class="plag-flex">
+    <form id="users-with-plagiarism" class="plag-flex">
         <div class="plag-flex-row">
             <span class="plag-flex-item">
                 <select id="user-1-dropdown-list" name="user_id_1" class="user1-select">
-                    {% for ranking in rankings %}
-                        <option value="{{ ranking["user_id"] }}">(Max Match: {{ ranking["percent"] }}) {{ ranking["display_name"] }} &lt;{{ ranking["user_id"] }}&gt;</option>
-                    {% endfor %}
+                    <option>Loading...</option>
                 </select>
             </span>
             <a id="swap-students-button" class="btn btn-secondary pl-1 pr-1" title="Switch Focused Student"><i class="fa fa-long-arrow-alt-left fa-lg"></i></a>

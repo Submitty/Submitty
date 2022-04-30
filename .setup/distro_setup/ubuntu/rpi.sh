@@ -179,6 +179,7 @@ pip3 install scikit-image
 #install some pdflatex packages
 apt-get install -qqy texlive-latex-base texlive-extra-utils texlive-latex-recommended
 apt-get install -qqy texlive-generic-recommended
+apt-get install -qqy texlive-latex-extra
 
 
 # dictionary of words in /usr/share/dict/words

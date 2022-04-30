@@ -1,3 +1,5 @@
+
+<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -9,29 +11,58 @@
       </label>
       <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
-        {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+        {% for queue in viewer.getAllOpenQueues() %}
           <option value="{{queue['code']}}">{{queue['code']}}</option>
         {% endfor %}
       </select>
     </div>
-    <label for="token_box">Queue Access Code:</label>
-    <input type="text" name="token" id="token_box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on" required="required">
+    <label for="token-box">Queue Access Code:</label>
+    <input type="text" name="token" id="token-box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on">
     <br>
-    {% if viewer.isContactInfoEnabled() %}
+    <div class="enter-contact-info" style="display: none">
       <label for="contact_info">My Contact Information (follow instructor directions):</label>
-      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on" required="required">
+      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
       <br>
-    {% endif %}
+    </div>
     <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
   </form>
     <script>
         $('#queue_code').change(function(){
-        document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
+            document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
+
+            const selected_queue =  $("#queue_code").val();
+            let queue='temp';
+            let found = false;
+            {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
+                queue = "{{ queue['code'] }}";
+                if (queue === selected_queue){
+                    $('.enter-contact-info').css('display', 'block');
+                    $('#contact_info').prop('required', true);
+                    found = true;
+                }
+            {% endfor %}
+            if (found === false){
+                $('.enter-contact-info').css('display', 'none');
+                $('#contact_info').prop('required', false);
+            }
         });
     </script>
 
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+    {% if viewer.getQueueSocketMessage() %}
+        <div class = "queue-message">
+            <p id="queue-message-msg-time" style="position: relative; float: right;">Today at {{ viewer.getQueueSocketMessageSentTime() }} </p>
+            <h3 id="queue-message-prompt">
+                Message From Queue Admins:<br>
+            </h3>
+            <p id="queue-message-msg">
+                {{ viewer.getQueueSocketMessage() }}
+            </p>
+        </div>
+    {% endif %}
+<br>
   <div id="queue_status">
+  <h2>My Queue Status</h2>
     <p>
       {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
       There
@@ -41,7 +72,7 @@
       ahead of you in the queue
     </p>
 
-    <p>You are currently in:
+    <p>You are currently in queue:
       <b>{{viewer.getCurrentQueueCode()}}</b>
     </p>
 
@@ -79,8 +110,75 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+
+      {# Display the switch queue form if there is more than 1 open queue or the queue code we got does not match the 1 open queue 
+      e.g if an instructor closes the queue we are in and opens are new one#}
+
+      {% set my_queue = 'code' %}
+      {% set open_queues = viewer.getAllOpenQueues()%}
+      {% if open_queues|length == 1 %}
+          {% for queue in open_queues %}
+            {% set my_queue = queue['code'] %}
+          {% endfor %}
+      {% endif %}
+      {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
+      <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
+          <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+          <div class="form-group">
+              <br>
+              <h2>Switch My Queue</h2>
+              NOTE: Your queue entry time will be preserved<br>
+              <label for="queue_code">Queue:
+              </label>
+              <select id="switch_queue_code" class="form-control" name="code" required="required" onchange="toggleSwitchQueueForm()">
+                  <option value="">Queue Name</option>
+                  {% for queue in open_queues %}
+                      {% if queue['code'] != viewer.getCurrentQueueCode() %}
+                        <option value="{{queue['code']}}">{{queue['code']}}</option>
+                      {% endif %}
+                  {% endfor %}
+              </select>
+              <div id="switch_queue_form" class="form-group" style="display: none;">
+                  <label for="token-box">Queue Access Code:</label>
+                  <input type="text" name="token" id="token-box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on">
+                  <div class="enter-contact-info" style="display: none">
+                      <label for="contact_info">My Contact Information (follow instructor directions):</label>
+                      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
+                      <br>
+                  </div>
+              </div>
+              <button id="join_queue_btn" type="submit" class="btn btn-primary">Switch Queue</button>
+          </div>
+      </form>
     <br>
-    <p>Use the pause button if you must step away from your computer for a few minutes.  This will preserve your position in the queue.</p>
+      {% endif %}
+      <script>
+          $('#switch_queue_code').change(function(){
+              const selected_queue =  $('#switch_queue_code').val();
+              let queue='temp';
+              let found = false;
+              {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
+              queue = "{{ queue['code'] }}";
+              if (queue === selected_queue){
+                  $('.enter-contact-info').css('display', 'block');
+                  $('#contact_info').prop('required', true);
+                  found = true;
+              }
+              {% endfor %}
+              if (found === false){
+                  $('.enter-contact-info').css('display', 'none');
+                  $('#contact_info').prop('required', false);
+              }
+          });
+      </script>
+    <h2>Pause My Queue Position</h2>
+    <p>
+    Use the pause button if you must step away from your computer for a few minutes.<br>
+    This will preserve your position in the queue.
+    </p>
     <form method="post" action="{{base_url}}/togglePause">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="pause_state" value="{{ viewer.isCurrentlyPaused()?'false':'true' }}"/>
@@ -97,7 +195,10 @@
       {% else %}
         <p id="student_timer" help_time="{{ viewer.timeToISO(viewer.getCurrentTimePausedStart()) }}"></p>
       {% endif %}
-      <p>WARNING: If you remain paused for more than a few minutes, you may be removed by the teaching staff. Please refer to the course syllabus for office hour queue usage policies.</p>
+      <p>
+      WARNING: If you remain paused for more than a few minutes, you may be removed by the teaching staff.<br>
+      Please refer to the course syllabus for office hour queue usage policies.
+      </p>
     </form>
   </div>
 {% else %}
@@ -115,3 +216,65 @@
     </form>
   </div>
 {% endif %}
+<br>
+<a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
+<a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-primary">Close Table</button></a>
+<br><br>
+<div class="container queue_occupancy" style="display: none">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Queue</th>
+                <th scope="col">People In Queue</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for name, number in viewer.getQueueOccupancy() %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ number }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+
+    function queueMessage(message) {
+        let title = "Submitty - New Message From Office Hours Queue Staff: ";
+        let options = {
+            body: message,
+            icon: buildUrl(['img', 'favicon.ico'])
+        }
+        if (Notification.permission === "granted") {
+            // If it's okay let's create a notification
+            let notification = new Notification(title, options);
+        }
+        // Otherwise, we need to ask the user for permission
+        else if (Notification.permission !== 'denied' || Notification.permission === "default") {
+            Notification.requestPermission(function (permission) {
+                if (permission === "granted") {
+                    let notification = new Notification(title, options);
+                }
+            });
+        //if notification permissions are denied
+        }else{
+            alert('New Message From Office Hours Queue Staff');
+        }
+    }
+
+
+    function toggleQueueOccupancy(){
+        $('.queue_occupancy').toggle();
+        $('#close_queue_occupancy').toggle();
+        $('#view_queue_occupancy').toggle();
+    }
+
+    function toggleSwitchQueueForm(){
+        $("#switch_queue_form").css('display', 'block');
+    }
+
+
+</script>
+
+

@@ -4,7 +4,7 @@
 }
 
 .dropdown-bar {
-    padding: 0 0 20px 0;
+    padding: 0 0 20px;
 }
 
 .dropdown-btn {
@@ -26,7 +26,7 @@
 
 .poll-type-description {
     padding-left: 25px;
-    color: var(--standard-medium-gray);
+    color: var(--text-black);
 }
 
 .move-btn {
@@ -43,6 +43,11 @@
     display: inline;
 }
 
+.radio-label-pair {
+    display: flex;
+    align-items: flex-start;
+}
+
 input[type="radio"][disabled=""]:checked::before {
     content: "";
     display: block;
@@ -57,4 +62,19 @@ input[type="radio"][disabled=""]:checked::before {
 
 .active {
     background: var(--always-default-white);
+}
+
+form {
+    display: inline;
+}
+
+#poll-name-container {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+}
+
+#poll-name {
+    flex-grow: 100;
+    margin-left: 0.5em;
 }

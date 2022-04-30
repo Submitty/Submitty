@@ -9,12 +9,14 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
-use app\libraries\DateUtils;
+use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\PollUtils;
-use app\models\PollModel;
 
+/**
+ * @Enabled("polls")
+ */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -117,7 +119,7 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewPoll() {
-        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date'];
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'release_histogram'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
                 $this->core->addErrorMessage("Error occured in adding poll");
@@ -141,6 +143,12 @@ class PollController extends AbstractController {
         }
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
+            $this->core->addErrorMessage("Invalid student histogram release setting");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -200,7 +208,7 @@ class PollController extends AbstractController {
             );
         }
 
-        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders);
+        $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $_POST["release_histogram"]);
         $file_path = null;
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             // validate the uploaded file size
@@ -394,7 +402,7 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
         }
-        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'removed_responses'];
+        $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'removed_responses', 'release_histogram'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
                 $this->core->addErrorMessage("Error occured in editing poll");
@@ -412,6 +420,10 @@ class PollController extends AbstractController {
         }
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
+            $this->core->addErrorMessage("Invalid student histogram release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $file_path = null;
@@ -503,7 +515,7 @@ class PollController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path);
+        $this->core->getQueries()->editPoll($poll->getId(), $_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $file_path, $_POST["release_histogram"]);
         return new RedirectResponse($returnUrl);
     }
 
@@ -527,7 +539,6 @@ class PollController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
-     * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
     public function viewResults($poll_id) {
@@ -537,14 +548,24 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
         $poll = $this->core->getQueries()->getPoll($poll_id);
-        $results = $this->core->getQueries()->getResults($poll_id);
+
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
+
+        if (!$this->core->getUser()->accessAdmin() && !$poll->isHistogramAvailable()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+
+        $results = $this->core->getQueries()->getResults($poll_id);
+
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Poll',
@@ -616,6 +637,10 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single reponse. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
+            if (!in_array($question_type, PollUtils::getPollTypes())) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
             $responses = [];
             $orders = [];
             $i = 0;
@@ -627,7 +652,15 @@ class PollController extends AbstractController {
             }
             $answers = $poll["correct_responses"];
             $release_date = $poll["release_date"];
-            $this->core->getQueries()->addNewPoll($name, $question, $question_type, $responses, $answers, $release_date, $orders);
+            /*  Polls that were exported before this feature was
+                implemented don't have this data. At the time, poll histograms
+                were not available to students. */
+            $release_histogram = array_key_exists("release_histogram", $poll) ? $poll["release_histogram"] : "never";
+            if (!in_array($release_histogram, PollUtils::getReleaseHistogramSettings())) {
+                $num_errors = $num_errors + 1;
+                continue;
+            }
+            $this->core->getQueries()->addNewPoll($name, $question, $question_type, $responses, $answers, $release_date, $orders, $release_histogram);
             $num_imported = $num_imported + 1;
         }
         if ($num_errors === 0) {

@@ -907,7 +907,8 @@ def checkout_vcs_repo(config, my_file):
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
             try:
-                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', which_branch])
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1',
+                                                        which_branch, '--'])
                 # old method:  when we had the full history, roll-back to a version by date
                 # what_version = subprocess.check_output(['git', 'rev-list', '-n', '1',
                 #                                         '--before="'+submission_string+'"',
@@ -1038,7 +1039,7 @@ def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
     scheduler/shipper/worker and refactoring this design should be
     part of the project.
     ----------------------------------------------------------------
-    '''
+    '''  # noqa: B018
 
     # Grab all the VCS files currently in the folder...
     vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]

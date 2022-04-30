@@ -42,7 +42,14 @@
             <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
-        <textarea class="config-row" name="forum_create_thread_message" id="create-thread-message" rows="4"/>{{ fields['forum_create_thread_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "create-thread-message",
+            "class" : "config-row",
+            "markdown_area_name" : "forum_create_thread_message",
+            "markdown_area_value" : fields['forum_create_thread_message'],
+            "preview_div_id" : "create-thread-message-preview",
+            "render_header" : true
+        } only %}
 
         <h2>Office Hours Queue</h2>
         <hr>
@@ -54,14 +61,6 @@
                 <span class="option-alt">Choose whether to enable an Office Hours Queue for this course.</span>
             </label>
         </div>
-        <div id="queue-contact-info-wrapper" class="config-row checkbox-row">
-            <input type="checkbox" name="queue_contact_info" id="queue-contact-info" value="true" {{ fields['queue_contact_info'] ? 'checked': '' }} />
-            <label for="queue-contact-info">
-                <span class="option-title">Contact Info for Office Hours Queue</span>
-                <br>
-                <span class="option-alt">Check this box to require that students specify their contact information for office hours help (e.g., email address, video chat, virtual meeting URL, phone number).  This setting should only be enabled if the queue is used for remote or online instruction and tutoring.</san>
-            </label>
-        </div>
 
         <label for="queue-message" class="config-row">
             <span class="option-title">Office Hours Queue Welcome Message (Optional)</span>
@@ -71,7 +70,14 @@
                 If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
             </span>
         </label>
-        <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "queue-message",
+            "class" : "config-row",
+            "markdown_area_name" : "queue_message",
+            "markdown_area_value" : fields['queue_message'],
+            "preview_div_id" : "queue-message-preview",
+            "render_header" : true
+        } only %}
 
 
         <h2>Online Polls</h2>
@@ -95,7 +101,14 @@
                 What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
-        <textarea class="config-row" name="upload_message" id="upload-message">{{ fields['upload_message'] }}</textarea>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "upload-message",
+            "class" : "config-row",
+            "markdown_area_name" : "upload_message",
+            "markdown_area_value" : fields['upload_message'],
+            "preview_div_id" : "upload-message-preview",
+            "render_header" : true
+        } only %}
 
         <label for="private-repository" class="config-row">
             <span class="option-title">Course Autograding Config Directory</span>
@@ -164,9 +177,8 @@
             <span class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</span>
             <br>
             <span class="option-alt">
-                Number of allowed late days given to each student when they are added to
-                the course.  Additional late days can be granted (e.g., as incentives)
-                using the "Late Days Allowed" form.
+                Initial number of late days given to all students at the start of the course.
+                Additional late days can be granted (e.g., as incentives) using the "Late Days Allowed" form.
             </span>
         </label>
         <input class="config-row" type="number" name="default_student_late_days" id="default-student-late-days" value="{{ fields['default_student_late_days'] }}" />

@@ -88,9 +88,8 @@
             "placeholder" : post_content_placeholder,
             "preview_div_id" : "preview_box_" ~ post_box_id,
             "preview_div_name" : "preview_box_" ~ post_box_id,
-            "onclick" : "previewForumMarkdown.call(this)",
-            "render_buttons" : render_markdown is defined and render_markdown ? render_markdown : false,
-            "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
+            "render_header" : render_markdown is defined and render_markdown ? render_markdown : false,
+            "markdown_header_id" : "markdown_header_" ~ post_box_id,
             "min_height" : min_height,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
@@ -189,10 +188,7 @@
             </div>
         {% endif %}
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
-        <a onclick="$('#edit-user-post').css('display', 'none');
-                 $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
-                 $('#title').val('');
-                 $(this).closest('form').trigger('reinitialize.areYouSure');"
+        <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />

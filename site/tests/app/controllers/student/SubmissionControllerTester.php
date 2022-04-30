@@ -66,6 +66,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
+        $this->core->setTesting(true);
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
@@ -329,7 +330,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                     $content = $value;
                 }
                 $file_path = FileUtils::joinPaths($dir, $filename);
-                if (Utils::endsWith($filename, '.zip') === true) {
+                if (str_ends_with($filename, '.zip') === true) {
                     $file = new ZipArchive();
                     $file->open($file_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
                     $file->addFromString('test1.txt', 'a');

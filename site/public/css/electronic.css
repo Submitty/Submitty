@@ -532,7 +532,7 @@ progress::-webkit-progress-value {
     -webkit-appearance: none;
     width: 7px;
 }
-  
+
 #grading-panel-student-name::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, .5);
@@ -1207,7 +1207,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container.mark-publish {
-    background-color: #bbddee;
+    background-color: var(--alert-border-blue);
 }
 
 .gradeable .mark-disabled span {
@@ -1418,19 +1418,14 @@ tr.is_publish {
     padding: 10px;
 }
 
-#solution_ta_notes .row .grading_label {
-    padding-left: 0;
-}
-
 .solution-box {
     font-size: 16px;
-    padding-bottom: 20px;
 }
 
 .solution-header {
     display: flex;
     font-size: 16px;
-    padding: 10px 5px;
+    padding: 5px 5px 10px;
     justify-content: space-between;
 }
 
@@ -1443,29 +1438,12 @@ tr.is_publish {
     flex-direction: column;
 }
 
-.solution-notes-text {
-    padding: 10px 5px;
-    background: var(--solution-text-background);
-    margin-bottom: 10px;
-}
-
-.solution-saved .solution-notes-text {
-    display: flex;
-}
-
-.solution-box button {
-    max-width: 90px;
+.solution-save-btn {
+    margin-top: 10px;
 }
 
 .solution-box button.hide {
     display: none !important;
-}
-
-[id^=textbox-solution-] {
-    min-height: 120px;
-    max-height: 400px;
-    margin-bottom: 10px;
-    resize: none;
 }
 
 input[type="radio"][disabled=""]:checked::before {

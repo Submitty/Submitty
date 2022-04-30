@@ -7,11 +7,11 @@ import os
 from pathlib import Path
 import re
 from typing import Set
-import subprocess
 
 from sqlalchemy.exc import OperationalError
 
 from . import db, get_dir_path, get_migrations_path, get_environments
+from .dumper import dump_database
 from .loader import load_module, load_migrations
 
 
@@ -71,10 +71,7 @@ def status(args):
             loop_args.config.database['dbname'] = 'submitty'
             try:
                 database = db.Database(loop_args.config.database, environment)
-                exists = database.engine.dialect.has_table(
-                    database.engine,
-                    database.migration_table.__tablename__
-                )
+                exists = database.has_table(database.migration_table.__tablename__)
                 if not exists:
                     print('Could not find migration table for {}'.format(environment))
                     database.close()
@@ -109,10 +106,7 @@ def status(args):
                     )
                     try:
                         database = db.Database(loop_args.config.database, environment)
-                        exists = database.engine.dialect.has_table(
-                            database.engine,
-                            database.migration_table.__tablename__
-                        )
+                        exists = database.has_table(database.migration_table.__tablename__)
                         if not exists:
                             print(
                                 'Could not find migration table for {}.{}'.format(
@@ -449,17 +443,7 @@ def dump(args):
     if 'master' in args.environments:
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
-        out = subprocess.check_output([
-            'su',
-            '-',
-            'postgres',
-            '-c',
-            'pg_dump -d submitty --schema-only --no-privileges --no-owner'
-        ], universal_newlines=True)
-
-        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
-        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
-        out_file.write_text(out)
+        dump_database('submitty', out_file)
         print('DONE')
 
     if 'course' in args.environments:
@@ -467,15 +451,5 @@ def dump(args):
         print(f'Dumping course environment to {str(out_file)}... ', end='')
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
-
-        out = subprocess.check_output([
-            'su',
-            '-',
-            'postgres',
-            '-c',
-            f'pg_dump -d submitty_{semester}_sample --schema-only --no-privileges --no-owner'
-        ], universal_newlines=True)
-        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
-        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
-        out_file.write_text(out)
+        dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')

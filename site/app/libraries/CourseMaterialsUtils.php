@@ -2,13 +2,12 @@
 
 namespace app\libraries;
 
-use app\controllers\MiscController;
 use app\entities\course\CourseMaterial;
+use app\entities\course\CourseMaterialAccess;
 use app\exceptions\MalformedDataException;
 use app\models\User;
 
 class CourseMaterialsUtils {
-
     /**
      * Determine if a course materials file has been released.
      *
@@ -65,5 +64,18 @@ class CourseMaterialsUtils {
         }
 
         return '';
+    }
+
+    public static function insertCourseMaterialAccess(Core $core, string $path) {
+        $course_material = $core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+            ->findOneBy(['path' => $path]);
+        $course_material_access = new CourseMaterialAccess(
+            $course_material,
+            $core->getUser()->getId(),
+            DateUtils::getDateTimeNow()
+        );
+        $course_material->addAccess($course_material_access);
+        $core->getCourseEntityManager()->persist($course_material_access);
+        $core->getCourseEntityManager()->flush();
     }
 }

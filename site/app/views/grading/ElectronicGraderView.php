@@ -430,7 +430,7 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param GradedGradeable[] $graded_gradeables,
+     * @param GradedGradeable[] $graded_gradeables
      * @param User[] $teamless_users
      * @param array $graders
      * @param Team[] $empty_teams
@@ -481,7 +481,7 @@ HTML;
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 if ($peer === false) {
                     $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
+                    $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
                 }
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading"];
@@ -570,7 +570,6 @@ HTML;
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
-        /** @var GradedGradeable $row */
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
             $info = [
@@ -760,16 +759,35 @@ HTML;
 
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
-            /* @var Team $team */
-            $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
+            $user_assignment_setting_json = isset($row) ? json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable)) : '{}';
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
             $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-            $team_name = $row->getSubmitter()->getTeam()->getTeamName();
+            $team_name = isset($row) ? $row->getSubmitter()->getTeam()->getTeamName() : '';
 
             $empty_team_info[] = [
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}', '{$team_name}');"
             ];
+        }
+
+        $grader_registration_sections = $gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION ? $gradeable->getRotatingGraderSections()[$this->core->getUser()->getId()] ?? [] : $this->core->getUser()->getGradingRegistrationSections();
+
+        $message = "";
+        $message_warning = false;
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
+            if ($view_all) {
+                if (count($grader_registration_sections) !== 0) {
+                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
+                    $message_warning = true;
+                }
+            }
+            elseif (count($grader_registration_sections) === 0) {
+                $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
+                $message_warning = true;
+            }
+        }
+        elseif (count($grader_registration_sections) === 0) {
+            $message = 'Notice: You are not assigned to grade any students for this gradeable.';
         }
 
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : [];
@@ -837,7 +855,10 @@ HTML;
             "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),
-            "is_instructor" => $this->core->getUser()->getGroup() === 1
+            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
+            "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
+            "message" => $message,
+            "message_warning" => $message_warning
         ]);
     }
 
@@ -873,7 +894,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
@@ -928,7 +949,7 @@ HTML;
                 "message" => "Overridden grades"
             ];
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $error_message = [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange
@@ -942,17 +963,25 @@ HTML;
                 ];
             }
         }
-        elseif ($rollbackSubmission != -1) {
+        elseif ($late_status === LateDayInfo::STATUS_LATE) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
+                "message" => "Late Submission"
             ];
         }
-        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-            $error_message = [
-                "color" => "var(--standard-red-orange)", // fire engine red
-                "message" => "Late Submission (No on time submission available)"
-            ];
+        elseif ($late_status === LateDayInfo::STATUS_BAD) {
+            if ($rollbackSubmission === -1) {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (no valid submission available)"
+                ];
+            }
+            else {
+                $error_message = [
+                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Bad Submission (submitter has valid submission - Version #" . $rollbackSubmission . ")"
+                ];
+            }
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
             $pattern1 = "upload.pdf";
@@ -971,6 +1000,7 @@ HTML;
             // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
             if ($pattern_match_flag == true) {
                 $error_message = [
+                    "color" => "var(--standard-vibrant-yellow)", // canary yellow
                     "message" => "Multiple files within submissions"
                 ];
             }
@@ -1079,11 +1109,15 @@ HTML;
                 $gradeable->getId(),
                 $highest_version,
                 $old_files,
-                $graded_gradeable->getSubmitter()->getId()
+                $graded_gradeable->getSubmitter()->getId(),
+                $gradeable->hasAllowedTime(),
+                $gradeable->getUserAllowedTime($graded_gradeable->getSubmitter()->getUser()) ?? -1
             );
         }
 
         CodeMirrorUtils::loadDefaultDependencies($this->core);
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+        $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1645,7 +1679,7 @@ HTML;
     }
 
 
-    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id): string {
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id, bool $is_timed, int $allowed_minutes): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
             [
@@ -1665,7 +1699,9 @@ HTML;
             "old_files" => $old_files,
             "is_grader_view" => true,
             "max_file_uploads" => ini_get('max_file_uploads'),
-            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css')
+            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
+            "is_timed" => $is_timed,
+            "allowed_minutes" => $allowed_minutes
             ]
         );
     }

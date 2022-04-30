@@ -8,7 +8,6 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
@@ -17,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
 class MiscController extends AbstractController {
-
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
     /**
@@ -77,7 +75,7 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        if (!Utils::startsWith($file_path, $check_path)) {
+        if (!str_starts_with($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
@@ -153,15 +151,19 @@ class MiscController extends AbstractController {
                     return false;
                 }
             }
+
+            if ($dir === "course_materials") {
+                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
+            }
         }
 
         $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        if ($mime_type === "application/pdf" || (Utils::startsWith($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+            $this->core->getOutput()->useHeader(false);
+            $this->core->getOutput()->useFooter(false);
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
@@ -253,6 +255,10 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->showError($access_failure);
                 return false;
             }
+        }
+
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         if ($dir == 'submissions') {
