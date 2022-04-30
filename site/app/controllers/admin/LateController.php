@@ -48,14 +48,14 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days")
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
      * @return MultiResponse
      */
-    public function viewLateDayCache() {
+    public function viewLateDaysForensics() {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'LateDay'],
-                'displayLateDayCache',
+                'displayLateDayForesnics',
                 $this->core->getQueries()->getAllUsers(),
                 $this->core->getConfig()->getDefaultStudentLateDays()
             )
@@ -63,7 +63,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
      * @return MultiResponse
      */
     public function flushLateDayCache() {
@@ -71,7 +71,7 @@ class LateController extends AbstractController {
         $this->core->addSuccessMessage("Late day cache flushed!");
 
         return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['late_day_cache']))
+            new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']))
         );
     }
 
@@ -85,7 +85,7 @@ class LateController extends AbstractController {
         $this->core->addSuccessMessage("Late day cache calculated!");
 
         return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']))
+            new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']))
         );
     }
 

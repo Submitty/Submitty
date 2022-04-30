@@ -13,6 +13,7 @@ class LateDayView extends AbstractView {
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addInternalJs('latedays.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
@@ -27,11 +28,12 @@ class LateDayView extends AbstractView {
             "users" => $users,
             "student_full" => $student_full,
             "initial_late_days" => $initial_late_days,
+            "late_days_forensics_url" => $this->core->buildCourseUrl(['late_days_forensics']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
-    public function displayLateDayCache($students, $initial_late_days) {
+    public function displayLateDayForesnics($students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
@@ -43,7 +45,7 @@ class LateDayView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
-        $this->core->getOutput()->addBreadcrumb('Bulk Late Days');
+        $this->core->getOutput()->addBreadcrumb('Late Days Forensics');
         $this->core->getOutput()->enableMobileViewport();
 
         $student_full = Utils::getAutoFillData($students);
@@ -116,13 +118,13 @@ class LateDayView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("admin/late_day_cache/LateDayCacheBase.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("admin/late_days_forensics/LateDaysForensicsBase.twig", [
             "student_full" => $student_full,
             "students" => $students,
             "initial_late_days" => $initial_late_days,
-            "flush_cache_url" => $this->core->buildCourseUrl(['bulk_late_days', 'flush']),
-            "calculate_cache_url" => $this->core->buildCourseUrl(['bulk_late_days', 'calculate']),
-            "cache_url" => $this->core->buildCourseUrl(['bulk_late_days']),
+            "flush_cache_url" => $this->core->buildCourseUrl(['late_days_forensics', 'flush']),
+            "calculate_cache_url" => $this->core->buildCourseUrl(['late_days_forensics', 'calculate']),
+            "cache_url" => $this->core->buildCourseUrl(['late_days_forensics']),
             "view_all" => $view_all,
             "status_to_simple_message" => LateDayInfo::getSimpleMessageFromSatus(),
             "late_day_cache_header" => $late_day_cache_header,
