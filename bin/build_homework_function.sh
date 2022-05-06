@@ -4,10 +4,10 @@
 
 function clean_homework {
     # which assignment to cleanup
-    semester=$1
-    course=$2
-    assignment=$3
-    course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
+    semester="$1"
+    course="$2"
+    assignment="$3"
+    course_dir="$SUBMITTY_DATA_DIR/courses/$semester/$course"
 
     echo "clean old build: $course_dir $3"
 
@@ -58,31 +58,31 @@ function fix_permissions {
     # change permissions so other instructor users in this course & DAEMON_USER can re-run the build course script
     find "$course_dir/build/"                   -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/build/"                   -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/build/"                           -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/build/"                           -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/provided_code/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/provided_code/"           -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/provided_code/"                   -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/provided_code/"                   -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/instructor_solution/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/instructor_solution/"           -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/instructor_solution/"                   -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/instructor_solution/"                   -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/generated_output/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/generated_output/"           -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/generated_output/"                   -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/generated_output/"                   -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/test_input/"              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/test_input/"              -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/test_input/"                      -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/test_input/"                      -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/test_output/"             -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/test_output/"             -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/test_output/"                     -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/test_output/"                     -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/custom_validation_code/"  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/custom_validation_code/"  -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/custom_validation_code/"          -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/custom_validation_code/"          -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/config/build/"            -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/config/build/"            -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/config/build/"            -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/config/build/"            -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/config/complete_config/"  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/config/complete_config/"  -type f -exec chmod -f ug+rw,o= {} \;
-    find "$course_dir/config/complete_config/"  -exec chgrp -f ${course_group} {} \;
+    find "$course_dir/config/complete_config/"  -exec chgrp -f "${course_group}" {} \;
 
 }
 
@@ -166,8 +166,8 @@ function build_homework {
 
     # Run the complete config json through a python json syntax checker.
     python3 "${GRADINGCODE}/json_syntax_checker.py" complete_config.json
-    py_res=$?
-    if (( $py_res != 0 )); then
+    py_res="$?"
+    if (( "$py_res" != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
         popd > /dev/null
         exit 1
@@ -175,7 +175,7 @@ function build_homework {
 
     # Add allowed minutes in database from config if exists
     python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
-    set_minutes=$?
+    set_minutes="$?"
 
     if ((set_minutes != 0)); then
         echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
@@ -195,9 +195,9 @@ function build_homework {
 
 
     ./configure.out complete_config.json "${course_dir}/config/build/build_${assignment}.json" "$assignment"
-    configure_res=$?
+    configure_res="$?"
 
-    if (( $configure_res != 0 )); then
+    if (( "$configure_res" != 0 )); then
         echo -e "\nFailed to create a complete_config.json"
         popd > /dev/null
         exit 1
@@ -210,7 +210,7 @@ function build_homework {
     # build the configuration, compilation, runner, and validation executables
     # configure cmake, specifying the clang compiler
     CXX=/usr/bin/clang++ cmake . > "$hw_build_path/log_cmake_output.txt" 2>&1
-    cmake_res=$?
+    cmake_res="$?"
     chmod -f 660 "$hw_build_path/log_cmake_output.txt"
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
@@ -227,7 +227,7 @@ function build_homework {
     make -j 8
 
     # capture exit code of make
-    make_res=$?
+    make_res="$?"
     chmod -f 660 "$hw_build_path/log_make_output.txt"
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
