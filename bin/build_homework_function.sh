@@ -177,7 +177,7 @@ function build_homework {
     python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
     set_minutes="$?"
 
-    if ((set_minutes != 0)); then
+    if (("$set_minutes" != 0)); then
         echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
         popd > /dev/null
         exit 1
