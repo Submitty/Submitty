@@ -24,8 +24,6 @@ try:
 except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err
-    else:
-        print(err)
 
 
 try:
@@ -36,5 +34,3 @@ try:
 except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err
-    else:
-        print(err)
