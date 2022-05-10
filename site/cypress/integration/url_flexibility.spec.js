@@ -6,10 +6,6 @@ describe('Tests for auto removal of trailing slash in url', () => {
         cy.login();
     });
 
-    after(() => {
-        cy.logout();
-    });
-
     const BASE_URL = `/courses/${getCurrentSemester()}/sample`;
 
     [
