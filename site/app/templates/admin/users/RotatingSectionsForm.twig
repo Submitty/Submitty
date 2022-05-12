@@ -1,16 +1,7 @@
 <script>
     $(function() {
-        $("[name='rotating_type']").change(function() {
-            if ($(this).val() == "alphabetically") {
-                $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
 
-            }
-            else {
-                $("[name='fewest']").attr('onclick', '').removeClass('disabled');
-            }
-        });
-
-        $("[name='sort_type']").change(function() {
+        $("[name='rotating_assignment_type']").change(function() {
             var val = $(this).val();
 			if (val != "redo") {
 				$('#redo-data').hide();
@@ -179,19 +170,19 @@
    				<fieldset class="flex-col">
 					<legend class="option-title">Change Current Sections</legend>
 					<label>
-						<input type="radio" name="sort_type" value="drop_null" />
+						<input type="radio" name="rotating_assignment_type" value="drop_null" />
                         Only remove unregistered students (registration section=NULL) from rotating sections
 					</label>
 					<label>
-						<input type="radio" name="sort_type" value="fewest" />
+						<input type="radio" name="rotating_assignment_type" value="fewest" />
                         Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
 					</label>
                     <label>
-                        <input type="radio" name="sort_type" value="drop_all" />
+                        <input type="radio" name="rotating_assignment_type" value="drop_all" />
                         Remove all students from rotating sections
                     </label>
 					<label>
-						<input type="radio" name="sort_type" value="redo" />
+						<input type="radio" name="rotating_assignment_type" value="redo" />
                         Redo rotating sections completely
 					</label>
 				</fieldset>
@@ -202,7 +193,7 @@
                     </label>
                     <label>
                         Sort students:
-                        <select name="rotating_type">
+                        <select name="sort_type">
                             <option value="random">Randomly</option>
                             <option value="alphabetically">Alphabetically</option>
                         </select>
@@ -211,7 +202,7 @@
                         <legend>Exclude students in the following registrations:</legend>
                         {% for row in reg_sections %}
                         <label>
-                            <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" />
+                            <input type="checkbox" name="excluded_registration_sections[]" value="{{ row['sections_registration_id'] }}" />
                             Section {{ row['sections_registration_id'] }}
                         </label>
                         {% endfor %}

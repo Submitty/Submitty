@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\exceptions;
 
 class AuthorizationException extends BaseException {
-
     /**
      * AuthorizationException constructor.
      *

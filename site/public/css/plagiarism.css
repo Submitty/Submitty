@@ -3,6 +3,10 @@
     white-space: normal;
 }
 
+th {
+    padding: 0 0.25em;
+}
+
 .plag-table-cont {
     margin-top: 24px;
     width: 100%;
@@ -10,14 +14,6 @@
 
 .plag-table-cont th {
     white-space: nowrap;
-}
-
-td .plag-action-btn-cont {
-    display: flex;
-}
-
-td .plag-action-btn-cont a:not(:last-child) {
-    margin-right: 40px;
 }
 
 .config-id-title {
@@ -33,6 +29,23 @@ td .plag-action-btn-cont a:not(:last-child) {
     text-align: left;
     width: inherit;
     background-color: var(--table-info);
+}
+
+td {
+    border-left-style: none;
+    border-right-style: none;
+}
+
+.padded-icon-column {
+    padding: 0 0.5em !important;
+}
+
+.unviewed {
+    background-color: var(--viewed-content);
+}
+
+.unviewed td:first-child {
+    border-left: 3px solid var(--actionable-blue);
 }
 
 .run-log-data pre {
@@ -65,31 +78,28 @@ input[type="radio"] {
     flex: 1;
 }
 
-input[type="text"] {
+input[type="text"],
+textarea {
     width: 100%;
 }
 
-.deletable-text {
-    width: calc(100% - 2em) !important;
-}
-
 .delete-btn {
-    padding-left: 5px;
+    padding-left: 0.5em;
 }
 
-input[type=text]:invalid {
+input[type="text"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
 
-[data-theme="dark"] input[type=text]:invalid {
+[data-theme="dark"] input[type="text"]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-[data-theme="dark"] input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type="text"]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }
 
-#prev-gradeable-div {
+#other-gradeable-div {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -97,20 +107,19 @@ input[type=text]:invalid {
     padding-bottom: 30px;
 }
 
-#prev-gradeable-div select {
+#other-gradeable-div select {
     width: calc(100% / 3 - 10px);
-    margin: 5px;
+    margin-right: 0.2em;
+    margin-top: 0.5em;
 }
 
-#prev-gradeable-div select:nth-child(3n+2) {
-    margin-left: 0;
+#other-gradeable-paths {
+    height: 4em;
 }
 
-#prev-gradeable-div select:nth-child(3n+1) {
-    margin-right: 0;
-}
-
-#current-code-file, #provided-code-file, #prev-gradeable-div {
+#current-code-file,
+#provided-code-file,
+#other-gradeable-div {
     display: none;
 }
 
@@ -141,25 +150,15 @@ input[type=text]:invalid {
     margin-top: 5px;
 }
 
-.add-more {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-}
-
-.plag-data-group .fa-plus-square {
-    margin-right: 10px;
-}
-
 /* ==== Results Page ======================================================== */
 .match-style {
     background-color: yellow;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .specific-match-style {
     background-color: orange;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .common-code-style {
@@ -238,7 +237,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 .loading-animation {
     border: 5px solid var(--standard-dark-gray);
-    border-top: 5px solid rgba(0,0,0,0);
+    border-top: 5px solid rgb(0 0 0 / 0%);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     width: 3em;
@@ -301,11 +300,8 @@ main#main.full-screen-mode .plagiarism-result-cont {
     float: right;
 }
 
-#popup_to_show_matches_id {
+#popup-to-show-matches-id {
     display: none;
-    top: 0;
-    left: 0;
-    width: auto;
     position: fixed;
 }
 
@@ -320,7 +316,6 @@ main#main.full-screen-mode .plagiarism-result-cont {
 
 [data-theme="dark"] .plag-legend {
     text-shadow: 0 0 3px transparent;
-
 }
 
 @media (max-width: 660px) {
@@ -328,8 +323,8 @@ main#main.full-screen-mode .plagiarism-result-cont {
         width: 100%;
     }
 
-    #users_with_plagiarism.plag-flex a,
-    #users_with_plagiarism.plag-flex span {
+    #users-with-plagiarism.plag-flex a,
+    #users-with-plagiarism.plag-flex span {
         flex-grow: 1;
         display: flex;
         flex-direction: column;

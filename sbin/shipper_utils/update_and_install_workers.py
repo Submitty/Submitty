@@ -91,11 +91,16 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
         return True
     else:
         success = False
+        timed_out = False
         try:
             (target_connection,
              intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
         except Exception as e:
-            print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
+            if str(e) == "timed out":
+                print(f"WARNING: Timed out when trying to ssh to {user}@{host}\nskipping {host} machine...")
+                timed_out = True
+            else:
+                print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False
         try:
             success = True
@@ -124,6 +129,9 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
         exit_code = run_systemctl_command(worker, 'stop', False)
         if exit_code != 0:
             print(f"Could not turn off {worker}'s daemon. Please allow rsyncing to continue and then attempt another install.")
+    elif exit_code == 4:
+        print(f"WARNING: Connection to machine {worker} timed out. Skipping code copying...")
+        return True
 
     local_directory = submitty_repository
     remote_host = '{0}@{1}'.format(user, host)
@@ -169,7 +177,10 @@ def update_machine(machine,stats,args):
     # We don't have to update the code for the primary machine or if docker_images is specified.
     if not primary and not args.docker_images:
         print("copy Submitty source code...")
-        copy_code_to_worker(machine, user, host, submitty_repository)
+        timed_out = copy_code_to_worker(machine, user, host, submitty_repository)
+        if timed_out == True:
+            print(f"WARNING: Connection to machine {machine} timed out. Skipping Submitty installation...")
+            return True
         print("beginning installation...")
         success = install_worker(user, host)
         if success == False:

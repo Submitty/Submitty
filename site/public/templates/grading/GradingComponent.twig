@@ -53,7 +53,7 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
-{% if ta_grading_peer or not peer_component %}
+{% if ta_grading_peer or not component.peer_component %}
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode and custom marks are enabled #}
     {% set f_mark = component.marks|first %}

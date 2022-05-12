@@ -2,16 +2,19 @@
  * This file defines a standardized set of styling rules for html elements which have been converted from
  * markdown to html using our markdown parser.
  *
- * To utilize these rules simply add 'markdown' to the class attribute of the parent container which holds the
- * converted markdown.
+ * The 'markdown' class should never be added directly to an element. Instead, render that element's content with
+ * site/app/templates/misc/Markdown.twig
  *
  * Beware when making changes here, as your changes are likely to affect the look and feel of several pages on submitty.
  */
 
+/* Actual rendered markdown styling (Markdown.twig) */
 .markdown {
-    font-family: 'Source Sans Pro', 'sans-serif';
+    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+    font-family: "Source Sans Pro", sans-serif;
     white-space: normal;
     position: relative;
+    word-wrap: break-word;
 }
 
 .markdown h1,
@@ -66,7 +69,7 @@
 }
 
 .markdown .line-numbers {
-    position:absolute;
+    position: absolute;
     top: 1em;
     padding-right: 1px;
     font-size: 13px;
@@ -85,33 +88,162 @@
     overflow-x: scroll;
 }
 
-.markdown th, td{
+.markdown th,
+.markdown td {
     border: 1px solid var(--standard-light-gray);
     padding: 3px;
 }
 
-.markdown-preview {
+/* Styling of markdown input space (MarkdownArea.twig) */
+.markdown-area {
+    border-radius: 6px;
     border: 1px solid var(--standard-light-gray);
-    background-color: var(--standard-input-background);
-    border-radius: 4px;
-    padding: 4px 6px;
-    height: auto !important;
-    overflow: scroll;
-    resize: none;
-    max-height: 300px;
+}
+
+/* header (.markdown-area-header + children) */
+.markdown-area-header {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--standard-pale-gray);
+    padding: 0 10px;
+    border-radius: 6px 6px 0 0;
+}
+
+[data-theme="dark"] .markdown-area-header {
+    background-color: var(--standard-deep-dark-gray);
+}
+
+.markdown-area-toolbar {
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+}
+
+.markdown-mode-buttons {
+    display: flex;
+    margin-top: 10px;
+}
+
+.markdown-mode-tab {
+    font-size: 14px;
+    margin-left: 5px;
+    padding-left: 16px;
+    padding-right: 16px;
+    min-height: 35px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.markdown-mode-tab.active {
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 6px 6px 0 0;
+    border-bottom-style: none;
+    background-color: var(--default-white);
+    color: var(--text-black);
+}
+
+.markdown-mode-tab:not(.active) {
+    border: 1px solid var(--standard-pale-gray);
+    background-color: var(--standard-pale-gray);
+    color: var(--standard-medium-gray);
+    transition: color 0.5s 0s;
+}
+
+[data-theme="dark"] .markdown-mode-tab:not(.active) {
+    background-color: var(--standard-deep-dark-gray);
+    border-color: var(--standard-deep-dark-gray);
+}
+
+.markdown-mode-tab:not(.active):hover {
+    color: var(--text-black);
+}
+
+.markdown-tool {
+    cursor: pointer;
+    margin-left: 3px;
+}
+
+/* body (.markdown-area-body + children) */
+.markdown-area-body {
+    padding: 16px;
+    background: var(--default-white);
+    border-radius: 0 0 6px 6px;
+    position: relative;
 }
 
 .markdown-area textarea {
     resize: vertical;
     min-height: 100px;
     max-height: 300px;
-    width: -webkit-fill-available;
+    tab-size: 4;
+}
+
+.markdown-preview {
+    border: none;
+    background-color: var(--default-white);
+    border-radius: 4px;
+    padding: 4px 6px;
+    height: auto !important;
+    overflow: auto;
+    resize: none;
+    min-height: 100px;
+    max-height: 300px;
+    width: fill-available;
 }
 
 .btn-markdown {
-    margin: 5px;
+    margin-left: 5px;
 }
 
-#peer-table th{
+/* Preview Loading Spinner */
+.markdown-preview-load-spinner {
+    display: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
+.markdown-preview-load-spinner div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: 2px 2px 2px 5px;
+    border: 2px solid var(--submitty-logo-blue);
+    border-radius: 50%;
+    animation: markdown-preview-load-spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: var(--submitty-logo-blue) transparent transparent transparent;
+}
+
+.markdown-preview-load-spinner div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+
+.markdown-preview-load-spinner div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+
+.markdown-preview-load-spinner div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+
+@keyframes markdown-preview-load-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#peer-table th {
     border: 1px solid var(--standard-light-gray);
+}
+
+.markdown img {
+    background-color: white;
+    max-width: 100%;
 }

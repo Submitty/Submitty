@@ -1,0 +1,72 @@
+{
+  "required_capabilities": "cpp",
+  "grading_parameters": {
+        "TOTAL_POINTS" : 11,
+        "AUTO_POINTS" : 11,
+        "TA_POINTS" : 0,
+        "EXTRA_CREDIT_POINTS" : 0
+  },
+
+  "display_testcase_runtime_memory" : true,
+
+  "testcases" : [
+      {
+          "type" : "Compilation",
+          "title" : "Compilation",
+          "command" : "clang++ -Wall -Wextra -o a.out -- *.cpp",
+          "executable_name" : "a.out",
+          "points" : 3,
+          "leaderboard_tags": ["compilation"]
+      },
+
+      {
+        "title": "Sorting a short sequence",
+        "command": "./a.out < input_short.txt",
+        "points": 4,
+        "leaderboard_tags": ["general_sorting"],
+        "validation": [
+          {
+            "method": "diff",
+            "comparison": "byLine",
+            "actual_file": "STDOUT.txt",
+            "expected_file": "output_short.txt"
+          }
+        ]
+      },
+
+      {
+        "title": "Sorting a long sequence",
+        "command": "./a.out < input_long.txt",
+        "points": 4,
+        "leaderboard_tags": ["general_sorting", "long_sort"],
+        "validation": [
+          {
+            "method": "diff",
+            "comparison": "byLine",
+            "actual_file": "STDOUT.txt",
+            "expected_file": "output_long.txt"
+          }
+        ]
+      }
+    ],
+
+    "leaderboards": [
+      {
+        "top_visible_students": 10,
+        "title": "Compilation",
+        "tag": "compilation",
+        "description":"A leaderboard that tests which program compiles the fastest. This is mostly useless."
+      },
+      {
+        "top_visible_students": 10,
+        "title": "Overall Sorting",
+        "tag": "general_sorting"
+      },
+      {
+        "top_visible_students": 0,
+        "title": "Intensive Sorting",
+        "tag": "long_sort",
+        "description":"A leaderboard that shows all students that were able to complete the harder sorting question."
+      }
+    ]
+}

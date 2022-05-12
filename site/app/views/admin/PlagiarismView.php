@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
-
     /**
      * @param array $plagiarism_result_info
      * @param string $refresh_page
@@ -61,7 +60,7 @@ class PlagiarismView extends AbstractView {
      * @param array $config
      * @return string
      */
-    public function configurePlagiarismForm(string $new_or_edit, array $config): string {
+    public function configurePlagiarismForm(string $new_or_edit, array $config, array $gradeables_with_plag_configs): string {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         if ($new_or_edit === "edit") {
             $this->core->getOutput()->addBreadcrumb('Edit Gradeable Configuration');
@@ -78,7 +77,9 @@ class PlagiarismView extends AbstractView {
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$config["gradeable_id"]}&config_id={$config["config_id"]}",
             "csrf_token" => $this->core->getCsrfToken(),
             "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
-            "config" => $config
+            "gradeables_with_plag_configs" => $gradeables_with_plag_configs,
+            "config" => $config,
+            "supported_languages" => PlagiarismUtils::SUPPORTED_LANGUAGES
         ]);
     }
 }

@@ -55,6 +55,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = [
             "authentication_method" => "PamAuthentication",
+            "ldap_options" => []
+        ];
+        $config = array_merge($config, $extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "authentication.json"), $config);
+
+        $config = [
             "database_host" => "/var/run/postgresql",
             "database_port" => 5432,
             "database_user" => "submitty_dbuser",
@@ -118,7 +124,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
-                'queue_contact_info' => true,
                 'queue_message' => '',
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
@@ -244,6 +249,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
+            'ldap_options' => [],
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
             'default_hw_late_days' => 0,
@@ -284,7 +290,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
-                    'queue_contact_info' => true,
                     'queue_message' => '',
                     'queue_announcement_message' => '',
                     'seek_message_enabled'           => false,
@@ -317,7 +322,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'verified_submitty_admin_user' => null,
             'php_user' => null,
             'queue_enabled' => true,
-            'queue_contact_info' => true,
             'queue_message' => '',
             'queue_announcement_message' => '',
             'seek_message_enabled'           => false,
@@ -407,7 +411,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     public function testInvalidMasterConfigPath() {
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Could not find config directory: /invalid/path');
         $config->loadMasterConfigs('/invalid/path');
     }
@@ -415,7 +419,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     public function testConfigPathFile() {
         $this->createConfigFile();
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
     }
@@ -424,7 +428,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -433,14 +437,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
     public function testInvalidCourseConfigPath() {
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Could not find course config file: /invalid/path');
         $config->loadCourseJson("s17", "csci0000", "/invalid/path");
     }
@@ -449,7 +453,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         $config = new Config($this->core);
         file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Error parsing the config file: Syntax error');
         $config->loadCourseJson("s17", "csci1000", FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
@@ -458,7 +462,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessageMatches('/Could not find email config: .*\/config\/email.json/');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -499,8 +503,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_contact_info',
-                'queue_message', 'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
+                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
+                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
             ],
         ];
         $return = [];
@@ -543,7 +547,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid Timezone identifier: invalid');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -553,7 +557,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -563,7 +567,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
-        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_log_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
     }
@@ -639,5 +643,31 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->isDebug());
         $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
         $this->assertFalse($config->checkFeatureFlagEnabled('feature_1'));
+    }
+
+    public function ldapOptionsDataProvider() {
+        return [['url'], ['uid'], ['bind_dn']];
+    }
+
+    /**
+     * @dataProvider ldapOptionsDataProvider
+     */
+    public function testExceptionMissingLdapOptionUrl(string $option): void {
+        $extra = [
+            'authentication_method' => 'LdapAuthentication',
+            'ldap_options' => [
+                'url' => 'ldap://localhost',
+                'uid' => 'uid',
+                'bind_dn' => 'ou=users',
+            ],
+        ];
+
+        unset($extra['ldap_options'][$option]);
+
+        $this->createConfigFile($extra);
+        $config = new Config($this->core);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage("Missing config value for ldap options: ${option}");
+        $config->loadMasterConfigs($this->config_path);
     }
 }

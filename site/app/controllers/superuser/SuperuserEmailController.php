@@ -2,13 +2,11 @@
 
 namespace app\controllers\superuser;
 
-use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use app\libraries\routers\AccessControl;
-use app\libraries\User;
 use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
@@ -17,8 +15,6 @@ use app\models\SuperuserEmail;
  * @AccessControl(level="SUPERUSER")
  */
 class SuperuserEmailController extends AbstractController {
-
-
     /**
      * @Route("/superuser/email")
      * @return MultiResponse

@@ -17,8 +17,6 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "boost/timer/timer.hpp"
-
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 
@@ -42,9 +40,9 @@ int parse_results_grade(std::ifstream &istr, std::vector<int>& testcases, int cu
     std::stringstream ss(line);
     std::string token, token2;
     ss >> token;
-    if (token == "Testcase") {
+    if (token.substr(0,4) == "test") {
       int num;
-      ss >> num;
+      num = std::stoi(token.substr(4,2));
       bool found = false;
       for (unsigned int i = 0; i < testcases.size(); i++) {
 	//std::cout << " arg " << testcases[i] << std::endl;
@@ -54,8 +52,8 @@ int parse_results_grade(std::ifstream &istr, std::vector<int>& testcases, int cu
       }
       if (!found) continue;
       //std::cout << "line: " << line << std::endl;
-      ss >> token;
-      assert (token == ":");
+      assert (token.substr(6,1) == ":");
+      assert (token.size() == 7);
       ss >> token2;
       int value = 0;
       while (ss.good()) {

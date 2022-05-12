@@ -85,14 +85,14 @@
 .filter-buttons:focus {
     color: var(--text-black);
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 .filter {
     margin-bottom: 1em;
 }
 
-.docker-warning {
+.docker-warning,
+#docker-name-example {
     margin-bottom: 1em;
     padding: 10px;
 }
