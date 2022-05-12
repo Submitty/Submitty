@@ -5,7 +5,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
 1. On the host computer, create a new directory named GIT_CHECKOUT to
    hold all of the Submitty git repositories.  Manually checkout these
-   repositories:
+   repositories (and make sure they are up-to-date):
 
    From https://github.com/Submitty
 
@@ -35,83 +35,79 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
 2. Install UTM
    https://mac.getutm.app/
+   Current version: 3.5.1
 
 
 3. Download and save the Ubuntu 20.04 ARM Server ISO
    https://mac.getutm.app/gallery/ubuntu-20-04
+   https://cdimage.ubuntu.com/releases/20.04.4/release/
 
 
-4. Launch UTM, and through the UTM GUI, create a new VM:
+4. Launch UTM, and through the UTM GUI, press "+" to create a new VM:
 
-   under the "Information" tab, give your VM a unique name.
+   Select "Virtualize"
+   Select "Linux"
 
-   under the "System" tab, specify:
-   architecture -> ARM64 (aarch64)
-   system -> QEMU 6.0 ARM Virtual Machine
-   memory -> 2048 mb (or more)
-   click on "show advanced settings"
+   Under Boot ISO Image: browse to select the Ubuntu 20.04 ISO you just downloaded.
+
+   memory -> 4096 mb (or more)
    CPU Cores -> 2 (or more)
 
-   under the "Drives" tab, make 2 drives:
-   the first one is a "removable drive" "USB" for the CD/DVD (ISO) image, USB interface
-   the second one is a "disk image" with "virtIO" that is at least 40 GB.
+   Storage, 64GB, press "Next"
 
-   under the "Network" tab... we'll setup port forwarding in a later
-   step (it gives errors if you set it too early?)
+   Shared Directory, Browse to specify the "GIT_CHECKOUT" directory on your host
 
-   under the "Sharing" tab,
-   -> could uncheck "enable clipboard sharing" (doesn't seem to work anyways, buggy?)
-   -> "enable directory sharing"
+   Review the Summary, press "Save"
 
 
-
-5. From the main screen, with this new VM selected:
-
-   -> set the CD/DVD drive to point to the ISO you downloaded to your
-      host machine earlier
-
-   -> set the shared directory to point to the GIT_CHECKOUT directory
-      that holds your Submitty git repositories on your host machine
-
-
-6. Now boot & install the guest machine.  Do the interactive Ubuntu
-   Server installation...
+5. Now press the play button to boot & install the guest machine.
+   Do the interactive Ubuntu Server installation...
 
    * "Install Ubuntu Server"
 
    ... you'll wait a while here ...
 
    * "English"
+   * (do not upgrade to Ubuntu 22.04 -- "Continue without updating")
+
    * "Done" on keyboard layout
    * "Done" on network connections
    * "Done" on configure proxy
    * "Done" on alternate mirror
    * "Done" on default for storage configuration / storage layout
-   * "on default for storage configuration / file system
+   * "Done" on default for storage configuration / file system
 
-      - set the "device" "mounted at /" to be at least 35 GB
-        it probably defaulted to 20BG
+      - set the "device" "mounted at /" to be most of your space (e.g. 60GB)
+        it probably defaulted to 30BG (leaving 30GB of free)
 
    * "Continue" on confirm destructive action
    * Fill in the profile setup (set a <USERNAME> & <PASSWORD>)
+
+   * Press "Done" on Ubuntu Advantage
+
    * Select "Install OpenSSH server" and then "Done"
    * "Done" on featured server snaps
 
-   ... now wait why the server installs ...
+   It will initially say "Installing system" at the top of the page and then quickly switch to "Install complete!" ...
 
-   It will say "Install complete!" at the top of the page
+   ... now wait why the server does updates ...
+
+   Wait a while, until it says "Reboot now"
 
    select "Reboot now"
 
 
-7. After waiting a little while...
+6. After waiting a little while...
    NOTE: reboot only seems to stop.  It doesn't actually halt & restart.
 
    From the main UTM screen:
 
    * Turn off the virtual machine by pressing the square symbol.
 
-   * "Clear"/disconnect the removable CD/DVD drive.
+     If it says "do you want to force stop this VM and lose all unsaved data?  stop or cancel"...
+
+
+   * "Clear"/disconnect the removable CD/DVD drive (the ISO).
 
    * Click on the sliders icon in the upper right to edit the VM
      settings again.
@@ -127,12 +123,12 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    * Then press the play icon to boot the machine again.
 
 
-8. To ssh from your host machine to the guest vm:
+7. To ssh from your host machine to the guest vm:
 
    ssh -p 1234 <USERNAME>@localhost
 
 
-9. To share directories between host & guest machines:
+8. To share directories between host & guest machines:
 
    On the guest machine:
 
@@ -158,6 +154,16 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    (rebooting) the VM and then try again.
 
    sudo umount /usr/local/submitty/GIT_CHECKOUT
+
+
+9. TEMPORARY HACK STEP
+
+   open .setup/pip/system_requirements.txt
+   comment out the opencv and onnx version installations (compilation from scratch fails)
+
+    #opencv-python==3.4.10.37
+    #onnxruntime==1.8.1
+    #onnx==1.9.0
 
 
 10. Do Submitty system setup and installation:
