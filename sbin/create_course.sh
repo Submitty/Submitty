@@ -39,7 +39,7 @@ if [ -d "${DATABASE_HOST}" ]; then
 fi
 
 # Check that Submitty Master DB exists.
-PGPASSWORD="${DATABASE_PASS}" psql "${CONN_STRING}" -lqt | cut -d \| -f 1 | grep -qw submitty
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
     exit
@@ -47,7 +47,7 @@ fi
 
 #Ensure that tables exist within Submitty Master DB.
 sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms','courses','courses_users','sessions','users');"
-table_count=`PGPASSWORD="${DATABASE_PASS}" psql "${CONN_STRING}" -d submitty -tAc "${sql}"`
+table_count=`PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -tAc "${sql}"`
 if [[ "$table_count" -ne "5" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit
@@ -284,7 +284,7 @@ replace_fillin_variables "${course_dir}/config/config.json"
 
 
 echo -e "Creating database ${DATABASE_NAME}\n"
-PGPASSWORD="${DATABASE_PASS}" psql "${CONN_STRING}" -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to create database ${DATABASE_NAME}"
     exit
@@ -295,7 +295,7 @@ if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
 fi
-PGPASSWORD="${DATABASE_PASS}" psql "${CONN_STRING}" -d submitty -c "INSERT INTO courses (semester, course, group_name, owner_name)
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course, group_name, owner_name)
 VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}');"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
