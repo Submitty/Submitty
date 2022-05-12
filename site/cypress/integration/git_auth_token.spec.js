@@ -18,7 +18,7 @@ describe('Test cases revolving around git auth tokens', () => {
 
         cy.get('#new-auth-token-form > form > div > div > div.form-body > div.form-buttons > div > input').click();
 
-        cy.get('#new-token-banner > p:nth-child(5)').contains('Value: ');
+        cy.get('#new-token-banner > p:nth-child(6)').contains('Value: ');
 
         let cookie;
 
@@ -28,7 +28,7 @@ describe('Test cases revolving around git auth tokens', () => {
         // Clear the cookie so we can access the vcs_login route
         cy.clearCookies();
 
-        cy.get('#new-token-banner > p:nth-child(5)').invoke('text').then(text => {
+        cy.get('#new-token-banner > p:nth-child(6)').invoke('text').then(text => {
             const token = text.trim().split(' ')[1];
             // Verify the token works as a password
             cy.request({
