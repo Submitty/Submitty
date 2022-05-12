@@ -5,6 +5,9 @@
             it's value once so make sure to save it or you will need to create
             another one later.
         </p>
+        <p>
+            NOTE: Do not share this token with others. Treat it like a password.
+        </p>
         <br>
         <p><b>Name</b>: {{ new_token.getName() }}</p>
         {% if new_token.getExpiration() is null %}

@@ -33,7 +33,7 @@ class GitAuthController extends AbstractController {
      * @Route("/git_auth_tokens", methods={"POST"})
      */
     public function createGitAuthToken(): ResponseInterface {
-        if (!isset($_POST['name']) || !isset($_POST['expiration'])) {
+        if (!isset($_POST['name']) || !isset($_POST['expiration']) || $_POST['name'] === "") {
             $this->core->addErrorMessage("Name or expiration not provided");
             return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
         }
@@ -52,7 +52,7 @@ class GitAuthController extends AbstractController {
             $expiration = $this->core->getDateTimeNow()->add($time_to_add);
         }
 
-        $token = Utils::generateRandomString();
+        $token = Utils::generateRandomString(32);
         $hashed_token = password_hash($token, PASSWORD_DEFAULT);
 
         $auth_token = new GitAuthToken(
