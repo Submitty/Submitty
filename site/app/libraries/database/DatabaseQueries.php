@@ -7359,7 +7359,7 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $release_histogram,$show_correct_answer) {
+    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $release_histogram, $show_correct_answer) {
         $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path, release_histogram, show_correct_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null, $release_histogram, $show_correct_answer]);
         $this->course_db->query("SELECT max(poll_id) from polls");
         $poll_id = $this->course_db->rows()[0]['max'];
