@@ -33,7 +33,7 @@ class MiscController extends AbstractController {
     /**
      * Gets the timestamps for a list of resources under the 'site/public' folder.
      * Ignores files that are not under that folder.
-     * 
+     *
      * @Route("/timestamp_public_resources", methods={"POST"})
      */
     public function ajaxTimestampPublicResources(): JsonResponse {
