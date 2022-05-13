@@ -463,7 +463,7 @@ function setupNumericTextCells() {
               window.socketClient.send({'type': "update_numeric", 'elem': split_id[3], 'user': row_el.data("anon"), 'value': value, 'total': total});
             },
             function() {
-                elem.css("background-color", "#ff7777");
+                elem.css("background-color", "--standard-light-pink");
             }
         );
     });
@@ -557,7 +557,7 @@ function setupNumericTextCells() {
                                                     elem.css("background-color", "--main-body-white");
                                                 }
                                                 else {
-                                                    elem.css("background-color", "#ff7777");
+                                                    elem.css("background-color", "--standard-light-pink");
                                                 }
 
                                                 if(elem.val() == 0) {
