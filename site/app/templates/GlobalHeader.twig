@@ -242,8 +242,10 @@
                     <span>
                         {% if message.type == "error" %}
                         <i class="fas fa-times-circle"></i>
-                        {% else %}
+                        {% elseif message.type == "success" %}
                         <i class="fas fa-check-circle"></i>
+                        {% else %}
+                        <i class="fas fa-circle-exclamation"></i>
                         {% endif %}
                         {{ message.error | nl2br }}
                     </span>
