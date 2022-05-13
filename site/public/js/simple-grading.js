@@ -947,7 +947,7 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     elem.data('origval', value);
     elem.attr('data-origval', value);
     elem.val(value);
-    elem.css("background-color", "white");
+    elem.css("background-color", "--always-default-white");
     if(value == 0) {
       elem.css("color", "--standard-light-medium-gray");
     }
