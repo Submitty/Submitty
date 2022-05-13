@@ -64,7 +64,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
 
               # check for machine
               if platform.machine() == "aarch64":
-                  # TEMPORARY: docker pull often fails on ARM installation
+                  # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+                  # docker pull often fails on ARM installation
                   print("WARNING: SKIPPING DOCKER PULL ERROR")
               else:
                   # normal case
