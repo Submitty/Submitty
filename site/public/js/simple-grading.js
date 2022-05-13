@@ -417,7 +417,7 @@ function setupNumericTextCells() {
             return;
         }
         if(this.value == 0) {
-            elem.css("color", "#bbbbbb");
+            elem.css("color", "--standard-light-medium-gray");
         }
         else{
             elem.css("color", "");
@@ -554,14 +554,14 @@ function setupNumericTextCells() {
                                                 let elem = $('#cell-'+$(this).parent().parent().data("section")+'-'+$(this).parent().data("row")+'-'+(z-starting_index2));
                                                 elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    elem.css("background-color", "#ffffff");
+                                                    elem.css("background-color", "--main-body-white");
                                                 }
                                                 else {
                                                     elem.css("background-color", "#ff7777");
                                                 }
 
                                                 if(elem.val() == 0) {
-                                                    elem.css("color", "#bbbbbb");
+                                                    elem.css("color", "--standard-light-medium-gray");
                                                 }
                                                 else {
                                                     elem.css("color", "");
@@ -949,7 +949,7 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     elem.val(value);
     elem.css("background-color", "white");
     if(value == 0) {
-      elem.css("color", "#bbbbbb");
+      elem.css("color", "--standard-light-medium-gray");
     }
     else{
       elem.css("color", "");
