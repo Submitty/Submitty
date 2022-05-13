@@ -9,6 +9,7 @@ import traceback
 import argparse
 import get_docker_info
 from submitty_utils import ssh_proxy_jump
+import platform
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -61,9 +62,18 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                 repo, tag = image.split(':')
                 client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-                print(f"ERROR: Could not pull {image}")
-                traceback.print_exc()
-                success = False
+              print(f"ERROR: Could not pull {image}")
+              traceback.print_exc()
+
+              # check for machine
+              if platform.machine() == "aarch64":
+                  # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+                  # docker pull often fails on ARM installation
+                  print("WARNING: SKIPPING DOCKER PULL ERROR")
+              else:
+                  # normal case
+                  success = False
+
         docker_info = client.info()
         docker_images_obj = client.images.list()
         #print the details of the image

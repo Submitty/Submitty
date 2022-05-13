@@ -153,12 +153,12 @@ input[type="text"]:invalid {
 /* ==== Results Page ======================================================== */
 .match-style {
     background-color: yellow;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .specific-match-style {
     background-color: orange;
-    border: 1px solid black;
+    border-right: 1px solid var(--text-white);
 }
 
 .common-code-style {

@@ -17,7 +17,6 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
-use app\libraries\routers\FeatureFlag;
 use Exception;
 use DateTime;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,7 +28,6 @@ use app\entities\plagiarism\PlagiarismConfig;
  * Class PlagiarismController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
- * @FeatureFlag("plagiarism")
  */
 class PlagiarismController extends AbstractController {
     /**
@@ -876,7 +874,7 @@ class PlagiarismController extends AbstractController {
                     }
                 }
 
-                if (isset($_POST["other-gradeable-paths"])) {
+                if (isset($_POST["other-gradeable-paths"]) && $_POST["other-gradeable-paths"] !== "") {
                     $paths = explode(",", $_POST["other-gradeable-paths"]);
                     $other_gradeable_paths = [];
                     foreach ($paths as $path) {
@@ -1193,6 +1191,13 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
             return new RedirectResponse($return_url);
         }
+
+        // Update the last run timestamp
+        $em = $this->core->getCourseEntityManager();
+        /** @var PlagiarismConfig $plagiarism_config */
+        $plagiarism_config = $em->getRepository(PlagiarismConfig::class)->findOneBy(["gradeable_id" => $gradeable_id, "config_id" => $config_id]);
+        $plagiarism_config->setLastRunToCurrentTime();
+        $em->flush();
 
         try {
             $this->enqueueLichenJob("RunLichen", $gradeable_id, $config_id);
