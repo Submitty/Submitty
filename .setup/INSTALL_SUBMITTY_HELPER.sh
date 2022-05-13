@@ -32,10 +32,14 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
+
+#
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 UTM_ARM=0
 if [[ "$(uname -m)" = "aarch64" ]] ; then
     UTM_ARM=1
 fi
+
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
@@ -55,18 +59,12 @@ fi
 ########################################################################################################################
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 if [ ${UTM_ARM} == 1 ]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start
     sudo timedatectl set-timezone America/New_York
-
-    echo "skipping"
-    
-    #apt install ntpdate
-    #apt install ntp
-    #ntpdate -u "in.pool.ntp.org"
-    #ntpdate -u time.apple.com
 fi
 
 ########################################################################################################################
@@ -563,9 +561,10 @@ echo -e "Compile and install analysis tools"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-# WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
 if [ ${UTM_ARM} == 0 ]; then
-# END HACK
+# END ARM64
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
@@ -577,11 +576,12 @@ if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
 fi
 popd > /dev/null
 
-# WIP - HASKELL BINARY IS NOT AVAILABLE ARM 64
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
 else
     echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
 fi
-# END HACK
+# END ARM64
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

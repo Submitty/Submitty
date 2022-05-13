@@ -90,6 +90,7 @@ while :; do
     shift
 done
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 export UTM_ARM=0
 if [[ "$(uname -m)" = "aarch64" ]] ; then
     export UTM_ARM=1
@@ -103,6 +104,7 @@ fi
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
+    # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
     if [ ${UTM_ARM} == 0 ]; then
 	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
     fi
@@ -225,6 +227,7 @@ fi
 # STACK SETUP
 #################
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 #if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
 # stack is not available for non-x86_64 systems
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
@@ -272,14 +275,15 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-# WIP - CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON UTM_ARM MAC M1
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON ARM64 / UTM_ARM MAC M1
 if getent passwd vagrant > /dev/null; then
     # Already exists
     echo 're-running install submitty'
 elif [ ${UTM_ARM} == 1 ]; then
     useradd -m vagrant
 fi
-# END HACK
+# END ARM64
 
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
