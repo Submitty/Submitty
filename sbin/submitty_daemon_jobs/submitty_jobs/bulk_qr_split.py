@@ -43,9 +43,10 @@ def main(args):
 
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
-            page = convert_from_bytes(
-                open(filename, 'rb').read(),
-                first_page=page_number+1, last_page=page_number+2)[0]
+            with open(filename, 'rb') as open_file:
+                page = convert_from_bytes(
+                    open_file.read(),
+                    first_page=page_number+1, last_page=page_number+2)[0]
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
