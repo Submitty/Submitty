@@ -237,12 +237,12 @@
             if ($('#yes_student_view_after_grades').is(':checked')) {
                 $('#radio_ef_student_upload').prop('checked', false);
                 $('#radio_ef_bulk_upload').prop('checked', true);
-                let gradeableTypeString = $('#gradeable-type-string');
+                const gradeableTypeString = $('#gradeable-type-string');
                 gradeableTypeString.html(gradeableTypeString.attr('data-bulk'));
             } else {
                 $('#radio_ef_bulk_upload').prop('checked', false);
                 $('#radio_ef_student_upload').prop('checked', true);
-                let gradeableTypeString = $('#gradeable-type-string');
+                const gradeableTypeString = $('#gradeable-type-string');
                 gradeableTypeString.html(gradeableTypeString.attr('data-hw'));
             }
         }
@@ -255,8 +255,8 @@
             // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_view', true);
             disableElementChildren('#student_download_view', true);
-            let studentSubmit = $('#no_student_submit');
-            let studentDownload = $('#no_student_download');
+            const studentSubmit = $('#no_student_submit');
+            const studentDownload = $('#no_student_download');
 
             studentSubmit.prop('checked', true);
             studentDownload.prop('checked', true);
@@ -269,10 +269,10 @@
     }
 
     function onStudentSubmitChange() {
-        let cont = $('#due_date_options_container');
-        let bulk_upload = {{ is_bulk_upload ? "true": "false" }};
+        const cont = $('#due_date_options_container');
+        const bulk_upload = {{ is_bulk_upload ? "true": "false" }};
 
-        let no_due_date = $('#has_due_date_no');
+        const no_due_date = $('#has_due_date_no');
         if($('#yes_student_submit').is(':checked') || bulk_upload) {
             cont.show();
         }
@@ -338,13 +338,13 @@
         $('#config_search').on("focusout", onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
-            let elem = $('#yes_student_view');
+            const elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
-            let download = $('#no_student_download');
+            const download = $('#no_student_download');
             download.prop('checked', true);
             download.change();
-            let sub = $('#no_student_submit');
+            const sub = $('#no_student_submit');
             sub.prop('checked', true);
             sub.change();
         });

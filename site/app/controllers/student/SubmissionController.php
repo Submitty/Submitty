@@ -1884,13 +1884,12 @@ class SubmissionController extends AbstractController {
             }
             $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $user_path . "/" . $num_files . "/.bulk_upload_data.json";
+            $json_path = FileUtils::joinPaths($user_path, $num_files, ".bulk_upload_data.json");
             if (!file_exists($json_path)) {
-                $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+                $json_path = FileUtils::joinPaths($user_path, $num_files, "bulk_upload_data.json");
                 if (!file_exists($json_path)) {
                     continue;
                 }
-                continue;
             }
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
             if ($user === null) {
