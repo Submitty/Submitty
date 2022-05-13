@@ -497,7 +497,7 @@ HTML;
             if ($gradeable->isTeamAssignment()) {
                 if ($show_edit_teams) {
                     $columns[] = ["width" => "5%",  "title" => "Edit Teams",       "function" => "team_edit"];
-                    $columns[] = ["width" => "10%", "title" => "Team Id",          "function" => "team_id", "sort_type" => "id"];
+                    $columns[] = ["width" => "10%", "title" => "Team ID",          "function" => "team_id", "sort_type" => "id"];
                     $columns[] = ["width" => "6%",  "title" => "Team Name",        "function" => "team_name"];
                     $columns[] = ["width" => "26%", "title" => "Team Members",     "function" => "team_members"];
                 }
@@ -525,10 +525,10 @@ HTML;
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
             if ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
-                $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading_blind"];
+                $columns[]     = ["width" => "8%",  "title" => "Grading",       "function" => "grading_blind"];
             }
             else {
-                $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
+                $columns[]     = ["width" => "8%",  "title" => "Grading",       "function" => "grading"];
             }
             $columns[]         = ["width" => "7%",  "title" => "Total",            "function" => "total"];
             $columns[]         = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
