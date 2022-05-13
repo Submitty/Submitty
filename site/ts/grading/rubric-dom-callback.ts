@@ -74,7 +74,7 @@ export function onAddComponent(peer: boolean): void {
             alert(`Failed to add component! ${err.message}`);
         })
         .then(() => {
-            return rubric.closeAllComponents(true);
+            return rubric.closeAllComponents(true, true);
         })
         .then(() => {
             return rubric.reloadInstructorEditRubric(rubricDomAccess.getGradeableId(), rubricDomAccess.isItempoolAvailable(), rubricDomAccess.getItempoolOptions());

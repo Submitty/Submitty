@@ -1,7 +1,7 @@
 import { open_overall_comment_tab } from '../../grading/rubric';
 
 $(() => {
-    $(document).on('click', "input[id^='overall-comment-tab-']", function() {
+    $(document).on('click', "a[id^='overall-comment-tab-']", function() {
         const userId = $(this).attr('data-user-id') as string;
         open_overall_comment_tab(userId);
     });

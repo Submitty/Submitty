@@ -31,6 +31,27 @@ class MiscController extends AbstractController {
     }
 
     /**
+     * Gets the timestamps for a list of resources under the 'site/public' folder.
+     * Ignores files that are not under that folder.
+     * 
+     * @Route("/timestamp_public_resources", methods={"POST"})
+     */
+    public function ajaxTimestampPublicResources(): JsonResponse {
+        $resources = $_POST["resources"];
+        $resources = explode(",", $resources);
+        $timestamped_resources = [];
+        $base = realpath(FileUtils::joinPaths(__DIR__, '..', '..', 'public'));
+        foreach ($resources as $resource) {
+            // https://stackoverflow.com/questions/11816749/how-do-you-check-if-a-file-is-in-a-certain-directory-using-php
+            $resource_file = realpath(FileUtils::joinPaths($base, $resource));
+            if ($resource_file !== false && strncmp($resource_file, $base, strlen($base)) === 0) {
+                $timestamped_resources[$resource] = filemtime($resource_file);
+            }
+        }
+        return JsonResponse::getSuccessResponse($timestamped_resources);
+    }
+
+    /**
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
     public function decodeAnonPath($path) {
