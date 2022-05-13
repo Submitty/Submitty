@@ -1406,6 +1406,169 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get all of the late day cache ordered by date and g_id
+     * @return array $return = [
+     *  $user_id' => [
+     *      $event_title => [
+     *          $cache_row => [
+     *              'g_id' => string,
+     *              'user_id' => string,
+     *              'team_id' => string,
+     *              'late_days_allowed' => int,
+     *              'late_day_date' => DateTime,
+     *              'submission_days_late' => int,
+     *              'late_day_exceptions' => int,
+     *              'late_days_remaining' => int,
+     *              'late_day_status' => int,
+     *              'late_days_change' => int
+     *          ]
+     *      ]
+     *  ]
+     */
+    public function getLateDayCache(): array {
+        $query = "SELECT * FROM 
+                    late_day_cache AS ldc
+                    LEFT JOIN gradeable g ON g.g_id=ldc.g_id
+                  ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
+        $this->course_db->query($query);
+        $return = [];
+
+        // key: user, value: array of all cache available
+        foreach ($this->course_db->rows() as $row) {
+            $user_id = $row['user_id'] ?? $row['team_id'];
+            // title = g_title or event date
+            $title = $row['g_title'] ?? explode(" ", $row['late_day_date'])[0];
+            $return[$user_id][$title] = $row;
+        }
+        return $return;
+    }
+
+    /**
+     * Get the late day cache for a specific user
+     * @param string $user_id
+     * @return array $return = [
+     *      $id => [
+     *          'g_id' => string,
+     *          'user_id' => string,
+     *          'team_id' => string,
+     *          'late_days_allowed' => int,
+     *          'late_day_date' => DateTime,
+     *          'submission_days_late' => int,
+     *          'late_day_exceptions' => int,
+     *          'late_days_remaining' => int,
+     *          'late_day_status' => int,
+     *          'late_days_change' => int
+     *      ]
+     * ]
+     */
+    public function getLateDayCacheForUser(string $user_id): array {
+        $params = [$user_id];
+        $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST";
+        $this->course_db->query($query, $params);
+
+        $index = 1;
+        $late_day_events = [];
+        foreach ($this->course_db->rows() as $row) {
+            // Change string date to DateTime object
+            $row['late_day_date'] = new \DateTime($row['late_day_date']);
+
+            if (isset($row['g_id'])) { // Gradeable late day event
+                $late_day_events[$row['g_id']] = $row;
+            }
+            else { // Late day update event
+                $late_day_events[$index] = $row;
+                $index++;
+            }
+        }
+        return $late_day_events;
+    }
+
+    /**
+     * Get the late day infomration for a specific user (graded gradeable information)
+     * @param string $user_id
+     * @param string $g_id
+     * @return null|array $return = [
+     *      'g_id' => string,
+     *      'user_id' => string,
+     *      'team_id' => string,
+     *      'late_days_allowed' => int,
+     *      'late_day_date' => DateTime,
+     *      'submission_days_late' => int,
+     *      'late_day_exceptions' => int,
+     *      'late_days_remaining' => int,
+     *      'late_day_status' => int,
+     *      'late_days_change' => int
+     * ]
+     */
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
+        $params = [$user_id, $g_id];
+        $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    AND g_id=?";
+        $this->course_db->query($query, $params);
+
+        $row = $this->course_db->row();
+
+        // If cache doesnt exist, generate it and query again
+        if (empty($row)) {
+            $this->generateLateDayCacheForUser($user_id);
+            $this->course_db->query($query, $params);
+            $row = $this->course_db->row();
+        }
+
+        // If cache still doesnt exist, the gradeable is not associated with
+        // LateDays OR there has been a computation error
+        if (empty($row)) {
+            return null;
+        }
+
+        return $row;
+    }
+
+    /**
+     * Generate and update the late day cache for all of the students in the course
+     */
+    public function generateLateDayCacheForUsers(): void {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    (SELECT (cache_row).* 
+                    FROM 
+                        (SELECT
+                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
+                        FROM users
+                        ) calculated_cache
+                    )";
+
+        $this->course_db->query($query, $params);
+    }
+
+    /**
+     * Generate and update the late day cache for a student
+     * @param string $user_id
+     */
+    public function generateLateDayCacheForUser(string $user_id): void {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$user_id, $default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
+
+        $this->course_db->query($query, $params);
+    }
+
+    /**
+     * Remove all of the late day information cached
+     */
+    public function flushAllLateDayCache() {
+        $query = "DELETE FROM late_day_cache";
+        $this->course_db->query($query);
+    }
+
+    /**
      * Fetches all students from the given registration sections, $sections.
      *
      * @param  string[] $sections
@@ -4236,6 +4399,9 @@ AND gc_id IN (
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];
 
+        if (count($params) === 0) {
+            return [];
+        }
         $question_marks = $this->createParamaterList(count($params));
         $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN {$question_marks}", $params);
         $return = [];

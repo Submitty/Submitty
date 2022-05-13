@@ -721,6 +721,7 @@ class GradeableListTester extends BaseUnitTest {
         ]);
         $core->setUser($user);
         $core->setConfig(new Config($core));
+        $core->setTesting(true);
         return $core;
     }
 

@@ -74,15 +74,19 @@
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
-    {% if not currently_valid_repository %}
-        <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
-    {% endif %}
+
+        <div class="config_search_error" id="autograding_config_error">
+            {% if not currently_valid_repository %}
+                The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
+            {% endif %}
+        </div>
+
 
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
                 <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration">
+                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration" name="autograding_config_path_displayed">
                     <div style="margin-left: -45px; position: absolute; display: inline-block; width: auto; transform: translate(0, 25%);">
                         <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
                         <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
@@ -302,7 +306,7 @@
         let box = $(options).parent().find(".drop-down-box");
         // set the box's value to the text of the option
         $(box).val($(this).text());
-        $(box).trigger("input");
+        $(box).trigger("focusout");
     }
 
     function hideDropDownOptions(){
@@ -331,7 +335,7 @@
 
         // Update the text box when the path config changes
         onConfigPathChange();
-        $('#config_search').on("input", onConfigPathChange);
+        $('#config_search').on("focusout", onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
