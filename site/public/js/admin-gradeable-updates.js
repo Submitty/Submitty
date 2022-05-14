@@ -1,6 +1,8 @@
 
 let updateInProgressCount = 0;
 let errors = {};
+var previous_gradeable = "";
+var gradeable = "";
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
@@ -13,6 +15,12 @@ function updateErrorMessage() {
 }
 
 function setError(name, err) {
+    if (name === 'autograding_config_path') {
+        name = 'autograding_config_path_displayed';
+        const error_elem = $('#autograding_config_error');
+        error_elem.text(err);
+        error_elem.show();
+    }
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = err;
         elem.setCustomValidity("Invalid field.");
@@ -21,6 +29,12 @@ function setError(name, err) {
 }
 
 function clearError(name, update) {
+    if (name === 'autograding_config_path') {
+        name = 'autograding_config_path_displayed';
+        const error_elem = $('#autograding_config_error');
+        error_elem.text('');
+        error_elem.hide();
+    }
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.setCustomValidity('');
@@ -96,6 +110,38 @@ function updateGradeableErrorCallback(message, response_data) {
     updateErrorMessage();
 }
 
+function updateDueDate() {
+    let cont = $('#due_date_container');
+    let cont1 = $('#late_days_options_container');
+    let cont2 = $('#manual_grading_container');
+    let cont3 = $('#release_container');
+    if($('#has_due_date_no').is(':checked')) {
+        cont.hide();
+        cont1.hide();
+        cont2.hide();
+        cont3.hide();
+        $('#has_release_date_no').prop('checked', true);
+    }
+    else {
+        cont.show();
+        cont1.show();
+        cont2.show();
+        cont3.show();
+    }
+    onHasDueDate();
+}
+
+function updateReleaseDate() {
+    let cont = $('#release_date_container');
+    if($('#has_release_date_no').is(':checked')) {
+        cont.hide();
+    }
+    else {
+        cont.show();
+    }
+    onHasReleaseDate();
+}
+
 $(document).ready(function () {
     window.onbeforeunload = function (event) {
         if (Object.keys(errors).length !== 0) {
@@ -105,9 +151,42 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
+        if ($(this).hasClass('date-radio') && is_electronic) {
+            updateDueDate();
+        }
+        if ($(this).hasClass('date-radio')) {
+            updateReleaseDate();
+        }
         if ($(this).hasClass('ignore')) {
             return;
         }
+        if (previous_gradeable === '') {
+            previous_gradeable = $('#gradeable-lock').val();
+        }
+        gradeable = $('#gradeable-lock').val();
+        if (previous_gradeable !== gradeable) {
+            $('#gradeable-lock-points').val(0);
+        }
+        if (gradeable !== '') {
+            $('#gradeable-lock-max-points-field').show();
+            $('#gradeable-lock-max-points').text(`Out of ${gradeable_max_autograder_points[gradeable]} Maximum Autograding Points`);
+            previous_gradeable = gradeable;
+        }
+        else {
+            $('#gradeable-lock-points').val(0);
+            $('#gradeable-lock-max-points-field').hide();
+        }
+
+        let points = $('#gradeable-lock-points').val();
+        if (points === '') {
+            return false;
+        }
+        points = parseInt(points);
+        if ((points < 0 || points > gradeable_max_autograder_points[gradeable])) {
+            displayErrorMessage("Points must be between 0 and the max autograder points for that gradeable.");
+            return;
+        }
+
         // If its rubric-related, then make different request
         if ($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
             // ... but don't automatically save electronic rubric data
@@ -146,9 +225,9 @@ $(document).ready(function () {
         };
 
         // If its date-related, then submit all date data
-        if ($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+        if ($('#gradeable-dates').find('input[name="' + this.name + '"]:enabled').length > 0
             || $(this).hasClass('date-related')) {
-            $('#gradeable-dates :input,.date-related').each(addDataToRequest);
+            $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             function (response_data) {
@@ -170,8 +249,8 @@ $(document).ready(function () {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if($('#all_grade').is(':checked')){
-                if ( confirm("Each student grades every other student! Continue?")) {
+            if($('input[name="all_grade"]:checked').val() === 'All Grade All'){
+                if (confirm("Each student grades every other student! Continue?")) {
                     let data = {'csrf_token': csrfToken};
                     data[this.name] = $(this).val();
                     setRandomGraders($('#g_id').val(), data, function (response_data) {
@@ -290,23 +369,23 @@ function ajaxCheckBuildStatus() {
             if (response['data'] == 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display','none');
-                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'processing') {
                 $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display','none');
-                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'warnings') {
                 $('#rebuild-status').html('Gradeable built with warnings');
             }
             else if (response['data'] == true) {
+                $('.config_search_error').hide();
                 $('#rebuild-status').html('Gradeable build complete');
             }
             else if (response['data'] == false) {
                 $('#rebuild-status').html('Gradeable build failed');
+                $('#autograding_config_error').text('The current path is not valid, selecting Rebuild Gradeable without changing it will fail.');
                 $('.config_search_error').show();
             }
             else {

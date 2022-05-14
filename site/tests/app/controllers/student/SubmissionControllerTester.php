@@ -66,6 +66,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
+        $this->core->setTesting(true);
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
@@ -165,6 +166,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'student_view_after_grades' => false,
             'student_submit' => true,
             'has_due_date' => true,
+            'has_release_date' => true,
             'peer_grading' => false,
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
@@ -184,6 +186,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'grade_inquiry_start_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
             'grade_inquiry_due_date' => new \DateTime("9995-01-06 01:01:01", $this->core->getConfig()->getTimezone()),
             'allowed_minutes' => null,
+            'depends_on' => null,
+            'depends_on_points' => null,
             'allow_custom_marks' => true
         ];
         $gradeable = new Gradeable($this->core, $details);
@@ -326,7 +330,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                     $content = $value;
                 }
                 $file_path = FileUtils::joinPaths($dir, $filename);
-                if (Utils::endsWith($filename, '.zip') === true) {
+                if (str_ends_with($filename, '.zip') === true) {
                     $file = new ZipArchive();
                     $file->open($file_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
                     $file->addFromString('test1.txt', 'a');

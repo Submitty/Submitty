@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -61,6 +62,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
+export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
@@ -77,6 +79,10 @@ while :; do
             export NO_SUBMISSIONS=1
             echo 'no_submissions'
             ;;
+        --worker-pair)
+            export WORKER_PAIR=1
+            echo "worker_pair"
+            ;;
         *) # No more options, so break out of the loop.
             break
     esac
@@ -84,15 +90,24 @@ while :; do
     shift
 done
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+export UTM_ARM=0
+if [[ "$(uname -m)" = "aarch64" ]] ; then
+    export UTM_ARM=1
+fi
 
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
-
     export DEBIAN_FRONTEND=noninteractive
+fi
 
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
-    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+    if [ ${UTM_ARM} == 0 ]; then
+	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    fi
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
@@ -107,14 +122,16 @@ The vagrant box comes with some handy aliases:
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
+    lichen_install               - runs Lichen/install_lichen.sh
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
-    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP, CGI_USER,
-    CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
+    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
 EOF
 )
 
@@ -122,6 +139,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
 export DAEMON_USER=${DAEMON_USER}
@@ -135,6 +153,8 @@ export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias install_lichen='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
+alias lichen_install='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
@@ -158,6 +178,13 @@ else
 fi
 
 if [ ${WORKER} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
+        # Setting it up to allow SSH as root by default
+        mkdir -p -m 700 /root/.ssh
+        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+        sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+    fi
     echo "Installing Submitty in worker mode."
 else
     echo "Installing primary Submitty."
@@ -184,7 +211,7 @@ apt-get install libzbar0 --yes
 
 pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
     pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
 fi
 
@@ -200,10 +227,14 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ]; then
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+#if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
+# stack is not available for non-x86_64 systems
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
+    # NOTE: currently only 64-bit (x86_64) Linux binary is available
 fi
 
 #################################################################
@@ -244,7 +275,18 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON ARM64 / UTM_ARM MAC M1
+if getent passwd vagrant > /dev/null; then
+    # Already exists
+    echo 're-running install submitty'
+elif [ ${UTM_ARM} == 1 ]; then
+    useradd -m vagrant
+fi
+# END ARM64
+
+
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -281,6 +323,13 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
+    if [ ${WORKER_PAIR} == 1 ]; then
+        echo -e "attempting to create ssh key for submitty_daemon..."
+        su submitty_daemon -c "cd ~/"
+        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
+        su submitty_daemon -c "echo 'successfully created ssh key'"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@172.18.2.8"
+    fi
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -409,8 +458,8 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         # remove default sites which would cause server to mess up
-        rm /etc/apache2/sites*/000-default.conf
-        rm /etc/apache2/sites*/default-ssl.conf
+        rm -f /etc/apache2/sites*/000-default.conf
+        rm -f /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
@@ -425,6 +474,10 @@ if [ ${WORKER} == 0 ]; then
         sed -i '25s/^/\#/' /etc/pam.d/common-password
         sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
+        # Create folder and give permissions to PHP user for xdebug profiling
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+        usermod -aG vagrant ${PHP_USER}
+
         # Enable xdebug support for debugging
         phpenmod xdebug
 
@@ -436,7 +489,7 @@ if [ ${WORKER} == 0 ]; then
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
-xdebug.remote_host=10.0.2.2
+xdebug.remote_connect_back=1
 EOF
         fi
 
@@ -465,6 +518,9 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
+    if [ ${VAGRANT} == 1 ]; then
+        sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
+    fi
 
     #################################################################
     # PHP SETUP
@@ -475,9 +531,9 @@ EOF
     # post_max_filesize
 
     sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
@@ -602,8 +658,12 @@ echo Beginning Submitty Setup
 
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
-    echo  Running configure submitty in worker mode
-    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    echo "Running configure submitty in worker mode"
+    if [ ${VAGRANT} == 1 ]; then
+        echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    else
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    fi
 else
     if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
@@ -630,7 +690,12 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+
+        # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
+        sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -663,7 +728,7 @@ if [ ${WORKER} == 0 ]; then
         echo "Creating submitty master database"
         su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
         su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
-        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config -e master -e system migrate --initial
     else
         echo "Submitty master database already exists"
     fi
@@ -718,10 +783,11 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
 fi
 
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -765,7 +831,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [[ ${VAGRANT} == 1 ]]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""

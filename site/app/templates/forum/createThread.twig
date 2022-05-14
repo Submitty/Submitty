@@ -38,7 +38,8 @@
             "submit_label" : "Publish thread",
             "manage_categories_url" : manage_categories_url,
             "email_enabled": email_enabled,
-            "expiration_placeholder" : expiration_placeholder
+            "expiration_placeholder" : expiration_placeholder,
+            "render_markdown" : render_markdown
         } %}
 
     </form>
@@ -46,7 +47,6 @@
 
 <script>
     $( document ).ready(function() {
-        enableTabsInTextArea("[name=thread_post_content]");
         $("#thread_form").submit(() => {
             cancelDeferredSave(CREATE_THREAD_DEFER_KEY);
             clearCreateThreadAutosave();

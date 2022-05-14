@@ -516,7 +516,7 @@ progress::-webkit-progress-value {
 
 #grading-panel-student-name {
     position: absolute;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
     left: 5px;
     top: 5px;
@@ -532,7 +532,7 @@ progress::-webkit-progress-value {
     -webkit-appearance: none;
     width: 7px;
 }
-  
+
 #grading-panel-student-name::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, .5);
@@ -1207,7 +1207,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container.mark-publish {
-    background-color: #bbddee;
+    background-color: var(--alert-border-blue);
 }
 
 .gradeable .mark-disabled span {
@@ -1349,6 +1349,11 @@ tr.is_publish {
     z-index: 30;
 }
 
+#image-rotate-icons-bar, #notebook-image-rotate-icons-bar {
+    display: none;
+    padding: 0px 10px;
+}
+
 #file-content {
     height: 90%;
     width: 100%;
@@ -1413,19 +1418,14 @@ tr.is_publish {
     padding: 10px;
 }
 
-#solution_ta_notes .row .grading_label {
-    padding-left: 0;
-}
-
 .solution-box {
     font-size: 16px;
-    padding-bottom: 20px;
 }
 
 .solution-header {
     display: flex;
     font-size: 16px;
-    padding: 10px 5px;
+    padding: 5px 5px 10px;
     justify-content: space-between;
 }
 
@@ -1438,34 +1438,12 @@ tr.is_publish {
     flex-direction: column;
 }
 
-.solution-notes-text {
-    padding: 10px 5px;
-    background: var(--solution-text-background);
-    margin-bottom: 10px;
-}
-
-.solution-saved .solution-notes-text {
-    display: flex;
-}
-
-.solution-box button {
-    max-width: 90px;
+.solution-save-btn {
+    margin-top: 10px;
 }
 
 .solution-box button.hide {
     display: none !important;
-}
-
-[id^=textbox-solution-] {
-    min-height: 120px;
-    max-height: 400px;
-    margin-bottom: 10px;
-    resize: none;
-}
-
-/* Notebook panel */
-#notebook-main-view {
-    padding: 10px;
 }
 
 input[type="radio"][disabled=""]:checked::before {

@@ -5,7 +5,7 @@
 #include <vector>
 #include "testResults.h"
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 /* DESCRIPTION: Contains the differences in a block for a student's ouput
  * and the expected output */

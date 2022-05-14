@@ -3,7 +3,6 @@
 namespace app\libraries;
 
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\GradingSection;
@@ -135,10 +134,10 @@ class Access {
         $this->permissions["grading.electronic.delete_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.electronic.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.electronic.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -175,9 +174,12 @@ class Access {
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
+        $this->permissions["path.read.attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW;
+
         $this->permissions["path.read.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF;
+        $this->permissions["path.write.attachments"] = self::CHECK_CSRF | self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
@@ -227,6 +229,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.submissions",
                 "path.write" => "path.write.submissions",
+            ]
+        ];
+        $this->directories["attachments"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/attachments",
+            "subparts" => ["gradeable", "submitter", "grader"],
+            "permissions" => [
+                "path.read" => "path.read.attachments",
+                "path.write" => "path.write.attachments",
             ]
         ];
         $this->directories["checkout"] = [
@@ -746,6 +756,10 @@ class Access {
         //To array of [type, value]
         $subparts = array_combine($subpart_types, $subpart_values);
 
+        if (is_link($path)) {
+            return false;
+        }
+
         //So we can extract parameters from the path
         foreach ($subpart_types as $type) {
             $value = $subparts[$type];
@@ -766,6 +780,7 @@ class Access {
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
                     foreach (explode(",", $hidden_files) as $file_regex) {
+                        $file_regex = trim($file_regex);
                         if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
                             return false;
                         }
@@ -848,7 +863,7 @@ class Access {
         $path = implode(DIRECTORY_SEPARATOR, $parts);
 
         //Make sure it starts with the dir base
-        if (!Utils::startsWith($path, $info["base"])) {
+        if (!str_starts_with($path, $info["base"])) {
             //This both prevents people from accessing files outside the base dir
             // and lets us have relative paths. Convenient!
             if ($path[0] === "/") {

@@ -1,9 +1,15 @@
 <div class="content">
-    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <h1>Plagiarism Detection</h1>
     <div class="nav-buttons">
-        <a class="btn btn-primary"
-           href="{{ new_plagiarism_config_link }}"
-        ><i class="fas fa-plus"></i><span style="margin-left:0.5em;"></span>Configure New Gradeable for Plagiarism Detection</a>
+        <a class="btn btn-primary" href="{{ new_plagiarism_config_link }}">
+            <i class="fas fa-plus"></i>
+            <span style="margin-left:0.5em;"></span>
+            Configure New Gradeable for Plagiarism Detection
+        </a>
+        <a target=_blank class="right option-alt" style="margin-top: 1em;" href="https://submitty.org/instructor/course_management/plagiarism#plagiarism-main-page">
+            How to use Lichen Plagiarism Detection
+            <i style="font-style: normal;" class="fa-question-circle"></i>
+        </a>
     </div>
     {% if plagiarism_results_info|length > 0 %}
         <div class="plag-table-cont">
@@ -13,11 +19,14 @@
                         <th>Gradeable</th>
                         <th>Config #</th>
                         <th></th>
+                        <th></th>
+                        <th></th>
                         <th>Last Run</th>
-                        <th>Submissions</th>
-                        <th>Students Matched</th>
-                        <th>Nightly<br/>Re-run</th>
+                        <th>Submissions<br>Matched</th>
+                        <th>Top Match</th>
+                        {# <th>Nightly<br/>Re-run</th> #}
                         <th>Run Log</th>
+                        <th>Download<br>Config</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,21 +84,21 @@
 {% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
 
 {% macro renderPlagiarismRow(row) %}
-    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row">
+    <tr id="{{ row['id'] }}_{{ row['config_id'] }}_table_row" {% if not row['has_been_viewed'] %}class="unviewed"{% endif %}>
         <td>
-            {% if row['ranking_available'] is defined %}
+            {% if row['ranking_available'] %}
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
             {% else %}
                 {{ row['title'] }}
             {% endif %}
             <br/>
-            Due: {{ row['duedate'] }}
+            {% if row['duedate'] != null %} Due: {{ row['duedate'] }} {% endif %}
         </td>
         <td>
             {{ row['config_id'] }}
         </td>
-        {% if row['in_queue'] is defined %}
-            <td colspan=4>
+        {% if row['in_queue'] %}
+            <td colspan=6>
                 {% if row['processing'] %}
                     <i>Running</i>
                 {% else %}
@@ -97,36 +106,45 @@
                 {% endif %}
             </td>
         {% else %}
-            <td>
-                <span class="plag-action-btn-cont">
-                    <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}">
-                        <i class="fas fa-pencil-alt"></i>
-                    </a>
-                    <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}">
-                        <i class="fas fa-sync"></i>
-                    </a>
-                    <a aria-label="Delete {{ row['title'] }}" onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');">
-                        <i class="fas fa-trash"></i>
-                    </a>
-                </span>
+            <td class="padded-icon-column">
+                <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}">
+                    <i class="fas fa-pencil-alt"></i>
+                </a>
+            </td>
+            <td class="padded-icon-column">
+                <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}">
+                    <i class="fas fa-sync"></i>
+                </a>
+            </td>
+            <td class="padded-icon-column">
+                <a aria-label="Delete {{ row['title'] }}" onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');">
+                    <i class="fas fa-trash"></i>
+                </a>
             </td>
             <td>
                 {{ row['timestamp'] }}
             </td>
             <td>
-                {{ row['students'] }} students, {{ row['submissions'] }} submissions
+                {{ row['matching_submission_count'] }} of {{ row['submissions'] }}
             </td>
             <td>
-                {{ row['matches_and_topmatch'] }}
+                {{ row['top_match_percent'] }}
             </td>
         {% endif %}
+        {#
         <td>
             <input type="checkbox"
                    onclick='window.location.href = {{ row['nightly_rerun_link'] ?? '' }};'
                    {{ row['nightly_rerun_status'] ?? '' }}>
         </td>
+        #}
         <td>
-            <button class="btn btn-primary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+            <button class="btn btn-secondary" onclick="viewRunLog('{{ row['id'] }}', '{{ row['config_id'] }}')">View Log</button>
+        </td>
+        <td>
+            <a href="{{ row['download_config_file_link'] }}" aria-label="Download {{ row['title'] }} config.json" download="config.json">
+                <i class="fas fa-download"></i>
+            </a>
         </td>
     </tr>
 {% endmacro %}
@@ -139,20 +157,42 @@
         originalTableWidth = $(".plag-table-cont").width();
     });
 
+    function updateRunLog(gradeable_id, config_id) {
+        const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
+        $.get(url, function (data) {
+            if ($(`#${gradeable_id}_${config_id}_table_row`).next().hasClass("run-log-results")) {
+                data = JSON.parse(data);
+
+                const log = $(`#${gradeable_id}_${config_id}_table_row`).next().find('pre');
+                const stickToBottom = log[0].scrollHeight - log.scrollTop() - log.outerHeight() < 1;
+                log.html(data.data);
+
+                if (stickToBottom) {
+                    log.scrollTop(log[0].scrollHeight);
+                }
+
+                // the log is still open, so refresh it again
+                setTimeout(() => {
+                    updateRunLog(gradeable_id, config_id)
+                }, 50);
+            }
+        });
+    }
+
     function viewRunLog(gradeable_id, config_id) {
         if ($(`#${gradeable_id}_${config_id}_table_row`).next().hasClass("run-log-results")) {
             $(`#${gradeable_id}_${config_id}_table_row`).next().remove();
         }
         else {
-            const url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'log']) + `?gradeable_id=${gradeable_id}&config_id=${config_id}`;
-            $.get(url, function (data) {
-                data = JSON.parse(data);
-                $(`<tr class="run-log-results">
-                <td colspan="8" class="run-log-data">
-                    <pre style="width:${originalTableWidth}px">${data.data}</pre>
-                </td>
-            </tr>`).insertAfter(`#${gradeable_id}_${config_id}_table_row`);
-            });
+            $(`
+                <tr class="run-log-results">
+                    <td colspan="10" class="run-log-data">
+                        <pre style="width:${originalTableWidth}px"></pre>
+                    </td>
+                </tr>
+            `).insertAfter(`#${gradeable_id}_${config_id}_table_row`);
+
+            updateRunLog(gradeable_id, config_id);
         }
     }
 </script>

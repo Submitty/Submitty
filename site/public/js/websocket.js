@@ -32,7 +32,7 @@ class WebSocketClient {
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
-        my_url.port = 8443;
+        my_url.port = window.websocketPort;
         my_url.pathname = 'ws';
         this.url = my_url.href;
     }
@@ -42,6 +42,7 @@ class WebSocketClient {
         this.client = new WebSocket(this.url);
         this.client.onopen = () => {
             console.log('WebSocket: connected');
+            $('#socket-server-system-message').hide();
             if (this.onopen) {
                 this.onopen();
             }
@@ -69,7 +70,7 @@ class WebSocketClient {
                     console.log('WebSocket: Closed');
                     break;
                 default:
-                    this.reconnect();
+                    this.reconnect(page);
                     break;
             }
             //this.onclose(event);
@@ -78,13 +79,14 @@ class WebSocketClient {
         this.client.onerror = (error) => {
             switch (error.code) {
                 case 'ECONNREFUSED':
-                    this.reconnect();
+                    this.reconnect(page);
                     break;
                 default:
                     //console.log(`WebSocket: Error - ${error.code}`);
                     //this.onerror(error);
                     break;
             }
+            $('#socket-server-system-message').show();
         };
     }
 
@@ -99,12 +101,12 @@ class WebSocketClient {
         this.client.onerror = null;
     }
 
-    reconnect() {
+    reconnect(page) {
         console.log(`WebSocketClient: Retry in ${this.autoReconnectInterval}ms`);
         this.removeClientListeners();
         setTimeout(() => {
             console.log('WebSocketClient: Reconnecting...');
-            this.open(this.url);
+            this.open(page);
         }, this.autoReconnectInterval);
     }
 }

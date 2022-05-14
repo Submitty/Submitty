@@ -27,6 +27,7 @@ let num_clipboard_files = 0;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
+
 function initializeDragAndDrop() {
     file_array = [];
     previous_files = [];
@@ -281,7 +282,7 @@ function deleteSingleFile(filename, part, previous) {
     setButtonStatus();
 }
 
-function setButtonStatus() {
+function setButtonStatus(inactive_version = false) {
 
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     var labels = 0;
@@ -303,6 +304,10 @@ function setButtonStatus() {
         $("#submit").prop("disabled", false);
     }
 
+    $(".popup-submit").prop("disabled", false);
+    if (inactive_version) {
+        $("#submit").prop("disabled", true);
+    }
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
     // toggled the necessary flag that we're on a submission that would have previous (to prevent costly dom
     // lookups for the existance of #getprev id in the page)
@@ -317,6 +322,7 @@ function setButtonStatus() {
     else if (use_previous) {
         $("#getprev").prop("disabled", false);
     }
+
 }
 
 // LABELS FOR SELECTED FILES
@@ -384,6 +390,7 @@ function addLabel(filename, filesize, part, previous){
 
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
+    showPopup = true;
     if (!inactive_version) {
         setButtonStatus();
     }
@@ -697,12 +704,18 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
 }
 
 /**
- * @param gradeable_id
- * @param num_pages
- * @param use_qr_codes
- * @param qr_prefix
+ * Handle sending a bulk pdf to be split by the server 
+ * 
+ * @param {String} gradeable_id
+ * @param {Number} max_file_size
+ * @param {Number} max_post_size
+ * @param {Number} num_pages
+ * @param {Boolean} use_qr_codes
+ * @param {Boolean} use_ocr,
+ * @param {String} qr_prefix
+ * @param {String} qr_suffix
  */
-function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
+function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes, use_ocr, qr_prefix, qr_suffix) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -822,7 +835,6 @@ function gatherInputAnswersByType(type){
     {
         var inputs = $("[id^="+type+"_]");
     }
-
     if(type != "codebox"){
         inputs = inputs.serializeArray();
     }
@@ -846,7 +858,6 @@ function gatherInputAnswersByType(type){
         }
         input_answers[key].push(value);
     }
-
     return input_answers;
 }
 
@@ -1139,7 +1150,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock) {
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1156,6 +1167,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
+    formData.append('sections_lock', sections_lock);
 
     if(sections !== null){
         formData.append('sections', sections);
@@ -1211,6 +1223,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
           }
       }
     }
+
+    let linkToBeAdded = false;
     
     if($('#url_selection').is(":visible")){
       if($("#url_title").val() !== "" && $("#url_url").val() !== "" ){
@@ -1221,6 +1235,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     }
 
     if (filesToBeAdded == false && linkToBeAdded == false){
+        alert('You must add a file or specify link AND title!')
         return;
     }
     $.ajax({
@@ -1256,7 +1271,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime, sortPriority) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1269,9 +1284,15 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
 
     formData.append('csrf_token', csrf_token);
     formData.append('hide_from_students', hide_from_students);
-    formData.append('requested_path', requested_path);
+    formData.append('id', id);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
+    formData.append('sections_lock', sections_lock);
+    formData.append('link_url', link_url);
+    formData.append('link_title', link_title);
+    if (folderUpdate != null) {
+        formData.append('folder_update', folderUpdate);
+    }
 
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);

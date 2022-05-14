@@ -14,7 +14,7 @@ Required inputs:
 {% set show_verify_grader = can_verify_graders and graded_component is defined and graded_component.grader_id|length != 0 and grader_id != graded_component.grader_id and graded_component.verifier_id is not defined %}
 
 {% block component_click %}
-    {{ grading_disabled ? '' : 'onClickComponent(this)' }}
+    {{ grading_disabled ? '' : 'onClickComponent(this, true)' }}
 {% endblock %}
  
 {# This is causing a lot of console errros in edit gradeable #}
@@ -53,7 +53,7 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
-{% if ta_grading_peer or not peer_component %}
+{% if ta_grading_peer or not component.peer_component %}
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode and custom marks are enabled #}
     {% set f_mark = component.marks|first %}

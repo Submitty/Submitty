@@ -5,13 +5,13 @@
     <div id="material-upload-form" class="flex-col flex-col-space">
         <p>
             <strong>Path to directory containing course materials file(s):</strong><br />
-            {{ folderPath~"/" }}
+            {{ base_course_material_path~"/" }}
         </p>
         <label id="cm_path">
             <span>
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
-                {{ folderPath }}/optional/subdirectory
+                {{ base_course_material_path }}/optional/subdirectory
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
@@ -33,23 +33,14 @@
                 }
             </script>
             <br>
-            <span id = "show_Some_Section_Selection" style="display: none">
+            <div id = "show_Some_Section_Selection" class= "show-some-section-selection" style="display: none">
             {% for section in reg_sections %}
-                <tr>
-                    <span class = "inline">
-                        <td>
-                          <label for="section-{{ section['sections_registration_id'] }}">Section&nbsp;{{section['sections_registration_id']}}</label>
-                        </td>
-                        <td>
-                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                    </span>
-                </tr>
+                <div class = "reg-section-item">
+                    <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                </div>
             {% endfor %}
-          </span>
+            </div>
         </fieldset>
         <label id="upload_dt">
             <span>
@@ -115,8 +106,8 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -136,7 +127,7 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-' +element['sections_registration_id']
+                    var currentSection = '#section-upload-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
@@ -145,9 +136,15 @@
                 if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
                     sections = null;
                 }
-                var cmPath = document.getElementById('cm_path').innerHTML;
-                var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections);
+                if(sections === null || sections.length > 0){
+                    const cmPath = document.getElementById('cm_path').innerHTML;
+                    const requestedPath = document.getElementById("input-provide-full-path").value;
+                    const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+                }
+                else {
+                    alert("Select at least one section");
+                }
                 e.stopPropagation();
             });
         });
@@ -155,6 +152,9 @@
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
+                                {
+                                    label: "Beginning of time"
+                                },
                                 {
                                     label: "Now"
                                 },
@@ -169,13 +169,16 @@
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date();
+                                        date = new Date("1001-01-01 00:00:00");
                                         break;
                                     case 1:
                                         date = new Date();
-                                        date.setDate(date.getDate() + 1);
                                         break;
                                     case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
                                         date = new Date("9998-01-01 00:00:00");
                                         break;
                                 }

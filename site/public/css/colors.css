@@ -23,8 +23,8 @@
     --hover-light-border-actionable-blue: #2e6da4;
     --hover-border-actionable-blue: #204d74;
     --hover-dark-border-actionable-blue: #122b40;
-    --standard-lightskyblue: rgb(135, 206, 250);
-    --standard-mediumorchid: rgb(186, 85, 211);
+    --standard-lightskyblue: #87cefa;
+    --standard-mediumorchid: #ba55d3;
     --info-blue: #5bc0de;
     --hover-focus-info-blue: #31b0d5;
     --hover-active-all-info-blue: #269abc;
@@ -46,6 +46,9 @@
     --alert-info-blue: #3a87ad;
     --alert-background-blue: #d9edf7;
     --alert-border-blue: #bce8f1;
+    --alert-warning-yellow: #d09404;
+    --alert-background-warning-yellow: #fff3cd;
+    --alert-border-yellow: #f2e3b5;
     --alert-invalid-entry-pink: #ffdddd;
     --standard-pale-blue-gray: #e8f0f7;
     --btn-standard-pale-blue-gray: #e8f0f7;
@@ -64,7 +67,7 @@
     --standard-gray-black: #111111;
     --solution-text-background: #cccccc;
     --standard-pale-blue: #d8eef6;
-    --standard-focus-cornflowe-blue: #6495ed;
+    --standard-focus-cornflower-blue: #6495ed;
     --standard-medium-blue: #337ab7;
     --standard-medium-vibrant-blue: #1e90ff;
     --standard-aqua: #00b3fa;
@@ -79,7 +82,7 @@
     --standard-medium-orange: #ec971f;
     --standard-vibrant-orange: #ffa500;
     --standard-creamsicle-orange: #ff8040;
-    --standard-peachpuff: rgb(255, 218, 185);
+    --standard-peachpuff: #ffdab9;
     --standard-vibrant-yellow: #ffff00;
     --standard-vibrant-purple: #cc66ff;
     --standard-plum-purple: #72518a;
@@ -104,7 +107,7 @@
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
-    --standard-beige: rgb(245, 245, 220);
+    --standard-beige: #f5f5dc;
     --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
     --standard-pastel-blue: #d9edf7;
@@ -173,9 +176,31 @@
     --simple-half-credit-light-blue: #88d0f4;
     --simple-save-error-red: #da4f49;
 
+    /* For categorizing objects */
+    --category-color-1: #c3a2d2;
+    --category-color-2: #99b270;
+    --category-color-3: #cd98aa;
+    --category-color-4: #6bb88f;
+    --category-color-5: #c8938d;
+    --category-color-6: #6b9fb8;
+    --category-color-7: #c39e83;
+    --category-color-8: #98a3cd;
+    --category-color-9: #8ac78e;
+    --category-color-10: #b39b61;
+    --category-color-11: #6eb9aa;
+    --category-color-12: #b4be79;
+    --category-color-13: #94a2cc;
+    --category-color-14: #80be79;
+    --category-color-15: #b48b64;
+    --category-color-16: #b9b26e;
+    --category-color-17: #83a0c3;
+    --category-color-18: #ada5d4;
+    --category-color-19: #e57fcf;
+    --category-color-20: #c0c246;
+
     /* other */
-    --box-shadow-very-transparent: rgba(0, 0, 0, 0.12);
-    --box-shadow-slightly-transparent: rgba(0, 0, 0, 0.2);
+    --box-shadow-very-transparent: rgb(0 0 0 / 12%);
+    --box-shadow-slightly-transparent: rgb(0 0 0 / 20%);
     --no-image-available: #595959;
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
@@ -194,117 +219,36 @@
 }
 
 [data-theme="dark"] {
-    /* master color */
-    --submitty-logo-blue: #316498;
-
-    /* might wanna change blue borders/hover text/sidebar text to submitty blue */
-
-    /* buttons, primarily but also can be used for notifications/anything
+    /* might wanna change blue borders/hover text/sidebar text to submitty blue
+      buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
-    --danger-red: #dc3545;
-    --focus-danger-red: #ff5555;
-    --hover-active-danger-red: #ff6661;
-    --disabled-danger-red: #ad3937;
-    --warning-brown: #945600;
-    --focus-warning-brown: #ad7c37;
-    --hover-warning-brown: #9c5b00;
-    --active-warning-brown: #b58a4e;
-    --good-green: #5fb760;
-    --hover-good-green: #66cc77;
-    --disabled-good-green: #5cb85c;
-    --actionable-blue: #006398;
-    --focus-actionable-blue: #368aae;
-    --hover-actionable-blue: #00729e;
-    --hover-light-border-actionable-blue: #2e6da4;
-    --hover-border-actionable-blue: #204d74;
-    --hover-dark-border-actionable-blue: #122b40;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
-    --info-blue: #5bc0de;
-    --hover-focus-info-blue: #31b0d5;
-    --hover-active-all-info-blue: #269abc;
     --default-white: #36393f;
     --always-default-white: #ffffff;
     --badge-backgroud-red: #ff0000;
-    --dark-badge-background-red: #ad3937;
     --error-alert-dark-red: #ff7a7a;
-    --gray-red: #b94a48;
-    --solution-text-background: dimgrey;
-    --alert-background-bronze: #fcf8e3;
+    --solution-text-background: #696969;
     --alert-border-bronze: #514123;
-    --alert-bronze: #c09853;
-    --alert-success-green: #468847;
-    --alert-background-success-green: #dff0d8;
-    --alert-border-success-green: #d6e9c6;
-    --alert-danger-red: #8b0000;
-    --alert-border-danger-red: #f2dede;
-    --alert-background-danger-red: #eed3d7;
-    --alert-info-blue: #3a87ad;
     --alert-background-blue: #687379;
     --alert-border-blue: #2b5e68;
-    --alert-invalid-entry-pink: #ffdddd;
     --standard-pale-blue-gray: #2a2224;
-    --btn-standard-pale-blue-gray: #e8f0f7;
     --btn-default-active: #6d6d6d;
     --btn-default-white: #515151;
     --btn-default-hover: #595959;
-    --standard-light-blue-gray: #ddddff;
-    --standard-pale-gray: #f5f5f5;
     --standard-hover-light-gray: #2b2b2b;
     --standard-light-gray: #757575;
-    --standard-light-medium-gray: #bbbbbb;
     --standard-medium-gray: #a3a3a3;
-    --standard-medium-dark-gray: #666666;
-    --standard-dark-gray: #555555;
-    --standard-deep-dark-gray: #2e2e2e;
-    --standard-gray-black: #111111;
-    --standard-pale-blue: #d8eef6;
-    --standard-focus-cornflowe-blue: #2a3e64;
-    --standard-medium-blue: #337ab7;
-    --standard-medium-vibrant-blue: #1e90ff;
-    --standard-aqua: #00b3fa;
-    --standard-dark-blue: #23527c;
-    --standard-medium-dark-blue: #286090;
+    --standard-focus-cornflower-blue: #2a3e64;
     --standard-deep-blue: #9e9eff;
-    --standard-gray-blue: #0088bf;
-    --standard-light-red: #d9534f;
-    --standard-medium-red: #c9302c;
-    --standard-red-orange: #f62817;
-    --standard-light-orange: #f0ad4e;
-    --standard-medium-orange: #ec971f;
-    --standard-vibrant-orange: #ffa500;
-    --standard-creamsicle-orange: #ff8040;
-    --standard-peachpuff: rgb(153, 112, 76);
+    --standard-peachpuff: #99704c;
     --standard-vibrant-yellow: #757500;
-    --standard-vibrant-purple: #cc66ff;
-    --standard-plum-purple: #72518a;
-    --standard-vibrant-pink: #fd4472;
-    --standard-vibrant-pink-red: #c40233;
-    --standard-vibrant-green: #33cc33;
-    --standard-medium-green: #449d44;
     --standard-dark-green: #00bd00;
-    --standard-deep-dark-green: #006600;
-    --standard-mint-green: #00e08e;
-    --standard-dark-mint-green: #00a368;
-    --standard-pale-lime-green: #dff0d8;
-    --standard-light-lime-green: #c3e3b5;
-    --standard-medium-lime-green: #99cb84;
-    --standard-medium-dark-lime-green: #7dfa78;
-    --standard-vibrant-dark-blue: #006699;
     --standard-bronze: #e6ac00;
-    --standard-pastel-pink: #f2dede;
-    --standard-light-pink: #ff9999;
-    --standard-tangerine-yellow: #ffcc00;
-    --standard-pastel-yellow: #fcf8e3;
-    --standard-pale-yellow: #ffff99;
-    --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #8e7306;
-    --standard-beige: rgb(119, 119, 106);
-    --standard-light-gold: #fff3cd;
+    --standard-beige: #77776a;
     --standard-light-green: #427742;
     --standard-pastel-blue: #2f6580;
-    --standard-light-blue: #99ccff;
-    --standard-light-seafoam: #a4dad5;
 
     /* the look of the webpage itself */
     --background-blue: #202225;
@@ -325,9 +269,6 @@
     --btn-default-text: #ffffff;
 
     /* discussion forum */
-    --viewed-discussion-post-blue: #e8f0f7;
-    --deleted-discussion-post-grey: #dcdcdc;
-    --important-post: #ffd700; /* is also for star color */
     --attachment-box-color: #4a4a4a;
     --file-upload-table-hover: #4a4a4a;
 
@@ -342,8 +283,6 @@
     /* links */
     --external-link-blue: #9b9bf3;
     --external-link-hover: #a1a1ec;
-    --external-link-disabled: #888888;
-    --external-link-active: #991313;
 
     /* sidebar */
     --selected-nav-sidebar: #535353;
@@ -364,8 +303,8 @@
     --notebook-builder-itempool-green: #50826a;
 
     /* other */
-    --box-shadow-very-transparent: rgba(255, 255, 255, 0);
-    --box-shadow-slightly-transparent: rgba(255, 255, 255, 0);
+    --box-shadow-very-transparent: rgb(255 255 255 / 0%);
+    --box-shadow-slightly-transparent: rgb(255 255 255 / 0%);
     --no-image-available: #adadad;
     --standard-input-background: #4a4a4a;
     --checkbox-black: #5296db;

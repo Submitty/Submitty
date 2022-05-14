@@ -5,12 +5,9 @@ namespace app\libraries;
 use League\CommonMark\Block\Element\AbstractBlock;
 use League\CommonMark\Block\Renderer\BlockRendererInterface;
 use League\CommonMark\ElementRendererInterface;
-use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
-use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
 use League\CommonMark\HtmlElement;
 
 class CustomCodeBlockRenderer implements BlockRendererInterface {
-
     /** @var \League\CommonMark\Block\Renderer\IndentedCodeRenderer|\League\CommonMark\Block\Renderer\FencedCodeRenderer */
     protected $baseRenderer;
 
@@ -21,8 +18,7 @@ class CustomCodeBlockRenderer implements BlockRendererInterface {
     public function render(AbstractBlock $block, ElementRendererInterface $htmlRenderer, bool $inTightList = false) {
         $element = $this->baseRenderer->render($block, $htmlRenderer, $inTightList);
         $num_lines = substr_count($element->getContents(), "\n");
-        $element->setContents($this->addLineNumbers($element, $num_lines));
-        return $element;
+        return new HtmlElement('div', ["style" => "position: relative;"], $this->addLineNumbers($element, $num_lines));
     }
 
     private function addLineNumbers(HtmlElement $element, int $num_lines) {

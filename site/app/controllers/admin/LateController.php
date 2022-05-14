@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\exceptions\DatabaseException;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
@@ -27,7 +26,8 @@ class LateController extends AbstractController {
                 ['admin', 'LateDay'],
                 'displayLateDays',
                 $this->core->getQueries()->getUsersWithLateDays(),
-                $this->core->getQueries()->getAllUsers()
+                $this->core->getQueries()->getAllUsers(),
+                $this->core->getConfig()->getDefaultStudentLateDays()
             )
         );
     }
@@ -47,7 +47,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
+     * @param string|null $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
      * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse

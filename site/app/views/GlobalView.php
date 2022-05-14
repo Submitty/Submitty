@@ -2,10 +2,8 @@
 
 namespace app\views;
 
-use app\models\Breadcrumb;
-
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -47,6 +45,7 @@ class GlobalView extends AbstractView {
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
+            "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
@@ -55,22 +54,25 @@ class GlobalView extends AbstractView {
             "enable_banner" => $this->core->getConfig()->isDuckBannerEnabled(),
             "duck_img" => $duck_img,
             "use_mobile_viewport" => $this->output->useMobileViewport(),
-            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false
+            "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
+            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
+            "content_only" => $content_only,
         ]);
     }
 
-    public function footer($runtime, $wrapper_urls, $footer_links) {
+    public function footer($runtime, $wrapper_urls, $footer_links, $content_only) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
-            "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "submitty_queries" => $this->core->getSubmittyQueries(),
+            "course_queries" => $this->core->getCourseQueries(),
             "wrapper_urls" => $wrapper_urls,
             "latest_tag" => $this->core->getConfig()->getLatestTag(),
             "latest_commit" => $this->core->getConfig()->getLatestCommit(),
             "footer_links" => $footer_links,
             "module_js" => $this->output->getModuleJs(),
+            "content_only" => $content_only,
         ]);
     }
 }

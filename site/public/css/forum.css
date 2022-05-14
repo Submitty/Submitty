@@ -21,6 +21,7 @@
     margin-right: 10px;
     padding-left: 15px;
     margin-top: 10px;
+    min-height: 30px;
 }
 
 #thread_list {
@@ -39,7 +40,7 @@
 
 .post_content {
     margin-right: 5px;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 .post_viewed_btn {
@@ -133,11 +134,11 @@
     padding: 0;
 }
 
-.catergory-item-box {
+.category-item-box {
     background-color: var(--standard-pale-gray) !important;
 }
 
-.edit-category-button {
+.category-button {
     color: var(--standard-gray-black) !important;
 }
 
@@ -159,10 +160,18 @@
     color: orange;
 }
 
-.active-thread-announcement {
+.active-thread-announcement-expiring {
     position: relative;
     display: inline-block;
     color: gold;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.active-thread-announcement {
+    position: relative;
+    display: inline-block;
+    color: var(--submitty-logo-blue);
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
 }
@@ -193,16 +202,8 @@
     color: #e0e0e0 !important;
 }
 
-.golden_hover:hover {
-    color: gold !important;
-}
-
 .reverse_golden_hover {
-    color: gold !important;
-}
-
-.reverse_golden_hover:hover {
-    color: #e0e0e0 !important;
+    color: gold;
 }
 
 .text-decoration-none {
@@ -243,12 +244,24 @@
 }
 
 .current-favorite i.fas,
-.active-thread-remove-announcement i.fas {
+.active-thread-remove-announcement i.fas,
+.active-thread-remove-expiring-announcement i.fas {
     position: relative;
     display: inline-block;
-    color: gold;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
+}
+
+.current-favorite i.fas{
+    color: var(--standard-medium-red) !important;
+}
+
+.active-thread-remove-expiring-announcement i.fas {
+  color: gold !important;
+}
+
+.active-thread-remove-announcement i.fas {
+    color: var(--submitty-logo-blue) !important;
 }
 
 #thread_form {
@@ -269,6 +282,7 @@
 }
 
 .thread-announcement,
+.thread-announcement-expiring,
 .thread-favorite,
 .thread-merged,
 .thread-locked {
@@ -280,9 +294,14 @@
     -webkit-text-stroke-color: black;
 }
 
-.thread-announcement,
-.thread-favorite {
+.thread-announcement-expiring{
     color: gold;
+}
+.thread-favorite {
+    color: var(--standard-medium-red);
+}
+.thread-announcement {
+    color: var(--submitty-logo-blue);
 }
 
 .thread-merged,

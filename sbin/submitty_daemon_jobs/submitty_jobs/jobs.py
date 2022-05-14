@@ -4,6 +4,7 @@ Module that contains all of the jobs that the Submitty Daemon can do
 
 from abc import ABC, abstractmethod
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -167,18 +168,23 @@ class RunLichen(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        # We cast to an int to prevent malicious json files from containing invalid path components
+        config_id = int(self.job_details['config_id'])
+        config_data = self.job_details['config_data']
 
         # error checking
-        # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
-            print('invalid path component ".." in string')
+        # prevent backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable:
+            print('Error: Invalid path component ".." in string')
             return
 
         # paths
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
-        config_path = os.path.join(lichen_dir, gradeable, config_id)
+        config_path = os.path.join(lichen_dir, gradeable, str(config_id))
         data_path = os.path.join(DATA_DIR, 'courses')
+
+        with open(os.path.join(config_path, 'config.json'), 'w') as file:
+            json.dump(config_data, file, indent=4)
 
         # run Lichen
         subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
@@ -189,13 +195,13 @@ class DeleteLichenResult(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        config_id = int(self.job_details['config_id'])
 
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
 
         # error checking
         # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+        if '..' in semester or '..' in course or '..' in gradeable:
             print('invalid path component ".." in string')
             return
 
@@ -203,7 +209,7 @@ class DeleteLichenResult(CourseGradeableJob):
             return
 
         # delete the config directory
-        shutil.rmtree(os.path.join(lichen_dir, gradeable, config_id), ignore_errors=True)
+        shutil.rmtree(os.path.join(lichen_dir, gradeable, str(config_id)), ignore_errors=True)
 
         # if there are no other configs in this gradeable directory, remove it
         if len(os.listdir(os.path.join(lichen_dir, gradeable))) == 0:
@@ -328,7 +334,7 @@ class BulkUpload(CourseJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+        for key in ['semester', 'course', 'head_instructor', 'group_name']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
@@ -341,10 +347,7 @@ class CreateCourse(AbstractJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
-        base_course_semester = self.job_details['base_course_semester']
-        base_course_title = self.job_details['base_course_title']
-
-        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+        base_group = self.job_details['group_name']
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group
@@ -355,3 +358,20 @@ class CreateCourse(AbstractJob):
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+
+
+class UpdateDockerImages(AbstractJob):
+    def run_job(self):
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "docker")
+        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file_path):
+            flag = flag | os.O_CREAT
+        log_fd = os.open(log_file_path, flag)
+        script_path = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'update_and_install_workers.py')
+        with os.fdopen(log_fd, 'a') as output_file:
+            subprocess.run(["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file)
+
+        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
+        logger.write_to_log(log_file_path, log_msg)

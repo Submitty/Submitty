@@ -788,7 +788,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 var thread_title = json.title;
                 var thread_lock_date =  json.lock_thread_date;
                 var thread_status = json.thread_status;
-                var expiration = json.expiration;
+                var expiration = json.expiration.replace("-", "/");
+                expiration = expiration.replace("-", "/");
                 $("#title").prop('disabled', false);
                 $(".edit_thread").show();
                 $('#label_lock_thread').show();
@@ -798,7 +799,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                   $(".expiration").show();
                 }
-                $("#expirationDate").val(expiration);
+                $("#expirationDate").val(json.expiration);
 
                 // Categories
                 $(".cat-buttons").removeClass('btn-selected');
@@ -828,6 +829,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
     });
 }
 
+function cancelEditPostForum() {
+  const markdown_header = $(`#markdown_header_0`);
+  const edit_button = markdown_header.find('.markdown-write-mode');
+  if (markdown_header.attr('data-mode') === 'preview') {
+    edit_button.trigger('click');
+  }
+  $('#edit-user-post').css('display', 'none');
+  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
+  $('#title').val('');
+  $(this).closest('form').trigger('reinitialize.areYouSure');
+}
 
 function changeDisplayOptions(option){
     thread_id = $('#current-thread').val();
@@ -1109,7 +1121,8 @@ function generateCodeMirrorBlocks(container_element) {
             lineNumbers: true,
             readOnly: true,
             cursorHeight: 0.0,
-            lineWrapping: true
+            lineWrapping: true,
+            autoRefresh: true,
         });
 
         var lineCount = editor0.lineCount();
@@ -1253,6 +1266,7 @@ function addNewCategory(csrf_token){
         type: "POST",
         data: {
             newCategory: newCategory,
+            rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -1284,6 +1298,7 @@ function addNewCategory(csrf_token){
             $('#ui-category-list').append(newelement);
             $(".category-list-no-element").hide();
             refreshCategories();
+            window.location.reload();
         },
         error: function(){
             window.alert("Something went wrong while trying to add a new category. Please try again.");
@@ -1321,15 +1336,15 @@ function deleteCategory(category_id, category_desc, csrf_token){
     })
 }
 
-function editCategory(category_id, category_desc, category_color, csrf_token) {
+function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
     var data = {category_id: category_id, csrf_token: csrf_token};
-    if(category_desc !== null) {
+    if(category_desc !== null && changed === 'desc') {
         data['category_desc'] = category_desc;
     }
-    if(category_color !== null) {
+    if(category_color !== null && changed === 'color') {
         data['category_color'] = category_color;
     }
     var url = buildCourseUrl(['forum', 'categories', 'edit']);
@@ -1578,25 +1593,29 @@ function bookmarkThread(thread_id, type){
     });
 }
 
-function toggleMarkdown(post_box_id) {
+function toggleMarkdown(post_box_id, triggered) {
   if(post_box_id === undefined) post_box_id = '';
-  $(`#markdown_buttons_${post_box_id}`).toggle();
-  $(this).toggleClass('markdown-active'); 
+  //display/hide the markdown header
+  $(`#markdown_header_${post_box_id}`).toggle();
+  $(this).toggleClass('markdown-active markdown-inactive');
+  //if markdown has just been turned off, make sure we exit preview mode if it is active
+  if($(this).hasClass('markdown-inactive')) {
+    const markdown_header = $(`#markdown_header_${post_box_id}`);
+    const edit_button = markdown_header.find('.markdown-write-mode');
+    if (markdown_header.attr('data-mode') === 'preview') {
+      edit_button.trigger('click');
+    }
+  }
+  //trigger this event for all other markdown toggle buttons (since the setting should be persistent)
+  if (!triggered) {
+    $('.markdown-toggle').not(this).each(function() {
+      toggleMarkdown.call(this, this.id.split('_')[2], true);
+    });
+  }
+  //set various settings related to new markdown state
   $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
   $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-}
-
-function previewForumMarkdown(){
-  let post_box_num = $(this).closest('.thread-post-form').data('post_box_id');
-  if (post_box_num === undefined) {
-    post_box_num = '';
-  }
-  const reply_box = $(`textarea#reply_box_${post_box_num}`);
-  const preview_box = $(`#preview_box_${post_box_num}`);
-  const preview_button = $(this);
-  const post_content = reply_box.val();
-
-  previewMarkdown(reply_box, preview_box, preview_button, { content: post_content });
+  document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
 }
 
 function checkInputMaxLength(obj){
@@ -1694,7 +1713,6 @@ function loadThreadHandler(){
                 $('#posts_list').empty().html(JSON.parse(json.data.html));
                 window.history.pushState({"pageTitle":document.title},"", url);
 
-                enableTabsInTextArea('.post_content_reply');
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
@@ -1888,7 +1906,7 @@ function updateThread(e) {
     lock_thread_date: $('input#lock_thread_date').text(),
     expirationDate: $('input#expirationDate').val(),
     cat,
-    markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
+    markdown_status: parseInt($("input#markdown_input_").val()),
   };
 
   $.ajax({

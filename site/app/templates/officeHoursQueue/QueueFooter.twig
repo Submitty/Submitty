@@ -105,7 +105,8 @@
   }
 
   function unhideId(element, id) {
-    element.parentElement.innerHTML = id;
+    element.parentElement.append("<" + id + ">");
+    element.remove();
   }
 
   function updateTimerInterval() {
@@ -146,7 +147,7 @@
   {% if viewer.isGrader() %}
 
       $('#old_queue_code').change(function(){
-          document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
+          document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
       });
 
       var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
@@ -222,6 +223,8 @@
             case "announcement_update":
                 updateAnnouncement();
                 break;
+            case "update_message":
+                updateMessage(msg.queue_code, msg.alert);
             default:
                 console.log("Unknown message received.");
                 break;
@@ -303,12 +306,52 @@
   }
 
   function toggleQueue(index, code){
-      $.post( `{{base_url}}/${code}/toggle`, {
+      $.post( `{{base_url}}/${encodeURIComponent(code)}/toggle`, {
           csrf_token: '{{ csrf_token }}',
           queue_code: code,
           queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1
       });
   }
 
+  function updateMessage(queue_code, alert) {
+    {% if viewer.inQueue() %}
+        let current_code = '{{ viewer.getCurrentQueueCode() }}'
+        if (current_code === queue_code) {
+            if (alert) {
+                ajaxGetQueueMessage(queue_code).then(function(message){
+                    queueMessage(message);
+                });
+            }
+            updateQueueStatus();
+        }
+    {% endif %}
+  }
+
+  /**
+   * ajax call to fetch the queue's message
+   * @param {string} queue_code
+   * @return {Promise} Rejects except when the response returns status 'success'
+   */
+  function ajaxGetQueueMessage(queue_code) {
+      return new Promise(function (resolve, reject) {
+          $.getJSON({
+              type: "GET",
+              async: false,
+              url: buildCourseUrl(['office_hours_queue', 'get_queue_message']),
+              data: {
+                  'code' : queue_code
+              },
+              success: function (response) {
+                  resolve(response.data);
+              },
+              error: function (err) {
+                  reject(err);
+              }
+          });
+      });
+  }
+
+
+  
 </script>
 </div>

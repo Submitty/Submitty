@@ -13,27 +13,28 @@ function open_peer_feedback_tab(user, ordered_graders) {
     }
     $('#peer_feedback_nav_'+user).addClass('active-btn');
 }
-function set_peer_feedback(grader_id, user_id, g_id, feedback) {
+function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     let peer_feedback_positive = ['no_response', 'thanks', 'helpful', 'detailed'];
     let peer_feedback_negative = ['inappropriate'];
     peer_feedback_positive.forEach(function(feedback, index) {
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_positive_selected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_positive_unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-positive-selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-positive-unselected");
     })
     peer_feedback_negative.forEach(function(feedback, index) {
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_negative_selected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-negative-selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-negative-unselected");
     })
     if(peer_feedback_positive.indexOf(feedback) !== -1){
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_positive_unselected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_positive_selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-positive-unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-positive-selected");
     }
     else{
-        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer_feedback_negative_unselected");
-        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_selected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).removeClass("peer-feedback-negative-unselected");
+        $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer-feedback-negative-selected");
     }
-    peerFeedbackUpload(grader_id, user_id, g_id, feedback);
-
+    if (send) {
+        peerFeedbackUpload(grader_id, user_id, g_id, feedback);
+    }
 }
 function switch_feedback_modes() {
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
@@ -92,22 +93,35 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in ordered_graders|filter(user => overall_comments[user] is not empty) %}
+            {% for user in ordered_graders | filter(user => grader_info[user] is defined) | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
                         Overall note from {{peer_aliases[user]}}:
                     </p>
+                    {% if grader_info[user].comment is not empty %}
                     <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                        <span class='gradeable_comment'>{{ grader_info[user].comment | nl2br }}</span>
                     </p>
+                    {% endif %}
+                    {% if grader_info[user].attachments is not empty %}
+                    <div id="attachments-{{ user | escape }}">
+                        {% for file in grader_info[user].attachments %}
+                            {% include "autograding/Attachments.twig" with {
+                                file: file,
+                                id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                                is_grader_view: false,
+                                can_modify: false
+                            } only %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-
             {% endfor %}
         </div>
     {# /Total auto + manual #}
@@ -220,7 +234,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -229,7 +243,6 @@ function switch_feedback_modes() {
         </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
-
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
                 <table class="mobile-table" id="peer-feedback-table-{{grader}}">
                     <tbody>
@@ -253,19 +266,33 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if overall_comments[anon_grader_id_mapping[grader]] is not empty %}
+                {% if grader_info[anon_grader_id_mapping[grader]] is defined %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
                             Overall note from grader:
                         </p>
+                        {% if grader_info[anon_grader_id_mapping[grader]].comment is not empty %}
                         <p class="overall-comment">
-                            <span class='gradeable_comment'>{{ overall_comments[anon_grader_id_mapping[grader]] | nl2br }}</span>
+                            <span class='gradeable_comment'>{{ grader_info[anon_grader_id_mapping[grader]].comment | nl2br }}</span>
                         </p>
+                        {% endif %}
+                        {% if grader_info[anon_grader_id_mapping[grader]].attachments is not empty %}
+                        <div id="attachments-{{ anon_grader_id_mapping[grader] | escape }}">
+                            {% for file in grader_info[anon_grader_id_mapping[grader]].attachments %}
+                                {% include "autograding/Attachments.twig" with {
+                                    file: file,
+                                    id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
+                                    is_grader_view: false,
+                                    can_modify: false
+                                } only %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 {% endif %}
 
             {% for file in uploaded_pdfs %}
-                {% if file.encoded_name in annotated_file_names and grader in file.graders%}
+                {% if file.encoded_name is defined and file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
                         {{file.name}} :
@@ -281,17 +308,17 @@ function switch_feedback_modes() {
             <b>Peer Feedback:</b>
             <div>
                 </br>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
-                <a class="btn peer_feedback_positive_unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
-                <a class="btn peer_feedback_negative_unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
+                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
+                <a class="btn peer-feedback-negative-unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
             </div>
             <script>
                 var feedbackArray = {{peer_feedback|json_encode|raw}};
                 if('{{grader}}' in feedbackArray){
                     var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback'];
-                    set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback)
+                    set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback, false)
                 }
             </script>
         </div>

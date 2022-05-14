@@ -2,10 +2,6 @@ import {buildUrl} from '../support/utils.js';
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
     describe('Test cases where the user should succesfully login', () => {
-        afterEach(() => {
-            cy.logout();
-        });
-
         it('should log in through root endpoint', () => {
             //should hit the login form
             cy.visit('/');
@@ -38,9 +34,9 @@ describe('Test cases revolving around the logging in functionality of the site',
 
         it('should redirect after logging in', () => {
             //try to visit a page not logged in, then log in and see where we are
-            const full_url = buildUrl(['sample', 'gradeable', 'open_homework'], true);
+            const full_url = buildUrl(['sample', 'config'], true);
 
-            cy.visit(['sample', 'gradeable', 'open_homework']);
+            cy.visit(['sample', 'config']);
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
 
             cy.login();
@@ -59,6 +55,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
     describe('Test cases where the user should not be able to login', () => {
         it('should reject bad passwords', () => {
+            cy.checkLogoutInAfterEach();
             cy.visit([]);
 
             cy.get('input[name=user_id]').type('instructor');
@@ -72,6 +69,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
         it('should reject bad usernames', () => {
+            cy.checkLogoutInAfterEach();
             cy.visit([]);
 
             cy.get('input[name=user_id]').type('bad-username');

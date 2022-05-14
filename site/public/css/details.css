@@ -46,6 +46,20 @@
     flex-direction: column-reverse;
 }
 
+.details-warning-box {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.details-warning-highlight {
+    background-color: var(--standard-vibrant-orange);
+}
+
+.details-warning-neutral {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .details-action-box > * {
     margin-top: 0;
     white-space: initial;
@@ -291,4 +305,9 @@
 
 .randomize_cancel_btn {
     float: left;
+}
+
+.gradeable_message li {
+    margin-left:30px;
+    margin-bottom:10px;
 }

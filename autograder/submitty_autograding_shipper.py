@@ -906,7 +906,8 @@ def checkout_vcs_repo(config, my_file):
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
             try:
-                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', which_branch])
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1',
+                                                        which_branch, '--'])
                 # old method:  when we had the full history, roll-back to a version by date
                 # what_version = subprocess.check_output(['git', 'rev-list', '-n', '1',
                 #                                         '--before="'+submission_string+'"',
@@ -1037,7 +1038,7 @@ def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
     scheduler/shipper/worker and refactoring this design should be
     part of the project.
     ----------------------------------------------------------------
-    '''
+    '''  # noqa: B018
 
     # Grab all the VCS files currently in the folder...
     vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
@@ -1275,9 +1276,13 @@ def history_short_circuit_helper(
     with open(submit_timestamp_path) as fd:
         submit_timestamp = dateutils.read_submitty_date(fd.read().rstrip())
     submit_time = dateutils.write_submitty_date(submit_timestamp)
-    gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
 
-    seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
+    # compute lateness (if there is a due date / submission deadline)
+    if gradeable_deadline is None:
+        seconds_late = 0
+    else:
+        gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
+        seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
 
     first_access = ''
     access_duration = -1
@@ -1360,11 +1365,11 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
         )
         return False
 
-    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
-
     if not can_short_circuit(config_obj):
         return False
+
+    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    config.logger.log_message(f"Short-circuiting {gradeable_id}", job_id=job_id)
 
     # Augment the queue object
     base, path = os.path.split(queue_file)
