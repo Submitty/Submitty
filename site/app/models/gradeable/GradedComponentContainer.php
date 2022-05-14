@@ -18,7 +18,6 @@ use app\libraries\NumberUtils;
  * @method GradedComponent[] getGradedComponents()
  */
 class GradedComponentContainer extends AbstractModel {
-
     /** @var Component The Component all grades are for */
     private $component = null;
     /** @var TaGradedGradeable The TaGradedGradeable all grades belong to */

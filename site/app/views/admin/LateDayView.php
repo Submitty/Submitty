@@ -7,8 +7,9 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 
 class LateDayView extends AbstractView {
-    public function displayLateDays($users, $students) {
+    public function displayLateDays($users, $students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('latedays.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
@@ -23,6 +24,7 @@ class LateDayView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/LateDays.twig", [
             "users" => $users,
             "student_full" => $student_full,
+            "initial_late_days" => $initial_late_days,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

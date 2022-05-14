@@ -1660,7 +1660,7 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
     }
     search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        search_params.set('who_id', id);
+        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
         submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));
@@ -1792,7 +1792,7 @@ function onAddComponent(peer) {
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
-            return closeAllComponents(true);
+            return closeAllComponents(true, true);
         })
         .then(function () {
           return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
@@ -1841,6 +1841,7 @@ function importComponentsFromFile() {
             }
         },
         error: function (e) {
+            console.log(e);
             alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                 "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
         }
@@ -2253,7 +2254,7 @@ function setPdfPageAssignment(page) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(function () {
             return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
@@ -2499,10 +2500,11 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
 
 function open_overall_comment_tab(user) {
     const textarea = $(`#overall-comment-${user}`);
+    const comment_root = textarea.closest('.general-comment-entry');
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    textarea.parent().show();
+    comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 
     //if the tab is for the main user of the page
@@ -2513,15 +2515,35 @@ function open_overall_comment_tab(user) {
     } else {
         textarea.show();
     }
-}
 
-function previewOverallCommentMarkdown(user){
-    const markdown_area = $(`#overall-comment-${user}`);
-    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
-    const preview_button = $(this);
-    const markdown_content = markdown_area.val();
+    let attachmentsListUser = $(`#attachments-list-${user}`);
+    if (attachmentsListUser.length !== 0) {
+        let attachmentsList = $("#attachments-list");
+        $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
+        let isUser = false;
+        if (attachmentsList.attr("data-user") === user) {
+            $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
+        } else {
+            $("#attachment-upload-form").css("display", "none");
+        }
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+        }
+        
+        attachmentsList.attr("data-active-user", user);
+    }
 
-    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**
@@ -2643,14 +2665,15 @@ function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
         if(files[i].innerText.trim() == "upload.pdf"){
+            page_num = Math.min($("#viewer > .page").length, page_num);
             let page = $("#pageContainer" + page_num);
             if($("#file-view").is(":visible")){
                 if(page.length) {
-                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#submission_browser').scrollTop(page[0].offsetTop);
                 }
             }
             else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
+                viewFileFullPanel("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }

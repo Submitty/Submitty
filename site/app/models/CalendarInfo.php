@@ -7,7 +7,6 @@ use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradeableList;
 use app\views\NavigationView;
-use DateTime;
 
 /**
  * Class CalendarInfo
@@ -15,7 +14,6 @@ use DateTime;
  * Container of information used to fill the calendar.
  */
 class CalendarInfo extends AbstractModel {
-
     /**
      * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value

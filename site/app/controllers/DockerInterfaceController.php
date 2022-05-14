@@ -2,13 +2,9 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\DateUtils;
-use app\exceptions\CurlException;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
-
     /**
      * @Route("/admin/docker", methods={"GET"})
      * @Route("/api/docker", methods={"GET"})
@@ -35,26 +30,7 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        try {
-            $response = $this->core->curlRequest(
-                FileUtils::joinPaths($this->core->getConfig()->getCgiUrl(), "docker_ui.cgi")
-            );
-        }
-        catch (CurlException $exc) {
-            $msg = "Failed to get response from CGI process, please try again";
-            return new MultiResponse(
-                JsonResponse::getFailResponse($msg),
-                new WebResponse("Error", "errorPage", $msg)
-            );
-        }
-        $json = json_decode($response, true);
-
-        if ($json['success'] === false) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse($json['error']),
-                new WebResponse("Error", "errorPage", $json['error'])
-            );
-        }
+        $json = [];
 
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(

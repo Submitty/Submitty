@@ -3,13 +3,11 @@
 namespace app\controllers;
 
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
 
 class GlobalController extends AbstractController {
-
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
@@ -25,6 +23,7 @@ class GlobalController extends AbstractController {
         $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
+        $content_only = $this->core->getOutput()->isContentOnly();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
             $css->add($wrapper_urls['override.css']);
@@ -61,7 +60,7 @@ class GlobalController extends AbstractController {
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name, $content_only);
     }
 
     // ==========================================================================================
@@ -192,6 +191,7 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-envelope"
             ]);
         }
+
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
@@ -214,7 +214,7 @@ class GlobalController extends AbstractController {
                         if (empty($link['icon'])) {
                             $link['icon'] = "fa-question";
                         }
-                        if (!Utils::startsWith($link['icon'], "fa-")) {
+                        if (!str_starts_with($link['icon'], "fa-")) {
                             $link['icon'] = "fa-" . $link['icon'];
                         }
                         $sidebar_buttons[] = new NavButton($this->core, [
@@ -283,6 +283,11 @@ class GlobalController extends AbstractController {
                 "title" => "Gradebook",
                 "icon" => "fa-book-reader"
             ]);
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
+            ]);
         }
 
         // --------------------------------------------------------------------------
@@ -311,14 +316,12 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-eraser"
             ]);
 
-            if ($this->core->getConfig()->checkFeatureFlagEnabled('plagiarism')) {
-                $sidebar_buttons[] = new NavButton($this->core, [
-                    "href" => $this->core->buildCourseUrl(['plagiarism']),
-                    "title" => "Plagiarism Detection",
-                    "id" => "nav-sidebar-plagiarism",
-                    "icon" => "fa-exclamation-triangle"
-                ]);
-            }
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['plagiarism']),
+                "title" => "Plagiarism Detection",
+                "id" => "nav-sidebar-plagiarism",
+                "icon" => "fa-exclamation-triangle"
+            ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['reports']),
@@ -382,12 +385,19 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        // --------------------------------------------------------------------------
-        // FACULTY & SUPERUSERS ONLY
-        if ($this->core->getUser()->accessFaculty()) {
+        $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
+        // Create the line for all faculties, superusers, and instructors
+        if (
+            $this->core->getUser()->accessFaculty()
+            || $is_instructor
+        ) {
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line",
             ]);
+        }
+        // --------------------------------------------------------------------------
+        // FACULTY & SUPERUSERS ONLY
+        if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['admin', 'docker']),
                 "title" => "Docker UI",
@@ -421,17 +431,28 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['superuser','email']),
+                "href" => $this->core->buildUrl(['superuser', 'email']),
                 "title" => "Email All",
                 "icon" => "fas fa-paper-plane"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['superuser','email_status']),
+                "href" => $this->core->buildUrl(['superuser', 'email_status']),
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
             ]);
         }
+
+        // --------------------------------------------------------------------------
+        // INSTRUCTOR IN ANY COURSE
+        if ($is_instructor) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
+            ]);
+        }
+
         $sidebar_buttons[] = new Button($this->core, [
             "class" => "nav-row short-line",
         ]);
@@ -457,7 +478,7 @@ class GlobalController extends AbstractController {
                 break;
             case 10:
                 //October (Halloween)
-                if ($day >= 25 && $day <= 31) {
+                if ($day >= 25) {
                     $duck_img = 'moorthy_duck/halloween.png';
                 }
                 break;
@@ -467,7 +488,7 @@ class GlobalController extends AbstractController {
                 break;
             case 7:
                 //July (Independence)
-                if ($day >= 1 && $day <= 7) {
+                if ($day <= 7) {
                     $duck_img = 'moorthy_duck/07-july.svg';
                 }
                 break;
@@ -517,6 +538,7 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         }, $wrapper_files);
+        $content_only = $this->core->getOutput()->isContentOnly();
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
@@ -534,7 +556,7 @@ class GlobalController extends AbstractController {
                             continue 2;
                         default:
                             //Validation OK.  Include $row.
-                            if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                            if (isset($row['icon']) && !str_starts_with($row['icon'], "fa-")) {
                                 $row['icon'] = "fa-" . $row['icon'];
                             }
                             $footer_links[] = $row;
@@ -551,7 +573,7 @@ class GlobalController extends AbstractController {
         }
 
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
     }
 
     private function routeEquals(string $a, string $b) {

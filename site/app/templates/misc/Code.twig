@@ -1,29 +1,15 @@
-<!doctype html>
-<html>
-<head>
-    <title>{{ filename }}</title>
-    {% for stylesheet in code_css %}
-        <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
-    {% endfor %}
-    {% for script in code_js %}
-        <script src='{{ script }}'></script>
-    {% endfor %}
-    <script>
-        function iFrameInit() {
-            $('body').css("height", "auto");
-            $('.CodeMirror').height("auto");
+<textarea id="code0">{{ file_contents }}</textarea>
+{% include 'misc/SourceSettings.twig' with { type: file_type, number: 0 } %}
+<script>
+    function iFrameInit() {
+        $('body').css("height", "auto");
+        $('.CodeMirror').height("auto");
 
-            $('.CodeMirror')[0].CodeMirror.setSize(null, null);
+        $('.CodeMirror')[0].CodeMirror.setSize(null, null);
 
-            $('body').css("height", ($('.CodeMirror').height()) + "px");
-        }
-        $(document).ready(function() {
-            iFrameInit();
-        });
-    </script>
-</head>
-<body>
-    <textarea id="code0">{{ file_contents }}</textarea>
-    {% include 'misc/SourceSettings.twig' with { type: file_type, number: 0 } %}
-</body>
-</html>
+        $('body').css("height", ($('.CodeMirror').height()) + "px");
+    }
+    $(document).ready(function() {
+        iFrameInit();
+    });
+</script>

@@ -2,54 +2,58 @@
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
                 </main>
             </div> {# /#wrapper #}
-            <footer>
-                &copy; {{ "now"|date("Y") }}
-                <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
-                <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}" target="_blank" title = "{{ latest_tag }} {{ latest_commit }}" class="black-btn">{{ latest_tag }}</a>
-                <span class="footer-separator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub" class="black-btn"><i class="fab fa-github fa-lg"></i></a>
-                <span class="footer-separator">|</span> <a href="https://rcos.io" target="_blank" class="black-btn">An RCOS project</a>
+            {% if not content_only %}
+                <footer>
+                    &copy; {{ "now"|date("Y") }}
+                    <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
+                    <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}" target="_blank" title = "{{ latest_tag }} {{ latest_commit }}" class="black-btn">{{ latest_tag }}</a>
+                    <span class="footer-separator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub" class="black-btn"><i class="fab fa-github fa-lg"></i></a>
+                    <span class="footer-separator">|</span> <a href="https://rcos.io" target="_blank" class="black-btn">An RCOS project</a>
 
-                {% for link in footer_links %}
-                    <span class="footer-separator">|</span>
-                    {% if link['icon'] is defined %}
-                        <i class="footer-link-icon fa fa-lg {{ link['icon'] }}"></i>
+                    {% for link in footer_links %}
+                        <span class="footer-separator">|</span>
+                        {% if link['icon'] is defined %}
+                            <i class="footer-link-icon fa fa-lg {{ link['icon'] }}"></i>
+                        {% endif %}
+                        {% if link['is_email'] is defined %}
+                            <a href="mailto:{{ link['url'] }}" class="black-btn">{{ link['title'] }}</a>
+                        {% else %}
+                            <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {% if is_debug %}
+                        <span class="footer-separator">|</span>
+                        <a href="#" onClick="togglePageDetails();" class="black-btn key_to_click" tabindex="0">Show Page Details</a>
+                        <span class="footer-separator">|</span>
+                        <a href="#" onClick="validateHtml();" class="black-btn key_to_click" tabindex="0">Validate HTML</a>
                     {% endif %}
-                    {% if link['is_email'] is defined %}
-                        <a href="mailto:{{ link['url'] }}" class="black-btn">{{ link['title'] }}</a>
-                    {% else %}
-                         <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
-                    {% endif %}
-
-                {% endfor %}
-
-                {% if is_debug %}
-                    <span class="footer-separator">|</span>
-                    <a href="#" onClick="togglePageDetails();" class="black-btn key_to_click" tabindex="0">Show Page Details</a>
-                    <span class="footer-separator">|</span>
-                    <a href="#" onClick="validateHtml();" class="black-btn key_to_click" tabindex="0">Validate HTML</a>
-                {% endif %}
-            </footer>
+                </footer>
+            {% endif %}
         </div> {# /#submitty-body #}
+    {% if not content_only %}
         {% if wrapper_urls['right_sidebar.html'] is defined %}
             {# uploaded homepage redirect can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
-    {% if wrapper_urls['bottom_bar.html'] is defined %}
-        {# uploaded homepage redirect can go here? #}
-        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
+        {% if wrapper_urls['bottom_bar.html'] is defined %}
+            {# uploaded homepage redirect can go here? #}
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
+        {% endif %}
     {% endif %}
-{% if is_debug %}
-    <div id='page-info'>
-        Runtime: {{ runtime }}<br /><br />
-        <h2>Site Details</h2>
-        Total Submitty Details: {{ submitty_queries|length }}<br /><br />
-        Submitty Queries:<br /> {{ self.query_list(submitty_queries) }}
+    {% if is_debug %}
+        <div id='page-info'>
+            Runtime: {{ runtime }}<br /><br />
+            <h2>Site Details</h2>
+            Total Submitty Details: {{ submitty_queries|length }}<br /><br />
+            Submitty Queries:<br /> {{ self.query_list(submitty_queries) }}
 
-        <h3>Course Details</h3>
-        Total Course Queries: {{ course_queries|length }}<br /><br />
-        Course Queries: <br /> {{ self.query_list(course_queries) }}
-    </div>
-{% endif %}
+            <h3>Course Details</h3>
+            Total Course Queries: {{ course_queries|length }}<br /><br />
+            Course Queries: <br /> {{ self.query_list(course_queries) }}
+        </div>
+    {% endif %}
     {% for url in module_js %}
         <script type="module" src="{{ url }}"></script>
     {% endfor %}

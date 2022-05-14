@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use app\models\gradeable\AutoGradedVersion;
+use app\models\QueueItem;
 
 /**
  * Class GradingQueue
@@ -11,7 +12,6 @@ use app\models\gradeable\AutoGradedVersion;
  * A class to represent the status of the grading queue
  */
 class GradingQueue {
-
     /** @var string The prefix for each normal queue file */
     private $queue_file_prefix = '';
     /** @var string The path to the queue directory */
@@ -40,7 +40,9 @@ class GradingQueue {
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
         $this->grading_path = FileUtils::joinPaths($submitty_path, 'in_progress_grading');
-        $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
+        if ($semester != null || $course != null) {
+            $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
+        }
     }
 
     /**
@@ -208,5 +210,256 @@ class GradingQueue {
     public function getGradingCount() {
         $this->ensureLoadedQueue();
         return count($this->grading_files);
+    }
+
+    /**
+     * Gets information on autograding queue, containing
+     *  - Submissions being graded
+     *      - Elapsed time in the queue
+     *      - The machine handling this grading job
+     *      - The submission's creator which should be hidden unless the one accessing this info is an instructor of the course
+     *  - Submissions in the queue
+     *      - Categorized by interactive (non-regrade) and regrade jobs
+     *      - The number of grading jobs requiring each capability
+     *  - The submissions' gradeable id and affiliated course
+     * @return array
+     */
+    public function getAutogradingInfo(string $config_path): array {
+        // Get information on the worker machines
+        $open_autograding_workers_json = FileUtils::readJsonFile(
+            FileUtils::joinPaths($config_path, "autograding_workers.json")
+        );
+
+        $this->ensureLoadedQueue();
+
+        $epoch_time = time();
+
+        $machine_grading_counts = [];
+        $capability_queue_counts = [];
+        $workers = [];
+        $ongoing_job_info = [];
+        $course_info = [];
+
+        foreach ($open_autograding_workers_json as $machine => $details) {
+            $machine_grading_counts[$machine] = 0;
+            foreach ($details["capabilities"] as $c) {
+                $capability_queue_counts[$c] = 0;
+            }
+            $workers[$machine] = $details["num_autograding_workers"];
+        }
+
+        ksort($capability_queue_counts);
+
+        $queue_counts = [];
+        $queue_counts["interactive"] = 0;
+        $queue_counts["interactive_ongoing"] = 0;
+        $queue_counts["regrade"] = 0;
+        $queue_counts["regrade_ongoing"] = 0;
+
+        foreach ($this->queue_files as $full_path_file) {
+            $path = FileUtils::joinPaths($this->queue_path, $full_path_file);
+            $this->updateDetailedQueueCount(
+                $path,
+                false,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
+        }
+
+        $started = [];
+        $not_yet_started = [];
+        $all_files = $this->subqueue_files;
+
+        foreach ($all_files as $worker => $files) {
+            foreach ($files as $file) {
+                $path = FileUtils::joinPaths($this->grading_path, $worker, self::GRADING_FILE_PREFIX . $file);
+                if (file_exists($path)) {
+                    $started[] = FileUtils::joinPaths($worker, $file);
+                }
+                else {
+                    $not_yet_started[] = FileUtils::joinPaths($worker, $file);
+                }
+            }
+        }
+
+        foreach ($started as $file) {
+            $path = FileUtils::joinPaths($this->grading_path, $file);
+            $job_file = $this->updateDetailedQueueCount(
+                $path,
+                true,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
+            $file_segments = explode("/", $file);
+            $machine = substr($file_segments[0], 0, strrpos($file_segments[0], "_", -1));
+            $file_segments = explode("__", $file_segments[1]);
+            $elapsed_time = "";
+            // Calculate the days elapsed
+            if ($job_file["elapsed_time"] > 60 * 60 * 24) {
+                $elapsed_time .= floor($job_file["elapsed_time"] / (60 * 60 * 24)) . " Days ";
+                $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60 * 24);
+            }
+            // Calculate the hours elapsed
+            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":";
+            $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60);
+            // Format the string with the minutes and seconds elapsed
+            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60), 2, "0", STR_PAD_LEFT) . ":"
+                . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT);
+            $ongoing_job_info[$machine][] = [
+                "semester" => $file_segments[0],
+                "course" => $file_segments[1],
+                "gradeable_id" => $file_segments[2],
+                "user_id" => $file_segments[3],
+                "regrade" => $job_file["regrade"],
+                "elapsed_time" => $elapsed_time,
+                "error" => $job_file["error"],
+                "stale" => $job_file["stale"]
+            ];
+        }
+
+        // These are files in the grading directory but does not have a GRADING_ file, so grading has not started yet
+        foreach ($not_yet_started as $file) {
+            $path = FileUtils::joinPaths($this->grading_path, $file);
+            $this->updateDetailedQueueCount(
+                $path,
+                false,
+                $epoch_time,
+                $queue_counts,
+                $capability_queue_counts,
+                $machine_grading_counts,
+                $open_autograding_workers_json,
+                $course_info
+            );
+        }
+
+        return [
+            "machine_grading_counts" => $machine_grading_counts,
+            "capability_queue_counts" => $capability_queue_counts,
+            "queue_counts" => $queue_counts,
+            "num_autograding_workers" => $workers,
+            "course_info" => $course_info,
+            "ongoing_job_info" => $ongoing_job_info
+        ];
+    }
+
+    // Helper function used to interpret the job files and update the count variables appropriately
+    private function updateDetailedQueueCount(
+        string $queue_or_grading_file,
+        bool $is_grading,
+        int $epoch_time,
+        array &$detailed_queue_counts,
+        array &$capability_queue_counts,
+        array &$machine_grading_counts,
+        array $open_autograding_workers_json,
+        array &$course_info
+    ): array {
+        $stale = false;
+        $error = "";
+        $regrade = false;
+
+        $elapsed_time = -1;
+
+        $job_file = basename($queue_or_grading_file);
+
+        try {
+            $entry = new QueueItem($queue_or_grading_file, $epoch_time, $is_grading);
+            $regrade = $entry->isRegrade();
+            if ($regrade) {
+                if ($is_grading) {
+                    $detailed_queue_counts["regrade_ongoing"] += 1;
+                }
+                else {
+                    $detailed_queue_counts["regrade"] += 1;
+                }
+            }
+            else {
+                if ($is_grading) {
+                    $detailed_queue_counts["interactive_ongoing"] += 1;
+                }
+                else {
+                    $detailed_queue_counts["interactive"] += 1;
+                }
+            }
+            $capability = "default";
+            if (in_array("required_capabilities", $entry->getQueueObj())) {
+                $capability = $entry->getQueueObj()["required_capabilities"];
+            }
+
+            if (!$is_grading) {
+                if (!array_key_exists($capability, $capability_queue_counts)) {
+                    $error .= "ERROR: {$job_file} requires {$capability} which is not provided by any worker";
+                }
+                else {
+                    $capability_queue_counts[$capability] += 1;
+
+                    $enabled_worker = false;
+                    foreach ($open_autograding_workers_json as $machine) {
+                        if ($machine["enabled"]) {
+                            if (in_array($capability, $machine["capabilities"])) {
+                                $enabled_worker = true;
+                            }
+                        }
+                    }
+
+                    if (!$enabled_worker) {
+                        $error .= "ERROR: {$job_file} requires {$capability} which is not provided by any *ENABLED* worker";
+                    }
+                }
+            }
+            else {
+                $max_time = $entry->getQueueObj()["max_possible_grading_time"];
+                $full_machine = $entry->getGradingQueueObj()['machine'];
+
+                $grading_machine = "NONE";
+                foreach ($open_autograding_workers_json as $machine => $details) {
+                    $m = $details["address"];
+                    if ($details["username"] !== "") {
+                        $m = "{$details['username']}@{$m}";
+                    }
+                    if ($full_machine === $m) {
+                        $grading_machine = $machine;
+                        break;
+                    }
+                }
+                $machine_grading_counts[$grading_machine] += 1;
+
+                $elapsed_time = $entry->getElapsedTime();
+                if ($elapsed_time > $max_time) {
+                    $stale = true;
+                }
+            }
+            $file_segments = explode("__", $job_file);
+            if (!array_key_exists($file_segments[0] . "__" . $file_segments[1], $course_info)) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]] = [];
+            }
+
+            if (!array_key_exists($file_segments[2], $course_info[$file_segments[0] . "__" . $file_segments[1]])) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]] = ["regrade" => 0, "interactive" => 0];
+            }
+
+            if ($regrade) {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]]["regrade"] += 1;
+            }
+            else {
+                $course_info[$file_segments[0] . "__" . $file_segments[1]][$file_segments[2]]["interactive"] += 1;
+            }
+        }
+        catch (\Exception $e) {
+            $error .= "Could not read for {$queue_or_grading_file}: {$e->getMessage()}";
+        }
+        return [
+            "elapsed_time" => $elapsed_time,
+            "stale" => $stale,
+            "error" => $error,
+            "regrade" => $regrade
+        ];
     }
 }

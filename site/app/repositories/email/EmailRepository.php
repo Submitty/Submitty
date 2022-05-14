@@ -2,7 +2,6 @@
 
 namespace app\repositories\email;
 
-use app\models\EmailStatusModel;
 use Doctrine\ORM\EntityRepository;
 
 class EmailRepository extends EntityRepository {

@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -447,8 +446,8 @@ class AutoGradedVersion extends AbstractModel {
         $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit() +
             $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
 
-        // avoid divide-by-zero (== not a typo)
-        if ($divisor == 0) {
+        // avoid divide-by-zero
+        if ((float) $divisor == (float) 0) {
             return NAN;
         }
         $result = floatval($dividend) / $divisor;

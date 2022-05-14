@@ -1,0 +1,8 @@
+{
+    "include" : ["./ts/**/*.ts", "./public/js/**/*.js"],
+    "compilerOptions": {
+        "strict": true,
+        "allowJs": true,
+        "noEmit": true
+    }
+}

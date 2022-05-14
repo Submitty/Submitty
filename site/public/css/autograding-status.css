@@ -1,0 +1,22 @@
+.right-boarder {
+    border-right: 1px solid var(--text-black);
+}
+
+#autograding-status-table {
+    border: 1px solid var(--text-black);
+}
+
+#course-table > *,
+#machine-table > * {
+    text-align: left;
+}
+
+#toggle-btn {
+    margin: 1em 0;
+}
+
+#course-table td:nth-of-type(1)::before { content: "Semester"; }
+#course-table td:nth-of-type(2)::before { content: "Course"; }
+#course-table td:nth-of-type(3)::before { content: "Gradeable Id"; }
+#course-table td:nth-of-type(4)::before { content: "Interactive"; }
+#course-table td:nth-of-type(5)::before { content: "Regrade"; }

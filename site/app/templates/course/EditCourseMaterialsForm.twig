@@ -16,23 +16,14 @@
                 Yes
             </label>
             <br>
-            <span id = "show-some-section-selection-edit" style="display: none">
+            <div id = "show-some-section-selection-edit" class= "show-some-section-selection" style="display: none;">
             {% for section in reg_sections %}
-                <tr>
-                    <span class = "inline">
-                        <td>
-                          <label for="section-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
-                        </td>
-                        <td>
-                            <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                    </span>
-                </tr>
+                <div class="reg-section-item">
+                    <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-edit-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                </div>
             {% endfor %}
-            </span>
+            </div>
             <script>
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
@@ -74,7 +65,7 @@
                 let sectionsEdit = [];
                 let cmTime = document.getElementById("edit-picker").value;
                 let sort = document.getElementById("edit-sort").value;
-                let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
+                let id = document.getElementById("material-edit-form").getAttribute("data-id");
                 let hideFromStudents = 'off';
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
@@ -95,7 +86,7 @@
                 let url_url = document.getElementById("edit-url-url");
                 let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
         flatpickr('.edit-picker', {
