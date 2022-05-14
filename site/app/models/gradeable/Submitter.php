@@ -15,7 +15,6 @@ use app\models\User;
  *  have either and access it in a consistent way.
  */
 class Submitter extends AbstractModel {
-
     /** @var Team|User The internal team or user instance */
     private $team_or_user;
 

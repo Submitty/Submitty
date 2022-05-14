@@ -1,0 +1,46 @@
+{
+  "testcases": [
+    {
+      "type": "FileCheck",
+      "title": "One Of True - Both Match",
+      "points": 5,
+      "one_of": true,
+      "actual_file": ["a.txt", "b.txt"]
+    },
+    {
+      "type": "FileCheck",
+      "title": "One Of True - One Match",
+      "points": 5,
+      "one_of": true,
+      "actual_file": ["c.txt", "d.txt"]
+    },
+    {
+      "type": "FileCheck",
+      "title": "One Of True - No Match",
+      "points": 5,
+      "one_of": true,
+      "actual_file": ["e.txt", "f.txt"]
+    },
+    {
+      "type": "FileCheck",
+      "title": "One Of False - Both Match",
+      "points": 5,
+      "one_of": false,
+      "actual_file": ["a.txt", "b.txt"]
+    },
+    {
+      "type": "FileCheck",
+      "title": "One Of False - One Match",
+      "points": 5,
+      "one_of": false,
+      "actual_file": ["c.txt", "d.txt"]
+    },
+    {
+      "type": "FileCheck",
+      "title": "One Of False - No Match",
+      "points": 5,
+      "one_of": false,
+      "actual_file": ["e.txt", "f.txt"]
+    }
+  ]
+}

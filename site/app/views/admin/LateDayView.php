@@ -9,6 +9,7 @@ use app\libraries\FileUtils;
 class LateDayView extends AbstractView {
     public function displayLateDays($users, $students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('latedays.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));

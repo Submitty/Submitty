@@ -3,6 +3,7 @@
 namespace app\models\gradeable;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\models\User;
@@ -219,7 +220,7 @@ class GradeableList extends AbstractModel {
             if (
                 $this->core->getUser()->accessAdmin()
                 || ($gradeable->getTaViewStartDate() <= $this->now && $this->core->getUser()->accessGrading())
-                || $gradeable->getSubmissionOpenDate() <= $this->now
+                || ($gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->isStudentSubmit())
             ) {
                 $return[$id] = $gradeable;
             }
@@ -249,7 +250,7 @@ class GradeableList extends AbstractModel {
      * @return int the section number; or -1 if not categorized
      */
     public static function getGradeableSection(Core $core, Gradeable $gradeable): int {
-        $now = $core->getDateTimeNow();
+        $now = DateUtils::getDateTimeNow();
         if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $now) {
             return self::GRADED;
         }

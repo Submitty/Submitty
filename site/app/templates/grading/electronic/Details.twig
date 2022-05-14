@@ -43,7 +43,7 @@
                 {% endif %}
                 <a class="btn btn-default"
                    href="{{ order_toggle_url }}">
-                    {{ sort == 'random' ? "Default Order" : "Random Order" }}
+                    {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
                 <a class="btn btn-default" id="toggle-anon-button"
@@ -54,11 +54,13 @@
             </div>
         </div>
     </div>
-    <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% if not is_student %}
+        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+    {% endif %}
     {% if not is_instructor %}
         <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
     {% endif %}
-    {% if can_regrade and not is_vcs %}
+    {% if can_regrade %}
         <div class="btn-group">
             <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -118,7 +120,7 @@
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
-                        <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">
+                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">
                             <a href="{{ details_base_url }}?sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
@@ -151,7 +153,7 @@
                 {# Section heading #}
                 <tbody class="details-info-header panel-head-active">
                     <tr class="info">
-                        {% if core.getUser().getGroup() < 4 %}
+                        {% if core.getUser().accessGrading() %}
                             <td colspan="{{ columns|length }}" style="text-align: center">
                                 <i class="collapse-icon fas fa-caret-right"></i>
                                 <i class="expand-icon fas fa-caret-down"></i>
@@ -367,7 +369,7 @@
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
-            {% if core.getUser().getGroup() < 4 %}
+            {% if core.getUser().accessGrading() %}
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                     {% else %}
@@ -393,7 +395,7 @@
                             circle grader-NULL }}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Hidden)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% endif %}
                     {% else %}
                         {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
@@ -405,7 +407,7 @@
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] < 4   %}
                             {# Indicates Non-Peer Component (Hidden) #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% else %}
                             {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
@@ -429,11 +431,6 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
-        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
@@ -441,7 +438,7 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
@@ -449,22 +446,20 @@
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
-
-
             {% endif %}
         {% endif %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
-        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
+        {% set contents = contents ~ " + Grade Inquiry" %}
+        {% set btn_class = "btn-danger" %}
+        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
+    {%  endif %}
     <td style="text-align: center;">
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
@@ -486,11 +481,6 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
-        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
@@ -498,25 +488,28 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-            {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
-            {% set btn_class = "btn-default" %}
+                {% set btn_class = "btn-default" %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
+                {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
-        {% if graded_gradeable.hasActiveRegradeRequest() %}
-            {% set contents = contents ~ " + Grade Inquiry" %}
-            {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
-        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
+        {% set contents = contents ~ " + Grade Inquiry" %}
+        {% set btn_class = "btn-danger" %}
+        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
+    {%  endif %}
     <td>
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}

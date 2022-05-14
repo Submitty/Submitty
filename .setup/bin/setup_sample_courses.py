@@ -17,6 +17,7 @@ from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from pathlib import Path
 from shutil import copyfile
 import glob
 import grp
@@ -499,15 +500,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def create_user(user_id):
-    if not user_exists(id):
-        print("Creating user {}...".format(user_id))
-        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
-                  "-M --shell /bin/false {}".format(user_id))
-        print("Setting password for user {}...".format(user_id))
-        os.system("echo {}:{} | chpasswd".format(user_id, user_id))
-
-
 def create_gradeable_submission(src, dst):
     """
     Given a source and a destination, copy the files from the source to the destination. First, before
@@ -624,28 +616,44 @@ class User(object):
             self.password = user['user_password']
 
     def create(self, force_ssh=False):
-        if not DB_ONLY:
+        if not DB_ONLY and not user_exists(self.id):
             if self.group > 2 and not force_ssh:
-                self._create_non_ssh()
+                self.create_non_ssh()
             else:
-                self._create_ssh()
+                self.create_ssh()
+            self.create_ldap()
+
         if self.group <= 1:
             add_to_group("submitty_course_builders", self.id)
         if self.sudo:
             add_to_group("sudo", self.id)
 
-    def _create_ssh(self):
-        if not user_exists(self.id):
-            print("Creating user {}...".format(self.id))
-            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
-            self.set_password()
+    def create_ssh(self):
+        print("Creating user {}...".format(self.id))
+        os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
+        self.set_password()
 
-    def _create_non_ssh(self):
-        if not DB_ONLY and not user_exists(self.id):
-            print("Creating user {}...".format(self.id))
-            os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
-                      "-M --shell /bin/false {}".format(self.id))
-            self.set_password()
+    def create_non_ssh(self):
+        print("Creating user {}...".format(self.id))
+        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                    "-M --shell /bin/false {}".format(self.id))
+        self.set_password()
+
+    def create_ldap(self):
+        print(f"Creating LDAP user {self.id}...")
+        path = Path("/tmp", self.id)
+        path.write_text(f"""
+dn: uid={self.id},ou=users,dc=vagrant,dc=local
+objectClass: top
+objectClass: account
+objectClass: shadowAccount
+uid: {self.id}
+userPassword: {self.id}
+shadowLastChange: 0
+shadowMax: 0
+shadowWarning: 0""")
+        os.system(f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}')
+        path.unlink()
 
     def set_password(self):
         print("Setting password for user {}...".format(self.id))
@@ -998,8 +1006,7 @@ class Course(object):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
                             print("Inserting {} for {}...".format(gradeable.id, user.id))
-                            # gd_overall_comment no longer does anything, and will be removed in a future update.
-                            values = {'g_id': gradeable.id, 'gd_overall_comment' : ''}
+                            values = {'g_id': gradeable.id}
                             overall_comment_values = {'g_id' : gradeable.id,  'goc_overall_comment': 'lorem ipsum lodar', 'goc_grader_id' : self.instructor.id}
 
                             if gradeable.team_assignment is True:
@@ -1046,7 +1053,7 @@ class Course(object):
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment='')
+                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id)
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
@@ -1309,7 +1316,6 @@ class Course(object):
         with open(course_json_file, 'r+') as open_file:
             course_json = json.load(open_file)
             course_json['course_details']['queue_enabled'] = True
-            course_json['course_details']['queue_contact_info'] = True
             course_json['course_details']['queue_message'] = queue_data["queue_message"]
             course_json['course_details']['queue_announcement_message'] = queue_data["queue_announcement_message"]
             open_file.seek(0)

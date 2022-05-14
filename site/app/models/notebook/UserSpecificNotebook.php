@@ -5,7 +5,6 @@ namespace app\models\notebook;
 use app\exceptions\NotebookException;
 use app\models\notebook\Notebook;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 
 /**
@@ -17,7 +16,6 @@ use app\libraries\FileUtils;
  */
 
 class UserSpecificNotebook extends Notebook {
-
     /** @prop @var array array of items where the notebook selects from */
     protected $item_pool = [];
     /** @prop @var array testcases config */

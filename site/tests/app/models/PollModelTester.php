@@ -4,10 +4,8 @@ namespace tests\app\models;
 
 use app\libraries\Core;
 use app\models\PollModel;
-use app\libraries\DateUtils;
 
 class PollModelTester extends \PHPUnit\Framework\TestCase {
-
     private $core;
     private $my_polls;
 

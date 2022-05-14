@@ -18,6 +18,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
     // eslint-disable-next-line no-undef
     const editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
@@ -25,6 +26,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true,
+        autoRefresh: true,
     });
 
     editor1.setSize('100%', '100%');
@@ -305,10 +307,10 @@ function recreateUser1Dropdown(state) {
         if (state.anon_mode_enabled) {
             const hashedDisplayName = element.display_name !== '' ? hashString(element.display_name) : '';
             const hashedUserID = hashString(element.user_id);
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(${element.percent}, ${element.match_count} hashes) ${hashedDisplayName} &lt;${hashedUserID}&gt;</option>`);
         }
         else {
-            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(Max Match: ${element.percent}) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
+            $('#user-1-dropdown-list').append(`<option value="${element.user_id}">(${element.percent}, ${element.match_count} hashes) ${element.display_name} &lt;${element.user_id}&gt;</option>`);
         }
     });
 }
@@ -348,10 +350,10 @@ function refreshUser2Dropdown(state) {
         if (state.anon_mode_enabled) {
             const hashedDisplayName = users.display_name !== '' ? hashString(users.display_name) : '';
             const hashedUserID = hashString(users.user_id);
-            append_options += `>(${users.percent} Match) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version: ${users.version}) `;
+            append_options += `>(${users.percent} hashes) ${hashedDisplayName} &lt;${hashedUserID}&gt; (version ${users.version}) `;
         }
         else {
-            append_options += `>(${users.percent} Match) ${users.display_name} &lt;${users.user_id}&gt; (version: ${users.version}) `;
+            append_options += `>(${users.percent} hashes) ${users.display_name} &lt;${users.user_id}&gt; (version ${users.version}) `;
         }
 
         if (users.source_gradeable !== state.this_term_course_gradeable) {
@@ -502,9 +504,9 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
         clickedMark.attributes.selected = true;
         clickedMark.className = 'selected-style-blue';
 
-        $('#popup_to_show_matches_id').css('left', `${e.clientX}px`);
-        $('#popup_to_show_matches_id').css('top', `${e.clientY}px`);
-        $('#popup_to_show_matches_id').empty();
+        $('#popup-to-show-matches-id').css('left', `${e.clientX}px`);
+        $('#popup-to-show-matches-id').css('top', `${e.clientY}px`);
+        $('#popup-to-show-matches-id').empty();
 
         $.each(clickedMark.attributes.others, (i, other) => {
             let humanified_source_gradeable = other.source_gradeable;
@@ -513,7 +515,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
             const sg = other.source_gradeable === state.this_term_course_gradeable ? '' : ` (${humanified_source_gradeable})`;
 
             const other_user_id = state.anon_mode_enabled ? hashString(other.user_id) : other.user_id;
-            $('#popup_to_show_matches_id').append(`
+            $('#popup-to-show-matches-id').append(`
                     <li id="others_menu_${i}" class="ui-menu-item">
                         <div tabindex="-1" class="ui-menu-item-wrapper">
                             ${other_user_id}: ${other.version}${sg}
@@ -522,7 +524,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 `);
             $(`#others_menu_${i}`).on('click', () => {
                 // hiding the popup and resetting the text color immediately makes the page feel faster
-                $('#popup_to_show_matches_id').css('display', 'none');
+                $('#popup-to-show-matches-id').css('display', 'none');
                 showLoadingIndicatorRight();
                 clickedMark.className = clickedMark.attributes.original_color;
                 state.editor2.getDoc().setValue('');
@@ -547,7 +549,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 refreshUser2Dropdown(state);
             });
         });
-        $('#popup_to_show_matches_id').css('display', 'block');
+        $('#popup-to-show-matches-id').css('display', 'block');
     }
 
     // Refresh editors
@@ -598,7 +600,7 @@ function handleClickedMarks(state) {
 
 
         // hide the "others" popup in case it was visible
-        $('#popup_to_show_matches_id').css('display', 'none');
+        $('#popup-to-show-matches-id').css('display', 'none');
 
 
         // Only grab the first one if there is overlap...
@@ -639,7 +641,7 @@ function handleClickedMarks(state) {
 
 
         // hide the "others" popup in case it was visible
-        $('#popup_to_show_matches_id').css('display', 'none');
+        $('#popup-to-show-matches-id').css('display', 'none');
 
 
         // Only grab the first one if there is overlap...

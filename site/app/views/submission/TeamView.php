@@ -6,7 +6,6 @@ use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
 
 class TeamView extends AbstractView {
-
     /**
      * Show team management page
      * @param \app\models\gradeable\Gradeable $gradeable

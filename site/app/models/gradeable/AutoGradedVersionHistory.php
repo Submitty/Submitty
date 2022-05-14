@@ -21,7 +21,6 @@ use app\models\AbstractModel;
  * @method \DateTime getSubmissionTimestamp()
  */
 class AutoGradedVersionHistory extends AbstractModel {
-
     /** @prop @var \DateTime Time the version went into the queue */
     protected $queue_time = null;
     /** @prop @var bool If the grading run was a batch regrade */
