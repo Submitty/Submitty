@@ -12,7 +12,8 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
-  NODE_VERSION: 10
+  NODE_VERSION: 16
+  PYTHON_VERSION: 3.6
 
 jobs:
     css-lint:
@@ -57,6 +58,8 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run eslint
+            - name: Run npm build (tsc and esbuild)
+              run: npm run build
 
 
     js-unit:
@@ -113,7 +116,7 @@ jobs:
             - name: Lint PHP code
               run: |
                   php vendor/bin/phpcs --version
-                  php vendor/bin/phpcs --standard=tests/ruleset.xml
+                  php vendor/bin/phpcs
             - name: Static analysis
               run: |
                   php vendor/bin/phpstan  --version
@@ -145,7 +148,7 @@ jobs:
           - name: Install dependencies
             run: composer install --prefer-dist --dev
           - name: Run php unit tests
-            run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+            run : php vendor/bin/phpunit
           - name: Upload Coverage
             uses: codecov/codecov-action@v1
             with:
@@ -159,7 +162,7 @@ jobs:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
           with:
-            python-version: '3.6'
+            python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
           uses: actions/cache@v2
           with:
@@ -181,7 +184,7 @@ jobs:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
           with:
-            python-version: '3.6'
+            python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
           uses: actions/cache@v2
           with:
@@ -236,7 +239,7 @@ jobs:
     e2e:
         needs:
           - js-lint
-          - js-unit          
+          - js-unit
           - php-lint
           - php-unit
           - python-lint
@@ -276,11 +279,11 @@ jobs:
 
           - uses: actions/setup-python@v2
             with:
-              python-version: '3.6'
+              python-version: ${{ env.PYTHON_VERSION }}
           - uses: shivammathur/setup-php@2.7.0
             with:
               php-version: ${{ env.PHP_VER }}
-              extensions: imagick
+              extensions: imagick, ldap
 
           - name: Set Timezone
             run: |
@@ -374,6 +377,11 @@ jobs:
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
 
+          - name: Setup ldap
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+
           - name: Set up sample course
             run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
 
@@ -416,6 +424,13 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
 
+          - name: Run git tests
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+              sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+              bash tests/git_test.sh
+
           - uses: nanasess/setup-chromedriver@master
           - name: Setup chromedriver
             run: |
@@ -439,11 +454,18 @@ jobs:
               key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
               restore-keys: |
                  ${{ runner.os }}-cache-node-modules-dev
-          - name: Install Cypress
+
+          - name: Install node dependencies
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: |
               npm install file-saver --save
               npm install --production=false
+
+          - name: Run API tests
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            run: npm run test:api
+            env:
+              BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
@@ -468,7 +490,7 @@ jobs:
               browser: chrome
               headless: true
               env: autograding_shipper_off=True
-          
+
           - name: Restart autograding shipper
             run: |
               sudo systemctl restart submitty_autograding_shipper
@@ -488,9 +510,21 @@ jobs:
               sudo systemctl restart submitty_autograding_worker
 
           - name: Switch to database auth
-            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/database.json
+            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with databse auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/integration/login.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
+
+          - name: Switch to LDAP auth
+            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+          - name: Run cypress e2e login tests with LDAP auth
             uses: cypress-io/github-action@v2
             with:
               config: baseUrl=http://localhost

@@ -14,9 +14,6 @@ use League\CommonMark\Block\Element\IndentedCode;
 use League\CommonMark\Inline\Element\Code;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
-use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
-use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
-use app\libraries\CustomCodeBlockRenderer;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -52,6 +49,8 @@ class Output {
     private $use_header = true;
     private $use_footer = true;
     private $use_mobile_viewport = false;
+
+    private $content_only = false;
 
     private $start_time;
 
@@ -128,6 +127,10 @@ HTML;
             return $plural;
         }, ["is_safe" => ["html"]]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
+            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+        }));
+
         if ($full_load) {
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
@@ -175,7 +178,6 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
-        $this->addInternalModuleJs('server.js');
         $this->addInternalJs('menu.js');
     }
 
@@ -391,7 +393,7 @@ HTML;
      * @return string
      */
     private function getView($class) {
-        if (!Utils::startsWith($class, "app\\views")) {
+        if (!str_starts_with($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
         if (!isset($this->loaded_views[$class])) {
@@ -516,6 +518,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleTwigJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs/twig'));
+    }
+
     public function addInternalModuleJs(string $file) {
         $this->addModuleJs($this->timestampResource($file, 'mjs'));
     }
@@ -543,14 +549,21 @@ HTML;
 
     /**
      * Enable or disable whether to use the global header
-     * @param bool $bool
      */
-    public function useHeader($bool = true) {
+    public function useHeader(bool $bool = true): void {
         $this->use_header = $bool;
     }
 
-    public function useFooter($bool = true) {
+    public function useFooter(bool $bool = true): void {
         $this->use_footer = $bool;
+    }
+
+    public function setContentOnly(bool $bool = false): void {
+        $this->content_only = $bool;
+    }
+
+    public function isContentOnly(): bool {
+        return $this->content_only;
     }
 
     public function enableMobileViewport(): void {

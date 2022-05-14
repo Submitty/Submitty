@@ -1,14 +1,19 @@
 {# This is the control shown/hidden #}
-<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;">
+<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;" onclick="closePopup('{{ block('popup_id') }}')">
     {% block form %}
         {# This lets us center the window #}
         <div class="popup-box">
             {# Actual displayed window #}
-            <div class="popup-window">
+            <div class="popup-window" onclick="event.stopPropagation()">
                 {% block title_panel %}
                     <div class="form-title">
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
+                            <button
+                                onclick="closePopup('{{ block('popup_id') }}')"
+                                class="btn btn-default close-button key_to_click"
+                                tabindex="-1"
+                            >Close</button>
                         {% endblock %}
                     </div>
                 {% endblock %}
