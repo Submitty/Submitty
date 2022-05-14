@@ -10,7 +10,6 @@ use app\libraries\Core;
 use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
-
     // Holds the mapping between pages that have open socket clients and those clients
     /** @var array */
     private $clients = [];
@@ -136,37 +135,42 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString): void {
-        if ($msgString === 'ping') {
-            $from->send('pong');
-            return;
-        }
-
-        $msg = json_decode($msgString, true);
-
-        if ($msg["type"] === "new_connection") {
-            if (isset($msg['page'])) {
-                if (!array_key_exists($msg['page'], $this->clients)) {
-                    $this->clients[$msg['page']] = new \SplObjectStorage();
-                }
-                $this->clients[$msg['page']]->attach($from);
-                $this->setSocketClientPage($msg['page'], $from);
-
-                $course_page = explode('-', $this->getSocketClientPage($from));
-                $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
+        try {
+            if ($msgString === 'ping') {
+                $from->send('pong');
+                return;
             }
-            else {
+
+            $msg = json_decode($msgString, true);
+
+            if (isset($msg["type"]) && $msg["type"] === "new_connection") {
+                if (isset($msg['page']) && is_string($msg['page'])) {
+                    if (!array_key_exists($msg['page'], $this->clients)) {
+                        $this->clients[$msg['page']] = new \SplObjectStorage();
+                    }
+                    $this->clients[$msg['page']]->attach($from);
+                    $this->setSocketClientPage($msg['page'], $from);
+
+                    $course_page = explode('-', $this->getSocketClientPage($from));
+                    $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
+                }
+                else {
+                    $from->close();
+                }
+            }
+            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
+                // user_id is only sent with socket clients open from a php user_agent
+                unset($msg['user_id']);
+                $new_msg_string = json_encode($msg);
+                $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
             }
+            else {
+                $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
+            }
         }
-        elseif (isset($msg['user_id'])) {
-            // user_id is only sent with socket clients open from a php user_agent
-            unset($msg['user_id']);
-            $new_msg_string = json_encode($msg);
-            $this->broadcast($from, $new_msg_string, $msg['page']);
-            $from->close();
-        }
-        else {
-            $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
+        catch (\Throwable $t) {
+            // TODO: Add logging for the message in $t
         }
     }
 

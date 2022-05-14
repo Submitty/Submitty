@@ -8,7 +8,6 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\Gradeable;
 
 class GradingOrder extends AbstractModel {
-
     /**
      * @var Gradeable $gradeable
      */

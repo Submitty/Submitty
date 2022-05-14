@@ -854,7 +854,6 @@ tbody.collapse.in {
     cursor: not-allowed;
     background-color: transparent;
     background-image: none;
-    filter: progid:dximagetransform.microsoft.gradient(enabled = false);
 }
 
 .btn-primary {
@@ -1037,7 +1036,6 @@ div.full-height {
 .cat-buttons:hover,
 .cat-buttons:focus {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 .peer-feedback-negative-unselected {
@@ -1082,7 +1080,6 @@ div.full-height {
 
 #ui-category-list .handle {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 #ui-category-list .handle:hover {
@@ -1166,6 +1163,15 @@ div.full-height {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--standard-medium-gray);
     margin-bottom: 10px;
+}
+
+.form-title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popup-close-icon:hover {
+    color: var(--external-link-blue);
 }
 
 .popup-form .form-body {
@@ -1625,7 +1631,7 @@ end of styles used in the admin gradeable page
 
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .custom-focus:focus {
-    outline: var(--standard-focus-cornflowe-blue);
+    outline: var(--standard-focus-cornflower-blue);
 }
 
 .invisible-btn {

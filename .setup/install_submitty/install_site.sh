@@ -38,6 +38,17 @@ set_permissions () {
     esac
 }
 
+set_mjs_permission () {
+    for file in $1/*; do
+        if [ -d "$file" ]; then
+            chmod 551 $file
+            set_mjs_permission $file
+        else
+            set_permissions $file
+        fi
+    done
+}
+
 echo -e "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
@@ -47,6 +58,7 @@ source ${THIS_DIR}/../bin/versions.sh
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
 PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
@@ -57,6 +69,22 @@ echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.ht
 chmod 644 /tmp/index.html
 chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
 mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
+    mkdir -p ${SUBMITTY_DATA_DIR}/run/websocket
+fi
+
+chown root:root ${SUBMITTY_DATA_DIR}/run
+chmod 755 ${SUBMITTY_DATA_DIR}/run
+
+chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
+chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
+
+# Delete all typescript code to prevent deleted files being left behind and potentially
+# causing compilation errors
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
+fi
 
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
@@ -262,9 +290,7 @@ chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-for file in ${SUBMITTY_INSTALL_DIR}/site/public/mjs/*; do
-    set_permissions $file
-done
+set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;

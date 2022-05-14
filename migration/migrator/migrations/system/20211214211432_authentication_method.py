@@ -1,6 +1,8 @@
 """Migration for the Submitty system."""
 from collections import OrderedDict
 import json
+from os import chmod
+from shutil import chown
 
 
 def up(config):
@@ -30,6 +32,8 @@ def up(config):
         db_file.truncate()
         del db_info['authentication_method']
         json.dump(db_info, db_file, indent=4)
+    chown(authentication_file, 'root', config.submitty_users['daemonphp_group'])
+    chmod(authentication_file, 0o440)
 
 
 def down(config):
