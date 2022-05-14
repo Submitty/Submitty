@@ -151,7 +151,7 @@ input[type="text"]:invalid {
 }
 
 /* ==== Results Page ======================================================== */
-.color-pickers > input[type=color] {
+.color-pickers > input[type="color"] {
     width: 50px;
     margin-top: 0.2em;
     margin-right: 0.2em;

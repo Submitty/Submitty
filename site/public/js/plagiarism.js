@@ -39,7 +39,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         'specific-match': '#fdb462',
         'selected-red': '#fb8072',
         'selected-blue': '#b3cde3',
-    }
+    };
 
     // this is the global state for the entire program.  All functions will read and modify this object.
     const state = {
