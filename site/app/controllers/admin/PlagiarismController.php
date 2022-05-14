@@ -874,7 +874,7 @@ class PlagiarismController extends AbstractController {
                     }
                 }
 
-                if (isset($_POST["other-gradeable-paths"])) {
+                if (isset($_POST["other-gradeable-paths"]) && $_POST["other-gradeable-paths"] !== "") {
                     $paths = explode(",", $_POST["other-gradeable-paths"]);
                     $other_gradeable_paths = [];
                     foreach ($paths as $path) {

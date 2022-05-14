@@ -58,6 +58,7 @@ source ${THIS_DIR}/../bin/versions.sh
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
 PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
@@ -68,6 +69,16 @@ echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.ht
 chmod 644 /tmp/index.html
 chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
 mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
+    mkdir -p ${SUBMITTY_DATA_DIR}/run/websocket
+fi
+
+chown root:root ${SUBMITTY_DATA_DIR}/run
+chmod 755 ${SUBMITTY_DATA_DIR}/run
+
+chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
+chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 
 # Delete all typescript code to prevent deleted files being left behind and potentially
 # causing compilation errors
