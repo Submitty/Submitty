@@ -1670,6 +1670,8 @@ CREATE TABLE public.users (
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY ((ARRAY['graded'::character varying, 'audit'::character varying, 'withdrawn'::character varying, 'staff'::character varying])::text[]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
