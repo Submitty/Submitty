@@ -14,6 +14,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -23,6 +37,133 @@ CREATE TYPE public.notifications_component AS ENUM (
     'grading',
     'team'
 );
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.late_day_cache (
+    g_id character varying(255),
+    user_id character varying(255) NOT NULL,
+    team_id character varying(255),
+    late_day_date timestamp with time zone NOT NULL,
+    late_days_remaining integer NOT NULL,
+    late_days_allowed integer,
+    submission_days_late integer,
+    late_day_exceptions integer,
+    late_day_status integer,
+    late_days_change integer NOT NULL,
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
+);
+
+
+--
+-- Name: calculate_remaining_cache_for_user(text, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_late_days integer) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        var_row RECORD;
+        return_cache late_day_cache%rowtype;
+        latestDate timestamp with time zone;
+        late_days_remaining integer;
+        late_days_change integer;
+        late_days_used integer;
+        returnedrow late_day_cache%rowtype;
+    BEGIN
+        -- Grab latest row of data available
+        FOR var_row IN (
+            SELECT * 
+            FROM late_day_cache ldc 
+            WHERE ldc.user_id = user_id
+            ORDER BY ldc.late_day_date DESC, ldc.g_id DESC NULLS LAST
+            LIMIT 1
+        ) LOOP
+            late_days_remaining = var_row.late_days_remaining;
+            latestDate = var_row.late_day_date;
+        END LOOP;
+        
+        -- Get the number of late days charged up to this point
+        late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
+            FROM late_day_cache ldc
+            WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
+                AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
+        );
+        
+        -- if there is no cache in the table, the starting point
+        -- should be the course default late days
+        IF late_days_remaining IS NULL THEN
+            late_days_remaining = default_late_days;
+            late_days_used = 0;
+        END IF;
+        
+        -- For every event after the cache's latest entry, calculate the 
+        -- late days remaining and the late day change (increase or decrease)
+        FOR var_row IN (
+            SELECT * FROM (
+                SELECT * FROM grab_late_day_gradeables_for_user (user_id := user_id)
+                UNION
+                SELECT * FROM grab_late_day_updates_for_user (user_id := user_id)
+            ) as combined
+            WHERE latestDate is NULL OR late_day_date > latestDate
+            ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST
+        ) LOOP
+            --is late day update
+            IF var_row.g_id IS NULL THEN
+                late_days_change = var_row.late_days_allowed - (late_days_remaining + late_days_used);
+                late_days_remaining = GREATEST(0, late_days_remaining + late_days_change);
+                return_cache = var_row;
+                return_cache.late_days_change = late_days_change;
+                return_cache.late_days_remaining = late_days_remaining;
+            --is gradeable event
+            ELSE
+                returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
+                late_days_used = late_days_used - returnedrow.late_days_change;
+				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
+                return_cache = var_row;
+                return_cache.late_days_change = returnedrow.late_days_change;
+                return_cache.late_days_remaining = returnedrow.late_days_remaining;
+            END IF;
+            RETURN NEXT return_cache;
+        END LOOP;
+        RETURN;
+    END;
+    $$;
+
+
+--
+-- Name: calculate_submission_days_late(timestamp with time zone, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.calculate_submission_days_late(submission_time timestamp with time zone, submission_due_date timestamp with time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        RETURN 
+        CASE
+            WHEN submission_time IS NULL THEN 0
+            WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
+            WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
+                OR DATE_PART('minute', submission_time - submission_due_date) > 0
+                OR DATE_PART('second', submission_time - submission_due_date) > 0
+                THEN DATE_PART('day', submission_time - submission_due_date) + 1
+            ELSE DATE_PART('day', submission_time - submission_due_date)
+        END;
+    END;
+    $$;
 
 
 --
@@ -51,60 +192,98 @@ $_$;
 CREATE FUNCTION public.csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader_id text) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
-  DECLARE
-    -- Size of first array after splitting
-    size INTEGER;
-    -- Array of individual line after splitting
-    line TEXT[];
-    -- Variable to store each line in the array
-    i TEXT;
-    -- Array of gc_ids for this gradeable
-    gcids INTEGER[];
-    -- gradeable_data id for this gradeable for this student
-    gdid INTEGER;
-    -- Array counter
-    j INTEGER;
-    -- Is this gradeable component text?
-    istext BOOLEAN[];
-    --Score to be inserted
-    score NUMERIC;
-  BEGIN
-    gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
-    istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
-    -- Get the number of gradeable components for this gradeable. Will be used to test
-    -- for uniform sized arrays
-    size := array_length(gcids, 1);
-    FOREACH i IN ARRAY vcode
-      LOOP
-        -- Split the current line
-        line := string_to_array(i, ',');
-        -- Check for uniform size
-        IF array_length(line, 1) <> size + 1 THEN
-          RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
-        END IF;
-
-        -- Remove any existing record for this student for this gradeable
-        DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
-
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_overall_comment) VALUES (gradeable_id, line[1], '', 1);
-
-        SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
-
-        FOR j IN 1..size
+    DECLARE
+        -- Size of first array after splitting
+        size INTEGER;
+        -- Array of individual line after splitting
+        line TEXT[];
+        -- Variable to store each line in the array
+        i TEXT;
+        -- Array of gc_ids for this gradeable
+        gcids INTEGER[];
+        -- gradeable_data id for this gradeable for this student
+        gdid INTEGER;
+        -- Array counter
+        j INTEGER;
+        -- Is this gradeable component text?
+        istext BOOLEAN[];
+        --Score to be inserted
+        score NUMERIC;
+    BEGIN
+        gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
+        istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
+        -- Get the number of gradeable components for this gradeable. Will be used to test
+        -- for uniform sized arrays
+        size := array_length(gcids, 1);
+        FOREACH i IN ARRAY vcode
         LOOP
-          IF istext[j] THEN
-          --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
-          ELSE
-            score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
-          END IF;
-        END LOOP;
+            -- Split the current line
+            line := string_to_array(i, ',');
+            -- Check for uniform size
+            IF array_length(line, 1) <> size + 1 THEN
+            RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
+            END IF;
 
-      END LOOP;
-    RETURN TRUE ;
-  END;
-  $$;
+            -- Remove any existing record for this student for this gradeable
+            DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
+
+            INSERT INTO gradeable_data(g_id, gd_user_id) VALUES (gradeable_id, line[1]);
+
+            SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
+
+            FOR j IN 1..size
+            LOOP
+            IF istext[j] THEN
+            --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            ELSE
+                score := CAST(line[j+1] AS NUMERIC);
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            END IF;
+            END LOOP;
+
+        END LOOP;
+        RETURN TRUE ;
+    END;
+    $$;
+
+
+--
+-- Name: electronic_gradeable_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.electronic_gradeable_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar ;
+            due_date timestamp;
+        BEGIN
+            -- Check for any important changes
+            IF TG_OP = 'UPDATE'
+            AND NEW.eg_submission_due_date = OLD.eg_submission_due_date
+            AND NEW.eg_has_due_date = OLD.eg_has_due_date
+            AND NEW.eg_allow_late_submission = OLD.eg_allow_late_submission
+            AND NEW.eg_late_days = OLD.eg_late_days THEN
+                RETURN NEW;
+            END IF;
+            
+            -- Grab submission due date
+            due_date = 
+            CASE
+                -- INSERT
+                WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
+                -- DELETE
+                WHEN TG_OP = 'DELETE' THEN OLD.eg_submission_due_date
+                -- UPDATE
+                ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
+            END;
+            
+            DELETE FROM late_day_cache WHERE late_day_date >= due_date;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -118,7 +297,278 @@ SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <
 $_$;
 
 
-SET default_tablespace = '';
+--
+-- Name: get_late_day_info_from_previous(integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late integer, late_days_allowed integer, late_day_exceptions integer, late_days_remaining integer) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        late_days_change = 0;
+        assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+        IF submission_days_late <= assignment_budget THEN
+            -- clamp the days charged to be the days late minus exceptions above zero.
+            late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+        END IF;
+
+        return_row.late_day_status = 
+        CASE
+            -- BAD STATUS
+            WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+            -- LATE STATUS
+            WHEN submission_days_late > late_day_exceptions THEN 2
+            -- GOOD STATUS
+            ELSE 1
+        END;
+
+        return_row.late_days_change = late_days_change;
+        return_row.late_days_remaining = late_days_remaining + late_days_change;
+        RETURN NEXT return_row;
+        RETURN;
+    END;
+    $$;
+
+
+--
+-- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+    latestDate timestamp with time zone ;
+    var_row RECORD;
+    returnrow late_day_cache%rowtype;
+    BEGIN
+        FOR var_row in (
+            WITH valid_gradeables AS (
+				SELECT g.g_id, g.g_title, eg.eg_submission_due_date, eg.eg_late_days
+				FROM gradeable g
+				JOIN electronic_gradeable eg
+					ON eg.g_id=g.g_id
+				WHERE 
+					eg.eg_submission_due_date IS NOT NULL
+					and eg.eg_has_due_date = TRUE
+					and eg.eg_student_submit = TRUE
+					and eg.eg_student_view = TRUE
+					and g.g_gradeable_type = 0
+					and eg.eg_allow_late_submission = TRUE
+					and eg.eg_submission_open_date <= NOW()
+			),
+			submitted_gradeables AS (
+				SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
+				FROM electronic_gradeable_version egv
+				JOIN electronic_gradeable_data egd
+					ON egv.g_id=egd.g_id 
+					AND egv.active_version=egd.g_version
+					AND (
+						CASE
+							when egd.team_id IS NOT NULL THEN egv.team_id=egd.team_id
+							else egv.user_id=egd.user_id
+						END
+					)
+				LEFT JOIN teams t
+					ON t.team_id=egd.team_id
+				LEFT JOIN users u
+					ON u.user_id=t.user_id
+					OR u.user_id=egd.user_id
+				WHERE u.user_id=user_id
+			)
+			SELECT
+				vg.g_id,
+				vg.g_title,
+				COALESCE(sg.user_id, user_id) as user_id,
+				sg.team_id,
+				vg.eg_submission_due_date AS late_day_date,
+				vg.eg_late_days AS late_days_allowed,
+				calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
+				CASE
+					WHEN lde.late_day_exceptions IS NULL THEN 0
+					ELSE lde.late_day_exceptions
+				END AS late_day_exceptions
+			FROM valid_gradeables vg
+			LEFT JOIN submitted_gradeables sg
+				ON vg.g_id=sg.g_id
+			LEFT JOIN late_day_exceptions lde
+				ON lde.user_id=user_id
+				AND vg.g_id=lde.g_id
+		ORDER BY late_day_date, g_id
+	) LOOP
+		returnrow.g_id = var_row.g_id;
+		returnrow.team_id = var_row.team_id;
+		returnrow.user_id = var_row.user_id;
+		returnrow.late_days_allowed = var_row.late_days_allowed;
+		returnrow.late_day_date = var_row.late_day_date;
+		returnrow.submission_days_late = var_row.submission_days_late;
+		returnrow.late_day_exceptions = var_row.late_day_exceptions;
+		RETURN NEXT returnrow;
+        END LOOP;
+        RETURN;	
+    END;
+    $$;
+
+
+--
+-- Name: grab_late_day_updates_for_user(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+    latestDate timestamp with time zone ;
+    var_row RECORD;
+    returnrow late_day_cache%rowtype;
+    BEGIN
+        FOR var_row in (
+            SELECT
+                ld.user_id,
+                ld.since_timestamp AS late_day_date,
+                ld.allowed_late_days AS late_days_allowed
+            FROM late_days ld
+            WHERE 
+                ld.user_id = user_id
+            ORDER BY late_day_date
+        ) LOOP
+            returnrow.user_id = var_row.user_id;
+            returnrow.late_day_date = var_row.late_day_date;
+            returnrow.late_days_allowed = var_row.late_days_allowed;
+            RETURN NEXT returnrow;
+        END LOOP;
+        RETURN;	
+    END;
+    $$;
+
+
+--
+-- Name: gradeable_delete(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.gradeable_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
+                                                                FROM electronic_gradeable 
+                                                                WHERE g_id = OLD.g_id);
+            RETURN OLD;
+        END;
+    $$;
+
+
+--
+-- Name: gradeable_version_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+            team_id varchar;
+            version RECORD;
+        BEGIN
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+            team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
+            
+            --- Remove all lade day cache for all gradeables past this submission die date
+            --- for every user associated with the gradeable
+            DELETE FROM late_day_cache ldc
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+                                    FROM electronic_gradeable eg
+                                    WHERE eg.g_id = g_id)
+                AND (
+                    ldc.user_id IN (SELECT t.user_id FROM teams t WHERE t.team_id = team_id)
+                    OR
+                    ldc.user_id = user_id
+                );
+
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: late_day_extension_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+        BEGIN
+            -- Grab values for delete/update/insert
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+            DELETE FROM late_day_cache ldc 
+            WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
+                                        FROM electronic_gradeable eg 
+                                        WHERE eg.g_id = g_id)
+            AND ldc.user_id = user_id;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: late_days_allowed_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        g_id varchar;
+        user_id varchar;
+        team_id varchar;
+        version RECORD;
+    BEGIN
+        version = CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+        -- since_timestamp = CASE WHEN TG_OP = 'DELETE' THEN OLD.since_timestamp ELSE NEW.since_timestamp END;
+        -- user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+        DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= version.since_timestamp AND ldc.user_id = version.user_id;
+        RETURN NEW;
+    END;
+    $$;
+
+
+--
+-- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_metrics (
+    user_id text NOT NULL,
+    team_id text NOT NULL,
+    g_id text NOT NULL,
+    g_version integer NOT NULL,
+    testcase_id text NOT NULL,
+    elapsed_time real,
+    max_rss_size integer,
+    points integer NOT NULL,
+    passed boolean NOT NULL,
+    hidden boolean NOT NULL,
+    CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
+    CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
 
 
 --
@@ -304,6 +754,7 @@ CREATE TABLE public.electronic_gradeable_version (
     user_id character varying(255),
     team_id character varying(255),
     active_version integer,
+    anonymous_leaderboard boolean DEFAULT true NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -316,7 +767,7 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL
 );
 
 
@@ -516,7 +967,6 @@ CREATE TABLE public.gradeable_data (
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255),
     gd_team_id character varying(255),
-    gd_overall_comment character varying NOT NULL,
     gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );
 
@@ -646,11 +1096,14 @@ CREATE TABLE public.lichen (
     regex_dir_checkout boolean NOT NULL,
     language character varying(255) NOT NULL,
     threshold smallint NOT NULL,
-    sequence_length smallint NOT NULL,
+    hash_size smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
+    last_run_timestamp timestamp with time zone DEFAULT now(),
+    has_provided_code boolean DEFAULT false NOT NULL,
+    other_gradeable_paths text,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
-    CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
+    CONSTRAINT lichen_hash_size_check CHECK ((hash_size > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
 );
 
@@ -673,6 +1126,38 @@ CREATE SEQUENCE public.lichen_id_seq
 --
 
 ALTER SEQUENCE public.lichen_id_seq OWNED BY public.lichen.id;
+
+
+--
+-- Name: lichen_run_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen_run_access (
+    id integer NOT NULL,
+    lichen_run_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_run_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_run_access_id_seq OWNED BY public.lichen_run_access.id;
 
 
 --
@@ -724,8 +1209,8 @@ CREATE TABLE public.notifications (
     content text NOT NULL,
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    seen_at timestamp with time zone
+    created_at timestamp(0) with time zone NOT NULL,
+    seen_at timestamp(0) with time zone
 );
 
 
@@ -842,7 +1327,7 @@ CREATE TABLE public.posts (
     parent_id integer DEFAULT '-1'::integer,
     author_user_id character varying NOT NULL,
     content text NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     anonymous boolean NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
     endorsed_by character varying,
@@ -927,7 +1412,9 @@ CREATE TABLE public.queue_settings (
     code text NOT NULL,
     token text,
     regex_pattern character varying,
-    contact_information boolean DEFAULT true NOT NULL
+    contact_information boolean DEFAULT true NOT NULL,
+    message character varying(400) DEFAULT NULL::character varying,
+    message_sent_time timestamp with time zone
 );
 
 
@@ -958,7 +1445,7 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 CREATE TABLE public.regrade_discussion (
     id integer NOT NULL,
     regrade_id integer NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255) NOT NULL,
     content text,
     deleted boolean DEFAULT false NOT NULL,
@@ -993,7 +1480,7 @@ ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.regrade_discussi
 CREATE TABLE public.regrade_requests (
     id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     user_id character varying(255),
     team_id character varying(255),
     status integer DEFAULT 0 NOT NULL,
@@ -1059,7 +1546,7 @@ CREATE TABLE public.solution_ta_notes (
     component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
-    edited_at timestamp with time zone NOT NULL,
+    edited_at timestamp(0) with time zone NOT NULL,
     itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
@@ -1183,6 +1670,8 @@ CREATE TABLE public.users (
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY ((ARRAY['graded'::character varying, 'audit'::character varying, 'withdrawn'::character varying, 'staff'::character varying])::text[]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1194,7 +1683,7 @@ CREATE TABLE public.users (
 CREATE TABLE public.viewed_responses (
     thread_id integer NOT NULL,
     user_id character varying NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL
 );
 
 
@@ -1262,6 +1751,13 @@ ALTER TABLE ONLY public.lichen ALTER COLUMN id SET DEFAULT nextval('public.liche
 
 
 --
+-- Name: lichen_run_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('public.lichen_run_access_id_seq'::regclass);
+
+
+--
 -- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1322,6 +1818,14 @@ ALTER TABLE ONLY public.student_favorites ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
+
+
+--
+-- Name: autograding_metrics autograding_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_metrics
+    ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id, g_version);
 
 
 --
@@ -1541,6 +2045,14 @@ ALTER TABLE ONLY public.late_days
 
 
 --
+-- Name: late_day_cache ldc_g_team_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);
+
+
+--
 -- Name: lichen lichen_gradeable_id_config_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1554,6 +2066,14 @@ ALTER TABLE ONLY public.lichen
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lichen_run_access lichen_run_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT lichen_run_access_pkey PRIMARY KEY (id);
 
 
 --
@@ -1768,10 +2288,52 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree
 
 
 --
+-- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric_id);
+
+
+--
+-- Name: electronic_gradeable electronic_gradeable_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER electronic_gradeable_change AFTER INSERT OR UPDATE OF eg_submission_due_date, eg_has_due_date, eg_allow_late_submission, eg_late_days ON public.electronic_gradeable FOR EACH ROW EXECUTE PROCEDURE public.electronic_gradeable_change();
+
+
+--
+-- Name: gradeable gradeable_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER gradeable_delete BEFORE DELETE ON public.gradeable FOR EACH ROW EXECUTE PROCEDURE public.gradeable_delete();
+
+
+--
+-- Name: electronic_gradeable_version gradeable_version_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER gradeable_version_change AFTER INSERT OR DELETE OR UPDATE ON public.electronic_gradeable_version FOR EACH ROW EXECUTE PROCEDURE public.gradeable_version_change();
+
+
+--
+-- Name: late_day_exceptions late_day_extension_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON public.late_day_exceptions FOR EACH ROW EXECUTE PROCEDURE public.late_day_extension_change();
+
+
+--
+-- Name: late_days late_days_allowed_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
 
 
 --
@@ -1868,6 +2430,14 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT fk_gradeable_id FOREIGN KEY (gradeable_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: lichen_run_access fk_lichen_run_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT fk_lichen_run_id FOREIGN KEY (lichen_run_id) REFERENCES public.lichen(id) ON DELETE CASCADE;
 
 
 --
@@ -2140,6 +2710,30 @@ ALTER TABLE ONLY public.grading_rotating
 
 ALTER TABLE ONLY public.grading_rotating
     ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_g_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_g_id FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_team FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_cache late_day_cache_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.late_day_cache
+    ADD CONSTRAINT late_day_cache_user FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

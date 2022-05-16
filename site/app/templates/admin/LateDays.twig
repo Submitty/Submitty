@@ -66,12 +66,12 @@
             <tbody>
                 {% for user in users %}
                     <tr>
-                        <td class="align-left">{{ user.getId() }}</td>
-                        <td class="align-left">{{ user.getDisplayedFirstName() }}</td>
-                        <td class="align-left">{{ user.getDisplayedLastName() }}</td>
-                        <td>{{ user.getAllowedLateDays() }}</td>
-                        <td>{{ user.getSinceTimestamp() }}</td>
-                        <td>
+                        <td data-before-content="Student ID" class="align-left">{{ user.getId() }}</td>
+                        <td data-before-content="First Name" class="align-left">{{ user.getDisplayedFirstName() }}</td>
+                        <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedLastName() }}</td>
+                        <td data-before-content="Total Allowed Late Days">{{ user.getAllowedLateDays() }}</td>
+                        <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
+                        <td data-before-content="Delete">
                             <a
                                 aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"

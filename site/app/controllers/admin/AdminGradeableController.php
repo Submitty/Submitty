@@ -177,7 +177,7 @@ class AdminGradeableController extends AbstractController {
         //true if there are no students in any rotating sections.
         //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
         $no_rotating_sections = true;
-        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+        foreach ($this->core->getQueries()->getUsersCountByRotatingSections() as $section) {
             if ($section['rotating_section'] != null && $section['count'] > 0) {
                 $no_rotating_sections = false;
                 break;
@@ -282,7 +282,8 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'has_custom_marks' => $hasCustomMarks
+            'has_custom_marks' => $hasCustomMarks,
+            'is_exam' => $gradeable->isScannedExam()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -982,7 +983,6 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setAutogradingConfigPath(
                 FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
-            $gradeable->setHasDueDate(false);
         }
 
         // Generate a blank component to make the rubric UI work properly
@@ -1086,6 +1086,10 @@ class AdminGradeableController extends AbstractController {
                 $date_set = true;
             }
         }
+
+        // TO DO: Update late day cache for admin late day update
+        // TO DO: Update late day cache for admin gradeable due date update
+        $late_day_status = null;
 
         // Set default value which may be set in loop below
         $regrade_modified = false;

@@ -10,9 +10,28 @@ use app\models\User;
  * Utility functions for interacting with dates and times
  */
 class DateUtils {
-
-    /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
+    /** @var string $MAX_TIME Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
+
+    /** @var \DateTimeZone $timezone */
+    private static $timezone;
+
+    public static function setTimezone(\DateTimeZone $timezone): void {
+        static::$timezone = $timezone;
+    }
+
+    /**
+     * Returns the current time
+     *
+     * @return \DateTime
+     * @throws \Exception
+     */
+    public static function getDateTimeNow(): \DateTime {
+        if (static::$timezone === null) {
+            throw new \RuntimeException("Need to call setTimezone before calling getDateTimeNow");
+        }
+        return new \DateTime('now', static::$timezone);
+    }
 
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded

@@ -16,10 +16,6 @@ describe('navigation page', () => {
         cy.viewport(1920,1200);
     });
 
-    afterEach(() => {
-        cy.logout();
-    });
-
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
@@ -27,7 +23,7 @@ describe('navigation page', () => {
         const sections = {
             future: 4,
             beta: 3,
-            open: 4,
+            open: 5,
             closed: 3,
             items_being_graded: 9,
             graded: 10,
@@ -121,7 +117,7 @@ describe('navigation page', () => {
 
         const sections = {
             beta: 3,
-            open: 4,
+            open: 5,
             closed: 3,
             items_being_graded: 9,
             graded: 10,
@@ -137,7 +133,7 @@ describe('navigation page', () => {
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
         const sections = {
-            open: 4,
+            open: 5,
             closed: 3,
             items_being_graded: 5,
             graded: 8,

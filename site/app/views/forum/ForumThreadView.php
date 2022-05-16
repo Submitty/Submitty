@@ -7,11 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
-
-    public function forumAccess() {
-        return $this->core->getConfig()->isForumEnabled();
-    }
-
     private function getSavedForumCategories($current_course, $categories) {
         $category_ids_array = array_column($categories, 'category_id');
         $cookieSelectedCategories = [];
@@ -86,11 +81,9 @@ class ForumThreadView extends AbstractView {
 
         foreach ($threadArray as $thread_id => $data) {
             $thread_title = $fromIdtoTitle[$thread_id];
-
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
 
-            $thread_list[$count - 1] = ["thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => []];
-
+            $thread_posts = [];
             foreach ($data as $post) {
                 $author = $post['author'];
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
@@ -114,7 +107,7 @@ class ForumThreadView extends AbstractView {
 
                 $posted_on = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp_post'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
-                $thread_list[$count - 1]["posts"][] = [
+                $thread_posts[] = [
                     "post_link" => $post_link,
                     "count" => $count,
                     "post_content" => $post_content,
@@ -124,8 +117,12 @@ class ForumThreadView extends AbstractView {
 
                 $count++;
             }
+            $thread_list[] = [
+                "thread_title" => $thread_title,
+                "thread_link" => $thread_link,
+                "posts" => $thread_posts
+            ];
         }
-
 
         return $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
             "buttons" => $buttons,
@@ -142,11 +139,6 @@ class ForumThreadView extends AbstractView {
      */
 
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false, $thread_announced = true) {
-
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl([]));
-            return;
-        }
         $threadExists = $this->core->getQueries()->threadExists();
         $filteredThreadExists = (count($threadsHead) > 0);
         $currentThread = -1;
@@ -1151,11 +1143,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function createThread($category_colors) {
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
-
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
 
@@ -1211,12 +1198,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function showCategories($category_colors) {
-
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl([]));
-            return;
-        }
-
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
@@ -1266,11 +1247,6 @@ class ForumThreadView extends AbstractView {
     }
 
     public function statPage($users) {
-        if (!$this->forumAccess()) {
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
-
         if (!$this->core->getUser()->accessFullGrading()) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;

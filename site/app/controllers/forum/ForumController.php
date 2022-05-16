@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -18,6 +19,8 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
+ *
+ * @Enabled("forum")
  */
 class ForumController extends AbstractController {
     /**
@@ -953,7 +956,6 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
-
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? [$_POST['thread_category']] : [];
@@ -1105,8 +1107,9 @@ class ForumController extends AbstractController {
         $anon = $current_post["anonymous"];
         foreach ($older_posts as $post) {
             $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
-            $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "post_content" => $post["content"]
+            $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $post["content"],
+                "render_markdown" => false,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;
@@ -1114,8 +1117,9 @@ class ForumController extends AbstractController {
         if (count($output) == 0) {
             // Current post
             $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
-            $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
-                "post_content" => $current_post["content"]
+            $_post['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $current_post["content"],
+                "render_markdown" => false,
             ]);
             $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $_post;

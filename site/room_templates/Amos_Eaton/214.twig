@@ -1,7 +1,7 @@
 <script>
   var title = "Amos Eaton 214"
   note_left = ""
-  note_right = ""
+  note_right = "seat 1 is on the right, when facing the screen"
 
   var config = {{ seating_config|raw }};
 </script>
@@ -77,7 +77,7 @@
     }
 
     function render_arrow(section) {
-      if(section == "left") {
+      if(section == "right") {
         var row = 16;
         var angle = Math.PI * 0.95;
         var angle_start = Math.PI * 0.442 + (row * 0.00145);
@@ -89,7 +89,7 @@
         var angle_start = Math.PI * 0.475;
         var angle_end   = Math.PI * 0.525;
       }
-      else if(section == "right") {
+      else if(section == "left") {
         var row = 16;
         var angle = Math.PI * 1.05;
         var angle_start = Math.PI * 0.535;
@@ -149,7 +149,7 @@
       ctx.strokeStyle = "#333333";
       ctx.stroke();
 
-      if(section == "left") {
+      if(section == "right") {
         var angle_start = Math.PI * 0.442 + (row * 0.00145);
         var angle_end   = Math.PI * 0.465;
 
@@ -183,7 +183,7 @@
           var angle_end   = Math.PI * 0.525;
         }
       }
-      else if(section == "right") {
+      else if(section == "left") {
         var angle_start = Math.PI * 0.535;
         var angle_end   = Math.PI * 0.558 - (row * 0.00145);
 
@@ -239,11 +239,11 @@
     }
 
     function render_row(row) {
-      render_section_row("left", row);
+      render_section_row("right", row);
       if (row <= 6) {
          render_section_row("middle", row);
       }
-      render_section_row("right", row);
+      render_section_row("left", row);
     }
 
     function render_section(section) {
@@ -324,7 +324,7 @@
 
     // Render title
     ctx.font = "bold 20pt sans-serif";
-    ctx.fillText(title, BASE_ROW_CENTER, 50);
+    ctx.fillText(title, BASE_ROW_CENTER-200, 50);
 
     // Render left note
     ctx.font = "bold 12pt sans-serif";
@@ -334,7 +334,7 @@
     // Render right note
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#333333";
-    ctx.fillText(note_right, 775, 50);
+    ctx.fillText(note_right, 650, 50);
 
     // Render front of room legend
     ctx.font = "italic 10pt sans-serif";
@@ -345,9 +345,9 @@
     ctx.fillText("Back of Room", BASE_ROW_CENTER, 490);
 
     // Render arrows
-    // render_arrow("left");
-    // render_arrow("middle");
     // render_arrow("right");
+    // render_arrow("middle");
+    // render_arrow("left");
 
     // Render rows and points
     for(var row = 1; row <= BASE_NUM_ROWS; row++) {

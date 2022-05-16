@@ -8,7 +8,6 @@ use app\exceptions\MalformedDataException;
 use app\models\User;
 
 class CourseMaterialsUtils {
-
     /**
      * Determine if a course materials file has been released.
      *
@@ -73,7 +72,7 @@ class CourseMaterialsUtils {
         $course_material_access = new CourseMaterialAccess(
             $course_material,
             $core->getUser()->getId(),
-            $core->getDateTimeNow()
+            DateUtils::getDateTimeNow()
         );
         $course_material->addAccess($course_material_access);
         $core->getCourseEntityManager()->persist($course_material_access);

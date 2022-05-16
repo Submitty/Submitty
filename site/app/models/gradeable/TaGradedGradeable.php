@@ -4,9 +4,11 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\AbstractModel;
 use app\models\User;
+use FilesystemIterator;
 
 /**
  * Class TaGradedGradeable
@@ -30,6 +32,8 @@ class TaGradedGradeable extends AbstractModel {
     private $graded_component_containers = [];
     /** @prop @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
+    /** @prop @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
+    private $attachments = [];
 
 
     /**
@@ -109,13 +113,28 @@ class TaGradedGradeable extends AbstractModel {
         $details["ta_grading_overall_comments"]["logged_in_user"]["comment"] = $current_user_comment;
         $details["ta_grading_overall_comments"]["other_graders"] = [];
 
+        $details["attachments"] = [];
+        $details["attachments"]["logged_in_user"]["user_id"] = $current_user_id;
+        $details["attachments"]["logged_in_user"]["attachments"] = $this->getAttachments($this->core->getUser());
+        $details["attachments"]["other_graders"] = [];
+
         // Students (peers) are not allowed to see other graders' comments.
         if ($this->core->getUser()->getGroup() < 4) {
+            foreach ($this->getAttachments() as $user_name => $attachments) {
+                if ($current_user_id === $user_name) {
+                    continue;
+                }
+                $details["ta_grading_overall_comments"]["other_graders"][$user_name] = "";
+                $details["attachments"]["other_graders"][$user_name] = $attachments;
+            }
             foreach ($this->overall_comments as $commenter => $comment) {
                 if ($commenter === $current_user_id) {
                     continue;
                 }
                 $details["ta_grading_overall_comments"]["other_graders"][$commenter] = $comment;
+                if (!isset($details["attachments"]["other_graders"][$commenter])) {
+                    $details["attachments"]["other_graders"][$commenter] = [];
+                }
             }
         }
 
@@ -503,6 +522,62 @@ class TaGradedGradeable extends AbstractModel {
             $graders = array_merge($graders, $container->getVisibleGraders());
         }
         return $graders;
+    }
+
+    /**
+     * Loads a list of attachments into the $attachments variable
+     * @param User $grader
+     * @return void
+     */
+    private function loadAttachments(User $grader) {
+        $grader_id = $grader->getId();
+        $attachment_list = [];
+
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "attachments", $this->getGradedGradeable()->getGradeableId(), $this->getGradedGradeable()->getSubmitter()->getId(), $grader->getId());
+        if (is_dir($path)) {
+            $attachment_itr = new FilesystemIterator($path);
+            foreach ($attachment_itr as $file_info) {
+                $attachment_list[] = [
+                    "name" => $file_info->getFilename(),
+                    "path" => $file_info->getPathName()
+                ];
+            }
+        }
+        if (!empty($attachment_list)) {
+            $this->attachments[$grader_id] = $attachment_list;
+        }
+    }
+
+    /**
+     * Gets the attachments that a specified grader uploaded for a specified version.
+     * @param User $grader
+     * @return array
+     */
+    public function getAttachments(User $grader = null) {
+        if ($grader === null) {
+            $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "attachments", $this->getGradedGradeable()->getGradeableId(), $this->getGradedGradeable()->getSubmitter()->getId());
+            $user_ids = [];
+            if (is_dir($path)) {
+                $attachment_itr = new FilesystemIterator($path);
+                foreach ($attachment_itr as $file_info) {
+                    if ($file_info->isDir()) {
+                        $user_ids[] = $file_info->getFilename();
+                    }
+                }
+            }
+            $users = $this->core->getQueries()->getUsersById($user_ids);
+            foreach ($users as $user) {
+                $this->loadAttachments($user);
+            }
+            return $this->attachments;
+        }
+        else {
+            $grader_id = $grader->getId();
+            if (!isset($this->attachments[$grader_id])) {
+                $this->loadAttachments($grader);
+            }
+            return $this->attachments[$grader_id] ?? [];
+        }
     }
 
     /* Intentionally Unimplemented accessor methods */
