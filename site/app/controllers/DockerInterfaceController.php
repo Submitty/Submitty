@@ -153,9 +153,16 @@ class DockerInterfaceController extends AbstractController {
 
     /**
      * @Route("/admin/update_docker", methods={"GET"})
-     * @return JsonResponse
+     * @return JsonResponse | MultiResponse
      */
     public function updateDockerCall() {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
+            );
+        }
         if (!$this->updateDocker()) {
             return JsonResponse::getErrorResponse("Failed to write to file");
         }
