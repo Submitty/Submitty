@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01fdfc1485993e88e18eb94cf756bc70",
+    "content-hash": "90be6e93583a99270e0b53bfadd70853",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -4395,16 +4395,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v2.14.13",
+            "version": "v2.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "66856cd0459df3dc97d32077a98454dc2a0ee75a"
+                "reference": "2fcc95728fbe9278773edcb605c7cf8bdc426c22"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/66856cd0459df3dc97d32077a98454dc2a0ee75a",
-                "reference": "66856cd0459df3dc97d32077a98454dc2a0ee75a",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/2fcc95728fbe9278773edcb605c7cf8bdc426c22",
+                "reference": "2fcc95728fbe9278773edcb605c7cf8bdc426c22",
                 "shasum": ""
             },
             "require": {
@@ -4420,7 +4420,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.14-dev"
+                    "dev-master": "2.15-dev"
                 }
             },
             "autoload": {
@@ -4459,7 +4459,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v2.14.13"
+                "source": "https://github.com/twigphp/Twig/tree/v2.15.0"
             },
             "funding": [
                 {
@@ -4471,7 +4471,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-06T06:45:17+00:00"
+            "time": "2022-05-15T06:21:48+00:00"
         }
     ],
     "packages-dev": [
