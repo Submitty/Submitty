@@ -128,7 +128,12 @@ function deleteUserForm(user_id, firstname, lastname) {
 }
 
 function demoteGraderForm(user_id, firstname, lastname) {
-    alert('demoteGraderForm()');
+    $('.popup-form').css('display', 'none');
+    const form = $("#demote-grader-form");
+    $('[name="user_id"]', form).val(user_id);
+    $('[name="displayed_fullname"]', form).val(firstname + " " + lastname);
+    $('#grader-fullname', form).html(firstname + " " + lastname);
+    form.css("display", "block");
 }
 
 function userFormChange() {
