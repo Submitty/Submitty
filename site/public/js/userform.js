@@ -127,6 +127,10 @@ function deleteUserForm(user_id, firstname, lastname) {
     form.css("display", "block");
 }
 
+function demoteGraderForm(user_id, firstname, lastname) {
+    alert('demoteGraderForm()');
+}
+
 function userFormChange() {
     var user_elem = $("select[name='user_group']")[0];
     var is_student = user_elem.options[user_elem.selectedIndex].text === "Student";
