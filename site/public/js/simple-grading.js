@@ -664,10 +664,10 @@ function setupSimpleGrading(action) {
             if (new_selector_array[2] < 0 && direction == "up") {
                 new_selector_array[2] += 1;
                 // // Selection needs to move to above the null section
-                if (new_selector_array[1] == "") {
+                if (new_selector_array[1] === "") {
                     new_selector_array[1] = 1;
                     while (true) {
-                        let temp_cell = $("#" + new_selector_array.join("-"));
+                        const temp_cell = $("#" + new_selector_array.join("-"));
                         if (!temp_cell.length) break;
                     new_selector_array[1] += 1;
                     }
@@ -722,7 +722,9 @@ function setupSimpleGrading(action) {
                         new_selector_array[2] = 0;
 
                         // Check if cell needs to move to null section
-                        if (tries == 1 && new_selector_array[1] != "") {new_selector_array[1] = "";}
+                        if (tries === 1 && new_selector_array[1] !== "") {
+                            new_selector_array[1] = "";
+                        }
                     } else break;
                 }
             }
