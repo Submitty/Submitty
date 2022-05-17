@@ -78,53 +78,32 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     };
 
     // Highlighting setup
-    if (localStorage.getItem('plagiarism-common-code-color') !== null) {
-        $('#common-code').val(localStorage.getItem('plagiarism-common-code-color'));
-        state.highlighting_colors['common-code'] = localStorage.getItem('plagiarism-common-code-color');
-    }
-    else {
-        $('#common-code').val(default_highlighting_colors['common-code']);
-    }
+    const highlighting_init = (localstorage_name, id) => {
+        if (localStorage.getItem(localstorage_name) !== null) {
+            $(`#${id}`).val(localStorage.getItem(localstorage_name));
+            state.highlighting_colors[id] = localStorage.getItem(localstorage_name);
+        }
+        else {
+            $(`#${id}`).val(default_highlighting_colors[id]);
+        }
 
-    if (localStorage.getItem('plagiarism-provided-code-color') !== null) {
-        $('#provided-code').val(localStorage.getItem('plagiarism-provided-code-color'));
-        state.highlighting_colors['provided-code'] = localStorage.getItem('plagiarism-provided-code-color');
-    }
-    else {
-        $('#provided-code').val(default_highlighting_colors['provided-code']);
-    }
+        $(`#${id}`).on('input', () => {
+            localStorage.setItem(localstorage_name, $(`#${id}`).val());
+            state.highlighting_colors[id] = $(`#${id}`).val();
+            refreshColorInfo(state);
+        });
+    };
 
-    if (localStorage.getItem('plagiarism-match-color') !== null) {
-        $('#match').val(localStorage.getItem('plagiarism-match-color'));
-        state.highlighting_colors['match'] = localStorage.getItem('plagiarism-match-color');
-    }
-    else {
-        $('#match').val(default_highlighting_colors['match']);
-    }
-
-    if (localStorage.getItem('plagiarism-specific-match-color') !== null) {
-        $('#specific-match').val(localStorage.getItem('plagiarism-specific-match-color'));
-        state.highlighting_colors['specific-match'] = localStorage.getItem('plagiarism-specific-match-color');
-    }
-    else {
-        $('#specific-match').val(default_highlighting_colors['specific-match']);
-    }
-
-    if (localStorage.getItem('plagiarism-selected-red-color') !== null) {
-        $('#specific-match').val(localStorage.getItem('plagiarism-selected-red-color'));
-        state.highlighting_colors['selected-red'] = localStorage.getItem('plagiarism-selected-red-color');
-    }
-    else {
-        $('#selected-red').val(default_highlighting_colors['selected-red']);
-    }
-
-    if (localStorage.getItem('plagiarism-selected-blue-color') !== null) {
-        $('#selected-blue').val(localStorage.getItem('plagiarism-selected-blue-color'));
-        state.highlighting_colors['selected-blue'] = localStorage.getItem('plagiarism-selected-blue-color');
-    }
-    else {
-        $('#selected-blue').val(default_highlighting_colors['selected-blue']);
-    }
+    [
+        ['plagiarism-common-code-color', 'common-code'],
+        ['plagiarism-provided-code-color', 'provided-code'],
+        ['plagiarism-match-color', 'match'],
+        ['plagiarism-match-color', 'specific-match'],
+        ['plagiarism-selected-red-color', 'selected-red'],
+        ['plagiarism-selected-blue-color', 'selected-blue'],
+    ].forEach((x) => {
+        highlighting_init(x[0], x[1]);
+    });
 
     $('#reset-colors').click(() => {
         localStorage.removeItem('plagiarism-common-code-color');
@@ -142,42 +121,6 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         $('#selected-blue').val(default_highlighting_colors['selected-blue']);
 
         state.highlighting_colors = default_highlighting_colors;
-        refreshColorInfo(state);
-    });
-
-    $('#common-code').change(() => {
-        localStorage.setItem('plagiarism-common-code-color', $('#common-code').val());
-        state.highlighting_colors['common-code'] = $('#common-code').val();
-        refreshColorInfo(state);
-    });
-
-    $('#provided-code').change(() => {
-        localStorage.setItem('plagiarism-provided-code-color', $('#provided-code').val());
-        state.highlighting_colors['provided-code'] = $('#provided-code').val();
-        refreshColorInfo(state);
-    });
-
-    $('#match').change(() => {
-        localStorage.setItem('plagiarism-match-color', $('#match').val());
-        state.highlighting_colors['match'] = $('#match').val();
-        refreshColorInfo(state);
-    });
-
-    $('#specific-match').change(() => {
-        localStorage.setItem('plagiarism-specific-match-color', $('#specific-match').val());
-        state.highlighting_colors['specific-match'] = $('#specific-match').val();
-        refreshColorInfo(state);
-    });
-
-    $('#selected-red').change(() => {
-        localStorage.setItem('plagiarism-selected-red-color', $('#selected-red').val());
-        state.highlighting_colors['selected-red'] = $('#selected-red').val();
-        refreshColorInfo(state);
-    });
-
-    $('#selected-blue').change(() => {
-        localStorage.setItem('plagiarism-selected-blue-color', $('#selected-blue').val());
-        state.highlighting_colors['selected-blue'] = $('#selected-blue').val();
         refreshColorInfo(state);
     });
     // End highlighting setup
