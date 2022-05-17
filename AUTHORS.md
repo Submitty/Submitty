@@ -14,7 +14,7 @@ Joe Krystowski, 2021-current
 William Allen, 2021-current  
 Shelly Belsky, 2021-current  
 Miles Ednie, 2021-current  
-Eddie Krystowski, 2021-current  
+Eddie Krystowski, 2021-current 
 Ching Hei (Henrik) Lam, 2021-current  
 Christopher Reed, 2021-current  
 Xueqing (Brad) Wu, 2021-current  
