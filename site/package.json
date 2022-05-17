@@ -44,7 +44,7 @@
     "cypress": "^9.5.4",
     "cypress-file-upload": "^5.0.8",
     "esbuild": "^0.14.27",
-    "eslint": "^8.11.0",
+    "eslint": "^8.15.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^26.1.5",
     "jest": "^28.0.3",
