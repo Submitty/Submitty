@@ -417,7 +417,7 @@ function setupNumericTextCells() {
             return;
         }
         if(this.value == 0) {
-            elem.css("color", "#bbbbbb");
+            elem.css("color", "--standard-light-medium-gray");
         }
         else{
             elem.css("color", "");
@@ -463,7 +463,7 @@ function setupNumericTextCells() {
               window.socketClient.send({'type': "update_numeric", 'elem': split_id[3], 'user': row_el.data("anon"), 'value': value, 'total': total});
             },
             function() {
-                elem.css("background-color", "#ff7777");
+                elem.css("background-color", "--standard-light-pink");
             }
         );
     });
@@ -554,14 +554,14 @@ function setupNumericTextCells() {
                                                 let elem = $('#cell-'+$(this).parent().parent().data("section")+'-'+$(this).parent().data("row")+'-'+(z-starting_index2));
                                                 elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    elem.css("background-color", "#ffffff");
+                                                    elem.css("background-color", "--main-body-white");
                                                 }
                                                 else {
-                                                    elem.css("background-color", "#ff7777");
+                                                    elem.css("background-color", "--standard-light-pink");
                                                 }
 
                                                 if(elem.val() == 0) {
-                                                    elem.css("color", "#bbbbbb");
+                                                    elem.css("color", "--standard-light-medium-gray");
                                                 }
                                                 else {
                                                     elem.css("color", "");
@@ -947,9 +947,9 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     elem.data('origval', value);
     elem.attr('data-origval', value);
     elem.val(value);
-    elem.css("background-color", "white");
+    elem.css("background-color", "--always-default-white");
     if(value == 0) {
-      elem.css("color", "#bbbbbb");
+      elem.css("color", "--standard-light-medium-gray");
     }
     else{
       elem.css("color", "");
