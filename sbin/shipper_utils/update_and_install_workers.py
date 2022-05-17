@@ -50,7 +50,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        res = subprocess.run(['lsb_release', '-a'], capture_output=True, check=True, text=True)
+        res = subprocess.run(['lsb_release', '-a'], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=True, universal_newlines=True)
         if res.returncode != 0:
             print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
         else:
@@ -144,8 +145,10 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
     print(f"performing rsync to {worker}...")
     # If this becomes too slow, we can exculde directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
-    command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory).split()
-    res = subprocess.run(command, capture_output=True, check= True, text=True)
+    command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
+              local_directory, remote_host, foreign_directory).split()
+    res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         check=True, universal_newlines=True)
     if res.returncode != 0:
         print(f"rsync ended in error with code {res.returncode}\n {res.stderr}")
     else:
