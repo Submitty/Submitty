@@ -14,7 +14,7 @@ Joe Krystowski, 2021-current
 William Allen, 2021-current  
 Shelly Belsky, 2021-current  
 Miles Ednie, 2021-current  
-Eddie Krystowski, 2021-current 
+Eddie Krystowski, 2021-current  
 Ching Hei (Henrik) Lam, 2021-current  
 Christopher Reed, 2021-current  
 Xueqing (Brad) Wu, 2021-current  
@@ -31,12 +31,12 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
-Javier Portorreal, 2020-2022 
+Javier Portorreal, 2020-2022  
 Stephanie Li, 2020-2022  
 Zixiang Zhang, 2020-2021  
 Roland Rao, 2020-2021  
-Vikram Srikishan, 2020-2021 
-Hector Rodriguez Figueroa 2019-2021 
+Vikram Srikishan, 2020-2021  
+Hector Rodriguez Figueroa 2019-2021  
 Eli Schiff 2019-2020  
 Kevin McKinney 2019-2020  
 John (Jack) Hulton 2018-2021  
