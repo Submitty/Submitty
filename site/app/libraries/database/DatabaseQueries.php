@@ -7807,6 +7807,18 @@ SQL;
     }
 
     /**
+     * Demote grader to a student, identified by user_id, semester, and course.
+     * 
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure, true otherwise
+     */
+    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+        return false;
+    }
+
+    /**
      * Insert access attempt to a given gradeable by a user.
      */
     public function insertGradeableAccess(

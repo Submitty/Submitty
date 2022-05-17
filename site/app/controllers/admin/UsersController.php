@@ -399,6 +399,30 @@ class UsersController extends AbstractController {
     }
 
     /**
+     * @param string $type
+     * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
+     * @return RedirectResponse
+     */
+    public function demoteGrader(string $type = 'users'): RedirectResponse {
+        $user_id = trim($_POST['user_id']);
+        $displayed_fullname = trim($_POST['displayed_fullname']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        if ($user_id === $this->core->getUser()->getId()) {
+            $this->core->addErrorMessage('You cannot demote yourself.');
+        }
+        elseif ($this->core->getQueries()->demoteGrader($user_id, $semester, $course)) {
+            $this->core->addSuccessMessage("{$displayed_fullname} has been demoted to a student.");
+        }
+        else {
+            $this->core->addErrorMessage("Could not demote {$displayed_fullname}.");
+        }
+
+        return new RedirectResponse($this->core->buildCourseUrl([$type]));
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
      */
     public function sectionsForm() {
