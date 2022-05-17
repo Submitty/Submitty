@@ -933,4 +933,10 @@ else
         python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
         echo -e -n "Done restarting shipper & workers\n\n"
     fi
+
+    # Update OS / Docker versions for all machines
+    echo "Update OS and Docker versions for all machines"
+    DATE_YMD=`date +%Y%m%d`
+    echo -e '{\n  "job": "UpdateDockerImages"\n}' > ${SUBMITTY_DATA_DIR}/daemon_job_queue/docker${DATE_YMD}.json
+    echo "Dispatched version updating job"
 fi
