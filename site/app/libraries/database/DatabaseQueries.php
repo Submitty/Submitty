@@ -7808,6 +7808,8 @@ SQL;
 
     /**
      * Demote grader to a student, identified by user_id, semester, and course.
+     * Set user group to 4 (student) and the query is successful if the row
+     * count (number of affected rows) is positive.
      * 
      * @param string $user_id
      * @param string $semester
@@ -7815,7 +7817,13 @@ SQL;
      * @return bool false on failure, true otherwise
      */
     public function demoteGrader(string $user_id, string $semester, string $course): bool {
-        return false;
+        $query = <<<SQL
+UPDATE courses_users
+SET user_group = 4
+WHERE user_id=? AND semester=? AND course=?
+SQL;
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
