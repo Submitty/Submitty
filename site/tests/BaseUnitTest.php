@@ -94,10 +94,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $core->method('checkCsrfToken')->willReturn(true);
         }
 
-        $core->method('buildUrl')->willReturnCallback(function (array $parts = []) {
-            return 'baseurl/' . implode('/', $parts);
-        });
-
         $mock_access = $this->createMock(Access::class);
         $mock_access->expects($this->any())->method('canI')->willReturnCallback(
             function ($permission) use ($access) {

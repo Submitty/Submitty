@@ -90,7 +90,6 @@ class AuthTokenControllerTester extends BaseUnitTest {
         $response = $controller->createVcsAuthToken();
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertNotEmpty($response->url);
         $this->assertEquals($core->buildUrl(['authentication_tokens']), $response->url);
 
         $this->assertArrayHasKey('new_auth_token', $_SESSION);
@@ -108,7 +107,6 @@ class AuthTokenControllerTester extends BaseUnitTest {
         $response = $controller->revokeVcsToken();
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertNotEmpty($response->url);
         $this->assertEquals($core->buildUrl(['authentication_tokens']), $response->url);
     }
 }
