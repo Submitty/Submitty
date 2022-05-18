@@ -2000,7 +2000,7 @@ class Gradeable extends AbstractModel {
 
     public function getRepositoryPath(User $user, Team $team = null) {
         if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
-            $vcs_path = $this->getVcsSubdirectory();
+            $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
         }
         else {
             if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
