@@ -3,46 +3,58 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
-use app\entities\GitAuthToken;
+use app\entities\VcsAuthToken;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
-use app\repositories\GitAuthTokenRepository;
-use app\views\GitAuthView;
+use app\repositories\VcsAuthTokenRepository;
+use app\views\AuthTokenView;
 use Symfony\Component\Routing\Annotation\Route;
 
-class GitAuthController extends AbstractController {
+class AuthTokenController extends AbstractController {
     /**
-     * @Route("/git_auth_tokens", methods={"GET"})
+     * @Route("/authentication_tokens", methods={"GET"})
      */
-    public function gitAuthTokens(): WebResponse {
+    public function vcsAuthTokens(): WebResponse {
         $em = $this->core->getSubmittyEntityManager();
-        /** @var GitAuthTokenRepository $repo */
-        $repo = $em->getRepository(GitAuthToken::class);
+        /** @var VcsAuthTokenRepository $repo */
+        $repo = $em->getRepository(VcsAuthToken::class);
         $tokens = $repo->getAllByUser($this->core->getUser()->getId(), true);
 
+        $token = null;
+        $auth_token = null;
+
+        if (isset($_SESSION['new_auth_token']) && isset($_SESSION['new_auth_token_id'])) {
+            $token = $_SESSION['new_auth_token'];
+            $auth_token = $repo->find($_SESSION['new_auth_token_id']);
+            unset($_SESSION['new_auth_token']);
+            unset($_SESSION['new_auth_token_id']);
+        }
+
         return new WebResponse(
-            GitAuthView::class,
-            'showGitAuthPage',
-            $tokens
+            AuthTokenView::class,
+            'showAuthTokenPage',
+            $tokens,
+            $auth_token,
+            $token
         );
     }
 
     /**
-     * @Route("/git_auth_tokens", methods={"POST"})
+     * @Route("/authentication_tokens/vcs", methods={"POST"})
      */
-    public function createGitAuthToken(): ResponseInterface {
+    public function createVcsAuthToken(): ResponseInterface {
         if (!isset($_POST['name']) || !isset($_POST['expiration']) || $_POST['name'] === "") {
             $this->core->addErrorMessage("Name or expiration not provided");
-            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+            return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
         }
         $name = $_POST['name'];
         $expiration = intval($_POST['expiration']);
         $valid_expirations = [0, 1, 6, 12];
         if (!in_array($expiration, $valid_expirations)) {
             $this->core->addErrorMessage("Please pick a valid expiration time");
-            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+            return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
         }
         if ($expiration === 0) {
             $expiration = null;
@@ -55,7 +67,7 @@ class GitAuthController extends AbstractController {
         $token = Utils::generateRandomString(32);
         $hashed_token = password_hash($token, PASSWORD_DEFAULT);
 
-        $auth_token = new GitAuthToken(
+        $auth_token = new VcsAuthToken(
             $this->core->getUser()->getId(),
             $hashed_token,
             $name,
@@ -65,40 +77,33 @@ class GitAuthController extends AbstractController {
         $em->persist($auth_token);
         $em->flush();
 
-        /** @var GitAuthTokenRepository $repo */
-        $repo = $em->getRepository(GitAuthToken::class);
-        $tokens = $repo->getAllByUser($this->core->getUser()->getId(), true);
-
         $this->core->addSuccessMessage("New token created successfully");
 
-        return new WebResponse(
-            GitAuthView::class,
-            'showGitAuthPage',
-            $tokens,
-            $auth_token,
-            $token
-        );
+        $_SESSION['new_auth_token'] = $token;
+        $_SESSION['new_auth_token_id'] = $auth_token->getId();
+
+        return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
     /**
-     * @Route("/git_auth_tokens/revoke", methods={"POST"})
+     * @Route("/authentication_tokens/vcs/revoke", methods={"POST"})
      */
-    public function revokeToken(): RedirectResponse {
+    public function revokeVcsToken(): RedirectResponse {
         if (!isset($_POST['id'])) {
             $this->core->addErrorMessage("ID wasn't specified.");
-            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+            return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
         }
         $id = $_POST['id'];
         $em = $this->core->getSubmittyEntityManager();
-        /** @var GitAuthToken | null $token */
-        $token = $em->getRepository(GitAuthToken::class)->find($id);
+        /** @var VcsAuthToken | null $token */
+        $token = $em->getRepository(VcsAuthToken::class)->find($id);
         if ($token === null || $token->getUserId() !== $this->core->getUser()->getId()) {
             $this->core->addErrorMessage("Unknown token");
-            return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+            return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
         }
         $em->remove($token);
         $em->flush();
         $this->core->addSuccessMessage("Token revoked");
-        return new RedirectResponse($this->core->buildUrl(['git_auth_tokens']));
+        return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 }

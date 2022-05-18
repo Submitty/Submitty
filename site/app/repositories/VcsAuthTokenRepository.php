@@ -2,19 +2,19 @@
 
 namespace app\repositories;
 
-use app\entities\GitAuthToken;
+use app\entities\VcsAuthToken;
 use Doctrine\ORM\EntityRepository;
 
-class GitAuthTokenRepository extends EntityRepository {
+class VcsAuthTokenRepository extends EntityRepository {
     /**
      * @param string $user_id
      * @param bool $expired
-     * @return GitAuthToken[]
+     * @return VcsAuthToken[]
      */
     public function getAllByUser(string $user_id, bool $expired = false): array {
         $qb = $this->_em->createQueryBuilder();
         $qb = $qb->select('g')
-            ->from('\app\entities\GitAuthToken', 'g');
+            ->from('\app\entities\VcsAuthToken', 'g');
         if (!$expired) {
             $qb = $qb->where(
                 $qb->expr()->orX(

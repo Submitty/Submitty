@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\entities\GitAuthToken;
+use app\entities\VcsAuthToken;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -10,7 +10,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
-use app\repositories\GitAuthTokenRepository;
+use app\repositories\VcsAuthTokenRepository;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -211,8 +211,8 @@ class AuthenticationController extends AbstractController {
 
         $token_login_success = false;
         $em = $this->core->getSubmittyEntityManager();
-        /** @var GitAuthTokenRepository $repo */
-        $repo = $em->getRepository(GitAuthToken::class);
+        /** @var VcsAuthTokenRepository $repo */
+        $repo = $em->getRepository(VcsAuthToken::class);
         $tokens = $repo->getAllByUser($_POST['user_id']);
 
         foreach ($tokens as $token) {

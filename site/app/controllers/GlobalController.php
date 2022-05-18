@@ -376,8 +376,8 @@ class GlobalController extends AbstractController {
         ]);
 
         $sidebar_buttons[] = new NavButton($this->core, [
-            "href" => $this->core->buildUrl(['git_auth_tokens']),
-            "title" => "Git Auth Tokens",
+            "href" => $this->core->buildUrl(['authentication_tokens']),
+            "title" => "Authentication Tokens",
             "icon" => "fa-key"
         ]);
 

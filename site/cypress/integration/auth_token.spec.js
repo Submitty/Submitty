@@ -1,10 +1,10 @@
 import {getCurrentSemester} from '../support/utils';
 
-describe('Test cases revolving around git auth tokens', () => {
+describe('Test cases revolving around authentication tokens', () => {
     beforeEach(() => {
         cy.visit('/');
         cy.login();
-        cy.visit('/git_auth_tokens');
+        cy.visit('/authentication_tokens');
     });
 
     it('Should create new token, receive it\'s value back, and pass vcs_login', () => {
@@ -14,7 +14,7 @@ describe('Test cases revolving around git auth tokens', () => {
 
         cy.get('#new-auth-token-name').type('Desktop');
 
-        cy.get('#new-auth-token-expiration').select('Never Expire');
+        cy.get('#new-auth-token-expiration').select('Never Expires');
 
         cy.get('#new-auth-token-form > form > div > div > div.form-body > div.form-buttons > div > input').click();
 

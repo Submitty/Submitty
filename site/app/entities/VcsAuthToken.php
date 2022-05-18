@@ -8,10 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class GitAuthToken
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\GitAuthTokenRepository")
- * @ORM\Table(name="git_auth_tokens")
+ * @ORM\Entity(repositoryClass="\app\repositories\VcsAuthTokenRepository")
+ * @ORM\Table(name="vcs_auth_tokens")
  */
-class GitAuthToken {
+class VcsAuthToken {
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")

@@ -12,7 +12,7 @@ def up(config, database):
     """
     database.execute(
     """
-    CREATE TABLE IF NOT EXISTS git_auth_tokens (
+    CREATE TABLE IF NOT EXISTS vcs_auth_tokens (
         id serial NOT NULL PRIMARY KEY,
         user_id varchar NOT NULL,
         token varchar NOT NULL,

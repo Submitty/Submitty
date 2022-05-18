@@ -1,4 +1,4 @@
-function openCreateGitAuthTokenForm() {
+function openCreateVcsAuthTokenForm() {
     const form = document.getElementById('new-auth-token-form');
     if (form !== null) {
         form.style.display = 'block';
@@ -16,7 +16,7 @@ function copyToken() {
 function init() {
     const button = document.getElementById('new-auth-token-button');
     if (button !== null) {
-        button.addEventListener('click', openCreateGitAuthTokenForm);
+        button.addEventListener('click', openCreateVcsAuthTokenForm);
     }
     const copyIcon = document.getElementById('token-copy-button');
     if (copyIcon !== null) {
