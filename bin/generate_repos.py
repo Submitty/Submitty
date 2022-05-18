@@ -62,7 +62,7 @@ def add_empty_commit(folder,which_branch):
             '-c', 'user.name=submitty',
             '-c', 'user.email=submitty@example.com',
             'commit', '--allow-empty',
-            '-m initial empty commit',
+            '-m', 'initial empty commit',
             '--author=submitty <submitty@example.com>'])
         subprocess.run(['git', 'push', 'origin', which_branch])
 
