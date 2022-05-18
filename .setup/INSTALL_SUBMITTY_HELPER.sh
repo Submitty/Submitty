@@ -936,7 +936,7 @@ else
 
     # Update OS / Docker versions for all machines
     echo "Update OS and Docker versions for all machines"
-    DATE_YMD=`date +%Y%m%d`
+    DATE_YMD=$(date +%Y%m%d)
     echo -e '{\n  "job": "UpdateDockerImages"\n}' > "${SUBMITTY_DATA_DIR}/daemon_job_queue/docker${DATE_YMD}.json"
     echo "Dispatched version updating job"
 fi
