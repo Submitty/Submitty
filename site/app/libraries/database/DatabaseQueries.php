@@ -7810,7 +7810,7 @@ SQL;
      * Demote grader to a student, identified by user_id, semester, and course.
      * Set user group to 4 (student) and the query is successful if the row
      * count (number of affected rows) is positive.
-     * 
+     *
      * @param string $user_id
      * @param string $semester
      * @param string $course
