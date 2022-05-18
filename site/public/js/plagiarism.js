@@ -120,7 +120,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         $('#selected-red').val(default_highlighting_colors['selected-red']);
         $('#selected-blue').val(default_highlighting_colors['selected-blue']);
 
-        state.highlighting_colors = default_highlighting_colors;
+        state.highlighting_colors = JSON.parse(JSON.stringify(default_highlighting_colors)); // a crude way to copy the object
         refreshColorInfo(state);
     });
     // End highlighting setup
