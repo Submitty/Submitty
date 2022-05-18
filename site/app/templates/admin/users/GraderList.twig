@@ -39,13 +39,13 @@
                                 <td>
                                     <a href="javascript:editUserForm('{{ grader.getId() }}');"
                                        aria-label="edit grader {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}">
-                                        <i class="fas fa-pencil-alt"></i>
+                                        <i class="fas fa-pencil-alt" title="Edit Grader"></i>
                                     </a>
                                 </td>
                                 <td>
                                     <a href="javascript:demoteGraderForm('{{ grader.getId() }}', '{{ grader.getDisplayedFirstName() }}', '{{ grader.getDisplayedLastName() }}');"
                                         aria-label="">
-                                        <i class="fas fa-pencil-alt"></i>
+                                        <i class="fas fa-user-xmark" title="Demote Grader"></i>
                                     </a>
                                 </td>
                             </tr>
