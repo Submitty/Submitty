@@ -81,6 +81,9 @@ function changeSubmissionMode(event: Event){
     const bulkUploadOpts = document.getElementById('pdf-submit-button');
     const qrUploadOpts = document.getElementById('qr-split-opts');
     const numericUploadOpts = document.getElementById('numeric-split-opts');
+    const pageSplitOpts = document.getElementById('pages-prompt');
+    const pageSplitPpts = document.getElementById('num_pages') as HTMLInputElement | null;
+    const expectPagesOpts = document.getElementById('expected-num-box');
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
@@ -123,11 +126,18 @@ function changeSubmissionMode(event: Event){
             message = 'Warning: Submitting files for bulk upload!';
 
             if (prevBulkSetting && prevBulkSetting === 'qr'){
-                qrUploadOpts!.style.display = 'inline';
+                qrUploadOpts!.style.display = 'block';
+                numericUploadOpts!.style.display = 'inline';
+                pageSplitOpts!.style.display = 'none';
+                pageSplitPpts!.style.display = 'none';
+                expectPagesOpts!.style.display = 'inline';
                 useQRCheckBox.click();
             }
             else {
                 numericUploadOpts!.style.display = 'inline';
+                pageSplitOpts!.style.display = 'inline';
+                pageSplitPpts!.style.display = 'inline';
+                expectPagesOpts!.style.display = 'none';
                 sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, 'numeric');
 
                 if (scanIdsOpts !== null) {
@@ -150,6 +160,9 @@ function switchBulkUploadOptions(event : Event){
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const numericUploadOpts = document.getElementById('numeric-split-opts');
+    const pageSplitOpts = document.getElementById('pages-prompt');
+    const pageSplitPpts = document.getElementById('num_pages') as HTMLInputElement | null;
+    const expectPagesOpts = document.getElementById('expected-num-box');
     const qrUploadOpts = document.getElementById('qr-split-opts');
 
     sessionStorage.setItem(`${window.gradeable_id}-bulk_setting`, element.checked ? 'qr' : 'numeric' );
@@ -159,7 +172,10 @@ function switchBulkUploadOptions(event : Event){
     }
     if (element.checked){
         qrUploadOpts!.style.display = 'block';
-        numericUploadOpts!.style.display = 'none';
+        numericUploadOpts!.style.display = 'inline';
+        pageSplitOpts!.style.display = 'none';
+        pageSplitPpts!.style.display = 'none';
+        expectPagesOpts!.style.display = 'inline';
 
         if (scanIdsOpts !== null) {
             scanIdsOpts.style.display = 'inline';
@@ -168,6 +184,9 @@ function switchBulkUploadOptions(event : Event){
     else {
         qrUploadOpts!.style.display = 'none';
         numericUploadOpts!.style.display = 'inline';
+        pageSplitOpts!.style.display = 'inline';
+        pageSplitPpts!.style.display = 'inline';
+        expectPagesOpts!.style.display = 'none';
 
         if (scanIdsOpts !== null) {
             scanIdsOpts.style.display = 'none';
