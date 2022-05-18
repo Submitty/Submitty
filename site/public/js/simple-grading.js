@@ -717,6 +717,11 @@ function setupSimpleGrading(action) {
                     }
 
                     if (direction == "down") {
+                        // Check if cell needs to move beyond null section
+                        if (new_selector_array[1] === "") {
+                            break;
+                        }
+
                         // Check if cell needs to move to next section
                         new_selector_array[1] += 1;
                         new_selector_array[2] = 0;
