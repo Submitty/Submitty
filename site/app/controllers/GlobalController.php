@@ -316,14 +316,12 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-eraser"
             ]);
 
-            if ($this->core->getConfig()->checkFeatureFlagEnabled('plagiarism')) {
-                $sidebar_buttons[] = new NavButton($this->core, [
-                    "href" => $this->core->buildCourseUrl(['plagiarism']),
-                    "title" => "Plagiarism Detection",
-                    "id" => "nav-sidebar-plagiarism",
-                    "icon" => "fa-exclamation-triangle"
-                ]);
-            }
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['plagiarism']),
+                "title" => "Plagiarism Detection",
+                "id" => "nav-sidebar-plagiarism",
+                "icon" => "fa-exclamation-triangle"
+            ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['reports']),
@@ -375,6 +373,12 @@ class GlobalController extends AbstractController {
             "href" => $this->core->buildUrl(['user_profile']),
             "title" => "My Profile",
             "icon" => "fa-user"
+        ]);
+
+        $sidebar_buttons[] = new NavButton($this->core, [
+            "href" => $this->core->buildUrl(['authentication_tokens']),
+            "title" => "Authentication Tokens",
+            "icon" => "fa-key"
         ]);
 
         if ($this->core->getConfig()->isDebug()) {
