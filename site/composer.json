@@ -33,7 +33,7 @@
     "spatie/commonmark-highlighter": "2.1.1",
     "symfony/cache": "4.4.41",
     "symfony/config": "4.4.41",
-    "symfony/http-foundation": "4.4.39",
+    "symfony/http-foundation": "4.4.41",
     "symfony/polyfill-php80": "1.25.0",
     "symfony/routing": "4.4.37",
     "textalk/websocket": "1.5.8",
