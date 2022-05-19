@@ -7,3 +7,11 @@
     color: var(--external-link-blue);
     cursor: pointer;
 }
+
+form {
+    display: inline;
+}
+
+samp {
+    word-wrap: break-word;
+}

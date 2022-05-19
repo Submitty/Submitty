@@ -417,12 +417,6 @@ class GlobalController extends AbstractController {
                 "title" => "New Course",
                 "icon" => "fa-plus-square"
             ]);
-
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['api_token']),
-                "title" => "API Token",
-                "icon" => "fa-shield"
-            ]);
         }
 
         // --------------------------------------------------------------------------
