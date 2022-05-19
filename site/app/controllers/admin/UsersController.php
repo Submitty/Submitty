@@ -375,7 +375,6 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @param string $type
      * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
      * @return RedirectResponse
      */
@@ -404,7 +403,6 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @param string $type
      * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
      * @return RedirectResponse
      */
