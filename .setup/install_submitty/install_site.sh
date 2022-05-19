@@ -65,10 +65,19 @@ CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
-echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
-chmod 644 /tmp/index.html
-chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
-mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+pushd /tmp > /dev/null
+# Make a temporary directory that root will own so there is no risk of
+# index.html existing before hand and causing issues
+TMP_DIR=$(mktemp -d)
+
+echo "Submitty is being updated. Please try again in 2 minutes." > ${TMP_DIR}/index.html
+chmod 644 ${TMP_DIR}/index.html
+chown ${CGI_USER}:${CGI_GROUP} ${TMP_DIR}/index.html
+mv ${TMP_DIR}/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+popd > /dev/null
+rm -rf ${TMP_DIR}
 
 if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/run/websocket
