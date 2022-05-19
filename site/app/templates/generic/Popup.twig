@@ -10,9 +10,9 @@
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
                             <button
-                                onclick="closePopup('{{ block('popup_id') }}')"
+                                onclick="{{ block('close_click_action') }}"
                                 class="btn btn-default close-button key_to_click"
-                                tabindex="-1"
+                                tabindex="-1" type="button"
                             >Close</button>
                         {% endblock %}
                     </div>
