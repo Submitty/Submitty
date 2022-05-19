@@ -1,13 +1,13 @@
 {% if new_token is defined and new_token_val is defined %}
     <div class="content" id="new-token-banner">
         <p>
-            Your new VCS Auth Token was created successfully and its value is displayed below.<br>
+            Your new VCS Authentication Token was created successfully and its value is displayed below.<br>
             <em>NOTE: Do not share this token with others. Treat it like a password.</em><br>
             <br>
         </p>
         <p>
             Save this value in a secure place -- <em>it will not be displayed if you reload this webpage</em>.<br>
-            If you lose this value, you will need to create a new GIT Auth Token.
+            If you lose this value, you will need to create a new VCS Authentication Token.
         </p>
         <br>
         <p><b>Name</b>: {{ new_token.getName() }}</p>
@@ -25,8 +25,13 @@
 
 <div class="content">
     <h1>Authentication Tokens</h1>
-    <h2>VCS (Git) Auth Tokens</h2>
-    <button class="btn btn-primary" id="new-auth-token-button">Create New VCS Auth Token</button>
+        <p>
+        For more information about managing and using these tokens, please see:<br>
+        <a href="https://submitty.org/student/account/authentication_tokens">Submitty Authentication Tokens</a>
+        <br><br>
+        </p>
+    <h2>Version Control System (GIT) Authentication Tokens</h2>
+    <button class="btn btn-primary" id="new-auth-token-button">Create New VCS Authentication Token</button>
     <br><br>
     {% if tokens|length != 0 %}
     <table class="table mobile-table">
