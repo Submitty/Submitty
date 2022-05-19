@@ -395,7 +395,8 @@ class UsersController extends AbstractController {
             else {
                 $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
             }
-        } else {
+        }
+        else {
             $this->core->addErrorMessage('User ID or name is not set.');
         }
 
@@ -423,7 +424,8 @@ class UsersController extends AbstractController {
             else {
                 $this->core->addErrorMessage("Failed to demote {$displayed_fullname}.");
             }
-        } else {
+        }
+        else {
             $this->core->addErrorMessage('User ID or name is not set.');
         }
 
