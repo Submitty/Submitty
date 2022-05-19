@@ -1,5 +1,5 @@
 {# This is the control shown/hidden #}
-<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;" onclick="closePopup('{{ block('popup_id') }}')">
+<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;" onclick="{{ block('close_click_action') }}">
     {% block form %}
         {# This lets us center the window #}
         <div class="popup-box">
