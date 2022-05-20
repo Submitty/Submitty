@@ -417,7 +417,7 @@ function setupNumericTextCells() {
             return;
         }
         if(this.value == 0) {
-            elem.css("color", "#bbbbbb");
+            elem.css("color", "--standard-light-medium-gray");
         }
         else{
             elem.css("color", "");
@@ -463,7 +463,7 @@ function setupNumericTextCells() {
               window.socketClient.send({'type': "update_numeric", 'elem': split_id[3], 'user': row_el.data("anon"), 'value': value, 'total': total});
             },
             function() {
-                elem.css("background-color", "#ff7777");
+                elem.css("background-color", "--standard-light-pink");
             }
         );
     });
@@ -554,14 +554,14 @@ function setupNumericTextCells() {
                                                 let elem = $('#cell-'+$(this).parent().parent().data("section")+'-'+$(this).parent().data("row")+'-'+(z-starting_index2));
                                                 elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    elem.css("background-color", "#ffffff");
+                                                    elem.css("background-color", "--main-body-white");
                                                 }
                                                 else {
-                                                    elem.css("background-color", "#ff7777");
+                                                    elem.css("background-color", "--standard-light-pink");
                                                 }
 
                                                 if(elem.val() == 0) {
-                                                    elem.css("color", "#bbbbbb");
+                                                    elem.css("color", "--standard-light-medium-gray");
                                                 }
                                                 else {
                                                     elem.css("color", "");
@@ -648,7 +648,10 @@ function setupSimpleGrading(action) {
         if(prev_cell.length) {
             // ids have the format cell-#SECTION-ROW#-COL#
             var new_selector_array = prev_cell.attr("id").split("-");
-            new_selector_array[1] = parseInt(new_selector_array[1]);
+
+            if (new_selector_array[1].length) {
+                new_selector_array[1] = parseInt(new_selector_array[1]);
+            }
             new_selector_array[2] = parseInt(new_selector_array[2]);
             new_selector_array[3] = parseInt(new_selector_array[3]);
 
@@ -658,10 +661,19 @@ function setupSimpleGrading(action) {
             else if (direction == "left") new_selector_array[3] -= 1;
             else if (direction == "right") new_selector_array[3] += 1;
 
-            // TODO: cannot move to NULL section (all cells with id 'cell--#-#')
             if (new_selector_array[2] < 0 && direction == "up") {
-                // // Selection needs to move to above section, if one exists
                 new_selector_array[2] += 1;
+                // // Selection needs to move to above the null section
+                if (new_selector_array[1] === "") {
+                    new_selector_array[1] = 1;
+                    while (true) {
+                        const temp_cell = $("#" + new_selector_array.join("-"));
+                        if (!temp_cell.length) break;
+                    new_selector_array[1] += 1;
+                    }
+                }
+
+                // // Selection needs to move to above section, if one exists
                 // // Find the previous section visible to the grader
                 while (new_selector_array[1] >= 0) {
                     new_selector_array[1] -= 1;
@@ -690,7 +702,7 @@ function setupSimpleGrading(action) {
             else {
                 // Try once with the new cell generated above, otherwise try moving down to the next section
                 let tries;
-                for (tries = 0; tries < 2; tries++) {
+                for (tries = 0; tries < 3; tries++) {
                     // get new cell
                     var new_cell = $("#" + new_selector_array.join("-"));
                     if (new_cell.length) {
@@ -705,10 +717,19 @@ function setupSimpleGrading(action) {
                     }
 
                     if (direction == "down") {
+                        // Check if cell needs to move beyond null section
+                        if (new_selector_array[1] === "") {
+                            break;
+                        }
+
                         // Check if cell needs to move to next section
                         new_selector_array[1] += 1;
                         new_selector_array[2] = 0;
-                        new_selector_array[3] = 0;
+
+                        // Check if cell needs to move to null section
+                        if (tries === 1 && new_selector_array[1] !== "") {
+                            new_selector_array[1] = "";
+                        }
                     } else break;
                 }
             }
@@ -746,32 +767,10 @@ function setupSimpleGrading(action) {
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
-    // make arrow keys in lab section changeable now
-    if(action == 'lab') {
-        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: false}, function(event) {
-            event.preventDefault();
-            movement("right");
-        });
-        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: false}, function(event) {
-            event.preventDefault();
-            movement("left");
-        });
-        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: false}, function(event) {
-            event.preventDefault();
-            movement("up");
-        });
-        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: false}, function(event) {
-            event.preventDefault();
-            movement("down");
-        });
-    }
-    //the arrow keys in test section remain unchangeable as setting up other keys will disturb the input
-    else{
-        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
-        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
-        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
-        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function(event) {});
-    }
+    registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
+    registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
+    registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
+    registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function() {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
@@ -947,9 +946,9 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     elem.data('origval', value);
     elem.attr('data-origval', value);
     elem.val(value);
-    elem.css("background-color", "white");
+    elem.css("background-color", "--always-default-white");
     if(value == 0) {
-      elem.css("color", "#bbbbbb");
+      elem.css("color", "--standard-light-medium-gray");
     }
     else{
       elem.css("color", "");

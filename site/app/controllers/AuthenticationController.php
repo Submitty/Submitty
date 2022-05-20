@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\entities\VcsAuthToken;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -9,6 +10,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
+use app\repositories\VcsAuthTokenRepository;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -206,11 +208,27 @@ class AuthenticationController extends AbstractController {
             $msg = 'Missing value for one of the fields';
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
-        $this->core->getAuthentication()->setUserId($_POST['user_id']);
-        $this->core->getAuthentication()->setPassword($_POST['password']);
-        if ($this->core->getAuthentication()->authenticate() !== true) {
-            $msg = "Could not login using that user id or password";
-            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+
+        $token_login_success = false;
+        $em = $this->core->getSubmittyEntityManager();
+        /** @var VcsAuthTokenRepository $repo */
+        $repo = $em->getRepository(VcsAuthToken::class);
+        $tokens = $repo->getAllByUser($_POST['user_id']);
+
+        foreach ($tokens as $token) {
+            if (password_verify($_POST['password'], $token->getToken())) {
+                $token_login_success = true;
+                break;
+            }
+        }
+
+        if (!$token_login_success) {
+            $this->core->getAuthentication()->setUserId($_POST['user_id']);
+            $this->core->getAuthentication()->setPassword($_POST['password']);
+            if ($this->core->getAuthentication()->authenticate() !== true) {
+                $msg = "Could not login using that user id or password";
+                return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            }
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
