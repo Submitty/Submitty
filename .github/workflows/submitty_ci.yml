@@ -13,7 +13,7 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.6
+  PYTHON_VERSION: 3.8
 
 jobs:
     css-lint:
