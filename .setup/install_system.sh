@@ -444,6 +444,13 @@ if [ ${WORKER} == 0 ]; then
 
     a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
+    # Disable mod_php and prefork based multiprocessing module
+    # as Submitty uses php-fpm to handle the PHP requests
+    a2dismod php${PHP_VERSION} mpm_prefork
+    # Enable event based multiprocessing module and http/2 module
+    # this will enable http/2 on any directory, if possible
+    a2enmod mpm_event http2
+
     # Install nginx to serve websocket connections
     sudo apt-get install -qqy nginx-full
 
