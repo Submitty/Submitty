@@ -54,7 +54,7 @@ class ElectronicGraderView extends AbstractView {
         int $regrade_requests,
         bool $show_warnings,
         int $submissions_in_queue,
-        $sort
+        string $sort = null
     ) {
 
         $peer = $gradeable->hasPeerComponent();

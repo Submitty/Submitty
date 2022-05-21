@@ -286,7 +286,8 @@
         }
 
         // change the url so if the user refreshes the page, they stay on the same tab
-        let searchParams = new URLSearchParams(window.location.search);
+        const searchParams = new URLSearchParams(window.location.search);
+
         if (!searchParams.has('nav_tab')) {
             searchParams.append('nav_tab', tab);
         }

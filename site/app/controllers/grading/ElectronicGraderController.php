@@ -483,7 +483,7 @@ class ElectronicGraderController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
-    public function showStatus($gradeable_id, $sort = null) {
+    public function showStatus(string $gradeable_id, string $sort = null) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
