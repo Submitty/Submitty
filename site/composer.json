@@ -50,6 +50,6 @@
   "scripts": {
     "test": "phpunit",
     "lint": "phpcs",
-    "static-analysis": "phpstan analyze app public"
+    "static-analysis": "phpstan analyze app public/index.php socket/index.php"
   }
 }
