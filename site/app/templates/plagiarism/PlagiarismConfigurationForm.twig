@@ -12,7 +12,7 @@
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id" id="gradeable_id">
                             {% for gradeable_id_title in config["gradeable_ids_titles"] %}
-                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} [{{ gradeable_id_title['g_id'] }}] ({{ gradeable_id_title['g_grade_due_date'] }})</option>
+                                <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }} [{{ gradeable_id_title['g_id'] }}] ({{ gradeable_id_title['due_date'] }})</option>
                             {% endfor %}
                         </select>
                     {% else %}
@@ -172,6 +172,7 @@
                             <label for="other-gradeables-id">Yes</label>
                         </span>
                         <div class="other-gradeables-wrapper" id="other-gradeable-div">
+                            <span id="add-more-other-gradeable" aria-label="Add more"><i class="fas fa-plus-square"></i>&nbsp;Add more</span>
                             <div id="other-gradeables-content">
                                 {% if new_or_edit == "edit" %}
                                     {% for row in config["other_gradeables"] %}
@@ -194,9 +195,8 @@
                                     {% endfor %}
                                 {% endif %}
                             </div>
-                            <div id="add-more-other-gradeable" class="add-more" aria-label="Add more">
-                                <i class="fas fa-plus-square"></i>&nbsp;Add more
-                            </div>
+                            <textarea id="other-gradeable-paths" name="other-gradeable-paths" class="low-margin-top" placeholder="Optionally specify gradeable paths by entering a list of comma-separated paths.  Whitespace will be removed."
+                            >{{ config["other_gradeable_paths"] }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -226,14 +226,13 @@
             <hr/>
             <div>
                 <a href="{{ plagiarism_link }}" class="btn btn-danger">Cancel</a>
-                <input id="submit-form" class="btn btn-primary" type="submit" value="{% if new_or_edit == "new" %} Create {% else %} Save {% endif %} Configuration"/>
+                <input id="submit-form" class="btn btn-primary" type="submit" value="{% if new_or_edit == "new" %} Create {% else %} Save {% endif %} and Run Configuration"/>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    const form = $("#save-configuration-form");
     const other_semester_course_list = JSON.parse(`{{ config["other_semester_courses"] | json_encode() | raw }}`);
     const gradeables_with_plag_configs = JSON.parse(`{{ gradeables_with_plag_configs | json_encode() | raw }}`);
 
@@ -299,23 +298,23 @@
     });
 
     // OTHER GRADEABLES ////////////////////////////////////////////////////////
-    $(document).ready(() => {
-        if ({{ config["has_other_gradeables"] ? "true" : "false" }} && $("#other-gradeables-id").is(":checked")) {
+    {% if config["has_other_gradeables"] %}
+        $(document).ready(() => {
             $("#other-gradeable-div").show();
-        }
-    });
+        });
+    {% endif %}
 
-    $('#add-more-other-gradeable', form).on('click', () => {
+    $('#add-more-other-gradeable').on('click', () => {
         addMoreOtherGradeable();
     });
 
     $("#no-other-gradeables-id").change(() => {
         $(".other-gradeables-wrapper").hide();
-        $('#other-gradeables-content', form).html('');
+        $('#other-gradeables-content').html('');
     });
 
-    $("#other-gradeables-id").change(() => {
-        $(".other-gradeables-wrapper").show();
+    $('#other-gradeables-id').change(() => {
+        $('.other-gradeables-wrapper').show();
         addMoreOtherGradeable();
     });
 

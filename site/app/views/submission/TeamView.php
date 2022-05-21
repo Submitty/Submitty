@@ -6,7 +6,6 @@ use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
 
 class TeamView extends AbstractView {
-
     /**
      * Show team management page
      * @param \app\models\gradeable\Gradeable $gradeable
@@ -45,7 +44,9 @@ class TeamView extends AbstractView {
             "cancel_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'cancel']),
             "set_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message']),
             "remove_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message', 'remove']),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            'git_auth_token_url' => $this->core->buildUrl(['git_auth_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 }

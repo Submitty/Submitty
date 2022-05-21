@@ -198,7 +198,8 @@ class UsersController extends AbstractController {
             'user_updated' => $user->isUserUpdated(),
             'instructor_updated' => $user->isInstructorUpdated(),
             'manual_registration' => $user->isManualRegistration(),
-            'grading_registration_sections' => $user->getGradingRegistrationSections()
+            'grading_registration_sections' => $user->getGradingRegistrationSections(),
+            'registration_type' => $user->getRegistrationType(),
         ]);
     }
 
@@ -330,6 +331,7 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
+        $user->setRegistrationType(intval($_POST['user_group']) == 4 ? $_POST['registration_type'] : 'staff');
         //Instructor updated flag tells auto feed to not clobber some of the users data.
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));
@@ -402,7 +404,7 @@ class UsersController extends AbstractController {
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+        $non_null_counts = $this->core->getQueries()->getUsersCountByRotatingSections();
 
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
         $sections_with_students = [];
@@ -495,169 +497,115 @@ class UsersController extends AbstractController {
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
 
-        if (!isset($_POST['sort_type'])) {
+        if (!isset($_POST['rotating_assignment_type'])) {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        elseif ($_POST['sort_type'] === "drop_null") {
-            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
-            $this->core->addSuccessMessage("Non registered students removed from rotating sections");
+        elseif (!in_array($_POST['rotating_assignment_type'], ['drop_null', 'drop_all', 'redo', 'fewest'])) {
+            $this->core->addErrorMessage("Invalid radio button option selected for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        elseif ($_POST['sort_type'] === "drop_all") {
+        elseif ($_POST['rotating_assignment_type'] === "drop_null") {
+            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
+            $this->core->addSuccessMessage("Unregistered students removed from rotating sections");
+            $this->core->redirect($return_url);
+        }
+        elseif ($_POST['rotating_assignment_type'] === "drop_all") {
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-
-        if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], ['random', 'alphabetically'])) {
-            $type = $_POST['rotating_type'];
-        }
-        else {
-            $type = 'random';
-        }
-
-        $section_count = intval($_POST['sections']);
-        if ($section_count < 1) {
-            $this->core->addErrorMessage("You must have at least one rotating section");
-            $this->core->redirect($return_url);
-        }
-
-        if (in_array($_POST['sort_type'], ['redo', 'fewest']) && $type == "random") {
-            $sort = $_POST['sort_type'];
-        }
-        else {
-            $sort = 'redo';
-        }
-
-        $section_counts = array_fill(0, $section_count, 0);
-        $team_section_counts = [];
-        if ($sort === 'redo') {
-            $users = $this->core->getQueries()->getRegisteredUserIds();
-            $teams = $this->core->getQueries()->getTeamIdsAllGradeables();
-            $users_with_reg_section = $this->core->getQueries()->getAllUsers();
-
-            $exclude_sections = [];
-            $reg_sections = $this->core->getQueries()->getRegistrationSections();
-            foreach ($reg_sections as $row) {
-                $test = $row['sections_registration_id'];
-                if (isset($_POST[$test])) {
-                    array_push($exclude_sections, $_POST[$row['sections_registration_id']]);
+        if ($_POST['rotating_assignment_type'] === "redo") {
+            $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIds();
+            $unassigned_gradeable_teams = $this->core->getQueries()->getTeamIdsAllGradeables();
+            // Find the number of rotating sections to create or update during section assignments
+            $num_rotating_sections = intval($_POST['sections']);
+            if ($num_rotating_sections < 1) {
+                $this->core->addErrorMessage("Must specify a positive number of sections to redo rotating sections");
+                $this->core->redirect($return_url);
+            }
+            // get all users' id's except those that are in excluded registration sections (from selected checkboxes)
+            $excluded_registration_sections = $_POST["excluded_registration_sections"] ?? [];
+            $excluded_users = $this->core->getQueries()->getUsersByRegistrationSections($excluded_registration_sections);
+            $excluded_user_ids = array_map(function (User $user) {
+                return $user->getId();
+            }, $excluded_users);
+            $unassigned_user_ids = array_values(array_diff($unassigned_user_ids, $excluded_user_ids));
+            // shuffle order of user id's and team id's for "random" radio button
+            $sort_type = $_POST['sort_type'] ?? 'random';
+            if ($sort_type === 'random') {
+                shuffle($unassigned_user_ids);
+                foreach ($unassigned_gradeable_teams as $g_id => $team_ids) {
+                    shuffle($unassigned_gradeable_teams[$g_id]);
                 }
             }
-            //remove people who should not be added to rotating sections
-            for ($j = 0; $j < count($users_with_reg_section);) {
-                for ($i = 0; $i < count($exclude_sections); ++$i) {
-                    if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
-                        array_splice($users_with_reg_section, $j, 1);
-                        $j--;
-                        break;
-                    }
-                }
-                ++$j;
-            }
-            for ($i = 0; $i < count($users);) {
-                $found_in = false;
-                for ($j = 0; $j < count($users_with_reg_section); ++$j) {
-                    if ($users[$i] == $users_with_reg_section[$j]->getId()) {
-                        $found_in = true;
-                        break;
-                    }
-                }
-                if (!$found_in) {
-                    array_splice($users, $i, 1);
-                    continue;
-                }
-                ++$i;
-            }
-            if ($type === 'random') {
-                shuffle($users);
-                foreach ($teams as $g_id => $team_ids) {
-                    shuffle($teams[$g_id]);
-                }
-            }
+            // delete current rotating sections and create new ones
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->getQueries()->deleteAllRotatingSections();
-            for ($i = 1; $i <= $section_count; $i++) {
+            for ($i = 1; $i <= $num_rotating_sections; $i++) {
                 $this->core->getQueries()->insertNewRotatingSection($i);
             }
-
-            for ($i = 0; $i < count($users); $i++) {
-                $section = $i % $section_count;
-                $section_counts[$section]++;
+            // distribute users to their new rotating sections and create $section_assignment_counts array
+            // $section_assigment_counts array represents the number of students to add to each rotating section (section represented by an index in array)
+            $section_assignment_counts = array_fill(0, $num_rotating_sections, floor(count($unassigned_user_ids) / $num_rotating_sections));
+            for ($section = 0; $section < count($unassigned_user_ids) % $num_rotating_sections; $section++) {
+                $section_assignment_counts[$section]++;
             }
-            foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i++) {
-                    $section = $i % $section_count;
-
-                    if (!array_key_exists($g_id, $team_section_counts)) {
-                        $team_section_counts[$g_id] = array_fill(0, $section_count, 0);
-                    }
-
-                    $team_section_counts[$g_id][$section]++;
+            // $gradeables_section_assignment_counts 2d array represents the number of gradeable teams to add to each rotating section
+            // array's top level is a gradeable id + bottom level is # teams to add to each rotating section (section represented by an index)
+            $gradeables_section_assignment_counts = [];
+            // distribute gradeable teams to their new rotating sections and update $gradeables_section_assignment_counts array
+            foreach ($unassigned_gradeable_teams as $g_id => $team_ids) {
+                $gradeables_section_assignment_counts[$g_id] = array_fill(0, $num_rotating_sections, floor(count($team_ids) / $num_rotating_sections));
+                for ($section = 0; $section < count($team_ids) % $num_rotating_sections; $section++) {
+                    $gradeables_section_assignment_counts[$g_id][$section]++;
+                }
+            }
+            // update each team's rotating section assignments using $gradeables_section_assignment_counts array
+            // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
+            foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
+                for ($i = 0; $i < $num_rotating_sections; $i++) {
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
         }
-        else {
+        else { // $_POST['rotating_assignment_type'] === "fewest"
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
-            $max_section = $this->core->getQueries()->getMaxRotatingSection();
-            if ($max_section === null) {
-                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
-            }
-            elseif ($max_section != $section_count) {
-                $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
+            $unassigned_user_ids = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
+            // Find the number of rotating sections to create or update during section assignments
+            $num_rotating_sections = $this->core->getQueries()->getMaxRotatingSection();
+            if ($num_rotating_sections === null) {
+                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot put newly
+                    registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
-            $users = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
-            $teams = $this->core->getQueries()->getTeamIdsWithNullRotating();
-            // only random sort can use 'fewest' type
-            shuffle($users);
-            foreach ($teams as $g_id => $team_ids) {
-                shuffle($teams[$g_id]);
+            // 'fewest' rotating section setup option can only use random sort
+            shuffle($unassigned_user_ids);
+            // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
+            // $section_assigment_counts array represents the number of students to add to each rotating section (section represented by an index in array)
+            $total_users_count = $this->core->getQueries()->getTotalRegisteredUsersCount();
+            $expected_section_sizes = array_fill(0, $num_rotating_sections, floor($total_users_count / $num_rotating_sections));
+            for ($section = 0; $section < $total_users_count % $num_rotating_sections; $section++) {
+                $expected_section_sizes[$section]++;
             }
-            $sections = $this->core->getQueries()->getCountUsersRotatingSections();
-            $use_section = 0;
-            $max = $sections[0]['count'];
-            foreach ($sections as $section) {
-                if ($section['count'] < $max) {
-                    $use_section = $section['rotating_section'] - 1;
-                    break;
-                }
-            }
-
-            for ($i = 0; $i < count($users); $i++) {
-                $section_counts[$use_section]++;
-                $use_section = ($use_section + 1) % $section_count;
-            }
-            foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i++) {
-                    $use_section = ($use_section + 1) % $section_count;
-
-                    if (!array_key_exists($g_id, $team_section_counts)) {
-                        $team_section_counts[$g_id] = array_fill(0, $section_count, 0);
-                    }
-
-                    $team_section_counts[$g_id][$use_section]++;
-                }
-            }
+            $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
+            $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
+                return $expected_size - $curr_size['count'];
+            }, $expected_section_sizes, $curr_section_sizes);
         }
-
-        for ($i = 0; $i < $section_count; $i++) {
-            $update_users = array_splice($users, 0, $section_counts[$i]);
+        // distribute unassigned users to rotating sections using the $section_assigment_counts array
+        for ($section = 0; $section < $num_rotating_sections; $section++) {
+            $update_users = array_splice($unassigned_user_ids, 0, $section_assignment_counts[$section]);
             if (count($update_users) == 0) {
                 continue;
             }
-            $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
+            $this->core->getQueries()->updateUsersRotatingSection($section + 1, $update_users);
         }
-
-        //update graders' access for gradeables with all access grading for limited
-        //access graders now that rotating sections are set up
-
-        //$update_graders_gradeables is all gradeables in this semester/course where
-        //there's limited access graders + all access grading
-        $update_graders_gradeables = [];
+        // Update graders' access for gradeables with all access grading for limited access graders now that rotating sections are set up
+        $update_graders_gradeables = []; // all gradeables in this course where there's limited access graders + all access grading
         $update_graders_gradeables_ids = $this->core->getQueries()->getGradeableIdsForFullAccessLimitedGraders();
         foreach ($update_graders_gradeables_ids as $row) {
             $g_id = $row['g_id'];
@@ -667,25 +615,13 @@ class UsersController extends AbstractController {
             }
             $update_graders_gradeables[] = $tmp_gradeable;
         }
-
         $new_graders = $this->core->getQueries()->getNewGraders();
-
         foreach ($update_graders_gradeables as $update_gradeable) {
             $update_gradeable->setRotatingGraderSections($new_graders);
             $this->core->getQueries()->updateGradeable($update_gradeable);
         }
 
-        foreach ($team_section_counts as $g_id => $counts) {
-            for ($i = 0; $i < $section_count; $i++) {
-                $update_teams = array_splice($teams[$g_id], 0, $team_section_counts[$g_id][$i]);
-
-                foreach ($update_teams as $team_id) {
-                    $this->core->getQueries()->updateTeamRotatingSection($team_id, $i + 1);
-                }
-            }
-        }
-
-        $this->core->addSuccessMessage("Rotating sections setup");
+        $this->core->addSuccessMessage("Rotating sections reassigned successfully");
         $this->core->redirect($return_url);
     }
 
@@ -699,6 +635,13 @@ class UsersController extends AbstractController {
      * @return array $contents  Data rows and columns read from xlsx or csv file
      */
     private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        // Need to provide a comment typehint on these two variables to avoid a phpstan error
+        // See: https://github.com/phpstan/phpstan/issues/6559
+        /** @var string */
+        $csv_file = '';
+        /** @var string */
+        $xlsx_file = '';
+
         // Data is confidential, and therefore must be deleted immediately after
         // this process ends, regardless if process completes successfully or not.
         register_shutdown_function(
@@ -877,13 +820,23 @@ class UsersController extends AbstractController {
         // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
+        $registration_type_idx = $pref_firstname_idx + 2;
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
+        $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
         $bad_columns = []; //Tracks columns in which errors occured
 
+        /* Used for validation of grading assignment for graders to registration sections. Graders cannot
+          be assigned to grade the (created-by-default) null registration section. */
+        $invalid_grading_assignments = [];
+        $valid_sections = $this->core->getQueries()->getRegistrationSections();
+        foreach ($valid_sections as $i => $section) {
+            $valid_sections[$i] = $section['sections_registration_id'];
+        }
+
         // Mapping column with its validation formats
         $column_formats = [
-            'column_count' => 'Only 5 to 9 columns are allowed',
+            'column_count' => 'Only 5 to 10 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
             'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
@@ -892,7 +845,12 @@ class UsersController extends AbstractController {
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
-            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.'
+            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
+            'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' .
+                'enclosed in double quotes (e.g. "1,3,STAFF").',
+            'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
+            'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
+            'user_registration_type' => 'Student registration type must be one of either "graded", "audit", or "withdrawn".',
         ];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
@@ -903,7 +861,7 @@ class UsersController extends AbstractController {
                 continue;
             }
             // Bounds check to ensure minimum required number of rows is present.
-            if (count($vals) < 5 || count($vals) > 9) {
+            if (count($vals) < 5 || count($vals) > 10) {
                 $bad_row_details[$row_num + 1][] = 'column Count';
                 if (!in_array('column_count', $bad_columns)) {
                     $bad_columns[] = 'column_count';
@@ -984,6 +942,50 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
+            /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
+               Automatically validate if not set (this field is optional). */
+            if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
+                if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
+                    // Regex check for comma-separated registration sections.
+                    $bad_row_details[$row_num + 1][] = 'grading assignments format';
+                    if (!in_array('grading_assignments_format', $bad_columns)) {
+                        $bad_columns[] = 'grading_assignments_format';
+                    }
+                }
+                else {
+                    $grading_assignments = explode(',', $vals[$grading_assignments_idx]);
+                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
+                        // Prevent duplicate registration sections from being specified for assignment.
+                        $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
+                        if (!in_array('grading_assignments_format', $bad_columns)) {
+                            $bad_columns[] = 'grading_assignments_duplicate';
+                        }
+                    }
+                    else {
+                        // Confirm entered registration sections are valid, pre-existing sections within the course.
+                        $unrecognized_sections = array_diff($grading_assignments, $valid_sections);
+                        if (count($unrecognized_sections) > 0) {
+                            $bad_row_details[$row_num + 1][] = 'grading assignment sections';
+                            if (!in_array('invalid_grading_assignments', $bad_columns)) {
+                                $bad_columns[] = 'invalid_grading_assignments';
+                            }
+                            $invalid_grading_assignments = array_unique(array_merge($invalid_grading_assignments, $unrecognized_sections));
+                        }
+                    }
+                }
+            }
+            /* Check valid registration type for classlist uploads; automatically validate if not set (this field is optional).
+               Graderlist uploads default to 'staff' registration type. */
+            if ($list_type === 'classlist' && !(empty($vals[$registration_type_idx]))) {
+                if (!User::validateUserData('student_registration_type', $vals[$registration_type_idx])) {
+                    $bad_row_details[$row_num + 1][] = 'registration type';
+                    if (!in_array('user_registration_type', $bad_columns)) {
+                        $bad_columns[] = 'user_registration_type';
+                    }
+                }
+            }
+            // Ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data.
+            $uploaded_data[$row_num] = $vals;
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
@@ -996,6 +998,9 @@ class UsersController extends AbstractController {
             $msg .= "\n Format your data as per following standards";
             foreach ($bad_columns as $bad_col) {
                 $msg .= "\n " . $column_formats[$bad_col];
+                if ($bad_col === 'invalid_grading_assignments') {
+                    $msg .= ' Invalid registration sections specified:- ' . implode(', ', $invalid_grading_assignments) . '.';
+                }
             }
             $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
@@ -1010,7 +1015,7 @@ class UsersController extends AbstractController {
             foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
                     // Validate if this user has any data to update.
-                    // Did student registration section or grader group change?
+                    // Did student registration section, grader group, or registration type change?
                     if (count($row) === 1) {
                         $users_to_update[] = $row;
                     }
@@ -1018,6 +1023,9 @@ class UsersController extends AbstractController {
                         $users_to_update[] = $row;
                     }
                     elseif ($list_type === 'graderlist' && $row[4] !== (string) $existing_user->getGroup()) {
+                        $users_to_update[] = $row;
+                    }
+                    elseif ($list_type === 'classlist' && !empty($row[$registration_type_idx]) && $row[$registration_type_idx] !== $existing_user->getRegistrationType()) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -1055,6 +1063,8 @@ class UsersController extends AbstractController {
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
                 $user_group = $list_type === 'classlist' ? '4' : '3';
                 $user->setGroup($user_group);
+                $user_registration_type = $list_type === 'classlist' ? 'graded' : 'staff';
+                $user->setRegistrationType($user_registration_type);
                 $insert_or_update_user_function('insert', $user);
             }
             else {
@@ -1079,6 +1089,17 @@ class UsersController extends AbstractController {
                 if ($use_database) {
                     $user->setPassword($row[5]);
                 }
+                if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
+                    $user->setGradingRegistrationSections($grading_assignments);
+                }
+                if ($list_type === 'classlist') {
+                    $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
+                }
+                else {
+                    $user->setRegistrationType('staff');
+                }
                 $insert_or_update_user_function('insert', $user);
             }
         }
@@ -1100,6 +1121,17 @@ class UsersController extends AbstractController {
                     $user->setRegistrationSection($row[$registration_section_idx]);
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
+                if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
+                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
+                    sort($grading_assignments);
+                    $user->setGradingRegistrationSections($grading_assignments);
+                }
+                if ($list_type === 'classlist') {
+                    $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
+                }
+                else {
+                    $user->setRegistrationType('staff');
+                }
             }
             $insert_or_update_user_function('update', $user);
         }

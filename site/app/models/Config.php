@@ -33,6 +33,8 @@ use app\libraries\FileUtils;
  * @method integer getDefaultStudentLateDays()
  * @method string getConfigPath()
  * @method string getAuthentication()
+ * @method array getLdapOptions()
+ * @method void setLdapOptions(array $options)
  * @method \DateTimeZone getTimezone()
  * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
@@ -80,7 +82,6 @@ use app\libraries\FileUtils;
  */
 
 class Config extends AbstractModel {
-
     /**
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never
@@ -121,6 +122,11 @@ class Config extends AbstractModel {
     protected $websocket_port = 8443;
     /** @prop @var string */
     protected $authentication;
+    /**
+     * @prop
+     * @var array
+     **/
+    protected $ldap_options = [];
     /** @prop @var DateTimeZone */
     protected $timezone;
     /** @var string */
@@ -311,8 +317,21 @@ class Config extends AbstractModel {
             $this->database_driver = $database_json['driver'];
         }
 
-        $this->authentication = $database_json['authentication_method'];
         $this->debug = $database_json['debugging_enabled'] === true;
+
+        $authentication_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'authentication.json'));
+        if (!$authentication_json) {
+            throw new ConfigException("Could not find authentication config: {$this->config_path}/authentication.json");
+        }
+        $this->authentication = $authentication_json['authentication_method'];
+        $this->ldap_options = $authentication_json['ldap_options'];
+        if ($this->authentication === 'LdapAuthentication') {
+            foreach (['url', 'uid', 'bind_dn'] as $key) {
+                if (!isset($this->ldap_options[$key])) {
+                    throw new ConfigException("Missing config value for ldap options: {$key}");
+                }
+            }
+        }
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
         if (!$submitty_json) {

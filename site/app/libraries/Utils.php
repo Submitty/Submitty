@@ -8,7 +8,6 @@ use Ds\Set;
  * Class Utils
  */
 class Utils {
-
     /**
      * Defines a new default str_pad that's useful for things like parts of a datetime
      *

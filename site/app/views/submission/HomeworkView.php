@@ -18,7 +18,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractNotebookInput;
 
 class HomeworkView extends AbstractView {
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -44,6 +43,10 @@ class HomeworkView extends AbstractView {
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
+
+        if ($this->core->getUser()->accessFullGrading()) {
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
+        }
 
         // Only show the late banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
@@ -118,7 +121,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        if ($submission_count > 0) {
+        if ($submission_count > 0 && $active_version !== 0) {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -169,7 +172,7 @@ class HomeworkView extends AbstractView {
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysAllowed() : $late_days_allowed;
 
         $error = false;
         $messages = [];
@@ -423,7 +426,7 @@ class HomeworkView extends AbstractView {
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
-        $viewing_inactive_version = $highest_version !== $display_version;
+        $viewing_inactive_version = $display_version !== 0 && $highest_version !== $display_version;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
@@ -502,7 +505,9 @@ class HomeworkView extends AbstractView {
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
-            'recent_version_url' => $recent_version_url
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['git_auth_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 

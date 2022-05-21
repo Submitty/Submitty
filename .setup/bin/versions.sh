@@ -5,8 +5,8 @@
 # of built artificats.
 
 # SUBMITTY REPOS
-export AnalysisTools_Version=v.18.06.00
-export Lichen_Version=v21.10.00
+export AnalysisTools_Version=v22.03.00
+export Lichen_Version=v22.05.00
 export RainbowGrades_Version=v21.06.01
 export Tutorial_Version=v20.10.01
 export SysadminTools_Version=v20.01.00

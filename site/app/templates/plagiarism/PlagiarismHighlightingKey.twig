@@ -1,0 +1,20 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}Plagiarism-Highlighting-Key{% endblock %}
+{% block title %}Plagiarism Highlighting Key{% endblock %}
+{% block body %}
+<div class="color-pickers">
+    <button id="reset-colors" class="btn">Reset Colors</button><br>
+    <input type="color" id="common-code" name="common-code">
+    <label for="common-code">Matches many students</label><br>
+    <input type="color" id="provided-code" name="provided-code">
+    <label for="provided-code">Matches instructor-provided code</label><br>
+    <input type="color" id="match" name="match">
+    <label for="match">Matches student(s) other than the selected student</label><br>
+    <input type="color" id="specific-match" name="specific-match">
+    <label for="specific-match">Matches selected student</label><br>
+    <input type="color" id="selected-red" name="selected-red">
+    <label for="selected-red">Specific matching region</label><br>
+    <input type="color" id="selected-blue" name="selected-blue">
+    <label for="selected-blue">Selected region</label><br>
+</div>
+{% endblock %}

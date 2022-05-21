@@ -32,6 +32,15 @@ if [ -d ${THIS_DIR}/../.vagrant ]; then
     VAGRANT=1
 fi
 
+
+#
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+UTM_ARM=0
+if [[ "$(uname -m)" = "aarch64" ]] ; then
+    UTM_ARM=1
+fi
+
+
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
@@ -44,6 +53,18 @@ if [ ${WORKER} == 0 ]; then
 else
     ALL_DAEMONS=( submitty_autograding_worker )
     RESTART_DAEMONS=( )
+fi
+
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+if [ ${UTM_ARM} == 1 ]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
 fi
 
 ########################################################################################################################
@@ -141,6 +162,7 @@ PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -241,6 +263,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/socket_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
@@ -283,6 +306,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/socket_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
@@ -475,12 +499,37 @@ g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INST
 # build the helper program for calculating early submission incentive extensions
 g++ ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.cpp -lboost_system -lboost_filesystem -std=c++11 -Wall -g -o ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
 
+GRADINGCODE="${SUBMITTY_INSTALL_DIR}/src/grading"
+JSONCODE="${SUBMITTY_INSTALL_DIR}/vendor/include"
+
+# Create the complete/build config using main_configure
+g++ "${GRADINGCODE}/main_configure.cpp" \
+    "${GRADINGCODE}/load_config_json.cpp" \
+    "${GRADINGCODE}/execute.cpp" \
+    "${GRADINGCODE}/TestCase.cpp" \
+    "${GRADINGCODE}/error_message.cpp" \
+    "${GRADINGCODE}/window_utils.cpp" \
+    "${GRADINGCODE}/dispatch.cpp" \
+    "${GRADINGCODE}/change.cpp" \
+    "${GRADINGCODE}/difference.cpp" \
+    "${GRADINGCODE}/tokenSearch.cpp" \
+    "${GRADINGCODE}/tokens.cpp" \
+    "${GRADINGCODE}/clean.cpp" \
+    "${GRADINGCODE}/execute_limits.cpp" \
+    "${GRADINGCODE}/seccomp_functions.cpp" \
+    "${GRADINGCODE}/empty_custom_function.cpp" \
+    "-I${JSONCODE}" \
+    -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
+
 # set the permissions
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
+
+chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/configure.out
 
 
 ###############################################
@@ -539,6 +588,11 @@ echo -e "Compile and install analysis tools"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
+if [ ${UTM_ARM} == 0 ]; then
+# END ARM64
+
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
@@ -548,6 +602,13 @@ if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     echo ${AnalysisTools_Version} > VERSION
 fi
 popd > /dev/null
+
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
+else
+    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
+fi
+# END ARM64
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

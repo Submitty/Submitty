@@ -1792,7 +1792,7 @@ function onAddComponent(peer) {
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
-            return closeAllComponents(true);
+            return closeAllComponents(true, true);
         })
         .then(function () {
           return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
@@ -2254,7 +2254,7 @@ function setPdfPageAssignment(page) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(function () {
             return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
@@ -2506,6 +2506,44 @@ function open_overall_comment_tab(user) {
     $('#overall-comment-tabs').children().removeClass('active-btn');
     comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
+
+    //if the tab is for the main user of the page
+    if(!textarea.hasClass('markdown-preview')){
+        if($(`#overall-comment-markdown-preview-${user}`).is(':hidden')){
+            textarea.show();
+        }
+    } else {
+        textarea.show();
+    }
+
+    let attachmentsListUser = $(`#attachments-list-${user}`);
+    if (attachmentsListUser.length !== 0) {
+        let attachmentsList = $("#attachments-list");
+        $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
+        let isUser = false;
+        if (attachmentsList.attr("data-user") === user) {
+            $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
+        } else {
+            $("#attachment-upload-form").css("display", "none");
+        }
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+        }
+        
+        attachmentsList.attr("data-active-user", user);
+    }
+
 }
 
 /**
@@ -2627,14 +2665,15 @@ function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
         if(files[i].innerText.trim() == "upload.pdf"){
+            page_num = Math.min($("#viewer > .page").length, page_num);
             let page = $("#pageContainer" + page_num);
             if($("#file-view").is(":visible")){
                 if(page.length) {
-                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#submission_browser').scrollTop(page[0].offsetTop);
                 }
             }
             else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
+                viewFileFullPanel("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }

@@ -12,7 +12,6 @@ use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
-
     /**
      * @Route("/courses/{_semester}/{_course}/student_photos")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
