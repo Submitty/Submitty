@@ -175,12 +175,7 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = ORMSetup::createAnnotationMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
-            $this->config->isDebug(),
-            null,
-            null
-        );
+        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
 
         if ($debug_stack) {
             $config->setSQLLogger($debug_stack);
