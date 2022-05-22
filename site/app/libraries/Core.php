@@ -12,8 +12,8 @@ use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
-use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -175,12 +175,11 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = Setup::createAnnotationMetadataConfiguration(
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
             null,
-            null,
-            false
+            null
         );
 
         if ($debug_stack) {
