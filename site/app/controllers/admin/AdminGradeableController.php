@@ -1155,6 +1155,10 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === false && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                $this->core->getQueries()->convertInquiryComponentId($gradeable);
+            }
+
             // Try to set the property
             try {
                 //convert the property name to a setter name
