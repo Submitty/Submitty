@@ -208,6 +208,7 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 #libraries for QR code processing:
 #install DLL for zbar
 apt-get install libzbar0 --yes
+apt-get install python3-opencv --yes
 
 pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
 
