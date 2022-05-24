@@ -33,9 +33,67 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username='instructor') => {
-    cy.get('input[name=user_id]').type(username, {force: true});
-    cy.get('input[name=password]').type(username, {force: true});
-    cy.get('input[name=login]').click();
+    cy.get('body')
+        .then(body => {
+            if (body.find('input[name=user_id]').length > 0) {
+                cy.get('input[name=user_id]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.get('input[name=login]').click();
+            }
+            else {
+                cy.get('#saml-login').should('have.attr', 'href').then(href => {
+                    cy.request(href).then((res) => {
+                        const url = new URL(res.redirects[1].split(" ")[1]);
+                        const authState = url.searchParams.get('AuthState');
+                        cy.request({
+                            url: url.origin + url.pathname,
+                            method: 'POST',
+                            body: {
+                                username: username,
+                                password: username,
+                                AuthState: authState
+                            },
+                            form: true
+                        }).then(r => {
+                            const parser = new DOMParser();
+                            const html = parser.parseFromString(r.body, 'text/html');
+                            const inputs = html.getElementsByTagName("input");
+                            let samlRes = '';
+                            let relay = '';
+                            for (const input of inputs) {
+                                switch (input.name) {
+                                    case 'SAMLResponse':
+                                        samlRes = input.value;
+                                        break;
+                                    case 'RelayState':
+                                        relay = input.value;
+                                        break;
+                                }
+                            }
+                            const action = html.getElementsByTagName("form")[0].action;
+                            expect(action).to.equal(`${Cypress.config('baseUrl')}/authentication/check_login`);
+                            cy.request({
+                                url: action,
+                                method: 'POST',
+                                body: {
+                                    SAMLResponse: samlRes,
+                                    RelayState: relay
+                                },
+                                form: true
+                            }).then(res => {
+                                expect(res.status).to.equal(200);
+                                cy.visit(res.url);
+                            });
+                            //console.log(r);
+                        });
+                    });
+                });
+                /*cy.get('#saml-login').click();
+                cy.get('input[name=username]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.get('#submit > td:nth-child(3) > button').click();*/
+            }
+        });
 });
 
 /**

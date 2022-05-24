@@ -2,13 +2,16 @@
 
 namespace app\controllers;
 
+use app\authentication\SamlAuthentication;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
+use app\views\AuthenticationView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -69,15 +72,14 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/login")
      *
      * @var string $old the url to redirect to after login
-     * @return MultiResponse
+     * @return ResponseInterface
      */
     public function loginForm($old = null) {
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
             $old = null;
         }
-        return MultiResponse::webOnlyResponse(
-            new WebResponse('Authentication', 'loginForm', $old)
-        );
+        $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
+        return new WebResponse('Authentication', 'loginForm', $old, $is_saml_auth);
     }
 
     /**
@@ -92,6 +94,7 @@ class AuthenticationController extends AbstractController {
      * @return MultiResponse
      */
     public function checkLogin($old = null) {
+        $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
             $old = null;
         }
@@ -104,21 +107,26 @@ class AuthenticationController extends AbstractController {
             );
         }
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
-        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $msg = 'Cannot leave user id or password blank';
+        if (!$is_saml_auth) {
+            if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+                $msg = 'Cannot leave user id or password blank';
 
-            $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getFailResponse($msg),
-                null,
-                new RedirectResponse($old)
-            );
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($msg),
+                    null,
+                    new RedirectResponse($old)
+                );
+            }
+            $this->core->getAuthentication()->setUserId($_POST['user_id']);
+            $this->core->getAuthentication()->setPassword($_POST['password']);
         }
-        $this->core->getAuthentication()->setUserId($_POST['user_id']);
-        $this->core->getAuthentication()->setPassword($_POST['password']);
-        if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
-            Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
-            $msg = "Successfully logged in as " . htmlentities($_POST['user_id']);
+        if ($this->core->authenticate($_POST['stay_logged_in'] || $is_saml_auth) === true) {
+            if ($is_saml_auth && isset($_POST['RelayState']) && str_starts_with($_POST['RelayState'], $this->core->getConfig()->getBaseUrl())) {
+                $old = $_POST['RelayState'];
+            }
+            Logger::logAccess($this->core->getAuthentication()->getUserId(), $_COOKIE['submitty_token'], "login");
+            $msg = "Successfully logged in as " . htmlentities($this->core->getAuthentication()->getUserId());
 
             $this->core->addSuccessMessage($msg);
             return new MultiResponse(
@@ -128,9 +136,15 @@ class AuthenticationController extends AbstractController {
             );
         }
         else {
-            $msg = "Could not login using that user id or password";
+            if ($is_saml_auth) {
+                $old = $this->core->buildUrl(['authentication', 'login']);
+                $msg = "Could not login";
+            }
+            else {
+                $msg = "Could not login using that user id or password";
+                $this->core->addErrorMessage($msg);
+            }
 
-            $this->core->addErrorMessage($msg);
             $this->core->redirect($old);
             return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
@@ -243,5 +257,36 @@ class AuthenticationController extends AbstractController {
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
         return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
+    }
+
+    /**
+     * @Route("/authentication/saml_start")
+     */
+    public function samlStart($old = null) {
+        if (!$this->core->getAuthentication() instanceof SamlAuthentication) {
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
+            $old = null;
+        }
+        /** @var SamlAuthentication $auth */
+        $auth = $this->core->getAuthentication();
+        return new RedirectResponse($auth->redirect($old));
+    }
+
+    /**
+     * @Route("/authentication/user_select")
+     * @return ResponseInterface
+     */
+    public function userSelection() {
+        if (!isset($_SESSION['Authenticated_User_Id']) || !$this->core->getAuthentication() instanceof SamlAuthentication) {
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
+        }
+        $authorized_users = array_map(function ($user) {
+            return $user['user_id'];
+        }, $this->core->getQueries()->getSAMLAuthorizedUserIDs($_SESSION['Authenticated_User_Id']));
+        $users = $this->core->getQueries()->getUsersByIds($authorized_users);
+
+        return new WebResponse(AuthenticationView::class, 'userSelection', $users);
     }
 }

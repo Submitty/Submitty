@@ -3,6 +3,9 @@
     <!--
     <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
     -->
+    {% if is_saml %}
+    <a href="{{ saml_url }}" class="btn btn-primary" id="saml-login">Login with {{ saml_name }}</a>
+    {% else %}
     <form action="{{ login_url }}" method="post" id="login">
         <label>
             User ID
@@ -18,4 +21,5 @@
         </label>
         <input type="submit" name="login" value="Login" class="btn btn-primary" />
     </form>
+    {% endif %}
 </div>

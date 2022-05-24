@@ -7861,4 +7861,11 @@ ORDER BY
                     AND g_id = ?
         ", [$state, $user_id, $gradeable_id]);
     }
+
+    public function getSAMLAuthorizedUserIDs(string $saml_id): array {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE saml_id = ?
+        ", [$saml_id]);
+        return $this->submitty_db->rows();
+    }
 }

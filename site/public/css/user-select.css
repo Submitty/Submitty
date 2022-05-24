@@ -1,0 +1,10 @@
+
+
+@media (min-width: 768px) {
+    #user-select {
+        margin: 30px auto;
+        min-width: 450px;
+        width: 30%;
+        height: fit-content;
+    }
+}
