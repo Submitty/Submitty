@@ -19,6 +19,14 @@ from autograder import config as submitty_config
 
 JOB_ID = '~WORK~'
 
+# Worker should leave a warning in the log if the disk usage meets the
+# warning threshold
+DISK_USAGE_WARNING_THRESHOLD = 0.70
+
+# Worker should exit and write an error in the log if the disk usage
+# meets the error threshold
+DISK_USAGE_ERROR_THRESHOLD = 0.93
+
 
 # ==================================================================================
 # ==================================================================================
@@ -169,6 +177,23 @@ def launch_workers(config, my_name, my_stats):
     if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
         raise SystemExit(
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
+        )
+
+    # verify the disk space is enough
+    disk_usage = shutil.disk_usage('/')
+    disk_usage_percentage = float(disk_usage.used) / float(disk_usage.total)
+
+    print(disk_usage_percentage)
+
+    if disk_usage_percentage >= DISK_USAGE_ERROR_THRESHOLD:
+        config.logger.log_message(
+            f"ERROR: Disk usage {disk_usage_percentage} exceeds the threshold"
+        )
+        raise SystemExit("ERROR: Disk usage exceeds the threshold")
+
+    if disk_usage_percentage >= DISK_USAGE_WARNING_THRESHOLD:
+        config.logger.log_message(
+            f"WARNING: Disk usage {disk_usage_percentage} meets the warning threshold"
         )
 
     config.logger.log_message("grade_scheduler.py launched")
