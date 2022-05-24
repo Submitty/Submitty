@@ -712,8 +712,7 @@
     }
 
     function changeSortOrder() {
-        const status = {{ sort == 'random' ? 1 : 0}};
-        if (status) {
+        if ("{{ sort == 'random' ? true : false }}") {
             document.cookie = 'sort=id;';
         }
         else {
