@@ -183,8 +183,6 @@ def launch_workers(config, my_name, my_stats):
     disk_usage = shutil.disk_usage('/')
     disk_usage_percentage = float(disk_usage.used) / float(disk_usage.total)
 
-    print(disk_usage_percentage)
-
     if disk_usage_percentage >= DISK_USAGE_ERROR_THRESHOLD:
         config.logger.log_message(
             f"ERROR: Disk usage {disk_usage_percentage} exceeds the threshold"

@@ -56,4 +56,18 @@ if __name__ == '__main__':
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
 
+    print('Delaying {0} seconds to allow the system to stablize...'
+          .format(delay_in_seconds))
+    time.sleep(delay_in_seconds)
+
+    print("Verifying all worker daemons...")
+    cmd = "python3 {0} status --daemon worker --target perform_on_all_workers"
+    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
+
+    result = subprocess.run(["su", '-', "submitty_daemon", "-c", cmd],
+                            stdout=subprocess.PIPE, universal_newlines=True)
+    print(result.stdout)
+    if "is inactive" in result.stdout:
+        print("Some workers are inactive, check workers' logs.")
+
     print('Finished!')
