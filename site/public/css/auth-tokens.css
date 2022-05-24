@@ -1,0 +1,9 @@
+#new-token-banner {
+    background-color: var(--actionable-blue);
+    color: var(--always-default-white);
+}
+
+#token-copy-button:hover {
+    color: var(--external-link-blue);
+    cursor: pointer;
+}
