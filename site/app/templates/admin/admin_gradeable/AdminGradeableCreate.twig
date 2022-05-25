@@ -273,7 +273,7 @@
                                 <input style='width: 30%' type='text' name="vcs_url" id="vcs_self_url" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="" required />
                             {% else %}
-			        <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
+			        <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() }}</kbd>
                             {% endif %}
 			</div>						    
 		    </div>
