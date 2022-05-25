@@ -1998,6 +1998,7 @@ class Gradeable extends AbstractModel {
         }
     }
 
+
     public function getRepositoryPath(User $user, Team $team = null) {
         if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
             $vcs_path = $this->getVcsSubdirectory();
@@ -2011,11 +2012,7 @@ class Gradeable extends AbstractModel {
             }
         }
         $repo = $vcs_path;
-        
-        return replaceTokens($repo, $user, $team);
-    }
 
-    public function replaceTokens(String $repo, User $user, Team $team = null) {
         $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
         $repo = str_replace('{$user_id}', $user->getId(), $repo);
