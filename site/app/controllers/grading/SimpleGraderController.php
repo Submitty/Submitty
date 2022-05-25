@@ -246,7 +246,6 @@ class SimpleGraderController extends AbstractController {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getSuccessResponse($return_data)
                 );
-
             }
 
             $data = $_POST['scores'][$component->getId()] ?? '';
