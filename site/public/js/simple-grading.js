@@ -413,6 +413,12 @@ function setupCheckboxCells() {
 function setupNumericTextCells() {
     $(".cell-grade").change(function() {
         elem = $(this);
+        var split_id = elem.attr("id").split("-");
+        var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
+
+        var scores = {};
+        var old_scores = {};
+        var total = 0;
 
         const numbers = /^[0-9]+$/;
         if(this.tagName.toLowerCase() === 'input') {
@@ -421,8 +427,30 @@ function setupNumericTextCells() {
                 this.value = 0;
             }
             else if(!this.value.match(numbers)) {
-                alert('Score must be a positive integer');
+                alert('Score should be a positive integer');
                 this.value = 0;
+            }
+            // Input greater than the max_clamp for the component is not allowed
+            else {
+                submitAJAX(
+                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+                    {
+                        'csrf_token': csrfToken,
+                        'user_id': row_el.data("user"),
+                        'old_scores': old_scores,
+                        'scores': scores,
+                        'get_max_clamp': true
+                    },
+                    function(returned_data) {
+                        if(this.value > returned_data['data']['max_clamp']) {
+                            alert('Score should be less than the maximum value: ' + returned_data['data']['max_clamp']);
+                            this.value = 0;
+                        }
+                    },
+                    function() {
+                        alert("[SAVE ERROR] Refresh Page");
+                    }
+                );
             }
         }
 
@@ -432,13 +460,6 @@ function setupNumericTextCells() {
         else{
             elem.css("color", "");
         }
-
-        var split_id = elem.attr("id").split("-");
-        var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
-
-        var scores = {};
-        var old_scores = {};
-        var total = 0;
 
         row_el.find(".cell-grade").each(function() {
             elem = $(this);

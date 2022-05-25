@@ -219,9 +219,11 @@ class SimpleGraderController extends AbstractController {
             );
         }
         elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse("Didn't submit any scores")
-            );
+            if (!isset($_POST['get_max_clamp'])) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse("Didn't submit any scores")
+                );
+            }
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
@@ -239,6 +241,14 @@ class SimpleGraderController extends AbstractController {
         $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
+            if (isset($_POST['get_max_clamp']) && $_POST['get_max_clamp']) {
+                $return_data['max_clamp'] = $component->getUpperClamp();
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getSuccessResponse($return_data)
+                );
+
+            }
+
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
 
@@ -255,9 +265,9 @@ class SimpleGraderController extends AbstractController {
                         $component->getUpperClamp() < $data
                         || !is_numeric($data)
                     ) {
-                        //return MultiResponse::JsonOnlyResponse(
-                          //  JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
-                        //);
+                        return MultiResponse::JsonOnlyResponse(
+                            JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
+                        );
                     }
                     $db_data = $component_grade->getTotalScore();
                     if ($original_data != $db_data) {
