@@ -20,9 +20,6 @@
 # once we move to a newer pip.
 cryptography==3.3.2
 
-# For QR bulk upload
-opencv-python==4.5.5.64
-
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.3 # Submitty-util specific.
 
