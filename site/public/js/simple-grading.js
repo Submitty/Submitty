@@ -413,9 +413,19 @@ function setupCheckboxCells() {
 function setupNumericTextCells() {
     $(".cell-grade").change(function() {
         elem = $(this);
-        if (this.value == "") {
-            return;
+
+        const numbers = /^[0-9]+$/;
+        if(this.tagName.toLowerCase() === 'input') {
+            // Empty input is ok for comment but not numeric cells
+            if(!this.value) {
+                this.value = 0;
+            }
+            else if(!this.value.match(numbers)) {
+                alert('Score must be a positive integer');
+                this.value = 0;
+            }
         }
+
         if(this.value == 0) {
             elem.css("color", "--standard-light-medium-gray");
         }

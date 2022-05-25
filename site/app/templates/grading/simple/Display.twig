@@ -292,9 +292,9 @@
             <td class="option-small-input">
                 <input
                     class="option-small-box cell-grade" tabindex="0"
-                    style="text-align: center; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                    style="text-align: center; width: 120px; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_score == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
-                    type="text"
+                    type="number"
                     id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_score }}"
