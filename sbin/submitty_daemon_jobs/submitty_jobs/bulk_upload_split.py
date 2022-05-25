@@ -28,7 +28,7 @@ def main(args):
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
-        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj, strict=False)
         total_pages = len(pdfReader.pages)
         if (total_pages % num != 0):
             msg = filename + " not divisible by " + str(num)
@@ -38,7 +38,7 @@ def main(args):
 
         # recalculate the total # of pages for each file
         pdfFileObj = open(filename, 'rb')
-        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj, strict=False)
         total_pages = len(pdfReader.pages)
         max_length = len(str(total_pages - num))
 

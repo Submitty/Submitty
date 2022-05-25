@@ -33,7 +33,7 @@ def main(args):
 
     try:
         os.chdir(split_path)
-        pdfPages = PdfFileReader(filename)
+        pdfPages = PdfFileReader(filename, strict=False)
         pdf_writer = PdfFileWriter()
         i = id_index = 0
         page_count = 1
