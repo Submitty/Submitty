@@ -29,7 +29,7 @@ def main(args):
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-        total_pages = pdfReader.numPages
+        total_pages = len(pdfReader.pages)
         if (total_pages % num != 0):
             msg = filename + " not divisible by " + str(num)
             print(msg)
@@ -39,7 +39,7 @@ def main(args):
         # recalculate the total # of pages for each file
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-        total_pages = pdfReader.numPages
+        total_pages = len(pdfReader.pages)
         max_length = len(str(total_pages - num))
 
         output = {"filename": filename, "is_qr": False, "page_count": num}
@@ -50,14 +50,14 @@ def main(args):
         buff = log_msg
         while i < total_pages:
             cover_writer = PdfFileWriter()
-            cover_writer.addPage(pdfReader.getPage(i))
+            cover_writer.add_page(pdfReader.pages[i])
             prepended_index = str(i).zfill(max_length)
             cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], prepended_index)
             output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
             pdf_writer = PdfFileWriter()
             start = i
             for j in range(start, start+num):
-                pdf_writer.addPage(pdfReader.getPage(j))
+                pdf_writer.add_page(pdfReader.pages[j])
                 i += 1
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
