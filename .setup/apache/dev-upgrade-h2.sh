@@ -82,6 +82,10 @@ update_config() {
 
     sed -i "s/^SSL/\ \ \ \ SSL/" "${P_APACHE}"                                           \
         || panic "Failed to update the apache config"
+
+    info "Double check that HTTP/2 module is enabled"
+    a2dismod "php$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" mpm_prefork
+    a2enmod mpm_event http2
 }
 
 # remove apache TLS configuration
@@ -164,7 +168,7 @@ MODE="$1"
 shift
 
 if [[ "$UID" -ne 0 ]]; then
-    echo "Please run as root"
+    panic "Please run as root"
 fi
 
 while [[ "$#" -gt 0 ]]; do
@@ -181,12 +185,22 @@ while [[ "$#" -gt 0 ]]; do
             S_DOMAIN="$2"
             shift 2
             ;;
+        --i-know-what-i-am-doing-please-go-ahead)
+            VAGRANT=1
+            shift
+            ;;
         *)
             warn "Unknown option: $1"
             display_help
             exit 1
     esac
 done
+
+if [[ "$HOSTNAME" != "vagrant" && "$VAGRANT" -ne 1 ]]; then
+    warn "The script is designed for Submitty Vagrant VM in DEVELOPMENT environment"
+    warn "If you believe this is an error, please append the following option:"
+    panic "--i-know-what-i-am-doing-please-go-ahead"
+fi
 
 # check the domain settings
 SUBMITTY_DOMAIN=$(jq ".submission_url" "${SUBMITTY_INSTALL_DIR:?}/config/submitty.json"  \
@@ -201,12 +215,12 @@ if [[ "${SUBMITTY_DOMAIN}" != "${S_DOMAIN}" ]]; then
 fi
 
 case "$MODE" in
-    "up")
+    "up"|"upgrade")
         info "Upgrading to h2+TLS"
         upgrade
         info "Now you need to use https://${S_DOMAIN}"
         ;;
-    "down")
+    "down"|"downgrade")
         info "Downgrading to http1.1"
         downgrade
         info "Now you need to use http://${S_DOMAIN}"
