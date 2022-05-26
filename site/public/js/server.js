@@ -1,5 +1,8 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
+
+const { each } = require("jquery");
+
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
   loadInBreadcrumbLinks();
@@ -176,6 +179,46 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         })
     }
 }
+
+
+function loadAllTestcaseOutput(test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
+{
+    const parsed_test_cases = JSON.parse(test_cases);
+
+    parsed_test_cases.forEach(function callback(test_case, index) {
+        //alert(index + " => " + test_case.name + " | Can Be Viewed: " + test_case.can_view);
+
+        var can_view = (!test_case.hidden || show_hidden);
+        var can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden)
+
+        if (can_view_details && test_case.has_extra_results)
+        {
+            //alert("!!!! " + test_case.name + " can load !!!!");
+            loadTestcaseOutput("testcase_" + index, gradeable_id, who_id, index, version);
+        }
+
+        if (test_case.has_extra_results && can_view)
+        {
+            const element = document.getElementById("testcase_" + index);
+            if(element != null)
+            {
+                if(num_visible_testcases == 0)
+                {
+                    element.style.display = 'block';
+                }
+                else
+                {
+                    element.style.display = 'none';
+                }
+            }
+        }
+
+        // loadTestcaseOutput(test_case, gradeable_id, who_id, i, version);
+    });
+        
+    // loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});
+}
+
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
