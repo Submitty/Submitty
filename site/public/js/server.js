@@ -1,7 +1,7 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 
-const { each } = require("jquery");
+//const { each } = require("jquery");
 
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
@@ -142,6 +142,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
     let loadingTools = $("#tc_" + index).find(".loading-tools");
 
+    // If div_name is expanded, collapse
     if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
@@ -150,6 +151,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-show").show();
     }
+    // If div_name is collapsed, expand
     else{
         $("#show_char_"+index).toggle();
         var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
@@ -181,8 +183,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 }
 
 
-function loadAllTestcaseOutput(test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
+function loadAllTestcaseOutput(expand_all, test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
 {
+    //alert ("Value of Expand All: " + expand_all)
     const parsed_test_cases = JSON.parse(test_cases);
 
     parsed_test_cases.forEach(function callback(test_case, index) {
@@ -190,32 +193,35 @@ function loadAllTestcaseOutput(test_cases, show_hidden, show_hidden_details, num
 
         var can_view = (!test_case.hidden || show_hidden);
         var can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden)
+        
+        var div_name = "testcase_" + index;
 
         if (can_view_details && test_case.has_extra_results)
         {
             //alert("!!!! " + test_case.name + " can load !!!!");
-            loadTestcaseOutput("testcase_" + index, gradeable_id, who_id, index, version);
-        }
-
-        if (test_case.has_extra_results && can_view)
-        {
-            const element = document.getElementById("testcase_" + index);
-            if(element != null)
+            // Check if we should trigger loadTestcaseOutput or not
+            if($(div_name).is(":visible") != expand_all)
             {
-                if(num_visible_testcases == 0)
-                {
-                    element.style.display = 'block';
-                }
-                else
-                {
-                    element.style.display = 'none';
-                }
+                loadTestcaseOutput(div_name, gradeable_id, who_id, index, version);
             }
         }
 
-        // loadTestcaseOutput(test_case, gradeable_id, who_id, i, version);
+        // if (test_case.has_extra_results && can_view)
+        // {
+        //     const element = document.getElementById(div_name);
+        //     if(element != null)
+        //     {
+        //         if(num_visible_testcases == 0)
+        //         {
+        //             element.style.display = 'block';
+        //         }
+        //         else
+        //         {
+        //             element.style.display = 'none';
+        //         }
+        //     }
+        // }
     });
-        
     // loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});
 }
 
