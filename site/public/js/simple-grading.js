@@ -415,11 +415,14 @@ function setupNumericTextCells() {
         elem = $(this);
         var split_id = elem.attr("id").split("-");
         var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
+        console.log(elem.data('origval'));
+        console.log(elem.val());
 
         var scores = {};
         var old_scores = {};
         var total = 0;
 
+        var exceed_max = false;
         const numbers = /^[0-9]+$/;
         if(this.tagName.toLowerCase() === 'input') {
             // Empty input is ok for comment but not numeric cells
@@ -442,9 +445,9 @@ function setupNumericTextCells() {
                         'get_max_clamp': true
                     },
                     function(returned_data) {
-                        if(this.value > returned_data['data']['max_clamp']) {
+                        if(value > returned_data['data']['max_clamp']) {
+                            elem.val() = elem.data('origval');
                             alert('Score should be less than the maximum value: ' + returned_data['data']['max_clamp']);
-                            this.value = 0;
                         }
                     },
                     function() {
@@ -452,6 +455,10 @@ function setupNumericTextCells() {
                     }
                 );
             }
+        }
+
+        if(exceed_max) {
+            console.log(this.value);
         }
 
         if(this.value == 0) {
@@ -476,9 +483,9 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-      let value = this.value;
+        value = this.value;
 
-      submitAJAX(
+        submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
