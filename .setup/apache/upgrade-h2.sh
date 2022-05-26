@@ -127,7 +127,7 @@ upgrade_submitty() {
     info "Upgrading configurations for Submitty"
     sed -i "s/http\:\/\/${S_DOMAIN}/https\:\/\/${S_DOMAIN}/"                             \
             "${SUBMITTY_INSTALL_DIR}/config/submitty.json"                               \
-        panic "Failed to upgrade to HTTPS for Submitty"
+        || panic "Failed to upgrade to HTTPS for Submitty"
 }
 
 # downgrade submitty configuration to HTTP
@@ -135,7 +135,7 @@ downgrade_submitty() {
     info "Downgrading configurations for Submitty"
     sed -i "s/https\:\/\/${S_DOMAIN}/http\:\/\/${S_DOMAIN}/"                             \
             "${SUBMITTY_INSTALL_DIR}/config/submitty.json"                               \
-        panic "Failed to downgrade to HTTP for Submitty"
+        || panic "Failed to downgrade to HTTP for Submitty"
 }
 
 
