@@ -366,6 +366,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install ca-certificates
 
           - name: Install third party dependencies
             run: |
@@ -393,7 +394,7 @@ jobs:
           - name: Set up apache
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl wsgi
               sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
               sudo mkdir -p /run/php
               sudo chown www-data:www-data /run/php
@@ -403,10 +404,12 @@ jobs:
               sudo rm -rf /etc/apache2/sites-enabled/*
               sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
               sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+              sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
               sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
               sudo chmod 0640 /etc/apache2/suexec/www-data
               sudo a2ensite submitty
               sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+              sudo -E env "PATH=$PATH" bash .setup/apache/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
               sudo apache2ctl -t
               sudo service php${PHP_VER}-fpm restart
               sudo service apache2 restart
@@ -425,6 +428,9 @@ jobs:
               sudo service nginx restart
 
           - name: Run git tests
+            env:
+              GIT_CURL_VERBOSE: 1
+              GIT_TRACE: 1
             run: |
               cd $SUBMITTY_REPOSITORY
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
@@ -443,7 +449,7 @@ jobs:
             run: |
               pushd ${SUBMITTY_REPOSITORY}
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+              TEST_URL="https://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
 
           # TODO: Remove this block after upgrading jsPDF
@@ -465,12 +471,12 @@ jobs:
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: npm run test:api
             env:
-              BASE_URL: http://localhost
+              BASE_URL: https://localhost
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=https://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -484,7 +490,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=https://localhost
               spec: cypress/integration/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -498,7 +504,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=https://localhost
               spec: cypress/integration/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -515,7 +521,7 @@ jobs:
           - name: Run cypress e2e login tests with databse auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=https://localhost
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -527,7 +533,7 @@ jobs:
           - name: Run cypress e2e login tests with LDAP auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=https://localhost
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome

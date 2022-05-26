@@ -86,6 +86,12 @@ update_config() {
     info "Double check that HTTP/2 module is enabled"
     a2dismod "php$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" mpm_prefork
     a2enmod mpm_event http2
+
+    info "Checking the integrity of Apache configuration"
+    apachectl configtest || {
+        cat "${P_APACHE}"
+        panic "Apache's configuration is invalid"
+    }
 }
 
 # remove apache TLS configuration
@@ -123,7 +129,10 @@ update_syscert() {
 # reload apache server
 reload_apache() {
     info "Reloading apache2"
-    systemctl restart apache2 || panic "Failed to reload apache2"
+    systemctl restart apache2 || {
+        systemctl --no-pager status apache2
+        panic "Failed to reload apache2"
+    }
 }
 
 # upgrade submitty configuration to HTTPS
