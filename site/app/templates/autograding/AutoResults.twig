@@ -22,10 +22,9 @@
         <div class="box submission-page-total-header key_to_click" tabindex="0"
             {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"
-                {# {% set sync_expand_all = true %}
-                {% if hide_version_and_test_details == false %}
+                {# {% if hide_version_and_test_details == false %}
                     {% if not incomplete_autograding %}
-                        onclick="loadAllTestcaseOutput('{{sync_expand_all}}', '{{ testcases|json_encode|e('html_attr') }}', '{{show_hidden}}', '{{show_hidden_details}}', '{{num_visible_testcases}}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
+                        onclick="loadAllTestcaseOutput('{{sync_expand_all}}', '{{ testcases|json_encode|e('html_attr') }}', '{{show_hidden}}', '{{show_hidden_details}}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
                     {% endif %}
                 {% endif %} #}
                 style="cursor:pointer;"

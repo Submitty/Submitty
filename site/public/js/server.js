@@ -183,9 +183,19 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 }
 
 
-function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
+/*
+ * Function to toggle all of the given test cases, resulting in all to be expanded or collapsed.  
+ * 
+ * @param total_div_name {string} name of div id encapsulating loading tools
+ * @param test_cases {array of test cases} array of all test cases for gradable that should be affected by toggle
+ * 
+ * Requires total_div_name to contain 3 spans: 
+ *  loading-tools-show
+ *  loading-tools-hide
+ *  loading-tools-in-progress
+*/
+function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hidden_details, gradeable_id, who_id, version = '')
 {
-    //alert ("Value of Expand All: " + expand_all)
     const parsed_test_cases = JSON.parse(test_cases);
     //var maxN = $("#sync_expand_all");
     
@@ -194,18 +204,16 @@ function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hid
 
     //window.stop();
     var expand_all = false;
-    if(loadingTools.find(".loading-tools-hide").is(":visible"))
+    if(loadingTools.find(".loading-tools-hide").is(":visible"))         // Collapse Test Cases
     {
-        //alert("CURRENTLY COLLAPSE ALL");
         expand_all = false;
         
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-show").show();
     }
     
-    else //(loadingTools.find(".loading-tools-show").is(":visible"))
+    else //(loadingTools.find(".loading-tools-show").is(":visible"))    // Expand Test Cases
     {
-        //alert("CURRENTLY EXPAND ALL");
         expand_all = true;
         
         loadingTools.find("span").hide();
@@ -213,7 +221,7 @@ function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hid
     }
 
 
-
+    // Expand/Collapse all test cases
     parsed_test_cases.forEach(function callback(test_case, index) {
 
         var can_view = (!test_case.hidden || show_hidden);
@@ -221,22 +229,20 @@ function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hid
         
         var div_name = "testcase_" + index;
 
+        // Check if test case should be expanded/collapsed
         if (can_view_details && test_case.has_extra_results)
         {
-            //alert("!!!! " + test_case.name + " can load !!!!");
-            // Check if we should trigger loadTestcaseOutput or not
             if($("#" + div_name).is(":visible") != expand_all)
             {
                 loadTestcaseOutput(div_name, gradeable_id, who_id, index, version);
             }
         }
     });
-    // loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});
-
+    
+    // If loading is completed, set Collapse All text to be visible
     if(loadingTools.find(".loading-tools-in-progress").is(":visible"))
     {
         // WAIT UNTIL ALL test cases are loaded ... OR force shut down (don't even care about it being fully loaded)
-        //alert("NOW COLLAPSE ALL");
         
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-hide").show();
