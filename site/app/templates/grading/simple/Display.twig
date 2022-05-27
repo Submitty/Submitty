@@ -301,6 +301,7 @@
                     value="{{ component_score }}"
                     onclick="this.select()"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
+                    onkeydown="javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
