@@ -48,7 +48,7 @@
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^26.2.2",
     "jest": "^28.1.0",
-    "jest-environment-jsdom": "^28.0.2",
+    "jest-environment-jsdom": "^28.1.0",
     "node-fetch": "^2.6.7",
     "regenerator-runtime": "^0.13.9",
     "stylelint": "^14.8.3",
