@@ -415,15 +415,26 @@ function setupNumericTextCells() {
         elem = $(this);
         var split_id = elem.attr("id").split("-");
         var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
-        console.log(elem.data('origval'));
-        console.log(elem.val());
 
         var scores = {};
         var old_scores = {};
         var total = 0;
 
-        var exceed_max = false;
+
+        var exceed_max;
+        let value = this.value;
         const numbers = /^[0-9]+$/;
+
+        function determine_max_clamp(response) {
+            if (response['status'] === 'success') {
+                if(value > response['data']['max_clamp']) {
+                    exceed_max = true;
+
+                    alert('Score should be less than the maximum value: ' + response['data']['max_clamp']);
+                }
+            }
+        }
+
         if(this.tagName.toLowerCase() === 'input') {
             // Empty input is ok for comment but not numeric cells
             if(!this.value) {
@@ -435,31 +446,29 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                submitAJAX(
-                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
-                    {
+                value = this.value;
+                $.ajax({
+                    url: buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+                    type: "POST",
+                    data: {
                         'csrf_token': csrfToken,
                         'user_id': row_el.data("user"),
-                        'old_scores': old_scores,
-                        'scores': scores,
                         'get_max_clamp': true
                     },
-                    function(returned_data) {
-                        if(value > returned_data['data']['max_clamp']) {
-                            elem.val() = elem.data('origval');
-                            alert('Score should be less than the maximum value: ' + returned_data['data']['max_clamp']);
+                    success: function(response) {
+                        response = JSON.parse(response);
+                        if (response['status'] === 'success') {
+                            determine_max_clamp(response);
                         }
                     },
-                    function() {
-                        alert("[SAVE ERROR] Refresh Page");
+                    error: function() {
+                        alert("[ERROR] Refresh Page");
                     }
-                );
+                });
             }
         }
 
-        if(exceed_max) {
-            console.log(this.value);
-        }
+        console.log(exceed_max);
 
         if(this.value == 0) {
             elem.css("color", "--standard-light-medium-gray");
