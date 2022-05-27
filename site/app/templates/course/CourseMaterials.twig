@@ -9,13 +9,13 @@
     {% if user_group == 1 %}
         <div style="float: right; margin-bottom: 20px;">
             {# button to open all of the subfolders and cookie it#}
-            <button onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</button>
+            <button onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary " tabindex="0">Open/Close All Folders</button>
             {# button to set the release dates of all files in the page/course materials #}
             <button
                     onclick='openSetAllRelease()'
-                    class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
+                    class="btn btn-primary  {% if not materials_exist %}disabled{% endif %}"
                     tabindex="0">Set All Release Dates</button>
-            <button onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</button>
+            <button onclick="newUploadCourseMaterialsForm()" class="btn btn-primary " tabindex="0">Upload Course Materials</button>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
@@ -80,8 +80,8 @@
                         {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
-                    <button class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getId }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
-                    <button class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></button>
+                    <button  tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getId }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
+                    <button  tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></button>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>
                 {% if not course_material.getSections|length == 0 %}
@@ -146,15 +146,15 @@
     {% else %}
         <div class="folder-container">
             <div class="div-viewer">
-                <button class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setCookie('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
+                <button class="openAllDiv  openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setCookie('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </button>
-                <button onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></button>
+                <button onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></button>
                 {% if user_group == 1 %}
-                    <button class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
-                    <button class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
-                    <button onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</button>
+                    <button tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_path }}", "{{ directory_priorities[folder_path] }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
+                    <button tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></button>
+                    <button onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary " tabindex="0">Set Folder Release Date</button>
                 {% endif %}
                 {% if not seen[folder_path] %}
                     <span class="badge course-material-badge" >NEW</span>
