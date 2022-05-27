@@ -134,7 +134,8 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Gets the points the submitter earned for the active version
-     * @return int
+     * This should always return an int, except when it returns NAN, which is a float
+     * @return int|float
      */
     public function getTotalPoints() {
         $instance = $this->getActiveVersionInstance();
