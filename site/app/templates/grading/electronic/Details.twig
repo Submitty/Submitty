@@ -84,7 +84,7 @@
             >Export Teams Members</a>
         {% endif %}
         {% if show_export_teams_button %}
-            <button class="btn btn-primary key_to_click"
+            <button class="btn btn-primary "
                     tabindex="0"
                     onclick="importTeamForm();"
             >
@@ -96,7 +96,7 @@
         {# Randomize team button #}
         {% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
             {% if past_grade_start_date %}
-                <button class="btn btn-default key_to_click"
+                <button class="btn btn-default "
                         tabindex="0"
                         onclick="randomizeRotatingGroupsButton()"
                 >
