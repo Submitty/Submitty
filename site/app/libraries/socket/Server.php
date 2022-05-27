@@ -159,10 +159,12 @@ class Server implements MessageComponentInterface {
         catch (DatabaseException $de) {
             try {
                 $this->core->loadMasterDatabase();
+                $this->logError($de, $conn);
                 $this->onOpen($conn);
             }
             catch (\Exception $e) {
                 $this->logError($de, $conn);
+                $this->logError($e, $conn);
                 $this->closeWithError($conn);
             }
         }
