@@ -183,13 +183,38 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 }
 
 
-function loadAllTestcaseOutput(expand_all, test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
+function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hidden_details, num_visible_testcases, gradeable_id, who_id, version = '')
 {
     //alert ("Value of Expand All: " + expand_all)
     const parsed_test_cases = JSON.parse(test_cases);
+    //var maxN = $("#sync_expand_all");
+    
+    // Process total div
+    let loadingTools = $("#" + total_div_name).find(".loading-tools");
+
+    //window.stop();
+    var expand_all = false;
+    if(loadingTools.find(".loading-tools-hide").is(":visible"))
+    {
+        //alert("CURRENTLY COLLAPSE ALL");
+        expand_all = false;
+        
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
+    }
+    
+    else //(loadingTools.find(".loading-tools-show").is(":visible"))
+    {
+        //alert("CURRENTLY EXPAND ALL");
+        expand_all = true;
+        
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
+    }
+
+
 
     parsed_test_cases.forEach(function callback(test_case, index) {
-        //alert(index + " => " + test_case.name + " | Can Be Viewed: " + test_case.can_view);
 
         var can_view = (!test_case.hidden || show_hidden);
         var can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden)
@@ -200,29 +225,22 @@ function loadAllTestcaseOutput(expand_all, test_cases, show_hidden, show_hidden_
         {
             //alert("!!!! " + test_case.name + " can load !!!!");
             // Check if we should trigger loadTestcaseOutput or not
-            if($(div_name).is(":visible") != expand_all)
+            if($("#" + div_name).is(":visible") != expand_all)
             {
                 loadTestcaseOutput(div_name, gradeable_id, who_id, index, version);
             }
         }
-
-        // if (test_case.has_extra_results && can_view)
-        // {
-        //     const element = document.getElementById(div_name);
-        //     if(element != null)
-        //     {
-        //         if(num_visible_testcases == 0)
-        //         {
-        //             element.style.display = 'block';
-        //         }
-        //         else
-        //         {
-        //             element.style.display = 'none';
-        //         }
-        //     }
-        // }
     });
     // loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});
+
+    if(loadingTools.find(".loading-tools-in-progress").is(":visible"))
+    {
+        // WAIT UNTIL ALL test cases are loaded ... OR force shut down (don't even care about it being fully loaded)
+        //alert("NOW COLLAPSE ALL");
+        
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-hide").show();
+    }
 }
 
 
