@@ -1568,6 +1568,27 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query);
     }
 
+    public function getLateDayUpdateTimestamps() {
+        $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
+        $this->course_db->query($query);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = new \DateTime($row['since_timestamp']);
+        }
+        return $return;
+    }
+
+    public function getLastLateDayUpdatesForUsers() {
+        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
+        $this->course_db->query($query);
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['user_id']] = new \DateTime($row['max']);
+        }
+        return $return;
+    }
+
     /**
      * Fetches all students from the given registration sections, $sections.
      *
