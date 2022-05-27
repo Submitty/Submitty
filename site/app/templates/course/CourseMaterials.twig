@@ -70,7 +70,7 @@
                     {% else %}
                         {{ name }}
                     {% endif %}
-                    <button class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></button>
+                    <button  onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></button>
                 {% endif %}
                 {% if user_group == 1 %}
                     {% if course_material.isLink %}
