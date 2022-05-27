@@ -61,7 +61,7 @@
             <div class="file-viewer">
                 {% if course_material.isLink %}
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
-                    <button href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</button>
+                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
                 {% else %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
