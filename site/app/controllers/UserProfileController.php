@@ -176,7 +176,7 @@ class UserProfileController extends AbstractController {
         if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
             $secondaryEmail = trim($_POST['secondary_email']);
             $secondaryEmailNotify = trim($_POST['secondary_email_notify']) === "true";
-            if ((!$secondaryEmailNotify && $secondaryEmail == "") || (($user->validateUserData('user_email_secondary', $secondaryEmail) === true) && !(($secondaryEmail == "") && $secondaryEmailNotify))) {
+            if ((!$secondaryEmailNotify && $secondaryEmail == "") || (!(($secondaryEmail == "") && $secondaryEmailNotify)) && ($user->validateUserData('user_email_secondary', $secondaryEmail) === true)) {
                 $user->setSecondaryEmail($secondaryEmail);
                 $user->setEmailBoth($secondaryEmailNotify);
                 $this->core->getQueries()->updateUser($user);
