@@ -682,13 +682,13 @@ ANALYSIS_TOOLS_TS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/
 # Copy cloned files to AnalysisToolsTS directory
 rsync -rtz ${ANALYSIS_TOOLS_TS_REPO} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
 
-# pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
+pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
 
 # # install npm packages
-# npm install
+npm install
 
 # # build project
-# npm run build
+npm run build
 
 popd > /dev/null
 
