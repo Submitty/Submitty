@@ -176,7 +176,7 @@ class UserProfileController extends AbstractController {
         if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
             $secondaryEmail = trim($_POST['secondary_email']);
             $secondaryEmailNotify = trim($_POST['secondary_email_notify']) === "true";
-            if (((!$secondaryEmailNotify && $secondaryEmail == "")) || (($user->validateUserData('user_email_secondary', $secondaryEmail) === true) && !($secondaryEmail == ""))) {
+            if ((!$secondaryEmailNotify && $secondaryEmail === "") || (($secondaryEmail !== "") && $user->validateUserData('user_email_secondary', $secondaryEmail) === true)) {
                 $user->setSecondaryEmail($secondaryEmail);
                 $user->setEmailBoth($secondaryEmailNotify);
                 $this->core->getQueries()->updateUser($user);
@@ -187,7 +187,7 @@ class UserProfileController extends AbstractController {
                 ]);
             }
             else {
-                if ($secondaryEmail == "") {
+                if ($secondaryEmail === "") {
                     return JsonResponse::getErrorResponse("Secondary email can't be empty if secondary email notify is true");
                 }
                 return JsonResponse::getErrorResponse("Secondary email address must be a valid email");
