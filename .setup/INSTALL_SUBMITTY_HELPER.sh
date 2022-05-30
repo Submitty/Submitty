@@ -675,14 +675,14 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 echo -e "Build and install analysis tools ts"
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
+mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
-ANALYSIS_TOOLS_TS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/
+ANALYSIS_TOOLS_TS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/"
 
 # Copy cloned files to AnalysisToolsTS directory
-rsync -rtz ${ANALYSIS_TOOLS_TS_REPO} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
+rsync -rtz "${ANALYSIS_TOOLS_TS_REPO}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
-pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
+pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
 # # install npm packages
 npm install
@@ -693,8 +693,8 @@ npm run build
 popd > /dev/null
 
 # # change permissions
-chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS
+chown -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
