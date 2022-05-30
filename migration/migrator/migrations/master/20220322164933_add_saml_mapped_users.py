@@ -16,6 +16,7 @@ def up(config, database):
         id serial NOT NULL PRIMARY KEY,
         saml_id varchar(255) NOT NULL,
         user_id varchar(255) NOT NULL,
+        active boolean NOT NULL DEFAULT TRUE,
         CONSTRAINT fk_user_id
             FOREIGN KEY(user_id)
                 REFERENCES users(user_id)

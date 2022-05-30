@@ -8083,4 +8083,19 @@ ORDER BY
         ", [$saml_id]);
         return $this->submitty_db->rows();
     }
+
+    public function getProxyMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT user_id, saml_id, active FROM saml_mapped_users
+                WHERE saml_id != user_id;
+        ");
+        return $this->submitty_db->rows();
+    }
+
+    public function insertSamlMapping(string $saml_id, string $submitty_id) {
+        $this->submitty_db->query("
+            INSERT INTO saml_mapped_users (saml_id, user_id)
+                VALUES (?, ?);
+        ", [$saml_id, $submitty_id]);
+    }
 }

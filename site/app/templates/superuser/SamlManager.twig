@@ -1,0 +1,39 @@
+<div class="content">
+    <h1>SAML Management</h1>
+    <h2>Actions</h2>
+    <button class="btn btn-primary" id="new-proxy-user-btn">New Proxy User</button>
+    <button class="btn btn-primary" id="new-proxy-mapping-btn">Assign Proxy Mapping</button>
+    <form method="POST" action="{{ add_all_mapping_url }}" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-warning">Add All Users to SAML Mapping</button>
+    </form>
+    <button class="btn btn-warning">Validate Mapped Users</button>
+    <br><br>
+    <h2>Mapped Proxy Users</h2>
+    <table class="table">
+        <tr>
+            <th>SAML Username</th>
+            <th>Submitty Username</th>
+            <th>Active?</th>
+            <th>Action</th>
+        </tr>
+        {% for row in proxy_mapped_users %}
+        <tr>
+            <td>{{ row['saml_id'] }}</td>
+            <td>{{ row['user_id'] }}</td>
+            <td>{{ row['active'] ? 'True' : 'False' }}</td>
+            <td>
+                {% if row['active'] %}
+                    <button class="btn btn-warning">Deactivate</button>
+                {% else %}
+                    <button class="btn btn-warning">Activate</button>
+                {% endif %}
+                <button class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% include('superuser/NewProxyUser.twig') %}
+{% include('superuser/NewProxyMapping.twig') %}
