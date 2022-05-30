@@ -8095,7 +8095,9 @@ ORDER BY
     public function insertSamlMapping(string $saml_id, string $submitty_id) {
         $this->submitty_db->query("
             INSERT INTO saml_mapped_users (saml_id, user_id)
-                VALUES (?, ?);
+                VALUES (?, ?) ON CONFLICT ON CONSTRAINT
+                saml_mapped_users_saml_id_user_id_key DO UPDATE
+                SET active = true;
         ", [$saml_id, $submitty_id]);
     }
 }
