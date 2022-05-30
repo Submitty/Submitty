@@ -420,20 +420,8 @@ function setupNumericTextCells() {
         var old_scores = {};
         var total = 0;
 
-
-        var exceed_max;
         let value = this.value;
-        const numbers = /^[0-9]+$/;
-
-        function determine_max_clamp(response) {
-            if (response['status'] === 'success') {
-                if(value > response['data']['max_clamp']) {
-                    exceed_max = true;
-
-                    alert('Score should be less than the maximum value: ' + response['data']['max_clamp']);
-                }
-            }
-        }
+        const numbers = /^[0-9]*\.?[0-9]*$/;
 
         if(this.tagName.toLowerCase() === 'input') {
             // Empty input is ok for comment but not numeric cells
@@ -441,34 +429,31 @@ function setupNumericTextCells() {
                 this.value = 0;
             }
             else if(!this.value.match(numbers)) {
-                alert('Score should be a positive integer');
+                alert('Score should be a positive number');
                 this.value = 0;
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                value = this.value;
-                $.ajax({
-                    url: buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
-                    type: "POST",
-                    data: {
+                submitAJAX(
+                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+                    {
                         'csrf_token': csrfToken,
                         'user_id': row_el.data("user"),
                         'get_max_clamp': true
                     },
-                    success: function(response) {
-                        response = JSON.parse(response);
-                        if (response['status'] === 'success') {
-                            determine_max_clamp(response);
+                    function(response) {
+                      if(value > response['data']['max_clamp']) {
+                            if(!alert('Score should be less than the maximum value: ' + response['data']['max_clamp'])) {
+                                window.location.reload();
+                            }
                         }
                     },
-                    error: function() {
+                    function() {
                         alert("[ERROR] Refresh Page");
                     }
-                });
+                );
             }
         }
-
-        console.log(exceed_max);
 
         if(this.value == 0) {
             elem.css("color", "--standard-light-medium-gray");

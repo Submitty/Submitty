@@ -243,9 +243,7 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['get_max_clamp']) && $_POST['get_max_clamp']) {
                 $return_data['max_clamp'] = $component->getUpperClamp();
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getSuccessResponse($return_data)
-                );
+                return JsonResponse::getSuccessResponse($return_data);
             }
 
             $data = $_POST['scores'][$component->getId()] ?? '';
