@@ -551,7 +551,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
