@@ -65,7 +65,7 @@ class QueryIdentifier {
             }
             $query = implode("", array_slice($tokens, $pos));
         }
-        
+
         if (str_contains($query, QueryIdentifier::PG_TABLE)) {
             return QueryIdentifier::PG_TABLE;
         }
