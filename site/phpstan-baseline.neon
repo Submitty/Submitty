@@ -811,16 +811,6 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Use of constant FILTER_FLAG_HOST_REQUIRED is deprecated since PHP 7\\.3\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Use of constant FILTER_FLAG_SCHEME_REQUIRED is deprecated since PHP 7\\.3\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Negated boolean expression is always false\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php

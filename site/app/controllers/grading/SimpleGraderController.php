@@ -301,9 +301,14 @@ class SimpleGraderController extends AbstractController {
                 // This catches both the not-set and blank-data case for numeric cells
                 if ($data !== '') {
                     if (
-                        $component->getUpperClamp() < $data
-                        || !is_numeric($data)
+                        !is_numeric($data)
+                        || $data < 0
                     ) {
+                        return MultiResponse::JsonOnlyResponse(
+                            JsonResponse::getFailResponse("Save error: score must be a positive number")
+                        );
+                    }
+                    if ($component->getUpperClamp() < $data) {
                         return MultiResponse::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
                         );
