@@ -435,7 +435,7 @@ function setupNumericTextCells() {
             // Input greater than the max_clamp for the component is not allowed
             else {
                 submitAJAX(
-                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'maxclamp']),
                     {
                         'csrf_token': csrfToken,
                         'user_id': row_el.data("user"),

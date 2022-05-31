@@ -193,6 +193,55 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param string $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/maxclamp", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function getMaxClamp($gradeable_id) {
+        if (!isset($_POST['user_id'])) {
+            return JsonResponse::getFailResponse('Did not pass in user_id');
+        }
+        $user_id = $_POST['user_id'];
+
+        $grader = $this->core->getUser();
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+
+        $user = $this->core->getQueries()->getUserById($user_id);
+        if ($gradeable === null) {
+            return JsonResponse::getFailResponse("Invalid gradeable ID");
+        }
+        elseif ($user === null) {
+            return JsonResponse::getFailResponse("Invalid user ID");
+        }
+        elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
+            if (!isset($_POST['get_max_clamp'])) {
+                return JsonResponse::getFailResponse("Didn't submit any scores");
+            }
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+
+        //Make sure they're allowed to do this
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["graded_gradeable" => $graded_gradeable])) {
+            return JsonResponse::getFailResponse("You do not have permission to do this.");
+        }
+
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Return ids and scores of updated components in success response so frontend can validate
+        $return_data = [];
+
+        foreach ($gradeable->getComponents() as $component) {
+            if (isset($_POST['get_max_clamp']) && $_POST['get_max_clamp']) {
+                $return_data['max_clamp'] = $component->getUpperClamp();
+                return JsonResponse::getSuccessResponse($return_data);
+            }
+        }
+
+        return JsonResponse::getFailResponse("Did not find a max clamp value");
+    }
+
+    /**
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
@@ -219,11 +268,9 @@ class SimpleGraderController extends AbstractController {
             );
         }
         elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
-            if (!isset($_POST['get_max_clamp'])) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse("Didn't submit any scores")
-                );
-            }
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse("Didn't submit any scores")
+            );
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
@@ -241,11 +288,6 @@ class SimpleGraderController extends AbstractController {
         $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
-            if (isset($_POST['get_max_clamp']) && $_POST['get_max_clamp']) {
-                $return_data['max_clamp'] = $component->getUpperClamp();
-                return JsonResponse::getSuccessResponse($return_data);
-            }
-
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
 
