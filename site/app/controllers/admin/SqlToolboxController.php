@@ -41,6 +41,14 @@ class SqlToolboxController extends AbstractController {
     public function runQuery(): JsonResponse {
         $query = trim($_POST['sql']);
 
+        if (QueryIdentifier::identify($query) === QueryIdentifier::PG_TABLE) {
+            return JsonResponse::getFailResponse('Possible attempt to access privileged pg_catalog table.  Not allowed.');
+        }
+
+        if (QueryIdentifier::identify($query) === QueryIdentifier::SQL_TABLE) {
+            return JsonResponse::getFailResponse('Possible attempt to access privileged information_schema table.  Not allowed.');
+        }
+
         if (QueryIdentifier::identify($query) !== QueryIdentifier::SELECT) {
             return JsonResponse::getFailResponse('Invalid query, can only run SELECT queries.');
         }

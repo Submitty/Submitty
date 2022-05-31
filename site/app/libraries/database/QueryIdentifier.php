@@ -9,6 +9,8 @@ class QueryIdentifier {
     const INSERT = 'insert';
     const UPDATE = 'update';
     const DELETE = 'delete';
+    const PG_TABLE = 'pg_';
+    const SQL_TABLE = 'sql_';
     const UNKNOWN = 'unknown';
 
     public static function identify(string $query): string {
@@ -63,8 +65,14 @@ class QueryIdentifier {
             }
             $query = implode("", array_slice($tokens, $pos));
         }
-
-        if (str_starts_with($query, QueryIdentifier::SELECT)) {
+        
+        if (str_contains($query, QueryIdentifier::PG_TABLE)) {
+            return QueryIdentifier::PG_TABLE;
+        }
+        elseif (str_contains($query, QueryIdentifier::SQL_TABLE)) {
+            return QueryIdentifier::SQL_TABLE;
+        }
+        elseif (str_starts_with($query, QueryIdentifier::SELECT)) {
             return QueryIdentifier::SELECT;
         }
         elseif (str_starts_with($query, QueryIdentifier::UPDATE)) {
