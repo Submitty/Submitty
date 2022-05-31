@@ -685,10 +685,10 @@ rsync -rtz "${ANALYSIS_TOOLS_TS_REPO}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysis
 pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
 # # install npm packages
-npm install
+sudo npm install
 
 # # build project
-npm run build
+sudo npm run build
 
 popd > /dev/null
 
