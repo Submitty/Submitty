@@ -25,6 +25,7 @@
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">Worker Health</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle">OS Info</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
@@ -38,6 +39,14 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th style="vertical-align: middle;">{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
+            <td>{% if worker['name'] in machine_system_details|keys %}
+                    Disk Usage: {{ worker_health[worker['name']]['disk'] }} <br/>
+                    Worker Status: {{ worker_health[worker['name']]['worker'] }}
+                    Shipper Status: {{ worker_health[worker['name']]['shipper'] }}
+                    {% else %}
+                    Not yet retrieved
+                {% endif %}
+            </td>
             <td>
             {% if worker['name'] in machine_system_details|keys %}
                 {% for info in machine_system_details[worker['name']] %}
@@ -73,7 +82,7 @@
             </div>
         </div>
     {% endif %}
-    
+
     <table class="table table-striped docker-table mobile-table">
         <thead>
             <tr>
@@ -164,7 +173,7 @@
     <div style="margin-bottom: 1em">
         <label for="capability-form" style="display: inline-block; margin-right: 1em; width: 5%;">
             Capability:
-        </label> 
+        </label>
         <select class="form-control form-control-lg" style="width:93%; display: inline-block;" id="capability-form">
             {% for capability in capabilities %}
                 <option>{{capability}}</option>
@@ -174,7 +183,7 @@
     <div>
         <label for="add-field" style="display: inline-block; margin-right: 1em; width: 5%">
             Image:
-        </label> 
+        </label>
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>

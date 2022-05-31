@@ -31,6 +31,7 @@ class DockerView extends AbstractView {
         $worker_machines = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
+        $worker_health = [];
         $machine_docker_version = [];
         $machine_system_details = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
@@ -126,6 +127,21 @@ class DockerView extends AbstractView {
                 $is_match = preg_match("/UPDATE MACHINE: (.+)/", $buffer, $matches);
                 if ($is_match) {
                     $current_machine = $matches[1];
+                }
+
+                $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $worker_health[$current_machine]["disk"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $worker_health[$current_machine]["worker"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $worker_health[$current_machine]["shipper"] = $matches[1];
                 }
 
                 $is_match = preg_match("/Distributor ID:(.+)/", $buffer, $matches);
@@ -228,6 +244,7 @@ class DockerView extends AbstractView {
                 "last_updated" => $last_ran,
                 "machine_to_update" => $machine_to_update,
                 "image_info" => $image_info,
+                "worker_health" => $worker_health,
                 "machine_docker_version" => $machine_docker_version,
                 "machine_system_details" => $machine_system_details,
                 "aliases" => $aliases,
