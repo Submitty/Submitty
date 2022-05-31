@@ -206,10 +206,10 @@ class SimpleGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-        if ($gradeable === null) {
+        if (!$gradeable) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
-        elseif ($user === null) {
+        elseif (!$user) {
             return JsonResponse::getFailResponse("Invalid user ID");
         }
         elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
@@ -257,12 +257,12 @@ class SimpleGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-        if ($gradeable === null) {
+        if (!$gradeable) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid gradeable ID")
             );
         }
-        elseif ($user === null) {
+        elseif (!$user) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid user ID")
             );
