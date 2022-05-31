@@ -133,19 +133,31 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 
 }
 
+
+
+function CollapseTestcaseOutput(index, div_name, orig_div_name, loadingTools)
+{
+    $("#show_char_" + index).toggle();
+    $(div_name).empty();
+    toggleDiv(orig_div_name);
+
+    loadingTools.find("span").hide();
+    loadingTools.find(".loading-tools-show").show();
+}
+
+var vr; // Need to find out how to do this not as a global variable & specific to each test case
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
     let orig_div_name = div_name;
     div_name = "#" + div_name;
 
     let loadingTools = $("#tc_" + index).find(".loading-tools");
 
+    if(vr)
+    {
+        vr.abort();
+    }
     if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
+        CollapseTestcaseOutput(index, div_name, orig_div_name, loadingTools);
     }
     else{
         $("#show_char_"+index).toggle();
@@ -153,7 +165,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
+        vr = $.getJSON({
             url: url,
             success: function(response) {
                 if (response.status !== 'success') {
@@ -169,9 +181,16 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 enableKeyToClick();
             },
             error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
+                if(vr.readyState != 0){
+                    alert("Could not load diff, please refresh the page and try again.");
+                    console.log(e);
+                    displayAjaxError(e);
+                }
+                else
+                {
+                    CollapseTestcaseOutput(index, div_name, orig_div_name, loadingTools);
+                    console.log("JSON Load Aborted");
+                }
             }
         })
     }
