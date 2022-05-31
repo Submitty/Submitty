@@ -8,6 +8,7 @@ import docker
 import traceback
 import argparse
 import get_docker_info
+import get_health_info
 from submitty_utils import ssh_proxy_jump
 import platform
 
@@ -56,6 +57,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
         else:
             print(res.stdout)
+        get_health_info.print_info()
         client = docker.from_env()
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
@@ -82,6 +84,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     else:
         commands = list()
         commands.append('lsb_release -a')
+        commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_health_info.py')}")
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
@@ -110,7 +113,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             success = True
             for command in commands:
                 print(f'{host}: performing {command}')
-                (_, stdout, _) = target_connection.exec_command(command, timeout=60)
+                (_, stdout, _) = target_connection.exec_command(command, timeout=120)
                 print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
