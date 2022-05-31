@@ -375,6 +375,12 @@ class GlobalController extends AbstractController {
             "icon" => "fa-user"
         ]);
 
+        $sidebar_buttons[] = new NavButton($this->core, [
+            "href" => $this->core->buildUrl(['authentication_tokens']),
+            "title" => "Authentication Tokens",
+            "icon" => "fa-key"
+        ]);
+
         if ($this->core->getConfig()->isDebug()) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['calendar']),
