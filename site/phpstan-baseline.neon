@@ -206,14 +206,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 2
-			path: app/controllers/admin/LateController.php
-
-		-
 			message: "#^Negated boolean expression is always true\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
