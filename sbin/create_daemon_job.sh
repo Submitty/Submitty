@@ -88,9 +88,11 @@ get_job_index() {
 
 
 JSON_ARGS=""
-
+## FIXME: If Ubuntu18.04 is deprecated, delete lines with ``# rm''
+## FIXME: and uncomment lines with ``##''
 parse_job_reqs() {
     JSON_ARGS="jq -n --arg job ${JOB_NAME}"
+    JSON_BODY="'{"                                                  # rm
     # check the param size
     info "Checking the size of parameters"
     [[ "$#" -ne "${#JOB_REQS[@]}" ]] && {
@@ -106,14 +108,18 @@ parse_job_reqs() {
 
     for (( i=0; i<${#JOB_REQS[@]}; i++ )); do
         JSON_ARGS="${JSON_ARGS} --arg ${JOB_REQS[i]} $1"
+        JSON_BODY="${JSON_BODY} \$${JOB_REQS[i]},".                 # rm
         shift 1
     done
 
-    info "${JSON_ARGS} '\$ARGS.named'"
+    JSON_BODY="${JSON_BODY} }'"
+    ## info "${JSON_ARGS} '\$ARGS.named'"
+    info "${JSON_ARGS} ${JSON_BODY}"                                # rm
 
     if ! JSON_DATA=$(
         # shellcheck disable=2016
-        ${JSON_ARGS} '$ARGS.named'
+        ## ${JSON_ARGS} '$ARGS.named'
+        ${JSON_ARGS} ${JSON_BODY}                                   # rm
     ); then
         jqVer=$(jq -V)
         panic "Failed to create json, jq version ${jqVer} "
