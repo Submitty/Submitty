@@ -109,10 +109,14 @@ parse_job_reqs() {
         shift 1
     done
 
-    info "${JSON_ARGS}"
+    info "${JSON_ARGS} '\$ARGS.named'"
 
-    if ! JSON_DATA=$(${JSON_ARGS} "\$ARGS.named"); then
-        panic "Failed to create json"
+    if ! JSON_DATA=$(
+        # shellcheck disable=2016
+        ${JSON_ARGS} '$ARGS.named'
+    ); then
+        jqVer=$(jq -V)
+        panic "Failed to create json, jq version ${jqVer} "
     fi
 
     info "Constructed json query:"
