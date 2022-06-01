@@ -126,6 +126,31 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
 fi
 
+
+################################################################################################################
+################################################################################################################
+# VALIDATE DATABASE SUPERUSERS
+
+DATABASE_FILE="$CONF_DIR/database.json"
+MASTER_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
+COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
+
+
+CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$MASTER_DBUSER'\"" postgres)
+
+if [ "$CHECK" == "f" ]; then
+    echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
+    exit
+fi
+
+CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$COURSE_DBUSER'\"" postgres)
+
+if [ "$CHECK" == "t" ]; then
+    echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
+    exit
+fi
+
+
 ################################################################################################################
 ################################################################################################################
 # INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
