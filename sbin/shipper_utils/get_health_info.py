@@ -1,19 +1,13 @@
 import shutil
 import subprocess
 
-SYSTEMCTL_RC = ("Running (0)", "Inactive (1)", "Inactive (2)", "Not Running (3)",
-                "Service Unknown (4)", "Unknown Error")
+SYSTEMCTL_RC = ("Running", "Inactive (1)", "Inactive (2)", "Not Running (3)",
+                "Service Not Found", "Unknown Error")
 
 
-def worker_service() -> int:
+def service_status(service: str) -> int:
     return subprocess.run([
-                "systemctl", "status", "submitty_autograding_worker", "--no-pager"
-           ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
-
-
-def shipper_service() -> int:
-    return subprocess.run([
-                "systemctl", "status", "submitty_autograding_shipper", "--no-pager"
+                "systemctl", "status", f"{service}", "--no-pager"
            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
 
 
@@ -23,15 +17,14 @@ def disk_percentage() -> float:
 
 
 def print_info() -> None:
-    worker = worker_service()
-    if worker > len(SYSTEMCTL_RC) - 1:
-        worker = len(SYSTEMCTL_RC) - 1
+    worker = min(service_status("submitty_autograding_worker"), len(SYSTEMCTL_RC) - 1)
     print("Worker Service:", SYSTEMCTL_RC[worker])
 
-    shipper = shipper_service()
-    if shipper > len(SYSTEMCTL_RC) - 1:
-        shipper = len(SYSTEMCTL_RC) - 1
+    shipper = min(service_status("submitty_autograding_shipper"), len(SYSTEMCTL_RC) - 1)
     print("Shipper Service:", SYSTEMCTL_RC[shipper])
+
+    daemon = min(service_status("submitty_daemon_jobs_handler"), len(SYSTEMCTL_RC) - 1)
+    print("Daemon Job Handler:", SYSTEMCTL_RC[daemon])
 
     print("Disk Usage: {0:.3f}%".format(disk_percentage() * 100))
 
