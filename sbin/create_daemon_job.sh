@@ -96,7 +96,7 @@ parse_job_reqs() {
     [[ "$#" -ne "${#JOB_REQS[@]}" ]] && {
         warn "The number of argument does not match with the job requirement"
         info "Job name: ${JOB_NAME}"
-        info "Job arguments (${#JOB_REQS}): ${JOB_REQS[*]}"
+        info "Job arguments (${#JOB_REQS[@]}): ${JOB_REQS[*]}"
         info "Got arguments ($#): ${*}"
         warn "See the help below:"
         display_help
@@ -134,7 +134,7 @@ dispatch() {
 
 # Check the dispatching queue
 [[ ! -d "${SUBMITTY_DAEMON_JOB_Q}" ]] && {
-    panic ""
+    panic "Queue folder (${SUBMITTY_DAEMON_JOB_Q}) does not exist!"
 }
 
 get_job_index "$@"
