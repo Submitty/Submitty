@@ -141,7 +141,20 @@ class DockerView extends AbstractView {
 
                 $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
                 if ($is_match) {
-                    $worker_health[$current_machine]["shipper"] = $matches[1];
+                    if ($matches[1] != "Service Not Found") {
+                        $worker_health[$current_machine]["shipper"] = $matches[1];
+                    } else {
+                        $worker_health[$current_machine]["shipper"] = NULL;
+                    }
+                }
+
+                $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    if ($matches[1] != "Service Not Found") {
+                        $worker_health[$current_machine]["daemon"] = $matches[1];
+                    } else {
+                        $worker_health[$current_machine]["daemon"] = NULL;
+                    }
                 }
 
                 $is_match = preg_match("/Distributor ID:(.+)/", $buffer, $matches);

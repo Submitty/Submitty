@@ -39,10 +39,19 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th style="vertical-align: middle;">{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
-            <td>{% if worker['name'] in machine_system_details|keys %}
-                    Disk Usage: {{ worker_health[worker['name']]['disk'] }} <br/>
-                    Worker Status: {{ worker_health[worker['name']]['worker'] }}
-                    Shipper Status: {{ worker_health[worker['name']]['shipper'] }}
+            <td>{% if worker['name'] in worker_health|keys %}
+                    Disk Usage:
+                        {{ worker_health[worker['name']]['disk'] }} <br/>
+                    Worker Status:
+                        {{ worker_health[worker['name']]['worker'] }}
+                    {% if worker_health[worker['name']]['shipper'] is not null %}
+                        <br/>Shipper Status:
+                            {{ worker_health[worker['name']]['shipper'] }}
+                    {% endif %}
+                    {% if worker_health[worker['name']]['daemon'] is not null %}
+                        <br/>Daemon Status:
+                            {{ worker_health[worker['name']]['daemon'] }}
+                    {% endif %}
                     {% else %}
                     Not yet retrieved
                 {% endif %}
