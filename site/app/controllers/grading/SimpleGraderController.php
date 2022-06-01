@@ -202,7 +202,7 @@ class SimpleGraderController extends AbstractController {
         if ($gradeable === null) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
-        
+
         // Return max clamp values for the component
         $return_data = [];
 
