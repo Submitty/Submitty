@@ -297,6 +297,9 @@ class SimpleGraderController extends AbstractController {
                     }
                     $component_grade->setScore($data);
                 }
+                else {
+                    continue;
+                }
             }
             $component_grade->setGradeTime($this->core->getDateTimeNow());
             $return_data[$component->getId()] = $data;
