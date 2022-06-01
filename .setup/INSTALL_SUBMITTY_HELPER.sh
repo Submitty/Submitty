@@ -958,4 +958,7 @@ else
         python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
         echo -e -n "Done restarting shipper & workers\n\n"
     fi
+
+    # Dispatch daemon job to update OS info
+    "${SUBMITTY_INSTALL_DIR}/sbin/create_daemon_job.sh" UpdateDockerImages
 fi
