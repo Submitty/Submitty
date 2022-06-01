@@ -143,8 +143,9 @@ class DockerView extends AbstractView {
                 if ($is_match) {
                     if ($matches[1] != "Service Not Found") {
                         $worker_health[$current_machine]["shipper"] = $matches[1];
-                    } else {
-                        $worker_health[$current_machine]["shipper"] = NULL;
+                    }
+                    else {
+                        $worker_health[$current_machine]["shipper"] = null;
                     }
                 }
 
@@ -152,8 +153,9 @@ class DockerView extends AbstractView {
                 if ($is_match) {
                     if ($matches[1] != "Service Not Found") {
                         $worker_health[$current_machine]["daemon"] = $matches[1];
-                    } else {
-                        $worker_health[$current_machine]["daemon"] = NULL;
+                    }
+                    else {
+                        $worker_health[$current_machine]["daemon"] = null;
                     }
                 }
 
