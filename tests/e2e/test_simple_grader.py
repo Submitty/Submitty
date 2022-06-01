@@ -122,6 +122,9 @@ class TestSimpleGrader(BaseTestCase):
             # wait until ajax is done, then refresh the page and wait until the element comes back with the updated data
             self.wait_after_ajax()
             self.driver.refresh()
+            WebDriverWait(self.driver, 10).until(EC.alertIsPresent())
+            alert = self.driver.switch_to.alert
+            alert.accept()
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-1-0-0' and @{}='{}']".format(attribute, next_score))))
             # if numeric, reset value so that test will continue to work as expected
             if next_score == "3.4":
