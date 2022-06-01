@@ -132,11 +132,11 @@ fi
 # VALIDATE DATABASE SUPERUSERS
 
 DATABASE_FILE="$CONF_DIR/database.json"
-MASTER_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
+GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
 COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
 
 
-CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$MASTER_DBUSER'\"" postgres)
+CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'\"" postgres)
 
 if [ "$CHECK" == "f" ]; then
     echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."

@@ -259,13 +259,13 @@ else:
     else:
         DATABASE_PORT = defaults['database_port']
 
-    DATABASE_USER = get_input('What is the master database user/role?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the global database user/role?', defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the master database user/role {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the global database user/role {}? {}'.format(DATABASE_USER, default))
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
