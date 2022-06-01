@@ -10,7 +10,7 @@ from . import submitty_ocr as scanner
 
 # try importing required modules
 try:
-    from PyPDF2 import PdfFileReader, PdfFileWriter
+    from PyPDF2 import PdfReader, PdfWriter
     from pdf2image import convert_from_bytes
     import pyzbar.pyzbar as pyzbar
     from pyzbar.pyzbar import ZBarSymbol
@@ -33,8 +33,8 @@ def main(args):
 
     try:
         os.chdir(split_path)
-        pdfPages = PdfFileReader(filename, strict=False)
-        pdf_writer = PdfFileWriter()
+        pdfPages = PdfReader(filename, strict=False)
+        pdf_writer = PdfWriter()
         i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
@@ -109,8 +109,8 @@ def main(args):
                         pdf_writer.write(out)
 
                 # start a new pdf and grab the cover
-                cover_writer = PdfFileWriter()
-                pdf_writer = PdfFileWriter()
+                cover_writer = PdfWriter()
+                pdf_writer = PdfWriter()
                 cover_writer.add_page(pdfPages.pages[i])
                 pdf_writer.add_page(pdfPages.pages[i])
 
@@ -141,7 +141,7 @@ def main(args):
                     output[output_filename]['id'] = "BLANK"
                     prev_file = output_filename
                     id_index += 1
-                    cover_writer = PdfFileWriter()
+                    cover_writer = PdfWriter()
                     # save cover
                     cover_writer.add_page(pdfPages.pages[i])
                     with open(cover_filename, 'wb') as out:
