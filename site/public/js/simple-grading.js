@@ -439,7 +439,6 @@ function setupNumericTextCells() {
                     {
                         'csrf_token': csrfToken,
                         'user_id': row_el.data("user"),
-                        'get_max_clamp': true
                     },
                     function(response) {
                       if(value > response['data']['max_clamp']) {
