@@ -235,7 +235,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                     displayAjaxError(e);
                 }
             }
-        }))
+        }));
     }
 }
 
