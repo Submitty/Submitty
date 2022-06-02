@@ -121,16 +121,15 @@
 
                         <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                         <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
-
+                        <div id="expected-num-box">
+                            <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
+                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
+                        </div>
                     </div>
 
                     <div id="numeric-split-opts">
                         <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
                         <input type="number" id= "num_pages" placeholder="required"/>
-                        <div id="expected-num-box">
-                            <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
-                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
-                        </div>
                     </div>
                 </div>
             </div>
@@ -146,6 +145,14 @@
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+            {# Below will get uncommented once SAML is active #}
+            {# <p>You will need to use an Authentication Token.</p> #}
+            <br><br>
+            {% if git_auth_token_required %}
+                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+            {% endif %}
+            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
+            <br><br>
         {% endif %}
 
         {% if vcs_host_type == 2 or vcs_host_type == 3 %}

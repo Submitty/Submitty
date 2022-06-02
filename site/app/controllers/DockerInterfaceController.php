@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
-
     /**
      * @Route("/admin/docker", methods={"GET"})
      * @Route("/api/docker", methods={"GET"})
@@ -157,6 +156,10 @@ class DockerInterfaceController extends AbstractController {
      * @return JsonResponse
      */
     public function updateDockerCall() {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
         if (!$this->updateDocker()) {
             return JsonResponse::getErrorResponse("Failed to write to file");
         }

@@ -30,7 +30,6 @@ use app\exceptions\ValidationException;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
-
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
 
@@ -340,7 +339,7 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-
+            $ldi = $late_days->getLateDayInfoByGradeable($gg->getGradeable());
             if (!$gg->hasOverriddenGrades()) {
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -348,7 +347,7 @@ class ReportController extends AbstractController {
                         // Version conflict or incomplete grading, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
-                    elseif ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                    elseif ($ldi !== null && $ldi->getStatus() === LateDayInfo::STATUS_BAD) {
                         // BAD submission, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }

@@ -197,6 +197,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             }
             else if (elem.data('score') === 0.5) {
                 elem.removeClass('simple-full-credit');
+                elem.css('background-color', '');
                 elem.addClass('simple-half-credit');
             }
             else {
@@ -242,7 +243,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.attr("data-grader", elem.data("grader"));    // update new grader
                     elem.find('.simple-grade-grader').text(elem.data("grader"));
                 });
-                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score'), 'grader': elems.data('grader')});
+                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id").split("-")[3], 'user': parent.data('anon'), 'score': elems.data('score'), 'grader': elems.data('grader')});
             } else {
                 console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
                 elems.each(function(idx, elem) {
@@ -416,14 +417,14 @@ function setupNumericTextCells() {
             return;
         }
         if(this.value == 0) {
-            elem.css("color", "#bbbbbb");
+            elem.css("color", "--standard-light-medium-gray");
         }
         else{
             elem.css("color", "");
         }
 
-        var row_num = elem.attr("id").split("-")[1];
-        var row_el = $("tr#row-" + row_num);
+        var split_id = elem.attr("id").split("-");
+        var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
 
         var scores = {};
         var old_scores = {};
@@ -444,7 +445,6 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-      let id = this.id;
       let value = this.value;
 
       submitAJAX(
@@ -459,10 +459,11 @@ function setupNumericTextCells() {
               // Finds the element that stores the total and updates it to reflect increase
               if (row_el.find(".cell-total").text() != total)
                 row_el.find(".cell-total").text(total).hide().fadeIn("slow");
-              window.socketClient.send({'type': "update_numeric", 'elem': id, 'value': value, 'total': total});
+              
+              window.socketClient.send({'type': "update_numeric", 'elem': split_id[3], 'user': row_el.data("anon"), 'value': value, 'total': total});
             },
             function() {
-                elem.css("background-color", "#ff7777");
+                elem.css("background-color", "--standard-light-pink");
             }
         );
     });
@@ -550,24 +551,27 @@ function setupNumericTextCells() {
                                             for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
                                                 value_temp_str = value_str + y;
                                                 status_temp_str = status_str + y;
-                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
+                                                let elem = $('#cell-'+$(this).parent().parent().data("section")+'-'+$(this).parent().data("row")+'-'+(z-starting_index2));
+                                                elem.val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff");
+                                                    elem.css("background-color", "--main-body-white");
                                                 }
                                                 else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
+                                                    elem.css("background-color", "--standard-light-pink");
                                                 }
 
-                                                if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
+                                                if(elem.val() == 0) {
+                                                    elem.css("color", "--standard-light-medium-gray");
                                                 }
                                                 else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
+                                                    elem.css("color", "");
                                                 }
 
-                                                total += Number($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val());
+                                                total += Number(elem.val());
                                             }
-                                            $('#total-'+$(this).parent().data("row")).val(total);
+                                            // $('#total-'+$(this).parent().data("row")).val(total);
+                                            const split_row = $(this).parent().attr("id").split('-');
+                                            $('#total-'+split_row[1]+'-'+split_row[2]).val(total);
                                             z++;
                                             var counter = 0;
                                             while (counter < num_text) {
@@ -642,26 +646,91 @@ function setupSimpleGrading(action) {
     function movement(direction){
         var prev_cell = $(".cell-grade:focus");
         if(prev_cell.length) {
-            // ids have the format cell-ROW#-COL#
+            // ids have the format cell-#SECTION-ROW#-COL#
             var new_selector_array = prev_cell.attr("id").split("-");
-            new_selector_array[1] = parseInt(new_selector_array[1]);
+
+            if (new_selector_array[1].length) {
+                new_selector_array[1] = parseInt(new_selector_array[1]);
+            }
             new_selector_array[2] = parseInt(new_selector_array[2]);
+            new_selector_array[3] = parseInt(new_selector_array[3]);
 
             // update row and col to get new val
-            if (direction == "up") new_selector_array[1] -= 1;
-            else if (direction == "down") new_selector_array[1] += 1;
-            else if (direction == "left") new_selector_array[2] -= 1;
-            else if (direction == "right") new_selector_array[2] += 1;
+            if (direction == "up") new_selector_array[2] -= 1;
+            else if (direction == "down") new_selector_array[2] += 1;
+            else if (direction == "left") new_selector_array[3] -= 1;
+            else if (direction == "right") new_selector_array[3] += 1;
 
-            // get new cell
-            var new_cell = $("#" + new_selector_array.join("-"));
-            if (new_cell.length) {
-                prev_cell.blur();
-                new_cell.focus();
-                new_cell.select(); // used to select text in input cells
+            if (new_selector_array[2] < 0 && direction == "up") {
+                new_selector_array[2] += 1;
+                // // Selection needs to move to above the null section
+                if (new_selector_array[1] === "") {
+                    new_selector_array[1] = 1;
+                    while (true) {
+                        const temp_cell = $("#" + new_selector_array.join("-"));
+                        if (!temp_cell.length) break;
+                    new_selector_array[1] += 1;
+                    }
+                }
 
-                if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
-                    $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                // // Selection needs to move to above section, if one exists
+                // // Find the previous section visible to the grader
+                while (new_selector_array[1] >= 0) {
+                    new_selector_array[1] -= 1;
+                    let temp_cell = $("#" + new_selector_array.join("-"));
+                    if (temp_cell.length) break;
+                }
+                // Find the last cell in this section
+                let new_cell = $("#" + new_selector_array.join("-"));
+                while (new_cell.length) {
+                    new_selector_array[2] += 1;
+                    new_cell = $("#" + new_selector_array.join("-"));
+                }
+                new_selector_array[2] -= 1;
+                
+                new_cell = $("#" + new_selector_array.join("-"));
+                if (new_cell.length) {
+                    prev_cell.blur();
+                    new_cell.focus();
+                    new_cell.select(); // used to select text in input cells
+
+                    if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
+                        $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                    }
+                }
+            }
+            else {
+                // Try once with the new cell generated above, otherwise try moving down to the next section
+                let tries;
+                for (tries = 0; tries < 3; tries++) {
+                    // get new cell
+                    var new_cell = $("#" + new_selector_array.join("-"));
+                    if (new_cell.length) {
+                        prev_cell.blur();
+                        new_cell.focus();
+                        new_cell.select(); // used to select text in input cells
+
+                        if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
+                            $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                        }
+                        break;
+                    }
+
+                    if (direction == "down") {
+                        // Check if cell needs to move beyond null section
+                        if (new_selector_array[1] === "") {
+                            break;
+                        }
+
+                        // Check if cell needs to move to next section
+                        new_selector_array[1] += 1;
+                        new_selector_array[2] = 0;
+
+                        // Check if cell needs to move to null section
+                        if (tries === 1 && new_selector_array[1] !== "") {
+                            new_selector_array[1] = "";
+                        }
+                    } else break;
                 }
             }
         }
@@ -698,32 +767,10 @@ function setupSimpleGrading(action) {
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
-    // make arrow keys in lab section changeable now
-    if(action == 'lab') {
-        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: false}, function(event) {
-            event.preventDefault();
-            movement("right");
-        });
-        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: false}, function(event) {
-            event.preventDefault();
-            movement("left");
-        });
-        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: false}, function(event) {
-            event.preventDefault();
-            movement("up");
-        });
-        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: false}, function(event) {
-            event.preventDefault();
-            movement("down");
-        });
-    }
-    //the arrow keys in test section remain unchangeable as setting up other keys will disturb the input
-    else{
-        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
-        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
-        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
-        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function(event) {});
-    }
+    registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
+    registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
+    registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
+    registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function() {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
@@ -764,7 +811,8 @@ function setupSimpleGrading(action) {
                 var tr_elem = $('table tbody tr[data-user="' + value +'"]');
                 // if a match is found, then use it to find the cell
                 if(tr_elem.length > 0) {
-                    var new_cell = $("#cell-" + tr_elem.attr("data-row") + "-0");
+                    let split_id = tr_elem.attr("id").split("-");
+                    var new_cell = $("#cell-" + split_id[1] + '-' + split_id[2] + "-0");
                     prev_cell.blur();
                     new_cell.focus();
                     $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
@@ -846,10 +894,10 @@ function initSocketClient() {
   window.socketClient.onmessage = (msg) => {
     switch (msg.type) {
       case "update_checkpoint":
-        checkpointSocketHandler(msg.elem, msg.score, msg.grader);
+        checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader);
         break;
       case "update_numeric":
-        numericSocketHandler(msg.elem, msg.value, msg.total)
+        numericSocketHandler(msg.elem, msg.user, msg.value, msg.total)
         break;
       default:
         console.log('Undefined message received');
@@ -859,42 +907,53 @@ function initSocketClient() {
   window.socketClient.open(gradeable_id);
 }
 
-function checkpointSocketHandler(elem_id, score, grader) {
-  let elem = $('#' + elem_id);
-  elem.data('score', score);
-  elem.attr("data-score", score);
-  elem.data('grader', grader);
-  elem.attr("data-grader", grader);
-  elem.find('.simple-grade-grader').text(grader);
-  switch (score) {
-    case 1.0:
-        elem.addClass('simple-full-credit');
-        break;
-    case 0.5:
-        elem.removeClass('simple-full-credit');
-        elem.addClass('simple-half-credit');
-        break;
-    default:
-        elem.removeClass('simple-half-credit');
-        elem.css('background-color', '');
-        break;
+function checkpointSocketHandler(elem_id, anon_id, score, grader) {
+  // search for the user within the table
+  const tr_elem = $('table tbody tr[data-anon="' + anon_id +'"]');
+  // if a match is found, then use it to find animate the correct cell
+  if(tr_elem.length > 0) {
+    let split_id = tr_elem.attr("id").split("-");
+    let elem = $("#cell-" + split_id[1] + '-' + split_id[2] + '-' + elem_id);
+    elem.data('score', score);
+    elem.attr("data-score", score);
+    elem.data('grader', grader);
+    elem.attr("data-grader", grader);
+    elem.find('.simple-grade-grader').text(grader);
+    switch (score) {
+      case 1.0:
+          elem.addClass('simple-full-credit');
+          break;
+      case 0.5:
+          elem.removeClass('simple-full-credit');
+          elem.css('background-color', '');
+          elem.addClass('simple-half-credit');
+          break;
+      default:
+          elem.removeClass('simple-half-credit');
+          elem.css('background-color', '');
+          break;
+    }
+    elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+    elem.animate({"border-right-width": "0px"}, 400);
   }
-  elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-  elem.animate({"border-right-width": "0px"}, 400);
 }
 
-function numericSocketHandler(elem_id, value, total) {
-  let elem = $('#' + elem_id);
-  elem.data('origval', value);
-  elem.attr('data-origval', value);
-  elem.val(value);
-  elem.css("background-color", "white");
-  if(value == 0) {
-    elem.css("color", "#bbbbbb");
+function numericSocketHandler(elem_id, anon_id, value, total) {
+  const tr_elem = $('table tbody tr[data-anon="' + anon_id +'"]');
+  if(tr_elem.length > 0) {
+    let split_id = tr_elem.attr("id").split("-");
+    let elem = $("#cell-" + split_id[1] + '-' + split_id[2] + '-' + elem_id);
+    elem.data('origval', value);
+    elem.attr('data-origval', value);
+    elem.val(value);
+    elem.css("background-color", "--always-default-white");
+    if(value == 0) {
+      elem.css("color", "--standard-light-medium-gray");
+    }
+    else{
+      elem.css("color", "");
+    }
+    if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
+      elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
   }
-  else{
-    elem.css("color", "");
-  }
-  if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
-    elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
 }
