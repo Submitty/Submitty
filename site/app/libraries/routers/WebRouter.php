@@ -63,7 +63,7 @@ class WebRouter {
 
 
     /**
-     * If a request is a post request check to see if its less than the post_max_size or if its empty
+     * If a request is a post request check to see if its less than the post_max_size
      * @return MultiResponse|bool
      */
     private function checkPostMaxSize(Request $request) {
