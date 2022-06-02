@@ -184,7 +184,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         // Checks if xhr is defined and has not succeeded yet
         // If so, abort loading
         const xhr = output_xhrs.get(orig_div_name);
-        if(xhr && xhr.readyState != 4){
+        if(xhr && xhr.readyState !== 4){
             xhr.abort();
             output_xhrs.delete(orig_div_name);
         }
