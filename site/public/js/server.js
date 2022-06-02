@@ -150,8 +150,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
  * @param {object} loadingTools - loading tools used by span containing the text that 
  *                                correspond to the state of the test case (show, hide, loading)
  */
-function CollapseTestcaseOutput(div_name, index, loadingTools)
-{
+function CollapseTestcaseOutput(div_name, index, loadingTools){
     $("#show_char_" + index).toggle();
     $("#" + div_name).empty();
     toggleDiv(div_name);
@@ -179,8 +178,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     let loadingTools = $("#tc_" + index).find(".loading-tools");
 
     // Checks if output for this div is being loaded
-    if(output_xhrs.has(orig_div_name))
-    {
+    if(output_xhrs.has(orig_div_name)) {
         // Checks if xhr is defined and has not succeeded yet
         // If so, abort loading
         const xhr = output_xhrs.get(orig_div_name);
@@ -191,13 +189,11 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
     // Checks if test case output is visible
     // Output is visible - Collapse test case output
-    if($(div_name).is(":visible"))
-    {
+    if($(div_name).is(":visible")) {
         CollapseTestcaseOutput(orig_div_name, index, loadingTools);
     }
     // Output is not visible - Expand test case output
-    else
-    {
+    else {
         $("#show_char_"+index).toggle();
         var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
@@ -228,8 +224,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                     CollapseTestcaseOutput(orig_div_name, index, loadingTools);
                     console.log("JSON Load Aborted");
                 }
-                else
-                {
+                else {
                     alert("Could not load diff, please refresh the page and try again.");
                     console.log(e);
                     displayAjaxError(e);
