@@ -223,7 +223,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 enableKeyToClick();
             },
             error: function(e) {
-                if(output_xhrs.has(orig_div_name) && output_xhrs.get(orig_div_name).readyState == 0){
+                if(output_xhrs.has(orig_div_name) && output_xhrs.get(orig_div_name).readyState === 0){
                     output_xhrs.delete(orig_div_name);
                     CollapseTestcaseOutput(orig_div_name, index, loadingTools);
                     console.log("JSON Load Aborted");
