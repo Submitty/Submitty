@@ -46,6 +46,9 @@
     --alert-info-blue: #3a87ad;
     --alert-background-blue: #d9edf7;
     --alert-border-blue: #bce8f1;
+    --alert-warning-yellow: #d09404;
+    --alert-background-warning-yellow: #fff3cd;
+    --alert-border-yellow: #f2e3b5;
     --alert-invalid-entry-pink: #ffdddd;
     --standard-pale-blue-gray: #e8f0f7;
     --btn-standard-pale-blue-gray: #e8f0f7;

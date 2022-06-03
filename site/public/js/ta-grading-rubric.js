@@ -1792,7 +1792,7 @@ function onAddComponent(peer) {
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
-            return closeAllComponents(true);
+            return closeAllComponents(true, true);
         })
         .then(function () {
           return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());

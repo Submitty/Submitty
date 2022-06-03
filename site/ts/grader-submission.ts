@@ -60,6 +60,7 @@ function init(){
 
     const prevQRPrefix = sessionStorage.getItem(`${window.gradeable_id}-qr-prefix`);
     const prevQRSuffix = sessionStorage.getItem(`${window.gradeable_id}-qr-suffix`);
+    const prevScanSetting = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`);
 
     if (prevQRPrefix){
         qrPrefixInput.value = prevQRPrefix;
@@ -67,6 +68,10 @@ function init(){
 
     if (prevQRSuffix){
         qrSuffixInput.value = prevQRSuffix;
+    }
+
+    if (prevScanSetting){
+        useScanIdsCheckBox!.checked = prevScanSetting === 'true';
     }
 }
 

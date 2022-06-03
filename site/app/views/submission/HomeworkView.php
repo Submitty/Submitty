@@ -172,7 +172,7 @@ class HomeworkView extends AbstractView {
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysAllowed() : $late_days_allowed;
 
         $error = false;
         $messages = [];
@@ -505,7 +505,9 @@ class HomeworkView extends AbstractView {
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
-            'recent_version_url' => $recent_version_url
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 
@@ -549,7 +551,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
