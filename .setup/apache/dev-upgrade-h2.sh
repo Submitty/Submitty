@@ -213,8 +213,8 @@ fi
 
 # check the domain settings
 SUBMITTY_DOMAIN=$(jq ".submission_url" "${SUBMITTY_INSTALL_DIR:?}/config/submitty.json"  \
-                    | cut -d'/' -f 3                                                     \
-                    | cut -d':' -f 1)
+                    | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/'
+                )
 if [[ "${SUBMITTY_DOMAIN}" != "${S_DOMAIN}" ]]; then
     warn "The configured domain is different from Submitty's domain!"
     info "Configured: ${S_DOMAIN}"
