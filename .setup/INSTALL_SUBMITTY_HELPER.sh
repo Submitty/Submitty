@@ -684,17 +684,17 @@ rsync -rtz "${ANALYSIS_TOOLS_TS_REPO}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysis
 
 pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
-# # install npm packages
-sudo npm install
-
-# # build project
-sudo npm run build
-
-popd > /dev/null
-
 # # change permissions
 chown -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+chmod -R 755 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+
+# # install npm packages
+su - ${DAEMON_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS && npm install"
+
+# # build project
+su - ${DAEMON_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS && npm run build"
+
+popd > /dev/null
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
