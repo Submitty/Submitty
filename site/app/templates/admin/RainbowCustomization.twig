@@ -65,12 +65,7 @@
                 <h2>Messages</h2>
                 <div id="cust_messages_collapse" class="collapsible_area">
                     <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
-
-                    {% if 0 in messages|keys %}
-                    <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
-                    {% else %}
-                    <textarea id="cust_messages_textarea"></textarea>
-                    {% endif %}
+                    <textarea id="cust_messages_textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
                 </div>
             </div>
             <div id="section_labels" class="customization_item">
