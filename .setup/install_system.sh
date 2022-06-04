@@ -203,6 +203,7 @@ source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 
+
 #################################################################
 # Node Package Setup
 ####################
