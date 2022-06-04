@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa9969a4216afbbf1c4884d3efe97885",
+    "content-hash": "55136171fc17a8e291bfbbbe921984fb",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3951,16 +3951,16 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.25.0",
+            "version": "v1.26.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "4407588e0d3f1f52efb65fbe92babe41f37fe50c"
+                "reference": "cfa0ae98841b9e461207c13ab093d76b0fa7bace"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/4407588e0d3f1f52efb65fbe92babe41f37fe50c",
-                "reference": "4407588e0d3f1f52efb65fbe92babe41f37fe50c",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/cfa0ae98841b9e461207c13ab093d76b0fa7bace",
+                "reference": "cfa0ae98841b9e461207c13ab093d76b0fa7bace",
                 "shasum": ""
             },
             "require": {
@@ -3969,7 +3969,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.23-dev"
+                    "dev-main": "1.26-dev"
                 },
                 "thanks": {
                     "name": "symfony/polyfill",
@@ -4014,7 +4014,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.25.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.26.0"
             },
             "funding": [
                 {
@@ -4030,7 +4030,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-04T08:16:47+00:00"
+            "time": "2022-05-10T07:21:04+00:00"
         },
         {
             "name": "symfony/polyfill-php81",
@@ -5193,16 +5193,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.7.3",
+            "version": "1.7.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "48c4621b1a6dde32aab2e9a79658b843ffb614f7"
+                "reference": "22e7559489776846e7c9d92ca43e8d1e53d18b94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/48c4621b1a6dde32aab2e9a79658b843ffb614f7",
-                "reference": "48c4621b1a6dde32aab2e9a79658b843ffb614f7",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/22e7559489776846e7c9d92ca43e8d1e53d18b94",
+                "reference": "22e7559489776846e7c9d92ca43e8d1e53d18b94",
                 "shasum": ""
             },
             "require": {
@@ -5228,7 +5228,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.7.3"
+                "source": "https://github.com/phpstan/phpstan/tree/1.7.9"
             },
             "funding": [
                 {
@@ -5248,7 +5248,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-05-29T11:36:09+00:00"
+            "time": "2022-06-02T13:27:46+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
