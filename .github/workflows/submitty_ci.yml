@@ -394,7 +394,7 @@ jobs:
           - name: Set up apache
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl wsgi
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
               sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
               sudo mkdir -p /run/php
               sudo chown www-data:www-data /run/php
@@ -428,9 +428,6 @@ jobs:
               sudo service nginx restart
 
           - name: Run git tests
-            env:
-              GIT_CURL_VERBOSE: 1
-              GIT_TRACE: 1
             run: |
               cd $SUBMITTY_REPOSITORY
               SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')

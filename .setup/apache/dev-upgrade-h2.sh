@@ -25,7 +25,7 @@ S_DOMAIN="localhost"
 SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR:?}
 
 # Check configured domain
-DOMAIN=$(jq ".submission_url" "${SUBMITTY_INSTALL_DIR}/config/submitty.json"             \
+DOMAIN=$(jq -r ".submission_url" "${SUBMITTY_INSTALL_DIR}/config/submitty.json"          \
             | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/' || :
         )
 
@@ -62,7 +62,8 @@ generate_cert() {
         -extensions EXT -config <( \
             printf "[dn]\nCN=%s\n[req]\ndistinguished_name = dn\n" "${S_DOMAIN}"
             printf "[EXT]\nsubjectAltName=DNS:%s\n" "${S_DOMAIN}"
-            printf "keyUsage=digitalSignature\nextendedKeyUsage=serverAuth" )            \
+            printf "keyUsage=digitalSignature,keyCertSign\nextendedKeyUsage=serverAuth\n"
+            printf "basicConstraints=critical,CA:TRUE,pathlen:1")                        \
         || panic "Failed to generate certificate"
 }
 
@@ -81,21 +82,12 @@ update_config() {
         remove_config
     fi
     info "Inserting TLS configurations to the apache config ${P_APACHE}"
-    sed -i "/^<VirtualHost /a SSLEngine\ on" "${P_APACHE}"                               \
-        || panic "Failed to update the apache config"
-
-    sed -i "/^SSLE/a SSLCertificateFile\ \"${P_CERT}/${S_DOMAIN}.crt\"" "${P_APACHE}"    \
-        || panic "Failed to update the apache config"
-
-    sed -i "/^SSLC/a SSLCertificateKeyFile\ \"${P_CERT}/${S_DOMAIN}.key\"" "${P_APACHE}" \
-        || panic "Failed to update the apache config"
-
-    sed -i "/^SSLCertificateFile/a SSLCertificateChainFile \"${P_CERT}/${S_DOMAIN}.crt\""\
-            "${P_APACHE}"                                                                \
-        || panic "Failed to update the apache config"
-
-    sed -i "s/^SSL/\ \ \ \ SSL/" "${P_APACHE}"                                           \
-        || panic "Failed to update the apache config"
+    {
+        sed -i "/^<VirtualHost /a SSLEngine\ on" "${P_APACHE}"
+        sed -i "/^SSLE/a SSLCertificateFile\ \"${P_CERT}/${S_DOMAIN}.crt\"" "${P_APACHE}"
+        sed -i "/^SSLC/a SSLCertificateKeyFile\ \"${P_CERT}/${S_DOMAIN}.key\"" "${P_APACHE}"
+        sed -i "s/^SSL/\ \ \ \ SSL/" "${P_APACHE}"
+    } || panic "Failed to update the apache config"
 
     info "Double check that HTTP/2 module is enabled"
     phpver=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
