@@ -1343,6 +1343,8 @@ tr.is_publish {
 
 .sticky-file-info {
     position: absolute;
+    right: 5px;
+    left: 5px;
     background-color: var(--standard-pale-blue-gray);
     padding: 10px 15px 0;
     z-index: 30;
