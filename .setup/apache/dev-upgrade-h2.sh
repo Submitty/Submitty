@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
+# shellcheck enable=all
 
 display_help() {
     echo "Usage:"
     echo "$0 up|down [Options]"
     echo "Options:"
-    echo "  -a '/etc/apac/s-e/submitty.conf'  # Path to submitty config"
-    echo "  -c '/etc/ssl/selfcert'            # Path to save certs"
-    echo "  -d 'localhost'                    # Domain"
+    echo "  -a '/etc/apac/s-e/submitty.conf'  # Path to submitty config "
+    echo "  -c '/etc/ssl/selfcert'            # Path to save certs      "
+    echo "  -d 'localhost'                    # Domain                  "
+    echo "  -v                                # Display extra debug info"
     echo "Notes:"
     echo "  You have to use the same parameters for upgrading and downgrading"
 }
@@ -19,6 +21,15 @@ P_CERT="/etc/ssl/selfcert"
 
 # generate certificate + key to the domain below
 S_DOMAIN="localhost"
+
+# Submitty system-defined env vars and checks
+SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR:?}
+
+# Check configured domain
+DOMAIN=$(jq ".submission_url" "${SUBMITTY_INSTALL_DIR}/config/submitty.json"             \
+            | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/' || :
+        )
+
 
 # log error to stderr and exit
 panic() {
@@ -80,11 +91,16 @@ update_config() {
     sed -i "/^SSLC/a SSLCertificateKeyFile\ \"${P_CERT}/${S_DOMAIN}.key\"" "${P_APACHE}" \
         || panic "Failed to update the apache config"
 
+    sed -i "/^SSLCertificateFile/a SSLCertificateChainFile \"${P_CERT}/${S_DOMAIN}.crt\""\
+            "${P_APACHE}"                                                                \
+        || panic "Failed to update the apache config"
+
     sed -i "s/^SSL/\ \ \ \ SSL/" "${P_APACHE}"                                           \
         || panic "Failed to update the apache config"
 
     info "Double check that HTTP/2 module is enabled"
-    a2dismod "php$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" mpm_prefork
+    phpver=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+    a2dismod "php${phpver}" mpm_prefork
     a2enmod mpm_event http2
 
     info "Checking the integrity of Apache configuration"
@@ -103,7 +119,7 @@ remove_config() {
 
 # deploy cert to system
 deploy_syscert() {
-    [ -e "/usr/local/share/ca-certificates/${S_DOMAIN}.crt" ] && {
+    [[ -e "/usr/local/share/ca-certificates/${S_DOMAIN}.crt" ]] && {
         warn "Found existed symlink to the certificate, removing"
         remove_syscert
     }
@@ -159,6 +175,7 @@ upgrade() {
     update_syscert
     reload_apache
     upgrade_submitty
+    test_http_version "2"
 }
 
 downgrade() {
@@ -168,6 +185,7 @@ downgrade() {
     remove_cert
     reload_apache
     downgrade_submitty
+    test_http_version "1.1"
 }
 
 
@@ -176,9 +194,9 @@ downgrade() {
 MODE="$1"
 shift
 
-if [[ "$UID" -ne 0 ]]; then
+[[ "${UID}" -ne 0 ]] && {
     panic "Please run as root"
-fi
+}
 
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
@@ -205,25 +223,21 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
-if [[ "$HOSTNAME" != "vagrant" && "$VAGRANT" -ne 1 ]]; then
+[[ "${HOSTNAME}" != "vagrant" && "${VAGRANT}" -ne 1 ]] && {
     warn "The script is designed for Submitty Vagrant VM in DEVELOPMENT environment"
     warn "If you believe this is an error, please append the following option:"
     panic "--i-know-what-i-am-doing-please-go-ahead"
-fi
+}
 
-# check the domain settings
-SUBMITTY_DOMAIN=$(jq ".submission_url" "${SUBMITTY_INSTALL_DIR:?}/config/submitty.json"  \
-                    | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/'
-                )
-if [[ "${SUBMITTY_DOMAIN}" != "${S_DOMAIN}" ]]; then
+[[ "${DOMAIN}" != "${S_DOMAIN}" ]] && {
     warn "The configured domain is different from Submitty's domain!"
     info "Configured: ${S_DOMAIN}"
-    info "Submitty: ${SUBMITTY_DOMAIN}"
+    info "Submitty: ${DOMAIN}"
     warn "Press any key to continue"
     read -r
-fi
+}
 
-case "$MODE" in
+case "${MODE}" in
     "up"|"upgrade")
         info "Upgrading to h2+TLS"
         upgrade
@@ -235,7 +249,7 @@ case "$MODE" in
         info "Now you need to use http://${S_DOMAIN}"
         ;;
     *)
-        warn "Unknown operation: $MODE"
+        warn "Unknown operation: ${MODE}"
         display_help
         exit 1
 esac
