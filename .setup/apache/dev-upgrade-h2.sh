@@ -8,7 +8,6 @@ display_help() {
     echo "  -a '/etc/apac/s-e/submitty.conf'  # Path to submitty config "
     echo "  -c '/etc/ssl/selfcert'            # Path to save certs      "
     echo "  -d 'localhost'                    # Domain                  "
-    echo "  -v                                # Display extra debug info"
     echo "Notes:"
     echo "  You have to use the same parameters for upgrading and downgrading"
 }
@@ -175,7 +174,6 @@ upgrade() {
     update_syscert
     reload_apache
     upgrade_submitty
-    test_http_version "2"
 }
 
 downgrade() {
@@ -185,7 +183,6 @@ downgrade() {
     remove_cert
     reload_apache
     downgrade_submitty
-    test_http_version "1.1"
 }
 
 
