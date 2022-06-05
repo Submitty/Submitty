@@ -5,21 +5,28 @@ display_help() {
     echo "Usage:"
     echo "$0 up|down [Options]"
     echo "Options:"
-    echo "  -a '/etc/apac/s-e/submitty.conf'  # Path to submitty config "
-    echo "  -c '/etc/ssl/selfcert'            # Path to save certs      "
-    echo "  -d 'localhost'                    # Domain                  "
+    echo "  -a '/etc/apache/s-e/submitty.conf' # Path to submitty config"
+    echo "  -n '/etc/nginx/s-e/submitty.conf'  # Path to submitty config"
+    echo "  -c '/etc/ssl/selfcert'             # Path to save certs     "
+    echo "  -d 'localhost'                     # Domain                 "
+    echo "  -f                                 # Overwrite certificate  "
     echo "Notes:"
     echo "  You have to use the same parameters for upgrading and downgrading"
 }
 
-# path to the configuration of submitty
+# path to the apache configuration of submitty
 P_APACHE="/etc/apache2/sites-enabled/submitty.conf"
+# path to the nginx configuration of submitty
+P_NGINX="/etc/nginx/sites-enabled/submitty.conf"
 
 # generate certificate + key to the path below
 P_CERT="/etc/ssl/selfcert"
 
 # generate certificate + key to the domain below
 S_DOMAIN="localhost"
+
+# should force update the certificates
+B_FORCE=0
 
 # Submitty system-defined env vars and checks
 SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR:?}
@@ -49,16 +56,21 @@ info() {
 
 # generate cert and key to $P_CERT
 generate_cert() {
-    if [[ ! -d "${P_CERT}" ]]; then
+    [[ ! -d "${P_CERT}" ]] && {
         warn "Could not find directory ${P_CERT}, creating"
         mkdir -p "${P_CERT}"
-    fi
+    }
+    [[ -e "${P_CERT}/${S_DOMAIN}.crt" && -e "${P_CERT}/${S_DOMAIN}.key"
+        && "${B_FORCE}" -eq "0" ]] && {
+        warn "Found existed certificates, use option -f to overwrite"
+        info "Skipping certificate generation"
+        return
+    }
+
     info "Generating certificates and keys"
     openssl req -x509                                                                    \
-        -out "${P_CERT}/${S_DOMAIN}.crt"                                                 \
-        -keyout "${P_CERT}/${S_DOMAIN}.key"                                              \
-        -newkey rsa:2048 -nodes -sha256                                                  \
-        -subj "/CN=${S_DOMAIN}"                                                          \
+        -out "${P_CERT}/${S_DOMAIN}.crt" -keyout "${P_CERT}/${S_DOMAIN}.key"             \
+        -newkey rsa:2048 -nodes -sha256 -subj "/CN=${S_DOMAIN}" -days 730                \
         -extensions EXT -config <( \
             printf "[dn]\nCN=%s\n[req]\ndistinguished_name = dn\n" "${S_DOMAIN}"
             printf "[EXT]\nsubjectAltName=DNS:%s\n" "${S_DOMAIN}"
@@ -75,12 +87,17 @@ remove_cert() {
 }
 
 
-# update apache TLS configuration
+# update TLS configurations
 update_config() {
-    if grep "SSL" "${P_APACHE}"; then
-        warn "Found SSL configuration, removing"
-        remove_config
-    fi
+    update_apache
+    update_nginx
+}
+update_apache() {
+    grep "SSL" "${P_APACHE}" && {
+        warn "Found SSL configurations in apache, removing"
+        remove_apache
+    }
+
     info "Inserting TLS configurations to the apache config ${P_APACHE}"
     {
         sed -i "/^<VirtualHost /a SSLEngine\ on" "${P_APACHE}"
@@ -97,14 +114,48 @@ update_config() {
     info "Checking the integrity of Apache configuration"
     apachectl configtest || {
         cat "${P_APACHE}"
+        remove_apache
         panic "Apache's configuration is invalid"
     }
 }
+update_nginx() {
+    grep "ssl_" "${P_NGINX}" && {
+        warn "Found SSL configurations in nginx, removing"
+        remove_nginx
+    }
 
-# remove apache TLS configuration
+    info "Inserting TLS configurations to the nginx config ${P_NGINX}"
+    {
+        sed -i "s/default_server/ssl\ default_server/" "${P_NGINX}"
+        sed -i "/^\ \{4\}server_n/a ssl_certificate\ \"${P_CERT}/${S_DOMAIN}.crt\";" "${P_NGINX}"
+        sed -i "/^ssl_c/a ssl_certificate_key\ \"${P_CERT}/${S_DOMAIN}.key\";" "${P_NGINX}"
+        sed -i ""
+        sed -i "s/^ssl_/\ \ \ \ ssl_/" "${P_NGINX}"
+    } || panic "Failed to update the nginx config"
+
+    info "Checking the integrity of NginX configuration"
+    nginx -t || {
+        cat "${P_NGINX}"
+        remove_nginx
+        panic "NginX's configuration is invalid"
+    }
+}
+
+# remove TLS configurations
 remove_config() {
+    remove_apache
+    remove_nginx
+}
+remove_apache() {
     info "Removing TLS configurations from the apache config ${P_APACHE}"
     sed -i "/^\ \{4\}SSL/d" "${P_APACHE}" || warn "Failed to remove SSL from apache"
+}
+remove_nginx() {
+    info "Removing TLS configurations from the nginx config ${P_NGINX}"
+    {
+        sed -i "/^\ \{4\}ssl_/d" "${P_NGINX}"
+        sed -i "s/\ ssl//" "${P_NGINX}"
+    } || warn "Failed to remove SSL from nginx"
 }
 
 
@@ -133,12 +184,23 @@ update_syscert() {
 }
 
 
-# reload apache server
+# reload web servers
+reload_servers() {
+    reload_apache
+    reload_nginx
+}
 reload_apache() {
     info "Reloading apache2"
     systemctl restart apache2 || {
         systemctl --no-pager status apache2
         panic "Failed to reload apache2"
+    }
+}
+reload_nginx() {
+    info "Reloading nginx"
+    systemctl restart nginx || {
+        systemctl --no-pager status nginx
+        panic "Failed to reload nginx"
     }
 }
 
@@ -164,7 +226,7 @@ upgrade() {
     update_config
     deploy_syscert
     update_syscert
-    reload_apache
+    reload_servers
     upgrade_submitty
 }
 
@@ -173,7 +235,7 @@ downgrade() {
     update_syscert
     remove_config
     remove_cert
-    reload_apache
+    reload_servers
     downgrade_submitty
 }
 
@@ -193,6 +255,10 @@ while [[ "$#" -gt 0 ]]; do
             P_APACHE="$2"
             shift 2
             ;;
+        -n|--nginx-config)
+            P_NGINX="$2"
+            shift 2
+            ;;
         -c|--cert-save)
             P_CERT="$2"
             shift 2
@@ -203,6 +269,10 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --i-know-what-i-am-doing-please-go-ahead)
             VAGRANT=1
+            shift
+            ;;
+        -f|--force)
+            B_FORCE=1
             shift
             ;;
         *)
