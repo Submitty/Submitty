@@ -79,14 +79,6 @@ generate_cert() {
         || panic "Failed to generate certificate"
 }
 
-# remove cert and key from $P_CERT
-remove_cert() {
-    info "Removing certificate and key"
-    rm -v "${P_CERT}/${S_DOMAIN}.crt" || warn "Failed to unlink ${P_CERT}/${S_DOMAIN}.crt"
-    rm -v "${P_CERT}/${S_DOMAIN}.key" || warn "Failed to unlink ${P_CERT}/${S_DOMAIN}.key"
-}
-
-
 # update TLS configurations
 update_config() {
     update_apache
@@ -234,7 +226,6 @@ downgrade() {
     remove_syscert
     update_syscert
     remove_config
-    remove_cert
     reload_servers
     downgrade_submitty
 }
