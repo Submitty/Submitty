@@ -847,8 +847,8 @@ fi
 # Upgrade to http/2 with TLS for non-worker Vagrant VMs
 if [[ "${WORKER}" == 0 && "${VAGRANT}" == 1 ]]; then
     echo "Upgrading to http/2"
-    chmod +x "${SUBMITTY_REPOSITORY}/.setup/apache/dev-upgrade-h2.sh"
-    /usr/bin/env bash "${SUBMITTY_REPOSITORY}/.setup/apache/dev-upgrade-h2.sh" up
+    chmod +x "${SUBMITTY_REPOSITORY}/.setup/dev-upgrade-h2.sh"
+    /usr/bin/env bash "${SUBMITTY_REPOSITORY}/.setup/dev-upgrade-h2.sh" up
 fi
 
 # If any of our daemon files have changed, we should reload the units:

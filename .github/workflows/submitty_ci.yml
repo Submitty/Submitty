@@ -409,7 +409,6 @@ jobs:
               sudo chmod 0640 /etc/apache2/suexec/www-data
               sudo a2ensite submitty
               sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-              sudo -E env "PATH=$PATH" bash .setup/apache/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
               sudo apache2ctl -t
               sudo service php${PHP_VER}-fpm restart
               sudo service apache2 restart
@@ -426,6 +425,10 @@ jobs:
               sudo chmod 644 /etc/nginx/sites-available/submitty.conf
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
+
+          - name: Upgrade to HTTPS
+            run: |
+              sudo -E env "PATH=$PATH" bash .setup/apache/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
 
           - name: Run git tests
             run: |
