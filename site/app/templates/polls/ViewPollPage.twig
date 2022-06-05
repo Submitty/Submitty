@@ -1,15 +1,15 @@
 <div class="content">
-	<h1>
-		{{ poll.getName() }}
-	</h1>
+    <h1>
+        {{ poll.getName() }}
+    </h1>
 
-	{% if user_admin or poll.isHistogramAvailable() %}
+    {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" onclick="toggle_section('poll-info')">Toggle Poll Info</button>
-		<button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
-	{% endif %}
+        <button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
+    {% endif %}
     <br/>
-	<div class="poll-view-table" id="info-histogram-table">
-		<div class="poll-view-wrapper info-wrapper" id="poll-info">
+    <div class="poll-view-table" id="info-histogram-table">
+        <div class="poll-view-wrapper info-wrapper" id="poll-info">
             {% include "misc/Markdown.twig" with {
                 "content": poll.getQuestion(),
             } only %}
@@ -49,67 +49,69 @@
                     <button type="submit" class="btn btn-primary">Submit</button>
                 {% endif %}
             </form>
-		</div>
-		{% if user_admin or poll.isHistogramAvailable() %}
-			<div class="poll-view-wrapper histogram-wrapper" id="poll-histogram" style="display: none;">
-				<div id="chartContainer"></div>
-			</div>
-		{% endif %}
-	</div>
+        </div>
+        {% if user_admin or poll.isHistogramAvailable() %}
+            <div class="poll-view-wrapper histogram-wrapper" id="poll-histogram" style="display: none;">
+                <div id="chartContainer"></div>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <script>
-	function toggle_section(section_id) {
-		$(`#${section_id}`).toggle('fast');
-	}
+    function toggle_section(section_id) {
+        $(`#${section_id}`).toggle('fast');
+    }
 
     function get_new_chart_width() {
         const MIN_CHART_WIDTH = 400;
         const DESIRED_CHART_FACTOR = 0.75;
         const table_size = $("#info-histogram-table").width();
         const desired_size = table_size * DESIRED_CHART_FACTOR;
+        // if the width of the viewport is small enough
         if (desired_size < MIN_CHART_WIDTH) {
+            // set the width of poll-info to 100%
             $("#poll-info").css("max-width", "100%");
             return Math.max(MIN_CHART_WIDTH, table_size);
-        } else {
-            $("#poll-info").css("max-width", "25%");
-            return desired_size;
         }
+        // reset width of poll-info
+        $("#poll-info").css("max-width", '');
+        return desired_size;
     }
 
-	{% if user_admin or poll.isHistogramAvailable() %}
-		window.onload = function () {
-			const data = [{
-				type: "bar",
-					x: [],
-					y: []
-				}];
-			{% for answer, number in results %}
-				data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-				data[0].y.push({{ number }});
-			{% endfor %}
-			const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+    {% if user_admin or poll.isHistogramAvailable() %}
+        window.onload = function () {
+            const data = [{
+                type: "bar",
+                    x: [],
+                    y: []
+                }];
+            {% for answer, number in results %}
+                data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+                data[0].y.push({{ number }});
+            {% endfor %}
+            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
-			const layout = {
-				title: title_text.documentElement.textContent,
+            const layout = {
+                title: title_text.documentElement.textContent,
                 paper_bgcolor: $("body").css("--default-white"),
                 plot_bgcolor: $("body").css("--default-white"),
                 font: {
                     color: $("body").css("--text-black")
                 },
                 width: width
-			}
+            }
 
-			Plotly.newPlot("chartContainer", data, layout);
+            Plotly.newPlot("chartContainer", data, layout);
 
-			window.addEventListener('resize', function() {
-				const width = get_new_chart_width();
-				const container = document.getElementById('chartContainer');
-				const update = {
-					width: width
-				}
-				Plotly.relayout(container, update);
-			});
-		}
-	{% endif %}
+            window.addEventListener('resize', function() {
+                const width = get_new_chart_width();
+                const container = document.getElementById('chartContainer');
+                const update = {
+                    width: width
+                }
+                Plotly.relayout(container, update);
+            });
+        }
+    {% endif %}
 </script>
