@@ -25,25 +25,46 @@ set -e
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-CONF_DIR=${THIS_DIR}/../../../config
+CONF_DIR="${THIS_DIR}/../../../config"
 
 VAGRANT=0
-if [ -d ${THIS_DIR}/../.vagrant ]; then
+if [ -d "${THIS_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
-source ${THIS_DIR}/bin/versions.sh
+#
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+UTM_ARM=0
+if [[ "$(uname -m)" = "aarch64" ]] ; then
+    UTM_ARM=1
+fi
 
-if [ ${WORKER} == 0 ]; then
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
+WORKER=$([[ $(jq -r '.worker' "${CONF_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
+
+source "${THIS_DIR}/bin/versions.sh"
+
+if [ "${WORKER}" == 0 ]; then
     ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
     RESTART_DAEMONS=( submitty_websocket_server submitty_daemon_jobs_handler )
 else
     ALL_DAEMONS=( submitty_autograding_worker )
     RESTART_DAEMONS=( )
+fi
+
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+if [ ${UTM_ARM} == 1 ]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
 fi
 
 ########################################################################################################################
@@ -79,7 +100,7 @@ fi
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
 set +e
-/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh"
 
 if [ $? -eq 1 ]; then
     echo -e "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
@@ -93,16 +114,16 @@ set -e
 ################################################################################################################
 # RUN THE SYSTEM AND DATABASE MIGRATIONS
 
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     echo -e 'Checking for system and database migrations'
 
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+    mkdir -p "${SUBMITTY_INSTALL_DIR}/migrations"
 
-    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrator/migrations ${SUBMITTY_INSTALL_DIR}
-    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
-    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
+    rsync -rtz "${SUBMITTY_REPOSITORY}/migration/migrator/migrations" "${SUBMITTY_INSTALL_DIR}"
+    chown root:root "${SUBMITTY_INSTALL_DIR}/migrations"
+    chmod 550 -R "${SUBMITTY_INSTALL_DIR}/migrations"
 
-    python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
+    python3 "${SUBMITTY_REPOSITORY}/migration/run_migrator.py" -e system -e master -e course migrate
 fi
 
 ################################################################################################################
@@ -111,7 +132,7 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+pushd "${SUBMITTY_REPOSITORY}/python_submitty_utils"
 pip3 install .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
@@ -128,20 +149,20 @@ popd > /dev/null
 # Re-Read other variables from submitty.json and submitty_users.json
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
-SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
-COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-NUM_UNTRUSTED=$(jq -r '.num_untrusted' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-DAEMON_USER=$(jq -r '.daemon_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMON_USER=$(jq -r '.daemon_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 DAEMON_GROUP=${DAEMON_USER}
-DAEMON_UID=$(jq -r '.daemon_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-DAEMON_GID=$(jq -r '.daemon_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
 ########################################################################################################################
 ########################################################################################################################
@@ -151,15 +172,15 @@ echo -e "\nBeginning installation of Submitty\n"
 
 #this function takes a single argument, the name of the file to be edited
 function replace_fillin_variables {
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" "$1"
 
-    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" "$1"
 
-    sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" "$1"
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" "$1"
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -168,11 +189,11 @@ function replace_fillin_variables {
 ########################################################################################################################
 ########################################################################################################################
 # if the top level INSTALL directory does not exist, then make it
-mkdir -p ${SUBMITTY_INSTALL_DIR}
+mkdir -p "${SUBMITTY_INSTALL_DIR}"
 
 
 # option for clean install (delete all existing directories/files
-if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
+if [[ "$#" -ge 1 && "$1" == "clean" ]] ; then
 
     # pop this argument from the list of arguments...
     shift
@@ -183,30 +204,30 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
         # pop this argument from the list of arguments...
         shift
 
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/app
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cache
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/config
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/cypress
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/public
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/room_templates
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/socket
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site/tests
-        find ${SUBMITTY_INSTALL_DIR}/site -maxdepth 1 -type f -exec rm {} \;
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/app"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/cgi-bin"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/config"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/cypress"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/public"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/room_templates"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/socket"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site/tests"
+        find "${SUBMITTY_INSTALL_DIR}/site" -maxdepth 1 -type f -exec rm {} \;
     else
-        rm -rf ${SUBMITTY_INSTALL_DIR}/site
-        rm -rf ${SUBMITTY_INSTALL_DIR}/src
-        rm -rf ${SUBMITTY_INSTALL_DIR}/vendor
-        rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+        rm -rf "${SUBMITTY_INSTALL_DIR}/site"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/src"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/vendor"
+        rm -rf "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
     fi
-    rm -rf ${SUBMITTY_INSTALL_DIR}/bin
-    rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
-    rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
+    rm -rf "${SUBMITTY_INSTALL_DIR}/bin"
+    rm -rf "${SUBMITTY_INSTALL_DIR}/sbin"
+    rm -rf "${SUBMITTY_INSTALL_DIR}/test_suite"
 fi
 
 # set the permissions of the top level directory
-chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
-chmod  751                            ${SUBMITTY_INSTALL_DIR}
+chown  "root:${COURSE_BUILDERS_GROUP}"  "${SUBMITTY_INSTALL_DIR}"
+chmod  751                              "${SUBMITTY_INSTALL_DIR}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -214,7 +235,7 @@ chmod  751                            ${SUBMITTY_INSTALL_DIR}
 
 echo -e "Make top level SUBMITTY DATA directories & set permissions"
 
-mkdir -p ${SUBMITTY_DATA_DIR}
+mkdir -p "${SUBMITTY_DATA_DIR}"
 
 if [ "${WORKER}" == 1 ]; then
     echo -e "INSTALLING SUBMITTY IN WORKER MODE"
@@ -224,90 +245,93 @@ fi
 
 #Make a courses and checkouts directory if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/courses
-    mkdir -p ${SUBMITTY_DATA_DIR}/user_data
-    mkdir -p ${SUBMITTY_DATA_DIR}/vcs
-    mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
+    mkdir -p "${SUBMITTY_DATA_DIR}/courses"
+    mkdir -p "${SUBMITTY_DATA_DIR}/user_data"
+    mkdir -p "${SUBMITTY_DATA_DIR}/vcs"
+    mkdir -p "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 
 
 # ------------------------------------------------------------------------
 # Create the logs directories that exist on both primary & worker machines
-mkdir -p ${SUBMITTY_DATA_DIR}/logs
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces
+mkdir -p "${SUBMITTY_DATA_DIR}/logs"
+mkdir -p "${SUBMITTY_DATA_DIR}/logs/autograding"
+mkdir -p "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
 # Create the logs directories that only exist on the primary machine
 if [ "${WORKER}" == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/access"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/emails"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/site_errors"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/socket_errors"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/ta_grading"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/course_creation"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/vcs_generation"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/rainbow_grades"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/psql"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/preferred_names"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/office_hours_queue"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/docker"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/daemon_job_queue"
 fi
 # ------------------------------------------------------------------------
 
 # set the permissions of these directories
-chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
-chmod  751                                        ${SUBMITTY_DATA_DIR}
+chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
+chmod  751                                            "${SUBMITTY_DATA_DIR}"
 
 #Set up courses and version control ownership if not in worker mode
 if [ "${WORKER}" == 0 ]; then
-    chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
-    chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
-    chown  ${PHP_USER}:${PHP_USER}                    ${SUBMITTY_DATA_DIR}/user_data
-    chmod  770                                        ${SUBMITTY_DATA_DIR}/user_data
-    chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs
-    chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
-    chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs/git
-    chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
+    chown  "root:${COURSE_BUILDERS_GROUP}"            "${SUBMITTY_DATA_DIR}/courses"
+    chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
+    chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
+    chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
+    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs"
+    chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
+    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs/git"
+    chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
+chown "root:${COURSE_BUILDERS_GROUP}"                   "${SUBMITTY_DATA_DIR}/logs"
 # Set owner/group for logs directories that exist on both primary & work machines
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces
+chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding"
+chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
+
 # Set owner/group for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
-    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
-    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
-    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
-    chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
+    chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/access"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/emails"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/course_creation"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/rainbow_grades"
+    chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/site_errors"
+    chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/socket_errors"
+    chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/ta_grading"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/vcs_generation"
+    chown  -R postgres:"${DAEMON_GROUP}"                  "${SUBMITTY_DATA_DIR}/logs/psql"
 
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
-    chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
-    chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
-    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/docker
-    chown  -R ${DAEMON_USER}:${DAEMONPHP_GROUP}       ${SUBMITTY_DATA_DIR}/logs/daemon_job_queue
+    chmod  g+w                                          "${SUBMITTY_DATA_DIR}/logs/psql"
+    chown  -R "${DAEMON_USER}:${DAEMON_GROUP}"          "${SUBMITTY_DATA_DIR}/logs/preferred_names"
+    chown  -R "${PHP_USER}:${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/office_hours_queue"
+    chown  -R "${DAEMON_USER}:${DAEMONPHP_GROUP}"       "${SUBMITTY_DATA_DIR}/logs/docker"
+    chown  -R "${DAEMON_USER}:${DAEMONPHP_GROUP}"       "${SUBMITTY_DATA_DIR}/logs/daemon_job_queue"
 
     # php & daemon needs to be able to read workers & containers config
-    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json
-    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
+    chown "${PHP_USER}:${DAEMONPHP_GROUP}"              "${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json"
+    chown "${PHP_USER}:${DAEMONPHP_GROUP}"              "${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json"
 fi
 
 # Set permissions of all files in the logs directories
-find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
+find "${SUBMITTY_DATA_DIR}/logs/" -type f -exec chmod 640 {} \;
 # Set permissions of all logs subdirectires
-find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod 750 {} \;
+find "${SUBMITTY_DATA_DIR}/logs/" -mindepth 1 -type d -exec chmod 750 {} \;
 # Created files in the logs subdirectories should inherit the group of the parent directory
-find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod g+s {} \;
+find "${SUBMITTY_DATA_DIR}/logs/" -mindepth 1 -type d -exec chmod g+s {} \;
 # Set permissions of the top level logs directory
-chmod 751 ${SUBMITTY_DATA_DIR}/logs/
+chmod 751 "${SUBMITTY_DATA_DIR}/logs/"
 
 # ------------------------------------------------------------------------
 
@@ -315,26 +339,26 @@ chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     # if the to_be_graded directories do not exist, then make them
-    mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
-    mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
-    mkdir -p $SUBMITTY_DATA_DIR/in_progress_grading
+    mkdir -p "$SUBMITTY_DATA_DIR/to_be_graded_queue"
+    mkdir -p "$SUBMITTY_DATA_DIR/daemon_job_queue"
+    mkdir -p "$SUBMITTY_DATA_DIR/in_progress_grading"
 
     # set the permissions of these directories
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
     # BATCH QUEUE: course builders (instructors & head TAs) will write items to this list, DAEMON_USER will remove them
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
-    chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
-    chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/in_progress_grading
-    chmod  750                                      $SUBMITTY_DATA_DIR/in_progress_grading
+    chown  "${DAEMON_USER}:${DAEMONPHP_GROUP}"        "$SUBMITTY_DATA_DIR/to_be_graded_queue"
+    chmod  770                                        "$SUBMITTY_DATA_DIR/to_be_graded_queue"
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}          "$SUBMITTY_DATA_DIR/daemon_job_queue"
+    chmod  770                                        "$SUBMITTY_DATA_DIR/daemon_job_queue"
+    chown  "${DAEMON_USER}:${DAEMONPHP_GROUP}"        "$SUBMITTY_DATA_DIR/in_progress_grading"
+    chmod  750                                        "$SUBMITTY_DATA_DIR/in_progress_grading"
 fi
 
 
 # tmp folder
-mkdir -p ${SUBMITTY_DATA_DIR}/tmp
-chown root:root ${SUBMITTY_DATA_DIR}/tmp
-chmod 511 ${SUBMITTY_DATA_DIR}/tmp
+mkdir -p        "${SUBMITTY_DATA_DIR}/tmp"
+chown root:root "${SUBMITTY_DATA_DIR}/tmp"
+chmod 511       "${SUBMITTY_DATA_DIR}/tmp"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -353,27 +377,27 @@ chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 ########################################################################################################################
 # CHECKOUT & INSTALL THE NLOHMANN C++ JSON LIBRARY
 
-nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
+nlohmann_dir="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json"
 
 # If we don't already have a copy of this repository, check it out
 if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
+    git clone --depth 1 "https://github.com/nlohmann/json.git" "${nlohmann_dir}"
 fi
 
 # TODO: We aren't checking / enforcing a specific/minimum version of this library...
 
 # Add read & traverse permissions for RainbowGrades and vendor repos
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
+find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type d -exec chmod o+rx {} \;
+find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type f -exec chmod o+r {} \;
 
 # "install" the nlohmann json library
-mkdir -p ${SUBMITTY_INSTALL_DIR}/vendor
-sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
-sudo chown -R root:submitty_course_builders ${SUBMITTY_INSTALL_DIR}/vendor
-rsync -rtz ${SUBMITTY_REPOSITORY}/../vendor/nlohmann/json/include ${SUBMITTY_INSTALL_DIR}/vendor/
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/vendor
-find ${SUBMITTY_INSTALL_DIR}/vendor -type d -exec chmod 555 {} \;
-find ${SUBMITTY_INSTALL_DIR}/vendor -type f -exec chmod 444 {} \;
+mkdir -p "${SUBMITTY_INSTALL_DIR}/vendor"
+sudo chown -R root:submitty_course_builders "${SUBMITTY_INSTALL_DIR}/vendor"
+sudo chown -R root:submitty_course_builders "${SUBMITTY_INSTALL_DIR}/vendor"
+rsync -rtz "${SUBMITTY_REPOSITORY}/../vendor/nlohmann/json/include" "${SUBMITTY_INSTALL_DIR}/vendor/"
+chown -R  root:root "${SUBMITTY_INSTALL_DIR}/vendor"
+find "${SUBMITTY_INSTALL_DIR}/vendor" -type d -exec chmod 555 {} \;
+find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -383,21 +407,21 @@ find ${SUBMITTY_INSTALL_DIR}/vendor -type f -exec chmod 444 {} \;
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
+rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
 
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
 for i in "${array[@]}"; do
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/${i}
+    replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/src/grading/${i}"
 done
 
 # building the autograding library
-mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
-pushd ${SUBMITTY_INSTALL_DIR}/src/grading/lib
+mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
+pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 cmake ..
 set +e
 make
-if [ $? -ne 0 ] ; then
+if [ "$?" -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
@@ -405,14 +429,14 @@ set -e
 popd > /dev/null
 
 # root will be owner & group of these files
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
+chown -R  root:root "${SUBMITTY_INSTALL_DIR}/src"
 # "other" can cd into & ls all subdirectories
-find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
+find "${SUBMITTY_INSTALL_DIR}/src" -type d -exec chmod 555 {} \;
 # "other" can read all files
-find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
+find "${SUBMITTY_INSTALL_DIR}/src" -type f -exec chmod 444 {} \;
 
-chgrp submitty_daemon ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
-chmod g+wrx ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+chgrp submitty_daemon "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py"
+chmod g+wrx           "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py"
 
 
 #Set up sample files if not in worker mode.
@@ -424,13 +448,13 @@ if [ "${WORKER}" == 0 ]; then
     echo -e "Copy the sample files"
 
     # copy the files from the repo
-    rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
+    rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
 
     # root will be owner & group of these files
-    chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
+    chown -R  root:root "${SUBMITTY_INSTALL_DIR}/more_autograding_examples"
     # but everyone can read all that files & directories, and cd into all the directories
-    find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
+    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type d -exec chmod 555 {} \;
+    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
 fi
 ########################################################################################################################
 ########################################################################################################################
@@ -440,9 +464,9 @@ if [ -x "$(command -v javac)" ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo
-    rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
+    rsync -rtz "${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java" "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java"
 
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    pushd "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit" > /dev/null
     # root will be owner & group of the source file
     chown  root:root  TestRunner.java
     # everyone can read this file
@@ -459,8 +483,8 @@ if [ -x "$(command -v javac)" ]; then
 
 
     # fix all java_tools permissions
-    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+    chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
+    chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
 fi
 
 
@@ -468,68 +492,93 @@ fi
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh"
 
 # build the helper program for strace output and restrictions by system call categories
-g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
 
 # build the helper program for calculating early submission incentive extensions
-g++ ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.cpp -lboost_system -lboost_filesystem -std=c++11 -Wall -g -o ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
+g++ "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.cpp" -lboost_system -lboost_filesystem -std=c++11 -Wall -g -o "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
+
+GRADINGCODE="${SUBMITTY_INSTALL_DIR}/src/grading"
+JSONCODE="${SUBMITTY_INSTALL_DIR}/vendor/include"
+
+# Create the complete/build config using main_configure
+g++ "${GRADINGCODE}/main_configure.cpp" \
+    "${GRADINGCODE}/load_config_json.cpp" \
+    "${GRADINGCODE}/execute.cpp" \
+    "${GRADINGCODE}/TestCase.cpp" \
+    "${GRADINGCODE}/error_message.cpp" \
+    "${GRADINGCODE}/window_utils.cpp" \
+    "${GRADINGCODE}/dispatch.cpp" \
+    "${GRADINGCODE}/change.cpp" \
+    "${GRADINGCODE}/difference.cpp" \
+    "${GRADINGCODE}/tokenSearch.cpp" \
+    "${GRADINGCODE}/tokens.cpp" \
+    "${GRADINGCODE}/clean.cpp" \
+    "${GRADINGCODE}/execute_limits.cpp" \
+    "${GRADINGCODE}/seccomp_functions.cpp" \
+    "${GRADINGCODE}/empty_custom_function.cpp" \
+    "-I${JSONCODE}" \
+    -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
 
 # set the permissions
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+chown "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
+chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
 
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
+chown "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
+chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
+
+chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/configure.out
 
 
 ###############################################
 # scripts used only by root for setup only
-mkdir -p ${SUBMITTY_INSTALL_DIR}/.setup/bin
-chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin
-chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
+mkdir -p        "${SUBMITTY_INSTALL_DIR}/.setup/bin"
+chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin"
+chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin"
 
-cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-cp  ${SUBMITTY_REPOSITORY}/.setup/bin/track_git_version.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-cp  ${SUBMITTY_REPOSITORY}/.setup/bin/init_auto_rainbow.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
-chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
-chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+cp  "${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py" "${SUBMITTY_INSTALL_DIR}/.setup/bin/"
+cp  "${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py"    "${SUBMITTY_INSTALL_DIR}/.setup/bin/"
+cp  "${SUBMITTY_REPOSITORY}/.setup/bin/track_git_version.py"        "${SUBMITTY_INSTALL_DIR}/.setup/bin/"
+cp  "${SUBMITTY_REPOSITORY}/.setup/bin/init_auto_rainbow.py"        "${SUBMITTY_INSTALL_DIR}/.setup/bin/"
+chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
+chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
+chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
+chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
 
 ########################################################################################################################
 ########################################################################################################################
 # PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
 
 # copy the file
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c   ${SUBMITTY_INSTALL_DIR}/.setup/
+rsync -rtz  "${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c"   "${SUBMITTY_INSTALL_DIR}/.setup/"
 # replace necessary variables
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c
+replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c"
 
 # SUID (Set owner User ID up on execution), allows the $DAEMON_USER
 # to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
-pushd ${SUBMITTY_INSTALL_DIR}/.setup/ > /dev/null
+pushd "${SUBMITTY_INSTALL_DIR}/.setup/" > /dev/null
 # set ownership/permissions on the source code
 chown root:root untrusted_execute.c
 chmod 500 untrusted_execute.c
 # compile the code
-g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+g++ -static untrusted_execute.c -o "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
 # change permissions & set suid: (must be root)
-chown root  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
-chgrp $DAEMON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
-chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+chown root           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
+chgrp "$DAEMON_USER" "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
+chmod 4550           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
 popd > /dev/null
 
 
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
-if [ ${WORKER} == 0 ]; then
-    bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
+if [ "${WORKER}" == 0 ]; then
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh"
 fi
 
 ################################################################################################################
@@ -538,54 +587,66 @@ fi
 
 echo -e "Compile and install analysis tools"
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
-pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
+if [ "${UTM_ARM}" == 0 ]; then
+# END ARM64
+
+pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
         do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${AnalysisTools_Version}/${b}" -O ${b}
     done
 
-    echo ${AnalysisTools_Version} > VERSION
+    echo "${AnalysisTools_Version}" > VERSION
 fi
 popd > /dev/null
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# HASKELL BINARY IS NOT AVAILABLE ARM64
+else
+    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
+fi
+# END ARM64
+
 # change permissions
-chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
+chmod -R 555                                       "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
 # NOTE: These variables must match the same variables in install_system.sh
-clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
-clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+clangsrc="${SUBMITTY_INSTALL_DIR}/clang-llvm/src"
+clangbuild="${SUBMITTY_INSTALL_DIR}/clang-llvm/build"
 # note, we are not running 'ninja install', so this path is unused.
-clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
+clanginstall="${SUBMITTY_INSTALL_DIR}/clang-llvm/install"
 
-ANALYSIS_TOOLS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
+ANALYSIS_TOOLS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools"
 
 # copying commonAST scripts
-mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
-mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
+mkdir -p "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
+mkdir -p "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/"
 
 array=( astMatcher.py commonast.py unionToolRunner.py jsonDiff.py utils.py refMaps.py match.py eqTag.py context.py \
         removeTokens.py jsonDiffSubmittyRunner.py jsonDiffRunner.py jsonDiffRunnerRunner.py createAllJson.py )
 for i in "${array[@]}"; do
-    rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/${i} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+    rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/${i}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 done
 
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp"       "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/"
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt"      "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp"      "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt" "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt"
 
 #copying tree visualization scrips
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt"        "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
+rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt"        "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
 #building commonAST excecutable
-pushd ${ANALYSIS_TOOLS_REPO}
-g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
-g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
+pushd "${ANALYSIS_TOOLS_REPO}"
+g++ commonAST/parser.cpp commonAST/traversal.cpp -o "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out"
+g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out"
 popd > /dev/null
 
 # FIXME: skipping this step as it has errors, and we don't use the output of it yet
@@ -606,33 +667,33 @@ popd > /dev/null
 
 
 # change permissions
-chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
+chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
 
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
+find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades" -type d -exec chmod o+rx {} \;
+find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades" -type f -exec chmod o+r {} \;
 
 #####################################
 # Obtain API auth token for submitty-admin user
 if [ "${WORKER}" == 0 ]; then
-    python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+    python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py"
 fi
 #####################################
 # Build & Install Lichen Modules
 
-/bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
+/bin/bash "${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh"
 
 
 ################################################################################################################
 ################################################################################################################
 
 # Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
+python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
+chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
 
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
@@ -650,7 +711,7 @@ cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/
 # Allow course creation by daemon
 #############################################################
 
-cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
+cat "${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers" | envsubst | cat - > /etc/sudoers.d/submitty
 chmod 0440 /etc/sudoers.d/submitty
 chown root:root /etc/sudoers.d/submitty
 
@@ -661,16 +722,16 @@ chown root:root /etc/sudoers.d/submitty
 # stop the submitty daemons (if they're running)
 for i in "${ALL_DAEMONS[@]}"; do
     set +e
-    systemctl is-active --quiet ${i}
-    is_active_now=$?
+    systemctl is-active --quiet "${i}"
+    is_active_now="$?"
     set -e
     if [[ "${is_active_now}" == "0" ]]; then
-        systemctl stop ${i}
+        systemctl stop "${i}"
         echo -e "Stopped ${i}"
     fi
     set +e
-    systemctl is-active --quiet ${i}
-    is_active_tmp=$?
+    systemctl is-active --quiet "${i}"
+    is_active_tmp="$?"
     set -e
     if [[ "$is_active_tmp" == "0" ]]; then
         echo -e "ERROR: did not successfully stop {$i}\n"
@@ -681,7 +742,7 @@ done
 if [ "${WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u ${DAEMON_USER} python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+    sudo -H -u "${DAEMON_USER}" python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
     echo -e "done"
 fi
 
@@ -689,14 +750,14 @@ fi
 if [ "${WORKER}" == 0 ]; then
     for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
         echo "ERROR: Also kill shipper pid $i";
-        kill $i || true;
+        kill "$i" || true;
     done
 fi
 
 # force kill any other worker processes that may be manually running on the primary or remote machines
 for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
     echo "ERROR: Also kill shipper pid $i";
-    kill $i || true;
+    kill "$i" || true;
 done
 
 
@@ -706,21 +767,21 @@ original_autograding_workers=/var/local/submitty/autograding_TODO/autograding_wo
 if [ -f $original_autograding_workers ]; then
     temp_autograding_workers=`mktemp`
     echo "save this file! ${original_autograding_workers} ${temp_autograding_workers}"
-    mv ${original_autograding_workers} ${temp_autograding_workers}
+    mv "${original_autograding_workers}" "${temp_autograding_workers}"
 fi
 
 array=( autograding_TODO autograding_DONE )
 for i in "${array[@]}"; do
-    rm -rf ${SUBMITTY_DATA_DIR}/${i}
-    mkdir -p ${SUBMITTY_DATA_DIR}/${i}
-    chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
-    chmod 770 ${SUBMITTY_DATA_DIR}/${i}
+    rm -rf "${SUBMITTY_DATA_DIR}/${i}"
+    mkdir -p "${SUBMITTY_DATA_DIR}/${i}"
+    chown -R "${DAEMON_USER}:${DAEMON_GID}" "${SUBMITTY_DATA_DIR}/${i}"
+    chmod 770 "${SUBMITTY_DATA_DIR}/${i}"
 done
 
 # return the autograding_workers json
 if [ -f "$temp_autograding_workers" ]; then
     echo "return this file! ${temp_autograding_workers} ${original_autograding_workers}"
-    mv ${temp_autograding_workers} ${original_autograding_workers}
+    mv "${temp_autograding_workers}" "${original_autograding_workers}"
 fi
 
 #############################################################
@@ -728,9 +789,9 @@ fi
 
 for i in "${ALL_DAEMONS[@]}"; do
     # update the autograding shipper & worker daemons
-    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
-    chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
-    chmod 444 /etc/systemd/system/${i}.service
+    rsync -rtz  "${SUBMITTY_REPOSITORY}/.setup/${i}.service" "/etc/systemd/system/${i}.service"
+    chown -R "${DAEMON_USER}:${DAEMON_GROUP}"                "/etc/systemd/system/${i}.service"
+    chmod 444                                                "/etc/systemd/system/${i}.service"
 done
 
 # delete the autograding tmp directories
@@ -746,9 +807,9 @@ for ((i=0;i<$NUM_UNTRUSTED;i++));
 do
     myuser=`printf "untrusted%02d" $i`
     mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
-    mkdir $mydir
-    chown ${DAEMON_USER}:$myuser $mydir
-    chmod 770 $mydir
+    mkdir "$mydir"
+    chown "${DAEMON_USER}:$myuser" "$mydir"
+    chmod 770 "$mydir"
 done
 
 
@@ -756,24 +817,24 @@ done
 # If the migrations have indicated that it is necessary to rebuild all
 # existing gradeables, do so.
 
-REBUILD_ALL_FILENAME=${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt
+REBUILD_ALL_FILENAME="${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt"
 
-if [ -f $REBUILD_ALL_FILENAME ]; then
+if [ -f "$REBUILD_ALL_FILENAME" ]; then
     echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding"
     echo -e "\n\nMust rebuild ALL GRADEABLES\n\n"
-    for s in /var/local/submitty/courses/*/*; do c=`basename $s`; ${s}/BUILD_${c}.sh --clean; done
+    for s in /var/local/submitty/courses/*/*; do c=`basename "$s"`; "${s}/BUILD_${c}.sh" --clean; done
     echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
-    rm $REBUILD_ALL_FILENAME
+    rm "$REBUILD_ALL_FILENAME"
 fi
 
 #############################################################################
 
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
-    if [[ "$#" == 0 || ("$#" == 1 && $1 != "skip_web_restart") || ("$#" -ge 2  && ($1 != "skip_web_restart" && $2 != "skip_web_restart")) ]]; then
+    if [[ "$#" == 0 || ("$#" == 1 && "$1" != "skip_web_restart") || ("$#" -ge 2  && ("$1" != "skip_web_restart" && "$2" != "skip_web_restart")) ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
-        systemctl restart php${PHP_VERSION}-fpm
+        systemctl restart "php${PHP_VERSION}-fpm"
         echo "done"
         echo -n "restarting apache2..."
         systemctl restart apache2
@@ -790,10 +851,10 @@ systemctl daemon-reload
 
 # restart the socket & jobs handler daemons
 for i in "${RESTART_DAEMONS[@]}"; do
-    systemctl restart ${i}
+    systemctl restart "${i}"
     set +e
-    systemctl is-active --quiet ${i}
-    is_active_after=$?
+    systemctl is-active --quiet "${i}"
+    is_active_after="$?"
     set -e
     if [[ "$is_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart ${i}\n"
@@ -807,22 +868,22 @@ done
 # INSTALL TEST SUITE if not in worker mode
 if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
-    if [[ "$#" -ge 1 && $1 == "test" ]]; then
+    if [[ "$#" -ge 1 && "$1" == "test" ]]; then
 
         # copy the directory tree and replace variables
         echo -e "Install Autograding Test Suite..."
-        rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-        mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
+        rsync -rtz  "${SUBMITTY_REPOSITORY}/tests/"  "${SUBMITTY_INSTALL_DIR}/test_suite"
+        mkdir -p "${SUBMITTY_INSTALL_DIR}/test_suite/log"
 
         # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-        ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/sbin/run_test_suite.py
+        ln -sf  "${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py"  "${SUBMITTY_INSTALL_DIR}/sbin/run_test_suite.py"
 
         echo -e "\nRun Autograding Test Suite...\n"
 
         # pop the first argument from the list of command args
         shift
         # pass any additional command line arguments to the run test suite
-        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py" "$@"
 
         echo -e "\nCompleted Autograding Test Suite\n"
     fi
@@ -834,11 +895,11 @@ fi
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
 if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
-    if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
+    if [[ "$#" -ge 1 && "$1" == "test_rainbow" ]]; then
 
         # copy the directory tree and replace variables
         echo -e "Install Rainbow Grades Test Suite..."
-        rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
+        rsync -rtz "${SUBMITTY_REPOSITORY}/tests/"  "${SUBMITTY_INSTALL_DIR}/test_suite"
 
         # add a symlink to conveniently run the test suite or specific tests without the full reinstall
         #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
@@ -852,9 +913,9 @@ if [ "${WORKER}" == 0 ]; then
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
         set +e
-        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py"  "$@"
 
-        if [[ $? -ne 0 ]]; then
+        if [[ "$?" -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
         else
             rainbow_counter=$((rainbow_counter+1))
@@ -872,30 +933,30 @@ fi
 if [ "${WORKER}" == 1 ]; then
     # the supervisor user/group must have write access on the worker machine
     echo -e -n "Update/confirm worker repository permissions"
-    chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
-    chmod -R g+rw ${SUBMITTY_REPOSITORY}
+    chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
+    chmod -R g+rw "${SUBMITTY_REPOSITORY}"
 else
-    if [ ${VAGRANT} == 0 ]; then
+    if [ "${VAGRANT}" == 0 ]; then
         # in order to update the submitty source files on the worker machines
         # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
         echo -e -n "Update/confirm primary repository permissions"
-        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-        chmod -R g+r ${SUBMITTY_REPOSITORY}
+        chgrp -R "${DAEMON_GID}" "${SUBMITTY_REPOSITORY}"
+        chmod -R g+r "${SUBMITTY_REPOSITORY}"
     fi
 
     # Update any foreign worker machines
     echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
-    sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
     echo -e -n "Done updating workers and installing docker images\n\n"
 
-    if [[ "$#" -ge 1 && $1 == "disable_shipper_worker" ]]; then
+    if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
         echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
     else
         # Restart the shipper & workers
         echo -e -n "Restart shipper & workers\n\n"
-        python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
+        python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py"
         echo -e -n "Done restarting shipper & workers\n\n"
     fi
 fi

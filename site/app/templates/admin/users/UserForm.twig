@@ -94,6 +94,14 @@
                 <option value="4">Student</option>
             </select>
         </label>
+        <label for="registration_type" class="full-width">
+            Registration Type:
+            <select name="registration_type" id="registration_type">
+                <option value="graded">graded</option>
+                <option value="audit">audit</option>
+                <option value="withdrawn">withdrawn</option>
+            </select>
+        </label>
         <fieldset id="user-form-assigned-sections" class="full-width" hidden>
             <legend style="font-weight:bold;font-size:16pt">Assigned Registration Sections for Grading</legend>
             {% for section in reg_sections %}
