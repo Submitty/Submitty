@@ -62,7 +62,7 @@ class PollController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
-     * @return MultiResponse
+     * @return WebResponse
      */
     public function viewPoll($poll_id) {
         if (!isset($poll_id)) {
@@ -78,12 +78,10 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                'Poll',
-                'viewPoll',
-                $poll
-            )
+        return new WebResponse(
+            'Poll',
+            'viewPoll',
+            $poll
         );
     }
 
