@@ -177,7 +177,7 @@ class AdminGradeableController extends AbstractController {
         //true if there are no students in any rotating sections.
         //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
         $no_rotating_sections = true;
-        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+        foreach ($this->core->getQueries()->getUsersCountByRotatingSections() as $section) {
             if ($section['rotating_section'] != null && $section['count'] > 0) {
                 $no_rotating_sections = false;
                 break;
@@ -315,6 +315,9 @@ class AdminGradeableController extends AbstractController {
             }
             // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if ($student_id === $grader_id) {
+                    return JsonResponse::getErrorResponse("Please note that student is not able to grade themselves");
+                }
                 $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
@@ -1153,6 +1156,10 @@ class AdminGradeableController extends AbstractController {
                 if ($post_val !== $gradeable->isRegradeAllowed()) {
                     $regrade_modified = true;
                 }
+            }
+
+            if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === false && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                $this->core->getQueries()->convertInquiryComponentId($gradeable);
             }
 
             // Try to set the property

@@ -23,13 +23,13 @@
                         {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                             <h3 class="grade-inquiry-header">Grade Inquiry:</h3>
                             <span class="grade-inquiry-status">
-                            {% if grade_inquiries[component.id].status == -1 and is_grading %}
+                            {% if grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1 and is_grading %}
                                     <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
                                     <span class="red-message">Unresolved Grade Inquiry</span>
-                            {% elseif grade_inquiries[component.id].status == -1 %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1 %}
                                 <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
                                 <span class="red-message">Grade Inquiry Under Review</span>
-                            {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is not null and grade_inquiries[component.id].status == 0 %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status is not null and grade_inquiries[component.id].status == 0 %}
                                 <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>
                                 <span class="green-message">Grade Inquiry Has Been Resolved</span>
                             {% endif %}
@@ -53,7 +53,7 @@
                         <input type="hidden" id="thread_id" name="thread_id" value="{{ grade_inquiries[component.id].id is defined ? grade_inquiries[component.id].id : 0  }}">
                         <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
                         <input type="hidden" id="gc_id" name="gc_id" value="{{ component.id }}">
-                        {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status == 0 %}
+                        {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status is not defined or grade_inquiries[component.id].status == 0 %}
                             {% set text_area_label_text = 'Write an inquiry:' %}
                         {% elseif grade_inquiries[component.id].status == -1 %}
                             {% set text_area_label_text = 'Add comment to grade inquiry:' %}
@@ -77,7 +77,7 @@
                                 <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Submit Grade Inquiry
                                 </button>
-                            {% elseif grade_inquiries[component.id].status == -1 and is_grading %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1 and is_grading %}
                                 {# Grader view,request is open #}
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
@@ -88,7 +88,7 @@
                                 <button type="button" id="grading-close" formaction="{{ change_request_status_url }}" class="gi-submit-empty gi-show-empty btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
-                            {% elseif grade_inquiries[component.id].status == -1 %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1 %}
                                 {# Request pending, we can submit new posts #}
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
@@ -96,7 +96,7 @@
                                 <button type="button" formaction="{{ change_request_status_url }}" class="gi-submit-empty btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
-                            {% elseif grade_inquiries[component.id].status == 0 and is_grading %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == 0 and is_grading %}
                                 {# Grader view, Request closed #}
                                 {# Letting Instructor reply(comment) to the inquiry without reopening the grade_inquiry #}
                                 <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
@@ -108,7 +108,7 @@
                                 <button type="button" formaction="{{ change_request_status_url }}" class="gi-show-empty btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry
                                 </button>
-                            {% elseif grade_inquiries[component.id].status == 0 %}
+                            {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == 0 %}
                                 {# Request closed #}
                                 <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry

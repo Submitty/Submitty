@@ -1,5 +1,9 @@
 <div class="content shadow" id="login-box">
-    <h1 id="login-guest">Login</h1>
+    <div id="login-guest">
+        {% include "misc/Markdown.twig" with {
+            "content": login_content
+        } only %}
+    </div>
     <!--
     <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
     -->

@@ -430,7 +430,7 @@ def archive_autograding_results(
         with open(os.path.join(tmp_submission, 'submission', ".submit.timestamp"), 'r') as submission_time_file:
             submission_string = submission_time_file.read().rstrip()
         # grab the first access to the gradeable page (if it exists)
-        user_assignment_access_filename = os.path.join(tmp_submission, ".user_assignment_access.json")
+        user_assignment_access_filename = os.path.join(tmp_submission, "submission", ".user_assignment_access.json")
         if os.path.exists(user_assignment_access_filename):
             with open(user_assignment_access_filename, 'r') as access_file:
                 obj = json.load(access_file)

@@ -51,8 +51,6 @@ use app\models\gradeable\AutoGradedVersion;
  * @see \app\exceptions\NotImplementedException
  */
 class DatabaseQueries {
-
-
     /**
      * @var Core
      */
@@ -1044,8 +1042,8 @@ VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
@@ -1096,8 +1094,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -1407,7 +1405,197 @@ WHERE semester=? AND course=? AND user_id=?",
         return $this->course_db->rows();
     }
 
+    /**
+     * Get all of the late day cache ordered by date and g_id
+     * @return array $return = [
+     *  $user_id' => [
+     *      $event_title => [
+     *          $cache_row => [
+     *              'g_id' => string,
+     *              'user_id' => string,
+     *              'team_id' => string,
+     *              'late_days_allowed' => int,
+     *              'late_day_date' => DateTime,
+     *              'submission_days_late' => int,
+     *              'late_day_exceptions' => int,
+     *              'late_days_remaining' => int,
+     *              'late_day_status' => int,
+     *              'late_days_change' => int
+     *          ]
+     *      ]
+     *  ]
+     */
+    public function getLateDayCache(): array {
+        $query = "SELECT * FROM 
+                    late_day_cache AS ldc
+                    LEFT JOIN gradeable g ON g.g_id=ldc.g_id
+                  ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
+        $this->course_db->query($query);
+        $return = [];
 
+        // key: user, value: array of all cache available
+        foreach ($this->course_db->rows() as $row) {
+            $user_id = $row['user_id'] ?? $row['team_id'];
+            // title = g_title or event date
+            $title = $row['g_title'] ?? explode(" ", $row['late_day_date'])[0];
+            $return[$user_id][$title] = $row;
+        }
+        return $return;
+    }
+
+    /**
+     * Get the late day cache for a specific user
+     * @param string $user_id
+     * @return array $return = [
+     *      $id => [
+     *          'g_id' => string,
+     *          'user_id' => string,
+     *          'team_id' => string,
+     *          'late_days_allowed' => int,
+     *          'late_day_date' => DateTime,
+     *          'submission_days_late' => int,
+     *          'late_day_exceptions' => int,
+     *          'late_days_remaining' => int,
+     *          'late_day_status' => int,
+     *          'late_days_change' => int
+     *      ]
+     * ]
+     */
+    public function getLateDayCacheForUser(string $user_id): array {
+        $params = [$user_id];
+        $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST";
+        $this->course_db->query($query, $params);
+
+        $index = 1;
+        $late_day_events = [];
+        foreach ($this->course_db->rows() as $row) {
+            // Change string date to DateTime object
+            $row['late_day_date'] = new \DateTime($row['late_day_date']);
+
+            if (isset($row['g_id'])) { // Gradeable late day event
+                $late_day_events[$row['g_id']] = $row;
+            }
+            else { // Late day update event
+                $late_day_events[$index] = $row;
+                $index++;
+            }
+        }
+        return $late_day_events;
+    }
+
+    /**
+     * Get the late day infomration for a specific user (graded gradeable information)
+     * @param string $user_id
+     * @param string $g_id
+     * @return null|array $return = [
+     *      'g_id' => string,
+     *      'user_id' => string,
+     *      'team_id' => string,
+     *      'late_days_allowed' => int,
+     *      'late_day_date' => DateTime,
+     *      'submission_days_late' => int,
+     *      'late_day_exceptions' => int,
+     *      'late_days_remaining' => int,
+     *      'late_day_status' => int,
+     *      'late_days_change' => int
+     * ]
+     */
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
+        $params = [$user_id, $g_id];
+        $query = "SELECT * FROM late_day_cache
+                    WHERE user_id=?
+                    AND g_id=?";
+        $this->course_db->query($query, $params);
+
+        $row = $this->course_db->row();
+
+        // If cache doesnt exist, generate it and query again
+        if (empty($row)) {
+            $this->generateLateDayCacheForUser($user_id);
+            $this->course_db->query($query, $params);
+            $row = $this->course_db->row();
+        }
+
+        // If cache still doesnt exist, the gradeable is not associated with
+        // LateDays OR there has been a computation error
+        if (empty($row)) {
+            return null;
+        }
+
+        return $row;
+    }
+
+    /**
+     * Generate and update the late day cache for all of the students in the course
+     */
+    public function generateLateDayCacheForUsers(): void {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    (SELECT (cache_row).* 
+                    FROM 
+                        (SELECT
+                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
+                        FROM users
+                        ) calculated_cache
+                    )";
+
+        $this->course_db->query($query, $params);
+    }
+
+    /**
+     * Generate and update the late day cache for a student
+     * @param string $user_id
+     */
+    public function generateLateDayCacheForUser(string $user_id): void {
+        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
+        $params = [$user_id, $default_late_days];
+
+        $query = "INSERT INTO late_day_cache 
+                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
+
+        $this->course_db->query($query, $params);
+    }
+
+    /**
+     * Remove all of the late day information cached
+     */
+    public function flushAllLateDayCache() {
+        $query = "DELETE FROM late_day_cache";
+        $this->course_db->query($query);
+    }
+
+    public function getLateDayUpdateTimestamps() {
+        $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
+        $this->course_db->query($query);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = new \DateTime($row['since_timestamp']);
+        }
+        return $return;
+    }
+
+    public function getLastLateDayUpdatesForUsers() {
+        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
+        $this->course_db->query($query);
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['user_id']] = new \DateTime($row['max']);
+        }
+        return $return;
+    }
+
+    /**
+     * Fetches all students from the given registration sections, $sections.
+     *
+     * @param  string[] $sections
+     * @param  string $orderBy
+     * @return User[]
+     */
     public function getUsersByRegistrationSections($sections, $orderBy = "registration_section") {
         $return = [];
         if (count($sections) > 0) {
@@ -2258,16 +2446,31 @@ ORDER BY g.sections_rotating_id, g.user_id",
      *
      * @return array
      */
-    public function getCountUsersRotatingSections() {
+    public function getUsersCountByRotatingSections() {
         $this->course_db->query(
             "
-SELECT rotating_section, count(*) as count
-FROM users
-WHERE registration_section IS NOT NULL
-GROUP BY rotating_section
-ORDER BY rotating_section"
+            SELECT rotating_section, count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL
+            GROUP BY rotating_section
+            ORDER BY rotating_section"
         );
         return $this->course_db->rows();
+    }
+
+    /**
+     * Returns the count of all users in course that are in a non-null registration section.
+     *
+     * @return integer
+     */
+    public function getTotalRegisteredUsersCount() {
+        $this->course_db->query(
+            "
+            SELECT count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL"
+        );
+        return $this->course_db->rows()[0]['count'];
     }
 
     /**
@@ -2345,13 +2548,19 @@ ORDER BY rotating_section"
         return $this->course_db->rows();
     }
 
+    /**
+     * Get newly registered students (registration section != NULL) that have not yet been
+     * assigned to a rotating section.
+     *
+     * @return string[] user id's
+     */
     public function getRegisteredUserIdsWithNullRotating() {
         $this->course_db->query(
             "
-SELECT user_id
-FROM users
-WHERE rotating_section IS NULL AND registration_section IS NOT NULL
-ORDER BY user_id ASC"
+            SELECT user_id
+            FROM users
+            WHERE rotating_section IS NULL AND registration_section IS NOT NULL
+            ORDER BY user_id ASC"
         );
         return array_map(
             function ($elem) {
@@ -2361,6 +2570,11 @@ ORDER BY user_id ASC"
         );
     }
 
+     /**
+      * Return an array of user id's for users that have been assigned a registration section
+      *
+      * @return string[] user id's
+      */
     public function getRegisteredUserIds() {
         $this->course_db->query(
             "
@@ -2398,31 +2612,14 @@ ORDER BY user_id ASC"
         return $gradeable_ids;
     }
 
-    /**
-     * Get all team ids for all gradeables where the teams are in rotating section NULL
-     *
-     * @return string[][] Map of gradeable_id => [ team ids ]
-     */
-    public function getTeamIdsWithNullRotating() {
-        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams WHERE rotating_section IS NULL");
-
-        $gradeable_ids = [];
-        $rows = $this->course_db->rows();
-        foreach ($rows as $row) {
-            $g_id = $row['g_id'];
-            $team_id = $row['team_id'];
-            if (!array_key_exists($g_id, $gradeable_ids)) {
-                $gradeable_ids[$g_id] = [];
-            }
-            $gradeable_ids[$g_id][] = $team_id;
-        }
-        return $gradeable_ids;
-    }
-
     public function setAllUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
 
+    /**
+     * Remove unregistered students (registration section = NULL) from rotating sections
+     *
+     */
     public function setNonRegisteredUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
@@ -2446,6 +2643,11 @@ ORDER BY user_id ASC"
         return $this->course_db->row()['cnt'];
     }
 
+    /**
+     * Adds given rotating section to the database
+     *
+     * @param integer $section
+     */
     public function insertNewRotatingSection($section) {
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", [$section]);
     }
@@ -2473,10 +2675,16 @@ ORDER BY user_id ASC"
         }
     }
 
+    /**
+     * Updates all given Users in $users array to have rotating section $section
+     *
+     * @param integer $section
+     * @param User[] $users
+     */
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge([$section], $users);
-        $update_string = $this->createParamaterList(count($users));
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$update_string}", $update_array);
+        $placeholders = $this->createParamaterList(count($users));
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
     }
 
     /**
@@ -2829,9 +3037,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $id
      * @return \DateTime
      */
-    public function getDateForGradeableById($id) {
-        $this->course_db->query("SELECT g_grade_due_date FROM gradeable WHERE g_id=?", [$id]);
-        return new \DateTime($this->course_db->rows()[0]['g_grade_due_date']);
+    public function getDueDateForGradeableById(string $id): ?\DateTime {
+        $this->course_db->query("SELECT eg_submission_due_date FROM electronic_gradeable WHERE g_id=? AND eg_has_due_date", [$id]);
+        if (count($this->course_db->rows()) > 0) { // the gradeable has a due date
+            return new \DateTime($this->course_db->rows()[0]['eg_submission_due_date']);
+        }
+        else {
+            return null;
+        }
     }
 
     public function getAllGradeablesIds() {
@@ -2876,7 +3089,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         foreach ($tmp as $row) {
             $new_graders[$row['user_id']] = $all_sections;
         }
-        $final_new_graders = [];
 
         return $new_graders;
     }
@@ -2953,8 +3165,27 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $this->course_db->query("UPDATE gradeable_teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
     }
 
+    /**
+     * Set a team's ($team_id) rotating section ($section)
+     *
+     * @param string $team_id
+     * @param int    $section
+     */
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
+    }
+
+    /**
+     * Set teams' (array $team_ids) rotating section ($section) for given gradeable id ($g_id)
+     *
+     * @param string[] $team_ids
+     * @param int      $section
+     * @param string   $g_id
+     */
+    public function updateTeamsRotatingSection($team_ids, $section, $g_id) {
+        $update_array = array_merge([$section, $g_id], $team_ids);
+        $placeholders = $this->createParamaterList(count($team_ids));
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE g_id=? AND team_id IN {$placeholders}", $update_array);
     }
 
     /**
@@ -4189,6 +4420,9 @@ AND gc_id IN (
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];
 
+        if (count($params) === 0) {
+            return [];
+        }
         $question_marks = $this->createParamaterList(count($params));
         $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN {$question_marks}", $params);
         $return = [];
@@ -4595,6 +4829,14 @@ AND gc_id IN (
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
         return ($this->course_db->row()['cnt']);
+    }
+
+    /*
+     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
+     * This allows graders to still respond to by component inquiries if in no-component mode.
+     */
+    public function convertInquiryComponentId($gradeable) {
+        $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM regrade_requests ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
     }
 
     public function getRegradeDiscussions(array $grade_inquiries) {
@@ -6586,6 +6828,28 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function setQueueMessage($queue_code, $message) {
+        //clear the message
+        if ($message === 'null') {
+            $this->course_db->query("UPDATE queue_settings SET message = null WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$queue_code]);
+        }
+        else {
+            $current_date = $this->core->getDateTimeNow();
+            $this->course_db->query("UPDATE queue_settings SET message = ?, message_sent_time = ? WHERE  UPPER(TRIM(code)) = UPPER(TRIM(?)) ", [$message, $current_date, $queue_code]);
+        }
+    }
+
+    public function getQueueMessage($queue_code) {
+        $this->course_db->query("SELECT message, message_sent_time from queue_settings where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
+        if (count($this->course_db->rows()) > 0) {
+            return $this->course_db->rows()[0];
+        }
+        else {
+            return null;
+        }
+    }
+
+
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
 
@@ -7567,6 +7831,26 @@ SQL;
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Demote grader to a student, identified by user_id, semester, and course.
+     * Set user group to 4 (student) and the query is successful if the row
+     * count (number of affected rows) is positive.
+     *
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure, true otherwise
+     */
+    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+        $query = <<<SQL
+UPDATE courses_users
+SET user_group = 4
+WHERE user_id=? AND semester=? AND course=?
+SQL;
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }

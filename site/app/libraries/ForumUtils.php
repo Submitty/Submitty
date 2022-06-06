@@ -10,7 +10,6 @@ use app\libraries\Utils;
  * Contains various useful functions for interacting with the forum
  */
 class ForumUtils {
-
     const FORUM_CHAR_POST_LIMIT = 5000;
 
     public static function checkGoodAttachment($isThread, $thread_id, $file_post) {

@@ -90,6 +90,12 @@ while :; do
     shift
 done
 
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+export UTM_ARM=0
+if [[ "$(uname -m)" = "aarch64" ]] ; then
+    export UTM_ARM=1
+fi
+
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
     export DEBIAN_FRONTEND=noninteractive
@@ -98,7 +104,10 @@ fi
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
-    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+    if [ ${UTM_ARM} == 0 ]; then
+	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+    fi
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
@@ -192,19 +201,6 @@ DATABASE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-#################################################################
-# PYTHON PACKAGE SETUP
-#########################
-
-#libraries for QR code processing:
-#install DLL for zbar
-apt-get install libzbar0 --yes
-
-pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
-
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
-    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
-fi
 
 #################################################################
 # Node Package Setup
@@ -218,10 +214,14 @@ fi
 # STACK SETUP
 #################
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+#if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
+# stack is not available for non-x86_64 systems
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
+    # NOTE: currently only 64-bit (x86_64) Linux binary is available
 fi
 
 #################################################################
@@ -261,6 +261,17 @@ if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
 else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
+
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON ARM64 / UTM_ARM MAC M1
+if getent passwd vagrant > /dev/null; then
+    # Already exists
+    echo 're-running install submitty'
+elif [ ${UTM_ARM} == 1 ]; then
+    useradd -m vagrant
+fi
+# END ARM64
+
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
@@ -434,8 +445,8 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         # remove default sites which would cause server to mess up
-        rm /etc/apache2/sites*/000-default.conf
-        rm /etc/apache2/sites*/default-ssl.conf
+        rm -f /etc/apache2/sites*/000-default.conf
+        rm -f /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
@@ -635,8 +646,8 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    if [ ${VAGRANT} == 1]; then
-        "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    if [ ${VAGRANT} == 1 ]; then
+        echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     fi
@@ -667,6 +678,11 @@ do-not-reply@vagrant
 localhost
 25
 " | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+
+        # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
+        sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -699,7 +715,7 @@ if [ ${WORKER} == 0 ]; then
         echo "Creating submitty master database"
         su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
         su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
-        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config -e master -e system migrate --initial
     else
         echo "Submitty master database already exists"
     fi
