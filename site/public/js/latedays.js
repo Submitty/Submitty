@@ -96,3 +96,41 @@ function deleteLateDays(user_id, datestamp) {
         })
     }
 }
+
+function updateCacheBuildStatus(url, confirm_message, status) {
+    var confirm = window.confirm(confirm_message);
+    if (confirm) {
+        // show rebuild status message
+        $('#rebuild-status-panel').show();
+        $('#rebuild-status').html(status);
+
+        // disable and grey out table and buttons
+        $('#calculate-btn').prop('disabled',true).css('opacity',0.5);
+        $('#flush-btn').prop('disabled',true).css('opacity',0.5);
+        $('#late-day-table').css('opacity',0.5);
+
+        $.ajax({
+            url: url,
+            success: function() {
+                window.location.reload();
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
+}
+
+function calculateLateDayCache() {
+    const url = buildCourseUrl(['late_days_forensics', 'calculate']);
+    const confirm_message = "Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.";
+    const status = "Recaclulating...";
+    updateCacheBuildStatus(url, confirm_message, status);
+}
+
+function flushLateDayCache() {
+    const url = buildCourseUrl(['late_days_forensics', 'flush']);
+    const confirm_message = "Are you sure you want to flush the cache? This will remove the late day cache for every user.";
+    const status = "Flushing...";
+    updateCacheBuildStatus(url, confirm_message, status);
+}

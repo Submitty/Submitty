@@ -201,19 +201,6 @@ DATABASE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-#################################################################
-# PYTHON PACKAGE SETUP
-#########################
-
-#libraries for QR code processing:
-#install DLL for zbar
-apt-get install libzbar0 --yes
-
-pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
-
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
-    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
-fi
 
 #################################################################
 # Node Package Setup
