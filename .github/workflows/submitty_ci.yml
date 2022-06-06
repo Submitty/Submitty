@@ -470,7 +470,7 @@ jobs:
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=http://localhost,watchForFileChanges=false
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -484,7 +484,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=http://localhost,watchForFileChanges=false
               spec: cypress/integration/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -498,7 +498,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=http://localhost,watchForFileChanges=false
               spec: cypress/integration/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -515,7 +515,7 @@ jobs:
           - name: Run cypress e2e login tests with databse auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=http://localhost,watchForFileChanges=false
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -527,7 +527,7 @@ jobs:
           - name: Run cypress e2e login tests with LDAP auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=http://localhost
+              config: baseUrl=http://localhost,watchForFileChanges=false
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
