@@ -208,12 +208,11 @@ class SimpleGraderController extends AbstractController {
 
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getUpperClamp()) {
-                $return_data['max_clamp'] = $component->getUpperClamp();
-                return JsonResponse::getSuccessResponse($return_data);
+                array_push($return_data, $component->getUpperClamp());
             }
         }
 
-        return JsonResponse::getFailResponse("Did not find max clamp values");
+        return JsonResponse::getSuccessResponse($return_data);
     }
 
     /**

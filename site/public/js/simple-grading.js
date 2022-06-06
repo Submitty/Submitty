@@ -434,23 +434,12 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                submitAJAX(
-                    buildCourseUrl(['gradeable', row_el.data('gradeable'), 'maxclamp']),
-                    {
-                        'csrf_token': csrfToken,
-                        'user_id': row_el.data("user"),
-                    },
-                    function(response) {
-                      if(value > response['data']['max_clamp']) {
-                            if(!alert('Score should be less than the maximum value: ' + response['data']['max_clamp'])) {
-                                window.location.reload();
-                            }
-                        }
-                    },
-                    function() {
-                        alert("[ERROR] Refresh Page");
+                if(localStorage.getItem('max_clamp')[split_id[3]] < this.value) {
+                    if(!alert('Score should be less than the maximum value: ' + localStorage.getItem('max_clamp')[split_id[3]])) {
+                        // Reload the page
+                        window.location.reload();
                     }
-                );
+                }
             }
         }
 
@@ -638,13 +627,31 @@ function setupNumericTextCells() {
     });
 }
 
+// helper function that request for the max clamp value for each grade components
+function getComponentMaxClamps() {
+    submitAJAX(
+        buildCourseUrl(['gradeable', $("#data-table").data('gradeable'), 'maxclamp']),
+        {
+            'csrf_token': csrfToken,
+        },
+        function(response) {
+            localStorage.setItem('max_clamp', response['data']);
+        },
+        function() {
+            alert("[ERROR] Refresh Page");
+        }
+    );
+}
+
 function setupSimpleGrading(action) {
     if(action === "lab") {
         setupCheckboxCells();
     }
     else if(action === "numeric") {
         setupNumericTextCells();
+        getComponentMaxClamps();
     }
+
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 
     // highlights the first jquery-ui autocomplete result if there is only one
