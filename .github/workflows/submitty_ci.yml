@@ -468,7 +468,7 @@ jobs:
               BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
@@ -482,7 +482,7 @@ jobs:
               sudo systemctl stop submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               spec: cypress/integration/autograding_status_1.spec.js
@@ -496,7 +496,7 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               spec: cypress/integration/autograding_status_2.spec.js
@@ -513,7 +513,7 @@ jobs:
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with databse auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               spec: cypress/integration/login.spec.js
@@ -525,7 +525,7 @@ jobs:
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               spec: cypress/integration/login.spec.js
