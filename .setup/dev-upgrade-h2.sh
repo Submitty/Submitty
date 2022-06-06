@@ -121,7 +121,6 @@ update_nginx() {
         sed -i "s/default_server/ssl\ default_server/" "${P_NGINX}"
         sed -i "/^\ \{4\}server_n/a ssl_certificate\ \"${P_CERT}/${S_DOMAIN}.crt\";" "${P_NGINX}"
         sed -i "/^ssl_c/a ssl_certificate_key\ \"${P_CERT}/${S_DOMAIN}.key\";" "${P_NGINX}"
-        sed -i ""
         sed -i "s/^ssl_/\ \ \ \ ssl_/" "${P_NGINX}"
     } || panic "Failed to update the nginx config"
 

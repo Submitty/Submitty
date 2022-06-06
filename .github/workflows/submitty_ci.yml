@@ -428,7 +428,8 @@ jobs:
 
           - name: Upgrade to HTTPS
             run: |
-              sudo -E env "PATH=$PATH" bash .setup/apache/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
 
           - name: Run git tests
             run: |
