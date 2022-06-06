@@ -5,6 +5,9 @@
 #### It should only be invoked by other scripts or by system, not by PHP
 #### For more info, see `./submitty_daemon_jobs/submitty_jobs/jobs.py`
 
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${CONF_DIR}/submitty.json")
+
 SUBMITTY_DAEMON_JOB_Q="${SUBMITTY_DATA_DIR:?}/daemon_job_queue"
 
 # Abstract requirements
@@ -111,13 +114,13 @@ parse_job_reqs() {
 
     info "${JSON_ARGS} '\$ARGS.named'"
 
-    if ! JSON_DATA=$(
+    JSON_DATA=$(
         # shellcheck disable=2016
         ${JSON_ARGS} '$ARGS.named'
-    ); then
+    ) || {
         jqVer=$(jq -V)
         panic "Failed to create json, jq version ${jqVer} "
-    fi
+    }
 
     info "Constructed json query:"
     echo "${JSON_DATA}" | {
