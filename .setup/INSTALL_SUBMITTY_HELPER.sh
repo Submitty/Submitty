@@ -136,14 +136,14 @@ GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
 COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
 
 
-CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'\"" postgres)
+CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'\"" postgres)
 
 if [ "$CHECK" == "f" ]; then
     echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
     exit
 fi
 
-CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolcreatedb FROM pg_authid WHERE rolname='$COURSE_DBUSER'\"" postgres)
+CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'\"" postgres)
 
 if [ "$CHECK" == "t" ]; then
     echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
