@@ -4416,6 +4416,47 @@ AND gc_id IN (
         }
         return false;
     }
+    
+    /**
+     * Set gradeable-specific user anon_id
+     * 
+     * @param string $user_id
+     * @param string $g_id
+     * @param string $anon_id
+     */
+    public function insertGradeableAnonId($user_id, $g_id, $anon_id) {
+        try {
+            $params= [$user_id, $g_id, $anon_id];
+            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
+            $this->course_db->commit();
+        }
+        catch (DatabaseException $dbException) {
+            $this->course_db->rollback();
+       }
+    }
+
+    /**
+     * Get gradeable-specific user anon_id
+     * 
+     * @param string $user_id
+     * @param string $g_id
+     */
+    public function getGradeableAnonId($user_id, $g_id) {
+        $result= $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE user_id=? AND g_id=?", [$user_id, $g_id]);
+        if ($this->course_db->getRowCount() === 0) {
+            return null;
+        }
+        else {
+            return $this->course_db->rows()[0]['anon_id'];
+        }
+    }
+
+    public function getAllAnonIdsByGradeable($g_id) {
+        $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
+
 
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];

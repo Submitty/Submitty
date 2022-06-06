@@ -1677,6 +1677,17 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255)
+)
+
+
+--
 -- Name: viewed_responses; Type: TABLE; Schema: public; Owner: -
 --
 

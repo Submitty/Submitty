@@ -472,6 +472,30 @@ class User extends AbstractModel {
     }
 
     /**
+     * @param string $g_id
+     */
+    public function getAnonIdByGradeable($g_id) {
+        $anon_id= $this->core->getQueries()->getGradeableAnonId($this->id, $g_id);
+        if ($anon_id === null) {
+            $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);
+            $alpha_length = strlen($alpha) - 1;
+            do {
+                $random = "";
+                for ($i = 0; $i < 15; $i++) {
+                    // this throws an exception if there's no avaiable source for generating
+                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // so just ignore this fact
+                    /** @noinspection PhpUnhandledExceptionInspection */
+                    $random .= $alpha[random_int(0, $alpha_length)];
+                }
+            } while (in_array($random, $anon_ids));
+            $this->core->getQueries()->insertGradeableAnonId($this->id, $g_id, $random);
+        }
+        return $anon_id ?? $random;
+    }
+
+    /**
      * Checks $data to make sure it is acceptable for $field.
      *
      * @param string $field
