@@ -434,8 +434,9 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                if(localStorage.getItem('max_clamp')[split_id[3]] && localStorage.getItem('max_clamp')[split_id[3]] < this.value) {
-                    alert('Score should be less than the max clamp value: ' + localStorage.getItem('max_clamp')[split_id[3]]);
+                let max_clamps = localStorage.getItem('max_clamp').split('-');
+                if(max_clamps[split_id[3]] && max_clamps[split_id[3]] < this.value) {
+                    alert('Score should be less than the max clamp value: ' + max_clamps[split_id[3]]);
                     this.value = 0;
                 }
             }
@@ -627,7 +628,7 @@ function setupNumericTextCells() {
 
 // helper function that request for the max clamp value for each grade components
 function getComponentMaxClamps() {
-    localStorage.setItem('max_clamp', $("#data-table").data('max-clamps').split("-"));
+    localStorage.setItem('max_clamp', $("#data-table").data('max-clamps'));
 
 }
 
