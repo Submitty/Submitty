@@ -1,10 +1,10 @@
 def percent_change(old,new):
-    return 100*(float(new)-old)/old
+    return 100*(float(new)-old)//old
 
 def print_change(old1, new1, old2, new2):
     p1 = percent_change(old1,new1)
     p2 = percent_change(old2,new2)
-    print p1, "vs", p2
+    print(p1, "vs", p2)
 
 print "#icebucketchallenge vs #alsicebucketchallenge, percentage change"
 print_change(200,500,100,300)
