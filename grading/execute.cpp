@@ -79,7 +79,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
-    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
+
+    // Submitty Analysis Tools TS
+    { "submitty_count_ts",       "/usr/bin/node "+SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/dist/index.js" },
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -597,7 +599,7 @@ void parse_command_line(const std::string &cmd,
   my_program = my_stdin = my_stdout = my_stderr = "";
 
   std::vector<std::string> tokens = break_into_tokens(cmd);
-
+  std::vector<std::string> sub_programs{};
   for (int i = 0; i < tokens.size(); i++) {
     std::cout << "TOKEN " << std::setw(3) << i << " IS '" << tokens[i] << "'" << std::endl;
   }
@@ -611,6 +613,13 @@ void parse_command_line(const std::string &cmd,
       assert (my_args.size() == 0);
       // program name
       my_program = validate_program(token, whole_config);
+      std::istringstream ss(my_program);
+      std::string sub_program;
+      while(std::getline(ss, sub_program, ' ')) {
+        sub_programs.push_back(sub_program);
+      }
+      my_program = sub_programs[0];
+      sub_programs.erase(sub_programs.begin());
       assert (my_program != "");
     }
 
@@ -735,6 +744,7 @@ void parse_command_line(const std::string &cmd,
     }
   }
 
+  my_args.insert(my_args.begin(), sub_programs.begin(), sub_programs.end());
 
 
   // FOR DEBUGGING
