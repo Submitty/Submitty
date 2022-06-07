@@ -474,7 +474,7 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
-              env: run_area=CI
+              env: run_area=CI,CHOKIDAR_USEPOLLING=1
 
           - name: Stop autograding services
             run: |
@@ -489,7 +489,7 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
-              env: autograding_shipper_off=True
+              env: autograding_shipper_off=True,CHOKIDAR_USEPOLLING=1
 
           - name: Restart autograding shipper
             run: |
@@ -503,7 +503,7 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
-              env: autograding_shipper_off=True
+              env: autograding_shipper_off=True,CHOKIDAR_USEPOLLING=1
 
           - name: Restart autograding worker
             run: |
@@ -520,6 +520,7 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
+              env: CHOKIDAR_USEPOLLING=1
 
           - name: Switch to LDAP auth
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
@@ -532,6 +533,7 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
+              env: CHOKIDAR_USEPOLLING=1
 
           - uses: actions/upload-artifact@v2
             if: failure()
