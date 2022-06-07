@@ -170,7 +170,14 @@
             {% endif %}
 
         {% endif %}
-        <input type="submit" id="submit" class="submit-gradeable btn btn-primary" value="Grade My Repository" />
+
+        <h3>Grade your repository:</h3>
+        <div class="upload-message">
+            {% include "misc/Markdown.twig" with {
+                "content" : upload_message
+            } only %}
+        </div>
+        <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
     {% else %}
 
     {% if is_notebook %}
