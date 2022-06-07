@@ -139,7 +139,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                 viewport: viewport,
             };
 
-            page.render(renderContext).then(() => {
+            page.render(renderContext).promise.then(() => {
                 PDFAnnotate.getAnnotations(file_name, num).then((annotationsPage) => {
                     const annotations = annotationsPage.annotations;
                     for (let an = 0; an < annotations.length; an++) {
