@@ -689,10 +689,10 @@ chown -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/Su
 chmod -R 755 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
 
 # # install npm packages
-su - ${DAEMON_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS && npm install"
+su "${DAEMON_USER}" -c "npm install"
 
 # # build project
-su - ${DAEMON_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS && npm run build"
+su "${DAEMON_USER}" -c "npm run build"
 
 popd > /dev/null
 
