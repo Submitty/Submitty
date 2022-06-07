@@ -434,11 +434,9 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                if(localStorage.getItem('max_clamp')[split_id[3]] < this.value) {
-                    if(!alert('Score should be less than the maximum value: ' + localStorage.getItem('max_clamp')[split_id[3]])) {
-                        // Reload the page
-                        window.location.reload();
-                    }
+                if(localStorage.getItem('max_clamp')[split_id[3]] && localStorage.getItem('max_clamp')[split_id[3]] < this.value) {
+                    alert('Score should be less than the max clamp value: ' + localStorage.getItem('max_clamp')[split_id[3]]);
+                    this.value = 0;
                 }
             }
         }
@@ -629,18 +627,8 @@ function setupNumericTextCells() {
 
 // helper function that request for the max clamp value for each grade components
 function getComponentMaxClamps() {
-    submitAJAX(
-        buildCourseUrl(['gradeable', $("#data-table").data('gradeable'), 'maxclamp']),
-        {
-            'csrf_token': csrfToken,
-        },
-        function(response) {
-            localStorage.setItem('max_clamp', response['data']);
-        },
-        function() {
-            alert("[ERROR] Refresh Page");
-        }
-    );
+    localStorage.setItem('max_clamp', $("#data-table").data('max-clamps').split("-"));
+
 }
 
 function setupSimpleGrading(action) {

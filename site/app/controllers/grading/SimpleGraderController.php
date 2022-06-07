@@ -193,30 +193,6 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/maxclamp", methods={"POST"})
-     * @return JsonResponse
-     */
-    public function getMaxClamp($gradeable_id) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-
-        if ($gradeable === null) {
-            return JsonResponse::getFailResponse("Invalid gradeable ID");
-        }
-
-        // Return max clamp values for the component
-        $return_data = [];
-
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getUpperClamp()) {
-                array_push($return_data, $component->getUpperClamp());
-            }
-        }
-
-        return JsonResponse::getSuccessResponse($return_data);
-    }
-
-    /**
-     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
