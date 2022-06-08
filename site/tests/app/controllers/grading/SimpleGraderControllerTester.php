@@ -12,7 +12,6 @@ use app\models\gradeable\GradedComponent;
 use tests\BaseUnitTest;
 
 class SimpleGraderControllerTester extends BaseUnitTest {
-
     /**
      * Helper method to generate a gradeable.
      *

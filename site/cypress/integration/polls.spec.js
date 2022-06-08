@@ -8,9 +8,8 @@
 describe('Test cases revolving around polls functionality', () => {
     it('Should verify all existing polls are on the instructor page', () => {
         // log in from instructor account
-        cy.visit('/');
-        cy.login();
         cy.visit(['sample', 'polls']);
+        cy.login();
 
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
@@ -43,9 +42,8 @@ describe('Test cases revolving around polls functionality', () => {
 
     it('Should verify all existing polls are on the student page', () => {
         // log in from instructor account
-        cy.visit('/');
-        cy.login('student');
         cy.visit(['sample', 'polls']);
+        cy.login('student');
 
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
@@ -61,9 +59,8 @@ describe('Test cases revolving around polls functionality', () => {
 
     it('Should verify all polls result pages', () => {
         // log in from instructor account
-        cy.visit('/');
-        cy.login();
         cy.visit(['sample', 'polls']);
+        cy.login();
 
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
@@ -125,9 +122,8 @@ describe('Test cases revolving around polls functionality', () => {
 
     it('Should verify making, editing, deleting poll works as expected', () => {
         // log in from instructor account
-        cy.visit('/');
-        cy.login();
         cy.visit(['sample', 'polls']);
+        cy.login();
 
         // verify the new poll page
         cy.contains('New Poll').click();
@@ -150,7 +146,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll Cypress Test');
         cy.get('#poll-question').type('# Question goes here...?');
-        cy.get('#poll-date').type('1970-01-01');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('+ Add Response').click();
         cy.contains('+ Add Response').click();

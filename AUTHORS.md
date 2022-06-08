@@ -5,6 +5,12 @@ Evan Maicus 2016-current
 
 ## Developers  
 
+Kasja Arnold 2022-current  
+Bowen (Evan) Shi 2022-current  
+Jiarui (Jerry) Lu 2022-current  
+Thomas Kozlowski 2022-current  
+Dan Janikowski 2022-current  
+Joe Krystowski, 2021-current  
 William Allen, 2021-current  
 Shelly Belsky, 2021-current  
 Miles Ednie, 2021-current  
@@ -13,13 +19,9 @@ Ching Hei (Henrik) Lam, 2021-current
 Christopher Reed, 2021-current  
 Xueqing (Brad) Wu, 2021-current  
 Alayn Arambula, 2021-current  
-Zixiang Zhang, 2020-current  
-Roland Rao, 2020-current  
-Vikram Srikishan, 2020-current  
 Jenay Barela, 2020-current  
 Jensen Li, 2020-current  
 Ben Kelly 2019-current  
-Hector Rodriguez Figueroa 2019-current  
 Shail Patel 2018-current  
 Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
@@ -29,8 +31,12 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
-Javier Portorreal, 2020  
-Stephanie Li, 2020  
+Javier Portorreal, 2020-2022  
+Stephanie Li, 2020-2022  
+Zixiang Zhang, 2020-2021  
+Roland Rao, 2020-2021  
+Vikram Srikishan, 2020-2021  
+Hector Rodriguez Figueroa 2019-2021  
 Eli Schiff 2019-2020  
 Kevin McKinney 2019-2020  
 John (Jack) Hulton 2018-2021  
@@ -108,5 +114,6 @@ Amy Burnett
 Aidan Noll  
 Toshi Piazza  
 Matt Raneri  
+Chris Reed  
 Zachary Wimer  
 For their bug reports of specific security vulnerabilities :)  

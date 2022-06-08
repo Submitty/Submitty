@@ -15,7 +15,6 @@ use app\models\gradeable\GradeableList;
 use app\libraries\FileUtils;
 
 class NavigationView extends AbstractView {
-
     const gradeableSections = [
         GradeableList::FUTURE => [
             //What title is displayed to the user for each category
@@ -59,8 +58,8 @@ class NavigationView extends AbstractView {
             "prefix" => "LATE SUBMIT"
         ],
         GradeableList::GRADING => [
-            "title" => "CLOSED",
-            "subtitle" => "being graded by TA/Instructor",
+            "title" => "GRADING IN PROGRESS",
+            "subtitle" => "",
             "section_id" => "items_being_graded",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-primary",
@@ -696,6 +695,9 @@ class NavigationView extends AbstractView {
                 $title = 'GRADE';
                 $date_text = 'grades due ';
                 $date_time = $gradeable->getGradeDueDate();
+            }
+            elseif ($list_section === GradeableList::GRADING && !$gradeable->hasReleaseDate()) {
+                $title = 'GRADE';
             }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';

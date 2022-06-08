@@ -17,7 +17,6 @@ use app\models\gradeable\Gradeable;
  * @method string getTeamName()
  */
 class Team extends AbstractModel {
-
     /** @prop @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
     /** @prop @var string registration section (registration or rotating) of team creator */

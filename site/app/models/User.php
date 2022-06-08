@@ -34,8 +34,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getGroup()
  * @method int getAccessLevel()
  * @method void setGroup(integer $group)
+ * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
  * @method int getRotatingSection()
+ * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method void setUserUpdated(bool $flag)
@@ -46,7 +48,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isLoaded()
  */
 class User extends AbstractModel {
-
     /**
      * Access groups, lower is more access
      */
@@ -110,6 +111,8 @@ class User extends AbstractModel {
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
+    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
+    protected $registration_type;
 
     /**
      * @prop
@@ -214,6 +217,9 @@ class User extends AbstractModel {
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
+
+        $default_registration_type = $this->group == 4 ? 'graded' : 'staff';
+        $this->registration_type = $details['registration_type'] ?? $default_registration_type;
     }
 
     /**
@@ -503,6 +509,12 @@ class User extends AbstractModel {
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 //"NULL" registration section should be validated as a datatype, not as a string.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+            case 'grading_assignments':
+                // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
+                return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
+            case 'student_registration_type':
+                // Student registration type must be one of either 'graded','audit', or 'withdrawn
+                return preg_match("~^(graded|audit|withdrawn)$~", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";

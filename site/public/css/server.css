@@ -854,7 +854,6 @@ tbody.collapse.in {
     cursor: not-allowed;
     background-color: transparent;
     background-image: none;
-    filter: progid:dximagetransform.microsoft.gradient(enabled = false);
 }
 
 .btn-primary {
@@ -1037,7 +1036,6 @@ div.full-height {
 .cat-buttons:hover,
 .cat-buttons:focus {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 .peer-feedback-negative-unselected {
@@ -1082,24 +1080,31 @@ div.full-height {
 
 #ui-category-list .handle {
     opacity: 0.8;
-    filter: alpha(opacity=80);
 }
 
 #ui-category-list .handle:hover {
     cursor: move;
 }
 
+#rainbow-mode {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 999999999;
+    pointer-events: none;
+}
+
 .rainbow {
     background:
         linear-gradient(
             135deg,
-            rgb(255 0 0 / 40%),
-            rgb(255 255 0 / 40%),
-            rgb(0 255 0 / 40%),
-            rgb(0 255 155 / 40%),
-            rgb(0 0 255 / 40%),
-            rgb(255 0 255 / 40%),
-            rgb(255 0 0 / 40%)
+            rgb(255 0 0 / 30%),
+            rgb(255 255 0 / 30%),
+            rgb(0 255 0 / 30%),
+            rgb(0 255 155 / 30%),
+            rgb(0 0 255 / 30%),
+            rgb(255 0 255 / 30%),
+            rgb(255 0 0 / 30%)
         );
 }
 
@@ -1158,6 +1163,15 @@ div.full-height {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--standard-medium-gray);
     margin-bottom: 10px;
+}
+
+.form-title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popup-close-icon:hover {
+    color: var(--external-link-blue);
 }
 
 .popup-form .form-body {
@@ -1617,7 +1631,7 @@ end of styles used in the admin gradeable page
 
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .custom-focus:focus {
-    outline: var(--standard-focus-cornflowe-blue);
+    outline: var(--standard-focus-cornflower-blue);
 }
 
 .invisible-btn {
@@ -1950,7 +1964,7 @@ header > * {
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-    background-color: var(--hover-dark-border-actionable-blue);
+    background-color: var(--standard-light-gray);
     width: 5px;
     height: 8px;
 }
@@ -1959,6 +1973,10 @@ header > * {
     background-color: var(--actionable-blue);
     border-radius: 5px;
     height: 10%;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+    background: var(--default-white);
 }
 
 .badge-1 {

@@ -13,7 +13,6 @@ use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
 class NotebookBuilderController extends AbstractController {
-
     /** @var string The username of the linux user who should own notebook builder files */
     private $expected_owner;
 
@@ -65,7 +64,7 @@ class NotebookBuilderController extends AbstractController {
                 return new RedirectResponse($failure_url);
             }
 
-            $gradeable->setAutogradingConfigPath($config_dir);
+            $gradeable->setAutogradingConfigPath($config_dir, true);
             $this->core->getQueries()->updateGradeable($gradeable);
             $json_path = FileUtils::joinPaths($config_dir, 'config.json');
             file_put_contents($json_path, '{"notebook": [], "testcases": []}');

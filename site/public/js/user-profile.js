@@ -33,10 +33,25 @@ function showUpdateSecondaryEmailForm() {
 
 /**
  * Gets the list of all available time zones as an array
+ * Referenced from https://stackoverflow.com/questions/9149556/how-to-get-utc-offset-in-javascript-analog-of-timezoneinfo-getutcoffset-in-c
  * @returns {string[]}
  */
 function getAvailableTimeZones() {
     return $('#time_zone_selector_label').data('available_time_zones').split(',')
+}
+
+/**
+ * Get the UTC offset of the user's local time zone
+ * 
+ * @return {string} of the user's local time zone UTC offset, for example for example '+9:30' or '-4:00'
+ */
+function getCurrentUTCOffset() {
+  let date = new Date()
+  let sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
+  let offset = Math.abs(date.getTimezoneOffset());
+  let hours = Math.floor(offset / 60);
+  hours = (hours < 10 ? '0' + hours : hours);
+  return sign + hours + ":00";
 }
 
 function updateUserPreferredNames () {
@@ -194,7 +209,18 @@ $(document).ready(function() {
 
     $('#theme_change_select').change(function() {
         updateTheme();
+        if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+          $(document.body).find('#rainbow-mode').remove();
+          localStorage.removeItem('rainbow-mode');
+          const theme_picker = $('#theme_change_select');
+          theme_picker.find('[value="rainbow"]').remove();
+        }
     });
+
+    if(JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
+      const theme_picker = $('#theme_change_select');
+      theme_picker.append(`<option value="rainbow" selected="selected">Rainbow Mode</option>`);
+    }
 
     if ($('#flagged-message').data('flagged') === "flagged") {
       $('#flagged-message').addClass('show');
@@ -224,6 +250,12 @@ $(document).ready(function() {
                     $('#user_utc_offset').text(response.data.utc_offset);
                     $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
                     displaySuccessMessage("Time-zone updated succesfully!");
+  
+                    // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
+                    var offset = getCurrentUTCOffset();
+                    if(response.data.utc_offset != offset) {
+                      displayWarningMessage("Selected time-zone does not match system time-zone.")
+                    }
                 }
                 else {
                     console.log(response);

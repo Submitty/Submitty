@@ -18,7 +18,6 @@ use app\libraries\FileUtils;
  * When adding to data to any property, the appropriate setter must be used as they preform additional validation.
  */
 class RainbowCustomizationJSON extends AbstractModel {
-
     protected $core;
 
     private $section;                   // Init in constructor

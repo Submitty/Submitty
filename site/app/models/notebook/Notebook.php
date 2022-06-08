@@ -172,10 +172,15 @@ class Notebook extends AbstractModel {
                             // Try to get the most recent submission
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                             //get answer for the selected display version
-                            $question_name = $notebookVal['filename'];
-                            $file_path = $this->core->getConfig()->getCoursePath();
-                            $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
-                            $version_answer = rtrim(file_get_contents($file_path));
+                            if ($display_version !== 0) {
+                                $question_name = $notebookVal['filename'];
+                                $file_path = $this->core->getConfig()->getCoursePath();
+                                $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
+                                $version_answer = rtrim(file_get_contents($file_path));
+                            }
+                            else {
+                                $version_answer = $notebookVal['initial_value'] ?? "";
+                            }
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -195,16 +200,21 @@ class Notebook extends AbstractModel {
                     }
                     else {
                         try {
-                            // Try to get the most recent submission
+                            // Try to get the most recent submission and add field to array
                             $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
-                            //get answer for the selected display version
-                            $question_name = $notebookVal['filename'];
-                            $file_path = $this->core->getConfig()->getCoursePath();
-                            $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
-                            $version_answer = rtrim(file_get_contents($file_path));
-                            // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
-                            $new_notebook[$notebookKey]['version_submission'] = $version_answer;
+                            //get answer for the selected display version
+                            if ($display_version !== 0) {
+                                $question_name = $notebookVal['filename'];
+                                $file_path = $this->core->getConfig()->getCoursePath();
+                                $file_path = FileUtils::joinPaths($file_path, "submissions", $gradeable_id, $student_id, $display_version, $question_name);
+                                $version_answer = rtrim(file_get_contents($file_path));
+                                // Add field to the array
+                                $new_notebook[$notebookKey]['version_submission'] = $version_answer;
+                            }
+                            else {
+                                $new_notebook[$notebookKey]['version_submission'] = '';
+                            }
                         }
                         catch (AuthorizationException $e) {
                             // If failed to get the most recent submission then skip

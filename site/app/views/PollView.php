@@ -8,7 +8,6 @@ use app\models\PollModel;
 use app\libraries\PollUtils;
 
 class PollView extends AbstractView {
-
     public function showPollsInstructor($todays_polls, $older_polls, $future_polls, $dropdown_states) {
         $this->core->getOutput()->addBreadcrumb("Submini Polls");
         $this->core->getOutput()->addInternalCss('polls.css');
