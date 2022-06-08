@@ -710,6 +710,10 @@ class ForumThreadView extends AbstractView {
         $thread_content = [];
 
         foreach ($threads as $thread) {
+            // Checks if thread ID is null. If so, skip this threads.
+            if ($thread["id"] == null) {
+                continue;
+            }
             $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)

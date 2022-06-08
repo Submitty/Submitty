@@ -916,6 +916,18 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
      */
     public function getSingleThread() {
+        // Checks if thread id is null. If so, render "fail" json response case informing that thread id is null.
+        if ($_POST['thread_id'] == null) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NULL ID)", $_POST['thread_id']);
+        }
+        // Checks if thread id is not an integer value. If so, render "fail" json response case informing that thread id is not an integer value.
+        if (!ctype_digit($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-INTEGER ID)", $_POST['thread_id']);
+        }
+        // Checks if thread id does not exist. If so, render "fail" json response case informing that the thread does not exist.
+        if (!$this->core->getQueries()->existsThread($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTANT ID)", $_POST['thread_id']);
+        }
         $thread_id = $_POST['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
         $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
