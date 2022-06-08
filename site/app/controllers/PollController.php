@@ -62,21 +62,17 @@ class PollController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
-     * @return MultiResponse|WebResponse
+     * @return RedirectResponse|WebResponse
      */
-    public function viewPoll(int $poll_id) {
+    public function viewPoll($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $poll = $this->core->getQueries()->getPoll($poll_id);
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         return new WebResponse(
             'Poll',
@@ -103,49 +99,36 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     public function addNewPoll() {
         $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'release_histogram', 'show_correct_answer'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
                 $this->core->addErrorMessage("Error occured in adding poll");
-                return MultiResponse::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['polls']))
-                );
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
         if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
             $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
             $this->core->addErrorMessage("Invalid student histogram release setting");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
-        if (!in_array($_POST["release_histogram"], PollUtils::getShowCorrectAnswerSettings())) {
+        if (!in_array($_POST["show_correct_answer"], PollUtils::getShowCorrectAnswerSettings())) {
             $this->core->addErrorMessage("Invalid settings for displaying correct answers on student histogram");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
         $response_count = intval($_POST["response_count"]);
@@ -160,15 +143,11 @@ class PollController extends AbstractController {
                 $id = preg_replace("/[^\d]/", "", $post_key);
                 if (!isset($_POST["response_" . $id]) || !isset($_POST["order_" . $id])) {
                     $this->core->addErrorMessage("Error with responses occured in adding poll: invalid response fields submitted");
-                    return MultiResponse::RedirectOnlyResponse(
-                        new RedirectResponse($this->core->buildCourseUrl(['polls']))
-                    );
+                    return new RedirectResponse($this->core->buildCourseUrl(['polls']));
                 }
                 if ($_POST["response_" . $id] === "") {
                     $this->core->addErrorMessage("Error occured in adding poll: responses must not be left blank");
-                    return MultiResponse::RedirectOnlyResponse(
-                        new RedirectResponse($this->core->buildCourseUrl(['polls']))
-                    );
+                    return new RedirectResponse($this->core->buildCourseUrl(['polls']));
                 }
                 $responses[$_POST["option_id_" . $id]] = $_POST["response_" . $id];
                 $orders[$_POST["option_id_" . $id]] = $_POST["order_" . $id];
@@ -179,27 +158,19 @@ class PollController extends AbstractController {
         }
         if (count($responses) !== count($orders) || $response_count !== count($responses) || count($answers) > count($responses)) {
             $this->core->addErrorMessage("Error with responses occured in editing poll");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         if (count($answers) == 0) {
             $this->core->addErrorMessage("Polls must have at least one correct response");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         elseif ($_POST["question_type"] == "single-response-single-correct" && count($answers) > 1) {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         elseif ((($_POST["question_type"] == "single-response-survey") || ($_POST["question_type"] == "multiple-response-survey")) && count($answers) != $response_count) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['polls']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
         $poll_id = $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $_POST["question_type"], $responses, $answers, $_POST["release_date"], $orders, $_POST["release_histogram"], $_POST["show_correct_answer"]);
@@ -223,9 +194,7 @@ class PollController extends AbstractController {
                 }
             }
         }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['polls']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
@@ -421,7 +390,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         if (!in_array($_POST["show_correct_answer"], PollUtils::getShowCorrectAnswerSettings())) {
-            $this->core->addErrorMessage("Invalid student histogram correct answer setting");
+            $this->core->addErrorMessage("Invalid settings for displaying correct answers on student histogram");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         $file_path = null;
