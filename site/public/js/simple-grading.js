@@ -434,9 +434,8 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                let max_clamps = localStorage.getItem('max_clamp').split('-');
-                if(max_clamps[split_id[3]] && max_clamps[split_id[3]] < this.value) {
-                    alert('Score should be less than the max clamp value: ' + max_clamps[split_id[3]]);
+                if(elem.data("maxclamp") && elem.data("maxclamp") <= this.value) {
+                    alert('Score should be less than the max clamp value: ' + elem.data("maxclamp"));
                     this.value = 0;
                 }
             }
@@ -626,19 +625,12 @@ function setupNumericTextCells() {
     });
 }
 
-// helper function that request for the max clamp value for each grade components
-function getComponentMaxClamps() {
-    localStorage.setItem('max_clamp', $("#data-table").data('max-clamps'));
-
-}
-
 function setupSimpleGrading(action) {
     if(action === "lab") {
         setupCheckboxCells();
     }
     else if(action === "numeric") {
         setupNumericTextCells();
-        getComponentMaxClamps();
     }
 
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)

@@ -79,17 +79,9 @@ class SimpleGraderView extends AbstractView {
         $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
 
-        $max_clamps = [];
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getUpperClamp()) {
-                array_push($max_clamps, $component->getUpperClamp());
-            }
-        }
-
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
             "action" => $action,
-            "max_clamps" => implode("-", $max_clamps),
             "section_type" => $section_type,
             "show_all_sections_button" => $show_all_sections_button,
             "view_all" => $view_all,
