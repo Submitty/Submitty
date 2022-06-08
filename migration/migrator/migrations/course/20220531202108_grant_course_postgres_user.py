@@ -37,8 +37,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database_file = config.config_path / 'database.json'
-    with(database_file).open('r') as db_file:
-        db_info = json.load(db_file, object_pairs_hook=OrderedDict)
-        database.execute("REVOKE ALL ON ALL TABLES IN SCHEMA public FROM {}".format(db_info['database_course_user']))
-        database.execute("REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM {}".format(db_info['database_course_user']))
+    pass
