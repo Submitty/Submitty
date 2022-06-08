@@ -99,3 +99,6 @@ if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
     chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 fi
 
+
+echo -e "Updating system dependencies"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"

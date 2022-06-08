@@ -26,8 +26,7 @@ main#main.full-screen-mode .content {
 }
 
 #wrapper {
-    padding-top: 30px;
-    min-height: 0;
+    min-height: max-content;
 }
 
 aside {
