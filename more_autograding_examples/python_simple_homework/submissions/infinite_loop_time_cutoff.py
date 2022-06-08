@@ -1,5 +1,5 @@
 def percent_change(old,new):
-    return int(100*(float(new)-old)//old)
+    return int(100*(float(new)-old)/old)
 
 def print_change(old1, new1, old2, new2):
     p1 = percent_change(old1,new1)
@@ -16,5 +16,5 @@ print_change(65000,70000,105000,85000)
 
 i = 0
 while 1 != 0:
-    #print "hello", i
+    # print("hello", i)
     i+=1
