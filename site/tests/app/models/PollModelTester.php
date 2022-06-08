@@ -24,7 +24,8 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]], // user_responses
                 "2021-01-11",                                      // release_date
                 null,                                              // image path
-                "never"                                            // student histogram release setting
+                "never",                                           // student histogram release setting
+                "never"                                            // histogram show answer setting
             ),
             1 => new PollModel(
                 $this->core,
@@ -38,6 +39,7 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 ["bitdiddle" => [0 => 2], "aphacker" => [0 => 0]],
                 "9999-12-31",
                 null,
+                "always",
                 "always"
             ),
             2 => new PollModel(
@@ -52,6 +54,7 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 ["bitdiddle" => [0 => 0, 1 => 2, 2 => 3], "aphacker" => [0 => 1, 1 => 3]],
                 date("Y-m-d"),
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png",
+                "when_ended",
                 "when_ended"
             )
         ];
@@ -198,5 +201,23 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->my_polls[0]->getReleaseHistogram(), "never");
         $this->assertEquals($this->my_polls[1]->getReleaseHistogram(), "always");
         $this->assertEquals($this->my_polls[2]->getReleaseHistogram(), "when_ended");
+    }
+
+    public function testCorrectAnswerRelease(): void {
+        $this->assertTrue($this->my_polls[0]->isShowCorrectNever());
+        $this->assertFalse($this->my_polls[1]->isShowCorrectNever());
+        $this->assertFalse($this->my_polls[2]->isShowCorrectNever());
+
+        $this->assertFalse($this->my_polls[0]->isShowCorrectWhenEnded());
+        $this->assertTrue($this->my_polls[1]->isShowCorrectWhenEnded());
+        $this->assertFalse($this->my_polls[2]->isShowCorrectWhenEnded());
+
+        $this->assertFalse($this->my_polls[0]->isShowCorrectAlways());
+        $this->assertFalse($this->my_polls[1]->isShowCorrectAlways());
+        $this->assertTrue($this->my_polls[2]->isShowCorrectAlways());
+
+        $this->assertFalse($this->my_polls[0]->isShowCorrect());
+        $this->assertTrue($this->my_polls[1]->isShowCorrect());
+        $this->assertFalse($this->my_polls[2]->isShowCorrect());
     }
 }
