@@ -40,7 +40,7 @@
                                     "style": "display: inline"
                                 } only %}
                             {% if poll.isShowCorrect() and response in poll.getAnswers() %}
-                                <p style="color: #00bd00; margin-left: 1rem ">correct</p>
+                                <p style="color: var(--good-green); margin-left: 1rem; font-weight: bolder">correct</p>
                             {% endif %}
                             <br/>
                             <br/>
@@ -92,10 +92,17 @@
                     color: [],
                 },
             }];
+            const [correctColor, defaultColor] =
+                [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
+                 window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
             {% for option_id, attributes in results %}
                 data[0].x.push("{{ poll.getResponseString(option_id)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
                 data[0].y.push({{ attributes['count'] }});
-                data[0].marker.color.push("{{ attributes['is_correct'] and poll.isShowCorrect() ? '#2ca02c' : '#1f77b4' }}");
+                data[0].marker.color.push(
+                    {{ attributes['is_correct'] and poll.isShowCorrect()
+                            ? 'correctColor'
+                            : 'defaultColor' }}
+                );
             {% endfor %}
             const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
