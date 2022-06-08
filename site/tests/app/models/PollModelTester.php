@@ -208,16 +208,16 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($this->my_polls[1]->isShowCorrectNever());
         $this->assertFalse($this->my_polls[2]->isShowCorrectNever());
 
-        $this->assertFalse($this->my_polls[0]->isShowCorrectWhenEnded());
-        $this->assertTrue($this->my_polls[1]->isShowCorrectWhenEnded());
-        $this->assertFalse($this->my_polls[2]->isShowCorrectWhenEnded());
-
         $this->assertFalse($this->my_polls[0]->isShowCorrectAlways());
-        $this->assertFalse($this->my_polls[1]->isShowCorrectAlways());
-        $this->assertTrue($this->my_polls[2]->isShowCorrectAlways());
+        $this->assertTrue($this->my_polls[1]->isShowCorrectAlways());
+        $this->assertFalse($this->my_polls[2]->isShowCorrectAlways());
+
+        $this->assertFalse($this->my_polls[0]->isShowCorrectWhenEnded());
+        $this->assertFalse($this->my_polls[1]->isShowCorrectWhenEnded());
+        $this->assertTrue($this->my_polls[2]->isShowCorrectWhenEnded());
 
         $this->assertFalse($this->my_polls[0]->isShowCorrect());
         $this->assertTrue($this->my_polls[1]->isShowCorrect());
-        $this->assertFalse($this->my_polls[2]->isShowCorrect());
+        $this->assertTrue($this->my_polls[2]->isShowCorrect());
     }
 }
