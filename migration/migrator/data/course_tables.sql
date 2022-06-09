@@ -92,7 +92,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
         END LOOP;
         
         -- Get the number of late days charged up to this point
-        late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
+        late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
