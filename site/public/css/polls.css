@@ -39,6 +39,10 @@
     cursor: pointer;
 }
 
+.response-btn {
+    vertical-align: top;
+}
+
 .radio p {
     display: inline;
 }
@@ -66,6 +70,21 @@ input[type="radio"][disabled=""]:checked::before {
 
 form {
     display: inline;
+}
+
+.poll-view-table {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.poll-view-wrapper.info-wrapper {
+    flex: 1 1 0;
+    margin-right: 3%;
+    max-width: 73%;
+}
+
+.poll-view-wrapper.histogram-wrapper {
+    flex: 2 1 0;
 }
 
 #poll-name-container {
