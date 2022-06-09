@@ -5,8 +5,8 @@ if (PDFAnnotate.default) {
     PDFAnnotate = PDFAnnotate.default;
 }
 
-let currentTool;
-let NUM_PAGES = 0;
+//let currentTool;
+//let NUM_PAGES = 0;
 
 window.RENDER_OPTIONS = {
     documentId: '',
@@ -25,7 +25,7 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-const ANNOTATION_DEFAULTS = {
+ANNOTATION_DEFAULTS = {
     size: 12,
     color: '#000000',
     class: 'Annotation',
