@@ -81,8 +81,8 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
     BEGIN
         -- Grab latest row of data available
         FOR var_row IN (
-            SELECT * 
-            FROM late_day_cache ldc 
+            SELECT *
+            FROM late_day_cache ldc
             WHERE ldc.user_id = user_id
             ORDER BY ldc.late_day_date DESC, ldc.g_id DESC NULLS LAST
             LIMIT 1
@@ -90,22 +90,22 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
             late_days_remaining = var_row.late_days_remaining;
             latestDate = var_row.late_day_date;
         END LOOP;
-        
+
         -- Get the number of late days charged up to this point
         late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
         );
-        
+
         -- if there is no cache in the table, the starting point
         -- should be the course default late days
         IF late_days_remaining IS NULL THEN
             late_days_remaining = default_late_days;
             late_days_used = 0;
         END IF;
-        
-        -- For every event after the cache's latest entry, calculate the 
+
+        -- For every event after the cache's latest entry, calculate the
         -- late days remaining and the late day change (increase or decrease)
         FOR var_row IN (
             SELECT * FROM (
@@ -152,7 +152,7 @@ CREATE FUNCTION public.calculate_submission_days_late(submission_time timestamp 
         late_days_change integer;
         assignment_budget integer;
     BEGIN
-        RETURN 
+        RETURN
         CASE
             WHEN submission_time IS NULL THEN 0
             WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
@@ -268,9 +268,9 @@ CREATE FUNCTION public.electronic_gradeable_change() RETURNS trigger
             AND NEW.eg_late_days = OLD.eg_late_days THEN
                 RETURN NEW;
             END IF;
-            
+
             -- Grab submission due date
-            due_date = 
+            due_date =
             CASE
                 -- INSERT
                 WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
@@ -279,7 +279,7 @@ CREATE FUNCTION public.electronic_gradeable_change() RETURNS trigger
                 -- UPDATE
                 ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
             END;
-            
+
             DELETE FROM late_day_cache WHERE late_day_date >= due_date;
             RETURN NEW;
         END;
@@ -317,7 +317,7 @@ CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late inte
             late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
         END IF;
 
-        return_row.late_day_status = 
+        return_row.late_day_status =
         CASE
             -- BAD STATUS
             WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
@@ -354,7 +354,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				FROM gradeable g
 				JOIN electronic_gradeable eg
 					ON eg.g_id=g.g_id
-				WHERE 
+				WHERE
 					eg.eg_submission_due_date IS NOT NULL
 					and eg.eg_has_due_date = TRUE
 					and eg.eg_student_submit = TRUE
@@ -367,7 +367,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 				SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
 				FROM electronic_gradeable_version egv
 				JOIN electronic_gradeable_data egd
-					ON egv.g_id=egd.g_id 
+					ON egv.g_id=egd.g_id
 					AND egv.active_version=egd.g_version
 					AND (
 						CASE
@@ -411,7 +411,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 		returnrow.late_day_exceptions = var_row.late_day_exceptions;
 		RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN;
     END;
     $$;
 
@@ -435,7 +435,7 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
                 ld.since_timestamp AS late_day_date,
                 ld.allowed_late_days AS late_days_allowed
             FROM late_days ld
-            WHERE 
+            WHERE
                 ld.user_id = user_id
             ORDER BY late_day_date
         ) LOOP
@@ -444,7 +444,7 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
             returnrow.late_days_allowed = var_row.late_days_allowed;
             RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN;
     END;
     $$;
 
@@ -457,8 +457,8 @@ CREATE FUNCTION public.gradeable_delete() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         BEGIN
-            DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                                FROM electronic_gradeable 
+            DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date
+                                                                FROM electronic_gradeable
                                                                 WHERE g_id = OLD.g_id);
             RETURN OLD;
         END;
@@ -482,11 +482,11 @@ CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
             g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
             team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
-            
+
             --- Remove all lade day cache for all gradeables past this submission die date
             --- for every user associated with the gradeable
             DELETE FROM late_day_cache ldc
-            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date
                                     FROM electronic_gradeable eg
                                     WHERE eg.g_id = g_id)
                 AND (
@@ -516,9 +516,9 @@ CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
             g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
 
-            DELETE FROM late_day_cache ldc 
-            WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
-                                        FROM electronic_gradeable eg 
+            DELETE FROM late_day_cache ldc
+            WHERE ldc.late_day_date >= (SELECT eg_submission_due_date
+                                        FROM electronic_gradeable eg
                                         WHERE eg.g_id = g_id)
             AND ldc.user_id = user_id;
             RETURN NEW;
@@ -1293,7 +1293,8 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) DEFAULT 'never'::character varying
+    release_histogram character varying(10) DEFAULT 'never'::character varying,
+    show_correct_answer character varying(10) DEFAULT 'never'::character varying
 );
 
 
