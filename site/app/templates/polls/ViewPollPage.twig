@@ -13,11 +13,6 @@
             {% include "misc/Markdown.twig" with {
                 "content": poll.getQuestion(),
             } only %}
-            {% if file_data is not null %}
-                <br/>
-                <img src="{{ file_data }}">
-                <br/>
-            {% endif %}
             <form method="post" action="{{ base_url }}/submitResponse">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>

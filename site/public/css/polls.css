@@ -83,10 +83,6 @@ form {
     max-width: 73%;
 }
 
-.poll-view-wrapper.info-wrapper img {
-    width: 100%;
-}
-
 .poll-view-wrapper.histogram-wrapper {
     flex: 2 1 0;
 }
