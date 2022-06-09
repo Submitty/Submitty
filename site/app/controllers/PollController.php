@@ -584,7 +584,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, poll histograms
                 were not available to students. */
             /*TODO allow option for showing correct poll answers */
-            $show_correct_answer = array_key_exists("show_correct_answer", $poll) ? $poll["show_correct_answer"] : false;
+            $show_correct_answer = array_key_exists("show_correct_answer", $poll) ? $poll["show_correct_answer"] : "never";
             $release_histogram = array_key_exists("release_histogram", $poll) ? $poll["release_histogram"] : "never";
             if (!in_array($release_histogram, PollUtils::getReleaseHistogramSettings())) {
                 $num_errors = $num_errors + 1;
