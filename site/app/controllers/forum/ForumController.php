@@ -916,6 +916,10 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
      */
     public function getSingleThread() {
+        // Checks if thread id is undefined. If so, render "fail" json response case informing that thread id is not set.
+        if (!isset($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id (UNSET ID)");
+        }
         // Checks if thread id is null. If so, render "fail" json response case informing that thread id is null.
         if ($_POST['thread_id'] == null) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NULL ID)");
