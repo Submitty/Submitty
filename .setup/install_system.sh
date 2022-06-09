@@ -669,7 +669,6 @@ sysadmin@example.com
 https://example.com
 1
 submitty-admin
-submitty-admin
 y
 
 
