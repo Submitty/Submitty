@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #####################################################################
-#            DEPRECATED
+#            UNSUPPORTED
 #
-# Support for Debian 8 (jessie) is deprecated as of 05/01/2019.
+# Support for Debian 8 (jessie) is unsupported as of 05/01/2019.
 # This script has not been maintained since then and we will not
 # accept PRs fixing any drift that exists. Use at your own risk.
 #
