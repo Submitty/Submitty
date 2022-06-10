@@ -7,6 +7,8 @@ use app\entities\VcsAuthToken;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
+use app\libraries\routers\AccessControl;
+use app\libraries\TokenManager;
 use app\libraries\Utils;
 use app\repositories\VcsAuthTokenRepository;
 use app\views\AuthTokenView;
@@ -24,6 +26,7 @@ class AuthTokenController extends AbstractController {
 
         $token = null;
         $auth_token = null;
+        $api_token = null;
 
         if (isset($_SESSION['new_auth_token']) && isset($_SESSION['new_auth_token_id'])) {
             $token = $_SESSION['new_auth_token'];
@@ -32,13 +35,47 @@ class AuthTokenController extends AbstractController {
             unset($_SESSION['new_auth_token_id']);
         }
 
+        if (isset($_SESSION['new_api_token'])) {
+            $api_token = $_SESSION['new_api_token'];
+            unset($_SESSION['new_api_token']);
+        }
+
+        $is_faculty = $this->core->getUser()->accessFaculty();
+
         return new WebResponse(
             AuthTokenView::class,
             'showAuthTokenPage',
+            $is_faculty,
             $tokens,
             $auth_token,
-            $token
+            $token,
+            $api_token
         );
+    }
+
+    /**
+     * @AccessControl(level="FACULTY")
+     * @Route("/authentication_tokens/api", methods={"POST"})
+     */
+    public function fetchApiToken(): RedirectResponse {
+        $user_id = $this->core->getUser()->getId();
+        $this->core->getQueries()->refreshUserApiKey($user_id);
+        $token = TokenManager::generateApiToken(
+            $this->core->getQueries()->getSubmittyUserApiKey($user_id)
+        );
+        $_SESSION['new_api_token'] = $token->toString();
+        return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
+    }
+
+    /**
+     * @AccessControl(level="FACULTY")
+     * @Route("/authentication_tokens/api/invalidate", methods={"POST"})
+     */
+    public function invalidateApiToken(): RedirectResponse {
+        $user_id = $this->core->getUser()->getId();
+        $this->core->getQueries()->refreshUserApiKey($user_id);
+        $this->core->addSuccessMessage("API Token invalidated");
+        return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
     /**
