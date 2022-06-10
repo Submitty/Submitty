@@ -375,27 +375,59 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @param string $type
      * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
      * @return RedirectResponse
      */
-    public function deleteUser(string $type = 'users'): RedirectResponse {
-        $user_id = trim($_POST['user_id']);
-        $displayed_fullname = trim($_POST['displayed_fullname']);
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
+    public function deleteUser(): RedirectResponse {
+        if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
+            $user_id = trim($_POST['user_id']);
+            $displayed_fullname = trim($_POST['displayed_fullname']);
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
 
-        if ($user_id === $this->core->getUser()->getId()) {
-            $this->core->addErrorMessage('You cannot delete yourself.');
-        }
-        elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
-             $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
+            if ($user_id === $this->core->getUser()->getId()) {
+                $this->core->addErrorMessage('You cannot delete yourself.');
+            }
+            elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
+                $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
+            }
+            else {
+                $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
+            }
         }
         else {
-            $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
+            $this->core->addErrorMessage('User ID or name is not set.');
         }
 
-        return new RedirectResponse($this->core->buildCourseUrl([$type]));
+        return new RedirectResponse($this->core->buildCourseUrl(['users']));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
+     * @return RedirectResponse
+     */
+    public function demoteGrader(): RedirectResponse {
+        if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
+            $user_id = trim($_POST['user_id']);
+            $displayed_fullname = trim($_POST['displayed_fullname']);
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+
+            if ($user_id === $this->core->getUser()->getId()) {
+                $this->core->addErrorMessage('You cannot demote yourself.');
+            }
+            elseif ($this->core->getQueries()->demoteGrader($user_id, $semester, $course)) {
+                $this->core->addSuccessMessage("{$displayed_fullname} has been demoted to a student.");
+            }
+            else {
+                $this->core->addErrorMessage("Failed to demote {$displayed_fullname}.");
+            }
+        }
+        else {
+            $this->core->addErrorMessage('User ID or name is not set.');
+        }
+
+        return new RedirectResponse($this->core->buildCourseUrl(['graders']));
     }
 
     /**
