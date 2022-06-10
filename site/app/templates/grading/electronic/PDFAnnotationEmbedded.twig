@@ -53,4 +53,10 @@
             $('#pdf-buttons').append(document.getElementById('download-annotations-btn-template').content.cloneNode(true));
         }
     });
+
+    $(function() {
+        let height = $(".sticky-file-info").outerHeight();
+        $("#viewer").css("paddingTop",height);
+    });
+
 </script>
