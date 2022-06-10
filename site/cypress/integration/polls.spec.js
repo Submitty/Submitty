@@ -72,8 +72,7 @@ describe('Test cases revolving around polls functionality', () => {
         // go to poll 1 result page
         cy.contains('Poll 1').siblings().last().click();
         // make sure all the page elements are there
-        cy.get('.content > h1').contains('Viewing poll results for Poll 1');
-        cy.get('.content > h2').contains('Question:');
+        cy.get('.content > h1').contains('Poll 1');
         cy.get('.markdown').contains('What animals swim in the sea?');
         cy.get('#chartContainer').contains('Poll 1');
         cy.get('#chartContainer').contains('Dolphin');
@@ -86,8 +85,7 @@ describe('Test cases revolving around polls functionality', () => {
         // go to poll 2 result page
         cy.contains('Poll 2').siblings().last().click();
         // make sure all the page elements are there
-        cy.get('.content > h1').contains('Viewing poll results for Poll 2');
-        cy.get('.content > h2').contains('Question:');
+        cy.get('.content > h1').contains('Poll 2');
         cy.get('.markdown').contains('What color is the sky?');
         cy.get('#chartContainer').contains('Poll 2');
         cy.get('#chartContainer').contains('Green');
@@ -99,8 +97,7 @@ describe('Test cases revolving around polls functionality', () => {
         // go to poll 3 result page
         cy.contains('Poll 3').siblings().last().click();
         // make sure all the page elements are there
-        cy.get('.content > h1').contains('Viewing poll results for Poll 3');
-        cy.get('.content > h2').contains('Question:');
+        cy.get('.content > h1').contains('Poll 3');
         cy.get('.markdown').contains('What is your favorite food?');
         cy.get('#chartContainer').contains('Poll 3');
         cy.get('#chartContainer').contains('Pizza');
@@ -113,8 +110,7 @@ describe('Test cases revolving around polls functionality', () => {
         // go to poll 4 result page
         cy.contains('Poll 4').siblings().last().click();
         // make sure all the page elements are there
-        cy.get('.content > h1').contains('Viewing poll results for Poll 4');
-        cy.get('.content > h2').contains('Question:');
+        cy.get('.content > h1').contains('Poll 4');
         cy.get('.markdown').contains('Which of the following statements are true? Select all that apply.');
         cy.get('#chartContainer').contains('Poll 4');
         cy.get('#chartContainer').contains('2 + 2 = 4');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\libraries\socket;
 
+use app\exceptions\DatabaseException;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use Ratchet\MessageComponentInterface;
@@ -150,8 +151,26 @@ class Server implements MessageComponentInterface {
      * Check the authentication status of the connection when it gets opened
      */
     public function onOpen(ConnectionInterface $conn): void {
-        if (!$this->checkAuth($conn)) {
-            $conn->close();
+        try {
+            if (!$this->checkAuth($conn)) {
+                $conn->close();
+            }
+        }
+        catch (DatabaseException $de) {
+            try {
+                $this->core->loadMasterDatabase();
+                $this->logError($de, $conn);
+                $this->onOpen($conn);
+            }
+            catch (\Exception $e) {
+                $this->logError($de, $conn);
+                $this->logError($e, $conn);
+                $this->closeWithError($conn);
+            }
+        }
+        catch (\Throwable $t) {
+            $this->logError($t, $conn);
+            $this->closeWithError($conn);
         }
     }
 
@@ -220,6 +239,12 @@ class Server implements MessageComponentInterface {
                 unset($this->users[$user_id]);
             }
         }
+    }
+
+    public function closeWithError(ConnectionInterface $conn): void {
+        $msg = ['error' => 'Server error'];
+        $conn->send(json_encode($msg));
+        $conn->close();
     }
 
     /**
