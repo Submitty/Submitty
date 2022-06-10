@@ -68,7 +68,7 @@ def mount_folders(config, mount_options)
   group = 'vagrant'
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
 
-  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
+  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
