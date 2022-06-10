@@ -485,7 +485,7 @@ jobs:
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_1.spec.js
+              spec: cypress/e2e/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -499,7 +499,7 @@ jobs:
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_2.spec.js
+              spec: cypress/e2e/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -516,7 +516,7 @@ jobs:
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -528,7 +528,7 @@ jobs:
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
