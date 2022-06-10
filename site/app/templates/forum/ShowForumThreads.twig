@@ -16,10 +16,8 @@
         initSocketClient();
 
         //delete new_thread Class to mark posts as seen in frontend for users who access posts via href or url
-        thread_id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
-        if(buildCourseUrl(['forum','threads',thread_id]) === (window.location.origin + window.location.pathname))
-        {$("#thread_box_link_"+thread_id).find('.thread_box').removeClass('new_thread');}
-
+        let thread_id = $('data#current-thread').val();
+        $(`#thread_box_link_${thread_id} .thread_box`).removeClass('new_thread');
     });
 
 </script>
