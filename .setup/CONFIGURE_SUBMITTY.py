@@ -187,7 +187,6 @@ defaults = {
     'institution_homepage' : '',
     'timezone' : tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
-    'submitty_admin_password': '',
     'email_user': '',
     'email_password': '',
     'email_sender': 'submitty@myuniversity.edu',
@@ -330,11 +329,6 @@ else:
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
     SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
-    while True:
-        SUBMITTY_ADMIN_PASSWORD = get_input("What is the submitty admin password", defaults['submitty_admin_password'])
-        if SUBMITTY_ADMIN_USERNAME != '' and SUBMITTY_ADMIN_PASSWORD == '':
-            continue
-        break
 
     while True:
         is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
@@ -655,7 +649,6 @@ if not args.worker:
 if not args.worker:
     config = OrderedDict()
     config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
-    config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
 
     with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
