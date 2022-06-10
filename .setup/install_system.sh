@@ -201,6 +201,8 @@ DATABASE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+
 
 #################################################################
 # Node Package Setup
@@ -668,7 +670,6 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
-submitty-admin
 submitty-admin
 y
 
