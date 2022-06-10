@@ -8,7 +8,7 @@
     <div id="grading-pdf-repair" hidden>
         <p><em>There is a problem with this pdf. Please repair to try and automatically fix any issues.</em></p>
     </div>
-    <div id="viewer" class="pdfViewer"></div>
+    <div id="viewer" onresize="addOffset()" class="pdfViewer"></div>
 </div>
 
 <!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
@@ -54,9 +54,10 @@
         }
     });
 
-    $(function() {
+    $($('#submission_browser').on("mouseover",function addOffset(){
         let height = $(".sticky-file-info").outerHeight();
         $("#viewer").css("paddingTop",height);
-    });
+    }));
+
 
 </script>
