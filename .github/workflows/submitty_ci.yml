@@ -13,11 +13,11 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.6
+  PYTHON_VERSION: 3.8
 
 jobs:
     css-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -39,7 +39,7 @@ jobs:
 
 
     js-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -63,7 +63,7 @@ jobs:
 
 
     js-unit:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -89,7 +89,7 @@ jobs:
 
 
     php-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -120,11 +120,11 @@ jobs:
             - name: Static analysis
               run: |
                   php vendor/bin/phpstan  --version
-                  php vendor/bin/phpstan analyze app
+                  php vendor/bin/phpstan analyze app public/index.php socket/index.php
 
 
     php-unit:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       defaults:
           run:
               working-directory: site
@@ -157,7 +157,7 @@ jobs:
 
 
     python-lint:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -179,7 +179,7 @@ jobs:
 
 
     python-unit:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -245,7 +245,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         services:
           postgres:
             image: postgres
