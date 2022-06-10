@@ -141,7 +141,7 @@ parameters:
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
 			"""
-			count: 28
+			count: 25
 			path: app/controllers/PollController.php
 
 		-
@@ -149,7 +149,7 @@ parameters:
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#
 			"""
-			count: 7
+			count: 5
 			path: app/controllers/PollController.php
 
 		-
@@ -203,14 +203,6 @@ parameters:
 				should not be used, just return JsonResponse directly$#
 			"""
 			count: 18
-			path: app/controllers/admin/LateController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 2
 			path: app/controllers/admin/LateController.php
 
 		-
