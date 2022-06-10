@@ -1568,6 +1568,27 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query);
     }
 
+    public function getLateDayUpdateTimestamps() {
+        $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
+        $this->course_db->query($query);
+        $return = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = new \DateTime($row['since_timestamp']);
+        }
+        return $return;
+    }
+
+    public function getLastLateDayUpdatesForUsers() {
+        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
+        $this->course_db->query($query);
+        $return = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['user_id']] = new \DateTime($row['max']);
+        }
+        return $return;
+    }
+
     /**
      * Fetches all students from the given registration sections, $sections.
      *
@@ -7810,6 +7831,26 @@ SQL;
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Demote grader to a student, identified by user_id, semester, and course.
+     * Set user group to 4 (student) and the query is successful if the row
+     * count (number of affected rows) is positive.
+     *
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure, true otherwise
+     */
+    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+        $query = <<<SQL
+UPDATE courses_users
+SET user_group = 4
+WHERE user_id=? AND semester=? AND course=?
+SQL;
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }

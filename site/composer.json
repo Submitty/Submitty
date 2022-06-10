@@ -31,10 +31,10 @@
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
-    "symfony/cache": "4.4.41",
-    "symfony/config": "4.4.41",
-    "symfony/http-foundation": "4.4.41",
-    "symfony/polyfill-php80": "1.25.0",
+    "symfony/cache": "4.4.42",
+    "symfony/config": "4.4.42",
+    "symfony/http-foundation": "4.4.42",
+    "symfony/polyfill-php80": "1.26.0",
     "symfony/routing": "4.4.41",
     "textalk/websocket": "1.5.8",
     "twig/twig": "2.15.1"
@@ -42,7 +42,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.7.1",
+    "phpstan/phpstan": "1.7.11",
     "phpstan/phpstan-deprecation-rules": "1.0",
     "phpunit/phpunit": "8.5.26",
     "submitty/php-codesniffer": "2.5.0"
