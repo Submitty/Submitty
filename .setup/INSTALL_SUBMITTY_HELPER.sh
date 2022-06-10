@@ -296,8 +296,9 @@ fi
 # Set owner/group of the top level logs directory
 chown "root:${COURSE_BUILDERS_GROUP}"                   "${SUBMITTY_DATA_DIR}/logs"
 # Set owner/group for logs directories that exist on both primary & work machines
-chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}"   "${SUBMITTY_DATA_DIR}/logs/autograding"
-chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}"   "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
+chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding"
+chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
+
 # Set owner/group for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
     chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/access"
