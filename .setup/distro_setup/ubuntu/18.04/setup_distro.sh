@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+#####################################################################
+#            UNSUPPORTED
+#
+# Support for Ubuntu 18.04 (bionic) is unsupported as of 06/01/2022.
+# This script has not been maintained since then and we will not
+# accept PRs fixing any drift that exists. Use at your own risk.
+#
+# To see the officially supported distros, please go to:
+#     https://submitty.org/sysadmin/server_os
+#
+#####################################################################
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
