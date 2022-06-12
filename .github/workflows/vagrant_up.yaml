@@ -1,6 +1,6 @@
 name: Vagrant Up
 
-on: 
+on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
@@ -11,12 +11,10 @@ permissions:
 jobs:
   vagrant-up:
     runs-on: macos-10.15
-    
+
     strategy:
       matrix:
         include:
-          - image: ubuntu-18.04
-            port: 1501
           - image: ubuntu-20.04
             port: 1511
       fail-fast: false
