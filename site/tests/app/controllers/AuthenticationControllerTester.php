@@ -3,7 +3,6 @@
 namespace tests\app\controllers;
 
 use app\authentication\AbstractAuthentication;
-use app\authentication\PamAuthentication;
 use app\controllers\AuthenticationController;
 use app\entities\VcsAuthToken;
 use app\models\Team;
