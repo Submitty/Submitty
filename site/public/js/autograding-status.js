@@ -152,8 +152,59 @@ function toggleUpdate() {
     }
 }
 
+function updateStackTrace() {
+    $('.stack-refresh-btn').prop('disabled', true);
+    $.ajax({
+        url: buildUrl(['autograding_status', 'get_stack']),
+        type: 'GET',
+        success: function (response) {
+            $('.stack-refresh-btn').prop('disabled', false);
+            const json = JSON.parse(response);
+            if (json.status !== 'success') {
+                displayErrorMessage(json.message);
+                return;
+            }
+            const error_log = $('.stack-trace');
+            error_log.empty();
+            error_log.append('<div class="stack-trace-wrapper"></div>');
+            error_log.append('<pre class="stack-trace-info custom-scrollbar"></pre>');
+            const wrapper = $('.stack-trace-wrapper');
+            const info = $('.stack-trace-info');
+            // Shouldn't be needed if the files follow the same timestamp format, but it's here just in case
+            const keys = Object.keys(json.data);
+            keys.sort(
+                (a, b) => {
+                    if (a === b) {
+                        return 0;
+                    }
+                    if (a < b) {
+                        return 1;
+                    }
+                    return -1;
+                },
+            );
+            keys.forEach((key, i) => {
+                const new_tab = $('<a class="tab"></a>').text(key);
+                if (i === 0) {
+                    new_tab.addClass('active-tab');
+                    info.text(json.data[key]);
+                }
+                wrapper.append(new_tab);
+                new_tab.attr('data', json.data[key]);
+                new_tab.on('click', () => {
+                    $('.active-tab').removeClass('active-tab');
+                    new_tab.addClass('active-tab');
+                    $('.stack-trace-info').text(new_tab.attr('data'));
+                });
+            });
+        },
+    });
+}
+
 $(document).ready(() => {
     $('#toggle-btn').text('Pause Update');
     $('#toggle-btn').on('click', toggleUpdate);
+    $('.stack-refresh-btn').on('click', updateStackTrace);
     time_id = setTimeout(updateTable, refresh_freq);
+    updateStackTrace();
 });
