@@ -8122,4 +8122,12 @@ ORDER BY
             DELETE FROM saml_mapped_users WHERE id = ?;
         ", [$id]);
     }
+
+    public function checkNonMappedUsers() {
+        $this->submitty_db->query("
+            SELECT user_id FROM users WHERE user_id NOT IN
+                (SELECT user_id FROM saml_mapped_users);
+        ");
+        return $this->rowsToArray($this->submitty_db->rows());
+    }
 }

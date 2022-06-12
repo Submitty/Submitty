@@ -1,13 +1,28 @@
+{% if invalid_users is defined %}
+    {% if invalid_users|length == 0 %}
+        <div class="content" style="background-color: var(--actionable-blue);">
+            <p>No validation errors!</p>
+        </div>
+    {% else %}
+        <div class="content" style="background-color: var(--danger-red);">
+            <p><b>VALIDATION ERRORS</b></p>
+            <p>The following users are not mapped:</p>
+            {% for user in invalid_users %}
+                <p>{{ user }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}
+
 <div class="content">
     <h1>SAML Management</h1>
     <h2>Actions</h2>
     <button class="btn btn-primary" id="new-proxy-user-btn">New Proxy User</button>
     <button class="btn btn-primary" id="new-proxy-mapping-btn">Assign Proxy Mapping</button>
-    <form method="POST" action="{{ add_all_mapping_url }}" style="display: inline;">
+    <form method="POST" action="{{ validate_url }}" style="display: inline;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn btn-warning">Add All Users to SAML Mapping</button>
+        <button class="btn btn-warning">Validate Mapped Users</button>
     </form>
-    <button class="btn btn-warning">Validate Mapped Users</button>
     <br><br>
     <h2>Mapped Proxy Users</h2>
     <table class="table">

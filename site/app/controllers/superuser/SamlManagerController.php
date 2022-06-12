@@ -122,32 +122,6 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/add_all", methods={"POST"})
-     * @return RedirectResponse
-     */
-    public function addAllUsers(): RedirectResponse {
-        $return_url = $this->core->buildUrl(['superuser', 'saml']);
-        $auth = $this->checkSamlEnabled();
-        if ($auth === false) {
-            return new RedirectResponse($return_url);
-        }
-        $users = $this->core->getQueries()->getAllSubmittyUsers();
-        $added = 0;
-        $skipped = 0;
-        foreach ($users as $user) {
-            if ($auth->isValidUsername($user->getId())) {
-                $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
-                $added++;
-            }
-            else {
-                $skipped++;
-            }
-        }
-        $this->core->addSuccessMessage("Added {$added} users to mapping and skipped {$skipped} users.");
-        return new RedirectResponse($return_url);
-    }
-
-    /**
      * @Route("/superuser/saml/update_active", methods={"POST"})
      * @return RedirectResponse
      */
@@ -174,7 +148,7 @@ class SamlManagerController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/saml/delete")
+     * @Route("/superuser/saml/delete", methods={"POST"})
      * @return RedirectResponse
      */
     public function deleteSamlMapping(): RedirectResponse {
@@ -195,5 +169,22 @@ class SamlManagerController extends AbstractController {
         $this->core->getQueries()->deleteSamlMapping($id);
         $this->core->addSuccessMessage("Successfully deleted");
         return new RedirectResponse($return_url);
+    }
+
+    /**
+     * @Route("/superuser/saml/validate")
+     * @return WebResponse
+     */
+    public function validate(): WebResponse {
+        if ($this->checkSamlEnabled() === false) {
+            return new WebResponse(ErrorView::class,
+                "errorPage",
+                "SAML not enabled"
+            );
+        }
+        // check that all users have at least 1 mapping in saml_mapped_users
+        $users = $this->core->getQueries()->checkNonMappedUsers();
+        $proxy_mapped_users = $this->core->getQueries()->getProxyMappedUsers();
+        return new WebResponse(SamlManagerView::class, 'renderPage', $proxy_mapped_users, $users);
     }
 }
