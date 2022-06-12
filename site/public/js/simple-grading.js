@@ -413,22 +413,40 @@ function setupCheckboxCells() {
 function setupNumericTextCells() {
     $(".cell-grade").change(function() {
         elem = $(this);
-        if (this.value == "") {
-            return;
-        }
-        if(this.value == 0) {
-            elem.css("color", "--standard-light-medium-gray");
-        }
-        else{
-            elem.css("color", "");
-        }
-
         var split_id = elem.attr("id").split("-");
         var row_el = $("tr#row-" + split_id[1] + "-" + split_id[2]);
 
         var scores = {};
         var old_scores = {};
         var total = 0;
+
+        let value = this.value;
+        const numbers = /^[0-9]*\.?[0-9]*$/;
+
+        if(this.tagName.toLowerCase() === 'input') {
+            // Empty input is ok for comment but not numeric cells
+            if(!this.value) {
+                this.value = 0;
+            }
+            else if(!this.value.match(numbers)) {
+                alert('Score should be a positive number');
+                this.value = 0;
+            }
+            // Input greater than the max_clamp for the component is not allowed
+            else {
+                if(elem.data("maxclamp") && elem.data("maxclamp") < this.value) {
+                    alert('Score should be less than or equal to the max clamp value: ' + elem.data("maxclamp"));
+                    this.value = 0;
+                }
+            }
+        }
+
+        if(this.value == 0) {
+            elem.css("color", "--standard-light-medium-gray");
+        }
+        else{
+            elem.css("color", "");
+        }
 
         row_el.find(".cell-grade").each(function() {
             elem = $(this);
@@ -445,9 +463,9 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-      let value = this.value;
+        value = this.value;
 
-      submitAJAX(
+        submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
@@ -614,6 +632,7 @@ function setupSimpleGrading(action) {
     else if(action === "numeric") {
         setupNumericTextCells();
     }
+
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 
     // highlights the first jquery-ui autocomplete result if there is only one
@@ -742,9 +761,7 @@ function setupSimpleGrading(action) {
         var input_cell = $("input.cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.code === "ArrowLeft" && (!input_cell.length || (
-                input_cell[0].selectionStart == 0 &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+        if(event.code === "ArrowLeft") {
             event.preventDefault();
             movement("left");
         }
@@ -753,9 +770,7 @@ function setupSimpleGrading(action) {
             movement("up");
         }
         // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.code === "ArrowRight" && (!input_cell.length || (
-                input_cell[0].selectionEnd == input_cell[0].value.length &&
-                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+        else if(event.code === "ArrowRight") {
             event.preventDefault();
             movement("right");
         }

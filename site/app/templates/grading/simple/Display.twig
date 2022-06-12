@@ -285,6 +285,7 @@
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
         {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
+            {% set max_clamp = component.getUpperClamp() %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             {% set component_score = component_grade.getScore() | default(0) %}
@@ -292,15 +293,17 @@
             <td class="option-small-input">
                 <input
                     class="option-small-box cell-grade" tabindex="0"
-                    style="text-align: center; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                    style="text-align: center; width: 120px; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_score == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
-                    type="text"
+                    type="number"
                     id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_score }}"
+                    data-maxclamp="{{ max_clamp }}"
                     value="{{ component_score }}"
                     onclick="this.select()"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
+                    onkeydown="javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight','Period'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
