@@ -8079,25 +8079,47 @@ ORDER BY
 
     public function getSAMLAuthorizedUserIDs(string $saml_id): array {
         $this->submitty_db->query("
-            SELECT user_id FROM saml_mapped_users WHERE saml_id = ?
+            SELECT user_id FROM saml_mapped_users WHERE saml_id = ? AND active = true
         ", [$saml_id]);
         return $this->submitty_db->rows();
     }
 
     public function getProxyMappedUsers(): array {
         $this->submitty_db->query("
-            SELECT user_id, saml_id, active FROM saml_mapped_users
+            SELECT id, user_id, saml_id, active FROM saml_mapped_users
                 WHERE saml_id != user_id;
         ");
         return $this->submitty_db->rows();
     }
 
     public function insertSamlMapping(string $saml_id, string $submitty_id) {
+        $this->submitty_db->beginTransaction();
         $this->submitty_db->query("
             INSERT INTO saml_mapped_users (saml_id, user_id)
-                VALUES (?, ?) ON CONFLICT ON CONSTRAINT
-                saml_mapped_users_saml_id_user_id_key DO UPDATE
+                VALUES (?, ?) ON CONFLICT (saml_id, user_id) DO UPDATE
                 SET active = true;
         ", [$saml_id, $submitty_id]);
+        $this->submitty_db->commit();
+    }
+
+    public function samlMappingDeletable(int $id): bool {
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+        return $this->submitty_db->row() > 0;
+    }
+
+    public function updateSamlMapping(int $id, bool $active) {
+        $this->submitty_db->query("
+            UPDATE saml_mapped_users SET active = ?
+                WHERE id = ?;
+        ", [$active, $id]);
+    }
+
+    public function deleteSamlMapping(int $id) {
+        $this->submitty_db->query("
+            DELETE FROM saml_mapped_users WHERE id = ?;
+        ", [$id]);
     }
 }

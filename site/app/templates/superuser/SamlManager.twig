@@ -24,11 +24,25 @@
             <td>{{ row['active'] ? 'True' : 'False' }}</td>
             <td>
                 {% if row['active'] %}
-                    <button class="btn btn-warning">Deactivate</button>
+                    <form method="POST" action="{{ change_active_saml_url }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <input type="hidden" name="activate" value="0">
+                        <input type="hidden" name="id" value="{{ row['id'] }}">
+                        <button class="btn btn-warning">Deactivate</button>
+                    </form>
                 {% else %}
-                    <button class="btn btn-warning">Activate</button>
+                    <form method="POST" action="{{ change_active_saml_url }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <input type="hidden" name="activate" value="1">
+                        <input type="hidden" name="id" value="{{ row['id'] }}">
+                        <button class="btn btn-warning">Activate</button>
+                    </form>
                 {% endif %}
-                <button class="btn btn-danger">Delete</button>
+                <form method="POST" action="{{ delete_mapping_url }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="id" value="{{ row['id'] }}">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
             </td>
         </tr>
         {% endfor %}

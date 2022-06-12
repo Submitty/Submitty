@@ -31,9 +31,9 @@ def up(config, database):
         LANGUAGE plpgsql
         AS $$
         BEGIN
-            IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id) = 1
+            IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id) = 2
             THEN
-                IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id AND user_id = saml_id) = 1
+                IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id AND user_id = saml_id) > 0
                 THEN
                     RAISE EXCEPTION 'SAML mapping already exists for this user';
                 end if;
@@ -50,7 +50,7 @@ def up(config, database):
 
     database.execute(
     """
-    CREATE TRIGGER saml_mapping_check_trigger BEFORE INSERT OR UPDATE on public.saml_mapped_users
+    CREATE TRIGGER saml_mapping_check_trigger AFTER INSERT on public.saml_mapped_users
     FOR EACH ROW EXECUTE PROCEDURE saml_mapping_check();
     """
     )
@@ -65,5 +65,4 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("DROP TRIGGER IF EXISTS saml_mapping_check_trigger;")
-    database.execute("DROP FUNCTION IF EXISTS saml_mapping_check;")
+    database.execute("DROP TRIGGER IF EXISTS saml_mapping_check_trigger on public.saml_mapped_users;")

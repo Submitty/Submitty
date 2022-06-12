@@ -146,4 +146,54 @@ class SamlManagerController extends AbstractController {
         $this->core->addSuccessMessage("Added {$added} users to mapping and skipped {$skipped} users.");
         return new RedirectResponse($return_url);
     }
+
+    /**
+     * @Route("/superuser/saml/update_active", methods={"POST"})
+     * @return RedirectResponse
+     */
+    public function updateActiveSaml(): RedirectResponse {
+        $return_url = $this->core->buildUrl(['superuser', 'saml']);
+
+        if (!isset($_POST['id']) || !isset($_POST['activate'])) {
+            $this->core->addErrorMessage("Missing id or active status");
+            return new RedirectResponse($return_url);
+        }
+
+        $id = intval($_POST['id']);
+        $active = $_POST['activate'] === "1";
+
+        if (!$this->core->getQueries()->samlMappingDeletable($id)) {
+            $this->core->addErrorMessage("You can't update the active status on that mapping");
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->getQueries()->updateSamlMapping($id, $active);
+        $this->core->addSuccessMessage("Successfully updated");
+
+        return new RedirectResponse($return_url);
+    }
+
+    /**
+     * @Route("/superuser/saml/delete")
+     * @return RedirectResponse
+     */
+    public function deleteSamlMapping(): RedirectResponse {
+        $return_url = $this->core->buildUrl(['superuser', 'saml']);
+
+        if (!isset($_POST['id'])) {
+            $this->core->addErrorMessage("Missing id");
+            return new RedirectResponse($return_url);
+        }
+
+        $id = intval($_POST['id']);
+
+        if (!$this->core->getQueries()->samlMappingDeletable($id)) {
+            $this->core->addErrorMessage("You can't delete that mapping");
+            return new RedirectResponse($return_url);
+        }
+
+        $this->core->getQueries()->deleteSamlMapping($id);
+        $this->core->addSuccessMessage("Successfully deleted");
+        return new RedirectResponse($return_url);
+    }
 }
