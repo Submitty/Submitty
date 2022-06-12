@@ -493,7 +493,7 @@ if os.path.isdir(CONFIG_INSTALL_DIR):
                 os.remove(os.path.join(CONFIG_INSTALL_DIR, file.name))
             else:
                 os.rmdir(os.path.join(CONFIG_INSTALL_DIR, file.name))
-else:
+elif os.path.exists(CONFIG_INSTALL_DIR):
     os.remove(CONFIG_INSTALL_DIR)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
