@@ -55,7 +55,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = [
             "authentication_method" => "PamAuthentication",
-            "ldap_options" => []
+            "ldap_options" => [],
+            "saml_options" => []
         ];
         $config = array_merge($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "authentication.json"), $config);

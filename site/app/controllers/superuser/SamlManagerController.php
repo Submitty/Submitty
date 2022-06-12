@@ -33,7 +33,8 @@ class SamlManagerController extends AbstractController {
      */
     public function showPage(): WebResponse {
         if ($this->checkSamlEnabled() === false) {
-            return new WebResponse(ErrorView::class,
+            return new WebResponse(
+                ErrorView::class,
                 "errorPage",
                 "SAML not enabled"
             );
@@ -184,7 +185,8 @@ class SamlManagerController extends AbstractController {
      */
     public function validate(): WebResponse {
         if ($this->checkSamlEnabled() === false) {
-            return new WebResponse(ErrorView::class,
+            return new WebResponse(
+                ErrorView::class,
                 "errorPage",
                 "SAML not enabled"
             );
