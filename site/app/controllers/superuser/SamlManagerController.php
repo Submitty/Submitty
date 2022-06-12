@@ -89,7 +89,7 @@ class SamlManagerController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
-        if (!$auth->isValidUsername($user_id)) {
+        if (!$auth->isValidUsername($saml_id)) {
             $this->core->addErrorMessage("Provided SAML ID is not valid.");
             return new RedirectResponse($return_url);
         }
