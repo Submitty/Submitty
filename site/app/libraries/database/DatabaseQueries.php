@@ -8102,12 +8102,39 @@ ORDER BY
         $this->submitty_db->commit();
     }
 
-    public function samlMappingDeletable(int $id): bool {
+    public function isSamlProxyUser(int $id): bool {
         $this->submitty_db->query("
             SELECT count(*) FROM saml_mapped_users WHERE
                 id = ? AND user_id != saml_id
         ", [$id]);
-        return $this->submitty_db->row() > 0;
+
+        $row = $this->submitty_db->row();
+
+        return $row['count'] > 0;
+    }
+
+    public function samlMappingDeletable(int $id): bool {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+
+        $row = $this->submitty_db->rows();
+        if (count($row) == 0) {
+            return false;
+        }
+
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                user_id = ?
+        ", [$row[0]["user_id"]]);
+
+        $row = $this->submitty_db->row();
+        if ($row['count'] < 2) {
+            return false;
+        }
+
+        return true;
     }
 
     public function updateSamlMapping(int $id, bool $active) {

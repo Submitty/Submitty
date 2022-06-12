@@ -82,6 +82,12 @@ class SamlManagerController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
+        $saml_id = trim($_POST['user_saml']);
+        if (empty($saml_id)) {
+            $this->core->addSuccessMessage("SAML ID not provided.");
+            return new RedirectResponse($return_url);
+        }
+
         $user = new User($this->core);
         $user->setId($user_id);
         $user->setLegalFirstName(trim($_POST['user_first_name']));
@@ -90,6 +96,7 @@ class SamlManagerController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $this->core->getQueries()->insertSubmittyUser($user);
+        $this->core->getQueries()->insertSamlMapping($saml_id, $user_id);
 
         $this->core->addSuccessMessage("New User Created");
         return new RedirectResponse($return_url);
@@ -136,7 +143,7 @@ class SamlManagerController extends AbstractController {
         $id = intval($_POST['id']);
         $active = $_POST['activate'] === "1";
 
-        if (!$this->core->getQueries()->samlMappingDeletable($id)) {
+        if (!$this->core->getQueries()->isSamlProxyUser($id)) {
             $this->core->addErrorMessage("You can't update the active status on that mapping");
             return new RedirectResponse($return_url);
         }

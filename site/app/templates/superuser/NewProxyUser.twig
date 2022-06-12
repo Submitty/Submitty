@@ -13,6 +13,8 @@
     <input type="text" id="form-user-last-name" placeholder="(Required)" name="user_last_name"><br>
     <label for="form-user-email">User Email:</label>
     <input type="text" id="form-user-email" placeholder="(Optional)" name="user_email"><br>
+    <label for="form-user-saml">SAML ID to map:</label>
+    <input type="text" id="form-user-saml" placeholder="(Required)" name="user_saml"><br>
 {% endblock %}
 {% block form %}
     <form method="POST" action="{{ new_proxy_user_url }}">
