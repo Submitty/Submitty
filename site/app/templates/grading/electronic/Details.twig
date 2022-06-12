@@ -461,7 +461,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().isTeam() ? graded_gradeable.getSubmitter().getAnonId() : graded_gradeable.getSubmitter().getAnonId(graded_gradeable.getGradeableId()) }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -511,7 +511,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().isTeam() ? graded_gradeable.getSubmitter().getAnonId() : graded_gradeable.getSubmitter().getAnonId(graded_gradeable.getGradeableId()) }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -625,17 +625,17 @@
 
 {# Anonymous ID #}
 {% macro render_column_user_id_anon(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getAnonId() }}</td>
+    <td>{{ graded_gradeable.getSubmitter().getUser().getAnonId(graded_gradeable.getGradeableId()) }}</td>
 {% endmacro %}
 
 {% macro render_column_team_members_anon(context, section, graded_gradeable, index, info, column) %}
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
-            {{ graded_gradeable.getSubmitter().getUser().getAnonId() }}
+            {{ graded_gradeable.getSubmitter().getUser().getAnonId(graded_gradeable.getGradeableId()) }}
         {% else %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
+                {{- member.getAnonId(graded_gradeable.getGradeableId()) -}}
             {%- endfor -%}
         {% endif %}
     <div style="font-style: italic; display: inline; color: grey;">
@@ -643,7 +643,7 @@
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
+                {{- member.getAnonId(graded_gradeable.getGradeableId()) -}}
             {%- endfor -%}
         {% endif %}
     </div>

@@ -1938,7 +1938,7 @@ class ElectronicGraderController extends AbstractController {
             $response_data['peer_gradeable'] = false;
         }
 
-        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
+        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->isTeam() ? $graded_gradeable->getSubmitter()->getAnonId() : $graded_gradeable->getSubmitter()->getAnonId($gradeable->getId());
 
         $response_data['itempool_items'] = [];
         $components = $gradeable->getComponents();
