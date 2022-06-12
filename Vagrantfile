@@ -104,16 +104,6 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.provision 'shell', inline: $script
   end
 
-  # Deprecated: This will be removed in the future and should not be relied upon.
-  # Note: This box is not compatible with macos M1
-  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
-    ubuntu.vm.box = 'bento/ubuntu-18.04'
-    ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8433, host: 8433   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
-    ubuntu.vm.provision 'shell', inline: $script
-  end
-
   config.vm.provider 'virtualbox' do |vb, override|
     vb.memory = 2048
     vb.cpus = 2
