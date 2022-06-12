@@ -65,6 +65,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "database_port" => 5432,
             "database_user" => "submitty_dbuser",
             "database_password" => "submitty_dbpass",
+            "database_course_user" => "submitty_course_dbuser",
+            "database_course_password" => "submitty_course_dbpass",
             "debugging_enabled" => false,
         ];
         $config = array_replace($config, $extra);
