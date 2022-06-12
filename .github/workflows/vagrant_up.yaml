@@ -15,8 +15,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - image: ubuntu-18.04
-            port: 1501
           - image: ubuntu-20.04
             port: 1511
       fail-fast: false

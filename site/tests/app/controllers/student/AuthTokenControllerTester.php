@@ -7,6 +7,7 @@ use app\entities\VcsAuthToken;
 use app\libraries\Core;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\TokenManager;
 use app\repositories\VcsAuthTokenRepository;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,6 +18,7 @@ class AuthTokenControllerTester extends BaseUnitTest {
 
     public function setUp(): void {
         $this->tokens = [];
+        TokenManager::initialize("secret", "https://submitty.org");
     }
 
     private function makeCore(bool $removeToken = false): Core {
@@ -63,7 +65,44 @@ class AuthTokenControllerTester extends BaseUnitTest {
         }
     }
 
-    public function testRetrievingTokens() {
+    public function testRetrievingApiToken() {
+        $core = $this->createMockCore([], [], [
+            "getSubmittyUserApiKey" => "user_api_key",
+            "refreshUserApiKey" => null
+        ]);
+
+        $controller = new AuthTokenController($core);
+
+        $response = $controller->fetchApiToken();
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+
+        $this->assertArrayHasKey("new_api_token", $_SESSION);
+
+        $token_string = $_SESSION["new_api_token"];
+
+        $token = TokenManager::parseApiToken($token_string);
+
+        $this->assertSame("user_api_key", $token->claims()->get("api_key"));
+
+        $this->assertMethodCalled("refreshUserApiKey");
+        $this->assertMethodCalled("getSubmittyUserApiKey");
+    }
+
+    public function testInvalidatingApiToken() {
+        $core = $this->createMockCore([], [], [
+            "refreshUserApiKey" => null
+        ]);
+
+        $controller = new AuthTokenController($core);
+
+        $response = $controller->invalidateApiToken();
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertMethodCalled("refreshUserApiKey");
+    }
+
+    public function testRetrievingVcsTokens() {
         $core = $this->makeCore();
 
         $controller = new AuthTokenController($core);
@@ -74,7 +113,7 @@ class AuthTokenControllerTester extends BaseUnitTest {
         $this->assertContains($this->tokens, $response->parameters);
     }
 
-    public function testMakingNewToken() {
+    public function testMakingNewVcsToken() {
         $core = $this->makeCore();
 
         $controller = new AuthTokenController($core);
@@ -98,7 +137,7 @@ class AuthTokenControllerTester extends BaseUnitTest {
         $this->assertEquals(0, $_SESSION['new_auth_token_id']);
     }
 
-    public function testRevokingToken() {
+    public function testRevokingVcsToken() {
         $core = $this->makeCore(true);
         $_POST['id'] = 0;
 
