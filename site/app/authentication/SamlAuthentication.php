@@ -19,7 +19,13 @@ class SamlAuthentication extends AbstractAuthentication {
     }
 
     public function redirect($old): string {
-        $url = $this->auth->login(urldecode($old) ?? $this->core->buildUrl(['home']), [], false, false, true);
+        if ($old === null) {
+            $redirect = $this->core->buildUrl(['home']);
+        }
+        else {
+            $redirect = urldecode($old);
+        }
+        $url = $this->auth->login($redirect, [], false, false, true);
         $_SESSION['AuthnRequestID'] = $this->auth->getLastRequestID();
         return $url;
     }

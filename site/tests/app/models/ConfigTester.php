@@ -251,6 +251,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'ldap_options' => [],
+            'saml_options' => [],
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
             'default_hw_late_days' => 0,

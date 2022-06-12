@@ -338,7 +338,7 @@ class Config extends AbstractModel {
         }
         $this->saml_options = $authentication_json['saml_options'];
         if ($this->authentication === 'SamlAuthentication') {
-            foreach ([] as $key) {
+            foreach (['name', 'username_attribute'] as $key) {
                 if (!isset($this->saml_options[$key])) {
                     throw new ConfigException("Missing config value for saml options: {$key}");
                 }

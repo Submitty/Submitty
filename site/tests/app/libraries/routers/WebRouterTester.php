@@ -16,7 +16,6 @@ class WebRouterTester extends BaseUnitTest {
             "/authentication/login"
         );
         $response = WebRouter::getWebResponse($request, $core);
-        $this->assertEquals(null, $response->redirect_response);
         $this->assertEquals("Authentication", $response->web_response->view_class);
         $this->assertEquals("loginForm", $response->web_response->view_function);
     }

@@ -26,7 +26,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             FileUtils::createDir(FileUtils::joinPaths($this->test_dir, $path));
         }
         $config_files = [
-            'authentication' => '{"authentication_method": "PamAuthentication", "ldap_options": []}',
+            'authentication' => '{"authentication_method": "PamAuthentication", "ldap_options": [], "saml_options": []}',
             'autograding_workers' => '{"primary":{"capabilities":["default"],"address":"localhost","username":"","num_autograding_workers":5,"enabled":true}}',
             'database' => '{"database_host":"\/var\/run\/postgresql","database_port":5432,"database_user":"submitty_dbuser","database_password":"submitty_dbuser","debugging_enabled":true}',
             'email' => '{"email_enabled":true,"email_user":"","email_password":"","email_sender":"submitty@vagrant","email_reply_to":"do-not-reply@vagrant","email_server_hostname":"localhost","email_server_port":25}',
