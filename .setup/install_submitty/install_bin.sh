@@ -42,6 +42,9 @@ done
 chown root:root ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
 
+chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/comment_count.sh
+chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/comment_count.sh
+
 #####################################
 
 echo -e "Copy the non-user scripts"
