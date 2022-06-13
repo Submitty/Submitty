@@ -117,6 +117,13 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
+TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc "SELECT COUNT(*) FROM terms WHERE term_id='${semester}'")
+
+if [[ "$TERM_EXISTS" -eq "0" ]] ; then
+    echo "ERROR: Provided term ${semester} doesn't exist."
+    echo "       To fix, try creating the term first by running 'create_term.sh'."
+    exit
+fi
 
 # FIXME: add some error checking on the $semester and $course
 #        variables
