@@ -7068,6 +7068,8 @@ AND gc_id IN (
             JOIN (
                 SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections
                 FROM users u
+                LEFT JOIN gradeable_anon ga 
+                ON u.user_id=ga.user_id
                 LEFT JOIN (
                     SELECT
                         json_agg(sections_registration_id) AS grading_registration_sections,
@@ -7075,14 +7077,7 @@ AND gc_id IN (
                     FROM grading_registration
                     GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
-                LEFT JOIN(
-                    SELECT
-                      anon_id,
-                      user_id,
-                      g_id
-                    FROM gradeable_anon
-                  ) AS ga ON u.user_id=ga.user_id
-            ) AS u ON eg IS NULL OR NOT eg.team_assignment AND u.g_id=g.g_id
+            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u.g_id=g.g_id
 
             /* Join user late day exceptions */
             LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
