@@ -4458,7 +4458,7 @@ AND gc_id IN (
         }
     }
 
-    public function getAllAnonIdsByGradeable ($g_id = null) {
+    public function getAllAnonIdsByGradeable($g_id = null) {
         if ($g_id == null) {
             $this->course_db->query("SELECT anon_id FROM gradeable_anon");
         }
