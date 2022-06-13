@@ -309,8 +309,12 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
     repairPDF();
 }
 
+
 // TODO: Stretch goal, find a better solution to load/unload
 // annotation. Maybe use session storage?
+    // the code below will remove the annotation info from local storage when a new window pops up
+    // unload event should not be avioded as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
+/**
 $(window).on('unload', () => {
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i).includes('annotations')) {
@@ -318,6 +322,7 @@ $(window).on('unload', () => {
         }
     }
 });
+**/
 
 function loadPDFToolbar() {
     const init_pen_size = document.getElementById('pen_size_selector').value;
