@@ -449,13 +449,16 @@ class User extends AbstractModel {
             $this->grading_registration_sections = $sections;
         }
     }
-    
+
     /**
      * Get gradeable-specific anon_id of an user
      * @param string $g_id
      */
-    public function getAnonId($g_id) {
-        $anon_id= $this->core->getQueries()->getGradeableAnonId($this->id, $g_id);
+    public function getAnonId($g_id = null) {
+        if ($g_id === null) {
+            return $this->anon_id ?? null;
+        }
+        $anon_id = $this->core->getQueries()->getGradeableAnonId($this->id, $g_id);
         if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable();

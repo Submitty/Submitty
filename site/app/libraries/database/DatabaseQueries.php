@@ -4416,23 +4416,23 @@ AND gc_id IN (
         }
         return false;
     }
-    
+
     /**
      * Set gradeable-specific user anon_id
-     * 
+     *
      * @param array $user_ids
      * @param string $g_id
      * @param string $anon_id
      */
-    public function insertGradeableAnonId($user_ids, $g_id, $anon_id=null) {
-        $user_ids= is_array($user_ids) ? $user_ids : [$user_ids];
+    public function insertGradeableAnonId($user_ids, $g_id, $anon_id = null) {
+        $user_ids = is_array($user_ids) ? $user_ids : [$user_ids];
         foreach ($user_ids as $user_id) {
-            if ($anon_id == null){
+            if ($anon_id == null) {
                 $this->core->getQueries()->getUserById($user_id)->getAnonId($g_id);
                 continue;
             }
             try {
-                $params= [$user_id, $g_id, $anon_id];
+                $params = [$user_id, $g_id, $anon_id];
                 $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
                 $this->course_db->commit();
             }
@@ -4444,12 +4444,12 @@ AND gc_id IN (
 
     /**
      * Get gradeable-specific user anon_id
-     * 
+     *
      * @param string $user_id
      * @param string $g_id
      */
     public function getGradeableAnonId($user_id, $g_id) {
-        $result= $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE user_id=? AND g_id=?", [$user_id, $g_id]);
+        $result = $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE user_id=? AND g_id=?", [$user_id, $g_id]);
         if ($this->course_db->getRowCount() === 0) {
             return null;
         }
@@ -4458,11 +4458,11 @@ AND gc_id IN (
         }
     }
 
-    public function getAllAnonIdsByGradeable($g_id = null) {
-        if ($g_id== null){
+    public function getAllAnonIdsByGradeable ($g_id = null) {
+        if ($g_id == null) {
             $this->course_db->query("SELECT anon_id FROM gradeable_anon");
         }
-        else{
+        else {
             $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
         }
         return $this->course_db->rows();
@@ -7077,7 +7077,7 @@ AND gc_id IN (
                 ) AS sr ON u.user_id=sr.user_id
                 LEFT JOIN(
                     SELECT
-                      anon_id, 
+                      anon_id,
                       user_id,
                       g_id
                     FROM gradeable_anon
@@ -7247,7 +7247,7 @@ AND gc_id IN (
                     ) AS sr ON u.user_id=sr.user_id
                     LEFT JOIN(
                         SELECT
-                          anon_id, 
+                          anon_id,
                           user_id,
                           g_id
                         FROM gradeable_anon
