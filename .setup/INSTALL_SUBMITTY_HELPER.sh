@@ -409,6 +409,13 @@ echo -e "Copy the grading code"
 # copy the files from the repo
 rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
 
+# copy the autograding_allowed_commands.json to config
+rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands.json" "${SUBMITTY_INSTALL_DIR}/config"
+
+# # change permissions of autograding_allowed_commands.json
+chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands.json"
+chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands.json"
+
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
 for i in "${array[@]}"; do

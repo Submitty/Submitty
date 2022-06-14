@@ -39,149 +39,44 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
+#define ALLOWED_COMMANDS_JSON SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands.json"
+
+#define PLACEHOLDER "{SUBMITTY_INSTALL_DIRECTORY}"
 
 // =====================================================================================
 // =====================================================================================
 
-
-bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker) {
-
-  std::map<std::string,std::string> allowed_system_programs = {
-
-    // Basic System Utilities (for debugging)
-    { "ls",                      "/bin/ls", },
-    { "time",                    "/usr/bin/time" },
-    { "mv",                      "/bin/mv" },
-    { "cp",                      "/bin/cp" },
-    { "chmod",                   "/bin/chmod" },
-    { "find",                    "/usr/bin/find" },
-    { "cat",                     "/bin/cat" },
-    { "compare",                 "/usr/bin/compare" }, //image magick!
-    { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
-    { "convert",                 "/usr/bin/convert" }, //image magick!
-    { "wkhtmltoimage",           "/usr/bin/wkhtmltoimage" },
-    { "wkhtmltopdf",             "/usr/bin/wkhtmltopdf" },
-    { "xvfb-run",                "/xvfb-run" },   // allow htmltoimage and htmltopdf to run headless
-    { "cut",                     "/usr/bin/cut" },
-    { "sort",                    "/usr/bin/sort" },
-    { "grep",                    "/bin/grep" },
-    { "sed",                     "/bin/sed" },
-    { "awk",                     "/usr/bin/awk" },
-    { "pwd",                     "/bin/pwd" },
-    { "env",                     "/usr/bin/env" },
-    { "pdftotext",               "/usr/bin/pdftotext" },
-    { "pdflatex",                "/usr/bin/pdflatex" },
-    { "wc",                      "/usr/bin/wc" },
-    { "head",                    "/usr/bin/head" },
-    { "tail",                    "/usr/bin/tail" },
-    { "uniq",                    "/usr/bin/uniq" },
-    { "echo",                    "/bin/echo" },
-
-    // Submitty Analysis Tools
-    { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
-    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
-
-    // for Computer Science I
-    { "python",                  "/usr/bin/python" },
-    { "python2",                 "/usr/bin/python2" },
-    { "python2.7",               "/usr/bin/python2.7" },
-    { "python3",                 "/usr/bin/python3" },
-    { "python3.5",               "/usr/bin/python3.5" },
-    { "python3.6",               "/usr/bin/python3.6" },
-    { "pylint",                  "/usr/local/bin/pylint" },
-
-    // for Data Structures
-    { "g++",                     "/usr/bin/g++" },
-    { "clang++",                 "/usr/bin/clang++" },
-    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
-    { "valgrind",                "/usr/bin/valgrind" },
-
-    // for Computer Organization
-    { "spim",                    "/usr/bin/spim" },
-    { "clang",                   "/usr/bin/clang" },
-    { "gdb",                     "/usr/bin/gdb" },
-
-    // for Principles of Software
-    { "java",                    "/usr/bin/java" },
-    { "javac",                   "/usr/bin/javac" },
-    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
-
-    // for Operating Systems
-    { "gcc",                     "/usr/bin/gcc" },
-    { "strings",                 "/usr/bin/strings" },
-
-    // for Programming Languages
-    { "swipl",                   "/usr/bin/swipl" },
-    { "plt-r5rs",                "/usr/bin/plt-r5rs" },
-    { "ozc",                     "/usr/bin/ozc" },
-    { "ozengine",                "/usr/bin/ozengine" },
-
-    // for Program Analysis course
-    { "ghc",                     "/usr/bin/ghc" },
-    { "ocaml",                   "/usr/bin/ocaml" },
-    { "ocamllex",                "/usr/bin/ocamllex" },
-    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
-    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
-
-    // for Cmake & Make
-    { "cmake",                   "/usr/bin/cmake" },
-    { "make",                    "/usr/bin/make" },
-
-    // for Network Programming
-    { "timeout",                 "/usr/bin/timeout" },
-    { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
-    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
-    { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
-    { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
-    { "expect",                  "/usr/bin/expect" },
-    { "sleep",                   "/bin/sleep" },
-
-    // for Distributed Systems
-    { "script",                  "/usr/bin/script" },
-
-    // for LLVM / Compiler class
-    { "lex",                     "/usr/bin/lex" },
-    { "flex",                    "/usr/bin/flex" },
-    { "yacc",                    "/usr/bin/yacc" },
-    { "bison",                   "/usr/bin/bison" },
-
-    // for graphics/window interaction
-    { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
-    { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
-    { "wmctrl",                  "/usr/bin/wmctrl"}, //bring window into focus
-    { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
-
-    // for Debugging
-    { "strace",                  "/usr/bin/strace" },
-
-    //Matlab
-    { "matlab",                  "/usr/local/bin/matlab" }
-
-  };
-
-  if(running_in_docker){
-    allowed_system_programs.insert({"bash", "/bin/bash"});
-    allowed_system_programs.insert({"php",  "/usr/bin/php"});
-  }
-  // find full path name
-  std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
-  if (itr != allowed_system_programs.end()) {
-    full_path_executable = itr->second;
-    return true;
-  }
-
-  // did they already use the full path name?
-  for (itr = allowed_system_programs.begin(); itr != allowed_system_programs.end(); itr++) {
-    if (itr->second == program) {
-      full_path_executable = program;
-      return true;
+std::string replace_placeholder(std::string value) {
+    int index = value.find(PLACEHOLDER);
+    if (index != -1) {
+        return value.replace(index, PLACEHOLDER.length(), SUBMITTY_INSTALL_DIRECTORY);
     }
-  }
-
-  // not an allowed system program
-  return false;
+    return value;
 }
 
+bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
+{
+    std::ifstream json_file(ALLOWED_COMMANDS_JSON);
+    nlohmann::json allowed_system_programs;
+    json_file >> allowed_system_programs;
+    if(running_in_docker){
+        allowed_system_programs["bash"] = "/bin/bash";
+        allowed_system_programs["php"] = "/usr/bin/php";
+    }
+    if (allowed_system_programs.contains(program)) {
+        full_path_executable = replace_placeholder(allowed_system_programs[program]);
+        return true;
+    }
+
+    for (auto& x : allowed_system_programs.items())
+    {
+        if (replace_placeholder(x.value()) == program) {
+            full_path_executable = program;
+            return true;
+        }
+    }
+    return false;
+}
 
 std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {
   std::set<std::string> answer;
