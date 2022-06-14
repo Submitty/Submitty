@@ -5,7 +5,7 @@ set -ev
 docker run -p 7000:8080 --add-host host.docker.internal:host-gateway \
  -d submitty/docker-test-saml-idp
 
-/usr/local/submitty/sbin/saml_utils.php add_users
+/usr/local/submitty/sbin/saml_utils.php --add_users
 
 mkdir -p /usr/local/submitty/config/saml/certs
 
