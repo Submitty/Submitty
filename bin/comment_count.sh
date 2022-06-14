@@ -3,7 +3,7 @@ if [ "$#" -eq 0 ]; then
   echo "Pass at least one directory or file" >&2
   exit 1
 fi
-mapfile -t csv < <( cloc --csv --quiet "$@" )
+mapfile -t csv < <( cloc --csv --quiet "$@" 2>/dev/null)
 if [ "${#csv[@]}" -eq 0 ]; then
   echo "File does not exist" >&2
   exit 1

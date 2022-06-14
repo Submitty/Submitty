@@ -1,0 +1,30 @@
+{
+    "testcases" : [
+        {
+            "title" : "Comment counting",
+
+            // count the number of comments
+            "command" : [ "comment_count *.py *.cpp"],
+            "points" : 4,
+            "validation" : [
+                {
+                    // Grade by comparing the contents of a file to a given integer.
+                    "method" : "intComparison",
+                    // Use the output of the second command.
+                    "actual_file" : "STDOUT_0.txt",
+                    "description" : "Number of comments",
+                    // The method by which to compare the output of "comment_count"
+                    "comparison" : "ge",
+                    // The integer against which to compare.
+                    "term" : 2,
+                    // Message to the student.
+                    "failure_message" : "Include comments in the submisson.",
+                    // Only display a message if the test failed.
+                    "show_message" : "on_failure",
+                    // Hide the student/instructor comparison.
+                    "show_actual" : "never"
+                }
+            ]
+        }
+    ]
+}
