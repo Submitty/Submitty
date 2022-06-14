@@ -2,7 +2,7 @@
 	"testcases" : [
 		{
 			"title" : "Python - Static Analysis",
-			"command" : ["submitty_count_ts token -l python count token Equal *.py" ],
+			"command" : ["submitty_count_ts -l python count token Equal *.py" ],
 			"points" : 4,
 			"validation" : [
 				{
