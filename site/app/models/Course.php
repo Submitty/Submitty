@@ -41,7 +41,7 @@ class Course extends AbstractModel {
         $this->title = $details['course'];
         $this->display_name = "";
         $this->user_group = $details['user_group'] ?? 3;
-        $this->registration_section = $details['registration_section'] ?? NULL;
+        $this->registration_section = $details['registration_section'] ?? null;
     }
 
     public function loadDisplayName() {
