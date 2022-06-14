@@ -121,7 +121,6 @@ TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc 
 
 if [[ "$TERM_EXISTS" -eq "0" ]] ; then
     echo "ERROR: Provided term ${semester} doesn't exist."
-    echo "       To fix, try creating the term first by running 'create_term.sh'."
     exit
 fi
 
