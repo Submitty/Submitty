@@ -8,7 +8,7 @@
     <div id="grading-pdf-repair" hidden>
         <p><em>There is a problem with this pdf. Please repair to try and automatically fix any issues.</em></p>
     </div>
-    <div id="viewer" onresize="addOffset()" class="pdfViewer"></div>
+    <div id="viewer" class="pdfViewer"></div>
 </div>
 
 <!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
@@ -53,7 +53,9 @@
             $('#pdf-buttons').append(document.getElementById('download-annotations-btn-template').content.cloneNode(true));
         }
     });
-
+    <!--The function below adds a dynamic offset to annotataion pdf in order to prevent overlapping with toolbar ,
+    same could not be achived through CSS as it cause the tools to hide when moved right in panel.
+    This has been done taking care of resizing of panel ,platform(device),overlapping and scrolling of panels-->
     $($('#submission_browser').on("mouseover",function addOffset(){
         let height = $(".sticky-file-info").outerHeight();
         $("#viewer").css("paddingTop",height);
