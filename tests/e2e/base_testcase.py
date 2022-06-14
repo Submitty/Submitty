@@ -80,12 +80,13 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         # attempt to set-up the connection to Chrome. Repeat a handful of times
         # in-case Chrome crashes during initialization
-        for _ in range(5):
+        for attempt in range(5):
             try:
                 self.driver = webdriver.Chrome(options=self.options)
                 break
             except WebDriverException:
-                pass
+                if attempt == 4:
+                    raise WebDriverException
         if self.driver is None:
             self.driver = webdriver.Chrome(options=self.options)
 
