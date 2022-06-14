@@ -274,11 +274,11 @@ else:
     print()
 
     default = ''
-    if 'database_password' in defaults and DATABASE_USER == defaults['database_course_user']:
+    if 'database_course_password' in defaults and DATABASE_COURSE_USER == defaults['database_course_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_USER, default))
-    if DATABASE_PASS == '' and DATABASE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
-        DATABASE_PASS = defaults['database_course_password']
+    DATABASE_COURSE_PASSWORD = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_COURSE_USER, default))
+    if DATABASE_COURSE_PASSWORD == '' and DATABASE_COURSE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
+        DATABASE_COURSE_PASSWORD = defaults['database_course_password']
     print()
 
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
@@ -422,8 +422,9 @@ else:
     config['database_host'] = DATABASE_HOST
     config['database_port'] = DATABASE_PORT
     config['database_user'] = DATABASE_USER
-    config['database_course_user'] = DATABASE_COURSE_USER
     config['database_password'] = DATABASE_PASS
+    config['database_course_user'] = DATABASE_COURSE_USER
+    config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['timezone'] = TIMEZONE
 
     config['authentication_method'] = AUTHENTICATION_METHOD
