@@ -18,5 +18,5 @@ curl http://localhost:7000/simplesaml/saml2/idp/metadata.php \
 
 chown -R submitty_php:submitty_php /usr/local/submitty/config/saml
 
-sed -i -e 's/"name": ""/"url": "SAML"/g' /usr/local/submitty/config/authentication.json
+sed -i -e 's/"name": ""/"name": "SAML"/g' /usr/local/submitty/config/authentication.json
 sed -i -e 's/"username_attribute": ""/"username_attribute": "uid"/g' /usr/local/submitty/config/authentication.json
