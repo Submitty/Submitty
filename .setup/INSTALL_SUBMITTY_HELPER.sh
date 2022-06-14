@@ -132,18 +132,26 @@ fi
 # VALIDATE DATABASE SUPERUSERS
 
 DATABASE_FILE="$CONF_DIR/database.json"
+DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
+DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
 GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
+GLOBAL_DBUSER_PASS=$(jq -r '.database_password' $DATABASE_FILE)
 COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
 
+DB_CONN="-h ${DATABASE_HOST} -U ${GLOBAL_DBUSER}"
+if [ ! -d "${DATABASE_HOST}" ]; then
+    DB_CONN="${DB_CONN} -p ${DATABASE_PORT}"
+fi
 
-CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'\"" postgres)
+
+CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'"`
 
 if [ "$CHECK" == "f" ]; then
     echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
     exit
 fi
 
-CHECK=$(su -c "psql -d submitty -tAc \"SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'\"" postgres)
+CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'"`
 
 if [ "$CHECK" == "t" ]; then
     echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
