@@ -2,5 +2,21 @@
 
 set -ev
 
-# docker run submitty/docker-test-saml-idp -p 7000:8080 \
-# --add-host host.docker.internal:host-gateway -d
+docker run submitty/docker-test-saml-idp -p 7000:8080 \
+ --add-host host.docker.internal:host-gateway -d
+
+/usr/local/submitty/sbin/saml_utils.php add_users
+
+mkdir -p /usr/local/submitty/config/saml/certs
+
+openssl req -x509 -sha256 -days 365 -nodes -newkey rsa:4096 \
+ -keyout /usr/local/submitty/config/saml/certs/sp.key \
+ -out /usr/local/submitty/config/saml/certs/sp.crt --subj "/C=US"
+
+curl http://localhost:7000/simplesaml/saml2/idp/metadata.php \
+ --output /usr/local/submitty/config/saml/idp_metadata.xml
+
+chown -R submitty_php:submitty_php /usr/local/submitty/config/saml
+
+sed -i -e 's/"name": ""/"url": "SAML"/g' /usr/local/submitty/config/authentication.json
+sed -i -e 's/"username_attribute": ""/"username_attribute": "uid"/g' /usr/local/submitty/config/authentication.json

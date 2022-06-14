@@ -128,5 +128,5 @@ fi
 
 # Install SAML IdP docker container for testing
 if [ ${VAGRANT} == 1 ]; then
-    # docker pull submitty/docker-test-saml-idp:latest
+    docker pull submitty/docker-test-saml-idp:latest
 fi
