@@ -41,15 +41,14 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define ALLOWED_COMMANDS_JSON SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands.json"
 
-#define PLACEHOLDER "{SUBMITTY_INSTALL_DIRECTORY}"
-
 // =====================================================================================
 // =====================================================================================
 
 std::string replace_placeholder(std::string value) {
-    int index = value.find(PLACEHOLDER);
+    std::string placeholder = "{SUBMITTY_INSTALL_DIRECTORY}";
+    int index = value.find(placeholder);
     if (index != -1) {
-        return value.replace(index, PLACEHOLDER.length(), SUBMITTY_INSTALL_DIRECTORY);
+        return value.replace(index, placeholder.length(), SUBMITTY_INSTALL_DIRECTORY);
     }
     return value;
 }
