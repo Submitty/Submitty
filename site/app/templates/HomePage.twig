@@ -19,8 +19,9 @@
                             {{ course['display_semester'] }} &nbsp; &nbsp;
                             {{ course['title'] | upper }} &nbsp; &nbsp;
                             {% if course['display_name'] != "" %}
-                                {{ course['display_name'] }}
+                                {{ course['display_name'] }} &nbsp; &nbsp;
                             {% endif %}
+                            (Section {{ course['registration_section'] ?? "NULL" }})
                             {{ user.accessAdmin() }}
                         </a>
                     </li>
