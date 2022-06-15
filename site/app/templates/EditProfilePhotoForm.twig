@@ -17,7 +17,10 @@
         <label for="user-image-button">
         <h2>My Profile Photo</h2>
         </label>
-        <input type="file" name="user_image" id="user-image-button" accept="image/*">
+        <br>
+        <input type="file" name="user_image" id="user-image-button" accept=".jpg, .jpeg, .gif, .png, .webp">
+        <br>
+        <span>Maximum allowed file size: 20 MB | Supported file formats: JPG, GIF, PNG, WEBP</span>
     </div>
 {% endblock %}
 {% block form %}

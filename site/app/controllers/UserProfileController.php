@@ -145,6 +145,11 @@ class UserProfileController extends AbstractController {
         else {
             $meta = explode('.', $_FILES['user_image']['name']);
             $extension = $meta[1];
+            $supported_ext = ["jpg", "jpeg", "gif", "png", "webp"];
+            $supp_mime_types = ["image/jpeg", "image/gif", "image/png", "image/webp"];
+            if (!(in_array($extension, $supported_ext) && in_array(mime_content_type($_FILES['user_image']['tmp_name']), $supp_mime_types))) {
+                return JsonResponse::getErrorResponse('File format not supported.');
+            }
 
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);

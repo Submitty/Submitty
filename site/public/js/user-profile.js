@@ -273,4 +273,10 @@ $(document).ready(function() {
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
     let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
     $('[value="' + user_time_zone + '"]').prop('selected', true);
+    $('#user-image-button').bind('change', function() {
+        if ((this.files[0].size/1048576)>20.0){
+            alert("Selected file's size exceeds 20 MB");
+            $('#user-image-button').val('');
+        }
+    });
 });
