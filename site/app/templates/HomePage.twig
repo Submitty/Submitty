@@ -21,7 +21,9 @@
                             {% if course['display_name'] != "" %}
                                 {{ course['display_name'] }} &nbsp; &nbsp;
                             {% endif %}
-                            (Section {{ course['registration_section'] ?? "NULL" }})
+                            {% if course['registration_section'] != null %}
+                                (Section {{ course['registration_section'] }})
+                            {% endif %}
                             {{ user.accessAdmin() }}
                         </a>
                     </li>
