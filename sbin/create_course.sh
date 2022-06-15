@@ -29,6 +29,8 @@ DATABASE_HOST=$(jq -r '.database_host' "${CONF_DIR}/database.json")
 DATABASE_PORT=$(jq -r '.database_port' "${CONF_DIR}/database.json")
 DATABASE_USER=$(jq -r '.database_user' "${CONF_DIR}/database.json")
 DATABASE_PASS=$(jq -r '.database_password' "${CONF_DIR}/database.json")
+DATABASE_COURSE_USER=$(jq -r '.database_course_user' "${CONF_DIR}/database.json")
+echo $DATABASE_COURSE_USER
 
 ########################################################################################################################
 ########################################################################################################################
@@ -295,6 +297,18 @@ if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
 fi
+
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+if [[ "$?" -ne "0" ]] ; then
+    echo "ERROR: Failed to grant table privileges to course database user"
+    exit
+fi
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+if [[ "$?" -ne "0" ]] ; then
+    echo "ERROR: Failed to grant sequence privileges to course database user"
+    exit
+fi
+
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course, group_name, owner_name)
 VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}');"
 if [[ "$?" -ne "0" ]] ; then
