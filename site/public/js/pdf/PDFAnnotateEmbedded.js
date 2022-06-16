@@ -5,9 +5,6 @@ if (PDFAnnotate.default) {
     PDFAnnotate = PDFAnnotate.default;
 }
 
-let currentTool;
-let NUM_PAGES = 0;
-
 window.RENDER_OPTIONS = {
     documentId: '',
     userId: '',
@@ -23,18 +20,6 @@ window.GENERAL_INFORMATION = {
     gradeable_id: '',
     file_name: '',
     broken: false,
-};
-
-const ANNOTATION_DEFAULTS = {
-    size: 12,
-    color: '#000000',
-    class: 'Annotation',
-    page: 1,
-    rotation: 0,
-    x: 50,
-    y: 50,
-    content: 'DEFAULT VALUE',
-    width: 5,
 };
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
@@ -260,7 +245,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 const viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', (e) => {
                     //Let touchscreen work
-                    if (currentTool == 'pen' || currentTool == 'text') {
+                    if (tooltype == 'pen' || tooltype == 'text') {
                         e.preventDefault();
                     }
                 });

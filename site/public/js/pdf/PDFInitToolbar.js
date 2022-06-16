@@ -42,15 +42,15 @@ function renderPDFToolbar() {
             }
             switch(option){
                 case 'pen':
-                    currentTool = 'pen';
+                    tooltype = 'pen';
                     PDFAnnotate.UI.enablePen();
                     break;
                 case 'eraser':
-                    currentTool = 'eraser';
+                    tooltype = 'eraser';
                     PDFAnnotate.UI.enableEraser();
                     break;
                 case 'cursor':
-                    currentTool = 'cursor';
+                    tooltype = 'cursor';
                     PDFAnnotate.UI.enableEdit();
                     break;
                 case 'clear':
@@ -82,7 +82,7 @@ function renderPDFToolbar() {
                 case 'rotate-left':
                     rotate(-90);
                 case 'text':
-                    currentTool = 'text';
+                    tooltype = 'text';
                     PDFAnnotate.UI.enableText();
                     break;
             }
