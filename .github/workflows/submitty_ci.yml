@@ -473,6 +473,7 @@ jobs:
             run: npm run test:api
             env:
               BASE_URL: https://localhost
+              NODE_EXTRA_CA_CERTS: "/etc/ssl/selfcert/localhost.crt"
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
