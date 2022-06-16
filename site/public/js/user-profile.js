@@ -274,8 +274,8 @@ $(document).ready(function() {
     let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
     $('[value="' + user_time_zone + '"]').prop('selected', true);
     $('#user-image-button').bind('change', function() {
-        if ((this.files[0].size/1048576)>20.0){
-            alert("Selected file's size exceeds 20 MB");
+        if ((this.files[0].size/1048576)>5.0){
+            alert("Selected file's size exceeds 5 MB");
             $('#user-image-button').val('');
         }
     });
