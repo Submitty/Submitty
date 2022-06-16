@@ -49,8 +49,7 @@ $core->loadMasterConfig();
 $core->loadAuthentication();
 
 if (!$core->getAuthentication() instanceof SamlAuthentication) {
-    echo "SAML not enabled. Please enable before using this!" . PHP_EOL;
-    exit();
+    echo "Warning: SAML not enabled." . PHP_EOL;
 }
 
 switch ($action) {
