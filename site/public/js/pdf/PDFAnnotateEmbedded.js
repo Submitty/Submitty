@@ -436,8 +436,7 @@ function repairPDF() {
     }
     catch (e) {
         // Ignore the identifier error
-    }
-    
+    }   
     //if the user specified to repair their faulty annotations, we should save the file for them now.
     if (repair_faulty) {
         saveFile();
