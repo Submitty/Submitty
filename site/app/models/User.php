@@ -301,10 +301,10 @@ class User extends AbstractModel {
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
-     * @return bool true if the update was successful, false otherwise
+     * @return int 1 if the update was successful, 0 otherwise and 2 if image upload quota has been exhausted
      * @throws \ImagickException
      */
-    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): int {
         $image_saved = true;
 
         // Try saving image to its new spot in the file directory
@@ -313,15 +313,18 @@ class User extends AbstractModel {
         }
         catch (\Exception $exception) {
             $image_saved = false;
+            if ($exception->getCode() === 2) {
+                return 2;
+            }
         }
 
         // Update the DB to 'preferred'
         if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
             $this->display_image_state = 'preferred';
-            return true;
+            return 1;
         }
 
-        return false;
+        return 0;
     }
 
     /**

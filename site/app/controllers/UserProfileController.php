@@ -149,7 +149,10 @@ class UserProfileController extends AbstractController {
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
-
+            if ($result === 2) {
+                return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
+            }
+ 
             if (!$result) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
@@ -160,7 +163,7 @@ class UserProfileController extends AbstractController {
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
                     'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
                     'image_alt_data' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
-                    'image_flagged_state' => $user->getDisplayImageState(),
+                    'image_flagged_state' => $user->getDisplayImageState()
                 ]);
             }
         }
