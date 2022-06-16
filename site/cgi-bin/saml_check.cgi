@@ -29,6 +29,8 @@ def valid_username(username):
             return True
         else:
             return False
+    else:
+        return True
 
 if __name__ == "__main__":
     main()
