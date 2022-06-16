@@ -258,15 +258,4 @@ class PDFController extends AbstractController {
 
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
-
-    /**
-     * NOT IN USE
-     */
-    private function showGraderPDFFullpage() {
-        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
-        //a full-sized annotator, so keeping this in for now.
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->renderOutput(['grading', 'PDFAnnotation'], 'showAnnotationPage');
-    }
 }

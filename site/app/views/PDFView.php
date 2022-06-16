@@ -54,7 +54,7 @@ class PDFView extends AbstractView {
             'file_path' => $file_path,
             'annotation_jsons' => json_encode($annotation_jsons),
             'student_popup' => $is_student,
-            'can_download_view_all' => !$is_peer_grader,
+            'can_download' => !$is_peer_grader,
             'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
