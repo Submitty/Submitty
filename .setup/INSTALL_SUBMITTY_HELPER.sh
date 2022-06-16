@@ -406,15 +406,25 @@ find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
 
 echo -e "Copy the grading code"
 
-# copy the files from the repo
-rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
+# copy the files from the repo excluding autograding_allowed_commands_default.json
+sync_exclude=autograding_allowed_commands_default.json
+rsync -rtz --exclude "${sync_exclude}" "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
 
 # copy the autograding_allowed_commands.json to config
-rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands.json" "${SUBMITTY_INSTALL_DIR}/config"
+rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
 
-# # change permissions of autograding_allowed_commands.json
-chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands.json"
-chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands.json"
+# # change permissions of autograding_allowed_commands_default.json
+chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+
+# create autograding_allowed_commands_custom.json if doesnt exist
+if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json" ]]; then
+    touch "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+fi
+
+# # change permissions of autograding_allowed_commands_custom.json
+chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
 
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )

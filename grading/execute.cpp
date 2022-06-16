@@ -39,7 +39,8 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-#define ALLOWED_COMMANDS_JSON SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands.json"
+#define ALLOWED_COMMANDS_CUSTOM SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands_custom.json"
+#define ALLOWED_COMMANDS_DEFAULT SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands_default.json"
 
 // =====================================================================================
 // =====================================================================================
@@ -53,11 +54,22 @@ std::string replace_placeholder(std::string value) {
     return value;
 }
 
+bool is_empty(std::ifstream& file)
+{
+    return file.peek() == std::ifstream::traits_type::eof();
+}
+
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
-    std::ifstream json_file(ALLOWED_COMMANDS_JSON);
+    std::ifstream default_file(ALLOWED_COMMANDS_DEFAULT);
+    std::ifstream custom_file(ALLOWED_COMMANDS_CUSTOM);
     nlohmann::json allowed_system_programs;
-    json_file >> allowed_system_programs;
+    default_file >> allowed_system_programs;
+    if (!is_empty(custom_file)) {
+        nlohmann::json allowed_system_programs_custom;
+        custom_file >> allowed_system_programs_custom;
+        allowed_system_programs.update(allowed_system_programs_custom);
+    }
     if(running_in_docker){
         allowed_system_programs["bash"] = "/bin/bash";
         allowed_system_programs["php"] = "/usr/bin/php";
