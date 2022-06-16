@@ -152,7 +152,7 @@ class UserProfileController extends AbstractController {
             if ($result === 2) {
                 return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
             }
- 
+
             if (!$result) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
