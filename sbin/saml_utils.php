@@ -47,23 +47,25 @@ use app\libraries\FileUtils;
 $core = new Core();
 $core->loadMasterConfig();
 $core->loadAuthentication();
+$auth = $core->getAuthentication();
 
-if (!$core->getAuthentication() instanceof SamlAuthentication) {
+if (!$auth instanceof SamlAuthentication) {
     echo "Warning: SAML not enabled." . PHP_EOL;
+    $auth = new SamlAuthentication($core);
+
 }
 
 switch ($action) {
     case "add_users":
-        add_users($core);
+        add_users($core, $auth);
         break;
     case "generate_metadata":
-        generate_metadata($core);
+        generate_metadata($core, $auth);
         break;
 }
 
-function add_users(Core $core) {
+function add_users(Core $core, SamlAuthentication $auth) {
     $core->loadMasterDatabase();
-    $auth = $core->getAuthentication();
     $users = $core->getQueries()->getAllSubmittyUsers();
     $added = 0;
     $skipped = 0;
@@ -79,8 +81,7 @@ function add_users(Core $core) {
     echo "Added {$added} users to mapping and skipped {$skipped} users." . PHP_EOL;
 }
 
-function generate_metadata(Core $core) {
-    $saml_auth = $core->getAuthentication();
+function generate_metadata(Core $core, SamlAuthentication $saml_auth) {
     $metadata = $saml_auth->getMetaData();
 
     $path = FileUtils::joinPaths($core->getConfig()->getConfigPath(), 'saml', 'sp_metadata.xml');
