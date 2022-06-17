@@ -304,6 +304,37 @@ $_$;
 CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late integer, late_days_allowed integer, late_day_exceptions integer, late_days_remaining integer) RETURNS SETOF public.late_day_cache
     LANGUAGE plpgsql
     AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        late_days_change = 0;
+        assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+        IF submission_days_late <= assignment_budget THEN
+            -- clamp the days charged to be the days late minus exceptions above zero.
+            late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+        END IF;
+
+        return_row.late_day_status = 
+        CASE
+            -- BAD STATUS
+            WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+            -- LATE STATUS
+            WHEN submission_days_late > late_day_exceptions THEN 2
+            -- GOOD STATUS
+            ELSE 1
+        END;
+
+        return_row.late_days_change = late_days_change;
+        return_row.late_days_remaining = late_days_remaining + late_days_change;
+        RETURN NEXT return_row;
+        RETURN;
+    END;
+    $$;
+
+
 --
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
@@ -333,6 +364,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 					and eg.eg_submission_open_date <= NOW()
 			),
 			submitted_gradeables AS (
+                SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
 				FROM electronic_gradeable_version egv
 				JOIN electronic_gradeable_data egd
 					ON egv.g_id=egd.g_id 

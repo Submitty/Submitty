@@ -157,7 +157,6 @@ class TestSidebar(BaseTestCase):
             [base_url + '/activity', 'Student Activity Dashboard'],
             [base_url + '/late_days', 'Late Days Allowed'],
             [base_url + '/extensions', 'Excused Absence Extensions'],
-            [base_url + '/bulk_late_days', 'Bulk Late Days'],
             [base_url + '/grade_override', 'Grade Override'],
             [base_url + '/plagiarism', 'Plagiarism Detection'],
             [base_url + '/reports', 'Grade Reports'],
