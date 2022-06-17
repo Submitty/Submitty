@@ -344,6 +344,7 @@ echo ======= MORE STUFF FOR BOTH =====
 echo === COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
 echo === SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
 echo === DAEMON_USER = ${DAEMON_USER}
+echo === DAEMONPHP_GROUP = ${DAEMONPHP_GROUP}
 
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
