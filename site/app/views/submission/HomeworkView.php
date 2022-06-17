@@ -11,7 +11,6 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
-use app\models\gradeable\LateDayInfo;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -184,11 +183,6 @@ class HomeworkView extends AbstractView {
         $error = false;
         $messages = [];
 
-        // Adjust charged days if submission was BAD (bad status means 0 days were actually charged)
-        // if ($late_day_info !== null && $late_day_info->getStatus() == LateDayInfo::STATUS_BAD) {
-        //     $active_days_charged = $active_days_late - $extensions;
-        // }
-
         // ------------------------------------------------------------
         // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
         if ($extensions > 0) {
@@ -202,15 +196,13 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
-        var_dump($active_days_charged, $late_day_budget, $late_days_allowed, $active_days_late);
-
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
             // BAD STATUS
             if ($active_days_charged == 0 && $active_days_late > $extensions) {
                 $error = true;
-                
+
                 // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
                 if ($active_days_late > $late_day_budget) {
                     $messages[] = ['type' => 'too_few_remain', 'info' => [
