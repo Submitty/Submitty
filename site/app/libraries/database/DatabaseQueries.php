@@ -1528,6 +1528,43 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get the Late Day Info for each user associated with a user and gradeable
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo
+     */
+    public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
+        $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
+        $cache['graded_gradeable'] = $graded_gradeable;
+        $ldi = null;
+
+        if ($cache !== null) {
+            $ldi = new LateDayInfo($this->core, $user, $cache);
+        }
+        return $ldi;
+    }
+
+    /**
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Submitter $submitter
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array
+     */
+    public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
+        // Collect Late Day Info for each user associated with the submitter
+        if ($submitter->isTeam()) {
+            $late_day_info = [];
+            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                $late_day_info[$member->getId()] = $this->getLateDayInfoForUserGradeable($member, $graded_gradeable);
+            }
+            return $late_day_info;
+        }
+        else {
+            return $this->getLateDayInfoForUserGradeable($submitter->getUser(), $graded_gradeable);
+        }
+    }
+
+    /**
      * Generate and update the late day cache for all of the students in the course
      */
     public function generateLateDayCacheForUsers(): void {
