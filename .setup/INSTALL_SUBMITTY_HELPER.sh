@@ -311,6 +311,8 @@ if [ "${WORKER}" == 0 ]; then
 fi
 # ------------------------------------------------------------------------
 
+echo ============== MADE DIRS ==================
+
 # set the permissions of these directories
 chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
 chmod  751                                            "${SUBMITTY_DATA_DIR}"
