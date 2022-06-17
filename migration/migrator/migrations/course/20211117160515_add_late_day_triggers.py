@@ -262,6 +262,7 @@ def up(config, database, semester, course):
             ELSE
                 returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
                 late_days_used = late_days_used - returnedrow.late_days_change;
+				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                 return_cache = var_row;
                 return_cache.late_days_change = returnedrow.late_days_change;
                 return_cache.late_days_remaining = returnedrow.late_days_remaining;
@@ -277,14 +278,18 @@ def up(config, database, semester, course):
     CREATE OR REPLACE FUNCTION late_days_allowed_change() RETURNS trigger
         LANGUAGE plpgsql
         AS $$
+    #variable_conflict use_variable
+    DECLARE
+        g_id varchar;
+        user_id varchar;
+        team_id varchar;
+        version RECORD;
     BEGIN
-        --- Update or Insert
-        IF NEW.since_timestamp IS NOT NULL THEN
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= NEW.since_timestamp AND ldc.user_id = NEW.user_id;
-        --- Delete
-        ELSE
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= OLD.since_timestamp AND ldc.user_id = OLD.user_id;
-        END IF ;
+        version = CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+        -- since_timestamp = CASE WHEN TG_OP = 'DELETE' THEN OLD.since_timestamp ELSE NEW.since_timestamp END;
+        -- user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+        DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= version.since_timestamp AND ldc.user_id = version.user_id;
         RETURN NEW;
     END;
     $$;
@@ -292,22 +297,29 @@ def up(config, database, semester, course):
 
     database.execute("""
     CREATE OR REPLACE FUNCTION gradeable_version_change() RETURNS trigger AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+            team_id varchar;
+            version RECORD;
         BEGIN
-            --- Update or Insert
-            IF NEW.g_id IS NOT NULL THEN
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = NEW.g_id)
-                                            AND ((user_id = NEW.user_id AND NEW.team_id IS NULL)
-                                                OR (NEW.user_id IS NULL AND team_id = NEW.team_id));
-            --- Delete
-            ELSE
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = OLD.g_id)
-                                            AND ((user_id = OLD.user_id AND OLD.team_id IS NULL)
-                                                OR (OLD.user_id IS NULL AND team_id = OLD.team_id));
-            END IF ;
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+            team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
+            
+            --- Remove all lade day cache for all gradeables past this submission die date
+            --- for every user associated with the gradeable
+            DELETE FROM late_day_cache ldc
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+                                    FROM electronic_gradeable eg
+                                    WHERE eg.g_id = g_id)
+                AND (
+                    ldc.user_id IN (SELECT t.user_id FROM teams t WHERE t.team_id = team_id)
+                    OR
+                    ldc.user_id = user_id
+                );
+
             RETURN NEW;
         END;
     $$ LANGUAGE plpgsql;
@@ -320,15 +332,9 @@ def up(config, database, semester, course):
             g_id varchar;
             user_id varchar;
         BEGIN
-            -- Grab values for delete
-            g_id = OLD.g_id; 
-            user_id = OLD.user_id;
-
-            -- Change values for update/insert
-            IF NEW.g_id IS NOT NULL THEN
-                g_id = NEW.g_id;
-                user_id = NEW.user_id;
-            END IF;
+            -- Grab values for delete/update/insert
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
 
             DELETE FROM late_day_cache ldc 
             WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
@@ -348,24 +354,24 @@ def up(config, database, semester, course):
             due_date timestamp;
         BEGIN
             -- Check for any important changes
-            IF NEW.eg_submission_due_date = OLD.eg_submission_due_date
+            IF TG_OP = 'UPDATE'
+            AND NEW.eg_submission_due_date = OLD.eg_submission_due_date
             AND NEW.eg_has_due_date = OLD.eg_has_due_date
             AND NEW.eg_allow_late_submission = OLD.eg_allow_late_submission
             AND NEW.eg_late_days = OLD.eg_late_days THEN
-            RETURN NEW;
+                RETURN NEW;
             END IF;
-            
-            -- Get effective g_id
-            g_id = NEW.g_id;
             
             -- Grab submission due date
-            due_date = NEW.eg_submission_due_date;
-            
-            -- If submission due date was updated, use the earliest date
-            IF OLD.eg_submission_due_date IS NOT NULL
-            AND NEW.eg_submission_due_date != OLD.eg_submission_due_date THEN
-                due_date = LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date);
-            END IF;
+            due_date = 
+            CASE
+                -- INSERT
+                WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
+                -- DELETE
+                WHEN TG_OP = 'DELETE' THEN OLD.eg_submission_due_date
+                -- UPDATE
+                ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
+            END;
             
             DELETE FROM late_day_cache WHERE late_day_date >= due_date;
             RETURN NEW;
@@ -387,27 +393,27 @@ def up(config, database, semester, course):
     # Create triggers
     database.execute("""
     CREATE TRIGGER gradeable_version_change AFTER INSERT OR UPDATE OR DELETE ON electronic_gradeable_version
-        FOR EACH ROW EXECUTE FUNCTION gradeable_version_change();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_version_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_days_allowed_change AFTER INSERT OR UPDATE OR DELETE ON late_days
-        FOR EACH ROW EXECUTE FUNCTION late_days_allowed_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_days_allowed_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_day_extension_change AFTER INSERT OR UPDATE OR DELETE ON late_day_exceptions
-        FOR EACH ROW EXECUTE FUNCTION late_day_extension_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_day_extension_change();
     """)
 
     database.execute("""
     CREATE TRIGGER electronic_gradeable_change AFTER INSERT OR UPDATE OF eg_submission_due_date, eg_has_due_date, eg_allow_late_submission, eg_late_days ON electronic_gradeable
-        FOR EACH ROW EXECUTE FUNCTION electronic_gradeable_change();
+        FOR EACH ROW EXECUTE PROCEDURE electronic_gradeable_change();
     """)
 
     database.execute("""
     CREATE TRIGGER gradeable_delete BEFORE DELETE ON gradeable
-        FOR EACH ROW EXECUTE FUNCTION gradeable_delete();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_delete();
     """)
     pass
 

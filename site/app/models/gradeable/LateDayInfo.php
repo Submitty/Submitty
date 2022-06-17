@@ -325,7 +325,10 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isRegradeAllowed() {
-        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
+        if ($this->graded_gradeable === null) {
+            return false;
+        }
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed();
     }
 
     /**

@@ -45,8 +45,8 @@ class HomeworkView extends AbstractView {
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
 
-        if ($is_admin) {
-            $this->core->getOutput()->addInternalModuleJs('instructor-submission.js');
+        if ($this->core->getUser()->accessFullGrading()) {
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
         // Only show the late banner if the submission has a due date
@@ -122,7 +122,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        if ($submission_count > 0) {
+        if ($submission_count > 0 && $active_version !== 0) {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -427,7 +427,7 @@ class HomeworkView extends AbstractView {
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
-        $viewing_inactive_version = $highest_version !== $display_version;
+        $viewing_inactive_version = $display_version !== 0 && $highest_version !== $display_version;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
@@ -514,7 +514,9 @@ class HomeworkView extends AbstractView {
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
-            'recent_version_url' => $recent_version_url
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 
@@ -558,7 +560,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
