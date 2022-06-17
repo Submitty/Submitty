@@ -341,6 +341,9 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 echo ======= MORE STUFF FOR BOTH =====
+echo === COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
+echo === SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
+echo === DAEMON_USER = ${DAEMON_USER}
 
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
