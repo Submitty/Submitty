@@ -303,7 +303,7 @@ class CourseMaterialsController extends AbstractController {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $_POST['requested_path'] = $course_material->getPath();
+                    $_POST['id'] = $course_material->getId();
                     $this->ajaxEditCourseMaterialsFiles(false);
                 }
             }
