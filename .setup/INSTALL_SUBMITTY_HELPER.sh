@@ -320,7 +320,9 @@ echo ===========================================
 
 # set the permissions of these directories
 chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
+echo ====== CHOWN DONE ======
 chmod  751                                            "${SUBMITTY_DATA_DIR}"
+echo ====== CHMOD DONE ======
 
 #Set up courses and version control ownership if not in worker mode
 if [ "${WORKER}" == 0 ]; then
