@@ -103,5 +103,12 @@
                 </div>
             {% endif %}
         </div>
+        <script>
+            $( "thread_box_link_{{ thread.thread_id }}" ).on( "click", function() {
+                location.reload(true);
+                console.log("reloading is done");
+            });
+        </script>
     </a>
+
 {% endfor %}
