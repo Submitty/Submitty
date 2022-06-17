@@ -314,6 +314,7 @@ fi
 echo ============== MADE DIRS ==================
 echo ============== COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
 echo ============== SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
+echo ============== DAEMON_USER = ${DAEMON_USER}
 echo  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
 echo ===========================================
 
