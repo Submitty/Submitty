@@ -314,6 +314,8 @@ fi
 echo ============== MADE DIRS ==================
 echo ============== COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
 echo ============== SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
+echo  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
+echo ===========================================
 
 # set the permissions of these directories
 chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
