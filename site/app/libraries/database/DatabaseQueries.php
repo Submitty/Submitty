@@ -1582,6 +1582,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
         $this->course_db->query($query);
         $return = [];
+    }
 
     /**
      * Get the latest valid versrion for a gradeable (good or late status)
