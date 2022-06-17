@@ -214,7 +214,6 @@ class PDFController extends AbstractController {
         }
         $is_peer_grader = false;
         $grader_id = $this->core->getUser()->getId();
-        $is_peer_grader = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->hasPeerComponent()) {
                 $is_peer_grader = true;
