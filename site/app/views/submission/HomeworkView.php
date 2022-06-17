@@ -185,9 +185,9 @@ class HomeworkView extends AbstractView {
         $messages = [];
 
         // Adjust charged days if submission was BAD (bad status means 0 days were actually charged)
-        if ($late_day_info !== null && $late_day_info->getStatus() == LateDayInfo::STATUS_BAD) {
-            $active_days_charged = $active_days_late - $extensions;
-        }
+        // if ($late_day_info !== null && $late_day_info->getStatus() == LateDayInfo::STATUS_BAD) {
+        //     $active_days_charged = $active_days_late - $extensions;
+        // }
 
         // ------------------------------------------------------------
         // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
@@ -198,26 +198,33 @@ class HomeworkView extends AbstractView {
         }
 
         // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
-        $active_days_charged = max(0, $active_days_late - $extensions);
+        if ($active_days_charged > 0) {
+            $active_days_charged = max(0, $active_days_late - $extensions);
+        }
+
+        var_dump($active_days_charged, $late_day_budget, $late_days_allowed, $active_days_late);
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
-            // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_day_budget) {
+            // BAD STATUS
+            if ($active_days_charged == 0 && $active_days_late > $extensions) {
                 $error = true;
-                $messages[] = ['type' => 'too_few_remain', 'info' => [
-                    'late' => $active_days_late,
-                    'remaining' => $late_day_budget
-                ]];
-            } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
-            elseif ($active_days_charged > $late_days_allowed) {
-                $error = true;
-                $messages[] = ['type' => 'too_many_used', 'info' => [
-                    'late' => $active_days_late,
-                    'charged' => $active_days_charged,
-                    'allowed' => $late_days_allowed
-                ]];
+                
+                // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
+                if ($active_days_late > $late_day_budget) {
+                    $messages[] = ['type' => 'too_few_remain', 'info' => [
+                        'late' => $active_days_late,
+                        'remaining' => $late_day_budget
+                    ]];
+                } // AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
+                else {
+                    $messages[] = ['type' => 'too_many_used', 'info' => [
+                        'late' => $active_days_late,
+                        'charged' => $active_days_late - $extensions,
+                        'allowed' => $late_days_allowed
+                    ]];
+                }
             } // LATE STATUS
             else {
                 $messages[] = ['type' => 'late', 'info' => [
