@@ -319,12 +319,16 @@ chmod  751                                            "${SUBMITTY_DATA_DIR}"
 
 #Set up courses and version control ownership if not in worker mode
 if [ "${WORKER}" == 0 ]; then
+    echo ============= CHOWN courses =========
     chown  "root:${COURSE_BUILDERS_GROUP}"            "${SUBMITTY_DATA_DIR}/courses"
     chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
+    echo ============= CHOWN user_data ===========
     chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
+    echo ============= CHOWN vcs =============
     chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
+    echo ============= CHOWN vcs/git ============
     chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
