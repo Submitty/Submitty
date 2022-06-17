@@ -13,7 +13,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class AutoGradingView extends AbstractView {
-
     /**
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden True to show the scores of hidden testcases
@@ -503,7 +502,6 @@ class AutoGradingView extends AbstractView {
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
-            'can_download' => !$gradeable->isVcs(),
             'display_version' => $display_version,
             'display_original_pdf' => $this->core->buildCourseUrl(['display_file']),
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),

@@ -15,8 +15,6 @@ use app\models\SuperuserEmail;
  * @AccessControl(level="SUPERUSER")
  */
 class SuperuserEmailController extends AbstractController {
-
-
     /**
      * @Route("/superuser/email")
      * @return MultiResponse

@@ -51,8 +51,6 @@ use app\models\gradeable\AutoGradedVersion;
  * @see \app\exceptions\NotImplementedException
  */
 class DatabaseQueries {
-
-
     /**
      * @var Core
      */
@@ -1044,8 +1042,8 @@ VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
@@ -1096,8 +1094,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -4453,6 +4451,9 @@ AND gc_id IN (
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];
 
+        if (count($params) === 0) {
+            return [];
+        }
         $question_marks = $this->createParamaterList(count($params));
         $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN {$question_marks}", $params);
         $return = [];
@@ -4859,6 +4860,14 @@ AND gc_id IN (
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
         return ($this->course_db->row()['cnt']);
+    }
+
+    /*
+     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
+     * This allows graders to still respond to by component inquiries if in no-component mode.
+     */
+    public function convertInquiryComponentId($gradeable) {
+        $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM regrade_requests ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
     }
 
     public function getRegradeDiscussions(array $grade_inquiries) {
@@ -7853,6 +7862,26 @@ SQL;
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Demote grader to a student, identified by user_id, semester, and course.
+     * Set user group to 4 (student) and the query is successful if the row
+     * count (number of affected rows) is positive.
+     *
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure, true otherwise
+     */
+    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+        $query = <<<SQL
+UPDATE courses_users
+SET user_group = 4
+WHERE user_id=? AND semester=? AND course=?
+SQL;
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }

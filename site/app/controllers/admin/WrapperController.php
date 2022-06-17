@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(permission="admin.wrapper")
  */
 class WrapperController extends AbstractController {
-
     const WRAPPER_FILES = [
         'top_bar.html',
         'left_sidebar.html',

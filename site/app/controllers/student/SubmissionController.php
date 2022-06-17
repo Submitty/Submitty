@@ -22,7 +22,6 @@ use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
-
     private $upload_details = [
         'version' => -1,
         'version_path' => null,
@@ -81,8 +80,8 @@ class SubmissionController extends AbstractController {
             !$this->core->getUser()->accessGrading()
             && (
                 !$gradeable->isSubmissionOpen()
-                || $gradeable->isStudentView()
-                && $gradeable->isStudentViewAfterGrades()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
                 && !$gradeable->isTaGradeReleased()
             )
         ) {

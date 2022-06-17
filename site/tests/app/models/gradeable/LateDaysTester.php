@@ -17,7 +17,6 @@ use app\models\User;
 use tests\BaseUnitTest;
 
 class LateDaysTester extends BaseUnitTest {
-
     private function mockGradedGradeable(string $gradeable_id, string $due_date, int $late_days, string $submission_date, int $late_day_exception) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
