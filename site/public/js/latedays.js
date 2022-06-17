@@ -122,14 +122,14 @@ function updateCacheBuildStatus(url, confirm_message, status) {
 }
 
 function calculateLateDayCache() {
-    const url = buildCourseUrl(['bulk_late_days', 'calculate']);
+    const url = buildCourseUrl(['late_days_forensics', 'calculate']);
     const confirm_message = "Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.";
     const status = "Recaclulating...";
     updateCacheBuildStatus(url, confirm_message, status);
 }
 
 function flushLateDayCache() {
-    const url = buildCourseUrl(['bulk_late_days', 'flush']);
+    const url = buildCourseUrl(['late_days_forensics', 'flush']);
     const confirm_message = "Are you sure you want to flush the cache? This will remove the late day cache for every user.";
     const status = "Flushing...";
     updateCacheBuildStatus(url, confirm_message, status);

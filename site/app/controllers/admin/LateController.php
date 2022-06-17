@@ -19,74 +19,64 @@ use Symfony\Component\Routing\Annotation\Route;
 class LateController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/late_days")
-     * @return MultiResponse
+     * @return WebResponse
      */
     public function viewLateDays() {
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['admin', 'LateDay'],
-                'displayLateDays',
-                $this->core->getQueries()->getUsersWithLateDays(),
-                $this->core->getQueries()->getAllUsers(),
-                $this->core->getConfig()->getDefaultStudentLateDays()
-            )
+        return new WebResponse(
+            ['admin', 'LateDay'],
+            'displayLateDays',
+            $this->core->getQueries()->getUsersWithLateDays(),
+            $this->core->getQueries()->getAllUsers(),
+            $this->core->getConfig()->getDefaultStudentLateDays()
         );
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/extensions")
-     * @return MultiResponse
+     * @return WebResponse
      */
     public function viewExtensions() {
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['admin', 'Extensions'],
-                'displayExtensions',
-                $this->core->getQueries()->getAllElectronicGradeablesIds()
-            )
+        return new WebResponse(
+            ['admin', 'Extensions'],
+            'displayExtensions',
+            $this->core->getQueries()->getAllElectronicGradeablesIds()
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days")
-     * @return MultiResponse
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
+     * @return WebResponse
      */
-    public function viewLateDayCache() {
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['admin', 'LateDay'],
-                'displayLateDayCache',
-                $this->core->getQueries()->getAllUsers(),
-                $this->core->getConfig()->getDefaultStudentLateDays()
-            )
+    public function viewLateDaysForensics() {
+        return new WebResponse(
+            ['admin', 'LateDay'],
+            'displayLateDayForesnics',
+            $this->core->getQueries()->getAllUsers(),
+            $this->core->getConfig()->getDefaultStudentLateDays()
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
-     * @return MultiResponse
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
+     * @return RedirectResponse
      */
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
 
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['late_day_cache']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
-     * @return MultiResponse
+     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
+     * @return RedirectResponse
      */
     public function calculateLateDayCache() {
         $this->core->getQueries()->generateLateDayCacheForUsers();
 
         $this->core->addSuccessMessage("Late day cache calculated!");
 
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']))
-        );
+        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
     }
 
     /**

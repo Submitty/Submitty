@@ -1043,8 +1043,8 @@ VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
@@ -1095,8 +1095,8 @@ WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
+            $params = [$user->getAnonId(), $user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -1529,46 +1529,9 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Get the Late Day Info for each user associated with a user and gradeable
-     * @param User $user
-     * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo
-     */
-    public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
-        $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
-        $cache['graded_gradeable'] = $graded_gradeable;
-        $ldi = null;
-
-        if ($cache !== null) {
-            $ldi = new LateDayInfo($this->core, $user, $cache);
-        }
-        return $ldi;
-    }
-
-    /**
-     * Get the Late Day Info for each user associated with a submitter and gradeable
-     * @param Submitter $submitter
-     * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo|array
-     */
-    public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
-        // Collect Late Day Info for each user associated with the submitter
-        if ($submitter->isTeam()) {
-            $late_day_info = [];
-            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
-                $late_day_info[$member->getId()] = $this->getLateDayInfoForUserGradeable($member, $graded_gradeable);
-            }
-            return $late_day_info;
-        }
-        else {
-            return $this->getLateDayInfoForUserGradeable($submitter->getUser(), $graded_gradeable);
-        }
-    }
-
-    /**
      * Generate and update the late day cache for all of the students in the course
      */
-    public function generateLateDayCacheForUsers() {
+    public function generateLateDayCacheForUsers(): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
 
@@ -5056,6 +5019,14 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+    /*
+     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
+     * This allows graders to still respond to by component inquiries if in no-component mode.
+     */
+    public function convertInquiryComponentId($gradeable) {
+        $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM regrade_requests ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+    }
+
     public function getRegradeDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -8048,6 +8019,26 @@ SQL;
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Demote grader to a student, identified by user_id, semester, and course.
+     * Set user group to 4 (student) and the query is successful if the row
+     * count (number of affected rows) is positive.
+     *
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure, true otherwise
+     */
+    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+        $query = <<<SQL
+UPDATE courses_users
+SET user_group = 4
+WHERE user_id=? AND semester=? AND course=?
+SQL;
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }

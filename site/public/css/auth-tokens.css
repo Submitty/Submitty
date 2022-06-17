@@ -1,0 +1,17 @@
+#new-token-banner {
+    background-color: var(--actionable-blue);
+    color: var(--always-default-white);
+}
+
+#token-copy-button:hover {
+    color: var(--external-link-blue);
+    cursor: pointer;
+}
+
+form {
+    display: inline;
+}
+
+#new-api-token {
+    word-wrap: break-word;
+}

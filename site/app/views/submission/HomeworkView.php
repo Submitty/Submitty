@@ -44,8 +44,8 @@ class HomeworkView extends AbstractView {
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
         $is_team_assignment = $gradeable->isTeamAssignment();
 
-        if ($is_admin) {
-            $this->core->getOutput()->addInternalModuleJs('instructor-submission.js');
+        if ($this->core->getUser()->accessFullGrading()) {
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
         // Only show the late banner if the submission has a due date
@@ -505,7 +505,9 @@ class HomeworkView extends AbstractView {
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
-            'recent_version_url' => $recent_version_url
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 
@@ -549,7 +551,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));

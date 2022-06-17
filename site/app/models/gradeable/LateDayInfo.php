@@ -120,19 +120,6 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter submitted on time
-     * @return bool
-     */
-    public function isOnTimeSubmission() {
-        // if there is no submission or if this isnt a gradeable event, ignore
-        if (!$this->has_submission || $this->isLateDayUpdate()) {
-            return true;
-        }
-
-        return $this->getStatus() == self::STATUS_GOOD || $this->getStatus() == self::STATUS_LATE;
-    }
-
-    /**
      * Gets the time the late day event took place
      * @return \DateTime
      */
@@ -298,7 +285,10 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isRegradeAllowed() {
-        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
+        if ($this->graded_gradeable === null) {
+            return false;
+        }
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed();
     }
 
     /**
