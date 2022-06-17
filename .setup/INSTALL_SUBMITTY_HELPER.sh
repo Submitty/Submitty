@@ -185,13 +185,12 @@ popd > /dev/null
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
-
+# Worker does not need course builders so just use root
 if [ "${WORKER}" == 0 ]; then
     COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
     COURSE_BUILDERS_GROUP=root
 fi
-
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
@@ -201,13 +200,12 @@ DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.
 DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-
+# Worker does not need daemon PHP so just use root
 if [ "${WORKER}" == 0 ]; then
     DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
     DAEMONPHP_GROUP=root
 fi
-
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
@@ -323,40 +321,21 @@ if [ "${WORKER}" == 0 ]; then
 fi
 # ------------------------------------------------------------------------
 
-echo ============== MADE DIRS ==================
-echo ============== COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
-echo ============== SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
-echo ============== DAEMON_USER = ${DAEMON_USER}
-echo  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
-echo ===========================================
-
 # set the permissions of these directories
 chown  "root:${COURSE_BUILDERS_GROUP}"                "${SUBMITTY_DATA_DIR}"
-echo ====== CHOWN DONE ======
 chmod  751                                            "${SUBMITTY_DATA_DIR}"
-echo ====== CHMOD DONE ======
 
 #Set up courses and version control ownership if not in worker mode
 if [ "${WORKER}" == 0 ]; then
-    echo ============= CHOWN courses =========
     chown  "root:${COURSE_BUILDERS_GROUP}"            "${SUBMITTY_DATA_DIR}/courses"
     chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
-    echo ============= CHOWN user_data ===========
     chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
-    echo ============= CHOWN vcs =============
     chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
-    echo ============= CHOWN vcs/git ============
     chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
-
-echo ======= MORE STUFF FOR BOTH =====
-echo === COURSE_BUILDERS_GROUP = ${COURSE_BUILDERS_GROUP}
-echo === SUBMITTY_DATA_DIR = ${SUBMITTY_DATA_DIR}
-echo === DAEMON_USER = ${DAEMON_USER}
-echo === DAEMONPHP_GROUP = ${DAEMONPHP_GROUP}
 
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
@@ -364,8 +343,6 @@ chown "root:${COURSE_BUILDERS_GROUP}"                   "${SUBMITTY_DATA_DIR}/lo
 # Set owner/group for logs directories that exist on both primary & work machines
 chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding"
 chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
-
-echo ====================================
 
 # Set owner/group for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
