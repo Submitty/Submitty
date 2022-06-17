@@ -14,6 +14,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -27,6 +41,7 @@ CREATE TYPE public.notifications_component AS ENUM (
 
 SET default_tablespace = '';
 
+SET default_with_oids = false;
 
 --
 -- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
@@ -112,6 +127,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
             ELSE
                 returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
                 late_days_used = late_days_used - returnedrow.late_days_change;
+				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                 return_cache = var_row;
                 return_cache.late_days_change = returnedrow.late_days_change;
                 return_cache.late_days_remaining = returnedrow.late_days_remaining;
@@ -130,24 +146,24 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
 CREATE FUNCTION public.calculate_submission_days_late(submission_time timestamp with time zone, submission_due_date timestamp with time zone) RETURNS integer
     LANGUAGE plpgsql
     AS $$
-#variable_conflict use_variable
-DECLARE
-	return_row late_day_cache%rowtype;
-	late_days_change integer;
-	assignment_budget integer;
-BEGIN
-	RETURN 
-	CASE
-		WHEN submission_time IS NULL THEN 0
-		WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
-		WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
-			OR DATE_PART('minute', submission_time - submission_due_date) > 0
-			OR DATE_PART('second', submission_time - submission_due_date) > 0
-			THEN DATE_PART('day', submission_time - submission_due_date) + 1
-		ELSE DATE_PART('day', submission_time - submission_due_date)
-	END;
-END;
-$$;
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        RETURN 
+        CASE
+            WHEN submission_time IS NULL THEN 0
+            WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
+            WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
+                OR DATE_PART('minute', submission_time - submission_due_date) > 0
+                OR DATE_PART('second', submission_time - submission_due_date) > 0
+                THEN DATE_PART('day', submission_time - submission_due_date) + 1
+            ELSE DATE_PART('day', submission_time - submission_due_date)
+        END;
+    END;
+    $$;
 
 
 --
@@ -245,24 +261,24 @@ CREATE FUNCTION public.electronic_gradeable_change() RETURNS trigger
             due_date timestamp;
         BEGIN
             -- Check for any important changes
-            IF NEW.eg_submission_due_date = OLD.eg_submission_due_date
+            IF TG_OP = 'UPDATE'
+            AND NEW.eg_submission_due_date = OLD.eg_submission_due_date
             AND NEW.eg_has_due_date = OLD.eg_has_due_date
             AND NEW.eg_allow_late_submission = OLD.eg_allow_late_submission
             AND NEW.eg_late_days = OLD.eg_late_days THEN
-            RETURN NEW;
+                RETURN NEW;
             END IF;
-            
-            -- Get effective g_id
-            g_id = NEW.g_id;
             
             -- Grab submission due date
-            due_date = NEW.eg_submission_due_date;
-            
-            -- If submission due date was updated, use the earliest date
-            IF OLD.eg_submission_due_date IS NOT NULL
-            AND NEW.eg_submission_due_date != OLD.eg_submission_due_date THEN
-                due_date = LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date);
-            END IF;
+            due_date = 
+            CASE
+                -- INSERT
+                WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
+                -- DELETE
+                WHEN TG_OP = 'DELETE' THEN OLD.eg_submission_due_date
+                -- UPDATE
+                ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
+            END;
             
             DELETE FROM late_day_cache WHERE late_day_date >= due_date;
             RETURN NEW;
@@ -288,35 +304,35 @@ $_$;
 CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late integer, late_days_allowed integer, late_day_exceptions integer, late_days_remaining integer) RETURNS SETOF public.late_day_cache
     LANGUAGE plpgsql
     AS $$
-#variable_conflict use_variable
-DECLARE
-	return_row late_day_cache%rowtype;
-	late_days_change integer;
-	assignment_budget integer;
-BEGIN
-	late_days_change = 0;
-	assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
-	IF submission_days_late <= assignment_budget THEN
-		-- clamp the days charged to be the days late minus exceptions above zero.
-		late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
-	END IF;
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        late_days_change = 0;
+        assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+        IF submission_days_late <= assignment_budget THEN
+            -- clamp the days charged to be the days late minus exceptions above zero.
+            late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+        END IF;
 
-	return_row.late_day_status = 
-	CASE
-		-- BAD STATUS
-		WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
-		-- LATE STATUS
-		WHEN submission_days_late > late_day_exceptions THEN 2
-		-- GOOD STATUS
-		ELSE 1
-	END;
+        return_row.late_day_status = 
+        CASE
+            -- BAD STATUS
+            WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+            -- LATE STATUS
+            WHEN submission_days_late > late_day_exceptions THEN 2
+            -- GOOD STATUS
+            ELSE 1
+        END;
 
-	return_row.late_days_change = late_days_change;
-	return_row.late_days_remaining = late_days_remaining + late_days_change;
-	RETURN NEXT return_row;
-	RETURN;
-END;
-$$;
+        return_row.late_days_change = late_days_change;
+        return_row.late_days_remaining = late_days_remaining + late_days_change;
+        RETURN NEXT return_row;
+        RETURN;
+    END;
+    $$;
 
 
 --
@@ -456,22 +472,29 @@ CREATE FUNCTION public.gradeable_delete() RETURNS trigger
 CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+            team_id varchar;
+            version RECORD;
         BEGIN
-            --- Update or Insert
-            IF NEW.g_id IS NOT NULL THEN
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = NEW.g_id)
-                                            AND ((user_id = NEW.user_id AND NEW.team_id IS NULL)
-                                                OR (NEW.user_id IS NULL AND team_id = NEW.team_id));
-            --- Delete
-            ELSE
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = OLD.g_id)
-                                            AND ((user_id = OLD.user_id AND OLD.team_id IS NULL)
-                                                OR (OLD.user_id IS NULL AND team_id = OLD.team_id));
-            END IF ;
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+            team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
+            
+            --- Remove all lade day cache for all gradeables past this submission die date
+            --- for every user associated with the gradeable
+            DELETE FROM late_day_cache ldc
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+                                    FROM electronic_gradeable eg
+                                    WHERE eg.g_id = g_id)
+                AND (
+                    ldc.user_id IN (SELECT t.user_id FROM teams t WHERE t.team_id = team_id)
+                    OR
+                    ldc.user_id = user_id
+                );
+
             RETURN NEW;
         END;
     $$;
@@ -489,15 +512,9 @@ CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
             g_id varchar;
             user_id varchar;
         BEGIN
-            -- Grab values for delete
-            g_id = OLD.g_id; 
-            user_id = OLD.user_id;
-
-            -- Change values for update/insert
-            IF NEW.g_id IS NOT NULL THEN
-                g_id = NEW.g_id;
-                user_id = NEW.user_id;
-            END IF;
+            -- Grab values for delete/update/insert
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
 
             DELETE FROM late_day_cache ldc 
             WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
@@ -516,14 +533,18 @@ CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
 CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+    #variable_conflict use_variable
+    DECLARE
+        g_id varchar;
+        user_id varchar;
+        team_id varchar;
+        version RECORD;
     BEGIN
-        --- Update or Insert
-        IF NEW.since_timestamp IS NOT NULL THEN
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= NEW.since_timestamp AND ldc.user_id = NEW.user_id;
-        --- Delete
-        ELSE
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= OLD.since_timestamp AND ldc.user_id = OLD.user_id;
-        END IF ;
+        version = CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+        -- since_timestamp = CASE WHEN TG_OP = 'DELETE' THEN OLD.since_timestamp ELSE NEW.since_timestamp END;
+        -- user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+        DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= version.since_timestamp AND ldc.user_id = version.user_id;
         RETURN NEW;
     END;
     $$;
@@ -1649,6 +1670,8 @@ CREATE TABLE public.users (
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY ((ARRAY['graded'::character varying, 'audit'::character varying, 'withdrawn'::character varying, 'staff'::character varying])::text[]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -2262,6 +2285,13 @@ CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree
 --
 
 CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+
+
+--
+-- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
 
 
 --

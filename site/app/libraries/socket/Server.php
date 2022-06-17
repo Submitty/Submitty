@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace app\libraries\socket;
 
+use app\exceptions\DatabaseException;
+use app\libraries\FileUtils;
+use app\libraries\Utils;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use app\libraries\Core;
 use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
-
     // Holds the mapping between pages that have open socket clients and those clients
     /** @var array */
     private $clients = [];
@@ -38,6 +40,30 @@ class Server implements MessageComponentInterface {
         if ($this->core->getConfig()->isDebug()) {
             echo $message . "\n";
         }
+    }
+
+    private function logError(\Throwable $error, ConnectionInterface $conn) {
+        $page = $this->pages[$conn->resourceId] ?? "null";
+
+        $date = getdate(time());
+        $timestamp = Utils::pad($date['hours']) . ":" . Utils::pad($date['minutes']) . ":" . Utils::pad($date['seconds']);
+        $timestamp .= " ";
+        $timestamp .= Utils::pad($date['mon']) . "/" . Utils::pad($date['mday']) . "/" . $date['year'];
+
+        $message  = $timestamp . "\n";
+        $message .= "Message:\n";
+        $message .= $error->getMessage() . "\n\n";
+        $message .= "Stack Trace:\n";
+        $message .= $error->getTraceAsString() . "\n\n";
+        $message .= "Page: " . $page . "\n";
+        $message .= str_repeat("=-", 30) . "=" . "\n";
+
+        $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']);
+        file_put_contents(
+            FileUtils::joinPaths($this->core->getConfig()->getLogPath(), "socket_errors", "{$filename}.log"),
+            $message,
+            FILE_APPEND | LOCK_EX
+        );
     }
 
     /**
@@ -125,8 +151,26 @@ class Server implements MessageComponentInterface {
      * Check the authentication status of the connection when it gets opened
      */
     public function onOpen(ConnectionInterface $conn): void {
-        if (!$this->checkAuth($conn)) {
-            $conn->close();
+        try {
+            if (!$this->checkAuth($conn)) {
+                $conn->close();
+            }
+        }
+        catch (DatabaseException $de) {
+            try {
+                $this->core->loadMasterDatabase();
+                $this->logError($de, $conn);
+                $this->onOpen($conn);
+            }
+            catch (\Exception $e) {
+                $this->logError($de, $conn);
+                $this->logError($e, $conn);
+                $this->closeWithError($conn);
+            }
+        }
+        catch (\Throwable $t) {
+            $this->logError($t, $conn);
+            $this->closeWithError($conn);
         }
     }
 
@@ -136,37 +180,42 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString): void {
-        if ($msgString === 'ping') {
-            $from->send('pong');
-            return;
-        }
-
-        $msg = json_decode($msgString, true);
-
-        if ($msg["type"] === "new_connection") {
-            if (isset($msg['page'])) {
-                if (!array_key_exists($msg['page'], $this->clients)) {
-                    $this->clients[$msg['page']] = new \SplObjectStorage();
-                }
-                $this->clients[$msg['page']]->attach($from);
-                $this->setSocketClientPage($msg['page'], $from);
-
-                $course_page = explode('-', $this->getSocketClientPage($from));
-                $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
+        try {
+            if ($msgString === 'ping') {
+                $from->send('pong');
+                return;
             }
-            else {
+
+            $msg = json_decode($msgString, true);
+
+            if (isset($msg["type"]) && $msg["type"] === "new_connection") {
+                if (isset($msg['page']) && is_string($msg['page'])) {
+                    if (!array_key_exists($msg['page'], $this->clients)) {
+                        $this->clients[$msg['page']] = new \SplObjectStorage();
+                    }
+                    $this->clients[$msg['page']]->attach($from);
+                    $this->setSocketClientPage($msg['page'], $from);
+
+                    $course_page = explode('-', $this->getSocketClientPage($from));
+                    $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
+                }
+                else {
+                    $from->close();
+                }
+            }
+            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
+                // user_id is only sent with socket clients open from a php user_agent
+                unset($msg['user_id']);
+                $new_msg_string = json_encode($msg);
+                $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
             }
+            else {
+                $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
+            }
         }
-        elseif (isset($msg['user_id'])) {
-            // user_id is only sent with socket clients open from a php user_agent
-            unset($msg['user_id']);
-            $new_msg_string = json_encode($msg);
-            $this->broadcast($from, $new_msg_string, $msg['page']);
-            $from->close();
-        }
-        else {
-            $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
+        catch (\Throwable $t) {
+            $this->logError($t, $from);
         }
     }
 
@@ -190,6 +239,12 @@ class Server implements MessageComponentInterface {
                 unset($this->users[$user_id]);
             }
         }
+    }
+
+    public function closeWithError(ConnectionInterface $conn): void {
+        $msg = ['error' => 'Server error'];
+        $conn->send(json_encode($msg));
+        $conn->close();
     }
 
     /**

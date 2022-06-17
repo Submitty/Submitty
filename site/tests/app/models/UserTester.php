@@ -46,6 +46,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['rotating_section'], $user->getRotatingSection());
         $this->assertEquals($details['manual_registration'], $user->isManualRegistration());
         $this->assertEquals([1,2], $user->getGradingRegistrationSections());
+        $this->assertEquals('staff', $user->getRegistrationType());
         $this->assertTrue($user->accessAdmin());
         $this->assertTrue($user->accessFullGrading());
         $this->assertTrue($user->accessGrading());
@@ -68,7 +69,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1,2]
+            'grading_registration_sections' => [1,2],
+            'registration_type' => 'audit',
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -80,6 +82,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['user_lastname'], $user->getLegalLastName());
         $this->assertEquals($details['user_preferred_lastname'], $user->getPreferredLastName());
         $this->assertEquals($details['user_preferred_lastname'], $user->getDisplayedLastName());
+        $this->assertEquals($details['registration_type'], $user->getRegistrationType());
     }
 
     public function testPassword() {
@@ -151,6 +154,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'preferred_last_name' => "",
             'numeric_id' => '123456789',
             'registration_section' => 1,
+            'registration_type' => 'staff',
             'rotating_section' => null,
             'modified' => true,
             'anon_id' => "TestAnonymous",

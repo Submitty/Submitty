@@ -29,4 +29,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     with open(args.file, 'w') as out_file:
-        json.dump(output, out_file)
+        json.dump(output, out_file, indent=4, sort_keys=True)

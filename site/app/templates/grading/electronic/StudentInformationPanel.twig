@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/electronic/StudentInformationPanel.js') }}
 <div id="student_info" class="rubric_panel">
     <div>
         <span class="grading_label">Student Information</span>
@@ -9,7 +10,7 @@
 
                     {# If viewing the active version, show cancel button, otherwise show button to switch active #}
                     {% if display_version > 0 %}
-                        <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                        <form id="student-info-ta-version-form" style="display: inline;" method="post"
                               action="{{ update_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
                             {% if display_version == active_version %}

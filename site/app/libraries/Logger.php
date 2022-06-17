@@ -13,7 +13,6 @@ namespace app\libraries;
  * @package app\libraries
  */
 class Logger {
-
     /**
      * Log levels for the logger
      */

@@ -17,7 +17,6 @@ use app\models\User;
  * @method string getId()
  */
 class LateDayInfo extends AbstractModel {
-
     const STATUS_NO_ACTIVE_VERSION = 0;
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
@@ -294,7 +293,10 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isRegradeAllowed() {
-        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
+        if ($this->graded_gradeable === null) {
+            return false;
+        }
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed();
     }
 
     /**

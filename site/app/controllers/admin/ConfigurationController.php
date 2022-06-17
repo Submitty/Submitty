@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .

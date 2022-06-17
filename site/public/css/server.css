@@ -1,5 +1,5 @@
-@import url("reset.css");
-@import url("google/inconsolata.css");
+@import "reset.css";
+@import "google/inconsolata.css";
 
 /* stylelint-disable no-descending-specificity */
 
@@ -1165,6 +1165,15 @@ div.full-height {
     margin-bottom: 10px;
 }
 
+.form-title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popup-close-icon:hover {
+    color: var(--external-link-blue);
+}
+
 .popup-form .form-body {
     flex-grow: 1;
     overflow-y: auto;
@@ -1955,7 +1964,7 @@ header > * {
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-    background-color: var(--hover-dark-border-actionable-blue);
+    background-color: var(--standard-light-gray);
     width: 5px;
     height: 8px;
 }
@@ -1964,6 +1973,10 @@ header > * {
     background-color: var(--actionable-blue);
     border-radius: 5px;
     height: 10%;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+    background: var(--default-white);
 }
 
 .badge-1 {
