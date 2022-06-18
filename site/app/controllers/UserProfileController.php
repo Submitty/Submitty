@@ -145,7 +145,7 @@ class UserProfileController extends AbstractController {
         }
         else {
             preg_match("/^.*\.(jpg|jpeg|png|gif)$/i", $_FILES['user_image']['name'], $extension);
-            if (!(FileUtils::isValidImage($_FILES['user_image']['tmp_name']) && FileUtils::validateUploadedFiles($_FILES['user_image'])[0]['success'] && count($extension)>=2)) {
+            if (!(FileUtils::isValidImage($_FILES['user_image']['tmp_name']) && FileUtils::validateUploadedFiles($_FILES['user_image'])[0]['success'] && count($extension) >= 2)) {
                 return JsonResponse::getErrorResponse("Something's wrong with the uploaded file.");
             }
 
