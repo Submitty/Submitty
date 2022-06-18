@@ -204,7 +204,7 @@ CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json
 if [ "${WORKER}" == 0 ]; then
     DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 else
-    DAEMONPHP_GROUP=${DAEMON_GROUP}
+    DAEMONPHP_GROUP="${DAEMON_GROUP}"
 fi
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
