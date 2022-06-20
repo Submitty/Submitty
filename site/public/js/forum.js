@@ -1679,6 +1679,7 @@ function loadThreadHandler(){
         event.preventDefault();
         var obj = this;
         var thread_id = $(obj).data("thread_id");
+        var thread_title = $(obj).data("thread_title");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
@@ -1712,7 +1713,8 @@ function loadThreadHandler(){
 
                 $('#posts_list').empty().html(JSON.parse(json.data.html));
                 window.history.pushState({"pageTitle":document.title},"", url);
-
+                $(document).attr("title", thread_title);
+                console.log(thread_title);
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
