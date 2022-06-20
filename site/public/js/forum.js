@@ -1715,6 +1715,11 @@ function loadThreadHandler(){
                 window.history.pushState({"pageTitle":document.title},"", url);
                 $(document).attr("title", thread_title);
                 console.log(thread_title);
+                if(thread_title.length > 25){
+                  $("h1.breadcrumb-heading").text(thread_title.slice(0,25)+"...");  
+                }else{
+                  $("h1.breadcrumb-heading").text(thread_title);
+                }
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
