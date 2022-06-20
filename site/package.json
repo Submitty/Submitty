@@ -43,7 +43,7 @@
     "babel-jest": "^28.1.1",
     "cypress": "^9.7.0",
     "cypress-file-upload": "^5.0.8",
-    "esbuild": "^0.14.45",
+    "esbuild": "^0.14.46",
     "eslint": "^8.17.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-jest": "^26.5.3",
