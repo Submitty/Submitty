@@ -149,7 +149,7 @@ class UserProfileController extends AbstractController {
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
-            if ($result === 2) {
+            if ($result === \app\models\User::PROFILE_IMG_QUOTA_EXHAUSTED) {
                 return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
             }
 

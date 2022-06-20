@@ -190,7 +190,7 @@ class DisplayImage extends AbstractModel {
         // Enforce limit on number of images
         $uploaded_dps = FileUtils::getAllFiles($folder_path, [], true);
         if (count($uploaded_dps) >= 50) {
-            throw new FileWriteException('Quota exhausted', 2);
+            throw new FileWriteException('Quota exhausted', User::PROFILE_IMG_QUOTA_EXHAUSTED);
         }
 
         // Decrease image size while maintaining form factor

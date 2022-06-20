@@ -66,6 +66,9 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
+    /** Profile image quota of 50 images exhausted */
+    const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -301,7 +304,7 @@ class User extends AbstractModel {
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
-     * @return int 1 if the update was successful, 0 otherwise and 2 if image upload quota has been exhausted
+     * @return int 1 if the update was successful, PROFILE_IMG_QUOTA_EXHAUSTED if image upload quota of 50 has been exhausted, 0 otherwise
      * @throws \ImagickException
      */
     public function setDisplayImage(string $image_extension, string $tmp_file_path): int {
@@ -313,8 +316,8 @@ class User extends AbstractModel {
         }
         catch (\Exception $exception) {
             $image_saved = false;
-            if ($exception->getCode() === 2) {
-                return 2;
+            if ($exception->getCode() === self::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return self::PROFILE_IMG_QUOTA_EXHAUSTED;
             }
         }
 
