@@ -23,7 +23,7 @@
     "aptoma/twig-markdown": "3.4.1",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.13.2",
-    "doctrine/orm": "2.12.2",
+    "doctrine/orm": "2.12.3",
     "egulias/email-validator": "3.2",
     "lcobucci/jwt": "3.4.6",
     "league/commonmark": "1.6.7",
@@ -42,9 +42,9 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.7.13",
+    "phpstan/phpstan": "1.7.15",
     "phpstan/phpstan-deprecation-rules": "1.0",
-    "phpunit/phpunit": "8.5.26",
+    "phpunit/phpunit": "8.5.27",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
