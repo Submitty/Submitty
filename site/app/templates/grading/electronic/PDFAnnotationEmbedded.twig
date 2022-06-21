@@ -63,4 +63,16 @@
             $('#pdf-buttons').append(document.getElementById('permission-annotations-btn-template').content.cloneNode(true));
         }
     });
+    /* The function below adds a dynamic offset to annotataion pdf in order to prevent overlapping with toolbar ,
+    same could not be achived through CSS as it cause the tools to hide when moved right in panel.
+    This has been done taking care of resizing of panel ,platform(device),overlapping and scrolling of panels */
+
+    const offSetter = new ResizeObserver(entries => {
+        entries.forEach(entry => {
+            let height = $(".sticky-file-info").outerHeight();
+            $("#viewer").css("paddingTop", height);
+        });
+    });
+    offSetter.observe(document.querySelector(".sticky-file-info"));
+
 </script>
