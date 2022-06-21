@@ -45,6 +45,10 @@ class Output {
     private $js;
     /** @var Set */
     private $module_js;
+    /** @var String */
+    private $manifest_json = "";
+    /** @var String */
+    private $service_worker = "";
 
     private $use_header = true;
     private $use_footer = true;
@@ -542,6 +546,12 @@ HTML;
         $this->module_js->add($url);
     }
 
+    public function addServiceWorker(): void {
+        /** add the manifest.js and serverice worker files to the page */
+        $this->service_worker = ($this->timestampResource('sw.js', ''));
+        $this->manifest_json = $this->timestampResource('manifest.json', '');
+    }
+
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
         return $this->core->getConfig()->getBaseUrl() . $folder . "/" . $file . (($timestamp !== 0) ? "?v={$timestamp}" : "");
@@ -610,6 +620,14 @@ HTML;
 
     public function getModuleJs(): Set {
         return $this->module_js;
+    }
+
+    public function getManifastPath() : String {
+        return $this->manifest_json;
+    }
+
+    public function getServiceWorkerPath() : String {
+        return $this->service_worker;
     }
 
     /**

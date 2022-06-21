@@ -4,12 +4,22 @@
 <head>
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
-    <link rel="manifest" href="../site/public/manifest.json">
+    <link rel="manifest" href="{{ manifast_path }}">
+    <script type="module" src="{{ service_worker_path }}"></script>
     <script>
         window.baseUrl = "{{ base_url }}";
         window.courseUrl = "{{ course_url }}";
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("{{ service_worker_path }}")
+                    .then(res => console.log("service worker registered"))
+                    .catch(err => console.log("service worker not registered", err))
+            })
+        }
     </script>
 
     {% for css_ref in css %}
