@@ -179,6 +179,7 @@ update_syscert() {
 reload_servers() {
     reload_apache
     reload_nginx
+    reload_wsserver
 }
 reload_apache() {
     info "Reloading apache2"
@@ -192,6 +193,13 @@ reload_nginx() {
     systemctl restart nginx || {
         systemctl --no-pager status nginx
         panic "Failed to reload nginx"
+    }
+}
+reload_wsserver() {
+    info "Reloading PHP WebSocket server"
+    systemctl restart submitty_websocket_server || {
+        systemctl --no-pager status submitty_websocket_server
+        warn "Failed to reload PHP WebSocket server"
     }
 }
 
