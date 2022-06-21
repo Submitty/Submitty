@@ -1017,7 +1017,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })
+    })  
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });

@@ -194,6 +194,8 @@ fi
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
 DATABASE_PASSWORD=submitty_dbuser
+DB_COURSE_USER=submitty_course_dbuser
+DB_COURSE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -201,19 +203,8 @@ DATABASE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-#################################################################
-# PYTHON PACKAGE SETUP
-#########################
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 
-#libraries for QR code processing:
-#install DLL for zbar
-apt-get install libzbar0 --yes
-
-pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
-
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
-    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
-fi
 
 #################################################################
 # Node Package Setup
@@ -674,6 +665,8 @@ else
         echo -e "/var/run/postgresql
 ${DB_USER}
 ${DATABASE_PASSWORD}
+${DB_COURSE_USER}
+${DB_COURSE_PASSWORD}
 America/New_York
 ${SUBMISSION_URL}
 
@@ -681,7 +674,6 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
-submitty-admin
 submitty-admin
 y
 
@@ -720,6 +712,8 @@ if [ ${WORKER} == 0 ]; then
     # create the submitty_dbuser role in postgres (if it does not yet exist)
     # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
     su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN CREATE ROLE ${DB_USER} SUPERUSER LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
+
+    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_COURSE_USER}') THEN CREATE ROLE ${DB_COURSE_USER} LOGIN PASSWORD '${dbcourse_user_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
