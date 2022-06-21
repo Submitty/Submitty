@@ -1677,9 +1677,9 @@ function loadThreadHandler(){
           return;
         }
         event.preventDefault();
-        var obj = this;
-        var thread_id = $(obj).data("thread_id");
-        var thread_title = $(obj).data("thread_title");
+        let obj = this;
+        let thread_id = $(obj).data("thread_id");
+        let thread_title = $(obj).data("thread_title");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
