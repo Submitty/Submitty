@@ -1,5 +1,5 @@
-@import url("reset.css");
-@import url("google/inconsolata.css");
+@import "reset.css";
+@import "google/inconsolata.css";
 
 /* stylelint-disable no-descending-specificity */
 

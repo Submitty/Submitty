@@ -126,6 +126,41 @@ if [ "${WORKER}" == 0 ]; then
     python3 "${SUBMITTY_REPOSITORY}/migration/run_migrator.py" -e system -e master -e course migrate
 fi
 
+
+################################################################################################################
+################################################################################################################
+# VALIDATE DATABASE SUPERUSERS
+
+if [ "${WORKER}" == 0 ]; then
+    DATABASE_FILE="$CONF_DIR/database.json"
+    DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
+    DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
+    GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
+    GLOBAL_DBUSER_PASS=$(jq -r '.database_password' $DATABASE_FILE)
+    COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
+
+    DB_CONN="-h ${DATABASE_HOST} -U ${GLOBAL_DBUSER}"
+    if [ ! -d "${DATABASE_HOST}" ]; then
+        DB_CONN="${DB_CONN} -p ${DATABASE_PORT}"
+    fi
+
+
+    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'"`
+
+    if [ "$CHECK" == "f" ]; then
+        echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
+        exit
+    fi
+
+    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'"`
+
+    if [ "$CHECK" == "t" ]; then
+        echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
+        exit
+    fi
+fi
+
+
 ################################################################################################################
 ################################################################################################################
 # INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
@@ -150,7 +185,12 @@ popd > /dev/null
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
-COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+# Worker does not need course builders so just use root
+if [ "${WORKER}" == 0 ]; then
+    COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+else
+    COURSE_BUILDERS_GROUP=root
+fi
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
@@ -160,7 +200,12 @@ DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.
 DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+# Worker does not have daemon PHP so just use daemon group
+if [ "${WORKER}" == 0 ]; then
+    DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+else
+    DAEMONPHP_GROUP="${DAEMON_GROUP}"
+fi
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
@@ -670,6 +715,32 @@ popd > /dev/null
 chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
+################################################################################################################
+################################################################################################################
+# BUILD AND INSTALL ANALYSIS TOOLS TS
+
+echo -e "Build and install analysis tools ts"
+
+mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+
+ANALYSIS_TOOLS_TS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/"
+
+# Copy cloned files to AnalysisToolsTS directory
+rsync -rtz "${ANALYSIS_TOOLS_TS_REPO}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+
+pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+
+# # change permissions
+chown -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+chmod -R 755 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
+
+# # install npm packages
+su "${DAEMON_USER}" -c "npm install"
+
+# # build project
+su "${DAEMON_USER}" -c "npm run build"
+
+popd > /dev/null
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
