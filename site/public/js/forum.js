@@ -1677,8 +1677,9 @@ function loadThreadHandler(){
           return;
         }
         event.preventDefault();
-        var obj = this;
-        var thread_id = $(obj).data("thread_id");
+        let obj = this;
+        let thread_id = $(obj).data("thread_id");
+        let thread_title = $(obj).data("thread_title");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
@@ -1712,7 +1713,13 @@ function loadThreadHandler(){
 
                 $('#posts_list').empty().html(JSON.parse(json.data.html));
                 window.history.pushState({"pageTitle":document.title},"", url);
-
+                //Updates the title and breadcrumb
+                $(document).attr("title", thread_title);
+                if(thread_title.length > 25){
+                  $("h1.breadcrumb-heading").text(thread_title.slice(0,25)+"...");  
+                }else{
+                  $("h1.breadcrumb-heading").text(thread_title);
+                }
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
