@@ -11,7 +11,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    Submitty
    AnalysisTools
-   CrashCourseCPPSyntax
+   AnalysisToolsTS
    Lichen
    RainbowGrades
    SysadminTools
@@ -24,8 +24,9 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    to this path:
    vendor/nlohmann/json/
 
-   Optionally (currently a private repo), from https://github.com/Submitty
+   And optionally (currently private repos), from https://github.com/Submitty
    LichenTestData
+   CrashCourseCPPSyntax
 
    *** FIXME: Currently we checkout all of the repositories manually,
        since the VM cannot write to the shared directory?  Unlike how
