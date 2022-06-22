@@ -23,14 +23,14 @@ if [ -d "${CURRENT_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
+# update packages
+apt-get update && apt-get upgrade -y
+
 #libraries for QR code processing:
 #install DLL for zbar
-apt-get install libzbar0 --yes
+apt-get install -y libzbar0
 
 ##source ${CURRENT_DIR}/distro_setup/setup_distro.sh
-
-# update packages
-apt-get update && apt-get upgrade
 
 #################################################################
 # PYTHON PACKAGE SETUP
