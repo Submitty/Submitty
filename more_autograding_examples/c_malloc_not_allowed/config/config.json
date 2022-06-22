@@ -1,0 +1,107 @@
+{
+	"required_capabilities": "cpp",
+
+    "grading_parameters": {
+        "TOTAL_POINTS": 100,
+        "AUTO_POINTS": 100,
+        "TA_POINTS": 0,
+        "EXTRA_CREDIT_POINTS": 0,
+        // Autograder will clamp the lowest score to the value below, including the excessive submission penalty
+        "PENALTY_POINTS": 0
+    },
+
+    "autograding": {
+        "compilation_to_runner": ["a.i", "a.out"]
+    },
+
+    "testcases": [
+        {
+            "type": "Compilation",
+            "title": "Compilation",
+            "command": ["clang -Wall -o a.out -- *.c",
+                        // GCC will trim the comments, but will not expand the defines and includes
+                        //   as it expands system headers which may contain prohibited functions.
+                        "gcc -E -P -fpreprocessed -dD -w -o a.i *.c *.h",
+                        // SED trims all whitespaces and change letters to lowercase
+                        "sed -i -z -e 's/[A-Z]/\\\\L&/' -e 's/[[:space:]]//g' a.i"],
+            "executable_name": ["a.out", "a.i"],
+            "points": 25
+        },
+
+        {
+            "title": "No malloc()",
+            "command": "awk '{printf(gsub(/malloc/,\"\"))}' RS='^$' a.i",
+            // The command above outputs the number of `malloc`
+            // Consider using submitty_count tokenizer in the future to check multiple defines...
+            // Prohibiting defines may lead to double include.
+            "points": -100,
+            "validation": [
+                {
+                    "method": "intComparison",
+                    "actual_file": "STDOUT.txt",
+                    "term": 0,
+                    "comparison": "ne",
+                    "show_message": "on_success",   // success -> submission has malloc -> -100
+                    "show_actual": "never",
+                    "description": "Check `malloc` keyword"
+                }
+            ]
+        },
+
+        {
+            "title": "Only calloc() and realloc()",
+            "command": "awk '{printf(gsub(/((m|(aligned_))alloc)|(alloca)/,\"\"))}' RS='^$' a.i",
+            // The command above will check for `malloc, aligned_alloc, alloca`.
+            // For complete alloc checking, use `((m|c|(aligned_)|(re))alloc)|(alloca)` in the gsub() section
+            "points": -100,
+            "validation": [
+                {
+                    "method": "intComparison",
+                    "actual_file": "STDOUT.txt",
+                    "term": 0,
+                    "comparison": "ne",
+                    "show_message": "on_success",
+                    "show_actual": "never",
+                    "description": "Check keywords other than `calloc` and `realloc`"
+                }
+            ]
+        },
+
+        {
+            "title": "No square brackets",
+            "command": "awk '{printf(gsub(/\\\\[/,\"\"))}' RS='^$' a.i",
+            "points": -100,
+            "validation": [
+                {
+                    "method": "intComparison",
+                    "actual_file": "STDOUT.txt",
+                    "term": 0,
+                    "comparison": "ne",
+                    "show_message": "on_success",
+                    "show_actual": "never",
+                    "description": "Check the square brackets"
+                }
+            ]
+        },
+
+        {
+            "title": "Run program",
+            "command": "./a.out",
+            "points": 75,
+            "validation": [
+                {
+                    "method": "errorIfNotEmpty",
+                    "actual_file": "execute_logfile.txt"
+                }
+            ]
+        },
+
+        {
+            "type": "FileCheck",
+            "title": "Submission Limit",
+            "points": -5,
+            "max_submissions": 3,
+            "penalty": -0.5
+        }
+    ]
+}
