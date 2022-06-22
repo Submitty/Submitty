@@ -29,6 +29,9 @@ apt-get install libzbar0 --yes
 
 ##source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
+# update packages
+apt-get update && apt-get upgrade
+
 #################################################################
 # PYTHON PACKAGE SETUP
 #########################
