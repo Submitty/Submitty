@@ -31,7 +31,7 @@ B_FORCE=0
 # Submitty system-defined env vars and checks
 SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR:?}
 
-# Check configured domain
+# check configured domain
 DOMAIN=$(jq -r ".submission_url" "${SUBMITTY_INSTALL_DIR}/config/submitty.json"          \
             | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/' || :
         )
@@ -54,6 +54,25 @@ info() {
 }
 
 
+# acquire a lock and open fd
+LOCKFILE="/run/lock/$(basename "$0")"
+exec {LOCKFD}>"${LOCKFILE}"
+
+lock() {
+    info "Acquiring a lock on ${LOCKFD}>${LOCKFILE}"
+    flock -x -n "${LOCKFD}" || {
+        panic "Another process is using the lockfile, exiting"
+    }
+    trap unlock EXIT
+}
+
+unlock() {
+    info "Closing ${LOCKFD} and unlocking"
+    exec {LOCKFD}>&-
+    rm -f "${LOCKFILE}"
+}
+
+
 # generate cert and key to $P_CERT
 generate_cert() {
     [[ ! -d "${P_CERT}" ]] && {
@@ -62,16 +81,16 @@ generate_cert() {
     }
     [[ -e "${P_CERT}/${S_DOMAIN}.crt" && -e "${P_CERT}/${S_DOMAIN}.key"
         && "${B_FORCE}" -eq "0" ]] && {
-        warn "Found existed certificates, use option -f to overwrite"
-        info "Skipping certificate generation"
-        return
+        info "Found existed certificates, use option -f to overwrite"
+        openssl x509 -checkend 2592000 -noout -in "${P_CERT}/${S_DOMAIN}.crt" && return
+        warn "The certificate will expire soon, regenerating..."
     }
 
     info "Generating certificates and keys"
     openssl req -x509                                                                    \
         -out "${P_CERT}/${S_DOMAIN}.crt" -keyout "${P_CERT}/${S_DOMAIN}.key"             \
         -newkey rsa:2048 -nodes -sha256 -subj "/CN=${S_DOMAIN}" -days 730                \
-        -extensions EXT -config <( \
+        -extensions EXT -config <(                                                       \
             printf "[dn]\nCN=%s\n[req]\ndistinguished_name = dn\n" "${S_DOMAIN}"
             printf "[EXT]\nsubjectAltName=DNS:%s\n" "${S_DOMAIN}"
             printf "keyUsage=digitalSignature,keyCertSign\nextendedKeyUsage=serverAuth\n"
@@ -296,11 +315,13 @@ done
 
 case "${MODE}" in
     "up"|"upgrade")
+        lock
         info "Upgrading to h2+TLS"
         upgrade
         info "Now you need to use https://${S_DOMAIN}"
         ;;
     "down"|"downgrade")
+        lock
         info "Downgrading to http1.1"
         downgrade
         info "Now you need to use http://${S_DOMAIN}"
