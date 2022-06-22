@@ -11,19 +11,20 @@ SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${CONF_DIR}/submitty.json")
 SUBMITTY_DAEMON_JOB_Q="${SUBMITTY_DATA_DIR:?}/daemon_job_queue"
 
 # Abstract requirements
-R_COURSE_JOB="semester,course"
-R_COURSE_GRADEABLE_JOB="${R_COURSE_JOB},gradeable"
+# R_COURSE_JOB="semester,course"
+# R_COURSE_GRADEABLE_JOB="${R_COURSE_JOB},gradeable"
 
 # Possible operations, "Job_Name:Job_Requirements_IFS_is_COMMA:Job_Prefix"
 # Note that these Job_Prefixes might not equal to the PHPs'
-OPS=("RunAutoRainbowGrades:${R_COURSE_JOB}:auto_rainbow"                                        # 0
-     "BuildConfig:${R_COURSE_GRADEABLE_JOB}:build_conf"                                         # 1
-     "RunGenerateRepos:${R_COURSE_GRADEABLE_JOB}:generate_repos"                                # 2
-     "RunLichen:${R_COURSE_GRADEABLE_JOB},config_id,config_data:run_lichen"                     # 3
-     "DeleteLichenResult:${R_COURSE_GRADEABLE_JOB},config_id:delete_lichen"                     # 4
-     "BulkUpload:${R_COURSE_JOB},timestamp,g_id,filename,is_qr,qr_prefix,qr_suffix,num:bulkup"  # 5
-     "CreateCourse:semester,course,head_instructor,group_name:create_course"                    # 6
-     "UpdateDockerImages::docker"                                                               # 7
+# Commented operations are not fully tested, test them before using
+OPS=(# "RunAutoRainbowGrades:${R_COURSE_JOB}:auto_rainbow"
+     # "BuildConfig:${R_COURSE_GRADEABLE_JOB}:build_conf"
+     # "RunGenerateRepos:${R_COURSE_GRADEABLE_JOB}:generate_repos"
+     # "RunLichen:${R_COURSE_GRADEABLE_JOB},config_id,config_data:run_lichen"
+     # "DeleteLichenResult:${R_COURSE_GRADEABLE_JOB},config_id:delete_lichen"
+     # "BulkUpload:${R_COURSE_JOB},timestamp,g_id,filename,is_qr,qr_prefix,qr_suffix,num:bulkup"
+     # "CreateCourse:semester,course,head_instructor,group_name:create_course"
+     "UpdateDockerImages::docker"
     )
 
 # Execution date, will append to Job_Prefix
