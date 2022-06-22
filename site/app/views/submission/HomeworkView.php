@@ -192,7 +192,7 @@ class HomeworkView extends AbstractView {
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_day_budget) {
+            if ($active_days_charged > $late_days_remaining) {
                 $error = true;
                 $messages[] = ['type' => 'too_few_remain', 'info' => [
                     'late' => $active_days_late,
@@ -506,7 +506,7 @@ class HomeworkView extends AbstractView {
             'can_student_submit' => $canStudentSubmit,
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
-            'git_auth_token_url' => $this->core->buildUrl(['git_auth_tokens']),
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
             'git_auth_token_required' => false
         ]);
     }
@@ -551,7 +551,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));

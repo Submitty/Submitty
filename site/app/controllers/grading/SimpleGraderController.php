@@ -241,19 +241,25 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
-            // This catches both the not-set and blank-data case
-            if ($data !== '') {
-                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                $component_grade->setGrader($grader);
 
-                if ($component->isText()) {
-                    $component_grade->setComment($data);
-                }
-                else {
+            $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+            $component_grade->setGrader($grader);
+
+            if ($component->isText()) {
+                $component_grade->setComment($data);
+            }
+            else {
+                // This catches both the not-set and blank-data case for numeric cells
+                if ($data !== '') {
                     if (
-                        $component->getUpperClamp() < $data
-                        || !is_numeric($data)
+                        !is_numeric($data)
+                        || $data < 0
                     ) {
+                        return MultiResponse::JsonOnlyResponse(
+                            JsonResponse::getFailResponse("Save error: score must be a positive number")
+                        );
+                    }
+                    if ($component->getUpperClamp() < $data) {
                         return MultiResponse::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
                         );
@@ -266,9 +272,12 @@ class SimpleGraderController extends AbstractController {
                     }
                     $component_grade->setScore($data);
                 }
-                $component_grade->setGradeTime($this->core->getDateTimeNow());
-                $return_data[$component->getId()] = $data;
+                else {
+                    continue;
+                }
             }
+            $component_grade->setGradeTime($this->core->getDateTimeNow());
+            $return_data[$component->getId()] = $data;
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
