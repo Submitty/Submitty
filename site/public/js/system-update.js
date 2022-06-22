@@ -4,27 +4,29 @@
 *
 * @param {String} current_tag - tag Submitty is currently running on
 */
+// eslint-disable-next-line no-unused-vars
 async function getReleases(current_tag) {
+    try {
+        const response = await fetch('https://api.github.com/repos/Submitty/Submitty/releases');
 
-    const text = document.getElementById("text");
-
-    try{
-        const response = await fetch("https://api.github.com/repos/Submitty/Submitty/releases");
-
-        if(response.status !== 200){
-            displayMessage(" Failed to get latest version info." + 
-                " (Status Code : " + response.status.toString() + ")<br>" +
-                "Message : " + response.statusText , "error"
+        if (response.status !== 200){
+            // eslint-disable-next-line no-undef
+            displayMessage(' Failed to get latest version info.' +
+                ` (Status Code : ${response.status.toString()})<br>` +
+                `Message : ${response.statusText}` , 'error',
             );
-            console.error("Got bad response:", response);
-        }else{
+            console.error('Got bad response:', response);
+        }
+        else {
             response.json().then(data => {
-                updateReleaseNotes(data, current_tag)
+                updateReleaseNotes(data, current_tag);
             });
         }
-    }catch(error){
+    }
+    catch (error){
         console.error(error);
-        displayMessage(error.toString(), "error");
+        // eslint-disable-next-line no-undef
+        displayMessage(error.toString(), 'error');
     }
 }
 
@@ -32,7 +34,7 @@ async function getReleases(current_tag) {
 /**
 * Update the page with latest available release and its release notes
 *
-* @param {Array} data - response from GitHub API, array of last few releases 
+* @param {Array} data - response from GitHub API, array of last few releases
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag){
@@ -48,11 +50,13 @@ function updateReleaseNotes(data, current_tag){
     const latest = data[0];
 
     $.ajax({
+        // eslint-disable-next-line no-undef
         url: buildUrl(['markdown']),
         type: 'POST',
         data: {
             content: addPRLinks(updates),
-            csrf_token: csrfToken
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
         },
         success: function(markdown_data) {
             //Now that we have the basic markdown, we have to do some extra work to add functionality into the HTML
@@ -64,7 +68,7 @@ function updateReleaseNotes(data, current_tag){
 
             //due to the splitting of the single markdown payload, there will always be an extra empty release at the
             //end, so don't include it in the loop
-            for(let i = 0; i < release_notes.length-1; i++) {
+            for (let i = 0; i < release_notes.length-1; i++) {
                 //have to wrap the output in <div class="markdown"></div> since we are using 1 ajax call to process multiple payloads
                 //that way they all come back at the same time & faster
                 $('.content').append(`<div class="box release"><div class="markdown">${injectStyling(release_notes[i])}</div></div>`);
@@ -96,7 +100,7 @@ function updateReleaseNotes(data, current_tag){
                 if (security_notes.length && !security_notes.hasClass('no-content')) {
                     $('<span class="badge red-background">SECURITY</span>').insertAfter($(release).find('.version-header').find('h1'));
                 }
-                
+
                 if (sysadmin_notes.length && !sysadmin_notes.hasClass('no-content')) {
                     $('<span class="badge red-background">SYSADMIN ACTION</span>').insertAfter($(release).find('.version-header').find('h1'));
                 }
@@ -108,40 +112,42 @@ function updateReleaseNotes(data, current_tag){
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
-                const important_message = $('.update-important').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-important').length === 1 ? "IS" : "ARE"} ${$('.update-important').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
+                const important_message = $('.update-important').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-important').length === 1 ? 'IS' : 'ARE'} ${$('.update-important').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
                                 ${important_message}`);
             }
-            
+
 
             //hide loading text
             $('#loading-text').hide();
         },
         error: function() {
+            // eslint-disable-next-line no-undef
             displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
-        }
+        },
     });
 }
 
 /**
  * Expands/Collapses all releases collectively. Ex. if the button is in expand mode, all releases
  * will be expanded, even those that are already expanded.
- * @param {HTMLElement} toggleAllButton 
+ * @param {HTMLElement} toggleAllButton
  */
+// eslint-disable-next-line no-unused-vars
 function toggleAllReleases(toggleAllButton) {
     //in this case, collapsed class controls what action the button should take
     //  if toggleAllButton has collapsed - will collapse all
     //  if toggleAllButton doesn't have collapsed - will expand all
     $('.btn-toggle-release').each( (index, button) => {
-        if($(toggleAllButton).hasClass('collapsed') != $(button).hasClass('collapsed')) {
+        if ($(toggleAllButton).hasClass('collapsed') != $(button).hasClass('collapsed')) {
             $(button).trigger('click');
         }
     });
 
     //toggle collapsed class and switch button text accordingly
     $(toggleAllButton).toggleClass('collapsed');
-    if($(toggleAllButton).hasClass('collapsed')) {
+    if ($(toggleAllButton).hasClass('collapsed')) {
         $(toggleAllButton).html('Collapse All');
     }
     else {
@@ -150,10 +156,11 @@ function toggleAllReleases(toggleAllButton) {
 }
 
 /**
- * 
+ *
  * @param {HTMLElement} button HTMLElement of the button that was clicked to trigger this function
  * @param {Event} event Event context of the click event that triggered this function
  */
+// eslint-disable-next-line no-unused-vars
 function toggleRelease(button, event) {
     const release = $(button).closest('.box');
     $(button).toggleClass('collapsed');
@@ -182,7 +189,7 @@ function toggleRelease(button, event) {
         $(button).addClass('btn-default');
         $(button).html('Collapse');
     }
-    //stop bubbling of event 
+    //stop bubbling of event
     event.stopPropagation();
 }
 
@@ -207,7 +214,7 @@ function injectStyling(markdown_data) {
     //replace normal <li> contents with spans with classes
     markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, (match, p1, p2, p3, p4) => `<li class="release-item"><span class="update-${`${p2 ? p2 : p4}`.toLowerCase()}">${p1 ? p1 : p3}</span>`);
     //add class and wrapper to version headers
-    markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, `<div class="version-header" onclick="$(this).find('.btn-toggle-release').trigger('click')">$&</div>`);
+    markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, '<div class="version-header" onclick="$(this).find(\'.btn-toggle-release\').trigger(\'click\')">$&</div>');
     //wrap release sections in a <div>
     markdown_data = markdown_data.replace(/<p>([^<\n\s]+)[^<\n]*?[\s\S]+?(?:<hr>)/g, (match, p1) => `<div class="section update-${p1.toLowerCase()}">${match}</div>`);
 
@@ -215,7 +222,7 @@ function injectStyling(markdown_data) {
 }
 
 function removeFilterFromHTML(html) {
-    return html.replace(/<span class=\"release-filtered\".*?>([\s\S]+?)<\/span>/g, '$1');
+    return html.replace(/<span class="release-filtered".*?>([\s\S]+?)<\/span>/g, '$1');
 }
 
 /**
@@ -223,7 +230,7 @@ function removeFilterFromHTML(html) {
  * and all filter highlighting is removed.
  */
 function clearFilter() {
-    $('#release-notes-filter').val(''); 
+    $('#release-notes-filter').val('');
     $('.release').show();
     $('.section').show();
     $('.release-item').show();
@@ -233,7 +240,7 @@ function clearFilter() {
         const no_filter = removeFilterFromHTML($(list_item).html());
         $(list_item).html(no_filter);
     });
-    
+
     //collapse all
     $('#toggle-releases').addClass('collapsed');
     $('#toggle-releases').trigger('click');
@@ -245,9 +252,10 @@ function clearFilter() {
  * @param {string} filter The substring to filter by
  *
  */
+// eslint-disable-next-line no-unused-vars
 function filterReleaseNotes(filter) {
     //handle special case of empty filter to save time
-    if(filter === '') {
+    if (filter === '') {
         clearFilter();
         return;
     }
@@ -258,7 +266,7 @@ function filterReleaseNotes(filter) {
     const releases = $('.release');
     releases.each( (i, release) => {
         //get all sections on this release
-        const sections = $(release).find('.section');    
+        const sections = $(release).find('.section');
         let found_at_least_one = false;
         sections.each( (j, section) => {
             //initially hide the section
@@ -268,12 +276,12 @@ function filterReleaseNotes(filter) {
                 return;
             }
             //if the filter exists in the section's text somewhere
-            if($(section).text().toLowerCase().includes(filter.toLowerCase())){
+            if ($(section).text().toLowerCase().includes(filter.toLowerCase())){
                 //show the section and make sure the release that the section is in is shown
                 $(section).show();
                 $(release).show();
 
-            
+
                 //loop through all release items in section
                 $(section).find('.release-item').each( (k, release_item) => {
                     //remove old filter highlighting
@@ -284,14 +292,14 @@ function filterReleaseNotes(filter) {
                     $(release_item).hide();
 
                     //if the filter text can be found in this release item
-                    if($(release_item).text().toLowerCase().includes(filter.toLowerCase())){
+                    if ($(release_item).text().toLowerCase().includes(filter.toLowerCase())){
                         found_at_least_one = true;
                         releases_shown++;
                         //show the release item
                         $(release_item).show();
                         //expand the release this release item belongs to if it isn't already expanded
                         const button = $(release).find('.btn-toggle-release');
-                        if(button.hasClass('collapsed')) {
+                        if (button.hasClass('collapsed')) {
                             button.trigger('click');
                         }
                         //replace all instances of the filter text that is not inside an html tag's attributes
@@ -302,9 +310,9 @@ function filterReleaseNotes(filter) {
                 });
             }
         });
-        
+
         //if no release items matched with the filter in this release, hide it
-        if(!found_at_least_one) {
+        if (!found_at_least_one) {
             $(release).hide();
         }
     });
