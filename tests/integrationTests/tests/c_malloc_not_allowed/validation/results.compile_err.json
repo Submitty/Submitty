@@ -1,0 +1,95 @@
+{
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Create Executable",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test01/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Compilation",
+            "testcase_message": "Compilation Errors and/or Warnings."
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Preprocessing"
+        },
+        {
+            "points_awarded": -100,
+            "test_name": "No malloc()"
+        },
+        {
+            "points_awarded": -100,
+            "test_name": "Only calloc() and realloc()"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "No square brackets"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06/execute_logfile.txt",
+                    "description": "execute_logfile.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Standard Output (STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'test06/STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Standard Error (STDERR.txt)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'test06/STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test06/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Run program"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

@@ -18,14 +18,23 @@
         {
             "type": "Compilation",
             "title": "Compilation",
-            "command": ["clang -Wall -o a.out -- *.c",
-                        // GCC will trim the comments, but will not expand the defines and includes
-                        //   as it expands system headers which may contain prohibited functions.
-                        "gcc -E -P -fpreprocessed -dD -w -o a.i *.c *.h",
-                        // SED trims all whitespaces and change letters to lowercase
-                        "sed -i -z -e 's/[A-Z]/\\\\L&/' -e 's/[[:space:]]//g' a.i"],
-            "executable_name": ["a.out", "a.i"],
+            "command": "clang -Wall -Wextra -Werror -o a.out -- *.c",
+            "executable_name": "a.out",
             "points": 25
+        },
+
+        {
+            "type": "Compilation",
+            "title": "Preprocessing",
+            "command": [
+                // GCC will trim the comments, but will not expand the defines and includes
+                //   as it expands system headers which may contain prohibited functions.
+                "gcc -E -P -fpreprocessed -dD -w -o a.i *.c *.h",
+                // SED trims all whitespaces and change letters to lowercase
+                "sed -i -z -e 's/[A-Z]/\\\\L&/' -e 's/[[:space:]]//g' a.i"
+            ],
+            "executable_name": "a.i",
+            "points": 0
         },
 
         {
