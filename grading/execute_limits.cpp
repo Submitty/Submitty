@@ -234,4 +234,11 @@ void enable_all_setrlimit(const std::string &program_name,
 
 
 // =====================================================================================
+
+void set_env_variables(const nlohmann::json &env_variables) {
+  for (auto& ev : env_variables.items()) {
+    setenv(ev.key().c_str(), ev.value().get_ref<const std::string&>().c_str(), 1);
+  }
+}
+
 // =====================================================================================

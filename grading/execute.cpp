@@ -918,6 +918,13 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
 
+  /*************************************************
+  *
+  * SET ENVIROMENT VARIABLES
+  *
+  **************************************************/
+  set_env_variables(whole_config.value("enviroment_variables",nlohmann::json()));
+
   // Student's shouldn't be forking & making threads/processes...
   // but if they do, let's set them in the same process group
   int pgrp = setpgid(getpid(), 0);
