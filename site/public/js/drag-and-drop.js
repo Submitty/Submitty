@@ -1288,8 +1288,12 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
     formData.append('sections_lock', sections_lock);
-    formData.append('link_url', link_url);
-    formData.append('link_title', link_title);
+    if(link_url != null) {
+        formData.append('link_url', link_url);
+    }
+    if(link_title != null) {
+        formData.append('link_title', link_title);
+    }
     if (folderUpdate != null) {
         formData.append('folder_update', folderUpdate);
     }
