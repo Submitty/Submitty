@@ -37,11 +37,11 @@
             "test_name": "Preprocessing"
         },
         {
-            "points_awarded": -100,
+            "points_awarded": 0,
             "test_name": "No malloc()"
         },
         {
-            "points_awarded": -100,
+            "points_awarded": 0,
             "test_name": "Only calloc() and realloc()"
         },
         {
