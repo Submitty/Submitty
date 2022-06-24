@@ -66,6 +66,12 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
+
+    /** 
+     * Profile image set return codes
+     */
+    const PROFILE_IMG_SET_FAILURE = 0;
+    const PROFILE_IMG_SET_SUCCESS = 1;
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
@@ -304,7 +310,7 @@ class User extends AbstractModel {
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
-     * @return int 1 if the update was successful, PROFILE_IMG_QUOTA_EXHAUSTED if image upload quota of 50 has been exhausted, 0 otherwise
+     * @return int PROFILE_IMG_SET_SUCCESS if the update was successful, PROFILE_IMG_QUOTA_EXHAUSTED if image upload quota of 50 has been exhausted, PROFILE_IMG_SET_FAILURE otherwise
      * @throws \ImagickException
      */
     public function setDisplayImage(string $image_extension, string $tmp_file_path): int {
@@ -324,10 +330,10 @@ class User extends AbstractModel {
         // Update the DB to 'preferred'
         if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
             $this->display_image_state = 'preferred';
-            return 1;
+            return self::PROFILE_IMG_SET_SUCCESS;
         }
 
-        return 0;
+        return self::PROFILE_IMG_SET_FAILURE;
     }
 
     /**
