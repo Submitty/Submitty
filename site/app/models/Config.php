@@ -479,7 +479,15 @@ class Config extends AbstractModel {
             throw new ConfigException("Missing config section 'database_details' in json file");
         }
 
-        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
+        $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
+
+        $this->course_database_params = [
+            'dbname' => $this->course_json['database_details']['dbname'],
+            'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
+            'username' => $database_json['database_course_user'],
+            'password' => $database_json['database_course_password']
+        ];
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
