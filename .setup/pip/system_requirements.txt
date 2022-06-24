@@ -29,7 +29,7 @@ pytz==2021.3 # Submitty-util specific.
 python-pam==1.8.4
 ruamel.yaml==0.17.21
 psycopg2-binary==2.9.3
-sqlalchemy==1.4.29
+sqlalchemy==1.4.38
 pylint==2.13.9
 psutil==5.9.0
 python-dateutil==2.8.2
