@@ -66,8 +66,7 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
-
-    /** 
+    /**
      * Profile image set return codes
      */
     const PROFILE_IMG_SET_FAILURE = 0;
