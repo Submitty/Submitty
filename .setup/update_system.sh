@@ -23,8 +23,20 @@ if [ -d "${CURRENT_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-# update packages
-apt-get update && apt-get upgrade -y
+APT=true
+# check if apt upgrades have been disabled
+for flag in "$@"; do
+    case $flag in
+        skip_apt_upgrade)
+            APT=false
+            ;;
+    esac
+done
+
+if [ "${APT}" == true ]; then
+    # update packages
+    apt-get update && apt-get upgrade -y
+fi
 
 #libraries for QR code processing:
 #install DLL for zbar
