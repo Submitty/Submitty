@@ -8120,7 +8120,7 @@ ORDER BY
         ", [$id]);
 
         $row = $this->submitty_db->rows();
-        if (count($row) == 0) {
+        if (count($row) === 0) {
             return false;
         }
 

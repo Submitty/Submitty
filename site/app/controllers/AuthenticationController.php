@@ -279,8 +279,11 @@ class AuthenticationController extends AbstractController {
 
     /**
      * @Route("/authentication/saml_start")
+     * @param string|null $old
+     *
+     * @return RedirectResponse
      */
-    public function samlStart($old = null) {
+    public function samlStart(string $old = null): RedirectResponse {
         if (!$this->core->getAuthentication() instanceof SamlAuthentication) {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
@@ -294,6 +297,7 @@ class AuthenticationController extends AbstractController {
 
     /**
      * @Route("/authentication/user_select")
+     *
      * @return ResponseInterface
      */
     public function userSelection() {
