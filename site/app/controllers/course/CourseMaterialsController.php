@@ -150,7 +150,7 @@ class CourseMaterialsController extends AbstractController {
                         break;
                     }
                 }
-                $path = $empty_folders[count($empty_folders)-1];
+                $path = $empty_folders[count($empty_folders) - 1];
                 foreach ($all_files as $file) {
                     if (str_starts_with($file->getPath(), $path)) {
                         $this->core->getCourseEntityManager()->remove($file);
