@@ -145,7 +145,7 @@ class CourseMaterialsController extends AbstractController {
             FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
             if (count($empty_folders) > 0) {
                 foreach ($empty_folders as $folder) {
-                    $success = $success & rmdir($folder);
+                    $success = $success && rmdir($folder);
                     if ($success === false) {
                         break;
                     }
