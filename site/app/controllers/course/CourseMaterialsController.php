@@ -115,7 +115,11 @@ class CourseMaterialsController extends AbstractController {
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($cm->getPath())));
-
+        // check to prevent the deletion of course_materials folder
+        if ($path === $this->core->getConfig()->getCoursePath() . "/uploads/course_materials") {
+            $this->core->addErrorMessage(basename($path) . " can't be removed.");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
