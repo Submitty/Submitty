@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace app\libraries\socket;
 
+use app\exceptions\DatabaseException;
+use app\libraries\FileUtils;
+use app\libraries\Utils;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use app\libraries\Core;
@@ -37,6 +40,30 @@ class Server implements MessageComponentInterface {
         if ($this->core->getConfig()->isDebug()) {
             echo $message . "\n";
         }
+    }
+
+    private function logError(\Throwable $error, ConnectionInterface $conn) {
+        $page = $this->pages[$conn->resourceId] ?? "null";
+
+        $date = getdate(time());
+        $timestamp = Utils::pad($date['hours']) . ":" . Utils::pad($date['minutes']) . ":" . Utils::pad($date['seconds']);
+        $timestamp .= " ";
+        $timestamp .= Utils::pad($date['mon']) . "/" . Utils::pad($date['mday']) . "/" . $date['year'];
+
+        $message  = $timestamp . "\n";
+        $message .= "Message:\n";
+        $message .= $error->getMessage() . "\n\n";
+        $message .= "Stack Trace:\n";
+        $message .= $error->getTraceAsString() . "\n\n";
+        $message .= "Page: " . $page . "\n";
+        $message .= str_repeat("=-", 30) . "=" . "\n";
+
+        $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']);
+        file_put_contents(
+            FileUtils::joinPaths($this->core->getConfig()->getLogPath(), "socket_errors", "{$filename}.log"),
+            $message,
+            FILE_APPEND | LOCK_EX
+        );
     }
 
     /**
@@ -124,8 +151,26 @@ class Server implements MessageComponentInterface {
      * Check the authentication status of the connection when it gets opened
      */
     public function onOpen(ConnectionInterface $conn): void {
-        if (!$this->checkAuth($conn)) {
-            $conn->close();
+        try {
+            if (!$this->checkAuth($conn)) {
+                $conn->close();
+            }
+        }
+        catch (DatabaseException $de) {
+            try {
+                $this->core->loadMasterDatabase();
+                $this->logError($de, $conn);
+                $this->onOpen($conn);
+            }
+            catch (\Exception $e) {
+                $this->logError($de, $conn);
+                $this->logError($e, $conn);
+                $this->closeWithError($conn);
+            }
+        }
+        catch (\Throwable $t) {
+            $this->logError($t, $conn);
+            $this->closeWithError($conn);
         }
     }
 
@@ -170,7 +215,7 @@ class Server implements MessageComponentInterface {
             }
         }
         catch (\Throwable $t) {
-            // TODO: Add logging for the message in $t
+            $this->logError($t, $from);
         }
     }
 
@@ -194,6 +239,12 @@ class Server implements MessageComponentInterface {
                 unset($this->users[$user_id]);
             }
         }
+    }
+
+    public function closeWithError(ConnectionInterface $conn): void {
+        $msg = ['error' => 'Server error'];
+        $conn->send(json_encode($msg));
+        $conn->close();
     }
 
     /**

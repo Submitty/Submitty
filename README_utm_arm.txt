@@ -11,7 +11,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    Submitty
    AnalysisTools
-   CrashCourseCPPSyntax
+   AnalysisToolsTS
    Lichen
    RainbowGrades
    SysadminTools
@@ -24,8 +24,9 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    to this path:
    vendor/nlohmann/json/
 
-   Optionally (currently a private repo), from https://github.com/Submitty
+   And optionally (currently private repos), from https://github.com/Submitty
    LichenTestData
+   CrashCourseCPPSyntax
 
    *** FIXME: Currently we checkout all of the repositories manually,
        since the VM cannot write to the shared directory?  Unlike how
@@ -143,10 +144,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    the command line, and in a guest machine startup script, but that
    may be a security concern.
 
-   ALSO: It appears the command below MUST be typed in the UTM VM GUI
-   Terminal (not from an ssh terminal).
-
    sudo mount -t davfs -o noexec http://127.0.0.1:9843 /usr/local/submitty/GIT_CHECKOUT
+
+   If you get an error trying to run this from the ssh terminal, try
+   running it directly in the UTM VM GUI terminal.
 
    If you get an error mounting the shared directory, you can try
    running the umount command below, and then repeat the mount command
@@ -180,6 +181,13 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
     sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh
 
 
-11. When finished, access the Submitty website from a browser on your host machine:
+11. After installation, to fix opencv & onnx:
+
+    sudo pip install opencv-python
+    sudo pip install onnxruntime
+    sudo apt install libgl1-mesa-glx
+
+
+12. When finished, access the Submitty website from a browser on your host machine:
 
     http://localhost:1511/
