@@ -1896,8 +1896,8 @@ function loadThreadHandler(){
         }
         event.preventDefault();
         const obj = this;
-        const thread_id = $(obj).data("thread_id");
-        const thread_title = $(obj).data("thread_title");
+        const thread_id = $(obj).data('thread_id');
+        const thread_title = $(obj).data('thread_title');
 
         // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['forum', 'threads', thread_id]);
@@ -1941,12 +1941,12 @@ function loadThreadHandler(){
                 //Updates the title and breadcrumb
                 $(document).attr('title', thread_title);
                 if (thread_title.length > 25) {
-                    $('h1.breadcrumb-heading').text(thread_title.slice(0,25) + '...');  
+                    $('h1.breadcrumb-heading').text(`${thread_title.slice(0,25)}...`);
                 }
                 else {
                     $('h1.breadcrumb-heading').text(thread_title);
                 }
-                
+
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
