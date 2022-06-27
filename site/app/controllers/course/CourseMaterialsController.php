@@ -138,19 +138,13 @@ class CourseMaterialsController extends AbstractController {
             $success = unlink($path);
         }
         $base_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials";
-        /* delete the topmost parent folder that's empty (contains no files), doing that requires the
-        ** subdirectories to be deleted first */
+        // delete the topmost parent folder that's empty (contains no files)
         if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
             $empty_folders = [];
             FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
             if (count($empty_folders) > 0) {
-                foreach ($empty_folders as $folder) {
-                    $success = $success && rmdir($folder);
-                    if ($success === false) {
-                        break;
-                    }
-                }
-                $path = $empty_folders[count($empty_folders) - 1];
+                $path = $empty_folders[0];
+                $success = $success && FileUtils::recursiveRmdir($path);
                 foreach ($all_files as $file) {
                     if (str_starts_with($file->getPath(), $path)) {
                         $this->core->getCourseEntityManager()->remove($file);
