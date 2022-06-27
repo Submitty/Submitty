@@ -6,14 +6,18 @@
   "description": "An open source Course Management System",
   "lang": "en",
   "dir": "auto",
-  "theme_color": "#ffba00",
+  "theme_color": "#006398",
   "background_color": "#000000",
   "orientation": "any",
   "icons": [
     {
-      "src": "https://submitty.org/images/moorthy_duck.png",
-      "sizes": "3000x3000",
+      "src": "img/pwa_512.png",
+      "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+    "src": "img/moorthy_duck.ico",
+    "sizes": "72x72 96x96 128x128 256x256"
     }
   ],
 
