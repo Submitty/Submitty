@@ -111,7 +111,7 @@ class submitty_router():
         outfile.write(f'{start}: {message}\n')
       else:
         str_lines = [str(x) for x in message_lines ]
-        outfile.write(f'{start}: {"<br>".join(str_lines)}\n')
+        outfile.write(f'{start}: {"<br/>".join(str_lines)}\n')
 
       if diagram_label is not None and obj['diagram_label'].strip() != '':
         outfile.write(f'Note over {sender},{recipient}: {diagram_label}\n')
