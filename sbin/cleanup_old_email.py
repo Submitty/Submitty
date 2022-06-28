@@ -11,9 +11,8 @@ This script takes 2 optional arguments:
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, Table, bindparam, text
+from sqlalchemy import create_engine, MetaData, text
 import sys
-import psutil
 
 
 try:
@@ -24,7 +23,7 @@ try:
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_CONFIG = json.load(open_file)
 
-        
+
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
@@ -71,13 +70,13 @@ def setup_db():
 
 def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     """Collect the emails to be deleted and information about errors and unsent email."""
-    
-    query  = """SELECT count(*) FROM emails;"""
+
+    query = """SELECT count(*) FROM emails;"""
     result = db.execute(text(query))
     for row in result:
         print(f"total email count: {row[0]}")
 
-    query  = """SELECT count(*) FROM emails where error != '';"""
+    query = """SELECT count(*) FROM emails where error != '';"""
     result = db.execute(text(query))
     for row in result:
         error_count = row[0]
@@ -85,19 +84,20 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     if error_count > 0:
         print (f"WARNING: {error_count} unsent emails in database WITH ERRORS.")
-        
-    query  = """SELECT count(*) FROM emails where sent is NULL AND error = '';"""
+
+    query = """SELECT count(*) FROM emails where sent is NULL AND error = '';"""
     result = db.execute(text(query))
     for row in result:
         unsent_count = row[0]
         print(f"unsent email count: {row[0]}")
 
     if unsent_count > 0:
-        print (f"WARNING: {unsent_count} UNSENT emails in database without errors.")
-        
+        print(f"WARNING: {unsent_count} UNSENT emails in database without errors.")
+
     last_week = str(TODAY - datetime.timedelta(days=days_to_preserve))
-    
-    query  = """SELECT count(*) FROM emails WHERE sent is not NULL AND sent < :format AND error = '';"""
+
+    query = """SELECT count(*) FROM emails WHERE sent is not NULL 
+    AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
     for row in result:
         before = row[0]
@@ -106,11 +106,13 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     if before == 0:
         print("Nothing to delete, exiting\n")
         return
-        
-    query  = """delete from emails WHERE ctid in (select ctid from emails where sent is not NULL AND sent < :format AND error = '' LIMIT :foo);"""
+
+    query = """delete from emails WHERE ctid in (select ctid from emails 
+    where sent is not NULL AND sent < :format AND error = '' LIMIT :foo);"""
     result = db.execute(text(query), format=last_week, foo=str(maximum_to_delete))
-        
-    query  = """SELECT count(*) FROM emails WHERE sent is not NULL AND sent < :format AND error = '';"""
+
+    query = """SELECT count(*) FROM emails WHERE sent is not NULL 
+    AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
     for row in result:
         after = row[0]
@@ -123,8 +125,8 @@ def main():
     try:
         db, metadata = setup_db()
 
-        print ("\nChecking Submitty Database Emails Table")
-        
+        print("\nChecking Submitty Database Emails Table")
+
         days_to_preserve = 360
         if len(sys.argv) > 1:
             days_to_preserve = int(sys.argv[1])
@@ -132,7 +134,7 @@ def main():
             print("ERROR: Should preserve at least 1 week of email")
             return
         print(f"preserving {days_to_preserve} days of email")
-            
+
         maximum_to_delete = 1000
         if len(sys.argv) > 2:
             maximum_to_delete = int(sys.argv[2])
@@ -140,8 +142,8 @@ def main():
             print("ERROR: maximum to delete should be between 10 and 10000")
             return
         print(f"deleting at most {maximum_to_delete} emails")
-        
-        delete_old_emails(db,days_to_preserve,maximum_to_delete)
+
+        delete_old_emails(db, days_to_preserve,m aximum_to_delete)
 
     except Exception as email_send_error:
         e = "[{}] Error Sending Email: {}".format(
