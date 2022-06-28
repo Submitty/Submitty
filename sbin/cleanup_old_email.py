@@ -143,7 +143,7 @@ def main():
             return
         print(f"deleting at most {maximum_to_delete} emails")
 
-        delete_old_emails(db, days_to_preserve,m aximum_to_delete)
+        delete_old_emails(db, days_to_preserve, maximum_to_delete)
 
     except Exception as email_send_error:
         e = "[{}] Error Sending Email: {}".format(
