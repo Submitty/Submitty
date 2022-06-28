@@ -885,6 +885,12 @@ done
 
 
 #############################################################################
+# Cleanup Old Email
+
+"${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 1000
+
+
+#############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
 # existing gradeables, do so.
 
