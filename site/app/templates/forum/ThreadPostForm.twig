@@ -132,7 +132,7 @@
 {% endif %}
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
-        <div class="inline-block">
+        <div style="display:block;">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
@@ -164,9 +164,6 @@
     {% endif %}
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
-        {% if show_anon %}
-            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
-        {% endif %}
         {% if show_thread_status is defined and show_thread_status %}
         <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">
             <option value="0">Comment</option>
@@ -174,12 +171,18 @@
             <option value="1">Resolved</option>
         </select>
         {% endif %}
+        <br>
+        <div class="new-thread-settings-wrapper">
+        {% if show_anon %}
+            <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label>Anonymous (to class)? </label>
+        {% endif %}
         {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
             {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
-            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
+            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>       
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
             <div class = "expiration inline-block" style="display: none;">
@@ -187,6 +190,8 @@
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
             </div>
         {% endif %}
+        <br>
+        </div>
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>

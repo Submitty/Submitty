@@ -466,6 +466,11 @@
     display: inline-block;
 }
 
+.new-thread-settings-wrapper{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
 .email-announcement-checkbox {
     margin-right: 18px;
     display: inline-block;
