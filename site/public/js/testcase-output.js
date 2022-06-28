@@ -1,6 +1,3 @@
-import { buildCourseUrl, toggleDiv, enableKeyToClick } from './server.js';
-
-
 /* GLOBAL VARIABLES */
 
 // Map to store the XMLHttpRequest object returned by getJSON when getting the 
