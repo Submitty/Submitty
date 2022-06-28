@@ -887,7 +887,7 @@ done
 #############################################################################
 # Cleanup Old Email
 
-"${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 1000
+"${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
 
 
 #############################################################################

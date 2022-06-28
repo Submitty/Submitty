@@ -83,7 +83,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
         print(f"error email count: {row[0]}")
 
     if error_count > 0:
-        print (f"WARNING: {error_count} unsent emails in database WITH ERRORS.")
+        print(f"WARNING: {error_count} unsent emails in database WITH ERRORS.")
 
     query = """SELECT count(*) FROM emails where sent is NULL AND error = '';"""
     result = db.execute(text(query))
@@ -96,7 +96,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     last_week = str(TODAY - datetime.timedelta(days=days_to_preserve))
 
-    query = """SELECT count(*) FROM emails WHERE sent is not NULL 
+    query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
     for row in result:
@@ -107,11 +107,11 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
         print("Nothing to delete, exiting\n")
         return
 
-    query = """delete from emails WHERE ctid in (select ctid from emails 
+    query = """delete from emails WHERE ctid in (select ctid from emails
     where sent is not NULL AND sent < :format AND error = '' LIMIT :foo);"""
     result = db.execute(text(query), format=last_week, foo=str(maximum_to_delete))
 
-    query = """SELECT count(*) FROM emails WHERE sent is not NULL 
+    query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
     for row in result:
@@ -138,8 +138,8 @@ def main():
         maximum_to_delete = 1000
         if len(sys.argv) > 2:
             maximum_to_delete = int(sys.argv[2])
-        if (maximum_to_delete < 10 or maximum_to_delete > 10000):
-            print("ERROR: maximum to delete should be between 10 and 10000")
+        if (maximum_to_delete < 10 or maximum_to_delete > 100000):
+            print("ERROR: maximum to delete should be between 10 and 100000")
             return
         print(f"deleting at most {maximum_to_delete} emails")
 
