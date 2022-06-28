@@ -458,11 +458,14 @@
     margin: 0 2px;
 }
 
-.thread-anon-checkbox,
-#thread_status,
+
 .thread-announcement-checkbox,
 .pinThread-checkbox {
     margin-left: 15px;
+    display: inline-block;
+}
+.thread-anon-checkbox,
+#thread_status{
     display: inline-block;
 }
 
