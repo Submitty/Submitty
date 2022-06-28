@@ -132,7 +132,7 @@
 {% endif %}
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
-        <div style="display:block;">
+        <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
@@ -164,14 +164,6 @@
     {% endif %}
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
-        {% if show_thread_status is defined and show_thread_status %}
-        <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">
-            <option value="0">Comment</option>
-            <option value="-1" selected="selected">Unresolved</option>
-            <option value="1">Resolved</option>
-        </select>
-        {% endif %}
-        <br>
         <div class="new-thread-settings-wrapper">
         {% if show_anon %}
             <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
@@ -190,8 +182,16 @@
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
             </div>
         {% endif %}
-        <br>
         </div>
+        <br style="margin-right:1rem;">
+        {% if show_thread_status is defined and show_thread_status %}
+        <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status" style="margin-bottom: 1rem;">
+            <option value="0">Comment</option>
+            <option value="-1" selected="selected">Unresolved</option>
+            <option value="1">Resolved</option>
+        </select>
+        {% endif %}
+        <br style="margin-bottom:1rem;">
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
