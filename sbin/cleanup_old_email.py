@@ -73,23 +73,20 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     query = """SELECT count(*) FROM emails;"""
     result = db.execute(text(query))
-    for row in result:
-        print(f"total email count: {row[0]}")
+    print(f"total email count: {result.fetchone()[0]}")
 
     query = """SELECT count(*) FROM emails where error != '';"""
     result = db.execute(text(query))
-    for row in result:
-        error_count = row[0]
-        print(f"error email count: {row[0]}")
+    error_count = result.fetchone()[0]
+    print(f"error email count: {error_count}")
 
     if error_count > 0:
         print(f"WARNING: {error_count} unsent emails in database WITH ERRORS.")
 
     query = """SELECT count(*) FROM emails where sent is NULL AND error = '';"""
     result = db.execute(text(query))
-    for row in result:
-        unsent_count = row[0]
-        print(f"unsent email count: {row[0]}")
+    unsent_count = result.fetchone()[0]
+    print(f"unsent email count: {unsent_count}")
 
     if unsent_count > 0:
         print(f"WARNING: {unsent_count} UNSENT emails in database without errors.")
@@ -99,9 +96,8 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
-    for row in result:
-        before = row[0]
-        print(f"email to delete before count: {row[0]}")
+    before = result.fetchone()[0]
+    print(f"email to delete before count: {before}")
 
     if before == 0:
         print("Nothing to delete, exiting\n")
@@ -114,12 +110,11 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
     result = db.execute(text(query), format=last_week)
-    for row in result:
-        after = row[0]
-        print(f"email to delete after count: {row[0]}")
+    after = result.fetchone()[0]
+    print(f"email to delete after count: {after}")
 
     print(f"deleted email count {before-after}\n")
-
+    
 
 def main():
     try:
