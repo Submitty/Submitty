@@ -2,11 +2,13 @@
     float: right;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_content {
     flex-grow: 1;
     padding: 0;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_show_threads {
     overflow: visible;
     flex-direction: column;
@@ -17,6 +19,7 @@
     margin-bottom: 10px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_bar {
     margin-right: 10px;
     padding-left: 15px;
@@ -24,42 +27,47 @@
     min-height: 30px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #thread_list {
     padding-right: 0;
     overflow-y: auto;
     height: 81vh;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #posts_list {
     overflow-y: auto;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .first_post .post_content {
     margin-top: 10px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .post_content {
     margin-right: 5px;
     white-space: pre-wrap;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_viewed_btn {
     background-color: #dcdcdcb5 !important;
 }
 
-.first_post .post_button {
-}
-
+/* stylelint-disable-next-line selector-class-pattern */
 .post_user_id {
     left: 5px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_button {
     position: relative;
     right: 5px;
     margin-left: 5px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_box {
     position: relative;
     box-shadow: 0 2px 15px -5px #888888;
@@ -70,15 +78,18 @@
     overflow-x: hidden;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_box a {
     text-decoration: none;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .first_post {
     padding-left: 10px !important;
     margin-top: 0 !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .thread_box {
     padding: 5px;
     overflow-y: auto;
@@ -86,22 +97,25 @@
     align-items: stretch;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .thread_box h5 {
     font-weight: normal;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #thread_list a {
     text-decoration: none;
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .create_thread_button {
     border-radius: 3px;
     width: 100%;
     min-width: 40px;
     min-height: 40px;
     position: relative;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgb(255 255 255 / 80%);
     box-shadow: 2px 2px 4px -3px #dddddd;
 }
 
@@ -111,6 +125,7 @@
     margin-bottom: 60px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #new_category_text {
     resize: none;
 }
@@ -198,10 +213,12 @@
     -webkit-text-stroke: 1px black;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
     color: #e0e0e0 !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .reverse_golden_hover {
     color: gold;
 }
@@ -252,18 +269,19 @@
     -webkit-text-stroke-color: black;
 }
 
-.current-favorite i.fas{
+.current-favorite i.fas {
     color: var(--standard-medium-red) !important;
 }
 
 .active-thread-remove-expiring-announcement i.fas {
-  color: gold !important;
+    color: gold !important;
 }
 
 .active-thread-remove-announcement i.fas {
     color: var(--submitty-logo-blue) !important;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #thread_form {
     margin-right: 15px;
     margin-left: 15px;
@@ -294,12 +312,14 @@
     -webkit-text-stroke-color: black;
 }
 
-.thread-announcement-expiring{
+.thread-announcement-expiring {
     color: gold;
 }
+
 .thread-favorite {
     color: var(--standard-medium-red);
 }
+
 .thread-announcement {
     color: var(--submitty-logo-blue);
 }
@@ -327,6 +347,7 @@
     display: inline-block;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_reply_form {
     margin-right: 17px;
 }
@@ -344,22 +365,27 @@
     display: inline-block;
 }
 
+/* stylelint-disable selector-class-pattern, selector-id-pattern */
 .forum_bar div div.col-6,
 #search_block div div,
 .forum_bar div div.col-5 {
     padding: 0;
     top: 0;
 }
+/* stylelint-enable selector-class-pattern, selector-id-pattern */
 
+/* stylelint-disable-next-line selector-id-pattern */
 #search_block div div.col-6 {
     margin-right: 5px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #search_block div div.col-6 input {
     width: 100%;
     height: 34px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern, no-descending-specificity */
 #search_block div {
     position: relative;
     top: 3px;
@@ -391,21 +417,19 @@
     float: right;
 }
 
+/* stylelint-disable-next-line selector-type-no-unknown */
 .history-container span h7 {
     position: relative;
     right: 5px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #merge_thread_parent {
     width: 200px;
 }
 
 .hoverable:hover {
-    -webkit-filter: brightness(85%);
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    -ms-transition: all 0.5s ease;
+    filter: brightness(85%);
     transition: all 0.5s ease;
 }
 
@@ -451,6 +475,7 @@
     display: inline-block;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #label_lock_thread {
     position: absolute;
     right: 0;
@@ -458,6 +483,7 @@
     margin: 0 2px;
 }
 
+/* stylelint-disable selector-class-pattern, selector-id-pattern */
 .thread-anon-checkbox,
 #thread_status,
 .thread-announcement-checkbox,
@@ -465,6 +491,7 @@
     margin-right: 15px;
     display: inline-block;
 }
+/* stylelint-enable selector-class-pattern, selector-id-pattern */
 
 .email-announcement-checkbox {
     margin-right: 18px;
@@ -522,13 +549,12 @@
     background-color: var(--attachment-box-color);
     border: 1px solid #e3e3e3;
     border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 5%);
 }
 
 .well blockquote {
     border-color: #dddddd;
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: rgb(0 0 0 / 15%);
 }
 
 .well-lg {
@@ -551,21 +577,21 @@
 }
 
 .attachment-img:hover {
-    box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+    box-shadow: 0 0 2px 1px rgb(0 140 186 / 50%);
     cursor: pointer;
 }
-
+/* stylelint-disable-next-line selector-id-pattern */
 #forum_filter_bar {
     margin-left: 15px;
     margin-top: 10px;
     font-size: small;
     display: none;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .post_content pre {
     white-space: pre-wrap;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .post_content p img {
     max-width: 100%;
 }
@@ -577,7 +603,7 @@
 .markdown-active {
     color: var(--submitty-logo-blue);
 }
-
+/* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {
     display: none;
@@ -609,13 +635,14 @@
 .category-sortable {
     background-color: var(--always-default-white);
 }
-
+/* stylelint-disable selector-class-pattern */
 [data-theme="dark"] .post_box,
 [data-theme="dark"] .create_thread_button,
 [data-theme="dark"] .well {
     box-shadow: none;
 }
-
+/* stylelint-enable selector-class-pattern */
+/* stylelint-disable-next-line selector-class-pattern */
 [data-theme="dark"] .post_box:not(.important) {
     border: 1px solid #bbbbbb;
 }
@@ -625,13 +652,13 @@
     margin: 5px auto;
     box-shadow: 4px 7px 5px #cccccc;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,
 .thread-box-full .flex-row {
     align-items: stretch;
     justify-content: flex-end;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .content .thread_box_link {
     text-decoration: none;
     color: var(--text-black);
@@ -648,7 +675,7 @@
 .thread-left-cont {
     flex: 3;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .viewed_post {
     background-color: var(--default-white);
 }
@@ -662,6 +689,7 @@
     background-color: var(--deleted-discussion-post-grey);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .new_post {
     background-color: var(--viewed-content);
 }
@@ -680,6 +708,7 @@
     border: 4px solid var(--submitty-logo-blue);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .new_thread {
     background-color: var(--viewed-content);
     color: var(--text-black);
