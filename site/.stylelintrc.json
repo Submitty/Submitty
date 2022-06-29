@@ -35,7 +35,6 @@
     "public/css/fileinput.css",
     "public/css/electronic.css",
     "public/css/diff-viewer.css",
-    "public/css/details.css",
-    "public/css/admin-gradeable.css"
+    "public/css/details.css"
   ]
 }
