@@ -31,7 +31,7 @@
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
-    "symfony/cache": "4.4.42",
+    "symfony/cache": "4.4.43",
     "symfony/config": "4.4.42",
     "symfony/http-foundation": "4.4.42",
     "symfony/polyfill-php80": "1.26.0",
