@@ -125,8 +125,9 @@
                   "useMaxWidth" : false
                 };
                 mermaid.initialize(config);
-                // TODO: This is a TEMPORARY fix, use callback
-                setTimeout(() => {mermaid.init( { "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");}, 200);
+                $( document ).ready(function() {
+                    mermaid.init( { "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");
+                });
               </script>
             {% endif %}
         </div>
