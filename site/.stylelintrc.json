@@ -22,7 +22,6 @@
     "public/css/user-profile.css",
     "public/css/submitbox.css",
     "public/css/sequence.css",
-    "public/css/rainbow-customization.css",
-    "public/css/officeHoursQueue.css"
+    "public/css/rainbow-customization.css"
   ]
 }
