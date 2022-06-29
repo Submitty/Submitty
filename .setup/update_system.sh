@@ -23,7 +23,8 @@ if [ -d "${CURRENT_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-#install DLL for zbar for QR processing
+#libraries for QR code processing:
+#install DLL for zbar
 apt-get install libzbar0 --yes
 
 ##source ${CURRENT_DIR}/distro_setup/setup_distro.sh
