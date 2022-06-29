@@ -19,7 +19,6 @@
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
     "public/css/highlightjs/*",
-    "public/css/user-profile.css",
-    "public/css/submitbox.css"
+    "public/css/user-profile.css"
   ]
 }
