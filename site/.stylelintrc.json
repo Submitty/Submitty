@@ -24,7 +24,6 @@
     "public/css/sequence.css",
     "public/css/rainbow-customization.css",
     "public/css/officeHoursQueue.css",
-    "public/css/notebook-builder.css",
-    "public/css/navigation.css"
+    "public/css/notebook-builder.css"
   ]
 }
