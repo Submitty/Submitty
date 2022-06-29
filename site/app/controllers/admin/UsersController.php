@@ -259,7 +259,8 @@ class UsersController extends AbstractController {
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
         $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"" . strip_tags($_POST['user_id']) . "\"<br>";
         if ($user === null && $authentication instanceof SamlAuthentication) {
-            if (!$authentication->isValidUsername($_POST['user_id'])) {
+            $authentication->setValidUsernames([$_POST['user_id']]);
+            if ($authentication->isInvalidUsername($_POST['user_id'])) {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
@@ -892,6 +893,14 @@ class UsersController extends AbstractController {
             'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
             'user_registration_type' => 'Student registration type must be one of either "graded", "audit", or "withdrawn".',
         ];
+        $users = [];
+        foreach ($uploaded_data as $vals) {
+            $users[] = $vals[0];
+        }
+        $authentication = $this->core->getAuthentication();
+        if ($authentication instanceof SamlAuthentication) {
+            $authentication->setValidUsernames($users);
+        }
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
             if (count($vals) === 1) {
@@ -914,9 +923,8 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_id';
                 }
             }
-            $authentication = $this->core->getAuthentication();
             if ($authentication instanceof SamlAuthentication) {
-                if (!$authentication->isValidUsername($vals[0])) {
+                if ($authentication->isInvalidUsername($vals[0])) {
                     $bad_row_details[$row_num + 1][] = 'user_id';
                     if (!in_array('user_id_saml', $bad_columns)) {
                         $bad_columns[] = 'user_id_saml';

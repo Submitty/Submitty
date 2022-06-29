@@ -69,6 +69,11 @@ function add_users(Core $core, SamlAuthentication $auth) {
     $users = $core->getQueries()->getAllSubmittyUsers();
     $added = 0;
     $skipped = 0;
+    $usernames = [];
+    foreach ($users as $user) {
+        $usernames[] = $user->getId();
+    }
+    $auth->setValidUsernames($usernames);
     foreach ($users as $user) {
         if ($auth->isValidUsername($user->getId())) {
             $core->getQueries()->insertSamlMapping($user->getId(), $user->getId());

@@ -10,6 +10,7 @@ use OneLogin\Saml2\Auth;
 
 class SamlAuthentication extends AbstractAuthentication {
     private $auth;
+    private $valid_usernames = null;
 
     public function __construct(Core $core) {
         // Library requires directory separator needed at end of path
@@ -30,21 +31,57 @@ class SamlAuthentication extends AbstractAuthentication {
         return $url;
     }
 
-    public function isValidUsername(string $username): bool {
+    public function setValidUsernames(array $usernames) {
         try {
             $username_check = $this->core->curlRequest(
                 $this->core->getConfig()->getCgiUrl() . "saml_check.cgi",
-                ['username' => $username]
+                ['usernames' => json_encode($usernames)]
             );
             $username_check = json_decode($username_check, true);
-            if ($username_check === null || !isset($username_check['valid']) || $username_check['valid'] !== true) {
-                return false;
+            if ($username_check !== null && isset($username_check['always_valid'])) {
+                if ($username_check['always_valid'] === true) {
+                    $this->valid_usernames = null;
+                    return;
+                }
             }
-            return true;
+            if ($username_check !== null && isset($username_check['usernames'])) {
+                $this->valid_usernames = $username_check['usernames'];
+            }
+            else {
+                $this->valid_usernames = [];
+            }
         }
         catch (CurlException $e) {
+            $this->valid_usernames = [];
+        }
+    }
+
+    /**
+     * Checks if provided username is valid
+     * setValidUsernames must be called beforehand
+     *
+     * @param string $username
+     * @return bool
+     */
+    public function isValidUsername(string $username): bool {
+        if ($this->valid_usernames === null) {
+            return true;
+        }
+        return in_array($username, $this->valid_usernames, true);
+    }
+
+    /**
+     * Checks if provided username is invalid
+     * setValidUsernames must be called beforehand
+     *
+     * @param string $username
+     * @return bool
+     */
+    public function isInvalidUsername(string $username): bool {
+        if ($this->valid_usernames === null) {
             return false;
         }
+        return !in_array($username, $this->valid_usernames);
     }
 
     public function authenticate(): bool {
