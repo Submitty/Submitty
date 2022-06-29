@@ -29,7 +29,6 @@
     "public/css/links.css",
     "public/css/input.css",
     "public/css/gradeable-notebook.css",
-    "public/css/gradeOverride.css",
-    "public/css/grade-inquiry.css"
+    "public/css/gradeOverride.css"
   ]
 }
