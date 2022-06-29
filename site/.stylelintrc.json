@@ -28,7 +28,6 @@
     "public/css/navigation.css",
     "public/css/links.css",
     "public/css/input.css",
-    "public/css/gradeable-notebook.css",
-    "public/css/gradeOverride.css"
+    "public/css/gradeable-notebook.css"
   ]
 }
