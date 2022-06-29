@@ -31,7 +31,6 @@
     "public/css/gradeable-notebook.css",
     "public/css/gradeOverride.css",
     "public/css/grade-inquiry.css",
-    "public/css/forum.css",
-    "public/css/fileinput.css"
+    "public/css/forum.css"
   ]
 }
