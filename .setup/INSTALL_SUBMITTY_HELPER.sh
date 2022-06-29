@@ -888,9 +888,9 @@ done
 # Cleanup Old Email
 
 # Will scan the emails table in the main Submitty database for email
-# receipts that were successfully sent (with no errors) and delete
-# them from the table.  A maximum of 10,000 email receipts will be
-# deleted.
+# receipts that were successfully sent at least 360 days ago, with no
+# errors, and delete them from the table.  A maximum of 10,000 email
+# receipts will be deleted.
 "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
 
 
