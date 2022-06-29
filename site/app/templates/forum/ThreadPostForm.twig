@@ -178,7 +178,7 @@
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
             <div class = "expiration inline-block" style="display: none;">
-              <label class="inline-block" for="expirationDate">{{ "Expiration Date" }}</label>
+              <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
             </div>
         {% endif %}

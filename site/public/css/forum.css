@@ -460,9 +460,10 @@
 
 
 .thread-announcement-checkbox,
-.pinThread-checkbox {
+.pinThread-checkbox{
     margin-left: 15px;
     display: inline-block;
+
 }
 .thread-anon-checkbox,
 #thread_status{
@@ -472,6 +473,7 @@
 .new-thread-settings-wrapper{
     display: flex;
     flex-wrap: nowrap;
+    align-items: center;
 }
 
 .email-announcement-checkbox {
