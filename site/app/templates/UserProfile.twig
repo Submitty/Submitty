@@ -132,9 +132,36 @@
                     </div>
                 </div>
             </div>
+            <div>
+            <button class="addpwa btn btn-primary">Install App</button>
+            </div>
         </div>
     </div>
 </div>
+<script>
+        let storedPrompt;
+        let pwaBtn = $('.addpwa');
+        pwaBtn[0].style.display = 'none';
+        window.addEventListener('beforeinstallprompt', (e) => {
+       
+        e.preventDefault();
+
+        storedPrompt = e;
+        pwaBtn[0].style.display = 'block';
+        pwaBtn[0].addEventListener('click', (e) => {
+         pwaBtn[0].style.display = 'none';
+         storedPrompt.prompt();
+         storedPrompt.userChoice.then((choiceResult) => {
+         if (choiceResult.outcome === 'accepted') {
+          console.log('Application Installed');
+         } else {
+          console.log('Application not Installed');
+         }
+         storedPrompt = null;
+      });
+  });
+});
+</script>
 {% include 'EditNameForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
