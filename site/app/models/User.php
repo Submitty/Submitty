@@ -218,8 +218,8 @@ class User extends AbstractModel {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
 
-        $default_registration_type = $this->group == 4 ? 'graded' : 'staff';
-        $this->registration_type = $details['registration_type'] ?? $default_registration_type;
+        // Use registration type data or default to "graded" for students and "staff" for others
+        $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
     }
 
     /**
