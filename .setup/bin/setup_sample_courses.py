@@ -1089,6 +1089,9 @@ class Course(object):
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
+            course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
+            course_materials_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials')
+            shutil.copytree(course_materials_path, course_materials_folder)
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
