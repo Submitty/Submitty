@@ -24,6 +24,10 @@ if [ -d "${CURRENT_DIR}/../.vagrant" ]; then
 fi
 
 APT=true
+if [ ${CI} == true ]; then
+    APT=false
+fi
+
 # check if apt upgrades have been disabled
 for flag in "$@"; do
     case $flag in
