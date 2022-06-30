@@ -1,7 +1,7 @@
 // Map to store the XMLHttpRequest object returned by getJSON when getting the
 // output to display in loadTestcaseOutput()
 // Key: orig_div_name   Value: XMLHttpRequest object
-const output_xhrs = new Map();
+const loading_testcases_xml_http_requests = new Map();
 
 /**
  * Collapses Test Case Output.
@@ -12,20 +12,21 @@ const output_xhrs = new Map();
  *                                correspond to the state of the test case (show, hide, loading)
  */
 function CollapseTestcaseOutput(div_name, index, loadingTools) {
-    $(`show_char_${index}`).toggle();
+    $(`#show_char_${index}`).toggle();
     $(`#${div_name}`).empty();
     // eslint-disable-next-line no-undef
     toggleDiv(div_name);
 
-    loadingTools.find('span').hide();
+    loadingTools.find('.loading-tools-hide').hide();
+    loadingTools.find('.loading-tools-in-progress').hide();
     loadingTools.find('.loading-tools-show').show();
 }
 
 /**
  * Expands or Collapses Test Case Output.
  *
- * @global {output_xhrs} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object) to store the
- *                         XMLHttpRequest object returned by getJSON when getting the output to display
+ * @global {loading_testcases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
+ *                         to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - id of div containing the output of the test case
  * @param {string} gradeable_id - ID of the gradeable
@@ -41,13 +42,13 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     const loadingTools = $(`#tc_${index}`).find('.loading-tools');
 
     // Checks if output for this div is being loaded
-    if (output_xhrs.has(orig_div_name)) {
+    if (loading_testcases_xml_http_requests.has(orig_div_name)) {
         // Checks if xhr is defined and has not succeeded yet
         // If so, abort loading
-        const xhr = output_xhrs.get(orig_div_name);
+        const xhr = loading_testcases_xml_http_requests.get(orig_div_name);
         if (xhr && xhr.readyState !== 4) {
             xhr.abort();
-            output_xhrs.delete(orig_div_name);
+            loading_testcases_xml_http_requests.delete(orig_div_name);
         }
     }
     // Checks if test case output is visible
@@ -61,10 +62,10 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output'])}?who_id=${who_id}&index=${index}&version=${version}`;
 
-        loadingTools.find('span').hide();
+        loadingTools.find('.loading-tools-show').hide();
         loadingTools.find('.loading-tools-in-progress').show();
 
-        output_xhrs.set(orig_div_name, $.getJSON({
+        loading_testcases_xml_http_requests.set(orig_div_name, $.getJSON({
             url: url,
             async: true,
             success: function(response) {
@@ -72,21 +73,21 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                     alert(`Error getting file diff: ${response.message}`);
                     return;
                 }
-                output_xhrs.delete(orig_div_name);
+                loading_testcases_xml_http_requests.delete(orig_div_name);
 
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 // eslint-disable-next-line no-undef
                 toggleDiv(orig_div_name);
 
-                loadingTools.find('span').hide();
+                loadingTools.find('.loading-tools-in-progress').hide();
                 loadingTools.find('.loading-tools-hide').show();
                 // eslint-disable-next-line no-undef
                 enableKeyToClick();
             },
             error: function(e) {
-                if (output_xhrs.has(orig_div_name) && output_xhrs.get(orig_div_name).readyState === 0) {
-                    output_xhrs.delete(orig_div_name);
+                if (loading_testcases_xml_http_requests.has(orig_div_name) && loading_testcases_xml_http_requests.get(orig_div_name).readyState === 0) {
+                    loading_testcases_xml_http_requests.delete(orig_div_name);
                     CollapseTestcaseOutput(orig_div_name, index, loadingTools);
                     console.log('JSON Load Aborted');
                 }
