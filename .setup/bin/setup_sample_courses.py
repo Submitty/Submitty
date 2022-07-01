@@ -1077,10 +1077,6 @@ class Course(object):
             self.add_sample_queue_data()
             print('Added office hours queue data to sample course.')
 
-        self.conn.close()
-        submitty_conn.close()
-        os.environ['PGPASSWORD'] = ""
-
         if self.code == 'sample':
             student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
@@ -1091,7 +1087,29 @@ class Course(object):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
             course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
             course_materials_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials')
+            if os.path.isdir(course_materials_folder):
+                # delete the folder if it exists to undo any manual uploads
+                shutil.rmtree(course_materials_folder)
             shutil.copytree(course_materials_path, course_materials_folder)
+            course_materials_table = Table("course_materials", self.metadata, autoload=True)
+            for dpath, dirs, files in os.walk(course_materials_folder):
+                self.conn.execute(course_materials_table.insert(), 
+                             path=dpath,
+                             type=2,
+                             release_date='2022-01-01 00:00:00',
+                             hidden_from_students=False,
+                             priority=0)
+                for file in files:
+                    self.conn.execute(course_materials_table.insert(), 
+                                 path=os.path.join(dpath, file),
+                                 type=0,
+                                 release_date='2022-01-01 00:00:00',
+                                 hidden_from_students=False,
+                                 priority=0)
+        self.conn.close()
+        submitty_conn.close()
+        os.environ['PGPASSWORD'] = ""
+        
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
