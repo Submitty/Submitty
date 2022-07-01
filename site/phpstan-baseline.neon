@@ -424,14 +424,6 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
-			message: """
-				#^Casting class Lcobucci\\\\JWT\\\\Token to string is deprecated\\.\\:
-				This method has been removed from the interface in v4\\.0$#
-			"""
-			count: 3
-			path: app/libraries/Core.php
-
-		-
 			message: "#^Negated boolean expression is always false\\.$#"
 			count: 2
 			path: app/libraries/Core.php
