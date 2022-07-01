@@ -25,7 +25,7 @@ describe('Test cases revolving around course material uploading and access contr
         //https://github.com/cypress-io/cypress/issues/14857
         //TODO: handle download
 
-        cy.get('.file-viewer > a').contains("file1.txt").parent().find(".fa-trash").click()
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
         cy.get('.file-viewer').contains('file1.txt').should('not.exist');
     });
@@ -60,7 +60,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('pre').should('have.text', 'a\n');
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.div-viewer > [id^=option1]').parent().find(".fa-trash").click();
+        cy.get('.div-viewer > [id^=option1]').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
     });
 
@@ -79,7 +79,7 @@ describe('Test cases revolving around course material uploading and access contr
         });
 
         cy.visit(['sample', 'course_materials']);
-        cy.get('.file-viewer > a').contains('Test URL').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('Test URL').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
         cy.get('.file-viewer > a').contains('Test URL').should('not.exist');
     });
@@ -97,12 +97,12 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#date_to_release_sf3').should('have.value', date);
         cy.get('#date_to_release_sf4').should('have.value', date);
 
-        cy.get('.file-viewer > a').contains('file1.txt').parent().find(".fa-pencil-alt").click();
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-pencil-alt').click();
         cy.get('#edit-picker').clear().type('9998-01-01 00:00:00');
         cy.waitPageChange(() => {
             cy.get('#submit-edit').click({force: true}); //div covering button
         });
-        cy.get('.file-viewer > a').contains('file1.txt').parent().find("[id^=date_to_release_sf]").should('have.value', '9998-01-01 00:00:00');
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('[id^=date_to_release_sf]').should('have.value', '9998-01-01 00:00:00');
 
         cy.logout();
         cy.login('aphacker');
@@ -125,10 +125,10 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer > a').contains('file1.txt').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer > a').contains('file2.txt').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('file2.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
     });
 
@@ -167,10 +167,10 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login();
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer > a').contains('file1.txt').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
 
-        cy.get('.div-viewer > a').contains('option1').parent().find(".fa-trash").click();
+        cy.get('.div-viewer > a').contains('option1').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
         cy.get('.file-viewer').should('have.length', 6);
     });
@@ -222,7 +222,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login();
 
         cy.visit(['sample', 'course_materials']);
-        cy.get('a[id=zip]').parent().find(".fa-trash").click()
+        cy.get('a[id=zip]').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
         cy.get('a[id=zip]').should('not.exist');
     });
@@ -238,7 +238,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('.file-viewer > a').contains('file2.txt').parent().find('.fa-pencil-alt').click()
+        cy.get('.file-viewer > a').contains('file2.txt').parent().find('.fa-pencil-alt').click();
         cy.get('#section-edit-2').check();
         cy.waitPageChange(() => {
             cy.get('#submit-edit').click();
@@ -266,10 +266,10 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login();
 
         cy.visit(['sample', 'course_materials']);
-        cy.get('.file-viewer > a').contains('file1.txt').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer > a').contains('file2.txt').parent().find(".fa-trash").click();
+        cy.get('.file-viewer > a').contains('file2.txt').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
         cy.get('.file-viewer').should('have.length', 6);
 
