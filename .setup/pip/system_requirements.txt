@@ -20,7 +20,7 @@
 # once we move to a newer pip.
 cryptography==3.3.2
 
-#For QR bulk upload
+# For QR bulk upload
 opencv-python==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
