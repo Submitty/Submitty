@@ -1086,13 +1086,11 @@ class Course(object):
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
             course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
-            course_materials_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials', 'sample_course_materials.zip')
-            if os.path.isdir(course_materials_folder):
-                # delete the folder if it exists to undo any manual uploads
-                shutil.rmtree(course_materials_folder)
+            course_materials_zip = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials', 'sample_course_materials.zip')
             with TemporaryDirectory() as tmpdir:
-                shutil.unpack_archive(course_materials_path, tmpdir)
-                shutil.move(tmpdir, course_materials_folder)
+                shutil.unpack_archive(course_materials_zip, tmpdir)
+                for f in os.listdir(tmpdir):
+                    shutil.move(os.path.join(tmpdir, f), course_materials_folder)
             course_materials_table = Table("course_materials", self.metadata, autoload=True)
             for dpath, dirs, files in os.walk(course_materials_folder):
                 self.conn.execute(course_materials_table.insert(), 
