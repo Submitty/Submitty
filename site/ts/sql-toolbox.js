@@ -76,22 +76,22 @@ export async function runSqlQuery() {
     }
 }
 
-export function generateCSV(id) {
+export function generateCSV(id){
     const results = document.getElementById(id);
     let csv = '';
     //Add headers to CSV string
     const header = results.children.item(0);
     const row = header.children.item(0);
-    for (let i = 1; i < row.children.length; i++) {
+    for (let i = 1; i < row.children.length; i++){
         csv += `"${row.children.item(i).textContent.split('"').join('""')}",`;
     }
     csv += '\n';
 
     //Add data to CSV string
     const data = results.children.item(1);
-    for (let i = 0; i < data.children.length; i++) {
+    for (let i = 0; i < data.children.length; i++){
         const row = data.children.item(i);
-        for (let j = 1; j < row.children.length; j++) {
+        for (let j = 1; j < row.children.length; j++){
             csv += `"${row.children.item(j).textContent.split('"').join('""')}",`;
         }
         csv += '\n';
@@ -99,7 +99,7 @@ export function generateCSV(id) {
     return csv;
 }
 
-export async function downloadSqlResult(id) {
+export async function downloadSqlResult(id){
     const csv = generateCSV(id);
     //Encode and download the CSV string
     const address = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;

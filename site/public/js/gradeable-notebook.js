@@ -84,14 +84,14 @@ function saveNotebookToLocal() {
     const codebox_inputs = [];
 
     //loop through multiple choice questions and save answers
-    $('.multiple_choice').each(function() {
+    $('.multiple_choice').each(function(){
         let file_name='';
-        $(this).children('fieldset').each(function() {
+        $(this).children('fieldset').each(function(){
             file_name = $(this).data('filename');
             if (file_name) {
                 const answers = [];
                 //grab selected answers
-                $(this).find('input').each(function() {
+                $(this).find('input').each(function(){
                     if ($(this)[0].checked) {
                         answers.push($(this)[0].defaultValue);
                     }
@@ -102,8 +102,8 @@ function saveNotebookToLocal() {
     });
 
     //save short answers
-    $('.short_answer').each(function() {
-        $(this).find('div[name^="codebox_"]').each(function() {
+    $('.short_answer').each(function(){
+        $(this).find('div[name^="codebox_"]').each(function(){
             const file_name = ($(this).data('filename') || '').trim();
             if (file_name) {
                 //grab input
@@ -140,7 +140,7 @@ function restoreNotebookFromLocal() {
         for (const id in inputs.multiple_choice) {
             const {file_name, answers} = inputs.multiple_choice[id];
             let found = false;
-            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function() {
+            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function(){
                 found = true;
                 //check off proper inputs
                 for (let i = 0; i < answers.length; i++) {
@@ -381,7 +381,7 @@ $(document).ready(() => {
 
     restoreNotebookFromLocal();
 
-    if (typeof cleanupAutosaveHistory === 'function') {
+    if (typeof cleanupAutosaveHistory === 'function'){
         cleanupAutosaveHistory('-notebook-autosave');
     }
 });

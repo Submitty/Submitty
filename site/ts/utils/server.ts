@@ -4,7 +4,7 @@
  * @param {string[]} parts
  * @returns string
  */
-export function buildCourseUrl(parts: string[] = []) : string {
+export function buildCourseUrl(parts: string[] = []) : string{
     return `${document.body.dataset.courseUrl}${parts.length > 0 ? `/${parts.join('/')}` : ''}`;
 }
 
@@ -13,13 +13,13 @@ export function buildCourseUrl(parts: string[] = []) : string {
  *
  * @returns string
  */
-export function getCsrfToken() : string {
+export function getCsrfToken() : string{
     return document.body.dataset.csrfToken ?? '';
 }
 
 let messages = 0;
 
-export function displayErrorMessage(message: string) {
+export function displayErrorMessage(message: string){
     displayMessage(message, 'error');
 }
 

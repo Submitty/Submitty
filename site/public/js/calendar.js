@@ -49,7 +49,7 @@ function nextMonth(month, year) {
  * @param datestr : string a string representing a date in the format of YYYY-mm-dd
  * @returns {Date} a Date object containing the specified date
  */
-function parseDate(datestr) {
+function parseDate(datestr){
     const temp = datestr.split('-');
     return new Date(parseInt(temp[0]), parseInt(temp[1])-1, parseInt(temp[2]));
 }

@@ -211,7 +211,7 @@ export function init() {
     document.getElementById('apply-btn').addEventListener('click', () => applySettings());
 }
 
-export function columnOnClick(n) {
+export function columnOnClick(n){
     let i, dir;
 
     if ($(`#${n}`).children('i').hasClass('fa-angle-up')) {
