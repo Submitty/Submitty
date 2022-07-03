@@ -52,6 +52,7 @@ export function sortTable(n, dir) {
 export function comparator (row1, row2, n, dir) {
     // Check if they're equal
     if (!helper(row1[n].innerHTML, row2[n].innerHTML) && !helper(row2[n].innerHTML, row1[n].innerHTML)) {
+        // eslint-disable-next-line eqeqeq
         if (1 != n && helper(row1[1].innerHTML, row2[1].innerHTML, 1)) {
             return true;
         }
@@ -59,9 +60,11 @@ export function comparator (row1, row2, n, dir) {
     }
     // They are not equal
     // Then check for lesser or greater relationships
+    // eslint-disable-next-line eqeqeq
     if (dir == 'asc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
         return true;
     }
+    // eslint-disable-next-line eqeqeq
     else if (dir == 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
         return true;
     }
@@ -71,12 +74,15 @@ export function comparator (row1, row2, n, dir) {
 // if n == 0 or n == 8
 // returns true if x < y, empty strings < digits < strings
 export function helper (x, y, i) {
+    // eslint-disable-next-line eqeqeq
     if (x != '' && y == '') {
         return false;
     }
+    // eslint-disable-next-line eqeqeq
     else if (x == '' && y != '') {
         return true;
     }
+    // eslint-disable-next-line eqeqeq
     if (i == 0 || i == 8) {
         const xIsDigit = /^\d+$/.test(x);
         const yIsDigit = /^\d+$/.test(y);
@@ -90,12 +96,15 @@ export function helper (x, y, i) {
             return x < y;
         }
     }
+    // eslint-disable-next-line eqeqeq
     else if ((i <= 7 && i >= 4) || i == 9) {
         const dateX = new Date(x);
         const dateY = new Date(y);
+        // eslint-disable-next-line eqeqeq
         if (dateX.toString() == 'Invalid Date') {
             return true;
         }
+        // eslint-disable-next-line eqeqeq
         else if (dateY.toString() == 'Invalid Date') {
             return false;
         }
@@ -130,21 +139,27 @@ export function applySettings() {
         const s_off_hours = data[i].office_hours_queue;
         let flag = false;
 
+        // eslint-disable-next-line eqeqeq
         if ((!Number.isNaN(grad_acc) && s_grad_acc == null) || Date.parse(s_grad_acc) < grad_acc) {
             flag = true;
         }
+        // eslint-disable-next-line eqeqeq
         else if ((!Number.isNaN(grad_sub) && s_grad_sub == null) || Date.parse(s_grad_sub) < grad_sub) {
             flag = true;
         }
+        // eslint-disable-next-line eqeqeq
         else if ((!Number.isNaN(forum_view) && s_forum_view == null) || Date.parse(s_forum_view) < forum_view) {
             flag = true;
         }
+        // eslint-disable-next-line eqeqeq
         else if ((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) {
             flag = true;
         }
+        // eslint-disable-next-line eqeqeq
         else if ((!Number.isNaN(num_poll) && s_num_polls == null) || Date.parse(s_num_polls) < num_poll) {
             flag = true;
         }
+        // eslint-disable-next-line eqeqeq
         else if ((!Number.isNaN(off_hours) && s_off_hours == null) || Date.parse(s_off_hours) < off_hours) {
             flag = true;
         }
@@ -209,9 +224,11 @@ export function columnOnClick(n){
     }
 
     for (i = 0; i < 10; i++) {
+        // eslint-disable-next-line eqeqeq
         if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
             $(`#${i}`).children('i').removeClass('fa-angle-up');
         }
+        // eslint-disable-next-line eqeqeq
         else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
             $(`#${i}`).children('i').removeClass('fa-angle-down');
         }

@@ -107,6 +107,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $(`#user_id_${i}`).autocomplete('option', 'appendTo', form);
         }
 
+        // eslint-disable-next-line eqeqeq
         if (user_assignment_setting_json != false) {
             const team_history_len = user_assignment_setting_json.team_history.length;
             team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[0].time, 'N/A', 'Team Formed'));
@@ -120,31 +121,40 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
                 const getRowBound = getTeamHistoryTableRowString.bind(null, past_lock_date, curr_json_entry.time);
 
+                // eslint-disable-next-line eqeqeq
                 if (curr_json_entry.action == 'admin_create' && curr_json_entry.first_user != undefined) {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, 'Created Team'));
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.first_user}`));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (curr_json_entry.action == 'admin_create' || curr_json_entry.action == 'admin_add_user'){
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.added_user}`));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'create') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Created Team'));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'admin_remove_user'){
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Removed ${curr_json_entry.removed_user}`));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'leave') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Left Team'));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'send_invitation') {
                     team_history_tbody.append(getRowBound(curr_json_entry.sent_by_user, `Invited ${curr_json_entry.sent_to_user}`));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'accept_invitation') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Accepted Invite'));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'cancel_invitation') {
                     team_history_tbody.append(getRowBound(curr_json_entry.canceled_by_user, `Uninvited ${curr_json_entry.canceled_user}`));
                 }
+                // eslint-disable-next-line eqeqeq
                 else if (user_assignment_setting_json.team_history[j].action == 'change_name') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Changed Team Name'));
                 }
@@ -166,6 +176,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 break;
             }
         }
+        // eslint-disable-next-line eqeqeq
         if (found || $(this).val() == '') {
             $(this)[0].setCustomValidity('');
         }

@@ -186,6 +186,7 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
 
 function newPostRender(gc_id, post_id, new_post) {
     // if grading inquiry per component is allowed
+    // eslint-disable-next-line eqeqeq
     if (gc_id != 0){
     // add new post to all tab
         const all_inquiries = $('.grade-inquiries').children("[data-component_id='0']");
@@ -195,7 +196,7 @@ function newPostRender(gc_id, post_id, new_post) {
         // add to grading component
         const component_grade_inquiry = $('.grade-inquiries').children(`[data-component_id='${gc_id}']`);
         last_post = component_grade_inquiry.children('.post_box').last();
-        if (last_post.length == 0) {
+        if (last_post.length === 0) {
             // if no posts
             last_post = component_grade_inquiry.children('.grade-inquiry-header-div').last();
         }
@@ -225,7 +226,7 @@ function newDiscussionRender(discussion) {
     localStorage.setItem('selected_tab',`.component-${component_id}`);
 
     // TA (access grading)
-    if ($('#regradeBoxSection').length == 0){
+    if ($('#regradeBoxSection').length === 0){
         $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
     }
     // student

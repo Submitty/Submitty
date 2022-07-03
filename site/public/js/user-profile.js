@@ -284,6 +284,7 @@ $(document).ready(() => {
 
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
+                    // eslint-disable-next-line eqeqeq
                     if (response.data.utc_offset != offset) {
                         // eslint-disable-next-line no-undef
                         displayWarningMessage('Selected time-zone does not match system time-zone.');

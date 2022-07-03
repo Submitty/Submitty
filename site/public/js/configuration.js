@@ -39,6 +39,7 @@ $(document).ready(() => {
                     elem.value = $(elem).attr('value');
 
                     // Ensure auto_rainbow_grades checkbox reverts to unchecked if it failed validation
+                    // eslint-disable-next-line eqeqeq
                     if ($(elem).attr('name') == 'auto_rainbow_grades') {
                         $(elem).prop('checked', false);
                     }

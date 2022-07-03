@@ -31,6 +31,7 @@ function filterOnClick() {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function (){
+            // eslint-disable-next-line eqeqeq
             if ($(this).text() == this_filter) {
                 hide = false;
             }
@@ -78,6 +79,7 @@ function addImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
+            // eslint-disable-next-line eqeqeq
             if (json.status == 'success') {
                 $('#add-field').val('');
                 // eslint-disable-next-line no-undef
@@ -105,6 +107,7 @@ function updateImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
+            // eslint-disable-next-line eqeqeq
             if (json.status == 'success') {
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);

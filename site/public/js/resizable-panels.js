@@ -29,6 +29,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     // Width of left side
     const mouseDownHandler = (e) => {
         // Get the current mouse position
+        // eslint-disable-next-line eqeqeq
         if (e.type == 'touchstart') {
             e = e.touches[0];
         }
@@ -65,6 +66,7 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize= fa
     };
 
     const mouseMoveHandler = (e) => {
+        // eslint-disable-next-line eqeqeq
         if (e.type == 'touchmove') {
             e = e.touches[0];
         }
