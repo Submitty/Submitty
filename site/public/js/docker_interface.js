@@ -8,7 +8,7 @@ function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
 
-    if (tgt.style.display === 'block'){
+    if (tgt.style.display === 'block') {
         tgt.style.display = 'none';
         btn.innerHTML = 'Expand';
     }
@@ -21,7 +21,7 @@ function collapseSection(id,btn_id) {
 function filterOnClick() {
     const this_filter = $(this).data('capability');
 
-    $('.filter-buttons').each(function (){
+    $('.filter-buttons').each(function () {
         $(this).addClass('fully-transparent');
     });
 
@@ -30,7 +30,7 @@ function filterOnClick() {
     $('.image-row').each(function() {
         const this_row = $(this);
         let hide = true;
-        $(this).find('.badge').each(function (){
+        $(this).find('.badge').each(function () {
             // eslint-disable-next-line eqeqeq
             if ($(this).text() == this_filter) {
                 hide = false;

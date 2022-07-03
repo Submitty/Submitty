@@ -41,7 +41,7 @@ function loadPage(page, load_page_url) {
     });
 }
 
-function textPageChange(){
+function textPageChange() {
     let page = parseInt($('#page-num').val());
     if (page < 1) {
         page = 1;

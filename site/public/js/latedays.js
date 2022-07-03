@@ -1,6 +1,6 @@
-function calculateLateDays(inputDate){
+function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
-    if (select_menu.selectedIndex === 0){
+    if (select_menu.selectedIndex === 0) {
         alert('Please select a gradeable first!');
         return;
     }

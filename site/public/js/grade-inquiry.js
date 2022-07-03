@@ -1,7 +1,7 @@
 /* global buildCourseUrl, WebSocketClient */
 /* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
-function onReady(){
+function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
     const component_selector = localStorage.getItem('selected_tab');
     const first_unresolved_component = $('.component-unresolved').first();
@@ -32,7 +32,7 @@ function onComponentTabClicked(tab) {
     const component_id = $(tab).data('component_id');
 
     // show posts that pertain to this component_id
-    $('.grade-inquiry').each(function(){
+    $('.grade-inquiry').each(function() {
         if ($(this).data('component_id') !== component_id) {
             $(this).hide();
         }
@@ -81,7 +81,7 @@ function onGradeInquirySubmitClicked(button) {
     // and ignore their response
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
-    if (submit_button_id && submit_button_id === 'grading-close'){
+    if (submit_button_id && submit_button_id === 'grading-close') {
         if (text_area.val().trim()) {
             if (!confirm('The text you entered will not be posted. Are you sure you want to close the grade inquiry?')) {
                 return;
@@ -107,7 +107,7 @@ function onGradeInquirySubmitClicked(button) {
         type: 'POST',
         url: button_clicked.attr('formaction'),
         data: form.serialize(),
-        success: function(response){
+        success: function(response) {
             try {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
@@ -126,7 +126,7 @@ function onGradeInquirySubmitClicked(button) {
                             'gc_id': gc_id,
                         });
                     }
-                    else if (data.type === 'open_grade_inquiry'){
+                    else if (data.type === 'open_grade_inquiry') {
                         window.socketClient.send({'type' : 'toggle_status', 'submitter_id' : submitter_id});
                         window.location.reload();
                     }
@@ -178,7 +178,7 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
             csrf_token: window.csrfToken,
             gc_id : gc_id,
         },
-        success: function(new_post){
+        success: function(new_post) {
             newPostRender(gc_id, post_id, new_post);
         },
     });
@@ -187,7 +187,7 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
 function newPostRender(gc_id, post_id, new_post) {
     // if grading inquiry per component is allowed
     // eslint-disable-next-line eqeqeq
-    if (gc_id != 0){
+    if (gc_id != 0) {
     // add new post to all tab
         const all_inquiries = $('.grade-inquiries').children("[data-component_id='0']");
         let last_post = all_inquiries.children('.post_box').last();
@@ -213,7 +213,7 @@ function gradeInquiryDiscussionHandler(submitter_id) {
         type: 'POST',
         url: buildCourseUrl(['gradeable', window.location.pathname.split('gradeable/')[1].split('/')[0], 'grade_inquiry', 'discussion']),
         data: {submitter_id: submitter_id, csrf_token: window.csrfToken},
-        success: function(discussion){
+        success: function(discussion) {
             newDiscussionRender(discussion);
         },
     });
@@ -226,7 +226,7 @@ function newDiscussionRender(discussion) {
     localStorage.setItem('selected_tab',`.component-${component_id}`);
 
     // TA (access grading)
-    if ($('#regradeBoxSection').length === 0){
+    if ($('#regradeBoxSection').length === 0) {
         $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
     }
     // student

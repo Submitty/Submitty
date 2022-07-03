@@ -1,7 +1,7 @@
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
 // eslint-disable-next-line no-unused-vars
-function ExtractBuckets(){
+function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
     bucket_list.each((idx,li) => {
@@ -14,8 +14,8 @@ function ExtractBuckets(){
 
 //Forces element's value to be non-negative
 // eslint-disable-next-line no-unused-vars
-function ClampPoints(el){
-    if (el.value === ''){
+function ClampPoints(el) {
+    if (el.value === '') {
         el.value = el.placeholder;
         el.classList.remove('override');
     }
@@ -24,7 +24,7 @@ function ClampPoints(el){
 
 // eslint-disable-next-line no-unused-vars
 function DetectMaxOverride(el) {
-    if (el.value !== el.placeholder){
+    if (el.value !== el.placeholder) {
         el.classList.add('override');
     }
     else {
@@ -32,12 +32,12 @@ function DetectMaxOverride(el) {
     }
 }
 
-function ExtractBucketName(s,offset){
+function ExtractBucketName(s,offset) {
     const tmp = s.split('-');
     let bucket = '';
     let i;
-    for (i=offset;i<tmp.length; i++){
-        if (i>offset){
+    for (i=offset;i<tmp.length; i++) {
+        if (i>offset) {
             bucket += '-';
         }
         bucket += tmp[i];
@@ -47,23 +47,23 @@ function ExtractBucketName(s,offset){
 
 //Forces element's value to be in range [0.0,100.0]
 // eslint-disable-next-line no-unused-vars
-function ClampPercent(el){
+function ClampPercent(el) {
     el.value = Math.min(Math.max(el.value,0.0),100.0);
     UpdateUsedPercentage();
     $(`#config-percent-${ExtractBucketName(el.id,1)}`).text(`${el.value}%`);
 }
 
 //Updates the sum of percentage points accounted for by the buckets being used
-function UpdateUsedPercentage(){
+function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent']").filter(function(){
+    $("input[id^='percent']").filter(function() {
         return $(this).parent().css('display') !== 'none';
-    }).each(function(){
+    }).each(function() {
         val += parseFloat($(this).val());
     });
     const percentage_span = $('#used_percentage');
     percentage_span.text(`${val.toString()}%`);
-    if (val>100.0){
+    if (val>100.0) {
         percentage_span.css({'color':'red','font-weight':'bold'});
     }
     else {
@@ -73,7 +73,7 @@ function UpdateUsedPercentage(){
 
 //Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
 // eslint-disable-next-line no-unused-vars
-function UpdateVisibilityBuckets(){
+function UpdateVisibilityBuckets() {
     //For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function() {
         //Extract the bucket name
@@ -83,7 +83,7 @@ function UpdateVisibilityBuckets(){
 
     //For each bucket that IS being used, show it
     const used_buckets = $('#buckets_used_list').find('input');
-    if (used_buckets.length === 0){
+    if (used_buckets.length === 0) {
         return;
     }
     let prev_bucket = ExtractBucketName(used_buckets.first().attr('id'),1);
@@ -105,7 +105,7 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function(){
+    $.each($("input[class='sections_and_labels']"), function() {
 
         // Get data
         const section = this.getAttribute('data-section').toString();
@@ -126,7 +126,7 @@ function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
 
-    $.each($("input[name='display_benchmarks']:checked"), function(){
+    $.each($("input[name='display_benchmarks']:checked"), function() {
         display_benchmarks.push($(this).val());
     });
 
@@ -161,7 +161,7 @@ function getGradeableBuckets() {
         // Only use buckets which have display block
         // This works even if outer container is collapsed
         // eslint-disable-next-line eqeqeq
-        if ($(this).css('display') == 'block'){
+        if ($(this).css('display') == 'block') {
             const bucket = {};
 
             // Extract bucket-type
@@ -305,7 +305,7 @@ function getBenchmarkPercent() {
 }
 
 // This function constructs a JSON representation of all the form input
-function buildJSON(){
+function buildJSON() {
 
     // Build the overall json
     let ret = {
