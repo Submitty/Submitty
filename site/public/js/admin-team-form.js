@@ -126,13 +126,13 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, 'Created Team'));
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.first_user}`));
                 }
-                else if (curr_json_entry.action === 'admin_create' || curr_json_entry.action === 'admin_add_user'){
+                else if (curr_json_entry.action === 'admin_create' || curr_json_entry.action === 'admin_add_user') {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Added ${curr_json_entry.added_user}`));
                 }
                 else if (user_assignment_setting_json.team_history[j].action === 'create') {
                     team_history_tbody.append(getRowBound(curr_json_entry.user, 'Created Team'));
                 }
-                else if (user_assignment_setting_json.team_history[j].action === 'admin_remove_user'){
+                else if (user_assignment_setting_json.team_history[j].action === 'admin_remove_user') {
                     team_history_tbody.append(getRowBound(curr_json_entry.admin_user, `Removed ${curr_json_entry.removed_user}`));
                 }
                 else if (user_assignment_setting_json.team_history[j].action === 'leave') {
@@ -184,7 +184,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     }
 }
 
-function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
+function getTeamHistoryTableRowString(isAfterLockDate, date, user, action) {
     return `<tr ${isAfterLockDate ? 'class="admin-team-history-after-lock"' : ''} tabIndex="-1">
         <td class="admin-team-history-td" tabIndex="0">${user}</td>
         <td class="admin-team-history-td" tabIndex="0">${action}</td>
@@ -192,11 +192,11 @@ function getTeamHistoryTableRowString(isAfterLockDate, date, user, action){
     </tr>`;
 }
 
-function getTeamFormLabelString(for_prefix, text, user_num ){
+function getTeamFormLabelString(for_prefix, text, user_num ) {
     return `<label tabIndex="0" for="${for_prefix + user_num}" style="display:none;">${`${text} ${user_num}`}</label>`;
 }
 
-function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string=''){
+function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string='') {
     return `<input 
                 tabIndex="0" 
                 id="${id_prefix + user_num}" 
@@ -208,7 +208,7 @@ function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num,
             />`;
 }
 
-function getTeamFormInputString(id_prefix, name_prefix, user_num){
+function getTeamFormInputString(id_prefix, name_prefix, user_num) {
     return `<input 
                 tabIndex="0" 
                 id="${id_prefix + user_num}" 
@@ -217,7 +217,7 @@ function getTeamFormInputString(id_prefix, name_prefix, user_num){
             />`;
 }
 
-function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclick, ...onclickArgs){
+function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclick, ...onclickArgs) {
     return `<button 
                 tabIndex="0"
                 id="${id_prefix + user_num}"
@@ -229,7 +229,7 @@ function getTeamFormButtonString(id_prefix, button_class, text, user_num, onclic
             </button>`;
 }
 
-function getTeamFormAddMoreUsersButtonString(user_num){
+function getTeamFormAddMoreUsersButtonString(user_num) {
     return `<button 
                 id="admin_team_form_add_more_users_button"
                 onclick="addTeamMemberInput(this, ${user_num});" 
@@ -242,7 +242,7 @@ function getTeamFormAddMoreUsersButtonString(user_num){
             </button>`;
 }
 
-function getTeamFormMultipleInvitesWarningString(){
+function getTeamFormMultipleInvitesWarningString() {
     return `<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:90%">
                 *Pending members highlighted in pink/red have invites to multiple teams.
             </div>`;

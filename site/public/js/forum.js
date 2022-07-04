@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-function categoriesFormEvents(){
+function categoriesFormEvents() {
     $('#ui-category-list').sortable({
         items : '.category-sortable',
         handle: '.handle',
@@ -26,19 +26,19 @@ function categoriesFormEvents(){
         $(element).css('background-color',$(element).val());
     };
 
-    $('.category-color-picker').each(function(){
+    $('.category-color-picker').each(function() {
         refresh_color_select($(this));
     });
 }
 
 // eslint-disable-next-line no-unused-vars
-function openFileForum(directory, file, path ){
+function openFileForum(directory, file, path ) {
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
     window.open(url,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
-function checkForumFileExtensions(post_box_id, files){
+function checkForumFileExtensions(post_box_id, files) {
     const count = files.length;
     for (let i = 0; i < files.length; i++) {
         // eslint-disable-next-line no-undef
@@ -55,23 +55,23 @@ function checkForumFileExtensions(post_box_id, files){
     return count === files.length;
 }
 
-function resetForumFileUploadAfterError(displayPostId){
+function resetForumFileUploadAfterError(displayPostId) {
     $(`#file_name${displayPostId}`).html('');
     document.getElementById(`file_input_label${displayPostId}`).style.border = '2px solid red';
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
 
 // eslint-disable-next-line no-unused-vars
-function checkNumFilesForumUpload(input, post_id){
+function checkNumFilesForumUpload(input, post_id) {
     // eslint-disable-next-line no-undef
     const displayPostId = (typeof post_id !== 'undefined') ? `_${escapeSpecialChars(post_id)}` : '';
-    if (input.files.length > 5){
+    if (input.files.length > 5) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
     }
     else {
-        if (!checkForumFileExtensions(input.files)){
+        if (!checkForumFileExtensions(input.files)) {
             // eslint-disable-next-line no-undef
             displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             resetForumFileUploadAfterError(displayPostId);
@@ -94,7 +94,7 @@ function uploadImageAttachments(attachment_box) {
         let file_object = null;
         const filename = target.attr('fname');
         // eslint-disable-next-line no-undef
-        for (let j = 0; j < file_array[part-1].length; j++){
+        for (let j = 0; j < file_array[part-1].length; j++) {
             // eslint-disable-next-line no-undef, eqeqeq
             if (file_array[part-1][j].name == filename) {
                 // eslint-disable-next-line no-undef
@@ -143,13 +143,13 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
 
     let valid = true;
-    if (!checkForumFileExtensions(post_box_id, files)){
+    if (!checkForumFileExtensions(post_box_id, files)) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
         valid = false;
     }
 
-    if (files.length > 5){
+    if (files.length > 5) {
         if (dynamic_check) {
             // eslint-disable-next-line no-undef
             displayErrorMessage('Max file upload size is 5. Please remove attachments accordingly.');
@@ -200,7 +200,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
@@ -211,7 +211,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                     return;
                 }
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
@@ -222,14 +222,14 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             clearReplyBoxAutosave(form);
 
             const thread_id = json['data']['thread_id'];
-            if (is_thread){
+            if (is_thread) {
                 window.socketClient.send({'type': 'new_thread', 'thread_id': thread_id});
             }
             else {
                 const post_id = json['data']['post_id'];
                 let reply_level = form[0].hasAttribute('id') ? parseInt(form.prev().attr('data-reply_level')) : 0;
                 reply_level = reply_level < 7 ? reply_level+1 : reply_level;
-                const post_box_ids = $('.post_reply_form .thread-post-form').map(function(){
+                const post_box_ids = $('.post_reply_form .thread-post-form').map(function() {
                     return $(this).data('post_box_id');
                 }).get();
                 const max_post_box_id = Math.max.apply(Math, post_box_ids);
@@ -238,7 +238,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
             window.location.href = json['data']['next_page'];
         },
-        error: function(){
+        error: function() {
             // eslint-disable-next-line no-undef
             displayErrorMessage(error_message);
         },
@@ -281,7 +281,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
             try {
                 const new_post = JSON.parse(response).data;
 
-                if (!edit){
+                if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
                     if (parent_post.hasClass('first_post')) {
@@ -351,7 +351,7 @@ function socketDeletePostHandler(post_id) {
     });
 }
 
-function socketNewOrEditThreadHandler(thread_id, edit=false){
+function socketNewOrEditThreadHandler(thread_id, edit=false) {
     $.ajax({
         type: 'POST',
         // eslint-disable-next-line no-undef
@@ -361,7 +361,7 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
             try {
                 const new_thread = JSON.parse(response).data;
 
-                if (!edit){
+                if (!edit) {
                     if ($(new_thread).find('.thread-announcement').length !== 0) {
                         const last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
                         if (last_bookmarked_announcement.length !== 0) {
@@ -408,7 +408,7 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
     });
 }
 
-function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_id=null){
+function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_id=null) {
     const thread_to_delete = `[data-thread_id='${thread_id}']`;
     $(thread_to_delete).fadeOut('slow', () => {
         $(thread_to_delete).next().remove();
@@ -416,8 +416,8 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
     });
 
     // eslint-disable-next-line eqeqeq
-    if ($('#current-thread').val() == thread_id){
-        if (merge){
+    if ($('#current-thread').val() == thread_id) {
+        if (merge) {
             // eslint-disable-next-line no-var, no-undef
             var new_url = buildCourseUrl(['forum', 'threads', merge_thread_id]);
         }
@@ -434,7 +434,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
     }
 }
 
-function socketResolveThreadHandler(thread_id){
+function socketResolveThreadHandler(thread_id) {
     const icon_to_update = $(`[data-thread_id='${thread_id}']`).find('i.fa-question');
     $(icon_to_update).fadeOut(400, () => {
         $(icon_to_update).removeClass('fa-question thread-unresolved').addClass('fa-check thread-resolved').fadeIn(400);
@@ -443,7 +443,7 @@ function socketResolveThreadHandler(thread_id){
     $(icon_to_update).attr('aria-label', 'Thread Resolved');
 
     // eslint-disable-next-line eqeqeq
-    if ($('#current-thread').val() == thread_id){
+    if ($('#current-thread').val() == thread_id) {
         $("[title='Mark thread as resolved']").remove();
     }
 }
@@ -471,8 +471,8 @@ function socketAnnounceThreadHandler(thread_id) {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
                 // look for thread to insert before -> thread_id 4 if inserting thread_id = 5
-                for (let i=0; i<announced_pinned_threads_ids.length; i++){
-                    if (announced_pinned_threads_ids[i] < thread_id){
+                for (let i=0; i<announced_pinned_threads_ids.length; i++) {
+                    if (announced_pinned_threads_ids[i] < thread_id) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_before = `[data-thread_id='${announced_pinned_threads_ids[i]}']`;
                         $(thread_to_announce).insertBefore($(thread_to_insert_before)).hide().fadeIn('slow');
@@ -480,7 +480,7 @@ function socketAnnounceThreadHandler(thread_id) {
                     }
 
                     // if last thread then insert after -> if inserting thread_id = 2
-                    if (i === announced_pinned_threads_ids.length-1){
+                    if (i === announced_pinned_threads_ids.length-1) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${announced_pinned_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -497,19 +497,19 @@ function socketAnnounceThreadHandler(thread_id) {
             // find announcements that are not bookmarked
             const announced_pinned_threads = $('.thread-announcement').siblings('.thread-favorite').parent().parent();
             const announced_only_threads = $('.thread-announcement').parent().parent().not(announced_pinned_threads);
-            if (announced_only_threads.length !== 0){
+            if (announced_only_threads.length !== 0) {
                 const announced_only_threads_ids = $(announced_only_threads).map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
-                for (let i=0; i<announced_only_threads_ids.length; i++){
-                    if (announced_only_threads_ids[i] < thread_id){
+                for (let i=0; i<announced_only_threads_ids.length; i++) {
+                    if (announced_only_threads_ids[i] < thread_id) {
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_before = `[data-thread_id='${announced_only_threads_ids[i]}']`;
                         $(thread_to_announce).insertBefore($(thread_to_insert_before)).hide().fadeIn('slow');
                         break;
                     }
 
-                    if (i === announced_only_threads_ids.length-1){
+                    if (i === announced_only_threads_ids.length-1) {
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${announced_only_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -534,10 +534,10 @@ function socketAnnounceThreadHandler(thread_id) {
     $(hr).insertAfter($(thread_to_announce)); // insert <hr> right after thread div
     // if user's current thread is the one modified -> update
     // eslint-disable-next-line eqeqeq
-    if ($('#current-thread').val() == thread_id){
+    if ($('#current-thread').val() == thread_id) {
     // if is instructor
         const instructor_pin = $('.not-active-thread-announcement');
-        if (instructor_pin.length){
+        if (instructor_pin.length) {
             instructor_pin.removeClass('.not-active-thread-announcement').addClass('active-thread-remove-announcement');
             instructor_pin.attr('onClick', instructor_pin.attr('onClick').replace('1,', '0,').replace('pin this thread to the top?', 'unpin this thread?'));
             instructor_pin.attr('title', 'Unpin Thread');
@@ -559,24 +559,24 @@ function socketUnpinThreadHandler(thread_id) {
 
     const not_pinned_threads = $('.thread_box').not($('.thread-announcement').parent()).parent();
     // if there exists other threads that are not pinned
-    if (not_pinned_threads.length){
+    if (not_pinned_threads.length) {
         // if thread is bookmarked
-        if ($(thread_to_unpin).find('.thread-favorite').length !== 0){
+        if ($(thread_to_unpin).find('.thread-favorite').length !== 0) {
             // if there exists other threads that are bookmarked
-            if (not_pinned_threads.find('.thread-favorite').length !== 0){
+            if (not_pinned_threads.find('.thread-favorite').length !== 0) {
                 const bookmarked_threads_ids = not_pinned_threads.find('.thread-favorite').parent().parent().map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
 
-                for (let i=0; i<bookmarked_threads_ids.length; i++){
-                    if (bookmarked_threads_ids[i] < thread_id){
+                for (let i=0; i<bookmarked_threads_ids.length; i++) {
+                    if (bookmarked_threads_ids[i] < thread_id) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_before = `[data-thread_id='${bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertBefore($(thread_to_insert_before)).hide().fadeIn('slow');
                         break;
                     }
 
-                    if (i === bookmarked_threads_ids.length-1){
+                    if (i === bookmarked_threads_ids.length-1) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -592,7 +592,7 @@ function socketUnpinThreadHandler(thread_id) {
         else {
             // if there exists other threads that are neither bookmarked nor pinned
             const not_bookmarked_threads = not_pinned_threads.not($('.thread-favorite').parent().parent());
-            if (not_bookmarked_threads.length){
+            if (not_bookmarked_threads.length) {
                 const not_bookmarked_threads_ids = not_bookmarked_threads.map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
@@ -605,7 +605,7 @@ function socketUnpinThreadHandler(thread_id) {
                         break;
                     }
 
-                    if (i === not_bookmarked_threads_ids.length-1){
+                    if (i === not_bookmarked_threads_ids.length-1) {
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${not_bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -632,10 +632,10 @@ function socketUnpinThreadHandler(thread_id) {
 
     // if user's current thread is the one modified -> update
     // eslint-disable-next-line eqeqeq
-    if ($('#current-thread').val() == thread_id){
+    if ($('#current-thread').val() == thread_id) {
     // if is instructor
         const instructor_pin = $('.active-thread-remove-announcement');
-        if (instructor_pin.length){
+        if (instructor_pin.length) {
             instructor_pin.removeClass('active-thread-remove-announcement').addClass('not-active-thread-announcement');
             instructor_pin.attr('onClick', instructor_pin.attr('onClick').replace('0,', '1,').replace('unpin this thread?', 'pin this thread to the top?'));
             instructor_pin.attr('title', 'Make thread an announcement');
@@ -775,14 +775,14 @@ function modifyOrSplitPost(e) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
 
             // modify
-            if (form.attr('id') === 'thread_form'){
+            if (form.attr('id') === 'thread_form') {
                 const thread_id = form.find('#edit_thread_id').val();
                 // eslint-disable-next-line no-var
                 var post_id = form.find('#edit_post_id').val();
@@ -822,17 +822,17 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             render_markdown: render_markdown,
             csrf_token: csrf_token,
         },
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -873,7 +873,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
 
             $('.cat-buttons input').prop('checked', false);
 
-            if (json.markdown === true){
+            if (json.markdown === true) {
                 $('#markdown_input_').val('1');
                 $('#markdown_toggle_').addClass('markdown-active');
                 $('#markdown_buttons_').show();
@@ -924,7 +924,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_status').hide();
             }
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to edit the post. Please try again.');
         },
     });
@@ -944,7 +944,7 @@ function cancelEditPostForum() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function changeDisplayOptions(option){
+function changeDisplayOptions(option) {
     // eslint-disable-next-line no-undef
     thread_id = $('#current-thread').val();
     document.cookie = `forum_display_option=${option};`;
@@ -952,20 +952,20 @@ function changeDisplayOptions(option){
     window.location.replace(`${buildCourseUrl(['forum', 'threads', thread_id])}?option=${option}`);
 }
 
-function readCategoryValues(){
+function readCategoryValues() {
     const categories_value = [];
-    $('#thread_category button').each(function(){
-        if ($(this).data('btn-selected')==='true'){
+    $('#thread_category button').each(function() {
+        if ($(this).data('btn-selected')==='true') {
             categories_value.push($(this).data('cat_id'));
         }
     });
     return categories_value;
 }
 
-function readThreadStatusValues(){
+function readThreadStatusValues() {
     const thread_status_value = [];
-    $('#thread_status_select button').each(function(){
-        if ($(this).data('btn-selected')==='true'){
+    $('#thread_status_select button').each(function() {
+        if ($(this).data('btn-selected')==='true') {
             thread_status_value.push($(this).data('sel_id'));
         }
     });
@@ -988,7 +988,7 @@ function dynamicScrollLoadPage(element, atEnd) {
     const spinner_up = arrow_up.prev();
     const spinner_down = arrow_down.next();
     $(element).data('dynamic_lock_load', true);
-    if (atEnd){
+    if (atEnd) {
         arrow_down.hide();
         spinner_down.show();
         load_page_callback = function(content, count) {
@@ -1064,7 +1064,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
         },
-        success: function(r){
+        success: function(r) {
             const x = JSON.parse(r)['data'];
             let content = x.html;
             const count = x.count;
@@ -1072,7 +1072,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             $(element).data('dynamic_lock_load', false);
             load_page_callback(content, count);
         },
-        error: function(){
+        error: function() {
             $(element).data('dynamic_lock_load', false);
             load_page_fail_callback();
             window.alert('Something went wrong while trying to load more threads. Please try again.');
@@ -1097,7 +1097,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     jElement.data('course', course);
 
     dynamicScrollLoadIfScrollVisible(jElement);
-    $(jElement).scroll(function(){
+    $(jElement).scroll(function() {
         const element = $(this)[0];
         const sensitivity = 2;
         const isTop = element.scrollTop < sensitivity;
@@ -1121,13 +1121,13 @@ function resetScrollPosition(id) {
     }
 }
 
-function saveScrollLocationOnRefresh(id){
+function saveScrollLocationOnRefresh(id) {
     const element = document.getElementById(id);
     $(element).scroll(() => {
         sessionStorage.setItem(`${id}_scrollTop`, $(element).scrollTop());
     });
     $(document).ready(() => {
-        if (sessionStorage.getItem(`${id}_scrollTop`) !== null){
+        if (sessionStorage.getItem(`${id}_scrollTop`) !== null) {
             $(element).scrollTop(sessionStorage.getItem(`${id}_scrollTop`));
         }
     });
@@ -1166,7 +1166,7 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
+function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback) {
 
     let categories_value = readCategoryValues();
     let thread_status_value = readThreadStatusValues();
@@ -1193,7 +1193,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(r){
+        success: function(r) {
             let x = JSON.parse(r)['data'];
             const page_number = parseInt(x.page_number);
             const threadCount = parseInt(x.count);
@@ -1224,7 +1224,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                 success_callback();
             }
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong when trying to filter. Please try again.');
             document.cookie = `${course}_forum_categories=; path=/;`;
             document.cookie = 'forum_thread_status=; path=/;';
@@ -1233,8 +1233,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 }
 
 // eslint-disable-next-line no-unused-vars
-function replyPost(post_id){
-    if ( $(`#${post_id}-reply`).css('display') === 'block' ){
+function replyPost(post_id) {
+    if ( $(`#${post_id}-reply`).css('display') === 'block' ) {
         $(`#${post_id}-reply`).css('display','none');
     }
     else {
@@ -1245,7 +1245,7 @@ function replyPost(post_id){
 
 function generateCodeMirrorBlocks(container_element) {
     const codeSegments = container_element.querySelectorAll('.code');
-    for (const element of codeSegments){
+    for (const element of codeSegments) {
         // eslint-disable-next-line no-undef
         const editor0 = CodeMirror.fromTextArea(element, {
             lineNumbers: true,
@@ -1295,7 +1295,7 @@ function showSplit(post_id) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1334,7 +1334,7 @@ function showSplit(post_id) {
             // eslint-disable-next-line no-undef
             captureTabInModal('popup-post-split');
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to get post information for splitting. Try again later.');
         },
     });
@@ -1352,17 +1352,17 @@ function showHistory(post_id) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1397,7 +1397,7 @@ function showHistory(post_id) {
                 const visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
                 let user_button_code = `<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, ${info_name}, ${visible_user_json}, false)' title='Show full user information'><i class='fas fa-eye' aria-hidden='true'></i></a>&nbsp;`;
-                if (!author_user_id){
+                if (!author_user_id) {
                     user_button_code = '';
                 }
                 // eslint-disable-next-line no-undef
@@ -1409,14 +1409,14 @@ function showHistory(post_id) {
             }
             generateCodeMirrorBlocks($('#popup-post-history')[0]);
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to display post history. Please try again.');
         },
     });
 }
 
 // eslint-disable-next-line no-unused-vars
-function addNewCategory(csrf_token){
+function addNewCategory(csrf_token) {
     const newCategory = $('#new_category_text').val();
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'new']);
@@ -1428,17 +1428,17 @@ function addNewCategory(csrf_token){
             rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token,
         },
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1475,14 +1475,14 @@ function addNewCategory(csrf_token){
             refreshCategories();
             window.location.reload();
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
 }
 
 // eslint-disable-next-line no-unused-vars
-function deleteCategory(category_id, category_desc, csrf_token){
+function deleteCategory(category_id, category_desc, csrf_token) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'delete']);
     $.ajax({
@@ -1492,17 +1492,17 @@ function deleteCategory(category_id, category_desc, csrf_token){
             deleteCategory: category_id,
             csrf_token: csrf_token,
         },
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1512,7 +1512,7 @@ function deleteCategory(category_id, category_desc, csrf_token){
             $(`#categorylistitem-${category_id}`).remove();
             refreshCategories();
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
@@ -1536,17 +1536,17 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
         url: url,
         type: 'POST',
         data: data,
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1565,7 +1565,7 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
             }
             refreshCategories();
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
@@ -1646,7 +1646,7 @@ function refreshCategories() {
     $('.cat-buttons').trigger('eventChangeCatClass');
 }
 
-function changeColorClass(){
+function changeColorClass() {
     const color = $(this).data('color');
     $(this).css('border-color',color);
     if ($(this).hasClass('btn-selected')) {
@@ -1668,17 +1668,17 @@ function reorderCategories(csrf_token) {
         url: url,
         type: 'POST',
         data: data,
-        success: function(data){
+        success: function(data) {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
             }
-            catch (err){
+            catch (err) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again').
                     return;
             }
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -1691,22 +1691,22 @@ function reorderCategories(csrf_token) {
             }, 1000);
             refreshCategories();
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to reordering categories. Please try again.');
         },
     });
 }
 
 /*This function ensures that only one reply box is open at a time*/
-function hideReplies(){
+function hideReplies() {
     const hide_replies = document.getElementsByClassName('reply-box');
-    for (let i = 0; i < hide_replies.length; i++){
+    for (let i = 0; i < hide_replies.length; i++) {
         hide_replies[i].style.display = 'none';
     }
 }
 
 // eslint-disable-next-line no-unused-vars
-function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
+function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token) {
     if (!checkAreYouSureForm()) {
         return;
     }
@@ -1714,7 +1714,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     const message = (isDeletion?'delete':'undelete');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
-    if (confirm){
+    if (confirm) {
         // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
         $.ajax({
@@ -1725,23 +1725,23 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 thread_id: thread_id,
                 csrf_token: csrf_token,
             },
-            success: function(data){
+            success: function(data) {
                 try {
                     // eslint-disable-next-line no-var
                     var json = JSON.parse(data);
                 }
-                catch (err){
+                catch (err) {
                     // eslint-disable-next-line no-undef
                     displayErrorMessage('Error parsing data. Please try again').
                         return;
                 }
-                if (json['status'] === 'fail'){
+                if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
                     displayErrorMessage(json['message']);
                     return;
                 }
                 let new_url = '';
-                switch (json['data']['type']){
+                switch (json['data']['type']) {
                     case 'thread':
                         window.socketClient.send({'type': 'delete_thread', 'thread_id': thread_id});
                         // eslint-disable-next-line no-undef
@@ -1759,7 +1759,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 }
                 window.location.replace(new_url);
             },
-            error: function(){
+            error: function() {
                 window.alert('Something went wrong while trying to delete/undelete a post. Please try again.');
             },
         });
@@ -1767,9 +1767,9 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
 }
 
 // eslint-disable-next-line no-unused-vars
-function alterAnnouncement(thread_id, confirmString, type, csrf_token){
+function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     const confirm = window.confirm(confirmString);
-    if (confirm){
+    if (confirm) {
         // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'announcements'])}?type=${type}`;
         $.ajax({
@@ -1781,7 +1781,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             // eslint-disable-next-line no-unused-vars
-            success: function(data){
+            success: function(data) {
                 if (type) {
                     window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
                 }
@@ -1790,7 +1790,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
                 }
                 window.location.reload();
             },
-            error: function(){
+            error: function() {
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');
             },
         });
@@ -1798,7 +1798,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 }
 
 // eslint-disable-next-line no-unused-vars
-function bookmarkThread(thread_id, type){
+function bookmarkThread(thread_id, type) {
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['forum', 'threads', 'bookmark'])}?type=${type}`;
     $.ajax({
@@ -1810,11 +1810,11 @@ function bookmarkThread(thread_id, type){
             csrf_token: csrfToken,
         },
         // eslint-disable-next-line no-unused-vars
-        success: function(data){
+        success: function(data) {
             // eslint-disable-next-line no-undef
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to update the bookmark. Please try again.');
         },
     });
@@ -1850,36 +1850,36 @@ function toggleMarkdown(post_box_id, triggered) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function checkInputMaxLength(obj){
+function checkInputMaxLength(obj) {
     // eslint-disable-next-line eqeqeq
-    if ($(obj).val().length == $(obj).attr('maxLength')){
+    if ($(obj).val().length == $(obj).attr('maxLength')) {
         alert('Maximum input length reached!');
         $(obj).val($(obj).val().substr(0, $(obj).val().length));
     }
 }
 
 // eslint-disable-next-line no-unused-vars
-function sortTable(sort_element_index, reverse=false){
+function sortTable(sort_element_index, reverse=false) {
     const table = document.getElementById('forum_stats_table');
     let switching = true;
-    while (switching){
+    while (switching) {
         switching=false;
         const rows = table.getElementsByTagName('TBODY');
         // eslint-disable-next-line no-var
-        for (var i=1;i<rows.length-1;i++){
+        for (var i=1;i<rows.length-1;i++) {
 
             const a = rows[i].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
             const b = rows[i+1].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
-            if (reverse){
+            if (reverse) {
                 // eslint-disable-next-line eqeqeq
-                if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
+                if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)) {
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
                 }
             }
             else {
                 // eslint-disable-next-line eqeqeq
-                if (sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+                if (sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)) {
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
                 }
@@ -1892,11 +1892,11 @@ function sortTable(sort_element_index, reverse=false){
     const headers = row0.getElementsByTagName('TH');
 
     // eslint-disable-next-line no-var, no-redeclare
-    for (var i = 0;i<headers.length;i++){
+    for (var i = 0;i<headers.length;i++) {
         const index = headers[i].innerHTML.indexOf(' ↓');
         const reverse_index = headers[i].innerHTML.indexOf(' ↑');
 
-        if (index > -1 || reverse_index > -1){
+        if (index > -1 || reverse_index > -1) {
             headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
         }
     }
@@ -1908,8 +1908,8 @@ function sortTable(sort_element_index, reverse=false){
     }
 }
 
-function loadThreadHandler(){
-    $('a.thread_box_link').click(function(event){
+function loadThreadHandler() {
+    $('a.thread_box_link').click(function(event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
         // eslint-disable-next-line no-undef
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
@@ -1931,17 +1931,17 @@ function loadThreadHandler(){
                 // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
             },
-            success: function(data){
+            success: function(data) {
                 try {
                     // eslint-disable-next-line no-var
                     var json = JSON.parse(data);
                 }
-                catch (err){
+                catch (err) {
                     // eslint-disable-next-line no-undef
                     displayErrorMessage('Error parsing data. Please try again').
                         return;
                 }
-                if (json['status'] === 'fail'){
+                if (json['status'] === 'fail') {
                     // eslint-disable-next-line no-undef
                     displayErrorMessage(json['message']);
                     return;
@@ -1973,7 +1973,7 @@ function loadThreadHandler(){
 
                 $('.post_reply_form').submit(publishPost);
             },
-            error: function(){
+            error: function() {
                 window.alert('Something went wrong while trying to display thread details. Please try again.');
             },
         });
@@ -1984,7 +1984,7 @@ function loadThreadHandler(){
 function loadAllInlineImages() {
     const toggleButton = $('#toggle-attachments-button');
 
-    const allShown = $('.attachment-well').filter(function(){
+    const allShown = $('.attachment-well').filter(function() {
         return $(this).is(':visible');
     }).length === $('.attachment-well').length;
     //if the button were to show them all but they have all been individually shown,
@@ -1993,7 +1993,7 @@ function loadAllInlineImages() {
         toggleButton.removeClass('show-all');
     }
 
-    const allHidden = $('.attachment-well').filter(function(){
+    const allHidden = $('.attachment-well').filter(function() {
         return !($(this).is(':visible'));
     }).length === $('.attachment-well').length;
     //if the button were to hide them all but they have all been individually hidden,
@@ -2006,7 +2006,7 @@ function loadAllInlineImages() {
         $(this).click();
 
         //overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all')){
+        if (toggleButton.hasClass('show-all')) {
             $('.attachment-well').eq(i).show();
         }
         else {
@@ -2022,7 +2022,7 @@ function loadInlineImages(encoded_data) {
     const data = JSON.parse(encoded_data);
     const attachment_well = $(`#${data[data.length-1]}`);
 
-    if (attachment_well.is(':visible')){
+    if (attachment_well.is(':visible')) {
         attachment_well.hide();
     }
     else {
@@ -2084,8 +2084,8 @@ if (!Array.prototype.toggleElement) {
     });
 }
 
-function clearForumFilter(){
-    if (checkUnread()){
+function clearForumFilter() {
+    if (checkUnread()) {
         $('#filter_unread_btn').click();
     }
     window.filters_applied = [];
@@ -2099,7 +2099,7 @@ function clearForumFilter(){
 }
 
 // eslint-disable-next-line no-unused-vars
-function loadFilterHandlers(){
+function loadFilterHandlers() {
     // eslint-disable-next-line no-unused-vars
     $('#filter_unread_btn').mousedown(function (e) {
         $(this).toggleClass('filter-inactive filter-active');
@@ -2109,7 +2109,7 @@ function loadFilterHandlers(){
         e.preventDefault();
         const current_selection = $(this).data('btn-selected');
 
-        if (current_selection==='true'){
+        if (current_selection==='true') {
             $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
         }
         else {
@@ -2122,7 +2122,7 @@ function loadFilterHandlers(){
             return e === filter_text;
         });
 
-        if (window.filters_applied.length === 0){
+        if (window.filters_applied.length === 0) {
             clearForumFilter();
         }
         else {
@@ -2142,9 +2142,9 @@ function loadFilterHandlers(){
     });
 }
 
-function thread_post_handler(){
+function thread_post_handler() {
     // eslint-disable-next-line no-unused-vars
-    $('.submit_unresolve').click(function(event){
+    $('.submit_unresolve').click(function(event) {
         const post_box_id = $(this).data('post_box_id');
         $(`#thread_status_input_${post_box_id}`).val(-1);
         return true;
@@ -2152,7 +2152,7 @@ function thread_post_handler(){
 }
 
 // eslint-disable-next-line no-unused-vars
-function forumFilterBar(){
+function forumFilterBar() {
     $('#forum_filter_bar').toggle();
 }
 
@@ -2214,8 +2214,8 @@ function updateThread(e) {
     });
 }
 
-function checkUnread(){
-    if ($('#unread').prop('checked')){
+function checkUnread() {
+    if ($('#unread').prop('checked')) {
         // eslint-disable-next-line no-undef
         unread_marked = true;
         $('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
@@ -2230,7 +2230,7 @@ function checkUnread(){
 // Used to update thread content in the "Merge Thread"
 // modal.
 // eslint-disable-next-line no-unused-vars
-function updateSelectedThreadContent(selected_thread_first_post_id){
+function updateSelectedThreadContent(selected_thread_first_post_id) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
@@ -2252,7 +2252,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
                 return;
             }
 
-            if (json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
@@ -2267,7 +2267,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
                 $('#thread-content').removeClass('markdown-active');
             }
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to fetch content. Please try again.');
         },
     });
@@ -2429,7 +2429,7 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
-    if (typeof cleanupAutosaveHistory === 'function'){
+    if (typeof cleanupAutosaveHistory === 'function') {
         // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
         setupForumAutosave();
@@ -2440,22 +2440,22 @@ $(() => {
 //When the user uses tab navigation on the thread list, this function
 //helps to make sure the current thread is always visible on the page
 // eslint-disable-next-line no-unused-vars
-function scrollThreadListTo(element){
+function scrollThreadListTo(element) {
     $(element).get(0).scrollIntoView({behavior: 'smooth', block: 'center'});
 }
 
 //Only used by the posters and only on recent posts (60 minutes since posted)
 // eslint-disable-next-line no-unused-vars
-function sendAnnouncement(id){
+function sendAnnouncement(id) {
     $('.pin-and-email-message').attr('disabled','disabled');
     $.ajax({
         type: 'POST',
         // eslint-disable-next-line no-undef
         url: buildCourseUrl(['forum', 'make_announcement']),
         data: {'id': id, 'csrf_token': window.csrfToken},
-        success: function(data){
+        success: function(data) {
             try {
-                if (JSON.parse(data).status === 'success'){
+                if (JSON.parse(data).status === 'success') {
                     pinAnnouncement(id, 1, window.csrfToken);
                     window.location.reload();
                 }
@@ -2467,14 +2467,14 @@ function sendAnnouncement(id){
                 console.error(error);
             }
         },
-        error: function(){
+        error: function() {
             window.alert('Something went wrong while trying to queue the announcement. Please try again.');
         },
     });
 }
 
-function pinAnnouncement(thread_id, type, csrf_token){
-    if (confirm){
+function pinAnnouncement(thread_id, type, csrf_token) {
+    if (confirm) {
         // eslint-disable-next-line no-undef
         const url = `${buildCourseUrl(['forum', 'announcements'])}?type=${type}`;
         $.ajax({
@@ -2486,7 +2486,7 @@ function pinAnnouncement(thread_id, type, csrf_token){
 
             },
             // eslint-disable-next-line no-unused-vars
-            success: function(data){
+            success: function(data) {
                 if (type) {
                     window.socketClient.send({'type': 'announce_thread', 'thread_id': thread_id});
                 }
@@ -2494,7 +2494,7 @@ function pinAnnouncement(thread_id, type, csrf_token){
                     window.socketClient.send({'type': 'unpin_thread', 'thread_id': thread_id});
                 }
             },
-            error: function(){
+            error: function() {
                 window.alert('Something went wrong while trying to remove announcement. Please try again.');
             },
         });
