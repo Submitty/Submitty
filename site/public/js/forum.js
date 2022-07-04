@@ -52,8 +52,7 @@ function checkForumFileExtensions(post_box_id, files){
             i--;
         }
     }
-    // eslint-disable-next-line eqeqeq
-    return count == files.length;
+    return count === files.length;
 }
 
 function resetForumFileUploadAfterError(displayPostId){
@@ -115,26 +114,26 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     const files = [];
     // eslint-disable-next-line no-undef
     for (let j = 0; j < file_array[index].length; j++) {
-        // eslint-disable-next-line no-undef, eqeqeq
-        if (file_array[index][j].name.indexOf("'") != -1 ||
-            // eslint-disable-next-line no-undef, eqeqeq
-            file_array[index][j].name.indexOf('"') != -1) {
+        // eslint-disable-next-line no-undef
+        if (file_array[index][j].name.indexOf("'") !== -1 ||
+            // eslint-disable-next-line no-undef
+            file_array[index][j].name.indexOf('"') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use quotes in your filename: ${file_array[index][j].name}`);
             return false;
         }
-        // eslint-disable-next-line no-undef, eqeqeq
-        else if (file_array[index][j].name.indexOf('\\\\') != -1 ||
-            // eslint-disable-next-line no-undef, eqeqeq
-            file_array[index][j].name.indexOf('/') != -1) {
+        // eslint-disable-next-line no-undef
+        else if (file_array[index][j].name.indexOf('\\\\') !== -1 ||
+            // eslint-disable-next-line no-undef
+            file_array[index][j].name.indexOf('/') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use a slash in your filename: ${file_array[index][j].name}`);
             return false;
         }
-        // eslint-disable-next-line no-undef, eqeqeq
-        else if (file_array[index][j].name.indexOf('<') != -1 ||
-            // eslint-disable-next-line no-undef, eqeqeq
-            file_array[index][j].name.indexOf('>') != -1) {
+        // eslint-disable-next-line no-undef
+        else if (file_array[index][j].name.indexOf('<') !== -1 ||
+            // eslint-disable-next-line no-undef
+            file_array[index][j].name.indexOf('>') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use angle brackets in your filename: ${file_array[index][j].name}`);
             return false;
@@ -176,9 +175,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
         return false;
     }
     if (test_category) {
-
-        // eslint-disable-next-line eqeqeq
-        if ((!form.prop('ignore-cat')) && form.find('.btn-selected').length == 0 && ($('.cat-buttons input').is(':checked') == false)) {
+        if ((!form.prop('ignore-cat')) && form.find('.btn-selected').length === 0 && ($('.cat-buttons input').is(':checked') === false)) {
             alert('At least one category must be selected.');
             return false;
         }
@@ -292,13 +289,11 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     }
                     else {
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
-                        // eslint-disable-next-line eqeqeq
-                        if (sibling_posts.length != 0) {
+                        if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
                                 return $(this).attr('data-reply_level') <= $(`#${parent_id}`).attr('data-reply_level') ? this : null;
                             });
-                            // eslint-disable-next-line eqeqeq
-                            if (parent_sibling_posts.length != 0) {
+                            if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
                             }
                             else {
@@ -341,8 +336,7 @@ function socketDeletePostHandler(post_id) {
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function() {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
-    // eslint-disable-next-line eqeqeq
-    if (sibling_posts.length != 0) {
+    if (sibling_posts.length !== 0) {
         // eslint-disable-next-line no-var
         var posts_to_delete = main_post.nextUntil(sibling_posts.first());
     }
@@ -368,11 +362,9 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
                 const new_thread = JSON.parse(response).data;
 
                 if (!edit){
-                    // eslint-disable-next-line eqeqeq
-                    if ($(new_thread).find('.thread-announcement').length != 0) {
+                    if ($(new_thread).find('.thread-announcement').length !== 0) {
                         const last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
-                        // eslint-disable-next-line eqeqeq
-                        if (last_bookmarked_announcement.length != 0) {
+                        if (last_bookmarked_announcement.length !== 0) {
                             $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn('slow');
                         }
                         else {
@@ -382,11 +374,9 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
                     else {
                         const last_announcement = $('.thread-announcement').last().parent().parent();
                         const last_bookmarked = $('.thread-favorite').last().parent().parent();
-                        // eslint-disable-next-line eqeqeq
-                        const last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
+                        const last = last_bookmarked.length === 0 ? last_announcement : last_bookmarked;
 
-                        // eslint-disable-next-line eqeqeq
-                        if (last.length == 0) {
+                        if (last.length === 0) {
                             $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
                         }
                         else {
@@ -470,14 +460,11 @@ function socketAnnounceThreadHandler(thread_id) {
     const hr = $(thread_to_announce).next(); // saving the <hr> for inserting later below the thread div
     hr.remove(); // removing this sibling <hr>
     // if there exists other announcements
-    // eslint-disable-next-line eqeqeq
-    if ($('.thread-announcement').length != 0) {
+    if ($('.thread-announcement').length !== 0) {
     // if thread to announce is already bookmarked
-        // eslint-disable-next-line eqeqeq
-        if ($(thread_to_announce).find('.thread-favorite').length != 0) {
+        if ($(thread_to_announce).find('.thread-favorite').length !== 0) {
             // if there exists other bookmarked announcements
-            // eslint-disable-next-line eqeqeq
-            if ($('.thread-announcement').siblings('.thread-favorite').length != 0) {
+            if ($('.thread-announcement').siblings('.thread-favorite').length !== 0) {
                 // notice that ids in desc order are also in a chronological order (newest : oldest)
                 // get announcement threads ids as an array -> [7, 6, 4, 3]
                 const announced_pinned_threads_ids = $('.thread-announcement').siblings('.thread-favorite').parent().parent().map(function() {
@@ -493,8 +480,7 @@ function socketAnnounceThreadHandler(thread_id) {
                     }
 
                     // if last thread then insert after -> if inserting thread_id = 2
-                    // eslint-disable-next-line eqeqeq
-                    if (i == announced_pinned_threads_ids.length-1){
+                    if (i === announced_pinned_threads_ids.length-1){
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${announced_pinned_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -511,8 +497,7 @@ function socketAnnounceThreadHandler(thread_id) {
             // find announcements that are not bookmarked
             const announced_pinned_threads = $('.thread-announcement').siblings('.thread-favorite').parent().parent();
             const announced_only_threads = $('.thread-announcement').parent().parent().not(announced_pinned_threads);
-            // eslint-disable-next-line eqeqeq
-            if (announced_only_threads.length != 0){
+            if (announced_only_threads.length !== 0){
                 const announced_only_threads_ids = $(announced_only_threads).map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
@@ -524,8 +509,7 @@ function socketAnnounceThreadHandler(thread_id) {
                         break;
                     }
 
-                    // eslint-disable-next-line eqeqeq
-                    if (i == announced_only_threads_ids.length-1){
+                    if (i === announced_only_threads_ids.length-1){
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${announced_only_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -577,11 +561,9 @@ function socketUnpinThreadHandler(thread_id) {
     // if there exists other threads that are not pinned
     if (not_pinned_threads.length){
         // if thread is bookmarked
-        // eslint-disable-next-line eqeqeq
-        if ($(thread_to_unpin).find('.thread-favorite').length != 0){
+        if ($(thread_to_unpin).find('.thread-favorite').length !== 0){
             // if there exists other threads that are bookmarked
-            // eslint-disable-next-line eqeqeq
-            if (not_pinned_threads.find('.thread-favorite').length != 0){
+            if (not_pinned_threads.find('.thread-favorite').length !== 0){
                 const bookmarked_threads_ids = not_pinned_threads.find('.thread-favorite').parent().parent().map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
@@ -594,8 +576,7 @@ function socketUnpinThreadHandler(thread_id) {
                         break;
                     }
 
-                    // eslint-disable-next-line eqeqeq
-                    if (i == bookmarked_threads_ids.length-1){
+                    if (i === bookmarked_threads_ids.length-1){
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -624,8 +605,7 @@ function socketUnpinThreadHandler(thread_id) {
                         break;
                     }
 
-                    // eslint-disable-next-line eqeqeq
-                    if (i == not_bookmarked_threads_ids.length-1){
+                    if (i === not_bookmarked_threads_ids.length-1){
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${not_bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -802,8 +782,7 @@ function modifyOrSplitPost(e) {
             }
 
             // modify
-            // eslint-disable-next-line eqeqeq
-            if (form.attr('id') == 'thread_form'){
+            if (form.attr('id') === 'thread_form'){
                 const thread_id = form.find('#edit_thread_id').val();
                 // eslint-disable-next-line no-var
                 var post_id = form.find('#edit_post_id').val();
@@ -1255,8 +1234,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
 // eslint-disable-next-line no-unused-vars
 function replyPost(post_id){
-    // eslint-disable-next-line eqeqeq
-    if ( $(`#${post_id}-reply`).css('display') == 'block' ){
+    if ( $(`#${post_id}-reply`).css('display') === 'block' ){
         $(`#${post_id}-reply`).css('display','none');
     }
     else {
@@ -1278,8 +1256,7 @@ function generateCodeMirrorBlocks(container_element) {
         });
 
         const lineCount = editor0.lineCount();
-        // eslint-disable-next-line eqeqeq
-        if (lineCount == 1) {
+        if (lineCount === 1) {
             editor0.setSize('100%', `${editor0.defaultTextHeight() * 2}px`);
         }
         else {
@@ -1415,8 +1392,7 @@ function showHistory(post_id) {
                 const first_name = post['user_info']['first_name'].trim();
                 const last_name = post['user_info']['last_name'].trim();
                 const author_user_id = post['user'];
-                // eslint-disable-next-line eqeqeq
-                const visible_username = `${first_name} ${(last_name.length == 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
+                const visible_username = `${first_name} ${(last_name.length === 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
                 let info_name = `${first_name} ${last_name} (${author_user_id})`;
                 const visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
@@ -2146,8 +2122,7 @@ function loadFilterHandlers(){
             return e === filter_text;
         });
 
-        // eslint-disable-next-line eqeqeq
-        if (window.filters_applied.length == 0){
+        if (window.filters_applied.length === 0){
             clearForumFilter();
         }
         else {

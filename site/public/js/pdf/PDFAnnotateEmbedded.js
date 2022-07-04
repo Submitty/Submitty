@@ -131,8 +131,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     const annotations = annotationsPage.annotations;
                     for (let an = 0; an < annotations.length; an++) {
                         const annotation = annotations[an];
-                        // eslint-disable-next-line eqeqeq
-                        if (annotation.type == 'drawing') {
+                        if (annotation.type === 'drawing') {
                             ctx.lineWidth = annotation.width;
                             ctx.strokeStyle = annotation.color;
                             ctx.beginPath();
@@ -143,8 +142,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                             }
                         }
 
-                        // eslint-disable-next-line eqeqeq
-                        if (annotation.type == 'textbox') {
+                        if (annotation.type === 'textbox') {
                             ctx.font = `${annotation.size}px sans-serif`;
                             ctx.fillStyle = annotation.color;
                             const text = annotation.content;
@@ -254,8 +252,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     const viewer = document.getElementById('viewer');
                     $(viewer).on('touchstart touchmove', (e) => {
                         //Let touchscreen work
-                        // eslint-disable-next-line eqeqeq
-                        if (currentTool == 'pen' || currentTool == 'text') {
+                        if (currentTool === 'pen' || currentTool === 'text') {
                             e.preventDefault();
                         }
                     });
@@ -277,8 +274,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             }
                             document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
                                 const selected = $('.tool-selected');
-                                // eslint-disable-next-line eqeqeq
-                                if (selected.length != 0 && $(selected[0]).attr('value') != 'cursor') {
+                                if (selected.length !== 0 && $(selected[0]).attr('value') !== 'cursor') {
                                     $('#save_status').text('Changes not saved');
                                     $('#save_status').css('color', 'red');
                                     $('#save-pdf-btn').removeClass('btn-default');

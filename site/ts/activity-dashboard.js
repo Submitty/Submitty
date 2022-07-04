@@ -60,12 +60,10 @@ export function comparator (row1, row2, n, dir) {
     }
     // They are not equal
     // Then check for lesser or greater relationships
-    // eslint-disable-next-line eqeqeq
-    if (dir == 'asc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
+    if (dir === 'asc' && helper(row1[n].innerHTML, row2[n].innerHTML, n)) {
         return true;
     }
-    // eslint-disable-next-line eqeqeq
-    else if (dir == 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
+    else if (dir === 'desc' && helper(row2[n].innerHTML, row1[n].innerHTML, n)) {
         return true;
     }
     return false;
@@ -100,12 +98,10 @@ export function helper (x, y, i) {
     else if ((i <= 7 && i >= 4) || i == 9) {
         const dateX = new Date(x);
         const dateY = new Date(y);
-        // eslint-disable-next-line eqeqeq
-        if (dateX.toString() == 'Invalid Date') {
+        if (dateX.toString() === 'Invalid Date') {
             return true;
         }
-        // eslint-disable-next-line eqeqeq
-        else if (dateY.toString() == 'Invalid Date') {
+        else if (dateY.toString() === 'Invalid Date') {
             return false;
         }
 

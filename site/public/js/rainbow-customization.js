@@ -160,8 +160,7 @@ function getGradeableBuckets() {
 
         // Only use buckets which have display block
         // This works even if outer container is collapsed
-        // eslint-disable-next-line eqeqeq
-        if ($(this).css('display') == 'block'){
+        if ($(this).css('display') === 'block'){
             const bucket = {};
 
             // Extract bucket-type
