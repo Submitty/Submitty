@@ -2,7 +2,7 @@
   "name": "submitty/submitty",
   "config": {
     "platform": {
-      "php": "7.2"
+      "php": "7.4"
     },
     "sort-packages": true,
     "allow-plugins": {
