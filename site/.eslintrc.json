@@ -25,6 +25,7 @@
         "eol-last": ["error"],
         "indent": ["error", 4, {"SwitchCase": 1}],
         "keyword-spacing": ["error", {"before": true, "after": true}],
+        "space-before-blocks": ["error", "always"],
         "linebreak-style": ["error", "unix"],
         "no-trailing-spaces": ["error"],
         "no-var": ["error"],
