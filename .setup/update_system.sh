@@ -31,7 +31,7 @@ fi
 # check if apt upgrades have been disabled
 for flag in "$@"; do
     case $flag in
-        skip_apt_upgrade)
+        --skip_apt_upgrade)
             APT=false
             ;;
     esac

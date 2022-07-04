@@ -77,7 +77,7 @@ fi
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
-       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" && "$1" != "skip_apt_upgrade" ]]; then
+       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" && "$1" != "--skip_apt_upgrade" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean quick"
@@ -90,7 +90,6 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh skip_web_restart"
-    echo -e "   ./INSTALL_SUBMITTY.sh skip_apt_upgrade"
     echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
     exit 1
 fi
@@ -538,7 +537,7 @@ fi
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh"
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "$@"
 
 # build the helper program for strace output and restrictions by system call categories
 g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"

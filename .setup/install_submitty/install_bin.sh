@@ -101,4 +101,4 @@ fi
 
 
 echo -e "Updating system dependencies"
-source "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "$@"
