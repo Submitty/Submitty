@@ -51,7 +51,7 @@ parso==0.8.3
 clang==14.0
 
 # Python libraries for QR bulk upload
-pyzbar==0.1.8
+pyzbar==0.1.9
 pdf2image==1.16.0
 numpy==1.23.0
 
