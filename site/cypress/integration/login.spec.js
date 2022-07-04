@@ -51,7 +51,6 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.login('pearsr');
             cy.get('#courses > h1').contains('My Courses');
             cy.visit(['sample']);
-            cy.url().should('eq', `${Cypress.config('baseUrl')}/courses/s22/sample/no_access`);
             cy.get('.content').contains('You don\'t have access to this course.');
         });
     });
