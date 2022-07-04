@@ -157,17 +157,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    sudo umount /usr/local/submitty/GIT_CHECKOUT
 
 
-9. TEMPORARY HACK STEP
-
-   open .setup/pip/system_requirements.txt
-   comment out the opencv and onnx version installations (compilation from scratch fails)
-
-    #opencv-python==3.4.10.37
-    #onnxruntime==1.8.1
-    #onnx==1.9.0
-
-
-10. Do Submitty system setup and installation:
+9. Do Submitty system setup and installation:
 
     On the guest machine:
 
@@ -181,13 +171,11 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
     sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh
 
 
-11. After installation, to fix opencv & onnx:
+10. After installation, to fix opencv & onnx:
 
-    sudo pip install opencv-python
-    sudo pip install onnxruntime
     sudo apt install libgl1-mesa-glx
 
 
-12. When finished, access the Submitty website from a browser on your host machine:
+11. When finished, access the Submitty website from a browser on your host machine:
 
     http://localhost:1511/
