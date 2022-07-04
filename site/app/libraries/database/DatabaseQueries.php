@@ -4083,7 +4083,7 @@ SQL;
         }
 
         $query = <<<SQL
-SELECT t.name AS term_name, u.semester, u.course, u.user_group
+SELECT t.name AS term_name, u.semester, u.course, u.user_group, u.registration_section
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
 INNER JOIN terms t ON u.semester=t.term_id
@@ -7004,7 +7004,9 @@ AND gc_id IN (
               u.manual_registration,
               u.last_updated,
               u.grading_registration_sections,
-              u.registration_section, u.rotating_section,
+              u.registration_section,
+              u.rotating_section,
+              u.registration_type,
               ldeu.late_day_exceptions,
               u.registration_subsection';
             $submitter_inject = '
@@ -7081,6 +7083,7 @@ AND gc_id IN (
               gcd.array_grader_last_updated,
               gcd.array_grader_registration_section,
               gcd.array_grader_rotating_section,
+              gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
 
               /* Aggregate Gradeable Component Data (versions) */
@@ -7155,6 +7158,7 @@ AND gc_id IN (
                   json_agg(ug.last_updated) AS array_grader_last_updated,
                   json_agg(ug.registration_section) AS array_grader_registration_section,
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
+                  json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
                   in_gcd.gd_id
                 FROM gradeable_component_data in_gcd
@@ -7316,6 +7320,7 @@ AND gc_id IN (
                 'last_updated',
                 'registration_section',
                 'rotating_section',
+                'registration_type',
                 'grading_registration_sections'
             ];
             $comp_array_properties = [

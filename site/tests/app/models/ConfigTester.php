@@ -66,6 +66,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "database_port" => 5432,
             "database_user" => "submitty_dbuser",
             "database_password" => "submitty_dbpass",
+            "database_course_user" => "submitty_course_dbuser",
+            "database_course_password" => "submitty_course_dbpass",
             "debugging_enabled" => false,
         ];
         $config = array_replace($config, $extra);
@@ -212,7 +214,15 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
-        $this->assertEquals(array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']), $config->getCourseDatabaseParams());
+        $course_db_params = [
+            'dbname' => 'submitty',
+            'host' => '/var/run/postgresql',
+            'port' => 5432,
+            'username' => 'submitty_course_dbuser',
+            'password' => 'submitty_course_dbpass'
+        ];
+
+        $this->assertEquals(array_merge($course_db_params, ['dbname' => 'submitty_s17_csci0000']), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(0, $config->getDefaultHwLateDays());
@@ -245,7 +255,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
-            'course_database_params' => array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']),
+            'course_database_params' => array_merge($course_db_params, ['dbname' => 'submitty_s17_csci0000']),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',

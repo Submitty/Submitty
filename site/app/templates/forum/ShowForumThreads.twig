@@ -14,6 +14,10 @@
         $("form").areYouSure();
         loadThreadHandler();
         initSocketClient();
+
+        //delete new_thread Class to mark posts as seen in frontend for users who access posts via href or url
+        let thread_id = $('data#current-thread').val();
+        $(`#thread_box_link_${thread_id} .thread_box`).removeClass('new_thread');
     });
 
 </script>

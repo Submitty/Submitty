@@ -347,9 +347,10 @@ jobs:
               unzip vnu.jar_20.3.16.zip
               sudo mv dist/vnu.jar /usr/bin/
 
-          - name: Create Database and default user
+          - name: Create Database and default users
             run: |
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
 
           - name: Install apt-get packages

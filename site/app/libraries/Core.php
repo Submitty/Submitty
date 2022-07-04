@@ -475,7 +475,7 @@ class Core {
                     $user_id,
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $token->claims()->get('expire_time'));
+                return Utils::setCookie('submitty_session', $token->toString(), $token->claims()->get('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -501,9 +501,9 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                return (string) TokenManager::generateApiToken(
+                return TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id)
-                );
+                )->toString();
             }
         }
         catch (\Exception $e) {
@@ -773,10 +773,10 @@ class Core {
                     if ($expire_time > 0) {
                         Utils::setCookie(
                             $cookie_key,
-                            (string) TokenManager::generateSessionToken(
+                            TokenManager::generateSessionToken(
                                 $session_id,
                                 $token->claims()->get('sub')
-                            ),
+                            )->toString(),
                             $expire_time
                         );
                     }

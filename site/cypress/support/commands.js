@@ -99,10 +99,10 @@ Cypress.Commands.add('waitPageChange', (fn) => {
 Cypress.Commands.overwrite('visit', (originalFn, options) => {
     let url = '';
 
-    if (Array.isArray(options)){
+    if (Array.isArray(options)) {
         url = buildUrl(options);
     }
-    else if ((typeof options) === 'string'){
+    else if ((typeof options) === 'string') {
         url = options;
     }
     else {

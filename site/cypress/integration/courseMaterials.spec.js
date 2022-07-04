@@ -370,7 +370,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
 
 
-        for (let i = 5; i > 0; i--){
+        for (let i = 5; i > 0; i--) {
             cy.get(`:nth-child(${6-i}) > .file-viewer`).contains(`file${i}.txt` );
         }
 
