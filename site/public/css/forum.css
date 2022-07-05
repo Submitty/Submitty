@@ -483,19 +483,22 @@
     margin: 0 2px;
 }
 
-
+/* stylelint-disable selector-class-pattern */
 .thread-announcement-checkbox,
-.pinThread-checkbox{
+.pinThread-checkbox {
     margin-left: 15px;
     display: inline-block;
-
 }
+/* stylelint-enable selector-class-pattern */
+
+/* stylelint-disable selector-id-pattern */
 .thread-anon-checkbox,
-#thread_status{
+#thread_status {
     display: inline-block;
 }
+/* stylelint-enable selector-id-pattern */
 
-.new-thread-settings-wrapper{
+.new-thread-settings-wrapper {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
