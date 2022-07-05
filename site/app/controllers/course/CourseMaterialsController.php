@@ -603,8 +603,19 @@ class CourseMaterialsController extends AbstractController {
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
+                            $double_dot = ["../","..\\","/..","\\.."];
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $entries[] = $zip->getNameIndex($i);
+                                //check to ensure that entry name doesn't have ..
+                                $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
+                                    if (strpos($entries[count($entries)-1], $dot) !== false) {
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                                if (count($dot_check) !== 0) {
+                                    return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
+                                }
                             }
                             $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                                 $name = strtolower($entry);
