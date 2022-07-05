@@ -11,12 +11,13 @@
     <div id="viewer" class="pdfViewer"></div>
 </div>
 
-<!-- Provide template of download button to copy over to toolbar since this page is the only one that gets the necessary info -->
-<template id="download-annotations-btn-template">
+<!-- Provide template of download / view all button to copy over to toolbar since this page is the only one that gets the necessary info -->
+<template id="permission-annotations-btn-template">
     {% if can_download is defined and can_download %}
         <button id="download-annotations-btn" class='btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs")' aria-label="Download the file">
             Download <i class="fas fa-download" title="Download the file"></i>
         </button>
+        <button id="toggle-annotations-btn" aria-label="Toggle Annotations" value="toggle-annotations" class="btn btn-default toolbar-action">Show All Annotations <i class="fas fa-eye"></i></button>
     {% endif %}
 </template>
 
@@ -31,7 +32,16 @@
         let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
         for(let grader in annotations){
             if(annotations[grader] !== ""){
-                localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+                if(grader === '{{ grader_id }}') {
+                    localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+                }
+                else{
+                if (!window.GENERAL_INFORMATION.hidden_annotations) {
+                        window.GENERAL_INFORMATION.hidden_annotations = {};
+                    }
+                    window.GENERAL_INFORMATION.hidden_annotations[grader] = annotations[grader];
+                    localStorage.setItem('{{ filename }}/' + grader +'/annotations', '[]');
+                }
             }
         }
     }
@@ -49,8 +59,20 @@
 
     //render download annotations button on toolbar
     $(function() {
-        if (!$('#pdf-buttons').has('#download-annotations-btn').length) {
-            $('#pdf-buttons').append(document.getElementById('download-annotations-btn-template').content.cloneNode(true));
+        if (!$('#pdf-buttons').has('#download-annotations-btn').length || !$('#pdf-buttons').has('#toggle-annotations-btn').length) {
+            $('#pdf-buttons').append(document.getElementById('permission-annotations-btn-template').content.cloneNode(true));
         }
     });
+    /* The function below adds a dynamic offset to annotataion pdf in order to prevent overlapping with toolbar ,
+    same could not be achived through CSS as it cause the tools to hide when moved right in panel.
+    This has been done taking care of resizing of panel ,platform(device),overlapping and scrolling of panels */
+
+    const offSetter = new ResizeObserver(entries => {
+        entries.forEach(entry => {
+            let height = $(".sticky-file-info").outerHeight();
+            $("#viewer").css("paddingTop", height);
+        });
+    });
+    offSetter.observe(document.querySelector(".sticky-file-info"));
+
 </script>
