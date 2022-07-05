@@ -8097,6 +8097,14 @@ ORDER BY
         return $this->submitty_db->rows();
     }
 
+    public function getSamlMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT id, user_id, saml_id FROM saml_mapped_users
+                WHERE saml_id = user_id AND active = true;
+        ");
+        return $this->submitty_db->rows();
+    }
+
     public function insertSamlMapping(string $saml_id, string $submitty_id) {
         $this->submitty_db->beginTransaction();
         $this->submitty_db->query("

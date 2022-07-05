@@ -12,7 +12,8 @@
 
 $long_opts = [
     "add_users",
-    "generate_metadata"
+    "generate_metadata",
+    "validate_users"
 ];
 
 $options = getopt(
@@ -62,6 +63,9 @@ switch ($action) {
     case "generate_metadata":
         generate_metadata($core, $auth);
         break;
+    case "validate_users":
+        validate_users($core, $auth);
+        break;
 }
 
 function add_users(Core $core, SamlAuthentication $auth) {
@@ -93,4 +97,32 @@ function generate_metadata(Core $core, SamlAuthentication $saml_auth) {
     FileUtils::writeFile($path, $metadata);
 
     echo "Metadata written to {$path}" . PHP_EOL;
+}
+
+function validate_users(Core $core, SamlAuthentication $saml_auth) {
+    $core->loadMasterDatabase();
+    $user_checks = [];
+    $proxy_users = $core->getQueries()->getProxyMappedUsers();
+    foreach ($proxy_users as $proxy_user) {
+        $user_checks[] = $proxy_user['user_id'];
+        $user_checks[] = $proxy_user['saml_id'];
+    }
+    $saml_users = $core->getQueries()->getSamlMappedUsers();
+    foreach ($saml_users as $saml_user) {
+        $user_checks[] = $saml_user['user_id'];
+    }
+    $saml_auth->setValidUsernames($user_checks);
+    foreach ($proxy_users as $proxy_user) {
+        if ($saml_auth->isInvalidUsername($proxy_user['saml_id'])) {
+            echo "Proxy user " . $proxy_user['user_id'] . " has invalid SAML ID: " . $proxy_user['saml_id'] . "\n";
+        }
+        if ($saml_auth->isValidUsername($proxy_user['user_id'])) {
+            echo "Proxy user " . $proxy_user['user_id'] . " has a Submitty user ID which is a valid SAML ID\n";
+        }
+    }
+    foreach ($saml_users as $saml_user) {
+        if ($saml_auth->isInvalidUsername($saml_user['user_id'])) {
+            echo "SAML user " . $saml_user['user_id'] . " has a SAML ID which is not valid\n";
+        }
+    }
 }
