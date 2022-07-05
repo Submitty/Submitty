@@ -608,7 +608,7 @@ class CourseMaterialsController extends AbstractController {
                                 $entries[] = $zip->getNameIndex($i);
                                 //check to ensure that entry name doesn't have ..
                                 $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
-                                    if (strpos($entries[count($entries)-1], $dot) !== false) {
+                                    if (strpos($entries[count($entries) - 1], $dot) !== false) {
                                         return true;
                                     }
                                     return false;
