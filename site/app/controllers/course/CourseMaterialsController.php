@@ -137,7 +137,7 @@ class CourseMaterialsController extends AbstractController {
         else {
             $success = unlink($path);
         }
-        $base_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials";
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         // delete the topmost parent folder that's empty (contains no files)
         if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
             $empty_folders = [];
@@ -145,12 +145,6 @@ class CourseMaterialsController extends AbstractController {
             if (count($empty_folders) > 0) {
                 $path = $empty_folders[0];
                 $success = $success && FileUtils::recursiveRmdir($path);
-                foreach ($all_files as $file) {
-                    if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
-                    }
-                }
-                $this->core->getCourseEntityManager()->flush();
             }
         }
         if ($success) {
