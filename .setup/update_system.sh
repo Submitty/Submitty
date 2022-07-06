@@ -29,7 +29,7 @@ apt-get install libzbar0 --yes
 
 #libraries for comment counting :
 #install cloc
-apt install cloc --yes
+apt-get install cloc --yes
 
 ##source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 

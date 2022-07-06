@@ -1,4 +1,7 @@
 {
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 100
+    },
     "testcases" : [
         {
             "title" : "Comment counting",
