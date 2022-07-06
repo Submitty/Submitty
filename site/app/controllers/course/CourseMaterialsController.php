@@ -145,6 +145,12 @@ class CourseMaterialsController extends AbstractController {
             if (count($empty_folders) > 0) {
                 $path = $empty_folders[0];
                 $success = $success && FileUtils::recursiveRmdir($path);
+                foreach ($all_files as $file) {
+                    if (str_starts_with($file->getPath(), $path)) {
+                        $this->core->getCourseEntityManager()->remove($file);
+                    }
+                }
+                $this->core->getCourseEntityManager()->flush();
             }
         }
         if ($success) {
