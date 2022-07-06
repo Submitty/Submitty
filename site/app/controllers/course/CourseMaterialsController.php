@@ -116,7 +116,7 @@ class CourseMaterialsController extends AbstractController {
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
         // check to prevent the deletion of course_materials folder
-        if ($path === $this->core->getConfig()->getCoursePath() . "/uploads/course_materials") {
+        if ($path === FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials")) {
             $this->core->addErrorMessage(basename($path) . " can't be removed.");
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
