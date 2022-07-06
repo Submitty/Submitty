@@ -377,4 +377,107 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
     });
+
+    it('Should sort course materials folder and preserve uploaded links', () => {
+        const test_url = buildUrl(['sample', 'users'], true);
+        const link_titles = ['Test URL', 'Nested Test URL'];
+
+        // Upload link 1
+        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+        cy.get('#input-provide-full-path').type('a');
+        cy.get('#url_selection_radio').click();
+        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#url_url').type(test_url);
+        cy.waitPageChange(() => {
+            cy.get('#submit-materials').click();
+        });
+
+        // Upload link 2
+        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#url_selection_radio').click();
+        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#url_url').type(test_url);
+        cy.waitPageChange(() => {
+            cy.get('#submit-materials').click();
+        });
+
+        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+
+        // Edit folders' sorting order
+        for (let i = 1; i >= 0; i--) {
+            cy.get('.fa-pencil-alt').eq(i).click();
+            cy.get('#edit-folder-sort').clear().type(i + 1);
+            cy.waitPageChange(() => {
+                cy.get('#submit-folder-edit').click();
+            });
+        }
+
+        // Confirm that link data was preserved
+        for (let i = 1; i < 4; i += 2) {
+            cy.get('.fa-pencil-alt').eq(i).click();
+            cy.get('#edit-url-title').should('have.value', link_titles[(i - 1) / 2]);
+            cy.get('#edit-url-url').should('have.value', test_url);
+            cy.get('#edit-course-materials-form > .popup-box > .popup-window > .form-title > .btn').click();
+        }
+
+        // Clean up files
+        cy.visit(['sample', 'course_materials']);
+        cy.get('.fa-trash').first().click();
+        cy.get('.btn-danger').click();
+
+        cy.get('.file-viewer').should('not.exist');
+    });
+
+    it('Should apply recursive updates to course materials folder and preserve uploaded links', () => {
+        const test_url = buildUrl(['sample', 'users'], true);
+        const link_titles = ['Test URL', 'Nested Test URL'];
+
+        // Upload link 1
+        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+        cy.get('#input-provide-full-path').type('a');
+        cy.get('#url_selection_radio').click();
+        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#url_url').type(test_url);
+        cy.waitPageChange(() => {
+            cy.get('#submit-materials').click();
+        });
+
+        // Upload link 2
+        cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
+        cy.get('#input-provide-full-path').type('a/b');
+        cy.get('#url_selection_radio').click();
+        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#url_url').type(test_url);
+        cy.waitPageChange(() => {
+            cy.get('#submit-materials').click();
+        });
+
+        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+
+        // Perform a recursive updates
+        cy.get('.fa-pencil-alt').first().click();
+        cy.get('#all-sections-showing-yes-folder').click();
+        cy.get('#section-folder-edit-1').check();
+        cy.get('#edit-folder-picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#hide-folder-materials-checkbox-edit').check();
+        cy.waitPageChange(() => {
+            cy.get('#submit-folder-edit-full').click({force: true}); //div covering button
+        });
+
+        // Confirm that link data was preserved
+        for (let i = 0; i < 2; i++) {
+            cy.get('.fa-pencil-alt').eq(i + 2).click();
+            cy.get('#edit-url-title').should('have.value', link_titles[1 - i]);
+            cy.get('#edit-url-url').should('have.value', test_url);
+            cy.get('#edit-course-materials-form > .popup-box > .popup-window > .form-title > .btn').click();
+        }
+
+        // Clean up files
+        cy.visit(['sample', 'course_materials']);
+        cy.get('.fa-trash').first().click();
+        cy.get('.btn-danger').click();
+
+        cy.get('.file-viewer').should('not.exist');
+    });
 });
