@@ -32,3 +32,34 @@ a.popout-item > .fas:hover {
     display: flex;
     flex-wrap: nowrap;
 }
+
+.infopanel {
+    position: relative;
+    top: 1px;
+}
+
+.infopanel .infopaneltext {
+    display: flex;
+    visibility: hidden;
+    position: absolute;
+    width: 400px;
+    background-color: var(--standard-lightskyblue);
+    color: black;
+    top: 25%;
+    left: 105%;
+    text-align: center;
+    padding: 10px 10px;
+    border-radius: 4px;
+}
+
+.infopanel:hover .infopaneltext {
+    visibility: visible;
+}
+
+@media (max-width: 725px) {
+    .infopanel .infopaneltext {
+        top: 100%;
+        left: 25%;
+        width: 175px;
+    }
+}

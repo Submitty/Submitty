@@ -34,7 +34,8 @@
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-picker" class="edit-picker" type="text" size="26"/>
+            <input id="edit-picker" class="edit-picker" type="text" size="26"/><br>
+            <span>(Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time)</span>
         </label>
         <label>
             <span>
@@ -44,7 +45,12 @@
         </label>
         <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
-            Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
+            Hide from students
+            <span class="infopanel">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span class="infopaneltext">If this feature is used then the students can view the hidden course material by guessing the corresponding course material ID (a number), it is recommended to use the release date feature to keep students from accessing course materials.</span>
+            </span><br>
+            (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
         <label hidden id="edit-url-title-label">
             <span>
