@@ -891,8 +891,9 @@ done
 # receipts that were successfully sent at least 360 days ago, with no
 # errors, and delete them from the table.  A maximum of 10,000 email
 # receipts will be deleted.
-"${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
-
+if [ "${WORKER}" == 0 ]; then
+    "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
+fi
 
 #############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
