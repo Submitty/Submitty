@@ -25,7 +25,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         Leave a message at logs/autograding when it receives an error signal from
         untrusted_execute.
         """
-        self.log_message("WARN: untrusted_execute reported an error")
+        self.log_message("ERROR: untrusted_execute reported an error")
 
     def setup_for_archival(self, overall_log):
         """
@@ -94,6 +94,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
                 script
             ]
 
+        # Make sure the signal matches to .setup/untrusted_execute.c
         signal.signal(signal.SIGCHLD, self._handle_error_signal)
 
         success = False
