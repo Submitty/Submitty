@@ -531,6 +531,22 @@ def create_gradeable_submission(src, dst):
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
 
+def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
+    """
+    Given a source and a destination, copy the files from the source to the destination.
+    """
+    with open(src, 'r+') as open_file:
+        annotation_json = json.load(open_file)
+        annotation_json['file_path'] = file_path
+        annotation_json['grader_id'] = grader_id
+        for annotation in annotation_json['annotations']:
+            annotation['userId'] = grader_id
+
+        open_file.seek(0)
+        open_file.truncate()
+
+    with open(os.path.join(dst, file_name), 'w') as f:
+        json.dump(annotation_json, f, indent = 2)
 
 class User(object):
     """
@@ -643,15 +659,15 @@ class User(object):
         print(f"Creating LDAP user {self.id}...")
         path = Path("/tmp", self.id)
         path.write_text(f"""
-dn: uid={self.id},ou=users,dc=vagrant,dc=local
-objectClass: top
-objectClass: account
-objectClass: shadowAccount
-uid: {self.id}
-userPassword: {self.id}
-shadowLastChange: 0
-shadowMax: 0
-shadowWarning: 0""")
+            dn: uid={self.id},ou=users,dc=vagrant,dc=local
+            objectClass: top
+            objectClass: account
+            objectClass: shadowAccount
+            uid: {self.id}
+            userPassword: {self.id}
+            shadowLastChange: 0
+            shadowMax: 0
+            shadowWarning: 0""")
         os.system(f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}')
         path.unlink()
 
@@ -870,6 +886,7 @@ class Course(object):
 
             # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
+            gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
@@ -903,6 +920,7 @@ class Course(object):
                         res.close()
                     else:
                         submission_path = os.path.join(gradeable_path, user.id)
+                        annotation_path = os.path.join(gradeable_annotation_path, user.id)
 
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
@@ -1002,6 +1020,32 @@ class Course(object):
 
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
+
+                            if gradeable.annotated_pdf is True:
+                                if not os.path.exists(gradeable_annotation_path):
+                                    os.makedirs(gradeable_annotation_path)
+                                    os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
+                                if not os.path.exists(annotation_path):
+                                    os.makedirs(annotation_path)
+                                if not os.path.exists(os.path.join(annotation_path, str(versions_to_submit))):
+                                    os.makedirs(os.path.join(annotation_path, str(versions_to_submit)))
+
+                                submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
+                                for submission in submissions:
+                                    src = os.path.join(gradeable.sample_path, submission)
+                                    dst = os.path.join(submission_path, str(version))
+                                    create_gradeable_submission(src, dst)
+
+                                grader_id = "instructor"
+                                annotation = random.choice(gradeable.annotations)
+                                annotation_src = os.path.join(gradeable.annotation_path, annotation)
+                                annotation_dst = os.path.join(annotation_path, str(versions_to_submit))
+
+                                encoded_path = hashlib.md5(submission_path.encode()).hexdigest()
+                                annotation_file_name = str(encoded_path) + "_" + grader_id + ".json"
+                                print(annotation_file_name)
+                                create_pdf_annotations(annotation_file_name, dst, annotation_src, annotation_dst, grader_id)
+
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
@@ -1578,6 +1622,9 @@ class Gradeable(object):
         self.allow_custom_marks = True
         self.plagiarism_submissions = []
         self.plagiarism_versions_per_user = 1
+        self.annotated_pdf = False
+        self.annotation_path = None
+        self.annotations = []
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1695,6 +1742,10 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
+            if 'eg_annotated_pdf' in gradeable:
+                self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
+                self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "annotation")
+
             self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
             self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
             if self.config_path is None:
@@ -1725,6 +1776,11 @@ class Gradeable(object):
                             if isinstance(elem, dict):
                                 raise TypeError("Cannot have dictionary inside of list for submissions "
                                                 "for {}".format(self.sample_path))
+                if self.annotation_path is not None:
+                    self.annotations = os.listdir(self.annotation_path)
+                    self.annotations = list(filter(lambda x: not x.startswith("."), self.annotations))
+                    # Ensure we're not sensitive to directory traversal order
+                    self.annotations.sort()
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_due_date
         assert self.has_release_date is False or self.grade_due_date <= self.grade_released_date
