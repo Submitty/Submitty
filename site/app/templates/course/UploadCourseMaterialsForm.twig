@@ -58,9 +58,9 @@
         <label>
             <input id="hide-materials-checkbox" type="checkbox" value="off" onchange="toggleHideMaterialsWarning()"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
-            <p id="upload-form-hide-warning" class="red-message full-width" style="display: none;">
+            <span id="upload-form-hide-warning" class="red-message full-width" style="display: none;">
                 Warning: Students can view the hidden course material by guessing the corresponding course material ID (a number), it is recommended to use the release date feature to keep students from accessing course materials.
-            </p>
+            </span>
         </label>
         <script>
             function toggleHideMaterialsWarning() {
