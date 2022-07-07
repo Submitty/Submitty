@@ -1890,24 +1890,3 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
     }
     return complete;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
