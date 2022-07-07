@@ -56,14 +56,17 @@
             <input id="upload_sort" value="0.0" type="text" size="26"/>
         </label>
         <label>
-            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
-            Hide from students
-            <span class="infopanel">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span class="infopaneltext">If this feature is used then the students can view the hidden course material by guessing the corresponding course material ID (a number), it is recommended to use the release date feature to keep students from accessing course materials.</span>
-            </span><br>
-            (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
+            <input id="hide-materials-checkbox" type="checkbox" value="off" onchange="toggleHideMaterialsWarning()"/>
+            Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
+            <p id="upload-form-hide-warning" class="red-message full-width" style="display: none;">
+                Warning: Students can view the hidden course material by guessing the corresponding course material ID (a number), it is recommended to use the release date feature to keep students from accessing course materials.
+            </p>
         </label>
+        <script>
+            function toggleHideMaterialsWarning() {
+                $('#hide-materials-checkbox:visible ~ #upload-form-hide-warning').toggle();
+            }
+        </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
             <legend class="black-message">

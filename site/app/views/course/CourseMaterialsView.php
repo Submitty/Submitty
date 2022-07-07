@@ -23,6 +23,7 @@ class CourseMaterialsView extends AbstractView {
         $directory_priorities = [];
         $seen = [];
         $folder_ids = [];
+        $folder_info = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
 
@@ -33,6 +34,7 @@ class CourseMaterialsView extends AbstractView {
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
+                $folder_info[$course_material->getPath()] = array("is_hidden" => $course_material->isHiddenFromStudents());
             }
             else {
                 $path_parts = explode("/", $rel_path);
@@ -134,7 +136,6 @@ class CourseMaterialsView extends AbstractView {
         $this->removeEmptyFolders($final_structure);
 
         $this->setSeen($final_structure, $seen, $base_course_material_path);
-
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -149,6 +150,7 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
+            "folder_info" => $folder_info,
             "links" => $links
         ]);
     }

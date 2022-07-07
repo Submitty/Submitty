@@ -46,9 +46,18 @@
             <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" />
         </label>
         <label>
-            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="enableFullUpdate()"/>
+            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="handleHideMaterialsChange()"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
+            <p id="edit-folder-form-hide-warning" class="red-message full-width" style="display: none;">
+                Warning: Students can view the hidden course material by guessing the corresponding course material ID (a number), it is recommended to use the release date feature to keep students from accessing course materials.
+            </p>
         </label>
+        <script>
+            function handleHideMaterialsChange() {
+                enableFullUpdate();
+                $('#hide-folder-materials-checkbox-edit:visible ~ #edit-folder-form-hide-warning').toggle();
+            }
+        </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>
