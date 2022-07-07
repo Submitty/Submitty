@@ -20,6 +20,40 @@ void json_set_default(nlohmann::json &whole_config, std::string field, const T& 
   }
 }
 
+uint64_t parse_file_size(std::string size_str) {
+  // Trim whitespaces
+  size_str.erase(remove_if(size_str.begin(), size_str.end(), isspace), size_str.end());
+
+  // Convert string to lowercase, note that it cannot handle UTF-8 characters
+  for (char& c : size_str)
+    c = std::tolower(c);
+
+  // Extract numeric file size, will cause exception if the number is larger than 64-bit
+  size_t unit_begin = 0;
+  uint64_t file_size = std::stoull(size_str, &unit_begin);
+  // check if it is 0 or contains invalid chars     ====whitelist====
+  if (file_size == 0 || size_str.find_first_not_of("01234567890bkmgti") == std::string::npos) {
+    std::cout << "Got parsed value " << file_size << " from string: " << size_str << std::endl;
+    throw std::invalid_argument("Wrong file size");
+  }
+
+  const std::string suffices = "bkmgt";
+  // Calculate l-shifts
+  size_t lshift = 0;
+  if (unit_begin != size_str.size() // handle strings without unit, treat as byte
+      && (lshift = suffices.find(size_str[unit_begin])) == std::string::npos) {
+    throw std::invalid_argument("Wrong file unit, possible units: B,KB,MB,GB,TB");
+  }
+  lshift = lshift * 10;
+
+  // Return the multiplied size, throw if overflowed
+  uint64_t parsed_size = file_size * (1UL << lshift);
+  if (file_size != parsed_size / (1UL << lshift)) {
+    throw std::overflow_error("Total file size overflowed");
+  }
+  return parsed_size;
+}
+
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   std::vector<std::string> all_testcase_ids = gatherAllTestcaseIds(whole_config);
@@ -157,7 +191,15 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     json_set_default(whole_config["early_submission_incentive"],"test_cases",std::vector<int>());
   }
 
-  json_set_default(whole_config, "max_submission_size", MAX_SUBMISSION_SIZE);
+  if (whole_config.find("max_submission_size") != whole_config.end()) {
+    if (whole_config["max_submission_size"].type() == nlohmann::json::value_t::string) {
+      // Found formatted string, convert to numeric bytes
+      uint64_t max_size_in_byte = parse_file_size(whole_config["max_submission_size"]);
+      whole_config["max_submission_size"] = max_size_in_byte;
+    } // Should not parse values: might overflow.  Let schema checker handle type errors
+  } else {
+    json_set_default(whole_config, "max_submission_size", MAX_SUBMISSION_SIZE);
+  }
   json_set_default(whole_config, "required_capabilities", "default");
 
   json_set_default(whole_config, "hide_submitted_files", false);
@@ -993,7 +1035,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
   json_set_default(single_testcase,"view_testcase_message",true);
   json_set_default(single_testcase,"publish_actions",false);
-  
+
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
     assert (itr->is_array());
