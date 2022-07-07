@@ -34,7 +34,7 @@ class CourseMaterialsView extends AbstractView {
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
-                $folder_info[$course_material->getPath()] = array("is_hidden" => $course_material->isHiddenFromStudents());
+                $folder_info[$course_material->getPath()] = ["is_hidden" => $course_material->isHiddenFromStudents()];
             }
             else {
                 $path_parts = explode("/", $rel_path);
@@ -136,6 +136,7 @@ class CourseMaterialsView extends AbstractView {
         $this->removeEmptyFolders($final_structure);
 
         $this->setSeen($final_structure, $seen, $base_course_material_path);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
