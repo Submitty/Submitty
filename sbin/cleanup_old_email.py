@@ -114,7 +114,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     print(f"email to delete after count: {after}")
 
     print(f"deleted email count {before-after}\n")
-    
+
 
 def main():
     try:
