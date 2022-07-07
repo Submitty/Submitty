@@ -13,8 +13,9 @@ for i in range(1, nArgs):
     files.extend(glob.glob(path))
 if (not len(files)):
     raise Exception("No matching files found for the input pattern")
-command = "cloc --csv --quiet " + " ".join(files)
-result = subprocess.check_output(command, shell=True).splitlines()
+command = ["cloc", "--csv", "--quiet"]
+command.extend(files)
+result = subprocess.check_output(command).splitlines()
 if (len(result)):
     # last line of the output contains the comment lines count
     out = (result[-1].decode("utf-8")).split(",")
