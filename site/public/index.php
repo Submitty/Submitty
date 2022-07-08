@@ -143,4 +143,3 @@ if ($response instanceof ResponseInterface) {
 }
 
 $core->getOutput()->displayOutput();
-?>
