@@ -622,11 +622,11 @@ HTML;
         return $this->module_js;
     }
 
-    public function getManifastPath() : String {
+    public function getManifastPath(): string {
         return $this->manifest_json;
     }
 
-    public function getServiceWorkerPath() : String {
+    public function getServiceWorkerPath(): string {
         return $this->service_worker;
     }
 
