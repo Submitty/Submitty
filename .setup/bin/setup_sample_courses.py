@@ -1087,21 +1087,28 @@ class Course(object):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
             course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
             course_materials_zip = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials', 'sample_course_materials.zip')
+            course_materials_table = Table("course_materials", self.metadata, autoload=True)
             with TemporaryDirectory() as tmpdir:
                 shutil.unpack_archive(course_materials_zip, tmpdir)
-                for f in os.listdir(tmpdir):
-                    shutil.move(os.path.join(tmpdir, f), course_materials_folder)
-            course_materials_table = Table("course_materials", self.metadata, autoload=True)
-            for dpath, dirs, files in os.walk(course_materials_folder):
-                self.conn.execute(course_materials_table.insert(), 
-                             path=dpath,
+                for dpath, dirs, files in os.walk(tmpdir):
+                    inner_dir=os.path.relpath(dpath, tmpdir)
+                    if inner_dir!=".":
+                        dir_to_make=os.path.join(course_materials_folder, inner_dir)
+                        os.mkdir(dir_to_make)
+                        subprocess.run(["chown", ":submitty_php", dir_to_make])
+                        self.conn.execute(course_materials_table.insert(), 
+                             path=dir_to_make,
                              type=2,
                              release_date='2022-01-01 00:00:00',
                              hidden_from_students=False,
                              priority=0)
-                for file in files:
-                    self.conn.execute(course_materials_table.insert(), 
-                                 path=os.path.join(dpath, file),
+                    for f in files:
+                        tmpfilepath= os.path.join(dpath,f)
+                        filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, tmpdir))
+                        shutil.move(tmpfilepath, filepath)
+                        subprocess.run(["chown", ":submitty_php", filepath])
+                        self.conn.execute(course_materials_table.insert(), 
+                                 path=filepath,
                                  type=0,
                                  release_date='2022-01-01 00:00:00',
                                  hidden_from_students=False,
