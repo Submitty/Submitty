@@ -1095,7 +1095,7 @@ class Course(object):
                     if inner_dir!=".":
                         dir_to_make=os.path.join(course_materials_folder, inner_dir)
                         os.mkdir(dir_to_make)
-                        subprocess.run(["chown", ":submitty_php", dir_to_make])
+                        subprocess.run(["chown", "submitty_php:submitty_php", dir_to_make])
                         self.conn.execute(course_materials_table.insert(), 
                              path=dir_to_make,
                              type=2,
@@ -1106,7 +1106,7 @@ class Course(object):
                         tmpfilepath= os.path.join(dpath,f)
                         filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, tmpdir))
                         shutil.move(tmpfilepath, filepath)
-                        subprocess.run(["chown", ":submitty_php", filepath])
+                        subprocess.run(["chown", "submitty_php:submitty_php", filepath])
                         self.conn.execute(course_materials_table.insert(), 
                                  path=filepath,
                                  type=0,
