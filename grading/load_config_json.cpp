@@ -22,7 +22,7 @@ void json_set_default(nlohmann::json &whole_config, std::string field, const T& 
 
 uint64_t parse_file_size(std::string size_str) {
   // Trim whitespaces
-  size_str.erase(remove_if(size_str.begin(), size_str.end(), isspace), size_str.end());
+  size_str.erase(std::remove_if(size_str.begin(), size_str.end(), isspace), size_str.end());
 
   // Convert string to lowercase, note that it cannot handle UTF-8 characters
   for (char& c : size_str)
@@ -32,7 +32,7 @@ uint64_t parse_file_size(std::string size_str) {
   size_t unit_begin = 0;
   uint64_t file_size = std::stoull(size_str, &unit_begin);
   // check if it is 0 or contains invalid chars     ====whitelist====
-  if (file_size == 0 || size_str.find_first_not_of("01234567890bkmgti") == std::string::npos) {
+  if (file_size == 0 || size_str.find_first_not_of("01234567890bkmgti") != std::string::npos) {
     std::cout << "Got parsed value " << file_size << " from string: " << size_str << std::endl;
     throw std::invalid_argument("Wrong file size");
   }
