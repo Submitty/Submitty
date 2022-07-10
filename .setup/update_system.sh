@@ -23,20 +23,38 @@ if [ -d "${CURRENT_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-APT=true
+#################################################################
+# LINUX PACKAGE UPGRADE
+#########################
 
-# check if apt upgrades have been disabled
-for flag in "$@"; do
-    case $flag in
-        --skip_apt_upgrade)
-            APT=false
-            ;;
-    esac
-done
+UPDATE_SETTINGS_JSON="${CONF_DIR}/update_settings.json"
+# only apt-get upgrade if UPDATE_SETTINGS_JSON exists, may be manually created or silently by CONFIGURE_SUBMITTY.py
+if [ -f "${UPDATE_SETTINGS_JSON}" ]; then
+    APT=$(jq -r '.upgrade_linux_packages' ${UPDATE_SETTINGS_JSON})
 
-if [ "${APT}" == true ]; then
-    # update packages
-    apt-get update && apt-get upgrade -y
+    # check if apt upgrades have been disabled
+    for flag in "$@"; do
+        case $flag in
+            skip_apt_upgrade)
+                APT=false
+                ;;
+        esac
+    done
+
+    if [ "${APT}" == true ]; then
+        # if upgrade is set to true then fetch rest of the configuration
+        APT_UPGRADE_TYPE=$(jq -r '.linux_packages_upgrade_type' ${UPDATE_SETTINGS_JSON})
+        AUTOHANDLE_APT_PROMPTS=$(jq -r '.autohandle_apt_prompts' ${UPDATE_SETTINGS_JSON})
+        AUTOHANDLE_APT_PROMPTS_OPTION=$(jq -r '.autohandle_apt_prompts_option' ${UPDATE_SETTINGS_JSON})
+        # set the args
+        if [ "${AUTOHANDLE_APT_PROMPTS}" == true ]; then
+            APT_GET_OPTIONS=( -o Dpkg::Options::=\"${AUTOHANDLE_APT_PROMPTS_OPTION}\" -y )
+        else
+            APT_GET_OPTIONS=( -y )
+        fi
+        # update packages
+        apt-get update && apt-get "${APT_GET_OPTIONS[@]}" "${APT_UPGRADE_TYPE}"
+    fi
 fi
 
 #libraries for QR code processing:

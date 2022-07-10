@@ -691,6 +691,24 @@ if not args.worker:
     os.chmod(EMAIL_JSON, 0o440)
 
 ##############################################################################
+# Write update_settings.json
+
+UPDATE_SETTINGS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'update_settings.json')
+
+if not os.path.isfile(UPDATE_SETTINGS_JSON):
+    config = OrderedDict()
+    config['upgrade_linux_packages'] = False
+    config['linux_packages_upgrade_type'] = "upgrade" #can be dist-upgrade
+    config['autohandle_apt_prompts'] = False
+    #Refer https://stackoverflow.com/questions/33370297/apt-get-update-non-interactive
+    config['autohandle_apt_prompts_option'] = '--force-confold'
+
+    with open(UPDATE_SETTINGS_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(UPDATE_SETTINGS_JSON, 'root', 'root')
+    os.chmod(UPDATE_SETTINGS_JSON, 0o774)
+
+##############################################################################
 
 print('Configuration completed. Now you may run the installation script')
 print(f'    sudo {INSTALL_FILE}')
