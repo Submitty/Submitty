@@ -97,7 +97,7 @@ Required Parameters:
         $(document).ready(function(){
             $('.overall-comment-other').each(function() {
                 const content = $(this).html().trim();
-                const url = buildURL(["markdown"]);
+                const url = buildUrl(["markdown"]);
                 renderMarkdown($(this), url, content);
             });
         });
@@ -114,5 +114,3 @@ Required Parameters:
       });
     </script>
 </div>
-
-

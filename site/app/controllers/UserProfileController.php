@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -149,8 +150,11 @@ class UserProfileController extends AbstractController {
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
+            if ($result === User::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
+            }
 
-            if (!$result) {
+            if ($result === User::PROFILE_IMG_SET_FAILURE) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
