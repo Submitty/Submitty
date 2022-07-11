@@ -28,21 +28,50 @@
                         {% endif %}
                     </td>
                     <td>
+                        {% set display_toggle = false %}
+                        {% set display_visible_text = true %}
+                        {% set visible_text = entry["name"] %}
+                        {% set hidden_text = "Anonymous" %}
+
+                        {# Self -- NO TOGGLE #}
                         {% if user_id == entry['user_id'] %}
-                            {{ entry["name"] }}
                             {% if studentIsAnonymous %}
-                                (anonymous to others)
+                                {% set visible_text = visible_text ~ " (anonymous to others)" %}
                             {% else %}
-                                (visible to everyone)
+                                {% set visible_text = visible_text ~ " (visible to everyone)" %}
                             {% endif %}
+                        {# Anonymous (Student View) -- NO TOGGLE #}
                         {% elseif not accessFullGrading and (not normal_leaderboard_section or entry["anonymous_leaderboard"]) %}
-                            Anonymous
+                            {% set display_visible_text = false %}
                         {% else %}
-                            {{ entry["name"] }}
+                            {# Anonymous (Staff View) -- TOGGLABLE #}
+                            {# {% if entry["anonymous_leaderboard"] and entry["user_id"] <= 2 and entry["user_group"] >= 4 %} #}
+                            {% if entry["anonymous_leaderboard"] and entry["user_group"] >= 4 %}
+                            {# {% if entry["anonymous_leaderboard"] %} #}
+                                {% set display_toggle = true %}
+                                {% set display_visible_text = false %}
+                            {% endif %}
                         {% endif %}
-                        {% if entry["user_group"] < 4%}(course staff){% endif %}
+                        {# APPEND INFO TO VISIBLE TEXT #}
+                        {% if entry["user_group"] < 4 %}
+                            {% set visible_text = visible_text ~ " (course staff)" %}
+                        {% endif %}
                         {% if accessFullGrading %}
-                            &lt;{{ entry["user_id"] }}&gt;
+                            {% set visible_text = visible_text ~ " <" ~ entry["user_id"] ~ ">" %}
+                        {% endif %}
+                        
+                        {# Display User #}
+                        {% if display_visible_text %}
+                            <strong class="post_user_id">{{ visible_text }}</strong>
+                        {% else %}
+                            <strong class="post_user_id">{{ hidden_text }}</strong>
+                            {% if display_toggle %}
+                            <span class="post-user-info key_to_click"
+                            onClick='changeName(this.parentNode, "{{ visible_text|replace({'<': "&lt;", '>': "&gt;"}) }}", "{{ hidden_text }}", "{{ entry['anonymous_leaderboard'] is defined ? 'asdf' : '' }}"); return false;'
+                            title="Show full user information"
+                            aria-label="Show full user information"
+                            ><i class="fas fa-eye"></i></span>
+                            {% endif %}
                         {% endif %}
                     </td>
                     <td>{{ entry["points"] }}</td>
