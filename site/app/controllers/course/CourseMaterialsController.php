@@ -114,8 +114,12 @@ class CourseMaterialsController extends AbstractController {
         }
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($cm->getPath())));
-
+        $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
+        // check to prevent the deletion of course_materials folder
+        if ($path === FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials")) {
+            $this->core->addErrorMessage(basename($path) . " can't be removed.");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
@@ -599,8 +603,19 @@ class CourseMaterialsController extends AbstractController {
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
+                            $double_dot = ["../","..\\","/..","\\.."];
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $entries[] = $zip->getNameIndex($i);
+                                //check to ensure that entry name doesn't have ..
+                                $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
+                                    if (strpos($entries[count($entries) - 1], $dot) !== false) {
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                                if (count($dot_check) !== 0) {
+                                    return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
+                                }
                             }
                             $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                                 $name = strtolower($entry);
