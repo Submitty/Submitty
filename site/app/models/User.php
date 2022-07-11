@@ -66,6 +66,14 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
+    /**
+     * Profile image set return codes
+     */
+    const PROFILE_IMG_SET_FAILURE = 0;
+    const PROFILE_IMG_SET_SUCCESS = 1;
+    /** Profile image quota of 50 images exhausted */
+    const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -301,10 +309,10 @@ class User extends AbstractModel {
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
-     * @return bool true if the update was successful, false otherwise
+     * @return int PROFILE_IMG_SET_SUCCESS if the update was successful, PROFILE_IMG_QUOTA_EXHAUSTED if image upload quota of 50 has been exhausted, PROFILE_IMG_SET_FAILURE otherwise
      * @throws \ImagickException
      */
-    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): int {
         $image_saved = true;
 
         // Try saving image to its new spot in the file directory
@@ -313,15 +321,18 @@ class User extends AbstractModel {
         }
         catch (\Exception $exception) {
             $image_saved = false;
+            if ($exception->getCode() === self::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return self::PROFILE_IMG_QUOTA_EXHAUSTED;
+            }
         }
 
         // Update the DB to 'preferred'
         if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
             $this->display_image_state = 'preferred';
-            return true;
+            return self::PROFILE_IMG_SET_SUCCESS;
         }
 
-        return false;
+        return self::PROFILE_IMG_SET_FAILURE;
     }
 
     /**

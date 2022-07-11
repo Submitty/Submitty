@@ -9,7 +9,7 @@ async function getReleases(current_tag) {
     try {
         const response = await fetch('https://api.github.com/repos/Submitty/Submitty/releases');
 
-        if (response.status !== 200){
+        if (response.status !== 200) {
             // eslint-disable-next-line no-undef
             displayMessage(' Failed to get latest version info.' +
                 ` (Status Code : ${response.status.toString()})<br>` +
@@ -23,7 +23,7 @@ async function getReleases(current_tag) {
             });
         }
     }
-    catch (error){
+    catch (error) {
         console.error(error);
         // eslint-disable-next-line no-undef
         displayMessage(error.toString(), 'error');
@@ -37,7 +37,7 @@ async function getReleases(current_tag) {
 * @param {Array} data - response from GitHub API, array of last few releases
 * @param {String} current_tag - tag Submitty is currently running on
 */
-function updateReleaseNotes(data, current_tag){
+function updateReleaseNotes(data, current_tag) {
     //collect all of the release notes submitty is behind into one large string
     //release notes are separated with \n-END-\n to help with parsing later
     let updates = '';
@@ -276,7 +276,7 @@ function filterReleaseNotes(filter) {
                 return;
             }
             //if the filter exists in the section's text somewhere
-            if ($(section).text().toLowerCase().includes(filter.toLowerCase())){
+            if ($(section).text().toLowerCase().includes(filter.toLowerCase())) {
                 //show the section and make sure the release that the section is in is shown
                 $(section).show();
                 $(release).show();
@@ -292,7 +292,7 @@ function filterReleaseNotes(filter) {
                     $(release_item).hide();
 
                     //if the filter text can be found in this release item
-                    if ($(release_item).text().toLowerCase().includes(filter.toLowerCase())){
+                    if ($(release_item).text().toLowerCase().includes(filter.toLowerCase())) {
                         found_at_least_one = true;
                         releases_shown++;
                         //show the release item
