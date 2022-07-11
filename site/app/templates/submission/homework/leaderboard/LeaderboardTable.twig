@@ -45,9 +45,7 @@
                             {% set display_visible_text = false %}
                         {% else %}
                             {# Anonymous (Staff View) -- TOGGLABLE #}
-                            {# {% if entry["anonymous_leaderboard"] and entry["user_id"] <= 2 and entry["user_group"] >= 4 %} #}
-                            {% if entry["anonymous_leaderboard"] and entry["user_group"] >= 4 %}
-                            {# {% if entry["anonymous_leaderboard"] %} #}
+                            {% if entry["anonymous_leaderboard"] %}
                                 {% set display_toggle = true %}
                                 {% set display_visible_text = false %}
                             {% endif %}
