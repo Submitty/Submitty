@@ -533,9 +533,20 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Given a source and a destination, copy the files from the source to the destination.
+    Specifically designed helper funtion that copys and modifies a annotation from the source to the destination.
+
+    :param file_name: encoded file name
+    :type src: str
+    :param file_path: anonymous file path
+    :type src: str
+    :param src: path of the file or directory we want to use for this annotation
+    :type src: str
+    :param dst: path to the folder where we should copy the annotation to
+    :type src: str
+    :param grader_id: grader of the annotation
+    :type src: str
     """
-    with open(src, 'r+') as open_file:
+    with open(src, 'r') as open_file:
         annotation_json = json.load(open_file)
         annotation_json['file_path'] = file_path
         annotation_json['grader_id'] = grader_id
@@ -543,7 +554,6 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
             annotation['userId'] = grader_id
 
         open_file.seek(0)
-        open_file.truncate()
 
     with open(os.path.join(dst, file_name), 'w') as f:
         json.dump(annotation_json, f, indent = 2)
@@ -944,6 +954,14 @@ class Course(object):
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
 
+                            if gradeable.annotated_pdf is True:
+                                if not os.path.exists(gradeable_annotation_path):
+                                    os.makedirs(gradeable_annotation_path)
+                                    #os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
+                                if not os.path.exists(annotation_path):
+                                    os.makedirs(annotation_path)
+                                    #os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_path))
+
                             # Reduce the probability to get a cancelled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
                             version_population = []
@@ -998,6 +1016,32 @@ class Course(object):
                                         src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarism_submissions.pop())
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
+                                elif gradeable.annotated_pdf is True:
+                                    if version == versions_to_submit:
+                                        annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
+                                        if not os.path.exists(annotation_version_path):
+                                            os.makedirs(annotation_version_path)
+                                            os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
+
+                                    submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
+                                    for submission in submissions:
+                                        src = os.path.join(gradeable.sample_path, submission)
+                                        dst = os.path.join(submission_path, str(version))
+                                        create_gradeable_submission(src, dst)
+
+                                        if version == versions_to_submit:
+                                            grader_id = "instructor"
+                                            annotation = random.choice(gradeable.annotations)
+                                            annotation_src = os.path.join(gradeable.annotation_path, annotation)
+                                            annotation_dst = os.path.join(annotation_path, str(version))
+
+                                            anon_dst = os.path.join(dst, submission).split("/")
+                                            anon_dst[9] = user.anon_id
+                                            anon_dst = "/".join(anon_dst)
+
+                                            encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
+                                            annotation_file_name = str(encoded_path) + "_" + grader_id + ".json"
+                                            create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, grader_id)
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
@@ -1020,32 +1064,6 @@ class Course(object):
 
                             with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
-
-                            if gradeable.annotated_pdf is True:
-                                if not os.path.exists(gradeable_annotation_path):
-                                    os.makedirs(gradeable_annotation_path)
-                                    os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
-                                if not os.path.exists(annotation_path):
-                                    os.makedirs(annotation_path)
-                                if not os.path.exists(os.path.join(annotation_path, str(versions_to_submit))):
-                                    os.makedirs(os.path.join(annotation_path, str(versions_to_submit)))
-
-                                submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
-                                for submission in submissions:
-                                    src = os.path.join(gradeable.sample_path, submission)
-                                    dst = os.path.join(submission_path, str(version))
-                                    create_gradeable_submission(src, dst)
-
-                                grader_id = "instructor"
-                                annotation = random.choice(gradeable.annotations)
-                                annotation_src = os.path.join(gradeable.annotation_path, annotation)
-                                annotation_dst = os.path.join(annotation_path, str(versions_to_submit))
-
-                                encoded_path = hashlib.md5(submission_path.encode()).hexdigest()
-                                annotation_file_name = str(encoded_path) + "_" + grader_id + ".json"
-                                print(annotation_file_name)
-                                create_pdf_annotations(annotation_file_name, dst, annotation_src, annotation_dst, grader_id)
-
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
