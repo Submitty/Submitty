@@ -1,6 +1,7 @@
 """Migration for the Submitty system."""
 import pkg_resources
 import subprocess
+import sys
 
 def up(config):
     #get existing installed packages and check if opencv-python is there
@@ -11,15 +12,13 @@ def up(config):
         try:
             subprocess.check_call("python3 -m pip uninstall opencv-python --yes --no-input", shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            print("Failed to uninstall opencv-python, quitting")
-            print(e.output)
-            return
-
+            print("Failed to uninstall opencv-python, quitting", file=sys.stderr)
+            raise e
     try:       
         subprocess.check_call("python3 -m pip install opencv-python-headless==4.6.0.66", shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print("Failed to install opencv-python-headless, quitting")
-        print(e.output)
+        print("Failed to install opencv-python-headless, quitting", file=sys.stderr)
+        raise e
 
 def down(config):
     """
