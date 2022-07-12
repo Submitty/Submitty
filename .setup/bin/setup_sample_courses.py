@@ -556,8 +556,6 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
         for annotation in annotation_json['annotations']:
             annotation['userId'] = grader_id
 
-        open_file.seek(0)
-
     with open(os.path.join(dst, file_name), 'w') as f:
         json.dump(annotation_json, f, indent = 2)
 
@@ -960,10 +958,8 @@ class Course(object):
                             if gradeable.annotated_pdf is True:
                                 if not os.path.exists(gradeable_annotation_path):
                                     os.makedirs(gradeable_annotation_path)
-                                    #os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
                                 if not os.path.exists(annotation_path):
                                     os.makedirs(annotation_path)
-                                    #os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_path))
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
@@ -1034,8 +1030,10 @@ class Course(object):
                                     ]).where(
                                         peer_assign.columns.user_id == user.id
                                     )
-                                    for res in self.conn.execute(stmt):  
+                                    for res in self.conn.execute(stmt):
+                                        #print(res)  
                                         assigned_graders.append(res[1])
+                                    #print(assigned_graders)
 
                                     submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
                                     for submission in submissions:
@@ -1045,7 +1043,7 @@ class Course(object):
 
                                         if version == versions_to_submit:
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
-                                            graders = random.sample(assigned_graders, len(annotations)-1)
+                                            graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
                                             # Make sure instructor is responsible for one of the annotations
                                             graders.append("instructor")
 
@@ -1053,13 +1051,13 @@ class Course(object):
                                             anon_dst[9] = user.anon_id
                                             anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
                                             
-                                            for i in range(len(annotations)):
+                                            for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
                                                 annotation_dst = os.path.join(annotation_path, str(version))
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
                                                 # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
-                                                annotation_file_name = str(encoded_path) + "_" + graders[i] + ".json"
-                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, grader)
+                                                annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
+                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
