@@ -533,7 +533,10 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper funtion that copys and modifies a annotation from the source to the destination.
+    Specifically designed helper funtion that copys a annotation from the source to the destination.
+    The source annotation need to be modifed to reflect:
+        the file that the annotations belongs to
+        the grader that is responsible for the annotation
 
     :param file_name: encoded file name
     :type src: str
@@ -1023,6 +1026,7 @@ class Course(object):
                                             os.makedirs(annotation_version_path)
                                             os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
                                     
+                                    # Get a list of graders that has access to the submission
                                     assigned_graders = []
                                     stmt = select([
                                         peer_assign.columns.user_id,
@@ -1034,7 +1038,6 @@ class Course(object):
                                         assigned_graders.append(res[1])
 
                                     submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
-
                                     for submission in submissions:
                                         src = os.path.join(gradeable.sample_path, submission)
                                         dst = os.path.join(submission_path, str(version))
@@ -1043,16 +1046,18 @@ class Course(object):
                                         if version == versions_to_submit:
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1)
+                                            # Make sure instructor is responsible for one of the annotations
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
                                             anon_dst[9] = user.anon_id
-                                            anon_dst = "/".join(anon_dst)
+                                            anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
                                             
                                             for i in range(len(annotations)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
                                                 annotation_dst = os.path.join(annotation_path, str(version))
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
+                                                # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
                                                 annotation_file_name = str(encoded_path) + "_" + graders[i] + ".json"
                                                 create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, grader)
                                 else:
