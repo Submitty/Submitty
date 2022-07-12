@@ -8081,4 +8081,93 @@ ORDER BY
                     AND g_id = ?
         ", [$state, $user_id, $gradeable_id]);
     }
+
+    public function getSAMLAuthorizedUserIDs(string $saml_id): array {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE saml_id = ? AND active = true
+        ", [$saml_id]);
+        return $this->submitty_db->rows();
+    }
+
+    public function getProxyMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT id, user_id, saml_id, active FROM saml_mapped_users
+                WHERE saml_id != user_id;
+        ");
+        return $this->submitty_db->rows();
+    }
+
+    public function getSamlMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT id, user_id, saml_id FROM saml_mapped_users
+                WHERE saml_id = user_id AND active = true;
+        ");
+        return $this->submitty_db->rows();
+    }
+
+    public function insertSamlMapping(string $saml_id, string $submitty_id) {
+        $this->submitty_db->beginTransaction();
+        $this->submitty_db->query("
+            INSERT INTO saml_mapped_users (saml_id, user_id)
+                VALUES (?, ?) ON CONFLICT (saml_id, user_id) DO UPDATE
+                SET active = true;
+        ", [$saml_id, $submitty_id]);
+        $this->submitty_db->commit();
+    }
+
+    public function isSamlProxyUser(int $id): bool {
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+
+        $row = $this->submitty_db->row();
+
+        return $row['count'] > 0;
+    }
+
+    public function samlMappingDeletable(int $id): bool {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+
+        $row = $this->submitty_db->rows();
+        if (count($row) === 0) {
+            return false;
+        }
+
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                user_id = ?
+        ", [$row[0]["user_id"]]);
+
+        $row = $this->submitty_db->row();
+        if ($row['count'] < 2) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function updateSamlMapping(int $id, bool $active) {
+        $this->submitty_db->query("
+            UPDATE saml_mapped_users SET active = ?
+                WHERE id = ?;
+        ", [$active, $id]);
+    }
+
+    public function deleteSamlMapping(int $id) {
+        $this->submitty_db->query("
+            DELETE FROM saml_mapped_users WHERE id = ?;
+        ", [$id]);
+    }
+
+    public function checkNonMappedUsers() {
+        $this->submitty_db->query("
+            SELECT user_id FROM users WHERE user_id NOT IN
+                (SELECT user_id FROM saml_mapped_users);
+        ");
+        return $this->rowsToArray($this->submitty_db->rows());
+    }
 }

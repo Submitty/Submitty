@@ -28,6 +28,7 @@
     "lcobucci/jwt": "3.4.6",
     "league/commonmark": "1.6.7",
     "maennchen/zipstream-php": "2.1.0",
+    "onelogin/php-saml": "^3.6",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
