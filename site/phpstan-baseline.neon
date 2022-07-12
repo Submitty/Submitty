@@ -27,14 +27,6 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/AuthenticationController.php
-
-		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
 			path: app/controllers/AuthenticationController.php
@@ -290,7 +282,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 10
+			count: 11
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
@@ -422,14 +414,6 @@ parameters:
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: app/libraries/Access.php
-
-		-
-			message: """
-				#^Casting class Lcobucci\\\\JWT\\\\Token to string is deprecated\\.\\:
-				This method has been removed from the interface in v4\\.0$#
-			"""
-			count: 3
-			path: app/libraries/Core.php
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"

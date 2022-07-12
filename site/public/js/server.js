@@ -29,8 +29,6 @@ function adjustBreadcrumbLinks(){
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
 
-
-
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -131,50 +129,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         }
     });
 
-}
-
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    let orig_div_name = div_name;
-    div_name = "#" + div_name;
-
-    let loadingTools = $("#tc_" + index).find(".loading-tools");
-
-    if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
-    }
-    else{
-        $("#show_char_"+index).toggle();
-        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
-            url: url,
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Error getting file diff: ' + response.message);
-                    return;
-                }
-                $(div_name).empty();
-                $(div_name).html(response.data);
-                toggleDiv(orig_div_name);
-
-                loadingTools.find("span").hide();
-                loadingTools.find(".loading-tools-hide").show();
-                enableKeyToClick();
-            },
-            error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
-            }
-        })
-    }
 }
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
@@ -960,7 +914,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })
+    })  
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
