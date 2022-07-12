@@ -44,6 +44,7 @@ uint64_t parse_file_size(std::string size_str) {
   }
   // check if it is well formatted
   if (!std::regex_match(size_str, accepted)) {
+    std::cout << "Got string " << size_str << std::endl;
     throw std::invalid_argument("Wrong format: accepted format is \\d+([KMGT]i?)?B?");
   }
 
@@ -51,7 +52,8 @@ uint64_t parse_file_size(std::string size_str) {
   const std::string suffices { "bkmgt" };
   size_t power = 0;
   size_t base  = 1000;
-  power = suffices.find(size_str[unit_begin]);
+  if ((power = suffices.find(size_str[unit_begin])) == std::string::npos)
+    power = 0; // Handle empty unit, treat as byte
   assert(power < 5);
   if (size_str.size() - unit_begin >= 2 && size_str[unit_begin + 1] == 'i')
     base = 1024;
