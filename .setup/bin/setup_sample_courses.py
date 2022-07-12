@@ -1022,26 +1022,39 @@ class Course(object):
                                         if not os.path.exists(annotation_version_path):
                                             os.makedirs(annotation_version_path)
                                             os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
+                                    
+                                    assigned_graders = []
+                                    stmt = select([
+                                        peer_assign.columns.user_id,
+                                        peer_assign.columns.grader_id
+                                    ]).where(
+                                        peer_assign.columns.user_id == user.id
+                                    )
+                                    for res in self.conn.execute(stmt):  
+                                        assigned_graders.append(res[1])
 
                                     submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
+
                                     for submission in submissions:
                                         src = os.path.join(gradeable.sample_path, submission)
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
 
                                         if version == versions_to_submit:
-                                            grader_id = "instructor"
-                                            annotation = random.choice(gradeable.annotations)
-                                            annotation_src = os.path.join(gradeable.annotation_path, annotation)
-                                            annotation_dst = os.path.join(annotation_path, str(version))
+                                            annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
+                                            graders = random.sample(assigned_graders, len(annotations)-1)
+                                            graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
                                             anon_dst[9] = user.anon_id
                                             anon_dst = "/".join(anon_dst)
-
-                                            encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
-                                            annotation_file_name = str(encoded_path) + "_" + grader_id + ".json"
-                                            create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, grader_id)
+                                            
+                                            for i in range(len(annotations)):
+                                                annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
+                                                annotation_dst = os.path.join(annotation_path, str(version))
+                                                encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
+                                                annotation_file_name = str(encoded_path) + "_" + graders[i] + ".json"
+                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, grader)
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
