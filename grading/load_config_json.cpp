@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <regex>
 #include <ctype.h>
 
 
@@ -21,34 +22,44 @@ void json_set_default(nlohmann::json &whole_config, std::string field, const T& 
 }
 
 uint64_t parse_file_size(std::string size_str) {
-  // Trim whitespaces
+  // Trim whitespaces, it cannot handle UTF-8 characters
   size_str.erase(std::remove_if(size_str.begin(), size_str.end(), isspace), size_str.end());
 
-  // Convert string to lowercase, note that it cannot handle UTF-8 characters
+  // Convert string to lowercase, it cannot handle UTF-8 characters
   for (char& c : size_str)
     c = std::tolower(c);
 
+  // Accepted units, all Bs could be omitted:
+  //    Base 1000: B, KB,  MB,  GB,  TB   (SI)
+  //    Base 1024: B, KiB, MiB, GiB, TiB  (IEC-i)
+  const std::regex accepted { "\\d+([kmgt]i?)?b?" };
+
   // Extract numeric file size, will cause exception if the number is larger than 64-bit
-  size_t unit_begin = 0;
+  size_t unit_begin  = 0;
   uint64_t file_size = std::stoull(size_str, &unit_begin);
-  // check if it is 0 or contains invalid chars     ====whitelist====
-  if (file_size == 0 || size_str.find_first_not_of("01234567890bkmgti") != std::string::npos) {
+  // check if it is 0
+  if (file_size == 0) {
     std::cout << "Got parsed value " << file_size << " from string: " << size_str << std::endl;
     throw std::invalid_argument("Wrong file size");
   }
-
-  const std::string suffices = "bkmgt";
-  // Calculate l-shifts
-  size_t lshift = 0;
-  if (unit_begin != size_str.size() // handle strings without unit, treat as byte
-      && (lshift = suffices.find(size_str[unit_begin])) == std::string::npos) {
-    throw std::invalid_argument("Wrong file unit, possible units: B,KB,MB,GB,TB");
+  // check if it is well formatted
+  if (!std::regex_match(size_str, accepted)) {
+    throw std::invalid_argument("Wrong format: accepted format is \\d+([KMGT]i?)?B?");
   }
-  lshift = lshift * 10;
+
+  // Parse the units
+  const std::string suffices { "bkmgt" };
+  size_t power = 0;
+  size_t base  = 1000;
+  power = suffices.find(size_str[unit_begin]);
+  assert(power < 5);
+  if (size_str.size() - unit_begin >= 2 && size_str[unit_begin + 1] == 'i')
+    base = 1024;
 
   // Return the multiplied size, throw if overflowed
-  uint64_t parsed_size = file_size * (1UL << lshift);
-  if (file_size != parsed_size / (1UL << lshift)) {
+  uint64_t multiplier  = static_cast<uint64_t>(std::pow(base, power));
+  uint64_t parsed_size = file_size * multiplier;
+  if (file_size != parsed_size / multiplier) {
     throw std::overflow_error("Total file size overflowed");
   }
   return parsed_size;
