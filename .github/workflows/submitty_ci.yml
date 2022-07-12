@@ -405,7 +405,6 @@ jobs:
               sudo rm -rf /etc/apache2/sites-enabled/*
               sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
               sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
-              sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
               sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
               sudo chmod 0640 /etc/apache2/suexec/www-data
               sudo a2ensite submitty
@@ -430,7 +429,18 @@ jobs:
           - name: Upgrade to HTTPS
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead
+              if [ -f .setup/dev-upgrade-h2.sh ]; then
+                sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
+                sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
+                  && echo "HTTP_PROTO=https" >> $GITHUB_ENV                                                        \
+                  || {  # Note that we assume the echo above is always true
+                    echo "HTTP_PROTO=http"  >> $GITHUB_ENV
+                    sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
+                  }
+              else
+                echo "HTTP_PROTO=http" >> $GITHUB_ENV
+                echo "Cannot find .setup/dev-upgrade-h2.sh, keep HTTP"
+              fi
 
           - name: Run git tests
             run: |
@@ -451,7 +461,7 @@ jobs:
             run: |
               pushd ${SUBMITTY_REPOSITORY}
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-              TEST_URL="https://localhost" python3 -m unittest discover -v --start-directory tests
+              TEST_URL="${{ env.HTTP_PROTO }}://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
 
           # TODO: Remove this block after upgrading jsPDF
@@ -473,13 +483,13 @@ jobs:
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: npm run test:api
             env:
-              BASE_URL: https://localhost
+              BASE_URL: ${{ env.HTTP_PROTO }}://localhost
               NODE_EXTRA_CA_CERTS: "/etc/ssl/selfcert/localhost.crt"
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=https://localhost
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -493,7 +503,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=https://localhost
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
               spec: cypress/integration/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -507,7 +517,7 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=https://localhost
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
               spec: cypress/integration/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -524,7 +534,7 @@ jobs:
           - name: Run cypress e2e login tests with databse auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=https://localhost
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -536,7 +546,7 @@ jobs:
           - name: Run cypress e2e login tests with LDAP auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=https://localhost
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
