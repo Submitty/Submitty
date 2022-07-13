@@ -99,6 +99,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
