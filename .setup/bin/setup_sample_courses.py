@@ -1016,12 +1016,6 @@ class Course(object):
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
                                 elif gradeable.annotated_pdf is True:
-                                    if version == versions_to_submit:
-                                        annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
-                                        if not os.path.exists(annotation_version_path):
-                                            os.makedirs(annotation_version_path)
-                                            os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
-                                    
                                     # Get a list of graders that has access to the submission
                                     assigned_graders = []
                                     stmt = select([
@@ -1040,6 +1034,11 @@ class Course(object):
                                         create_gradeable_submission(src, dst)
 
                                         if version == versions_to_submit:
+                                            annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
+                                            if not os.path.exists(annotation_version_path):
+                                                os.makedirs(annotation_version_path)
+                                                os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
+                                        
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
                                             # Make sure instructor is responsible for one of the annotations
