@@ -67,12 +67,14 @@
     same could not be achived through CSS as it cause the tools to hide when moved right in panel.
     This has been done taking care of resizing of panel ,platform(device),overlapping and scrolling of panels */
 
-    const offSetter = new ResizeObserver(entries => {
-        entries.forEach(entry => {
-            let height = $(".sticky-file-info").outerHeight();
-            $("#viewer").css("paddingTop", height);
+    if(typeof offSetter === "undefined") {
+        const offSetter = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                let height = $(".sticky-file-info").outerHeight();
+                $("#viewer").css("padding-top", height);
+            });
         });
-    });
-    offSetter.observe(document.querySelector(".sticky-file-info"));
+        offSetter.observe(document.querySelector(".sticky-file-info"));
+    }
 
 </script>
