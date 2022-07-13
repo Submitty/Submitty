@@ -4007,7 +4007,7 @@ SQL;
      */
     public function getPeerFeedbackForUser($gradeable_id, $user_id, $anon = false) {
         if ($anon) {
-            $this->course_db->query("SELECT u.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN gradeable_anon u ON u.user_id=p.grader_id WHERE p.g_id = ? AND p.user_id = ? ORDER BY p.grader_id", [$gradeable_id, $user_id]);
+            $this->course_db->query("SELECT ga.anon_id AS grader_id, p.user_id, p.feedback FROM peer_feedback p INNER JOIN gradeable_anon ga ON ga.user_id=p.grader_id WHERE p.g_id = ? AND p.user_id = ? ORDER BY p.grader_id", [$gradeable_id, $user_id]);
         }
         else {
             $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $user_id]);
@@ -4442,22 +4442,6 @@ AND gc_id IN (
         }
     }
 
-    /**
-     * Get gradeable-specific user anon_id
-     *
-     * @param string $user_id
-     * @param string $g_id
-     */
-    public function getGradeableAnonId($user_id, $g_id) {
-        $result = $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE user_id=? AND g_id=?", [$user_id, $g_id]);
-        if ($this->course_db->getRowCount() === 0) {
-            return null;
-        }
-        else {
-            return $this->course_db->rows()[0]['anon_id'];
-        }
-    }
-
     public function getAllAnonIdsByGradeable($g_id = null) {
         if ($g_id == null) {
             $this->course_db->query("SELECT anon_id FROM gradeable_anon");
@@ -4468,16 +4452,20 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-
-
-    public function getAnonId($user_id) {
+    /**
+     * Get gradeable-specific user anon_id
+     *
+     * @param string $user_id
+     * @param string $g_id
+     */
+    public function getAnonId($user_id, $g_id) {
         $params = (is_array($user_id)) ? $user_id : [$user_id];
-
+        $question_marks = $this->createParamaterList(count($params));
+        $params[] = $g_id;
         if (count($params) === 0) {
             return [];
         }
-        $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT user_id, anon_id FROM gradeable_anon WHERE user_id IN {$question_marks}", $params);
+        $this->course_db->query("SELECT user_id, anon_id FROM gradeable_anon WHERE user_id IN {$question_marks} AND g_id=?", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['user_id']] = $id_map['anon_id'];
@@ -4497,11 +4485,11 @@ AND gc_id IN (
         return $return;
     }
 
-    public function getUserFromAnon($anon_id) {
+    public function getUserFromAnon($anon_id, $g_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
-
         $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE anon_id IN {$question_marks}", $params);
+        $params[] = $g_id;
+        $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE anon_id IN {$question_marks} AND g_id=?", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['anon_id']] = $id_map['user_id'];
@@ -4526,8 +4514,8 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getSubmitterIdFromAnonId(string $anon_id) {
-        return $this->getUserFromAnon($anon_id)[$anon_id] ??
+    public function getSubmitterIdFromAnonId(string $anon_id, string $g_id = null) {
+        return $this->getUserFromAnon($anon_id, $g_id)[$anon_id] ??
             $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
                 null;
     }

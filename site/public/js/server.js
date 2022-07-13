@@ -658,7 +658,11 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    let download_path = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    if ($("#submission_browser").length > 0) {
+        download_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.location = download_path;
 }
 
 function downloadCourseMaterial(id) {
@@ -1474,7 +1478,11 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("attachments")) {
       directory = "attachments";
     }
-    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    if ($("#submission_browser").length > 0) {
+        file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
 

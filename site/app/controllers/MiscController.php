@@ -33,13 +33,13 @@ class MiscController extends AbstractController {
     /**
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
-    public function decodeAnonPath($path) {
+    public function decodeAnonPath($path, $g_id = null) {
         $exploded_path = explode("/", $path);
         if (count($exploded_path) < 10) {
             return $path;
         }
         $anon_id = explode("/", $path)[9];
-        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $g_id);
         if ($correct_user_id !== null) {
             $path = str_replace($anon_id, $correct_user_id, $path);
         }
@@ -58,7 +58,7 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']));
+        $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -100,7 +100,7 @@ class MiscController extends AbstractController {
         $cm = null;
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
             if ($dir === 'course_materials') {
                 $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
@@ -118,7 +118,7 @@ class MiscController extends AbstractController {
             }
         }
 
-        if (!is_null($gradeable_id)) {
+        if (!is_null($gradeable_id) && !is_null($user_id)) {
             $gradeable = $this->tryGetGradeable($gradeable_id, false);
             if ($gradeable === false) {
                 return false;
@@ -224,11 +224,11 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/download")
      */
-    public function downloadCourseFile($dir = null, $path = null, $course_material_id = null) {
+    public function downloadCourseFile($dir = null, $path = null, $course_material_id = null, $gradeable_id = null) {
         // security check
         $cm = null;
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
         }
         elseif ($course_material_id !== null) {
             $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -333,7 +333,7 @@ class MiscController extends AbstractController {
 
         $anon_id = $user_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
