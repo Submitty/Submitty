@@ -32,21 +32,16 @@ uint64_t parse_file_size(std::string size_str) {
   // Accepted units, all Bs could be omitted:
   //    Base 1000: B, KB,  MB,  GB,  TB   (SI)
   //    Base 1024: B, KiB, MiB, GiB, TiB  (IEC-i)
-  const std::regex accepted { "\\d+([kmgt]i?)?b?" };
+  const std::regex accepted { "[1-9]\\d*([kmgt]i?)?b?" };
+  // check if it is well formatted
+  if (!std::regex_match(size_str, accepted)) {
+    std::cout << "Got string: " << size_str << std::endl;
+    throw std::invalid_argument("Wrong format: accepted format is [1-9]\\d*([KMGT]i?)?B?");
+  }
 
   // Extract numeric file size, will cause exception if the number is larger than 64-bit
   size_t unit_begin  = 0;
   uint64_t file_size = std::stoull(size_str, &unit_begin);
-  // check if it is 0
-  if (file_size == 0) {
-    std::cout << "Got parsed value " << file_size << " from string: " << size_str << std::endl;
-    throw std::invalid_argument("Wrong file size");
-  }
-  // check if it is well formatted
-  if (!std::regex_match(size_str, accepted)) {
-    std::cout << "Got string " << size_str << std::endl;
-    throw std::invalid_argument("Wrong format: accepted format is \\d+([KMGT]i?)?B?");
-  }
 
   // Parse the units
   const std::string suffices { "bkmgt" };
@@ -61,9 +56,9 @@ uint64_t parse_file_size(std::string size_str) {
   // Return the multiplied size, throw if overflowed
   uint64_t multiplier  = static_cast<uint64_t>(std::pow(base, power));
   uint64_t parsed_size = file_size * multiplier;
-  if (file_size != parsed_size / multiplier) {
+  if (file_size != parsed_size / multiplier)
     throw std::overflow_error("Total file size overflowed");
-  }
+
   return parsed_size;
 }
 
