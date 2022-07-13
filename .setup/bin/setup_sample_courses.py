@@ -670,15 +670,15 @@ class User(object):
         print(f"Creating LDAP user {self.id}...")
         path = Path("/tmp", self.id)
         path.write_text(f"""
-            dn: uid={self.id},ou=users,dc=vagrant,dc=local
-            objectClass: top
-            objectClass: account
-            objectClass: shadowAccount
-            uid: {self.id}
-            userPassword: {self.id}
-            shadowLastChange: 0
-            shadowMax: 0
-            shadowWarning: 0""")
+dn: uid={self.id},ou=users,dc=vagrant,dc=local
+objectClass: top
+objectClass: account
+objectClass: shadowAccount
+uid: {self.id}
+userPassword: {self.id}
+shadowLastChange: 0
+shadowMax: 0
+shadowWarning: 0""")
         os.system(f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}')
         path.unlink()
 
@@ -1031,9 +1031,7 @@ class Course(object):
                                         peer_assign.columns.user_id == user.id
                                     )
                                     for res in self.conn.execute(stmt):
-                                        #print(res)  
                                         assigned_graders.append(res[1])
-                                    #print(assigned_graders)
 
                                     submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
                                     for submission in submissions:
