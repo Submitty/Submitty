@@ -305,7 +305,7 @@ $(document).ready(() => {
     });
 
     $('#user-image-button').bind('change', function() {
-        if ((this.files[0].size/1048576)>5.0){
+        if ((this.files[0].size/1048576)>5.0) {
             alert("Selected file's size exceeds 5 MB");
             $('#user-image-button').val('');
         }
