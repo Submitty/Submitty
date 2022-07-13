@@ -178,7 +178,7 @@ class PDFController extends AbstractController {
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index === 9) {
                 $user_id = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUserFromAnon($user_id, $g_id);
+                $anon_ids = $this->core->getQueries()->getUserFromAnon($user_id, $g_id);
                 $anon_path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
             }
             else {
@@ -212,9 +212,11 @@ class PDFController extends AbstractController {
         else {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
         }
+        $is_peer_grader = false;
         $grader_id = $this->core->getUser()->getId();
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->hasPeerComponent()) {
+                $is_peer_grader = true;
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($id, $user_ids)) {
@@ -254,6 +256,10 @@ class PDFController extends AbstractController {
             }
         }
 
+<<<<<<< HEAD
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path, $gradeable_id), $annotation_jsons, false, $page_num);
+=======
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num, false, $is_peer_grader);
+>>>>>>> 25d00226139d4cc1c102cf7818855d6ed620011d
     }
 }

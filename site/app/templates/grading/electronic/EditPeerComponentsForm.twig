@@ -37,8 +37,13 @@
 			        {% for mark in component.marks %}
 		                <div class="row">
 		                    <div class="col-no-gutters indicator">
+<<<<<<< HEAD
                                 {% if peer_details.marks_assigned is defined and
                                     peer_details.marks_assigned[component.id][peer] is defined and mark in peer_details.marks_assigned[component.id][peer] %}
+=======
+		                    	{% if peer_details.marks_assigned is defined and 
+		                    		peer_details.marks_assigned[component.id][peer] is defined and mark in peer_details.marks_assigned[component.id][peer] %}
+>>>>>>> 25d00226139d4cc1c102cf7818855d6ed620011d
 		                        	<i class="far fa-check-square fa-1g"></i>
 		                        {% else %}
 		                        	<i class="far fa-square fa-1g"></i>

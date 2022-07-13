@@ -4083,7 +4083,7 @@ SQL;
         }
 
         $query = <<<SQL
-SELECT t.name AS term_name, u.semester, u.course, u.user_group
+SELECT t.name AS term_name, u.semester, u.course, u.user_group, u.registration_section
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
 INNER JOIN terms t ON u.semester=t.term_id
@@ -7049,7 +7049,9 @@ AND gc_id IN (
               u.manual_registration,
               u.last_updated,
               u.grading_registration_sections,
-              u.registration_section, u.rotating_section,
+              u.registration_section,
+              u.rotating_section,
+              u.registration_type,
               ldeu.late_day_exceptions,
               u.registration_subsection';
             $submitter_inject = '
@@ -7128,6 +7130,7 @@ AND gc_id IN (
               gcd.array_grader_last_updated,
               gcd.array_grader_registration_section,
               gcd.array_grader_rotating_section,
+              gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
 
               /* Aggregate Gradeable Component Data (versions) */
@@ -7202,6 +7205,7 @@ AND gc_id IN (
                   json_agg(ug.last_updated) AS array_grader_last_updated,
                   json_agg(ug.registration_section) AS array_grader_registration_section,
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
+                  json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
                   in_gcd.gd_id,
                   ug.g_id
@@ -7372,6 +7376,7 @@ AND gc_id IN (
                 'last_updated',
                 'registration_section',
                 'rotating_section',
+                'registration_type',
                 'grading_registration_sections'
             ];
             $comp_array_properties = [
@@ -8133,5 +8138,94 @@ ORDER BY
                     user_id = ?
                     AND g_id = ?
         ", [$state, $user_id, $gradeable_id]);
+    }
+
+    public function getSAMLAuthorizedUserIDs(string $saml_id): array {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE saml_id = ? AND active = true
+        ", [$saml_id]);
+        return $this->submitty_db->rows();
+    }
+
+    public function getProxyMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT id, user_id, saml_id, active FROM saml_mapped_users
+                WHERE saml_id != user_id;
+        ");
+        return $this->submitty_db->rows();
+    }
+
+    public function getSamlMappedUsers(): array {
+        $this->submitty_db->query("
+            SELECT id, user_id, saml_id FROM saml_mapped_users
+                WHERE saml_id = user_id AND active = true;
+        ");
+        return $this->submitty_db->rows();
+    }
+
+    public function insertSamlMapping(string $saml_id, string $submitty_id) {
+        $this->submitty_db->beginTransaction();
+        $this->submitty_db->query("
+            INSERT INTO saml_mapped_users (saml_id, user_id)
+                VALUES (?, ?) ON CONFLICT (saml_id, user_id) DO UPDATE
+                SET active = true;
+        ", [$saml_id, $submitty_id]);
+        $this->submitty_db->commit();
+    }
+
+    public function isSamlProxyUser(int $id): bool {
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+
+        $row = $this->submitty_db->row();
+
+        return $row['count'] > 0;
+    }
+
+    public function samlMappingDeletable(int $id): bool {
+        $this->submitty_db->query("
+            SELECT user_id FROM saml_mapped_users WHERE
+                id = ? AND user_id != saml_id
+        ", [$id]);
+
+        $row = $this->submitty_db->rows();
+        if (count($row) === 0) {
+            return false;
+        }
+
+        $this->submitty_db->query("
+            SELECT count(*) FROM saml_mapped_users WHERE
+                user_id = ?
+        ", [$row[0]["user_id"]]);
+
+        $row = $this->submitty_db->row();
+        if ($row['count'] < 2) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function updateSamlMapping(int $id, bool $active) {
+        $this->submitty_db->query("
+            UPDATE saml_mapped_users SET active = ?
+                WHERE id = ?;
+        ", [$active, $id]);
+    }
+
+    public function deleteSamlMapping(int $id) {
+        $this->submitty_db->query("
+            DELETE FROM saml_mapped_users WHERE id = ?;
+        ", [$id]);
+    }
+
+    public function checkNonMappedUsers() {
+        $this->submitty_db->query("
+            SELECT user_id FROM users WHERE user_id NOT IN
+                (SELECT user_id FROM saml_mapped_users);
+        ");
+        return $this->rowsToArray($this->submitty_db->rows());
     }
 }
