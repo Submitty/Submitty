@@ -256,10 +256,6 @@ class PDFController extends AbstractController {
             }
         }
 
-<<<<<<< HEAD
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path, $gradeable_id), $annotation_jsons, false, $page_num);
-=======
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path), $annotation_jsons, false, $page_num, false, $is_peer_grader);
->>>>>>> 25d00226139d4cc1c102cf7818855d6ed620011d
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path, $gradeable_id), $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
 }

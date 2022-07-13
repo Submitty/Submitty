@@ -7058,7 +7058,7 @@ AND gc_id IN (
             JOIN (
                 SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections
                 FROM users u
-                LEFT JOIN gradeable_anon ga 
+                LEFT JOIN gradeable_anon ga
                 ON u.user_id=ga.user_id
                 LEFT JOIN (
                     SELECT
