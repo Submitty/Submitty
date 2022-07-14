@@ -40,6 +40,7 @@ tr>th:first-child,tr>td:first-child
 {
     position: sticky;
     left: 0rem;
+    border-left: 1px solid var(--standard-medium-gray);
   }
 tr>th:nth-child(2),tr>td:nth-child(2)
 {
