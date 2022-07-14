@@ -2,9 +2,13 @@ name: Submitty DB Check
 
 on:
     pull_request:
+        branches:
+            - main
     push:
         paths:
-            - "migration/**"
+            - migration/**
+    workflow_dispatch:
+
 
 jobs:
     db-check:
