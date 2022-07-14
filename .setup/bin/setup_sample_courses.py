@@ -913,6 +913,7 @@ class Course(object):
 
                     submitted = False
                     team_id = None
+                    anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
                         res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
@@ -1046,8 +1047,9 @@ class Course(object):
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
-                                            anon_dst[9] = user.anon_id
-                                            anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
+                                            anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
+                                            anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
+
                                             
                                             for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
@@ -1200,11 +1202,15 @@ class Course(object):
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
         ucounter = self.conn.execute(select([func.count()]).select_from(gradeable_teams_table)).scalar()
+        anon_team_ids = []
         for user in self.users:
             #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
 
-            unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            unique_team_id = str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            anon_team_id = generate_random_user_id(15)
+            if anon_team_id in anon_team_ids:
+                anon_team_id = generate_random_user_id()
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is None:
                 continue
@@ -1237,6 +1243,7 @@ class Course(object):
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(gradeable_teams_table.insert(),
                              team_id=unique_team_id,
+                             anon_id=anon_team_id,
                              g_id=gradeable.id,
                              registration_section=str(reg_section),
                              rotating_section=str(random.randint(1, self.rotating_sections)))
