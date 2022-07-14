@@ -4462,7 +4462,7 @@ AND gc_id IN (
         $params = (is_array($user_ids)) ? $user_ids : [$user_ids];
         $question_marks = $this->createParamaterList(count($params));
         $params[] = $g_id;
-        if (count($params) === 0) {
+        if (count($params) < 2) {
             return [];
         }
         $this->course_db->query("SELECT user_id, anon_id FROM gradeable_anon WHERE user_id IN {$question_marks} AND g_id=?", $params);
