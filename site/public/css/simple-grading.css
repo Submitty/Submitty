@@ -44,22 +44,22 @@ tr>th:first-child,tr>td:first-child
 tr>th:nth-child(2),tr>td:nth-child(2)
 {
     position: sticky;
-    left: 1rem;
+    left: 1.25rem;
   }
 tr>th:nth-child(3),tr>td:nth-child(3)
 {
     position: sticky;
-    left: 5rem;
+    left: 5.25rem;
   }
 tr>th:nth-child(4),tr>td:nth-child(4)
 {
     position: sticky;
-    left: 10rem;
+    left: 10.75rem;
   }
 tr>th:nth-child(5),tr>td:nth-child(5)
  {
     position: sticky;
-    left: 16rem;
+    left: 16.75rem;
     border-right: 1px solid var(--standard-medium-gray);
   }
   
