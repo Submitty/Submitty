@@ -487,7 +487,7 @@ class User extends AbstractModel {
             } while (in_array($random, $anon_ids));
             $this->core->getQueries()->insertGradeableAnonId($this->id, $g_id, $random);
         }
-        return $anon_id ?? $random;
+        return $anon_id ?? $random ?? null;
     }
 
     /**

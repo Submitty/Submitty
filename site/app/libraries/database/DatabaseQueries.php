@@ -4420,7 +4420,7 @@ AND gc_id IN (
     /**
      * Set gradeable-specific user anon_id
      *
-     * @param array $user_ids
+     * @param array|string $user_ids
      * @param string $g_id
      * @param string $anon_id
      */
@@ -4455,11 +4455,11 @@ AND gc_id IN (
     /**
      * Get gradeable-specific user anon_id
      *
-     * @param string $user_id
+     * @param array|string $user_ids
      * @param string $g_id
      */
-    public function getAnonId($user_id, $g_id) {
-        $params = (is_array($user_id)) ? $user_id : [$user_id];
+    public function getAnonId($user_ids, $g_id) {
+        $params = (is_array($user_ids)) ? $user_ids : [$user_ids];
         $question_marks = $this->createParamaterList(count($params));
         $params[] = $g_id;
         if (count($params) === 0) {
@@ -4526,6 +4526,7 @@ AND gc_id IN (
      * get all users' ids
      *
      * @Param string $current_user_id
+     * @return array
      */
     public function getAllUsersIds() {
         $query = "SELECT user_id FROM users";
@@ -4631,6 +4632,7 @@ AND gc_id IN (
     /*
      * helper function to convert rows array to one dimensional array of user ids
      *
+     * @return array
      */
     protected function rowsToArray($rows) {
         $result = [];
