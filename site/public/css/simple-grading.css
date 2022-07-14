@@ -29,49 +29,54 @@ input[type="number"]::-webkit-outer-spin-button {
     display: none !important;
 }
 
-.scrollable-table{
+.scrollable-table {
     overflow-x: auto;
 }
-th{
+
+th {
     background: var(--standard-light-gray);
 }
 
-tr>th:first-child,tr>td:first-child
-{
+tr > th:first-child,
+tr > td:first-child {
     position: sticky;
-    left: 0rem;
+    left: 0;
     border-left: 1px solid var(--standard-medium-gray);
-  }
-tr>th:nth-child(2),tr>td:nth-child(2)
-{
+}
+
+tr > th:nth-child(2),
+tr > td:nth-child(2) {
     position: sticky;
     left: 1.25rem;
-  }
-tr>th:nth-child(3),tr>td:nth-child(3)
-{
+}
+
+tr > th:nth-child(3),
+tr > td:nth-child(3) {
     position: sticky;
     left: 5.25rem;
-  }
-tr>th:nth-child(4),tr>td:nth-child(4)
-{
+}
+
+tr > th:nth-child(4),
+tr > td:nth-child(4) {
     position: sticky;
     left: 10.75rem;
-  }
-tr>th:nth-child(5),tr>td:nth-child(5)
- {
+}
+
+tr > th:nth-child(5),
+tr > td:nth-child(5) {
     position: sticky;
     left: 16.75rem;
     border-right: 1px solid var(--standard-medium-gray);
-  }
-  
-  tr:nth-child(odd) td {
+}
+
+tr:nth-child(odd) td {
     background: white;
- }
- 
- tr:nth-child(even) td {
+}
+
+tr:nth-child(even) td {
     background: var(--standard-light-gray);
- }
-  
+}
+
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
 }
