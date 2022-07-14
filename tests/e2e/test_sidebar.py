@@ -82,6 +82,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/update', 'System Update'],
             [self.test_url + '/superuser/email', 'Email All'],
             [self.test_url + '/superuser/email_status', 'Email Status'],
+            [self.test_url + '/superuser/saml', 'SAML Management'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]

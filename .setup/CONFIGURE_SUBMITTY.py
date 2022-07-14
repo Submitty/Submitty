@@ -172,6 +172,7 @@ authentication_methods = [
     'PamAuthentication',
     'DatabaseAuthentication',
     'LdapAuthentication',
+    'SamlAuthentication'
 ]
 
 defaults = {
@@ -202,6 +203,10 @@ defaults = {
         'url': '',
         'uid': '',
         'bind_dn': ''
+    },
+    'saml_options': {
+        'name': '',
+        'username_attribute': ''
     }
 }
 
@@ -223,7 +228,7 @@ if os.path.isfile(AUTHENTICATION_JSON):
 # no need to authenticate on a worker machine (no website)
 if not args.worker:
     if 'authentication_method' in loaded_defaults:
-        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method'])
+        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method']) + 1
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that
 # is not in an existing config file.)
@@ -336,6 +341,16 @@ else:
         LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
         LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
         LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'])
+
+    default_auth_options = defaults.get('saml_options', dict())
+    SAML_OPTIONS = {
+        'name': default_auth_options.get('name', ''),
+        'username_attribute': default_auth_options.get('username_attribute', '')
+    }
+
+    if AUTHENTICATION_METHOD == 'SamlAuthentication':
+        SAML_OPTIONS['name'] = get_input('Enter name you would like shown to user for authentication?', SAML_OPTIONS['name'])
+        SAML_OPTIONS['username_attribute'] = get_input('Enter SAML username attribute?', SAML_OPTIONS['username_attribute'])
 
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
@@ -477,8 +492,17 @@ if not args.worker:
             shutil.move(full_file_name, tmp_file)
             rescued.append((full_file_name, tmp_file))
 
+IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
+
 if os.path.isdir(CONFIG_INSTALL_DIR):
-    shutil.rmtree(CONFIG_INSTALL_DIR)
+    for file in os.scandir(CONFIG_INSTALL_DIR):
+        if file.name not in IGNORED_FILES_AND_DIRS:
+            if file.is_file():
+                os.remove(os.path.join(CONFIG_INSTALL_DIR, file.name))
+            else:
+                os.rmdir(os.path.join(CONFIG_INSTALL_DIR, file.name))
+elif os.path.exists(CONFIG_INSTALL_DIR):
+    os.remove(CONFIG_INSTALL_DIR)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
@@ -581,6 +605,7 @@ if not args.worker:
     config = OrderedDict()
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['ldap_options'] = LDAP_OPTIONS
+    config['saml_options'] = SAML_OPTIONS
 
     with open(AUTHENTICATION_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=4)

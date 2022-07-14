@@ -447,6 +447,12 @@ class GlobalController extends AbstractController {
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
             ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'saml']),
+                "title" => "SAML Management",
+                "icon" => "fas fa-user-lock"
+            ]);
         }
 
         // --------------------------------------------------------------------------

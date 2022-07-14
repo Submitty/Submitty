@@ -33,12 +33,24 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username='instructor') => {
-    cy.url().should('contain', '/authentication/login');
-    cy.get('input[name=user_id]').type(username, {force: true});
-    cy.get('input[name=password]').type(username, {force: true});
-    cy.waitPageChange(() => {
-        cy.get('input[name=login]').click();
-    });
+    cy.get('body')
+        .then(body => {
+            if (body.find('input[name=user_id]').length > 0) {
+                cy.get('input[name=user_id]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('input[name=login]').click();
+                });
+            }
+            else {
+                cy.get('#saml-login').click();
+                cy.get('input[name=username]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('#submit > td:nth-child(3) > button').click();
+                });
+            }
+        });
 });
 
 /**
