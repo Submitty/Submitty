@@ -9,30 +9,6 @@
     flex-direction: column;
 }
 
-#data-table td:focus,
-#data-table input:focus {
-    outline: 3px dashed var(--standard-medium-blue);
-}
-
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    display: none;
-}
-
-.sticky-top {
-    position: fixed;
-    top: 0;
-}
-
-.sticky-top label,
-.sticky-top .not-sticky {
-    display: none !important;
-}
-
-.scrollable-table {
-    overflow-x: auto;
-}
-
 th {
     background: var(--standard-light-gray);
 }
@@ -70,11 +46,35 @@ tr > td:nth-child(5) {
 }
 
 tr:nth-child(odd) td {
-    background: var(--default-white);
+    background: white;
 }
 
 tr:nth-child(even) td {
     background: var(--standard-light-gray);
+}
+
+#data-table td:focus,
+#data-table input:focus {
+    outline: 3px dashed var(--standard-medium-blue);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    display: none;
+}
+
+.sticky-top {
+    position: fixed;
+    top: 0;
+}
+
+.sticky-top label,
+.sticky-top .not-sticky {
+    display: none !important;
+}
+
+.scrollable-table {
+    overflow-x: auto;
 }
 
 .simple-full-credit {
