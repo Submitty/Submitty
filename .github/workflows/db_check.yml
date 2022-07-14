@@ -1,0 +1,126 @@
+name: Submitty DB Check
+
+on:
+    pull_request:
+    push:
+        paths:
+            - "migration/**"
+
+jobs:
+    db-check:
+        runs-on: ubuntu-20.04
+        env:
+            MAIN_DB_PORT:   7186
+            MAIN_WEB_PORT:  7817
+            MAIN_WS_PORT:   7818
+            MAIN_INSTALL_PATH:  ${{ github.WORKSPACE }}/main
+            MAIN_DATA_PATH:     ${{ github.WORKSPACE }}/main/var
+            MAIN_REPO_PATH:     ${{ github.WORKSPACE }}/main/GIT_CHECKOUT
+            PR_INSTALL_PATH:    ${{ github.WORKSPACE }}/branch
+            PR_REPO_PATH:       ${{ github.WORKSPACE }}/branch/GIT_CHECKOUT
+
+        services:
+            postgres-main:
+                image: postgres
+                env:
+                    POSTGRES_PASSWORD: submitty_dbuser
+                    POSTGRES_USER: postgres
+                    TZ: America/New_York
+                ports:
+                    - ${{ env.MAIN_DB_PORT }}:5432
+
+        steps:
+            - name: Checkout main Branch
+              uses: actions/checkout@v3
+              with:
+                  ref: main
+                  path: main/GIT_CHECKOUT/Submitty # relative to GITHUB_WORKSPACE
+
+            - name: Checkout Current Branch
+              uses: actions/checkout@v3
+              with:
+                path: branch/GIT_CHECKOUT/Submitty
+
+            - name: Generate Configurations
+              run: |
+                  mkdir -p ${MAIN_INSTALL_PATH}         &&  chmod -R 777 ${MAIN_INSTALL_PATH}
+                  mkdir -p ${MAIN_DATA_PATH}            &&  chmod -R 777 ${MAIN_DATA_PATH}
+                  mkdir -p ${MAIN_INSTALL_PATH}/config  &&  chmod -R 777 ${MAIN_INSTALL_PATH}/config
+                  mkdir -p ${GITHUB_WORKSPACE}/dumped/main
+                  mkdir -p ${GITHUB_WORKSPACE}/dumped/branch
+
+                  (
+                    echo "localhost"                    # database host
+                    echo "${MAIN_DB_PORT}"              # database port
+                    echo ""                             # global db user
+                    echo "submitty_dbuser"              # global db pass
+                    echo ""                             # course db user
+                    echo "submitty_dbuser"              # course db pass
+                    echo ""                             # timezone
+                    echo "http://localhost:${MAIN_WEB_PORT}"
+                    echo ""                             # vcs url
+                    echo ""                             # institution name
+                    echo ""                             # sysadmin email
+                    echo ""                             # where to report
+                    echo "1"                            # PamAuth
+                    echo ""                             # sysadmin username
+                    echo "n"                            # email notification
+                  ) | python3 ${MAIN_REPO_PATH}/Submitty/.setup/CONFIGURE_SUBMITTY.py    \
+                        --install-dir ${MAIN_INSTALL_PATH} --data-dir ${MAIN_DATA_PATH}  \
+                        --websocket-port ${MAIN_WS_PORT} --debug
+                  # Copy necessary files to the installation path
+                  cp -r ${MAIN_REPO_PATH}/Submitty/sbin       ${MAIN_INSTALL_PATH}
+                  cp -r ${MAIN_REPO_PATH}/Submitty/migrations ${MAIN_INSTALL_PATH}
+                  cp -r ${MAIN_INSTALL_PATH}/config           ${PR_INSTALL_PATH}
+
+            - name: Create Databases
+              env:
+                  PGPASSWORD: submitty_dbuser
+              run: |
+                  psql -d postgres -h localhost -U postgres -p ${MAIN_DB_PORT}           \
+                    -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
+                    -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"                \
+                  psql -d postgres -h localhost -U submitty_dbuser -p ${MAIN_DB_PORT}    \
+                    -c "CREATE DATABASE submitty"
+
+            - name: Setup Databases and Courses
+              run: |
+                  # migrate main according to dumped master database (assume it is correct)
+                  python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
+                  # setup blank course and apply the migration for it
+                  SUBMITTY_INSTALL_DIR=${MAIN_INSTALL_PATH} SUBMITTY_DATA_DIR=${MAIN_DATA_PATH}     \
+                    python3 ${MAIN_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py           \
+                    blank --no_grading
+
+            - name: Dump master and course Databases
+              run: |
+                python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py             \
+                    -e master -e course dump
+                cp ${MAIN_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql    \
+                   ${GITHUB_WORKSPACE}/dumped/main
+                cp ${MAIN_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql  \
+                   ${GITHUB_WORKSPACE}/dumped/main
+
+            - name: Apply New Migrations
+              run: |
+                python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py               \
+                    -e master -e course -c ${MAIN_INSTALL_PATH}/config migrate
+
+            - name: Dump Migrated Databases
+              run: |
+                python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py               \
+                    -e master -e course dump
+                cp ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql      \
+                   ${GITHUB_WORKSPACE}/dumped/branch
+                cp ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql    \
+                   ${GITHUB_WORKSPACE}/dumped/branch
+
+            - name: Compare master Database
+              run: |
+                diff --color ${GITHUB_WORKSPACE}/dumped/main/submitty_db.sql             \
+                             ${GITHUB_WORKSPACE}/dumped/branch/submitty_db.sql
+
+            - name: Compare course Database
+              run: |
+                diff --color ${GITHUB_WORKSPACE}/dumped/main/course_tables.sql           \
+                             ${GITHUB_WORKSPACE}/dumped/branch/course_tables.sql
