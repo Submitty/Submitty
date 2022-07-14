@@ -163,6 +163,7 @@ CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
+SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
 
@@ -199,6 +200,7 @@ defaults = {
     'course_code_requirements': "Please follow your school's convention for course code.",
     'sys_admin_email': '',
     'sys_admin_url': '',
+    'upgrade_linux_packages': False,
     'ldap_options': {
         'url': '',
         'uid': '',
@@ -217,6 +219,11 @@ if os.path.isfile(CONFIGURATION_JSON):
 if os.path.isfile(SUBMITTY_ADMIN_JSON):
     with open(SUBMITTY_ADMIN_JSON) as submitty_admin_file:
         loaded_defaults.update(json.load(submitty_admin_file))
+if os.path.isfile(SUBMITTY_JSON):
+    with open(SUBMITTY_JSON) as submitty_file:
+        submitty_file_json=json.load(submitty_file)
+        if "upgrade_linux_packages" in submitty_file_json.keys():
+            loaded_defaults["upgrade_linux_packages"]= submitty_file_json["upgrade_linux_packages"]
 if os.path.isfile(EMAIL_JSON):
     with open(EMAIL_JSON) as email_file:
         loaded_defaults.update(json.load(email_file))
@@ -311,6 +318,7 @@ else:
 
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
+    UPGRADE_LINUX_PACKAGES = get_input("Should Linux packages be updated with Submitty install?", defaults['upgrade_linux_packages'])
 
     USERNAME_TEXT = defaults['username_change_text']
 
@@ -475,7 +483,6 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 # Setup ${SUBMITTY_INSTALL_DIR}/config
 
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
-SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
@@ -623,6 +630,7 @@ config['autograding_log_path'] = AUTOGRADING_LOG_PATH
 if not args.worker:
     config['sys_admin_email'] = SYS_ADMIN_EMAIL
     config['sys_admin_url'] = SYS_ADMIN_URL
+config['upgrade_linux_packages'] = UPGRADE_LINUX_PACKAGES
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
 
@@ -714,24 +722,6 @@ if not args.worker:
         json.dump(config, json_file, indent=2)
     shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(EMAIL_JSON, 0o440)
-
-##############################################################################
-# Write update_settings.json
-
-UPDATE_SETTINGS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'update_settings.json')
-
-if not os.path.isfile(UPDATE_SETTINGS_JSON):
-    config = OrderedDict()
-    config['upgrade_linux_packages'] = False
-    config['linux_packages_upgrade_type'] = "upgrade" #can be dist-upgrade
-    config['autohandle_apt_prompts'] = False
-    #Refer https://stackoverflow.com/questions/33370297/apt-get-update-non-interactive
-    config['autohandle_apt_prompts_option'] = '--force-confold'
-
-    with open(UPDATE_SETTINGS_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=2)
-    shutil.chown(UPDATE_SETTINGS_JSON, 'root', 'root')
-    os.chmod(UPDATE_SETTINGS_JSON, 0o774)
 
 ##############################################################################
 
