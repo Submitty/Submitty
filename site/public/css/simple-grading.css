@@ -32,15 +32,35 @@ input[type="number"]::-webkit-outer-spin-button {
 .scrollable-table{
     overflow-x: auto;
 }
+th{
+    background: var(--standard-light-gray);
+}
 
-tr>th:first-child,tr>td:first-child,
-tr>th:nth-child(2),tr>td:nth-child(2),
-tr>th:nth-child(3),tr>td:nth-child(3),
-tr>th:nth-child(4),tr>td:nth-child(4),
+tr>th:first-child,tr>td:first-child
+{
+    position: sticky;
+    left: 0rem;
+  }
+tr>th:nth-child(2),tr>td:nth-child(2)
+{
+    position: sticky;
+    left: 1rem;
+  }
+tr>th:nth-child(3),tr>td:nth-child(3)
+{
+    position: sticky;
+    left: 5rem;
+  }
+tr>th:nth-child(4),tr>td:nth-child(4)
+{
+    position: sticky;
+    left: 10rem;
+  }
 tr>th:nth-child(5),tr>td:nth-child(5)
  {
     position: sticky;
-    left: 0;
+    left: 16rem;
+    border-right: 1px solid var(--standard-medium-gray);
   }
   
   tr:nth-child(odd) td {
