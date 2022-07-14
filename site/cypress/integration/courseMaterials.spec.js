@@ -414,19 +414,19 @@ describe('Test cases revolving around course material uploading and access contr
         }
 
         // Confirm that link data was preserved
-        for (let i = 1; i < 4; i += 2) {
+        for (let i = -1; i >= -3; i -= 2) {
             cy.get('.fa-pencil-alt').eq(i).click();
-            cy.get('#edit-url-title').should('have.value', link_titles[(i - 1) / 2]);
+            cy.get('#edit-url-title').should('have.value', link_titles[(i + 3) / 2]);
             cy.get('#edit-url-url').should('have.value', test_url);
             cy.get('#edit-course-materials-form > .popup-box > .popup-window > .form-title > .btn').click();
         }
 
         // Clean up files
         cy.visit(['sample', 'course_materials']);
-        cy.get('.fa-trash').first().click();
+        cy.get('a[id="a"]').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 
     it('Should apply recursive updates to course materials folder and preserve uploaded links', () => {
@@ -455,7 +455,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
 
-        // Perform a recursive updates
+        // Perform recursive updates
         cy.get('.fa-pencil-alt').first().click();
         cy.get('#all-sections-showing-yes-folder').click();
         cy.get('#section-folder-edit-1').check();
@@ -475,9 +475,9 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Clean up files
         cy.visit(['sample', 'course_materials']);
-        cy.get('.fa-trash').first().click();
+        cy.get('a[id="a"]').parent().find('.fa-trash').click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 });
