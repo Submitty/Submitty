@@ -120,9 +120,75 @@
             </p>
         </div>
     {% endif %}
+    <div class="two_tables">
 
     {# This is a data table #}
-    <table id="data-table" data-current-grader="{{ user_id }}" class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
+    <table id="data-table1" data-current-grader="{{ user_id }}" class="t1 table table-striped table-bordered persist-area" style="table-layout: fixed;">
+        <caption />
+        {# Table header #}
+        <thead>
+            <tr>
+                <th style="width:20px">#</th>
+                <th style="width:70px" scope="col">Section</th>
+                <th style="width:90px; text-align: left" scope="col">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id" aria-label="sort by ID">
+                        <span class="tooltiptext" title="sort by User ID">User ID </span><i class="fas fa-sort"></i>
+                    </a>
+                </th>
+                <th style="width:110px; text-align: left" scope="col">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">
+                        <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
+                    </a>
+                </th>
+                <th style="width:110px; text-align: left" scope="col">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">
+                        <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
+                    </a>
+                </th>
+            </tr>
+        </thead>
+        {# /Table header #}
+        {% if sections|length == 0 %}
+            <tbody>
+                <tr class="info">
+                    <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">No Grading To Be Done! :)</td>
+                </tr>
+            </tbody>
+        {% else %}
+            {% for section_id, section in sections %}
+                {# Section header #}
+                <tbody>
+                    <tr class="info">
+                        <td colspan="5" style="text-align: center; background-color: var(--alert-border-blue)">
+                            {% if gradeable.isGradeByRegistration() %}
+                                Students Enrolled in Registration Section {{ section_id | default('NULL') }}
+                            {% else %}
+                                Students Assigned to Rotating Section {{ section_id | default('NULL') }}
+                            {% endif %}
+                            {# Print button #}
+                            {% if action == 'lab' %}
+                                <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}&sort={{ sort }}">
+                                    <i class="fas fa-print">Print</i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="info">
+                        <td colspan="5" style="text-align: center; background-color: var(--alert-border-blue)">
+                            Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
+                        </td>
+                    </tr>
+                </tbody>
+                {# /Section header #}
+                <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}" data-section="{{ section_id }}">
+                    {% for grade in section.rows %}
+                        {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric) }}
+                    {% endfor %}
+                </tbody>
+            {% endfor %}
+        {% endif %}
+    </table>
+    <table id="data-table" data-current-grader="{{ user_id }}" class="t2 table table-striped table-bordered persist-area" style="table-layout: fixed;">
         <caption />
         {# Table header #}
         <thead>
@@ -212,6 +278,7 @@
             {% endfor %}
         {% endif %}
     </table>
+    </div>
     <script>
         $(function() {
             setupSimpleGrading("{{ action }}");

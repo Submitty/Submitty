@@ -29,6 +29,16 @@ input[type="number"]::-webkit-outer-spin-button {
     display: none !important;
 }
 
+.two_tables{
+    display: flexbox;
+}
+
+.t1{
+position: absolute;
+left: 0%;
+top: 0%;
+}
+
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
 }
