@@ -916,11 +916,12 @@ class Course(object):
                     anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams\
                         ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
+                            anon_team_id = temp[0][1]
                             previous_submission = select([electronic_gradeable_version]).where(
                                 electronic_gradeable_version.c['team_id'] == team_id)
                             res = self.conn.execute(previous_submission)
