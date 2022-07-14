@@ -42,7 +42,7 @@
                 </a>
                 {% endif %}
                 <a class="btn btn-default"
-                   href="{{ order_toggle_url }}">
+                   href="" onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
@@ -710,6 +710,16 @@
         }
         else {
             document.cookie = 'anon_mode=on;';
+        }
+        location.reload();
+    }
+
+    function changeSortOrder() {
+        if ({{ sort == 'random' ? "true" : "false" }}) {
+            document.cookie = 'sort=id;';
+        }
+        else {
+            document.cookie = 'sort=random;';
         }
         location.reload();
     }

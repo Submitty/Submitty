@@ -4,11 +4,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <signal.h>
 #include <grp.h>
 #include <string.h>
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* 
+/*
 
 compile instructions (using c static library, for security, to eliminate
 shared library that could be manipulated):
@@ -26,13 +27,25 @@ change permissions & set suid: (must be root)
 
 
 int main(int argc, char* argv[]) {
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+  /* Retrieve the PID from the parent process .  If the program fails internally,
+     then it sends SIGCHLD to the PID.  Make sure they match to the Python runner
+     at `autograder/autograder/execution_environment/jailed_sandbox.py`           */
 
-  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */  
+  // Parent PID to send the signal on program error
+  pid_t error_notify = getppid();
+
+  // Defines the signal to send.
+  int   error_signal = SIGCHLD;
+
+
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /* Verify that we have at least two arguments, which untrusted user
      to run as, and the name of the program to run... */
-  
+
   if (argc < 3) {
     fprintf(stderr,"untrusted_execute: ERROR! WRONG NUMBER OF ARGUMENTS\n");
+    kill(error_notify, error_signal);
     exit(1);
   }
   int length = strnlen(argv[1], 16);
@@ -40,6 +53,7 @@ int main(int argc, char* argv[]) {
   /* verify the untrusted username which must be of the form "untrustedNN" */
   if (length != 11 || strstr(argv[1],"untrusted") != argv[1]) {
     fprintf(stderr,"untrusted_execute: ERROR! Invalid untrusted user %s\n", argv[1]);
+    kill(error_notify, error_signal);
     exit(1);
   }
 
@@ -67,6 +81,7 @@ int main(int argc, char* argv[]) {
 
   if (which_untrusted < 0 || which_untrusted >= NUM_UNTRUSTED) {
     fprintf(stderr,"untrusted_execute: INVALID UNTRUSTED ID %d\n", which_untrusted);
+    kill(error_notify, error_signal);
     exit(1);
   }
 
@@ -80,6 +95,7 @@ int main(int argc, char* argv[]) {
   if (geteuid() != ROOT_UID || getuid() != DAEMON_UID) {
     fprintf(stderr,"INTERNAL ERROR: BAD USER\n");
     fprintf(stderr,"uid:%d euid:%d",getuid(),geteuid());
+    kill(error_notify, error_signal);
     exit(1);
   }
 
@@ -98,49 +114,55 @@ int main(int argc, char* argv[]) {
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO STAT SELF\n");
     perror("stat error: ");
+    kill(error_notify, error_signal);
     exit(1);
   }
   static const int CORRECT_PERMS = S_IFREG|S_ISUID|S_IRUSR|S_IXUSR|S_IRGRP|S_IXGRP;
   if (stat_data.st_mode != CORRECT_PERMS) {
     fprintf(stderr,"INTERNAL ERROR: file permissions 0x%x (vs 0x%x) are invalid!\n", stat_data.st_mode,
 	    CORRECT_PERMS);
+    kill(error_notify, error_signal);
     exit(1);
   }
   if (stat_data.st_uid != ROOT_UID ||
       stat_data.st_gid != DAEMON_GID) {
     fprintf(stderr,"INTERNAL ERROR: file uid %d gid %d are invalid\n", stat_data.st_uid, stat_data.st_gid);
+    kill(error_notify, error_signal);
     exit(1);
   }
 
-  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */  
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /* Drop privileges (groups, gid, uid) */
-  
+
   /* make sure to clear out the secondary groups first */
   gid_t my_gid = MY_UNTRUSTED_GID;
   res = setgroups (1,&my_gid);
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP GROUPS (setgroups)\n");
     perror("setgroups error: ");
+    kill(error_notify, error_signal);
     exit(1);
   }
 
   /* switch the group id to the untrusted group id */
-  res = setresgid(MY_UNTRUSTED_GID, MY_UNTRUSTED_GID, MY_UNTRUSTED_GID); 
+  res = setresgid(MY_UNTRUSTED_GID, MY_UNTRUSTED_GID, MY_UNTRUSTED_GID);
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP GROUP PRIVS\n");
     perror("setresgid error: ");
+    kill(error_notify, error_signal);
     exit(1);
   }
 
   /* switch the user id to the untrusted user id */
-  res = setresuid(MY_UNTRUSTED_UID, MY_UNTRUSTED_UID, MY_UNTRUSTED_UID); 
+  res = setresuid(MY_UNTRUSTED_UID, MY_UNTRUSTED_UID, MY_UNTRUSTED_UID);
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP USER PRIVS\n");
     perror("setresuid error: ");
+    kill(error_notify, error_signal);
     exit(1);
   }
 
-  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */  
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
   /* chop off this executable, and run the the program specified by the rest of the args */
   char *envp[1] = {NULL};
@@ -149,6 +171,7 @@ int main(int argc, char* argv[]) {
   perror("exec");
   fprintf(stderr,"INTERNAL ERROR: exec failed\n");
   fprintf(stderr,"%s\n",argv[1]);
+  kill(error_notify, error_signal);
   exit (1);
 }
 

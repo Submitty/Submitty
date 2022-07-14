@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -149,8 +150,11 @@ class UserProfileController extends AbstractController {
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
+            if ($result === User::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
+            }
 
-            if (!$result) {
+            if ($result === User::PROFILE_IMG_SET_FAILURE) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
@@ -176,8 +180,7 @@ class UserProfileController extends AbstractController {
         if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
             $secondaryEmail = trim($_POST['secondary_email']);
             $secondaryEmailNotify = trim($_POST['secondary_email_notify']) === "true";
-
-            if ((!$secondaryEmailNotify && $secondaryEmail == "") || $user->validateUserData('user_email_secondary', $secondaryEmail) === true) {
+            if ((!$secondaryEmailNotify && $secondaryEmail === "") || (($secondaryEmail !== "") && $user->validateUserData('user_email_secondary', $secondaryEmail) === true)) {
                 $user->setSecondaryEmail($secondaryEmail);
                 $user->setEmailBoth($secondaryEmailNotify);
                 $this->core->getQueries()->updateUser($user);
@@ -188,6 +191,9 @@ class UserProfileController extends AbstractController {
                 ]);
             }
             else {
+                if ($secondaryEmail === "") {
+                    return JsonResponse::getErrorResponse("Secondary email can't be empty if secondary email notify is true");
+                }
                 return JsonResponse::getErrorResponse("Secondary email address must be a valid email");
             }
         }
