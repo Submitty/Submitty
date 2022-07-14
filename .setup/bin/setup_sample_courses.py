@@ -926,6 +926,7 @@ class Course(object):
                             if res.rowcount > 0:
                                 continue
                             submission_path = os.path.join(gradeable_path, team_id)
+                            annotation_path = os.path.join(gradeable_annotation_path, team_id)
                         else:
                             continue
                         res.close()
