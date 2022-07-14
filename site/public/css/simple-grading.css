@@ -70,7 +70,7 @@ tr > td:nth-child(5) {
 }
 
 tr:nth-child(odd) td {
-    background: white;
+    background: var(--default-white);
 }
 
 tr:nth-child(even) td {
