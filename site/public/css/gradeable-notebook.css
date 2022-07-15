@@ -1,3 +1,4 @@
+/* stylelint-disable selector-type-no-unknown, declaration-block-no-redundant-longhand-properties */
 .notebook h1,
 .notebook h2,
 .notebook h3,
@@ -10,6 +11,7 @@
     margin-left: 0;
     margin-right: 0;
 }
+/* stylelint-enable selector-type-no-unknown, declaration-block-no-redundant-longhand-properties */
 
 .notebook > div {
     margin-top: 20px;
@@ -76,8 +78,8 @@ textarea.sa-box {
     align-items: center;
 }
 
-.mc input[type='checkbox'],
-.mc input[type='radio'] {
+.mc input[type="checkbox"],
+.mc input[type="radio"] {
     margin: 5px;
 }
 
@@ -102,6 +104,7 @@ img {
     margin-top: 10px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
     background-color: var(--standard-input-background) !important;
     border: 1px solid var(--standard-light-gray) !important;
@@ -116,8 +119,10 @@ img {
 }
 
 /* Not set for images as we want to allow them to be wider than 700px */
+/* stylelint-disable selector-class-pattern */
 .notebook .multiple_choice,
 .notebook .short_answer,
 .notebook .markdown {
     max-width: 700px;
 }
+/* stylelint-enable selector-class-pattern */
