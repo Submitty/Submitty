@@ -1050,7 +1050,6 @@ class Course(object):
                                             anon_dst = os.path.join(dst, submission).split("/")
                                             anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
                                             anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
-
                                             
                                             for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
