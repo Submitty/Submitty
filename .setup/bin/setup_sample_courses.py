@@ -1207,8 +1207,8 @@ class Course(object):
         for user in self.users:
             #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
-
             unique_team_id = str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            #also need to create and save the anonymous team id
             anon_team_id = generate_random_user_id(15)
             if anon_team_id in anon_team_ids:
                 anon_team_id = generate_random_user_id()
