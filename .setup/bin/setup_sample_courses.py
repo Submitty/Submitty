@@ -9,7 +9,7 @@ Usage: ./setup_sample_courses.py
        ./setup_sample_courses.py [course [course]]
        ./setup_sample_courses.py --help
 
-The first will create all couress in courses.yml while the second will only create the courses
+The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
 """
@@ -327,7 +327,6 @@ def generate_random_users(total, real_users):
 
     users = []
     user_ids = []
-    anon_ids = []
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
@@ -337,7 +336,6 @@ def generate_random_users(total, real_users):
             last_name = random.choice(last_names)
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
-            anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
             numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
@@ -345,11 +343,8 @@ def generate_random_users(total, real_users):
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
                 else:
                     user_id = user_id + "1"
-            if anon_id in anon_ids:
-                anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
                              "user_group": 4,
@@ -357,7 +352,6 @@ def generate_random_users(total, real_users):
             new_user.create()
             user_ids.append(user_id)
             users.append(new_user)
-            anon_ids.append(anon_id)
             random_users_file.write(user_id + "\n")
     return users
 
@@ -540,7 +534,6 @@ class User(object):
     Attributes:
         id
         numeric_id
-        anon_id
         password
         firstname
         lastname
@@ -557,7 +550,6 @@ class User(object):
     def __init__(self, user):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
-        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -801,11 +793,10 @@ class Course(object):
                                   registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
-                users_table.c.rotating_section: bindparam('rotating_section'),
-                users_table.c.anon_id: bindparam('anon_id')
+                users_table.c.rotating_section: bindparam('rotating_section')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -840,6 +831,18 @@ class Course(object):
             form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
+            anon_ids=[]
+            for user in self.users:
+                while True:
+                    anon_id=generate_random_user_id(15)
+                    if anon_id not in anon_ids:
+                        anon_ids.append(anon_id)
+                        break
+                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
+                self.conn.execute(gradeable_anon.insert(),
+                                  user_id=user.id,
+                                  g_id=gradeable.id,
+                                  anon_id=anon_id)
         os.system("chown -f submitty_php:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
