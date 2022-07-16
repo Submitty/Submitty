@@ -416,7 +416,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 
     it('Should release course materials in folder by date', () => {
@@ -443,7 +443,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login('aphacker');
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 0);
+        cy.get('.file-viewer').should('have.length', 6);
 
         cy.visit('/');
         cy.logout();
@@ -470,7 +470,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login('aphacker');
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 2);
+        cy.get('.file-viewer').should('have.length', 8);
 
         cy.logout();
         cy.login();
@@ -480,7 +480,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 
     it('Should restrict course materials in folder', () => {
@@ -525,13 +525,13 @@ describe('Test cases revolving around course material uploading and access contr
         cy.login('aphacker');
         cy.visit(['sample', 'course_materials']);
 
-        cy.get('.file-viewer').should('have.length', 2);
+        cy.get('.file-viewer').should('have.length', 8);
 
         // Check that a student not in section 1 cannot view the files
         cy.logout();
         cy.login('browna');
         cy.visit(['sample', 'course_materials']);
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
 
         const fileTgt = buildUrl(['sample', 'course_material', 'a', 'file1.txt']);
 
@@ -546,7 +546,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 
     it('Should hide course materials in folder visually', () => {
@@ -588,7 +588,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.logout();
         cy.login('aphacker');
         cy.visit(['sample', 'course_materials']);
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
 
         // Check that a student can view the files through a URL
         const fileTgt = buildUrl(['sample', 'course_material', 'a', 'file1.txt']);
@@ -604,7 +604,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-trash').first().click();
         cy.get('.btn-danger').click();
 
-        cy.get('.file-viewer').should('not.exist');
+        cy.get('.file-viewer').should('have.length', 6);
     });
 
     it('Should sort course materials folder and preserve uploaded links', () => {
