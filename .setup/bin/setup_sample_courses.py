@@ -327,6 +327,7 @@ def generate_random_users(total, real_users):
 
     users = []
     user_ids = []
+    anon_ids = []
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
@@ -336,6 +337,7 @@ def generate_random_users(total, real_users):
             last_name = random.choice(last_names)
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
+            anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
             numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
@@ -343,6 +345,8 @@ def generate_random_users(total, real_users):
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
                 else:
                     user_id = user_id + "1"
+            if anon_id in anon_ids:
+                anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
                              "user_firstname": first_name,
@@ -352,6 +356,7 @@ def generate_random_users(total, real_users):
             new_user.create()
             user_ids.append(user_id)
             users.append(new_user)
+            anon_ids.append(anon_id)
             random_users_file.write(user_id + "\n")
     return users
 
@@ -875,20 +880,21 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
 
+        anon_ids = {}
         for gradeable in self.gradeables:
             #create gradeable specific anonymous ids for users
-            anon_ids = {}
+            prev_state = random.getstate()
             for user in self.users:
-                while True:
+                anon_id = generate_random_user_id(15)
+                while anon_id in anon_ids.values():
                     anon_id = generate_random_user_id(15)
-                    if anon_id not in anon_ids.values():
-                        anon_ids[user.id] = anon_id
-                        break
+                anon_ids[user.id] = anon_id
                 gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
                 self.conn.execute(gradeable_anon.insert(),
                                   user_id=user.id,
                                   g_id=gradeable.id,
                                   anon_id=anon_id)
+            random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
                 json_team_history = self.make_sample_teams(gradeable)
@@ -1020,7 +1026,7 @@ class Course(object):
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
                                 elif gradeable.annotated_pdf is True:
-                                    # Get a list of graders that has access to the submission
+                                    # Get a list of graders that have access to the submission
                                     assigned_graders = []
                                     stmt = select([
                                         peer_assign.columns.user_id,
