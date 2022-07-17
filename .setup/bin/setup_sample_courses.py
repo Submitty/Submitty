@@ -858,18 +858,6 @@ class Course(object):
             form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-            anon_ids=[]
-            for user in self.users:
-                while True:
-                    anon_id=generate_random_user_id(15)
-                    if anon_id not in anon_ids:
-                        anon_ids.append(anon_id)
-                        break
-                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
-                self.conn.execute(gradeable_anon.insert(),
-                                  user_id=user.id,
-                                  g_id=gradeable.id,
-                                  anon_id=anon_id)
         os.system("chown -f submitty_php:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
@@ -888,6 +876,19 @@ class Course(object):
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
 
         for gradeable in self.gradeables:
+            #create gradeable specific anonymous ids for users
+            anon_ids = {}
+            for user in self.users:
+                while True:
+                    anon_id = generate_random_user_id(15)
+                    if anon_id not in anon_ids.values():
+                        anon_ids[user.id] = anon_id
+                        break
+                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
+                self.conn.execute(gradeable_anon.insert(),
+                                  user_id=user.id,
+                                  g_id=gradeable.id,
+                                  anon_id=anon_id)
             # create_teams
             if gradeable.team_assignment is True:
                 json_team_history = self.make_sample_teams(gradeable)
@@ -965,7 +966,7 @@ class Course(object):
                                     os.makedirs(annotation_path)
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
-                            # This is done my making other possibilities three times more likely
+                            # This is done by making other possibilities three times more likely
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
@@ -1048,7 +1049,7 @@ class Course(object):
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
-                                            anon_dst[9] = user.anon_id
+                                            anon_dst[9] = anon_ids[user.id]
                                             anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
                                             
                                             for i in range(len(graders)):
