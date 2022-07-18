@@ -2848,27 +2848,28 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
                             JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
                     ) as gcmd
                     ON gcmd.gd_{$type}_id=u.{$type}_id
-                WHERE gcmd.gcm_id = ?",$params
+                WHERE gcmd.gcm_id = ?",
+                $params
             );
         }
         else {
             $this->course_db->query(
-                    "
-                    SELECT u.{$user_type}_id
-                    FROM {$table} u
-                        JOIN (
-                            SELECT gr.sections_{$grade_type}_id
-                            FROM grading_{$grade_type} AS gr
-                            WHERE gr.user_id = ?
-                        ) AS gr
-                        ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
-                        JOIN (
-                            SELECT gd.gd_{$type}_id, gcmd.gcm_id
-                            FROM gradeable_component_mark_data AS gcmd
-                                JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-                        ) as gcmd
-                        ON gcmd.gd_{$type}_id=u.{$type}_id
-                    WHERE gcmd.gcm_id = ?",
+                "
+                SELECT u.{$user_type}_id
+                FROM {$table} u
+                    JOIN (
+                        SELECT gr.sections_{$grade_type}_id
+                        FROM grading_{$grade_type} AS gr
+                        WHERE gr.user_id = ?
+                    ) AS gr
+                    ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
+                    JOIN (
+                        SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                        FROM gradeable_component_mark_data AS gcmd
+                            JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                    ) as gcmd
+                    ON gcmd.gd_{$type}_id=u.{$type}_id
+                WHERE gcmd.gcm_id = ?",
                 $params
             );
         }
