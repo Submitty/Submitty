@@ -84,15 +84,15 @@ $( document ).ready(function() {
                     {% for file in uploaded_pdfs %}
                         {% if file.encoded_name in annotated_file_names %}
                             <div class="row">
-                                <div class="no-border-box col-md-4" style="float: right; word-break: break-word; display: inline-block">
+                                <div class="no-border-box col-md-4">
                                     <p>{{ file.relative_name }}</p>
                                 </div>
-                                <div class="no-border-box col-md-4 offset-md-4" style="float: center; word-break: break-word; display: inline-block">
-                                    <p style="text-align:center; vertical-align: middle; float: right">
+                                <div class="no-border-box col-md-4 offset-md-4">
+                                    <div class="btn-annotation">
                                         <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
                                         <button class = 'btn btn-default key_to_click' style="margin-right:20px;" onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
-                                    </p>
+                                    </div>
                                 </div>
                             </div>
                         {% endif %}
