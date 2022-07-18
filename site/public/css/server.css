@@ -629,20 +629,20 @@ td > a.active-sort {
 }
 
 .no-border-box .col-md-4 {
-    float: right; 
-    word-break: break-word; 
+    float: right;
+    word-break: break-word;
     display: inline-block
 }
 
 .no-border-box .col-md-4 .offset-md-4 {
-    float: center; 
-    word-break: break-word; 
+    float: center;
+    word-break: break-word;
     display: inline-block
 }
 
 .btn-annotation {
-    text-align:center; 
-    vertical-align: middle; 
+    text-align:center;
+    vertical-align: middle;
     float: right
 }
 
