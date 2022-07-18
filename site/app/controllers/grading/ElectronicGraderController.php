@@ -1010,7 +1010,13 @@ class ElectronicGraderController extends AbstractController {
      */
     public function uploadAttachment($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
+
+        //Get the user uploading attachment
         $grader = $this->core->getUser();
+        if (!$grader->accessGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);

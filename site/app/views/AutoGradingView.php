@@ -710,7 +710,6 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        $peer_graders = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $id);
         $grader_info = [];
 
         foreach ($ta_graded_gradeable->getAttachments() as $user_name => $attachments) {
@@ -719,7 +718,6 @@ class AutoGradingView extends AbstractView {
             }
 
             $grader_info[$user_name] = [];
-            $grader_info[$user_name]["attachments"] = $attachments;
             $grader_info[$user_name]["display_name"] = $user_name;
             $grader_info[$user_name]["comment"] = "";
         }
@@ -733,7 +731,6 @@ class AutoGradingView extends AbstractView {
             if (strlen(trim($comment)) > 0) {
                 if (!isset($grader_info[$user_name])) {
                     $grader_info[$user_name] = [];
-                    $grader_info[$user_name]["attachments"] = [];
                     $grader_info[$user_name]["display_name"] = $user_name;
                 }
                 $grader_info[$user_name]["comment"] = $comment;
