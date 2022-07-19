@@ -104,6 +104,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -242,6 +243,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
+     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
     public function setReleaseAll(): JsonResponse {

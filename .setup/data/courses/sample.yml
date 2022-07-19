@@ -738,10 +738,10 @@ gradeables:
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Released Peer PDF Homework
-  gradeable_config: pdf_word_count
+  gradeable_config: multiple_pdf_annotations
   g_bucket: homework
   g_grader_assignment_method: 2
-
+  eg_annotated_pdf: true
   
 - g_id: closed_team_homework
   eg_peer_grading: true
