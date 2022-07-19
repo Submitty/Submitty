@@ -425,7 +425,7 @@ class AutoGradingView extends AbstractView {
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
-        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable->getId(), $id, $active_version);
         $annotated_pdf_paths = [];
         $annotated_file_names = [];
         $annotation_paths = [];
@@ -435,7 +435,7 @@ class AutoGradingView extends AbstractView {
                 $pdf_id = explode("_", $file_info->getFilename())[0];
                 if (file_get_contents($file_info->getPathname()) !== "") {
                     $annotated_file_names[] = $pdf_id;
-                    $pdf_id = $pdf_id . '.pdf';
+                    //$pdf_id = $pdf_id . '.pdf';
                     if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
                         $target_file = scandir($annotation_path)[2];
                         $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
@@ -482,6 +482,8 @@ class AutoGradingView extends AbstractView {
                 $grader_info[$user_name]["comment"] = $comment;
             }
         }
+
+        var_dump($uploaded_pdfs, $pdfs_path, $annotated_file_names, $annotation_paths, $annotated_pdf_paths);
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
