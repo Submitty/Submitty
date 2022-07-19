@@ -318,7 +318,7 @@ else:
 
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
-    UPGRADE_LINUX_PACKAGES = get_input("Should Linux packages be updated with Submitty install?", defaults['upgrade_linux_packages'])
+    UPGRADE_LINUX_PACKAGES = get_input("Should Linux packages be automatically updated with each Submitty update/install?", defaults['upgrade_linux_packages'])
 
     USERNAME_TEXT = defaults['username_change_text']
 

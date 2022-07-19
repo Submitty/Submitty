@@ -27,7 +27,7 @@ fi
 # LINUX PACKAGE UPGRADE
 #########################
 
-APT=$(jq -r '.upgrade_linux_packages' ${CONF_DIR}/submitty.json)
+APT=$([[ $(jq -r '.upgrade_linux_packages' ${CONF_DIR}/submitty.json) == "true" ]] && echo true || echo false) || false
 
 # check if apt upgrades have been disabled
 for flag in "$@"; do
