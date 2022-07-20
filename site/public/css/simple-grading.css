@@ -45,11 +45,11 @@ tr > td:nth-child(5) {
     border-right: 1px solid var(--standard-medium-gray);
 }
 
-tr:nth-child(odd) td {
-    background: white;
+tr:nth-child(odd) td:nth-child(n+1):nth-child(-n+5) {
+    background: var(--default-white);
 }
 
-tr:nth-child(even) td {
+tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
     background: var(--standard-light-gray);
 }
 
