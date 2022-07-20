@@ -144,7 +144,7 @@ class Core {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
-                  "sudo service php7.2-fpm restart";
+                  "sudo service php" . PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "-fpm restart";
                 $this->addErrorMessage($message);
             }
         }
@@ -466,9 +466,9 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate(bool $persistent_cookie = true): bool {
-        $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
+                $user_id = $this->authentication->getUserId();
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
