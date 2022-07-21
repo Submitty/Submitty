@@ -8092,7 +8092,7 @@ ORDER BY
     public function getProxyMappedUsers(): array {
         $this->submitty_db->query("
             SELECT id, user_id, saml_id, active FROM saml_mapped_users
-                WHERE saml_id != user_id;
+                WHERE saml_id != user_id ORDER BY saml_id, user_id;
         ");
         return $this->submitty_db->rows();
     }
