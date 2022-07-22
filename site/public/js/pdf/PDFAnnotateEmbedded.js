@@ -330,7 +330,7 @@ function loadPDFToolbar() {
 
 function loadAllAnnotations(annotations, file_name) {
     for (const grader in annotations) {
-        if (annotations[grader] !== "") {
+        if (annotations[grader] !== '') {
             localStorage.setItem(`${file_name}/${grader}/annotations`, annotations[grader]);
         }
     }
@@ -338,7 +338,7 @@ function loadAllAnnotations(annotations, file_name) {
 
 function loadGraderAnnotations(annotations, file_name, grader_id) {
     for (const grader in annotations) {
-        if (annotations[grader] !== "") {
+        if (annotations[grader] !== '') {
             if (grader === grader_id) {
                 localStorage.setItem(`${file_name}/${grader}/annotations`, annotations[grader]);
             }
