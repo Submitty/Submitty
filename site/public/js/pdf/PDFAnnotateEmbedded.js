@@ -1,5 +1,5 @@
 /* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
-/* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations */
+/* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
 if (PDFAnnotate.default) {
     // eslint-disable-next-line no-global-assign
@@ -94,6 +94,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     cMapPacked: true,
                 }).promise.then((pdf) => {
                     const doc = new jspdf.jsPDF('p', 'mm');
+                    //console.log(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url, rerender_pdf);
                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
                 });
             },
@@ -326,6 +327,31 @@ function loadPDFToolbar() {
     const init_text_size = document.getElementById('text_size_selector').value;
     localStorage.setItem('text/size', init_text_size);
     PDFAnnotate.UI.setText(init_text_size, init_color);
+}
+
+function loadAllAnnotations(annotations, file_name) {
+    for (let grader in annotations) {
+        if(annotations[grader] !== "") {
+            localStorage.setItem(file_name + '/' + grader +'/annotations', annotations[grader]);
+        }
+    }
+}
+
+function loadGraderAnnotations(annotations, file_name, grader_id) {
+    for (let grader in annotations) {
+        if (annotations[grader] !== "") {
+            if (grader === grader_id) {
+                localStorage.setItem(file_name + '/' + grader +'/annotations', annotations[grader]);
+            }
+            else {
+                if (!window.GENERAL_INFORMATION.hidden_annotations) {
+                    window.GENERAL_INFORMATION.hidden_annotations = {};
+                }
+                window.GENERAL_INFORMATION.hidden_annotations[grader] = annotations[grader];
+                localStorage.setItem(file_name + '/' + grader +'/annotations', '[]');
+            }
+        }
+    }
 }
 
 function toggleOtherAnnotations(hide_others) {
