@@ -48,7 +48,7 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 std::string replace_placeholder(std::string value) {
     std::string placeholder = "{SUBMITTY_INSTALL_DIRECTORY}";
     int index = value.find(placeholder);
-    if (index != -1) {
+    if (index != string::npos) {
         return value.replace(index, placeholder.length(), SUBMITTY_INSTALL_DIRECTORY);
     }
     return value;

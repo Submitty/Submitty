@@ -459,8 +459,8 @@ rsync -rtz --exclude "${sync_exclude}" "${SUBMITTY_REPOSITORY}/grading" "${SUBMI
 rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
 
 # # change permissions of autograding_allowed_commands_default.json
-chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
-chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
 
 # create autograding_allowed_commands_custom.json if doesnt exist
 if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json" ]]; then
@@ -468,8 +468,8 @@ if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.j
 fi
 
 # # change permissions of autograding_allowed_commands_custom.json
-chown -R "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
-chmod -R 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
 
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
