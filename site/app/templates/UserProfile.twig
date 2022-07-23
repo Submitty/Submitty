@@ -133,6 +133,7 @@
                 </div>
             </div>
             <div>
+            <span class="option-alt" id="browser-support">Submitty supports an installable PWA which requires Chrome</span>
             <button class="addpwa btn btn-primary">Install App</button>
             <span class="option-alt" id="pwa-uninstall-lable">The Submitty PWA has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
             </div>
@@ -142,10 +143,10 @@
 <script>
         let storedPrompt;
         let pwaBtn = $('.addpwa');
+        let browser_lable = $("#browser-support");
         let pwalable = $("#pwa-uninstall-lable");
 
         pwaBtn[0].style.display = 'none';
-        pwalable[0].style.display='block';
         
         window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -158,7 +159,7 @@
          storedPrompt.userChoice.then((choiceResult) => {
          if (choiceResult.outcome === 'accepted') {
           console.log('Application Installed');
-          pwalable[0].style.display='none';
+          pwalable[0].style.display='block';
          } else {
           console.log('Application not Installed');
          }
@@ -167,6 +168,17 @@
       });
   });
 });
+function isInstalled() {
+if(navigator.userAgent.match(/chrome|chromium|crios/i)){
+    pwalable[0].style.display='block';
+    browser_lable[0].style.display='none';
+}else{
+    pwalable[0].style.display='none';
+    browser_lable[0].style.display='block';
+}
+
+}
+isInstalled();
 </script>
 {% include 'EditNameForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
