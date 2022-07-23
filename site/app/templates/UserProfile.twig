@@ -134,6 +134,7 @@
             </div>
             <div>
             <button class="addpwa btn btn-primary">Install App</button>
+            <span class="option-alt" id="pwa-uninstall-lable">The Submitty PWA has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
             </div>
         </div>
     </div>
@@ -141,12 +142,15 @@
 <script>
         let storedPrompt;
         let pwaBtn = $('.addpwa');
-        pwaBtn[0].style.display = 'none';
-        window.addEventListener('beforeinstallprompt', (e) => {
-       
-        e.preventDefault();
+        let pwalable = $("#pwa-uninstall-lable");
 
+        pwaBtn[0].style.display = 'none';
+        pwalable[0].style.display='block';
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
         storedPrompt = e;
+        pwalable[0].style.display='none';
         pwaBtn[0].style.display = 'block';
         pwaBtn[0].addEventListener('click', (e) => {
          pwaBtn[0].style.display = 'none';
@@ -154,10 +158,12 @@
          storedPrompt.userChoice.then((choiceResult) => {
          if (choiceResult.outcome === 'accepted') {
           console.log('Application Installed');
+          pwalable[0].style.display='none';
          } else {
           console.log('Application not Installed');
          }
          storedPrompt = null;
+
       });
   });
 });
