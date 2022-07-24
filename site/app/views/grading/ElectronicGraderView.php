@@ -1260,7 +1260,7 @@ HTML;
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
                 $user_or_team = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
-                $anon_id = ($user_or_team instanceof User) ? $user_or_team->getAnonId($g_id) : $user_or_team->getAnonId();
+                $anon_id = $user_or_team->getAnonId($g_id);
                 $anon_path = $anon_path . "/" . $anon_id;
             }
             else {
@@ -1331,7 +1331,7 @@ HTML;
             $student_grader = true;
         }
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
-        $anon_submitter_id = $graded_gradeable->getSubmitter()->isTeam() ? $graded_gradeable->getSubmitter()->getAnonId() : $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
+        $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
@@ -1447,7 +1447,7 @@ HTML;
             }
         }
         else {
-            $student_anon_ids[] = $graded_gradeable->getSubmitter()->isTeam() ? $graded_gradeable->getSubmitter()->getAnonId() : $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
+            $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         }
         // Disable grading if the requested version isn't the active one
         $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
@@ -1471,7 +1471,7 @@ HTML;
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
-                "anon_id" => $graded_gradeable->getSubmitter()->isTeam() ? $graded_gradeable->getSubmitter()->getAnonId() : $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
+                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "show_verify_all" => $show_verify_all,
@@ -1558,7 +1558,7 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
-                "anon_id" => $graded_gradeable->getSubmitter()->isTeam() ? $graded_gradeable->getSubmitter()->getAnonId() : $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
+                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,

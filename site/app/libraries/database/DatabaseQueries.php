@@ -2829,50 +2829,33 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$grader->getId(), $mark->getId()];
         $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+        $table_to_refer = 'u';
+        $gradeable_anon_inject = '';
         if ($type == 'user' && $user_type == 'anon') {
             array_unshift($params, $mark->getComponent()->getGradeable()->getId());
-            $this->course_db->query(
-                "
-                SELECT ga.{$user_type}_id
-                FROM {$table} u
-                    JOIN gradeable_anon ga ON ga.user_id=u.user_id AND ga.g_id = ?
-                    JOIN (
-                        SELECT gr.sections_{$grade_type}_id
-                        FROM grading_{$grade_type} AS gr
-                        WHERE gr.user_id = ?
-                    ) AS gr
-                    ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
-                    JOIN (
-                        SELECT gd.gd_{$type}_id, gcmd.gcm_id
-                        FROM gradeable_component_mark_data AS gcmd
-                            JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-                    ) as gcmd
-                    ON gcmd.gd_{$type}_id=u.{$type}_id
-                WHERE gcmd.gcm_id = ?",
-                $params
-            );
+            $table_to_refer = 'ga';
+            $gradeable_anon_inject = 'JOIN gradeable_anon ga ON ga.user_id=u.user_id AND ga.g_id = ?';
         }
-        else {
-            $this->course_db->query(
-                "
-                SELECT u.{$user_type}_id
-                FROM {$table} u
-                    JOIN (
-                        SELECT gr.sections_{$grade_type}_id
-                        FROM grading_{$grade_type} AS gr
-                        WHERE gr.user_id = ?
-                    ) AS gr
-                    ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
-                    JOIN (
-                        SELECT gd.gd_{$type}_id, gcmd.gcm_id
-                        FROM gradeable_component_mark_data AS gcmd
-                            JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-                    ) as gcmd
-                    ON gcmd.gd_{$type}_id=u.{$type}_id
-                WHERE gcmd.gcm_id = ?",
-                $params
-            );
-        }
+        $this->course_db->query(
+            "
+            SELECT {$table_to_refer}.{$user_type}_id
+            FROM {$table} u
+                {$gradeable_anon_inject}
+                JOIN (
+                    SELECT gr.sections_{$grade_type}_id
+                    FROM grading_{$grade_type} AS gr
+                    WHERE gr.user_id = ?
+                ) AS gr
+                ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
+                JOIN (
+                    SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                    FROM gradeable_component_mark_data AS gcmd
+                        JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                ) as gcmd
+                ON gcmd.gd_{$type}_id=u.{$type}_id
+            WHERE gcmd.gcm_id = ?",
+            $params
+        );
 
         // Map the results into a non-associative array of team/user ids
         return array_map(

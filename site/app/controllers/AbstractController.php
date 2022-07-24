@@ -129,7 +129,7 @@ abstract class AbstractController {
      * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return string|bool false in the fail/error case
      */
-    protected function tryGetSubmitterIdFromAnonId(string $anon_id, string $g_id = null, bool $render_json = true) {
+    protected function tryGetSubmitterIdFromAnonId(string $anon_id, string $g_id, bool $render_json = true) {
         if ($anon_id === '') {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
