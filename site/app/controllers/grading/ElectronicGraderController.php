@@ -1557,7 +1557,7 @@ class ElectronicGraderController extends AbstractController {
             if ($goToStudent !== null) {
                 $who_id = $goToStudent->getId();
                 if ($blind_grading || $anon_mode) {
-                    $who_id = $team ? $goToStudent->getAnonId() : $goToStudent->getAnonId($gradeable_id);
+                    $who_id = $goToStudent->getAnonId($gradeable_id);
                 }
             }
             if (empty($who_id)) {

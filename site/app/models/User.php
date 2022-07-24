@@ -459,8 +459,8 @@ class User extends AbstractModel {
      * @param string $g_id
      */
     public function getAnonId($g_id) {
-        if ($g_id === null) {
-            return null;
+        if ($g_id === "") {
+            return "";
         }
         $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
         $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
