@@ -904,7 +904,7 @@ class Course(object):
             max_individual_submissions = gradeable.max_individual_submissions
             # makes a section be ungraded if the gradeable is not electronic
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
-            # This for loop adds submissions for users and teams(if applicable)
+            # This for loop adds submissions/annotations for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
@@ -1040,7 +1040,6 @@ class Course(object):
                                             annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
                                             if not os.path.exists(annotation_version_path):
                                                 os.makedirs(annotation_version_path)
-                                                os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
                                         
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
@@ -1128,6 +1127,9 @@ class Course(object):
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
+
+                    if gradeable.type == 0 and os.path.isdir(gradeable_annotation_path):
+                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
