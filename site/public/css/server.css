@@ -628,19 +628,13 @@ td > a.active-sort {
     padding: 5px 5px 10px;
 }
 
-.no-border-box .col-md-4 {
+.file-annotation {
     float: right;
     word-break: break-word;
-    display: inline-block;
-}
-
-.no-border-box .col-md-4 .offset-md-4 {
-    float: center;
-    word-break: break-word;
-    display: inline-block;
 }
 
 .btn-annotation {
+    word-break: break-word;
     text-align: center;
     vertical-align: middle;
     float: right;
