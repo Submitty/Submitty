@@ -45,6 +45,7 @@ yaml = YAML(typ='safe')
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
+# Default values, will be overwritten in `main()` if corresponding arguments are supplied
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
@@ -52,10 +53,9 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
-    database_config_json = json.load(database_config)
-    DB_USER = database_config_json["database_user"]
-    DB_PASS = database_config_json["database_password"]
+DB_PORT = 5432
+DB_USER = "submitty_dbuser"
+DB_PASS = "submitty_dbuser"
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -70,17 +70,34 @@ def main():
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
+    global DB_HOST, DB_USER, DB_PASS
+    global SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR, SUBMITTY_REPOSITORY
+    global MORE_EXAMPLES_DIR, TUTORIAL_DIR
 
     args = parse_args()
     DB_ONLY = args.db_only
     NO_SUBMISSIONS = args.no_submissions
     NO_GRADING = args.no_grading
+    SUBMITTY_INSTALL_DIR = args.install_dir
+    SUBMITTY_DATA_DIR = args.data_dir
+    SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
+    MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
+    TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
+
+    if not os.path.isdir(SUBMITTY_INSTALL_DIR):
+        raise SystemError(f"The following directory does not exist: {SUBMITTY_INSTALL_DIR}")
     if not os.path.isdir(SUBMITTY_DATA_DIR):
-        raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
+        raise SystemError(f"The following directory does not exist: {SUBMITTY_DATA_DIR}")
     for directory in ["courses"]:
         if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
             raise SystemError("The following directory does not exist: " + os.path.join(
                 SUBMITTY_DATA_DIR, directory))
+    with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
+        database_config_json = json.load(database_config)
+        DB_USER = database_config_json["database_user"]
+        DB_HOST = database_config_json["database_host"]
+        DB_PORT = database_config_json["database_port"]
+        DB_PASS = database_config_json["database_password"]
     use_courses = args.course
 
     # We have to stop all running daemon grading and jobs handling
@@ -139,7 +156,8 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+    submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
+                                    .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
@@ -240,7 +258,7 @@ def main():
 
     if not NO_GRADING:
         # queue up all of the newly created submissions to grade!
-        os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
+        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
 
 
 def get_random_text_from_file(filename):
@@ -776,12 +794,14 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         print("Database created, now populating ", end="")
 
-        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+        submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
+                                        .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
         print("(Master DB connection made, metadata bound)...")
 
-        engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, database))
+        engine = create_engine("postgresql:///{}?host={}&port={}&user={}&password={}"
+                               .format(database, DB_HOST, DB_PORT, DB_USER, DB_PASS))
         self.conn = engine.connect()
         self.metadata = MetaData(bind=engine)
         print("(Course DB connection made, metadata bound)...")
