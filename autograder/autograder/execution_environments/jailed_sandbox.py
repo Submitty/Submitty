@@ -96,7 +96,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
             ]
 
         # Make sure the signal matches to .setup/untrusted_execute.c
-        signal.signal(signal.SIGCHLD, self._handle_error_signal)
+        signal.signal(signal.SIGUSR2, self._handle_error_signal)
 
         success = False
         try:
