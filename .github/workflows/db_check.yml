@@ -164,29 +164,13 @@ jobs:
 
             - name: Setup Databases and Courses for main
               run: | # migrate main according to dumped master database (assume it is correct)
-                  # Create symlinks to the original install path for compatibility
-                  sudo ln -vs ${MAIN_INSTALL_PATH}  /usr/local/submitty
-                  sudo ln -vs ${MAIN_DATA_PATH}     /var/local/submitty
-
-                  # Create port redirections for compatibility
-                  sudo sysctl net.ipv4.ip_forward=1
-                  sudo sysctl net.ipv6.conf.all.forwarding=1
-                  sudo iptables  -A OUTPUT -t nat -o lo -p tcp --dport 5432 -j REDIRECT -v          \
-                    --to-port ${{  job.services.postgres-main.ports['5432']  }}
-                  sudo ip6tables -A OUTPUT -t nat -o lo -p tcp --dport 5432 -j REDIRECT -v          \
-                    --to-port ${{  job.services.postgres-main.ports['5432']  }}
-
                   python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
                   sudo ln -vs /usr/bin/true /usr/bin/ldapadd
                   sudo -E python3 ${MAIN_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py     \
-                    blank --no_grading
-
-                  sudo iptables  -t nat -F -v
-                  sudo ip6tables -t nat -F -v
+                    blank --no_grading --data_dir ${MAIN_DATA_PATH} --install_dir ${MAIN_INSTALL_PATH}
 
                   sudo chmod -vR 777 ${MAIN_DATA_PATH}/courses
-
 
             - name: Apply New Migrations from Current Branch
               run: |
@@ -195,22 +179,10 @@ jobs:
 
             - name: Setup Databases and Courses for Current Branch
               run: |
-                  sudo rm /usr/local/submitty  /var/local/submitty
-                  sudo ln -vs ${PR_INSTALL_PATH}  /usr/local/submitty
-                  sudo ln -vs ${PR_DATA_PATH}     /var/local/submitty
-
-                  sudo iptables  -A OUTPUT -t nat -o lo -p tcp --dport 5432 -j REDIRECT -v          \
-                    --to-port ${{ job.services.postgres-branch.ports['5432'] }}
-                  sudo ip6tables -A OUTPUT -t nat -o lo -p tcp --dport 5432 -j REDIRECT -v          \
-                    --to-port ${{ job.services.postgres-branch.ports['5432'] }}
-
                   python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
-                  sudo -E python3 ${PR_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py         \
-                    blank --no_grading
-
-                  sudo iptables  -t nat -F -v
-                  sudo ip6tables -t nat -F -v
+                  sudo -E python3 ${PR_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py       \
+                    blank --no_grading --data_dir ${PR_DATA_PATH} --install_dir ${PR_INSTALL_PATH}
 
                   sudo chmod -vR 777 ${PR_DATA_PATH}/courses
 
