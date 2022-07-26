@@ -199,6 +199,7 @@ jobs:
                     "${{ job.services.postgres-branch.ports['5432'] }}"
 
             - name: Compare Migrated master Databases
+              if: always()
               run: |
                   diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql                           \
                                ${GITHUB_WORKSPACE}/dumped/branch/master.sql || {
@@ -207,6 +208,7 @@ jobs:
                   }
 
             - name: Compare Migrated course Databases
+              if: always()
               run: |
                   diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql                           \
                                ${GITHUB_WORKSPACE}/dumped/branch/course.sql || {
@@ -215,6 +217,7 @@ jobs:
                   }
 
             - name: Compare Migrated master Database with Provided Dump
+              if: always()
               run: |
                   diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql                         \
                                ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
@@ -223,6 +226,7 @@ jobs:
                   }
 
             - name: Compare Migrated course Database with Provided Dump
+              if: always()
               run: |
                   diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql                         \
                                ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
