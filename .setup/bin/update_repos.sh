@@ -71,6 +71,7 @@ function clone_or_update_repo {
                 echo -e "    ERROR: Submitty/${repo_name} repository history does not contain version ${min_repo_version}"
                 echo -e "        Run 'git fetch' to get the tags from github."
                 echo -e "        Also check to be sure your current branch is up-to-date."
+                echo -e "        If you have this repository cloned locally, you may have to update it manually."
                 popd > /dev/null
                 exit 1
             fi
