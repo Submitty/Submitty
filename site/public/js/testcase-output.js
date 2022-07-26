@@ -23,12 +23,12 @@ function CollapseTestcaseOutput(div_name, index, loadingTools) {
 }
 
 /**
- * Expands or Collapses Test Case Output.
+ * Expands or Collapses test case output.
  *
- * @global {loading_testcases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
+ * @global {loading_testcases_xml_http_requests} : Map (div_name ("testcase_" + index); Value - XMLHttpRequest object)
  *                         to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
- * @param {string} div_name - id of div containing the output of the test case
+ * @param {string} div_name - ID of div containing the output of the test case
  * @param {string} gradeable_id - ID of the gradeable
  * @param {string} who_id - ID of the submitter
  * @param {string} index - index of test case
@@ -103,70 +103,54 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 }
 
 
-/*
- * Function to toggle all of the given test cases, resulting in all to be expanded or collapsed.  
- * 
- * @param total_div_name {string} name of div id encapsulating loading tools
- * @param test_cases {array of test cases} array of all test cases for gradable that should be affected by toggle
- * 
- * Requires total_div_name to contain 3 spans: 
- *  loading-tools-show
- *  loading-tools-hide
- *  loading-tools-in-progress
-*/
-function loadAllTestcaseOutput(total_div_name, test_cases, show_hidden, show_hidden_details, gradeable_id, who_id, version = '')
+/**
+ * Expands or Collapses all test case outputs.
+ *
+ * @global {loading_testcases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
+ *                         to store the XMLHttpRequest object returned by getJSON when getting the output to display
+ *
+ * @param {string} div_name - ID of div that calls this function
+ * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
+ * @param {boolean} show_hidden - should hidden test cases be displayed
+ * @param {boolean} show_hidden_details - should hidden details be displayed
+ * @param {string} gradeable_id - ID of the gradeable
+ * @param {string} who_id - ID of the submitter
+ * @param {number} version - submission version
+ */
+function loadAllTestcaseOutput(div_name, test_cases, show_hidden, show_hidden_details, gradeable_id, who_id, version = '')
 {
     const parsed_test_cases = JSON.parse(test_cases);
 
     // Process total div
-    let loadingTools = $("#" + total_div_name).find(".loading-tools");
+    const loadingTools = $(`#${div_name}`).find('.loading-tools');
 
     //window.stop();
-    var expand_all = false;
-    if(loadingTools.find(".loading-tools-hide").is(":visible"))         // Collapse Test Cases
-    {
+    let expand_all = false;
+    if (loadingTools.find('.loading-tools-hide').is(':visible')) {
+        // All Test Cases should be Collapsed
         expand_all = false;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
+        loadingTools.find('.loading-tools-hide').hide();
+        loadingTools.find('.loading-tools-in-progress').hide();
+        loadingTools.find('.loading-tools-show').show();
     }
-
-    else //(loadingTools.find(".loading-tools-show").is(":visible"))    // Expand Test Cases
-    {
+    else {
+        // All Test Cases should be Expanded
         expand_all = true;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
+        loadingTools.find('.loading-tools-show').hide();
+        loadingTools.find('.loading-tools-in-progress').hide();
+        loadingTools.find('.loading-tools-hide').show();
     }
-
 
     // Expand/Collapse all test cases
     parsed_test_cases.forEach(function callback(test_case, index) {
-
-        // var can_view = (!test_case.hidden || show_hidden);
-        var can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden)
-
-        var div_name = "testcase_" + index;
+        const test_case_div_name = `testcase_${index}`;
+        const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
+        const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
 
         // Check if test case should be expanded/collapsed
-        if (can_view_details && test_case.has_extra_results)
-        {
-            if($("#" + div_name).is(":visible") != expand_all)
-            {
-                loadTestcaseOutput(div_name, gradeable_id, who_id, index, version);
-            } 
-            else{
-                console.log("Failed on #" + div_name + " | expected to" + (expand_all ? "expand" : "hide") + " all");
-            }
+        if (can_view_details && test_case.has_extra_results &&
+            ((expand_all && isTestCaseLoadingToolsShowVisible) || (!expand_all && !isTestCaseLoadingToolsShowVisible))) {
+            loadTestcaseOutput(test_case_div_name, gradeable_id, who_id, index, version);
         }
     });
-    
-    // If loading is completed, set Collapse All text to be visible
-    if(loadingTools.find(".loading-tools-in-progress").is(":visible"))
-    {
-        // WAIT UNTIL ALL test cases are loaded ... OR force shut down (don't even care about it being fully loaded)
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-hide").show();
-    }
 }
