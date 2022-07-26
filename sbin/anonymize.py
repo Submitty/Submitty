@@ -27,25 +27,33 @@ def main():
     metadata = MetaData(bind=course_engine)
 
     users = Table("users", metadata, autoload=True)
-    select = users.select()
-    rows = conn.execute(select)
+    user_select = users.select()
+    user_rows_obj = conn.execute(user_select)
+    user_rows = []
+    for row in user_rows_obj:
+        user_rows.append(row._mapping)
 
-    anon_ids = {}
+    gradeable = Table("gradeable", metadata, autoload=True)
+    g_select = gradeable.select()
+    gradeable_rows = conn.execute(g_select)
 
-    for row in rows:
-        user = row["user_id"]
-
-        anon = generate_random_user_id()
-        while(anon in anon_ids):
+    gradeable_anon = Table("gradeable_anon", metadata, autoload=True)
+    for g_row in gradeable_rows:
+        gradeable_id = g_row["g_id"]
+        anon_ids = {}
+        for row in user_rows:
+            user_id = row["user_id"]
             anon = generate_random_user_id()
-
-        #anon=user
-            
-        anon_ids[anon] = user
-        new_info = {'anon_id':anon}
-        update = users.update(values=new_info).where(users.c.user_id == bindparam('b_user_id'))
-        conn.execute(update, b_user_id = user)
-        
+            while(anon in anon_ids):
+                anon = generate_random_user_id()
+            anon_ids[anon] = user_id
+            new_info = {'anon_id':anon}
+            update = gradeable_anon.update(values=new_info).where(gradeable_anon.c.user_id == bindparam('b_user_id'), gradeable_anon.c.g_id == bindparam('b_g_id'))
+            result = conn.execute(update, b_user_id = user_id, b_g_id = gradeable_id)
+            if result.rowcount == 0:
+                new_row = {'user_id':user_id, 'g_id': gradeable_id, 'anon_id': anon}
+                insert = gradeable_anon.insert().values(new_row)
+                conn.execute(insert)
     conn.close()
 
 if __name__ == "__main__":

@@ -4438,24 +4438,13 @@ AND gc_id IN (
                 $this->core->getQueries()->getUserById($user_id)->getAnonId($g_id);
                 continue;
             }
-            try {
-                $params = [$user_id, $g_id, $anon_id];
-                $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
-                $this->course_db->commit();
-            }
-            catch (DatabaseException $dbException) {
-                $this->course_db->rollback();
-            }
+            $params = [$user_id, $g_id, $anon_id];
+            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
         }
     }
 
-    public function getAllAnonIdsByGradeable($g_id = null) {
-        if ($g_id == null) {
-            $this->course_db->query("SELECT anon_id FROM gradeable_anon");
-        }
-        else {
-            $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
-        }
+    public function getAllAnonIdsByGradeable($g_id) {
+        $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
 

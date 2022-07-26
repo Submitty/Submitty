@@ -466,7 +466,7 @@ class User extends AbstractModel {
         $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
         if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable();
+            $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);
             $alpha_length = strlen($alpha) - 1;
             do {
                 $random = "";
