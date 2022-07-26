@@ -229,3 +229,11 @@ jobs:
                     echo "::error:: Wrong provided dump, please check your database dumps"
                     exit 1
                   }
+
+            - name: Pack Artifacts
+              if: failure()
+              uses: actions/upload-artifact@v3
+              with:
+                name: dumped_database
+                path: ${{ github.WORKSPACE }}/dumped/**/*.sql
+                retention-days: 3
