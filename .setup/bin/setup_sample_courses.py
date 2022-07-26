@@ -70,7 +70,7 @@ def main():
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
-    global DB_HOST, DB_USER, DB_PASS
+    global DB_HOST, DB_PORT, DB_USER, DB_PASS
     global SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR, SUBMITTY_REPOSITORY
     global MORE_EXAMPLES_DIR, TUTORIAL_DIR
 
