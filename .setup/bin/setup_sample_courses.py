@@ -512,6 +512,8 @@ def parse_args():
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
                         help="Path to the folder that contains .yml files to use for course creation. Defaults to "
                              "../data/courses")
+    parser.add_argument("--install_dir", type=str, default="/usr/local/submitty", help="install path of submitty")
+    parser.add_argument("--data_dir", type=str, default="/var/local/submitty", help="data path of submitty")
     parser.add_argument("course", nargs="*",
                         help="course code to build. If no courses are passed in, then it'll use "
                              "all courses in courses.json")
@@ -1058,7 +1060,7 @@ class Course(object):
                                             if not os.path.exists(annotation_version_path):
                                                 os.makedirs(annotation_version_path)
                                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
-                                        
+
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
                                             # Make sure instructor is responsible for one of the annotations
@@ -1067,7 +1069,7 @@ class Course(object):
                                             anon_dst = os.path.join(dst, submission).split("/")
                                             anon_dst[9] = user.anon_id
                                             anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
-                                            
+
                                             for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
                                                 annotation_dst = os.path.join(annotation_path, str(version))
@@ -1189,7 +1191,7 @@ class Course(object):
                     dir_to_make=os.path.join(course_materials_folder, inner_dir)
                     os.mkdir(dir_to_make)
                     subprocess.run(["chown", "submitty_php:submitty_php", dir_to_make])
-                    self.conn.execute(course_materials_table.insert(), 
+                    self.conn.execute(course_materials_table.insert(),
                             path=dir_to_make,
                             type=2,
                             release_date='2022-01-01 00:00:00',
@@ -1200,7 +1202,7 @@ class Course(object):
                     filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, course_materials_source))
                     shutil.copy(tmpfilepath, filepath)
                     subprocess.run(["chown", "submitty_php:submitty_php", filepath])
-                    self.conn.execute(course_materials_table.insert(), 
+                    self.conn.execute(course_materials_table.insert(),
                                 path=filepath,
                                 type=0,
                                 release_date='2022-01-01 00:00:00',
@@ -1209,7 +1211,7 @@ class Course(object):
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
-        
+
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
