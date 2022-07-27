@@ -160,7 +160,6 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, set_all_div_n
     }
 }
 
-
 /**
  * Expands or Collapses all test case outputs.
  *

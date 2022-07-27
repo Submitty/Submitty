@@ -45,6 +45,7 @@
             </div>
         {% endif %}
 
+        {# Expand-Collapse All Toggle #}
         {# Determine if there exists test cases with viewable details #}
         {% set has_test_cases_with_viewable_details = false %}
         {% if hide_version_and_test_details == false %}
@@ -62,7 +63,7 @@
         {% endif %}
 
         {% if has_test_cases_with_viewable_details == true %}
-            {# Expand/Collapse All Button #}
+            {# Expand-Collapse All Button #}
             <div id='tc_total' class="key_to_click" tabindex="0"
                 {% if hide_version_and_test_details == false %}
                     {% if not incomplete_autograding %}
@@ -80,9 +81,9 @@
                     </span>
                 </span>
             </div>
-            {# /Expand/Collapse All Button #}
+            {# /Expand-Collapse All Button #}
         {% endif %}
-
+        {# /Expand-Collapse All Toggle #}
     {% endif %}
 
     {% if hide_version_and_test_details == false %}
