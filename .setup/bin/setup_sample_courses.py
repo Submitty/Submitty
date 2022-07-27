@@ -1285,6 +1285,7 @@ class Course(object):
                                                       "first_user": user.get_detail(self.code, "id")}]
                 ucounter += 1
             res.close()
+            anon_team_ids.append(anon_team_id);
         return json_team_history
 
     def add_sample_forum_data(self):
