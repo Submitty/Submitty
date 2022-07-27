@@ -1,8 +1,5 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
-
-//const { each } = require("jquery");
-
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
   loadInBreadcrumbLinks();
