@@ -43,20 +43,18 @@
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" />
+            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()"><br>
+            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
-            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="handleHideMaterialsChange()"/>
+            <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="handleHideMaterialsChange()">
             Hide from Students<br>
             <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
-            <span id="edit-folder-form-hide-warning" class="red-message full-width" style="display: none;">
-                Warning: Students can view the hidden course material by guessing the corresponding course material ID (a simple number).  It is recommended to instead use the release date feature if it is necessary to prevent students from accessing course materials.
-            </span>
         </label>
         <script>
             function handleHideMaterialsChange() {
                 enableFullUpdate();
-                $('#hide-folder-materials-checkbox-edit:visible ~ #edit-folder-form-hide-warning').toggle();
+                toggleHideMaterialsWarning('hide-folder-materials-checkbox-edit');
             }
         </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />

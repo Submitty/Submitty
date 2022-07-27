@@ -40,15 +40,15 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) }}
+        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
     {% for name, course_material in course_materials %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen) }}
         {% else %}
             {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format, folder_ids, seen) }}
         {% endif %}
@@ -80,7 +80,7 @@
                         {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ course_material.getId }}", "{{ course_material.getPriority }}", {{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}, "{{course_material.isHiddenFromStudents}}", "{{ course_material.getReleaseDate|date(date_format) }}", "{{ course_material.isLink }}", "{{ url_title }}", "{{ url_url }}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm(this)' data-id="{{ course_material.getId }}" data-priority="{{ course_material.getPriority }}" data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}} data-hidden-state="{{course_material.isHiddenFromStudents}}" data-release-time="{{ course_material.getReleaseDate|date(date_format) }}" data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}" data-link-url="{{ url_url }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>
@@ -140,9 +140,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) }}
+        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
     {% else %}
         <div class="folder-container">
             <div class="div-viewer">
@@ -152,7 +152,7 @@
                 </a>
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm("{{ folder_ids[folder_path] }}", "{{ directory_priorities[folder_path] }}", {{ folder_info[folder_path]['is_hidden'] ? 'true' : 'false' }})'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
@@ -161,7 +161,7 @@
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
-                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, folder_info, seen) }}
+                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
             </div>
         </div>
     {% endif %}
@@ -188,6 +188,23 @@
         }
         return "";
     }
+
+    {% if user_group == 1 %}
+
+        function toggleHideMaterialsWarning(clicked) {
+            const warningIds = {"hide-materials-checkbox": "upload-form", "hide-materials-checkbox-edit": "edit-form", "hide-folder-materials-checkbox-edit": "edit-folder-form"};
+            var callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
+            var warningMessage = $('#'+callerId+' ~ #'+warningIds[callerId]+'-hide-warning');
+            if($('#'+callerId).is(':checked') && warningMessage.length === 0) {
+                var callerParent = $('#'+callerId).parent().get(0);
+                callerParent.insertAdjacentHTML('beforeend', '<span id="'+warningIds[callerId]+'-hide-warning" class="red-message full-width">\nWarning: Students can view the hidden course material by guessing the corresponding course material ID (a simple number).  It is recommended to instead use the release date feature if it is necessary to prevent students from accessing course materials.\n</span>');
+            }
+            else if($('#'+callerId).is(':not(:checked)')) {
+                warningMessage.remove();
+            }
+        }
+
+    {% endif %}
 
     window.onload = function () {
         //determine if folders have been left open or closed
@@ -235,9 +252,72 @@
         }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        {% if user_group == 1 %}
+            var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
+
+            function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
+                if (first) {
+                    commonSections = editButton.data('sections');
+                    releaseTime = editButton.data('release-time');
+                    hiddenState = editButton.data('hidden-state');
+                    first = false;
+                }
+                else {
+                    commonSections = editButton.data('sections').filter(x => {return commonSections.includes(x);});
+                    if (!releaseTimeMismatch) {
+                        if (editButton.data('release-time') !== releaseTime) {
+                            releaseTimeMismatch = true;
+                            releaseTime = '';
+                        }
+                    }
+                    if (!hiddenStateMismatch) {
+                        if (editButton.data('hidden-state') !== hiddenState) {
+                            hiddenStateMismatch = true;
+                            hiddenState = '';
+                        }
+                    }
+                }
+                return [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch];
+            }
+
+            function folderSetter(elem) {
+                let insideFileMatcher = new RegExp(`^${elem.attr("id").replace("div", "file")}f[0-9]{0,}$`);
+                let insideFolderMatcher = new RegExp(`^${elem.attr("id")}d[0-9]{0,}$`);
+                let first = true;
+                let commonSections = [];
+                let releaseTime = "";
+                let hiddenState = '';
+                let hiddenStateMismatch = false;
+                let releaseTimeMismatch = false;
+                $(`.folder-container > [id^=${elem.attr("id")}d]`, elem).each(function() {
+                    if (insideFolderMatcher.test($(this).attr('id'))) {
+                        folderSetter($(this));
+                        [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this).siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                    }
+                });
+                $(`.file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]`, elem).each(function() {
+                    if (insideFileMatcher.test($(this).parent('.file-viewer').siblings('.file-viewer-data').attr('id'))) {
+                        [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                    }
+                });
+                let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
+                editButton.attr('data-sections', JSON.stringify(commonSections));
+                editButton.attr('data-release-time', releaseTime);
+                editButton.attr('data-hidden-state', hiddenState);
+            }
+
+            function callFolderSetter(elem) {
+                if (topFolderMatcher.test(elem.id)) {
+                    folderSetter($(elem));
+                }
+            }
+        {% endif %}
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
 
             $('[id^=div_viewer_]').each(function() {
+                {% if user_group == 1 %}
+                    callFolderSetter(this);
+                {% endif %}
                 var number = this.id.replace('div_viewer_', '').trim();
                 var keyValuePairs = document.cookie.split(';');
 
@@ -258,6 +338,9 @@
         else {
             // clean up all cookies which are stated with "cm_";
             $('[id^=div_viewer_]').each(function() {
+                {% if user_group == 1 %}
+                    callFolderSetter(this);
+                {% endif %}
                 var number = this.id.replace('div_viewer_', '').trim();
                 var keyValuePairs = document.cookie.split(';');
 
@@ -269,6 +352,12 @@
                 }
             });
         }
+        {% if user_group == 1 %}
+
+            $('#hide-materials-checkbox').on('change', toggleHideMaterialsWarning);
+            $('#hide-materials-checkbox-edit').on('change', toggleHideMaterialsWarning);
+
+        {% endif %}
     };
 
 </script>
