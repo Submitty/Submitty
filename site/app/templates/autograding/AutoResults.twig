@@ -97,7 +97,7 @@
 
                                 {% if can_view_details and testcase.has_extra_results %}
                                     style="cursor: pointer"
-                                    onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
+                                    onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', 'tc_total', '{{ testcases|json_encode|e('html_attr') }}', '{{show_hidden}}', '{{show_hidden_details}}', {{ display_version }});"
                                 {% endif %}
                         >
 
