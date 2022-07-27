@@ -298,7 +298,7 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    if (is_link === "1") {
+    if (is_link === 1) {
         const title_label = $("#edit-url-title-label", form);
         const url_label = $("#edit-url-url-label", form);
         title_label.prop('hidden', false);
