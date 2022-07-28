@@ -140,8 +140,7 @@ function toggleAllReleases(toggleAllButton) {
     //  if toggleAllButton has collapsed - will collapse all
     //  if toggleAllButton doesn't have collapsed - will expand all
     $('.btn-toggle-release').each( (index, button) => {
-        // eslint-disable-next-line eqeqeq
-        if ($(toggleAllButton).hasClass('collapsed') != $(button).hasClass('collapsed')) {
+        if ($(toggleAllButton).hasClass('collapsed') !== $(button).hasClass('collapsed')) {
             $(button).trigger('click');
         }
     });

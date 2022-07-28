@@ -81,7 +81,7 @@ export function helper (x, y, i) {
         return true;
     }
     // eslint-disable-next-line eqeqeq
-    if (i == 0 || i == 8) {
+    if (i == 0 || i === 8) {
         const xIsDigit = /^\d+$/.test(x);
         const yIsDigit = /^\d+$/.test(y);
         if (xIsDigit && yIsDigit) {
@@ -94,8 +94,7 @@ export function helper (x, y, i) {
             return x < y;
         }
     }
-    // eslint-disable-next-line eqeqeq
-    else if ((i <= 7 && i >= 4) || i == 9) {
+    else if ((i <= 7 && i >= 4) || i === 9) {
         const dateX = new Date(x);
         const dateY = new Date(y);
         if (dateX.toString() === 'Invalid Date') {
@@ -220,12 +219,11 @@ export function columnOnClick(n) {
     }
 
     for (i = 0; i < 10; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
+        if (i !== n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
             $(`#${i}`).children('i').removeClass('fa-angle-up');
         }
         // eslint-disable-next-line eqeqeq
-        else if (i != n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
+        else if (i !== n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
             $(`#${i}`).children('i').removeClass('fa-angle-down');
         }
     }
