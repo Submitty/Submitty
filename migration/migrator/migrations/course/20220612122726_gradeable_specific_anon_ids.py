@@ -21,6 +21,7 @@ def up(config, database, semester, course):
             user_id character varying NOT NULL,
             g_id character varying(255) NOT NULL,
             anon_id character varying(255),
+            PRIMARY KEY (g_id, anon_id),
             FOREIGN KEY(user_id)
                 REFERENCES users(user_id)
                 ON UPDATE CASCADE,
