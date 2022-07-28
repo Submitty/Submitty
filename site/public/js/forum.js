@@ -95,8 +95,8 @@ function uploadImageAttachments(attachment_box) {
         const filename = target.attr('fname');
         // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part-1].length; j++) {
-            // eslint-disable-next-line no-undef, eqeqeq
-            if (file_array[part-1][j].name == filename) {
+            // eslint-disable-next-line no-undef
+            if (file_array[part-1][j].name === filename) {
                 // eslint-disable-next-line no-undef
                 file_object = file_array[part-1][j];
                 break;
@@ -974,8 +974,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd?'next_page':'prev_page');
-    // eslint-disable-next-line eqeqeq
-    if (load_page == 0) {
+    if (load_page === 0) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -1016,8 +1015,7 @@ function dynamicScrollLoadPage(element, atEnd) {
         load_page_callback = function(content, count) {
             spinner_up.hide();
             arrow_up.after(content);
-            // eslint-disable-next-line eqeqeq
-            if (count == 0) {
+            if (count === 0) {
                 // Stop further loads
                 $(element).data('prev_page', 0);
             }

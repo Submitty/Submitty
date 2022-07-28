@@ -31,8 +31,7 @@ function filterOnClick() {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function () {
-            // eslint-disable-next-line eqeqeq
-            if ($(this).text() == this_filter) {
+            if ($(this).text() === this_filter) {
                 hide = false;
             }
         });
