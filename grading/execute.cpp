@@ -39,8 +39,8 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-#define ALLOWED_COMMANDS_CUSTOM SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands_custom.json"
-#define ALLOWED_COMMANDS_DEFAULT SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_allowed_commands_default.json"
+extern const char *GLOBAL_default_allowed_commands_string;  // defined in allowed_commands.cpp
+extern const char *GLOBAL_custom_allowed_commands_string;  // defined in allowed_commands.cpp
 
 // =====================================================================================
 // =====================================================================================
@@ -54,20 +54,15 @@ std::string replace_placeholder(std::string value) {
     return value;
 }
 
-bool is_empty(std::ifstream& file)
-{
-    return file.peek() == std::ifstream::traits_type::eof();
-}
-
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
-    std::ifstream default_file(ALLOWED_COMMANDS_DEFAULT);
-    std::ifstream custom_file(ALLOWED_COMMANDS_CUSTOM);
     nlohmann::json allowed_system_programs;
-    default_file >> allowed_system_programs;
-    if (!is_empty(custom_file)) {
+    std::stringstream default_sstr(GLOBAL_default_allowed_commands_string);
+    default_sstr >> allowed_system_programs;
+    std::stringstream custom_sstr(GLOBAL_custom_allowed_commands_string);
+    if (!custom_sstr.str().empty()) {
         nlohmann::json allowed_system_programs_custom;
-        custom_file >> allowed_system_programs_custom;
+        custom_sstr >> allowed_system_programs_custom;
         allowed_system_programs.update(allowed_system_programs_custom);
     }
     if(running_in_docker){

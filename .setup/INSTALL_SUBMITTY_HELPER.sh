@@ -581,6 +581,7 @@ g++ "${GRADINGCODE}/main_configure.cpp" \
     "${GRADINGCODE}/execute_limits.cpp" \
     "${GRADINGCODE}/seccomp_functions.cpp" \
     "${GRADINGCODE}/empty_custom_function.cpp" \
+    "${GRADINGCODE}/allowed_commands.cpp" \
     "-I${JSONCODE}" \
     -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
 
