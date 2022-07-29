@@ -7,8 +7,7 @@ import subprocess
 import docker
 import traceback
 import argparse
-import get_docker_info
-import get_health_info
+import get_sysinfo
 from submitty_utils import ssh_proxy_jump
 import platform
 
@@ -51,13 +50,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        res = subprocess.run(['lsb_release', '-a'], stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, check=True, universal_newlines=True)
-        if res.returncode != 0:
-            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
-        else:
-            print(res.stdout)
-        get_health_info.print_info()
+        get_sysinfo.print_distribution()
         client = docker.from_env()
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
@@ -80,15 +73,14 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_info = client.info()
         docker_images_obj = client.images.list()
         #print the details of the image
-        get_docker_info.printDockerInfo()
+        get_sysinfo.print_docker_info()
     else:
+        shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
         commands = list()
-        commands.append('lsb_release -a')
-        commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_health_info.py')}")
-        script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
+        script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
-        commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_docker_info.py')}")
+        commands.append(f"python3 {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success
