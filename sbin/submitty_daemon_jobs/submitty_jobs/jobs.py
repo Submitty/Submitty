@@ -375,3 +375,23 @@ class UpdateDockerImages(AbstractJob):
 
         log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
         logger.write_to_log(log_file_path, log_msg)
+
+
+class UpdateSystemInfo(AbstractJob):
+    def run_job(self):
+        today = datetime.datetime.now()
+        log_folder = os.path.join(DATA_DIR, "logs", "sysinfo")
+        log_file = os.path.join(log_folder, f"{today.strftime('%Y%m%d')}.txt")
+
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file):
+            flag = flag | os.O_CREAT
+        log = os.open(log_file, flag)
+
+        script = os.path.join(INSTALL_DIR, "sbin", "shipper_utils", "get_sysinfo.py")
+        with os.fdopen(log, 'a') as output_file:
+            subprocess.run(["python3", script, "--workers", "service", "disk", "sysload"],
+                           stdout=output_file, stderr=output_file)
+
+        log_msg = f"[Last ran on: {today.isoformat()}]\n"
+        logger.write_to_log(log_file, log_msg)
