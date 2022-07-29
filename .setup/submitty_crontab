@@ -17,4 +17,4 @@
 # Run preferred_name_logging.php every day at 2:05AM
 5 2 * * * submitty_daemon   php ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -m prod >/dev/null &2>1
 # Update OS Info and Service Health every hour
-0 * * * * submitty_daemon   /usr/local/submitty/sbin/create_daemon_job.sh UpdateSystemInfo
+0 * * * * submitty_daemon   /usr/local/submitty/sbin/update_worker_sysinfo.sh UpdateSystemInfo
