@@ -904,7 +904,7 @@ class Course(object):
             max_individual_submissions = gradeable.max_individual_submissions
             # makes a section be ungraded if the gradeable is not electronic
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
-            # This for loop adds submissions for users and teams(if applicable)
+            # This for loop adds submissions/annotations for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
@@ -913,19 +913,22 @@ class Course(object):
 
                     submitted = False
                     team_id = None
+                    anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams\
                         ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
+                            anon_team_id = temp[0][1]
                             previous_submission = select([electronic_gradeable_version]).where(
                                 electronic_gradeable_version.c['team_id'] == team_id)
                             res = self.conn.execute(previous_submission)
                             if res.rowcount > 0:
                                 continue
                             submission_path = os.path.join(gradeable_path, team_id)
+                            annotation_path = os.path.join(gradeable_annotation_path, team_id)
                         else:
                             continue
                         res.close()
@@ -1037,7 +1040,6 @@ class Course(object):
                                             annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
                                             if not os.path.exists(annotation_version_path):
                                                 os.makedirs(annotation_version_path)
-                                                os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, annotation_version_path))
                                         
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
@@ -1045,8 +1047,8 @@ class Course(object):
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
-                                            anon_dst[9] = user.anon_id
-                                            anon_dst = "/".join(anon_dst) # has the user id in the file path being anonymous
+                                            anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
+                                            anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
                                             
                                             for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
@@ -1125,6 +1127,9 @@ class Course(object):
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
+
+                    if gradeable.type == 0 and os.path.isdir(gradeable_annotation_path):
+                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
@@ -1225,11 +1230,15 @@ class Course(object):
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
         ucounter = self.conn.execute(select([func.count()]).select_from(gradeable_teams_table)).scalar()
+        anon_team_ids = []
         for user in self.users:
             #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
-
-            unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            unique_team_id = str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            #also need to create and save the anonymous team id
+            anon_team_id = generate_random_user_id(15)
+            if anon_team_id in anon_team_ids:
+                anon_team_id = generate_random_user_id()
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is None:
                 continue
@@ -1262,6 +1271,7 @@ class Course(object):
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(gradeable_teams_table.insert(),
                              team_id=unique_team_id,
+                             anon_id=anon_team_id,
                              g_id=gradeable.id,
                              registration_section=str(reg_section),
                              rotating_section=str(random.randint(1, self.rotating_sections)))
@@ -1275,6 +1285,7 @@ class Course(object):
                                                       "first_user": user.get_detail(self.code, "id")}]
                 ucounter += 1
             res.close()
+            anon_team_ids.append(anon_team_id);
         return json_team_history
 
     def add_sample_forum_data(self):
