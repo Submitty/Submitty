@@ -318,6 +318,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/office_hours_queue"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/docker"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/daemon_job_queue"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/sysinfo"
 fi
 # ------------------------------------------------------------------------
 
@@ -363,6 +364,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R "${PHP_USER}:${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/office_hours_queue"
     chown  -R "${DAEMON_USER}:${DAEMONPHP_GROUP}"       "${SUBMITTY_DATA_DIR}/logs/docker"
     chown  -R "${DAEMON_USER}:${DAEMONPHP_GROUP}"       "${SUBMITTY_DATA_DIR}/logs/daemon_job_queue"
+    chown  -R "${DAEMON_USER}:${DAEMONPHP_GROUP}"       "${SUBMITTY_DATA_DIR}/logs/sysinfo"
 
     # php & daemon needs to be able to read workers & containers config
     chown "${PHP_USER}:${DAEMONPHP_GROUP}"              "${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json"
@@ -1046,4 +1048,5 @@ else
     chown "root:${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/sbin/create_daemon_job.sh"
     chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/create_daemon_job.sh"
     "${SUBMITTY_INSTALL_DIR}/sbin/create_daemon_job.sh" UpdateDockerImages
+    "${SUBMITTY_INSTALL_DIR}/sbin/create_daemon_job.sh" UpdateSystemInfo
 fi
