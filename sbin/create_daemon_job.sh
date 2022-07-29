@@ -10,21 +10,11 @@ SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${CONF_DIR}/submitty.json")
 
 SUBMITTY_DAEMON_JOB_Q="${SUBMITTY_DATA_DIR:?}/daemon_job_queue"
 
-# Abstract requirements
-# R_COURSE_JOB="semester,course"
-# R_COURSE_GRADEABLE_JOB="${R_COURSE_JOB},gradeable"
-
-# Possible operations, "Job_Name:Job_Requirements_IFS_is_COMMA:Job_Prefix"
+# Possible operations, "Job_Name:Job_Prefix"
 # Note that these Job_Prefixes might not equal to the PHPs'
-# Commented operations are not fully tested, test them before using
-OPS=(# "RunAutoRainbowGrades:${R_COURSE_JOB}:auto_rainbow"
-     # "BuildConfig:${R_COURSE_GRADEABLE_JOB}:build_conf"
-     # "RunGenerateRepos:${R_COURSE_GRADEABLE_JOB}:generate_repos"
-     # "RunLichen:${R_COURSE_GRADEABLE_JOB},config_id,config_data:run_lichen"
-     # "DeleteLichenResult:${R_COURSE_GRADEABLE_JOB},config_id:delete_lichen"
-     # "BulkUpload:${R_COURSE_JOB},timestamp,g_id,filename,is_qr,qr_prefix,qr_suffix,num:bulkup"
-     # "CreateCourse:semester,course,head_instructor,group_name:create_course"
-     "UpdateDockerImages::docker"
+OPS=(
+        "UpdateSystemInfo:sysinfo"
+        "UpdateDockerImages:docker"
     )
 
 # Execution date, will append to Job_Prefix
@@ -33,14 +23,12 @@ DATE_YMD="$(date +%Y%m%d)"
 display_help() {
     op_size="${#OPS[@]}"
     echo "Usage:"
-    echo -e "$0 \033[0;36m<JobName>\033[0m \033[1;33m<JobParams...>\033[0m"
-    echo -e "Dispatch \033[0;36m<JobName>\033[0m with \033[1;33m<JobParams>\033[0m to the daemon job queue"
-    echo -e "Note that \033[1;33m<JobParams>\033[0m are ordered!"
-    echo -e "Possible \033[0;36m<JobName>\033[0m \033[1;33m<JobParams>\033[0m:"
+    echo -e "$0 \033[0;36m<JobName>\033[0m"
+    echo -e "Dispatch \033[0;36m<JobName>\033[0m to the daemon job queue"
 
     for (( i=0; i<op_size; i++ )); do
-        IFS=':' read -r name reqs _pref <<< "${OPS[i]}"
-        echo -e "  \033[0;36m${name}\033[0m \033[1;33m${reqs//,/ }\033[0m"
+        IFS=':' read -r name _pref <<< "${OPS[i]}"
+        echo -e "  \033[0;36m${name}\033[0m"
     done
 }
 
@@ -62,7 +50,6 @@ info() {
 
 
 JOB_NAME=""
-JOB_REQS=""
 JOB_PREFX=""
 
 get_job_index() {
@@ -73,10 +60,8 @@ get_job_index() {
     for (( i=0; i<op_size; i++ )); do
         name=$(echo "${OPS[i]}" | cut -d':' -f1)
         [[ "$1" == "${name}" ]] && {
-            IFS=':' read -r JOB_NAME JOB_REQS JOB_PREFX <<< "${OPS[i]}"
-            IFS=',' read -r -a JOB_REQS <<< "${JOB_REQS}"
+            IFS=':' read -r JOB_NAME JOB_PREFX <<< "${OPS[i]}"
             info "Got job ${JOB_NAME}, prefix ${JOB_PREFX}"
-            info "Parsed requirements: ${JOB_REQS[*]}"
             break
         }
     done
@@ -93,34 +78,16 @@ get_job_index() {
 
 JSON_ARGS=""
 
-parse_job_reqs() {
+dispatch() {
     JSON_ARGS="jq -n --arg job ${JOB_NAME}"
-    # check the param size
-    info "Checking the size of parameters"
-    [[ "$#" -ne "${#JOB_REQS[@]}" ]] && {
-        warn "The number of argument does not match with the job requirement"
-        info "Job name: ${JOB_NAME}"
-        info "Job arguments (${#JOB_REQS[@]}): ${JOB_REQS[*]}"
-        info "Got arguments ($#): ${*}"
-        warn "See the help below:"
-        display_help
-        panic "Job parameters do not match"
-    }
-    warn "Note that this script does not verify the integrity of parameters"
-
-    for (( i=0; i<${#JOB_REQS[@]}; i++ )); do
-        JSON_ARGS="${JSON_ARGS} --arg ${JOB_REQS[i]} $1"
-        shift 1
-    done
 
     info "${JSON_ARGS} '\$ARGS.named'"
-
     JSON_DATA=$(
         # shellcheck disable=2016
         ${JSON_ARGS} '$ARGS.named'
     ) || {
         jqVer=$(jq -V)
-        panic "Failed to create json, jq version ${jqVer} "
+        panic "Failed to create json, jq version ${jqVer}"
     }
 
     info "Constructed json query:"
@@ -129,10 +96,7 @@ parse_job_reqs() {
             info "${json_line}"
         done
     }
-}
 
-
-dispatch() {
     info "Dispatching job"
     echo "${JSON_DATA}" > "${SUBMITTY_DAEMON_JOB_Q}/${JOB_PREFX}${DATE_YMD}.json" \
         || panic "Dispatching failed"
@@ -147,7 +111,5 @@ dispatch() {
 
 get_job_index "$@"
 shift 1
-
-parse_job_reqs "$@"
 
 dispatch
