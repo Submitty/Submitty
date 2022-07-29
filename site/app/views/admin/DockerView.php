@@ -31,7 +31,6 @@ class DockerView extends AbstractView {
         $worker_machines = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
-        $worker_health = [];
         $machine_docker_version = [];
         $machine_system_details = [];
         foreach ($docker_data['autograding_workers'] as $name => $worker) {
@@ -69,6 +68,14 @@ class DockerView extends AbstractView {
             $capability_to_color[$capabilities[$i]] = min($i + 1, 20);
         }
 
+        $sysinfo_files = scandir(
+            FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "logs", "sysinfo"
+            )
+        );
+        $sysinfo_last_updated = "Unknown";
+
         $array_list = scandir(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
@@ -92,24 +99,20 @@ class DockerView extends AbstractView {
                 )
             );
 
-            $reset = false;
             $content = rtrim($content);
+            $content_2rpos = strrpos($content, "[Last ran", -35);
+            if ($content_2rpos === false) {
+                $content_2rpos = 0;
+            }
+            $content = substr($content, $content_2rpos + 10);
             $buffer = strtok($content, "\n");
             $current_machine = "";
             while ($buffer !== false) {
-                if ($reset) {
-                    $error_logs = [];
-                    $machine_to_update = [];
-                    $fail_images = [];
-                    $reset = false;
-                }
-
                 $matches = [];
 
                 $is_match = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
                 if ($is_match === 1) {
                     $last_ran = $matches[1];
-                    $reset = true;
                 }
 
                 $is_match = preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $buffer, $matches);
@@ -129,54 +132,10 @@ class DockerView extends AbstractView {
                     $current_machine = $matches[1];
                 }
 
-                $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
+                // Parse the OS description
+                $is_match = preg_match("/Description:\t(.+)/", $buffer, $matches);
                 if ($is_match) {
-                    $worker_health[$current_machine]["disk"] = $matches[1];
-                }
-
-                $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
-                if ($is_match) {
-                    $worker_health[$current_machine]["worker"] = $matches[1];
-                }
-
-                $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
-                if ($is_match) {
-                    if ($matches[1] != "Service Not Found") {
-                        $worker_health[$current_machine]["shipper"] = $matches[1];
-                    }
-                    else {
-                        $worker_health[$current_machine]["shipper"] = null;
-                    }
-                }
-
-                $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
-                if ($is_match) {
-                    if ($matches[1] != "Service Not Found") {
-                        $worker_health[$current_machine]["daemon"] = $matches[1];
-                    }
-                    else {
-                        $worker_health[$current_machine]["daemon"] = null;
-                    }
-                }
-
-                $is_match = preg_match("/Distributor ID:(.+)/", $buffer, $matches);
-                if ($is_match) {
-                    $machine_system_details[$current_machine]["Distributor"] = $matches[0];
-                }
-
-                $is_match = preg_match("/Description:(.+)/", $buffer, $matches);
-                if ($is_match) {
-                    $machine_system_details[$current_machine]["Description"] = $matches[0];
-                }
-
-                $is_match = preg_match("/Release:(.+)/", $buffer, $matches);
-                if ($is_match) {
-                    $machine_system_details[$current_machine]["Release"] = $matches[0];
-                }
-
-                $is_match = preg_match("/Codename:(.+)/", $buffer, $matches);
-                if ($is_match) {
-                    $machine_system_details[$current_machine]["Codename"] = $matches[0];
+                    $machine_system_details[$current_machine]["os"] = $matches[1];
                 }
 
                 // Parse the docker version
@@ -242,6 +201,79 @@ class DockerView extends AbstractView {
             }
         }
 
+        if (count($sysinfo_files) > 2) {
+            $sysinfo_most_recent = max($sysinfo_files);
+            $sysinfo_content = file_get_contents(
+                FileUtils::joinPaths(
+                    $this->core->getConfig()->getSubmittyPath(),
+                    "logs", "sysinfo", $sysinfo_most_recent
+                )
+            );
+
+            $sysinfo_content = rtrim($sysinfo_content);
+            $sysinfo_2rpos = strrpos($sysinfo_content, "[Last ran", -45);
+            if ($sysinfo_2rpos === false) {
+                $sysinfo_2rpos = 0;
+            }
+            $sysinfo_content = substr($sysinfo_content, $sysinfo_2rpos + 10);
+            $buffer = strtok($sysinfo_content, "\n");
+            $current_machine = "";
+
+            while ($buffer !== false) {
+                $matches = [];
+
+                $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $current_machine = $matches[1];
+                    $machine_system_details[$current_machine]["worker"] = null;
+                    $machine_system_details[$current_machine]["shipper"] = null;
+                    $machine_system_details[$current_machine]["daemon"] = null;
+                }
+
+                $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["worker"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["shipper"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["daemon"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["disk"] = $matches[1];
+                }
+
+                $is_match = preg_match("/System Load: \((.+)\)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["load"] = $matches[1];
+                }
+
+                $is_match = preg_match("/^\[Last ran on: (.+)\]/", $buffer, $matches);
+                if ($is_match) {
+                    $sysinfo_last_updated = $matches[1];
+                }
+
+                $is_match = preg_match("/ERR:/", $buffer, $matches);
+                if ($is_match) {
+                    $error_logs[] = "Failed to update system info";
+                }
+
+                if (preg_last_error() != PREG_NO_ERROR) {
+                    $error_logs[] = "Error while parsing system info logs";
+                    break;
+                }
+
+                $buffer = strtok("\n");
+            }
+        }
+
         $no_image_capabilities = array_unique($no_image_capabilities);
         foreach ($aliases as &$alias) {
             $alias = array_unique($alias);
@@ -257,9 +289,9 @@ class DockerView extends AbstractView {
                 "capability_to_color" => $capability_to_color,
                 "admin_url" => $this->core->buildUrl(["admin"]),
                 "last_updated" => $last_ran,
+                "sysinfo_last_updated" => $sysinfo_last_updated,
                 "machine_to_update" => $machine_to_update,
                 "image_info" => $image_info,
-                "worker_health" => $worker_health,
                 "machine_docker_version" => $machine_docker_version,
                 "machine_system_details" => $machine_system_details,
                 "aliases" => $aliases,

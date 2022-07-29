@@ -7,7 +7,8 @@
     Should be added back eventually, ideally showing workers' version as well
     <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
     #}
-    <p>Updated on: {{last_updated}}</p>
+    <p>Docker info updated on: {{last_updated}}</p>
+    <p>System info updated on: {{ sysinfo_last_updated }}</p>
     {% if error_logs | length > 0 %}
         <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
         <pre class="error-log">
@@ -25,8 +26,7 @@
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
-            <th rowspan=2 style="text-align: center; vertical-align: middle">Worker Health</th>
-            <th rowspan=2 style="text-align: center; vertical-align: middle">OS Info</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">System Info</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
@@ -39,29 +39,20 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th style="vertical-align: middle;">{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
-            <td>{% if worker['name'] in worker_health|keys %}
-                    Disk Usage:
-                        {{ worker_health[worker['name']]['disk'] }} <br/>
-                    Worker Status:
-                        {{ worker_health[worker['name']]['worker'] }}
-                    {% if worker_health[worker['name']]['shipper'] is not null %}
-                        <br/>Shipper Status:
-                            {{ worker_health[worker['name']]['shipper'] }}
+            <td>{% if worker['name'] in machine_system_details|keys %}
+                    {{ machine_system_details[worker['name']]['os'] }} <br />
+                    Disk Usage: {{ machine_system_details[worker['name']]['disk'] }} <br/>
+                    Load: {{ machine_system_details[worker['name']]['load'] }} <br />
+                    Worker: {{ machine_system_details[worker['name']]['worker'] }} <br/>
+                    {% if machine_system_details[worker['name']]['shipper'] is not null %}
+                        Shipper: {{ machine_system_details[worker['name']]['shipper'] }}<br/>
                     {% endif %}
-                    {% if worker_health[worker['name']]['daemon'] is not null %}
-                        <br/>Daemon Status:
-                            {{ worker_health[worker['name']]['daemon'] }}
+                    {% if machine_system_details[worker['name']]['daemon'] is not null %}
+                        Daemon: {{ machine_system_details[worker['name']]['daemon'] }}
                     {% endif %}
-                    {% else %}
+                {% else %}
                     Not yet retrieved
                 {% endif %}
-            </td>
-            <td>
-            {% if worker['name'] in machine_system_details|keys %}
-                {% for info in machine_system_details[worker['name']] %}
-                    {{info}} <br>
-                {% endfor %}
-            {% endif %}
             </td>
             <td>{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
