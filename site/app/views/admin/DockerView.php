@@ -71,7 +71,7 @@ class DockerView extends AbstractView {
         $sysinfo_files = scandir(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
-                "logs", "sysinfo"
+                "logs/sysinfo"
             )
         );
         $sysinfo_last_updated = "Unknown";
@@ -206,7 +206,8 @@ class DockerView extends AbstractView {
             $sysinfo_content = file_get_contents(
                 FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
-                    "logs", "sysinfo", $sysinfo_most_recent
+                    "logs/sysinfo",
+                    $sysinfo_most_recent
                 )
             );
 
