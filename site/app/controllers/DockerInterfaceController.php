@@ -182,6 +182,19 @@ class DockerInterfaceController extends AbstractController {
         ) {
             return false;
         }
+
+
+        $sysinfo_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue/sysinfo" . $now . ".json");
+        $sysinfo_data = [
+            "job" => "UpdateSystemInfo"
+        ];
+
+        if (
+            (!is_writable($sysinfo_job_file) && file_exists($sysinfo_job_file))
+            || file_put_contents($sysinfo_job_file, json_encode($sysinfo_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return false;
+        }
         return true;
     }
 }
