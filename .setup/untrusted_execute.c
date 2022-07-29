@@ -29,14 +29,14 @@ change permissions & set suid: (must be root)
 int main(int argc, char* argv[]) {
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /* Retrieve the PID from the parent process .  If the program fails internally,
-     then it sends SIGCHLD to the PID.  Make sure they match to the Python runner
+     then it sends SIGUSR2 to the PID.  Make sure they match to the Python runner
      at `autograder/autograder/execution_environment/jailed_sandbox.py`           */
 
   // Parent PID to send the signal on program error
   pid_t error_notify = getppid();
 
   // Defines the signal to send.
-  int   error_signal = SIGCHLD;
+  int   error_signal = SIGUSR2;
 
 
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
