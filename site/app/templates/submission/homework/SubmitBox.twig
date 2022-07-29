@@ -146,12 +146,12 @@
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
             {# Below will get uncommented once SAML is active #}
-            {# <p>You will need to use a Git auth token.</p> #}
+            {# <p>You will need to use an Authentication Token.</p> #}
             <br><br>
             {% if git_auth_token_required %}
-                <span>Note: Your school requires that you use Git Auth Tokens.</span><br>
+                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
             {% endif %}
-            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Git Auth Tokens</a>
+            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
             <br><br>
         {% endif %}
 
@@ -170,7 +170,14 @@
             {% endif %}
 
         {% endif %}
-        <input type="submit" id="submit" class="submit-gradeable btn btn-primary" value="Grade My Repository" />
+
+        <h3>Grade your repository:</h3>
+        <div class="upload-message">
+            {% include "misc/Markdown.twig" with {
+                "content" : upload_message
+            } only %}
+        </div>
+        <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
     {% else %}
 
     {% if is_notebook %}

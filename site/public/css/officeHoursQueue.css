@@ -1,4 +1,5 @@
 /* Hides elements on the page before they have been fully loaded */
+/* stylelint-disable-next-line selector-class-pattern */
 .page_loading {
     visibility: hidden;
 }
@@ -11,6 +12,7 @@ th {
     vertical-align: middle;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .filter_btn {
     margin-bottom: 0.5rem;
 }
@@ -20,10 +22,12 @@ th {
     display: none;
 }
 
+/* stylelint-disable selector-class-pattern */
 .current_queue_row,
 .current_queue_row a > i.fas {
     color: var(--btn-text-black);
 }
+/* stylelint-enable selector-class-pattern */
 
 .announcement-setting {
     min-height: 7em;
@@ -41,6 +45,7 @@ th {
     background-color: var(--standard-dark-gray);
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #contact_info {
     width: 620px;
 }
@@ -57,11 +62,12 @@ th {
 .filter-buttons:hover,
 .filter-buttons:focus {
     opacity: 0.8;
+    /* stylelint-disable-next-line function-no-unknown */
     filter: alpha(opacity=80);
 }
 
 .queue-message {
-    /*display: none;*/
+    /* display: none; */
     background-color: var(--alert-info-blue);
     padding: 1rem;
 }
@@ -76,11 +82,13 @@ th {
         display: none !important;
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .finish_helping_btn {
         white-space: normal;
         width: 5rem;
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .filter_settings_btn {
         width: 4rem;
     }

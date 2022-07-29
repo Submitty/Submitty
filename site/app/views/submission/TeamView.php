@@ -45,7 +45,7 @@ class TeamView extends AbstractView {
             "set_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message']),
             "remove_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message', 'remove']),
             "csrf_token" => $this->core->getCsrfToken(),
-            'git_auth_token_url' => $this->core->buildUrl(['git_auth_tokens']),
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
             'git_auth_token_required' => false
         ]);
     }

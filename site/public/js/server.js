@@ -29,8 +29,6 @@ function adjustBreadcrumbLinks(){
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
 
-
-
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -133,50 +131,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    let orig_div_name = div_name;
-    div_name = "#" + div_name;
-
-    let loadingTools = $("#tc_" + index).find(".loading-tools");
-
-    if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
-    }
-    else{
-        $("#show_char_"+index).toggle();
-        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
-            url: url,
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Error getting file diff: ' + response.message);
-                    return;
-                }
-                $(div_name).empty();
-                $(div_name).html(response.data);
-                toggleDiv(orig_div_name);
-
-                loadingTools.find("span").hide();
-                loadingTools.find(".loading-tools-hide").show();
-                enableKeyToClick();
-            },
-            error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
-            }
-        })
-    }
-}
-
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
@@ -260,10 +214,14 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(id, dir) {
+function newEditCourseMaterialsFolderForm(id, dir, is_hidden) {
     let form = $('#edit-course-materials-folder-form');
-
-    $('#hide-materials-checkbox-edit', form).prop('checked', false);
+    $('#hide-folder-materials-checkbox-edit', form).prop('checked', false);
+    if (is_hidden === true) {
+        $('#hide-folder-materials-checkbox-edit', form).prop('checked', true);
+    }
+    $('#hide-folder-materials-checkbox-edit:checked ~ #edit-folder-form-hide-warning').show();
+    $('#hide-folder-materials-checkbox-edit:not(:checked) ~ #edit-folder-form-hide-warning').hide();
     $('#material-folder-edit-form', form).attr('data-id', id);
     $("#show-some-section-selection-edit", form).hide();
     $("#all-sections-showing-yes", form).prop('checked',false);
@@ -289,6 +247,9 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
+
+    $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
+    $('#hide-materials-checkbox-edit:not(:checked) ~ #edit-form-hide-warning').hide();
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
@@ -960,7 +921,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })
+    })  
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
