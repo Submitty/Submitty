@@ -256,6 +256,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:

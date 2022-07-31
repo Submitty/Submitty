@@ -30,6 +30,7 @@ tests/**
 .setup/distro_setup/debian/8/setup_distro.sh
 sbin/create_term.sh
 sbin/killall_shippers_and_workers.sh
+sbin/create_course.sh
 sbin/replay_experiment_script.sh
 sbin/build_course.sh
 bin/build_homework_function.sh
