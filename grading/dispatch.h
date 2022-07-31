@@ -39,6 +39,7 @@ namespace dispatch {
 
 
     TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j);
+    TestResults* tolerance_diff_doit (const TestCase &tc, const nlohmann::json& j);
 }
 
 #endif

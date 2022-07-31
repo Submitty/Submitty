@@ -20,6 +20,7 @@
 
 typedef std::vector<std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;
+typedef std::vector<std::vector<int>> vectorOfSpaces;
 
 
 /* METHOD: clean
@@ -88,5 +89,19 @@ std::string wordsToString(vectorOfWords text);
  * is a line of text
  */
 vectorOfLines wordsToLines(vectorOfWords text);
+
+/* METHOD: stringToWordsAndSpaceList
+ * ARGS: text: string
+ * ARGS: spaceVector: Reference to a vectorOfSpaces
+ * RETURN: vectorOfWords
+ * PURPOSE: converts a string into a vector whose length is number of lines in the string
+ * and each element in the vector is a vector containing the words  in each line.
+ * Sets the spaceVector to a vector containing number of spaces between two words in line
+ */
+vectorOfWords stringToWordsAndSpaceList(std::string const &input, vectorOfSpaces &spaceVector);
+
+std::string recreateStudentFile(vectorOfWords student_file_words, vectorOfSpaces student_spaces);
+
+bool isNumber(const std::string &str);
 
 #endif //__CLEAN__
