@@ -236,6 +236,17 @@ jobs:
             flags: autograder
 
 
+    shellcheck:
+      name: ShellCheck
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v2
+        - name: install ShellCheck
+          run: sudo apt-get install -y shellcheck
+        - name: Run ShellCheck
+          run: bash run_shellcheck.sh
+
+
     e2e:
         needs:
           - js-lint
