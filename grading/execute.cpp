@@ -45,15 +45,6 @@ extern const char *GLOBAL_custom_allowed_commands_string;  // defined in allowed
 // =====================================================================================
 // =====================================================================================
 
-std::string replace_placeholder(std::string value) {
-    std::string placeholder = "{SUBMITTY_INSTALL_DIRECTORY}";
-    std::string::size_type index = value.find(placeholder);
-    if (index != std::string::npos) {
-        return value.replace(index, placeholder.length(), SUBMITTY_INSTALL_DIRECTORY);
-    }
-    return value;
-}
-
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
     nlohmann::json allowed_system_programs;
@@ -70,13 +61,13 @@ bool system_program(const std::string &program, std::string &full_path_executabl
         allowed_system_programs["php"] = "/usr/bin/php";
     }
     if (allowed_system_programs.contains(program)) {
-        full_path_executable = replace_placeholder(allowed_system_programs[program]);
+        full_path_executable = allowed_system_programs[program];
         return true;
     }
 
     for (auto& x : allowed_system_programs.items())
     {
-        if (replace_placeholder(x.value()) == program) {
+        if (x.value() == program) {
             full_path_executable = program;
             return true;
         }

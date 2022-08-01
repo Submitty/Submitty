@@ -458,6 +458,9 @@ rsync -rtz --exclude "${sync_exclude}" "${SUBMITTY_REPOSITORY}/grading" "${SUBMI
 # copy the autograding_allowed_commands.json to config
 rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
 
+# replace filling variables
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+
 # # change permissions of autograding_allowed_commands_default.json
 chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
@@ -466,6 +469,9 @@ chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.j
 if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json" ]]; then
     touch "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
 fi
+
+# replace filling variables
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
 
 # # change permissions of autograding_allowed_commands_custom.json
 chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
