@@ -646,6 +646,7 @@ class MiscController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";
