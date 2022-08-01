@@ -382,15 +382,13 @@ class GlobalController extends AbstractController {
             "icon" => "fa-key"
         ]);
 
-        if ($this->core->getConfig()->isDebug()) {
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['calendar']),
-                "title" => "Calendar",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-calendar",
-                "icon" => "fa-calendar"
-            ]);
-        }
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['calendar']),
+            "title" => "Calendar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-calendar",
+            "icon" => "fa-calendar"
+        ]);
 
         $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
         // Create the line for all faculties, superusers, and instructors
