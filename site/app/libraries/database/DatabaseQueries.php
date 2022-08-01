@@ -4434,7 +4434,7 @@ AND gc_id IN (
     public function insertGradeableAnonId($user_ids, $g_id, $anon_id = null) {
         $user_ids = is_array($user_ids) ? $user_ids : [$user_ids];
         foreach ($user_ids as $user_id) {
-            if ($anon_id == null) {
+            if ($anon_id === null) {
                 $this->core->getQueries()->getUserById($user_id)->getAnonId($g_id);
                 continue;
             }
