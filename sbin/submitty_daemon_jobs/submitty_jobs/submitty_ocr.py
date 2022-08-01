@@ -72,7 +72,7 @@ def preprocess(img):
     contours, _ = cv2.findContours(img_final_bin, cv2.RETR_TREE,
                                    cv2.CHAIN_APPROX_SIMPLE)
 
-    if (len(contours) == 0):
+    if len(contours) == 0:
         return []
 
     contours, boundingBoxes = sort_contours(contours)
@@ -82,7 +82,7 @@ def preprocess(img):
     # get the individual images
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
-        if (w > 20 and w < 75 and h > 35 and h < 125):
+        if w > 20 and w < 75 and h > 35 and h < 125:
             idx += 1
             new_img = img[y:y+h, x:x+w]
             # convert to MNIST expected img
