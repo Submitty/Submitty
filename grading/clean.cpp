@@ -267,37 +267,57 @@ vectorOfWords stringToWordsAndSpaceList(std::string const &text, vectorOfSpaces 
   return contents;
 }
 
-std::string recreateStudentFile(vectorOfWords student_file_words, vectorOfSpaces student_spaces) {
-  int num_lines = student_file_words.size();
-  std::vector<std::string> updated_lines;
-  std::vector<std::string> recreated_lines;
+std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces studentSpaces) {
+  int num_lines = studentFileWords.size();
+  std::vector<std::string> updatedLines;
   for (size_t i = 0; i < num_lines; i++) {
     std::string line;
-    for (size_t j = 0; j < student_file_words[i].size(); j++) {
+    for (size_t j = 0; j < studentFileWords[i].size(); j++) {
       if (j == 0) {
-        line = student_file_words[i][j];
+        line = studentFileWords[i][j];
       } else {
-        for (int k = 0; k < student_spaces[i][j - 1]; k++) {
+        for (int k = 0; k < studentSpaces[i][j - 1]; k++) {
           line += " ";
         }
-        line += student_file_words[i][j];
+        line += studentFileWords[i][j];
       }
     }
-    updated_lines.push_back(line);
+    updatedLines.push_back(line);
   }
-  std::vector<std::string> updated_student_file;
   const char* const delim = "\n";
-
   std::ostringstream imploded;
-  std::copy(updated_lines.begin(), updated_lines.end(),
+  std::copy(updatedLines.begin(), updatedLines.end(),
             std::ostream_iterator<std::string>(imploded, delim));
   return imploded.str();
 }
 
 bool isNumber(const std::string &str) {
+  bool atLeastOneDigit = false;
+  bool dotFound = false;
   for (char const &c : str) {
-    if (std::isdigit(c) == 0 && c != '.')
+    if (std::isdigit(c)) {
+      atLeastOneDigit = true;
+    }
+    else if (c == '.') {
+      if (dotFound) {
+        return false;
+      }
+      dotFound = true;
+    }
+    else {
       return false;
+    }
+  }
+  return true == atLeastOneDigit;
+}
+
+bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces) {
+  int len = std::min(studentSpaces.size(), expectedSpaces.size());
+  for (size_t i = 0; i < len; i++)
+  {
+    if (studentSpaces[i] != expectedSpaces[i]) {
+      return false;
+    }
   }
   return true;
 }

@@ -100,8 +100,27 @@ vectorOfLines wordsToLines(vectorOfWords text);
  */
 vectorOfWords stringToWordsAndSpaceList(std::string const &input, vectorOfSpaces &spaceVector);
 
-std::string recreateStudentFile(vectorOfWords student_file_words, vectorOfSpaces student_spaces);
+/* METHOD: recreateStudentFile
+ * ARGS: studentFileWords: updated student words vector
+ * ARGS: studentSpaces: Spaces vector of original student submitted file
+ * RETURN: string
+ * PURPOSE: creates a string from vectorOfWords given spaces between words
+ */
+std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces studentSpaces);
 
+/* METHOD: isNumber
+ * ARGS: str: string
+ * RETURN: bool
+ * PURPOSE: check if a string is a number
+ */
 bool isNumber(const std::string &str);
+
+/* METHOD: whiteSpaceListsEqual
+ * ARGS: expectedSpaces: vector of space count
+ * ARGS: studentSpaces: vector of space count
+ * RETURN: bool
+ * PURPOSE: check if two space space vectors are equal
+ */
+bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces);
 
 #endif //__CLEAN__

@@ -1367,53 +1367,68 @@ TestResults* dispatch::tolerance_diff_doit (const TestCase &tc, const nlohmann::
   }
 
   TestResults* answer = NULL;
+  // setup configurations
   std::string comparison = j.value("comparison","byLinebyChar");
   double tolerance = j.value("tolerance", 0.0);
-  bool ignoreWhitespace = j.value("ignoreWhitespace",false);
-  std::cout << "starting algo " << std::endl;
-  vectorOfSpaces studentSpaces;
-  vectorOfSpaces expectedSpaces;
-  vectorOfWords expectedFileWords = stringToWordsAndSpaceList(expected_file_contents, expectedSpaces);
-  vectorOfWords studentFileWords = stringToWordsAndSpaceList(student_file_contents, studentSpaces);
-  int studentLines = studentFileWords.size();
-  int expectedLines = expectedFileWords.size();
-  for (size_t i = 0; i < expectedLines; i++) {
-    if (i < studentLines) {
-      std::vector<std::string> expectedLineWords = expectedFileWords[i];
-      std::vector<std::string> studentLineWords = studentFileWords[i];
-      int expectedLineNumWords = expectedLineWords.size();
-      int studentLineNumWords = studentLineWords.size();
-      if (studentLineNumWords == expectedLineNumWords && studentLineWords == expectedLineWords) {
-        std::cout << "line " << i + 1 << " is equal " << std::endl;
-      } else if (studentLineNumWords > expectedLineNumWords &&
-                 std::equal(studentLineWords.begin(),
-                            studentLineWords.begin() + expectedLineNumWords,
-                            expectedLineWords.begin())) {
-        std::cout << "extra words in student submission" << std::endl;
+  bool ignoreWhitespace = j.value("ignoreWhitespace", false);
+  bool extraStudentOutputOk = j.value("extra_student_output",false);
+
+  // split student and expected files into words and an space count array
+  vectorOfSpaces student_spaces;
+  vectorOfSpaces expected_spaces;
+  vectorOfWords expected_file_words = stringToWordsAndSpaceList(expected_file_contents, expected_spaces);
+  vectorOfWords student_file_words = stringToWordsAndSpaceList(student_file_contents, student_spaces);
+  int student_lines = student_file_words.size();
+  int expected_lines = expected_file_words.size();
+  int equal_lines = 0;
+  for (size_t i = 0; i < expected_lines; i++) {
+    if (i < student_lines) {
+      std::vector<std::string> expected_line_words = expected_file_words[i];
+      std::vector<std::string> student_line_words = student_file_words[i];
+      int expected_line_num_words = expected_line_words.size();
+      int student_line_num_words = student_line_words.size();
+      if (student_line_num_words == expected_line_num_words && student_line_words == expected_line_words) {
+        if (ignoreWhitespace || whiteSpaceListsEqual(student_spaces[i], expected_spaces[i])) {
+          equal_lines += 1;
+        }
       } else {
-        int len = std::min(expectedLineNumWords, studentLineNumWords);
-        for (size_t j = 0; j < len; j++) {
-          if (isNumber(expectedLineWords[j]) &&
-              isNumber(studentLineWords[j])) {
-            float diff = std::abs(std::stod(expectedLineWords[j]) -
-                                  std::stod(studentLineWords[j]));
-            if (diff != 0 && diff < tolerance) {
-              studentFileWords[i][j] = expectedLineWords[j];
-              std::cout << "simple tolerance difference in line "
-                        << studentLineWords[j] << " character "
-                        << expectedLineWords[j] << std::endl;
+        bool line_has_diff = false;
+        for (size_t j = 0; j < expected_line_num_words; j++) {
+          if (j < student_line_num_words) {
+            if (expected_line_words[j] == student_line_words[j]) {
+              continue;
+            }
+            if (isNumber(expected_line_words[j]) && isNumber(student_line_words[j])) {
+              double diff = std::abs(std::stod(expected_line_words[j]) - std::stod(student_line_words[j]));
+              // if the tolerance falls within the range
+              if (diff != 0 && diff < tolerance) {
+                // replace the deviated student value with the expected value
+                student_file_words[i][j] = expected_line_words[j];
+                std::cout << "simple tolerance difference in line "
+                          << student_line_words[j] << " character "
+                          << expected_line_words[j] << std::endl;
+                continue;
+              }
             }
           }
+          line_has_diff = true;
         }
-        std::cout << "line " << i + 1 << " is not equal " << std::endl;
+        if (!line_has_diff) {
+          if (ignoreWhitespace || whiteSpaceListsEqual(student_spaces[i], expected_spaces[i])) {
+            equal_lines += 1;
+          }
+        }
       }
-    } else {
-      std::cout << "line " << i + 1 << " is missing in student file "
-                << std::endl;
     }
   }
-  std::cout << "recreating " << std::endl;
-  student_file_contents = recreateStudentFile(studentFileWords, studentSpaces);
+  if (equal_lines == expected_lines) {
+    int extra_lines = student_lines - expected_lines;
+    if (extra_lines == 0 || extraStudentOutputOk) {
+      answer = new TestResults(1);
+      return answer;
+    }
+  }
+  student_file_contents = recreateStudentFile(student_file_words, student_spaces);
   std::cout << "running mayers Diff " << std::endl;
   if (comparison == std::string("byLinebyChar")) {
     bool extraStudentOutputOk = j.value("extra_student_output",false);
