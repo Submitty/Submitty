@@ -178,7 +178,7 @@ class PDFController extends AbstractController {
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index === 9) {
                 $user_id = $file_path_parts[$index];
-                $anon_ids = $this->core->getQueries()->getUserFromAnon($user_id, $g_id);
+                $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $g_id);
                 $anon_path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
             }
             else {
