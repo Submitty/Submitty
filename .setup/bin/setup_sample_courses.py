@@ -531,6 +531,33 @@ def create_gradeable_submission(src, dst):
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
 
+def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
+    """
+    Specifically designed helper funtion that copys a annotation from the source to the destination.
+    The source annotation need to be modifed to reflect:
+        the file that the annotations belongs to
+        the grader that is responsible for the annotation
+
+    :param file_name: encoded file name
+    :type src: str
+    :param file_path: anonymous file path
+    :type src: str
+    :param src: path of the file or directory we want to use for this annotation
+    :type src: str
+    :param dst: path to the folder where we should copy the annotation to
+    :type src: str
+    :param grader_id: grader of the annotation
+    :type src: str
+    """
+    with open(src, 'r') as open_file:
+        annotation_json = json.load(open_file)
+        annotation_json['file_path'] = file_path
+        annotation_json['grader_id'] = grader_id
+        for annotation in annotation_json['annotations']:
+            annotation['userId'] = grader_id
+
+    with open(os.path.join(dst, file_name), 'w') as f:
+        json.dump(annotation_json, f, indent = 2)
 
 class User(object):
     """
@@ -870,13 +897,14 @@ class Course(object):
 
             # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
+            gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
             # makes a section be ungraded if the gradeable is not electronic
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
-            # This for loop adds submissions for users and teams(if applicable)
+            # This for loop adds submissions/annotations for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
@@ -885,24 +913,28 @@ class Course(object):
 
                     submitted = False
                     team_id = None
+                    anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams\
                         ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
+                            anon_team_id = temp[0][1]
                             previous_submission = select([electronic_gradeable_version]).where(
                                 electronic_gradeable_version.c['team_id'] == team_id)
                             res = self.conn.execute(previous_submission)
                             if res.rowcount > 0:
                                 continue
                             submission_path = os.path.join(gradeable_path, team_id)
+                            annotation_path = os.path.join(gradeable_annotation_path, team_id)
                         else:
                             continue
                         res.close()
                     else:
                         submission_path = os.path.join(gradeable_path, user.id)
+                        annotation_path = os.path.join(gradeable_annotation_path, user.id)
 
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
@@ -925,6 +957,12 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
+
+                            if gradeable.annotated_pdf is True:
+                                if not os.path.exists(gradeable_annotation_path):
+                                    os.makedirs(gradeable_annotation_path)
+                                if not os.path.exists(annotation_path):
+                                    os.makedirs(annotation_path)
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
                             # This is done my making other possibilities three times more likely
@@ -980,6 +1018,45 @@ class Course(object):
                                         src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarism_submissions.pop())
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
+                                elif gradeable.annotated_pdf is True:
+                                    # Get a list of graders that has access to the submission
+                                    assigned_graders = []
+                                    stmt = select([
+                                        peer_assign.columns.user_id,
+                                        peer_assign.columns.grader_id
+                                    ]).where(
+                                        peer_assign.columns.user_id == user.id
+                                    )
+                                    for res in self.conn.execute(stmt):
+                                        assigned_graders.append(res[1])
+
+                                    submissions = random.sample(gradeable.submissions, random.randint(1, len(gradeable.submissions)))
+                                    for submission in submissions:
+                                        src = os.path.join(gradeable.sample_path, submission)
+                                        dst = os.path.join(submission_path, str(version))
+                                        create_gradeable_submission(src, dst)
+
+                                        if version == versions_to_submit:
+                                            annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
+                                            if not os.path.exists(annotation_version_path):
+                                                os.makedirs(annotation_version_path)
+                                        
+                                            annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
+                                            graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
+                                            # Make sure instructor is responsible for one of the annotations
+                                            graders.append("instructor")
+
+                                            anon_dst = os.path.join(dst, submission).split("/")
+                                            anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
+                                            anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
+                                            
+                                            for i in range(len(graders)):
+                                                annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
+                                                annotation_dst = os.path.join(annotation_path, str(version))
+                                                encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
+                                                # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
+                                                annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
+                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
@@ -1051,6 +1128,9 @@ class Course(object):
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
 
+                    if gradeable.type == 0 and os.path.isdir(gradeable_annotation_path):
+                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_annotation_path))
+
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                         res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id)
@@ -1077,10 +1157,6 @@ class Course(object):
             self.add_sample_queue_data()
             print('Added office hours queue data to sample course.')
 
-        self.conn.close()
-        submitty_conn.close()
-        os.environ['PGPASSWORD'] = ""
-
         if self.code == 'sample':
             student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
@@ -1089,6 +1165,36 @@ class Course(object):
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
+            course_materials_source = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials')
+            course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
+            course_materials_table = Table("course_materials", self.metadata, autoload=True)
+            for dpath, dirs, files in os.walk(course_materials_source):
+                inner_dir=os.path.relpath(dpath, course_materials_source)
+                if inner_dir!=".":
+                    dir_to_make=os.path.join(course_materials_folder, inner_dir)
+                    os.mkdir(dir_to_make)
+                    subprocess.run(["chown", "submitty_php:submitty_php", dir_to_make])
+                    self.conn.execute(course_materials_table.insert(), 
+                            path=dir_to_make,
+                            type=2,
+                            release_date='2022-01-01 00:00:00',
+                            hidden_from_students=False,
+                            priority=0)
+                for f in files:
+                    tmpfilepath= os.path.join(dpath,f)
+                    filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, course_materials_source))
+                    shutil.copy(tmpfilepath, filepath)
+                    subprocess.run(["chown", "submitty_php:submitty_php", filepath])
+                    self.conn.execute(course_materials_table.insert(), 
+                                path=filepath,
+                                type=0,
+                                release_date='2022-01-01 00:00:00',
+                                hidden_from_students=False,
+                                priority=0)
+        self.conn.close()
+        submitty_conn.close()
+        os.environ['PGPASSWORD'] = ""
+        
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
@@ -1124,11 +1230,15 @@ class Course(object):
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
         ucounter = self.conn.execute(select([func.count()]).select_from(gradeable_teams_table)).scalar()
+        anon_team_ids = []
         for user in self.users:
             #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
-
-            unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            unique_team_id = str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            #also need to create and save the anonymous team id
+            anon_team_id = generate_random_user_id(15)
+            if anon_team_id in anon_team_ids:
+                anon_team_id = generate_random_user_id()
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is None:
                 continue
@@ -1161,6 +1271,7 @@ class Course(object):
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(gradeable_teams_table.insert(),
                              team_id=unique_team_id,
+                             anon_id=anon_team_id,
                              g_id=gradeable.id,
                              registration_section=str(reg_section),
                              rotating_section=str(random.randint(1, self.rotating_sections)))
@@ -1174,6 +1285,7 @@ class Course(object):
                                                       "first_user": user.get_detail(self.code, "id")}]
                 ucounter += 1
             res.close()
+            anon_team_ids.append(anon_team_id);
         return json_team_history
 
     def add_sample_forum_data(self):
@@ -1578,6 +1690,9 @@ class Gradeable(object):
         self.allow_custom_marks = True
         self.plagiarism_submissions = []
         self.plagiarism_versions_per_user = 1
+        self.annotated_pdf = False
+        self.annotation_path = None
+        self.annotations = []
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1695,6 +1810,10 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
+            if 'eg_annotated_pdf' in gradeable:
+                self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
+                self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "annotation")
+
             self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
             self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
             if self.config_path is None:
@@ -1725,6 +1844,11 @@ class Gradeable(object):
                             if isinstance(elem, dict):
                                 raise TypeError("Cannot have dictionary inside of list for submissions "
                                                 "for {}".format(self.sample_path))
+                if self.annotation_path is not None:
+                    self.annotations = os.listdir(self.annotation_path)
+                    self.annotations = list(filter(lambda x: not x.startswith("."), self.annotations))
+                    # Ensure we're not sensitive to directory traversal order
+                    self.annotations.sort()
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_due_date
         assert self.has_release_date is False or self.grade_due_date <= self.grade_released_date

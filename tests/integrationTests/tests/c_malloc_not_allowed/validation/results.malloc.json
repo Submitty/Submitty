@@ -1,0 +1,41 @@
+{
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
+        {
+            "points_awarded": 25,
+            "test_name": "Compilation"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Preprocessing"
+        },
+        {
+            "points_awarded": -100,
+            "test_name": "No malloc()"
+        },
+        {
+            "points_awarded": -100,
+            "test_name": "Only calloc() and realloc()"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "No square brackets"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06/execute_logfile.txt",
+                    "description": "execute_logfile.txt"
+                }
+            ],
+            "points_awarded": 75,
+            "test_name": "Run program"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

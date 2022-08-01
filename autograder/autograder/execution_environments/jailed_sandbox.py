@@ -1,6 +1,7 @@
 import os
 import subprocess
 import traceback
+import signal
 
 from . import secure_execution_environment
 
@@ -18,6 +19,14 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         super().__init__(config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job,
                          complete_config_obj, testcase_info, autograding_directory, log_path,
                          stack_trace_log_path, is_test_environment)
+
+    def _handle_error_signal(self, _signum, _frame):
+        """
+        Leave a message at logs/autograding and meta_log.txt when it receives an error signal
+        from untrusted_execute.
+        """
+        self.log_message("ERROR: untrusted_execute reported an error")
+        self.log_container_meta("ERROR: untrusted_execute reported an error")
 
     def setup_for_archival(self, overall_log):
         """
@@ -85,6 +94,9 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
                 untrusted_user,
                 script
             ]
+
+        # Make sure the signal matches to .setup/untrusted_execute.c
+        signal.signal(signal.SIGUSR2, self._handle_error_signal)
 
         success = False
         try:
