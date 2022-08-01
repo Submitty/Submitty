@@ -133,51 +133,51 @@
                 </div>
             </div>
             <div>
-            <span class="option-alt" id="browser-support">Submitty supports an installable PWA which requires Chrome</span>
+            <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
             <button class="addpwa btn btn-primary">Install App</button>
-            <span class="option-alt" id="pwa-uninstall-lable">The Submitty PWA has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
+            <span class="option-alt" id="pwa-uninstall-lable">The Submitty Progressive Web App (PWA) has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
             </div>
         </div>
     </div>
 </div>
 <script>
-        let storedPrompt;
-        let pwaBtn = $('.addpwa');
-        let browser_lable = $("#browser-support");
-        let pwalable = $("#pwa-uninstall-lable");
+    let storedPrompt;
+    let pwaBtn = $('.addpwa');
+    let browser_lable = $("#browser-support");
+    let pwalable = $("#pwa-uninstall-lable");
 
-        pwaBtn[0].style.display = 'none';
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
+    pwaBtn[0].style.display = 'none';
+
+    window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         storedPrompt = e;
         pwalable[0].style.display='none';
         pwaBtn[0].style.display = 'block';
         pwaBtn[0].addEventListener('click', (e) => {
-         pwaBtn[0].style.display = 'none';
-         storedPrompt.prompt();
-         storedPrompt.userChoice.then((choiceResult) => {
-         if (choiceResult.outcome === 'accepted') {
-          console.log('Application Installed');
-          pwalable[0].style.display='block';
-         } else {
-          console.log('Application not Installed');
-         }
-         storedPrompt = null;
+        pwaBtn[0].style.display = 'none';
 
-      });
-  });
+        storedPrompt.prompt();
+        storedPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                pwalable[0].style.display='block';
+            }
+            storedPrompt = null;
+
+        });
+    })
+        ;
 });
+    
 function isInstalled() {
-if(navigator.userAgent.match(/chrome|chromium|crios/i)){
-    pwalable[0].style.display='block';
-    browser_lable[0].style.display='none';
-}else{
-    pwalable[0].style.display='none';
-    browser_lable[0].style.display='block';
+    if(navigator.userAgent.match(/chrome|chromium|crios/i)){
+        pwalable[0].style.display='block';
+        browser_lable[0].style.display='none';
+    }else{
+        pwalable[0].style.display='none';
+        browser_lable[0].style.display='block';
+    }
 }
 
-}
 isInstalled();
 </script>
 {% include 'EditNameForm.twig' %}
