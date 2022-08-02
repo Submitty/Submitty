@@ -33,7 +33,7 @@ def print_red(msg):
 def print_green(msg):
     print('\x1b[1;32m'+msg+'\x1b[0m')
 def print_yellow(msg):
-     print('\x1b[1;33m'+msg+'\x1b[0m')
+    print('\x1b[1;33m'+msg+'\x1b[0m')
 
 # ==================================================================================
 # Tells a foreign autograding worker to reinstall.
