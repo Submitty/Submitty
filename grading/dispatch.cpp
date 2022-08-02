@@ -1320,6 +1320,14 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string comparison = j.value("comparison","byLinebyChar");
   bool ignoreWhitespace = j.value("ignoreWhitespace",false);
   bool lineSwapOk = j.value("lineSwapOk",false);
+  float tolerance = j.value("tolerance", 0.0);
+  bool extraStudentOutputOk = j.value("extra_student_output",false);
+  if (tolerance != 0.0) {
+    bool within_tolerance = tolerance_diff(expected_file_contents, student_file_contents, tolerance, ignoreWhitespace, extraStudentOutputOk);
+    if (within_tolerance) {
+      return new TestResults(1);
+    }
+  }
   if (comparison == std::string("byLinebyChar")) {
     bool extraStudentOutputOk = j.value("extra_student_output",false);
     vectorOfLines text_a = stringToLines( student_file_contents, j );
@@ -1337,7 +1345,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );
-      bool extraStudentOutputOk = j.value("extra_student_output",false);
       answer = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
       ((Difference*)answer)->type = ByLineByChar;
     }
@@ -1350,29 +1357,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   return answer;
 }
 
-TestResults* dispatch::tolerance_diff_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::cout << "tolerance diff " << std::endl;
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) {
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) {
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
-  }
-
-  TestResults* answer = NULL;
-  // setup configurations
-  std::string comparison = j.value("comparison","byLinebyChar");
-  double tolerance = j.value("tolerance", 0.0);
-  bool ignoreWhitespace = j.value("ignoreWhitespace", false);
-  bool extraStudentOutputOk = j.value("extra_student_output",false);
-
+bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::string &student_file_contents, const float &tolerance, const bool &ignoreWhitespace, const bool &extraStudentOutputOk) {
   // split student and expected files into words and an space count array
   vectorOfSpaces student_spaces;
   vectorOfSpaces expected_spaces;
@@ -1381,38 +1366,41 @@ TestResults* dispatch::tolerance_diff_doit (const TestCase &tc, const nlohmann::
   int student_lines = student_file_words.size();
   int expected_lines = expected_file_words.size();
   int equal_lines = 0;
+  // iterating over expected lines
   for (size_t i = 0; i < expected_lines; i++) {
     if (i < student_lines) {
       std::vector<std::string> expected_line_words = expected_file_words[i];
       std::vector<std::string> student_line_words = student_file_words[i];
       int expected_line_num_words = expected_line_words.size();
       int student_line_num_words = student_line_words.size();
+      // if the two lines are equal
       if (student_line_num_words == expected_line_num_words && student_line_words == expected_line_words) {
+        // if white spaces equal or ignoreWhitespaces set
         if (ignoreWhitespace || whiteSpaceListsEqual(student_spaces[i], expected_spaces[i])) {
           equal_lines += 1;
         }
       } else {
         bool line_has_diff = false;
+        // iterating over words in the expected line
         for (size_t j = 0; j < expected_line_num_words; j++) {
           if (j < student_line_num_words) {
             if (expected_line_words[j] == student_line_words[j]) {
               continue;
             }
+            // if words are not equal check if both of them are numbers
             if (isNumber(expected_line_words[j]) && isNumber(student_line_words[j])) {
-              double diff = std::abs(std::stod(expected_line_words[j]) - std::stod(student_line_words[j]));
+              float diff = std::abs(std::stod(expected_line_words[j]) - std::stod(student_line_words[j]));
               // if the tolerance falls within the range
               if (diff != 0 && diff < tolerance) {
                 // replace the deviated student value with the expected value
                 student_file_words[i][j] = expected_line_words[j];
-                std::cout << "simple tolerance difference in line "
-                          << student_line_words[j] << " character "
-                          << expected_line_words[j] << std::endl;
                 continue;
               }
             }
           }
           line_has_diff = true;
         }
+        // if line doesn't have a diff other than values within tolerance range
         if (!line_has_diff) {
           if (ignoreWhitespace || whiteSpaceListsEqual(student_spaces[i], expected_spaces[i])) {
             equal_lines += 1;
@@ -1424,37 +1412,9 @@ TestResults* dispatch::tolerance_diff_doit (const TestCase &tc, const nlohmann::
   if (equal_lines == expected_lines) {
     int extra_lines = student_lines - expected_lines;
     if (extra_lines == 0 || extraStudentOutputOk) {
-      answer = new TestResults(1);
-      return answer;
+      return true;
     }
   }
   student_file_contents = recreateStudentFile(student_file_words, student_spaces);
-  std::cout << "running mayers Diff " << std::endl;
-  if (comparison == std::string("byLinebyChar")) {
-    bool extraStudentOutputOk = j.value("extra_student_output",false);
-    vectorOfLines text_a = stringToLines( student_file_contents, j );
-    vectorOfLines text_b = stringToLines( expected_file_contents, j );
-    answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
-    ((Difference*)answer)->type = ByLineByChar;
-  } 
-  else if (comparison == std::string("byLine")) {
-    if (ignoreWhitespace) {
-      vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
-      vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
-      answer = ses(j, &text_a, &text_b, false );
-      ((Difference*)answer)->type = ByLineByChar;
-    } else {
-      vectorOfLines text_a = stringToLines( student_file_contents, j );
-      vectorOfLines text_b = stringToLines( expected_file_contents, j );
-      bool extraStudentOutputOk = j.value("extra_student_output",false);
-      answer = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
-      ((Difference*)answer)->type = ByLineByChar;
-    }
-  } else {
-    std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
-    std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
-    answer = new TestResults(0.0);
-  }
-  assert (answer != NULL);
-  return answer;
+  return false;
 }

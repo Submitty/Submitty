@@ -221,7 +221,6 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                   }
   else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);                 }
   else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                          }
-  else if (method == "tolerance_diff")             { return dispatch::tolerance_diff_doit(*this,grader);                          }
   else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                    }
   else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);                }
   else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                   }
