@@ -376,6 +376,12 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $sections = explode(",", $_POST['sections']);
             }
+            if (!isset($_POST['partial_sections'])) {
+                $partial_sections = [];
+            }
+            else {
+                $partial_sections = explode(",", $_POST['partial_sections']);
+            }
             if ($sections != null) {
                 $keep_ids = [];
 
@@ -395,7 +401,7 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 foreach ($course_material->getSections() as $section) {
-                    if (!in_array($section->getSectionId(), $keep_ids)) {
+                    if (!in_array($section->getSectionId(), $keep_ids) && !in_array($section->getSectionId(), $partial_sections)) {
                         $course_material->removeSection($section);
                     }
                 }

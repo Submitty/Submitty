@@ -39,6 +39,9 @@
                 }
             </script>
         </fieldset>
+        <p style="margin: 0px;">
+            <em>Note: Gray colored sections (if any) represent that some (but not all) materials inside this folder are restricted to those sections.</em>
+        </p>
         <label>
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
@@ -62,6 +65,7 @@
     <script>
         function submitFolderEdit(fullUpdate){ // Submit button
             let sectionsEdit = [];
+            let partialSections = [];
             let cmTime = document.getElementById("edit-folder-picker").value;
             let sort = document.getElementById("edit-folder-sort").value;
             let id = document.getElementById("material-folder-edit-form").getAttribute("data-id");
@@ -73,15 +77,21 @@
             let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
             reg_sectionArray.forEach(function(element){
                 let currentSectionEdit = '#section-folder-edit-' +element['sections_registration_id']
-                if  ($(currentSectionEdit).is(':checked'))  {
-                    sectionsEdit.push(element['sections_registration_id']);
+                if  ($(currentSectionEdit).is(':checked')) {
+                    if ($(currentSectionEdit).attr('class') === 'partial-section') {
+                        partialSections.push(element['sections_registration_id']);
+                    }
+                    else {
+                        sectionsEdit.push(element['sections_registration_id']);
+                    }
                 }
             });
             let sections_lock = document.getElementById('all-sections-showing-yes-folder').checked === true;
             if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no-folder").is(':checked') == true){
                 sectionsEdit = null;
+                partialSections = null;
             }
-            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, fullUpdate, null, null);
+            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null);
         };
 
         function enableFullUpdate() {

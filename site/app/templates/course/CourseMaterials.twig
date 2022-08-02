@@ -87,11 +87,11 @@
                 {% if not course_material.getSections|length == 0 %}
                 {% if course_material.isHiddenFromStudents %}
                     <span>Sections (Hidden):
-                        {{course_material.getSections|map(s => s.getSectionId)|join(',')}}
+                        {{course_material.getSections|sort|map(s => s.getSectionId)|join(',')}}
                         </span>
                 {% else %}
                     <span>Sections:
-                        {{course_material.getSections|map(s => s.getSectionId)|join(',')}}
+                        {{course_material.getSections|sort|map(s => s.getSectionId)|join(',')}}
                         </span>
                 {% endif %}
 
@@ -256,6 +256,7 @@
             var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
 
             function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
+                let residualSections = [];
                 if (first) {
                     commonSections = editButton.data('sections');
                     releaseTime = editButton.data('release-time');
@@ -263,7 +264,9 @@
                     first = false;
                 }
                 else {
-                    commonSections = editButton.data('sections').filter(x => {return commonSections.includes(x);});
+                    let combinedSections = [...(new Set([...commonSections, ...editButton.data('sections')]))];
+                    commonSections = commonSections.filter(x => {return editButton.data('sections').includes(x);});
+                    residualSections = combinedSections.filter(x => {return !commonSections.includes(x);});
                     if (!releaseTimeMismatch) {
                         if (editButton.data('release-time') !== releaseTime) {
                             releaseTimeMismatch = true;
@@ -277,7 +280,7 @@
                         }
                     }
                 }
-                return [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch];
+                return [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch];
             }
 
             function folderSetter(elem) {
@@ -285,6 +288,8 @@
                 let insideFolderMatcher = new RegExp(`^${elem.attr("id")}d[0-9]{0,}$`);
                 let first = true;
                 let commonSections = [];
+                let residualSections = [];
+                let partialSections = [];
                 let releaseTime = "";
                 let hiddenState = '';
                 let hiddenStateMismatch = false;
@@ -292,16 +297,21 @@
                 $(`.folder-container > [id^=${elem.attr("id")}d]`, elem).each(function() {
                     if (insideFolderMatcher.test($(this).attr('id'))) {
                         folderSetter($(this));
-                        [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this).siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                        let fEditButton = $(this).siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]');
+                        partialSections.push(...fEditButton.data('partial-sections'));
+                        [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps(fEditButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                        partialSections.push(...residualSections);
                     }
                 });
                 $(`.file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]`, elem).each(function() {
                     if (insideFileMatcher.test($(this).parent('.file-viewer').siblings('.file-viewer-data').attr('id'))) {
-                        [commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                        [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
+                        partialSections.push(...residualSections);
                     }
                 });
                 let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
                 editButton.attr('data-sections', JSON.stringify(commonSections));
+                editButton.attr('data-partial-sections', JSON.stringify(partialSections));
                 editButton.attr('data-release-time', releaseTime);
                 editButton.attr('data-hidden-state', hiddenState);
             }
@@ -356,6 +366,15 @@
 
             $('#hide-materials-checkbox').on('change', toggleHideMaterialsWarning);
             $('#hide-materials-checkbox-edit').on('change', toggleHideMaterialsWarning);
+            $('[id^="section-folder-edit"]').on('change', function() {
+                if ($(this).hasClass('partial-section')) {
+                    $(this).removeClass('partial-section');
+                    if ($(this).attr('class') === '') {
+                        $(this).removeAttr('class');
+                    }
+                    $(this).prop('checked', true);
+                }
+            })
 
         {% endif %}
     };

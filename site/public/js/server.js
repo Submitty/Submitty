@@ -218,6 +218,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     let id = $(tag).data('id');
     let dir = $(tag).data('priority');
     let folder_sections = $(tag).data('sections');
+    let partial_sections = $(tag).data('partial-sections');
     let release_time =  $(tag).data('release-time');
     let is_hidden = $(tag).data('hidden-state');
     let form = $('#edit-course-materials-folder-form');
@@ -227,26 +228,43 @@ function newEditCourseMaterialsFolderForm(tag) {
 
     let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
     if (is_hidden === 1) {
-        hide_materials_box.prop('checked', true).change();
+        hide_materials_box.prop('checked', true).trigger('change');
     }
     else {
-        hide_materials_box.prop('checked', false).change();
+        hide_materials_box.prop('checked', false).trigger('change');
     }
 
     $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
-
-    if(folder_sections.length !== 0){
-        for(let index = 0; index < folder_sections.length; ++index){
-            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
-        }
+    let showSections = function() {
         $("#all-sections-showing-no-folder", form).prop('checked',false);
         $("#all-sections-showing-yes-folder", form).prop('checked',true);
         $("#show-some-section-selection-folder-edit", form).show();
+    }
+    let sectionsVisible = false;
+    if (folder_sections.length !== 0) {
+        for(let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-section');
+            if ($(this).attr('class') === '') {
+                $(this).removeAttr('class');
+            }
+        }
+        showSections();
+        sectionsVisible = true;
     }
     else{
         $("#show-some-section-selection-folder-edit", form).hide();
         $("#all-sections-showing-yes-folder", form).prop('checked',false);
         $("#all-sections-showing-no-folder", form).prop('checked',true);
+    }
+    if (partial_sections.length !== 0) {
+        for(let index = 0; index < partial_sections.length; ++index) {
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-section');
+            $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
+        }
+        if (!sectionsVisible) {
+            showSections();
+        }
     }
 
     $('#material-folder-edit-form', form).attr('data-id', id);
@@ -273,11 +291,11 @@ function newEditCourseMaterialsForm(tag) {
     element._flatpickr.setDate(release_time);
 
     if(this_hide_from_students === 1){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true).change();
+        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
     }
 
     else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false).change();
+        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
     }
 
     $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();

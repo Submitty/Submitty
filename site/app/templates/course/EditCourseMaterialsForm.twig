@@ -88,7 +88,7 @@
                 let url_url = document.getElementById("edit-url-url");
                 let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
         flatpickr('.edit-picker', {

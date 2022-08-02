@@ -1271,7 +1271,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1288,6 +1288,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
     formData.append('sections_lock', sections_lock);
+    if (sections_lock === true && sectionsEdit.length===0) {
+        alert("Restrict to at least one section or select 'No'.");
+        return;
+    }
     if(link_url !== null) {
         formData.append('link_url', link_url);
     }
@@ -1300,6 +1304,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
+    }
+    if (partialSections !== null) {
+        formData.append('partial_sections', partialSections);
     }
 
     $.ajax({
