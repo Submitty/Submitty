@@ -60,17 +60,19 @@ bool system_program(const std::string &program, std::string &full_path_executabl
         allowed_system_programs["bash"] = "/bin/bash";
         allowed_system_programs["php"] = "/usr/bin/php";
     }
-    if (allowed_system_programs.contains(program)) {
-        full_path_executable = allowed_system_programs[program];
-        return true;
+    if (program.length() > 0 && program[0] == '/') {
+      for (auto& x : allowed_system_programs.items()) {
+          if (x.value() == program) {
+              full_path_executable = program;
+              return true;
+          }
+      }
     }
-
-    for (auto& x : allowed_system_programs.items())
-    {
-        if (x.value() == program) {
-            full_path_executable = program;
-            return true;
-        }
+    else {
+      if (allowed_system_programs.contains(program)) {
+          full_path_executable = allowed_system_programs[program];
+          return true;
+      }
     }
     return false;
 }
