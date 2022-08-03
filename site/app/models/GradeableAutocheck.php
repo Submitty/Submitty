@@ -81,18 +81,14 @@ class GradeableAutocheck extends AbstractModel {
         }
 
         if (isset($details["use_expected_string"])) {
-            if (
-                isset($details["expected_file"]) 
-                && substr($details["expected_file"], 0, 11) == "test_output" 
-                && file_exists($results_path . "/details/test_output/" . end(explode("/", $details["expected_file"])))
-                ) {
+            if (isset($details["expected_file"])
+                && substr($details["expected_file"], 0, 11) == "test_output"
+                && file_exists($results_path . "/details/test_output/" . end(explode("/", $details["expected_file"])))) {
                 $expected_file = $results_path . "/details/test_output/" . end(explode("/", $details["expected_file"]));
-            }
-            else {
+            } else {
                 $this->core->addErrorMessage("Auto-generated expected file not found.");
             }
-        }
-        elseif (isset($details["expected_file"])) {
+        } elseif (isset($details["expected_file"])) {
             if (substr($details["expected_file"], 0, 11) == "test_output") {
                 if (file_exists($course_path . "/" . $details["expected_file"])) {
                     $expected_file = $course_path . "/" . $details["expected_file"];
