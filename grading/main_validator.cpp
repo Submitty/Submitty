@@ -76,6 +76,8 @@ int main(int argc, char *argv[]) {
 
 
 bool ShowHelper(const std::string& when, bool success) {
+  if (when == "true") return true;
+  if (when == "false") return false;
   if (when == "always") return true;
   if (when == "never") return false;
   if (when == "on_success" && success) return true;
@@ -114,6 +116,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
   bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
   bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
+  bool use_expected_string = ShowHelper(tcg.value("use_expected_string","false"),test_case_success);
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
@@ -166,16 +169,14 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           expected = expected_file;
         } else if (expected_string != "") {
           //if expected file doesn't exist, use actual_file name to get the name of the expected string output file
-          //ex: actual_file = math_1.txt, expected = expected_string_math_1.txt
-          expected = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
+          //ex: actual_file = math_1.txt, expected = AUTO_GENERATED_math_1.txt
+          expected = "AUTO_GENERATED_" + actual_file.substr(actual_file.find('/')+1);
         }
         std::cout << "expected: " << expected << std::endl;
         std::cout << "expected_file: " << expected_file << std::endl;
         std::cout << "expected_string: " << expected_string << std::endl;
         std::cout << "actual_file: " << actual_file << std::endl;
 
-
-        expected = tcg.value("expected_file", "");
         if (expected != "") {
           std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
           fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
@@ -197,7 +198,10 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             expected_path << expected_out_dir << expected;
             std::cout << "expected_path: " << expected_path.str() << std::endl;
             if (show_expected) {
-             autocheck_j["expected_file"] = expected_path.str();
+              autocheck_j["expected_file"] = expected_path.str();
+              if (use_expected_string) {
+                autocheck_j["use_expected_string"] = true;
+             }
             }
             if (show_image_diff){
               autocheck_j["image_difference_file"] = my_testcase.getPrefix() + tcg.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");

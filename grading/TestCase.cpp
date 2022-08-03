@@ -203,8 +203,8 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   if (expected_file == "") {
     //if the expected file doesn't exist, write expected_string to it (but where?)
     //use actual_file name to get the name of the expected string output file
-    //ex: actual_file = math_1.txt, expected = expected_string_math_1.txt
-    expected_file = "expected_string_" + actual_file.substr(actual_file.find('/')+1);
+    //ex: actual_file = math_1.txt, expected = AUTO_GENERATED_math_1.txt
+    expected_file = "AUTO_GENERATED_" + actual_file.substr(actual_file.find('/')+1);
     filename = "test_output/" + expected_file;
     std::ofstream expected_file_stream(filename);
     expected_file_stream << expected_string;
