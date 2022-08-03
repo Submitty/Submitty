@@ -512,8 +512,8 @@ def parse_args():
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
                         help="Path to the folder that contains .yml files to use for course creation. Defaults to "
                              "../data/courses")
-    parser.add_argument("--install_dir", type=str, default="/usr/local/submitty", help="install path of submitty")
-    parser.add_argument("--data_dir", type=str, default="/var/local/submitty", help="data path of submitty")
+    parser.add_argument("--install_dir", type=str, default=SUBMITTY_INSTALL_DIR, help="install path of submitty")
+    parser.add_argument("--data_dir", type=str, default=SUBMITTY_DATA_DIR, help="data path of submitty")
     parser.add_argument("course", nargs="*",
                         help="course code to build. If no courses are passed in, then it'll use "
                              "all courses in courses.json")
