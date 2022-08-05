@@ -52,7 +52,7 @@ function checkForumFileExtensions(post_box_id, files) {
             i--;
         }
     }
-    return count == files.length;
+    return count === files.length;
 }
 
 function resetForumFileUploadAfterError(displayPostId) {
@@ -96,7 +96,7 @@ function uploadImageAttachments(attachment_box) {
         // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part-1].length; j++) {
             // eslint-disable-next-line no-undef
-            if (file_array[part-1][j].name == filename) {
+            if (file_array[part-1][j].name === filename) {
                 // eslint-disable-next-line no-undef
                 file_object = file_array[part-1][j];
                 break;
@@ -115,25 +115,25 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     // eslint-disable-next-line no-undef
     for (let j = 0; j < file_array[index].length; j++) {
         // eslint-disable-next-line no-undef
-        if (file_array[index][j].name.indexOf("'") != -1 ||
+        if (file_array[index][j].name.indexOf("'") !== -1 ||
             // eslint-disable-next-line no-undef
-            file_array[index][j].name.indexOf('"') != -1) {
+            file_array[index][j].name.indexOf('"') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use quotes in your filename: ${file_array[index][j].name}`);
             return false;
         }
         // eslint-disable-next-line no-undef
-        else if (file_array[index][j].name.indexOf('\\\\') != -1 ||
+        else if (file_array[index][j].name.indexOf('\\\\') !== -1 ||
             // eslint-disable-next-line no-undef
-            file_array[index][j].name.indexOf('/') != -1) {
+            file_array[index][j].name.indexOf('/') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use a slash in your filename: ${file_array[index][j].name}`);
             return false;
         }
         // eslint-disable-next-line no-undef
-        else if (file_array[index][j].name.indexOf('<') != -1 ||
+        else if (file_array[index][j].name.indexOf('<') !== -1 ||
             // eslint-disable-next-line no-undef
-            file_array[index][j].name.indexOf('>') != -1) {
+            file_array[index][j].name.indexOf('>') !== -1) {
             // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use angle brackets in your filename: ${file_array[index][j].name}`);
             return false;
@@ -175,8 +175,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
         return false;
     }
     if (test_category) {
-
-        if ((!form.prop('ignore-cat')) && form.find('.btn-selected').length == 0 && ($('.cat-buttons input').is(':checked') == false)) {
+        if ((!form.prop('ignore-cat')) && form.find('.btn-selected').length === 0 && ($('.cat-buttons input').is(':checked') === false)) {
             alert('At least one category must be selected.');
             return false;
         }
@@ -290,11 +289,11 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     }
                     else {
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
-                        if (sibling_posts.length != 0) {
+                        if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
                                 return $(this).attr('data-reply_level') <= $(`#${parent_id}`).attr('data-reply_level') ? this : null;
                             });
-                            if (parent_sibling_posts.length != 0) {
+                            if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
                             }
                             else {
@@ -327,7 +326,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
             catch (error) {
                 // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
-                return;
             }
         },
     });
@@ -338,7 +336,7 @@ function socketDeletePostHandler(post_id) {
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function() {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
-    if (sibling_posts.length != 0) {
+    if (sibling_posts.length !== 0) {
         // eslint-disable-next-line no-var
         var posts_to_delete = main_post.nextUntil(sibling_posts.first());
     }
@@ -364,9 +362,9 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                 const new_thread = JSON.parse(response).data;
 
                 if (!edit) {
-                    if ($(new_thread).find('.thread-announcement').length != 0) {
+                    if ($(new_thread).find('.thread-announcement').length !== 0) {
                         const last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
-                        if (last_bookmarked_announcement.length != 0) {
+                        if (last_bookmarked_announcement.length !== 0) {
                             $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn('slow');
                         }
                         else {
@@ -376,9 +374,9 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                     else {
                         const last_announcement = $('.thread-announcement').last().parent().parent();
                         const last_bookmarked = $('.thread-favorite').last().parent().parent();
-                        const last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
+                        const last = last_bookmarked.length === 0 ? last_announcement : last_bookmarked;
 
-                        if (last.length == 0) {
+                        if (last.length === 0) {
                             $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
                         }
                         else {
@@ -392,6 +390,7 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                     original_thread.next().remove();
                     original_thread.remove();
                 }
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() != thread_id) {
                     $(`[data-thread_id="${thread_id}"] .thread_box`).removeClass('active');
                 }
@@ -416,6 +415,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
         $(thread_to_delete).remove();
     });
 
+    // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
         if (merge) {
             // eslint-disable-next-line no-var, no-undef
@@ -426,8 +426,8 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
             var new_url = buildCourseUrl(['forum', 'threads']);
         }
         window.location.replace(new_url);
-        return;
     }
+    // eslint-disable-next-line eqeqeq
     else if (merge && $('#current-thread').val() == merge_thread_id) {
         // will be changed when posts work with sockets
         window.location.reload();
@@ -442,6 +442,7 @@ function socketResolveThreadHandler(thread_id) {
     $(icon_to_update).attr('title', 'Thread Resolved');
     $(icon_to_update).attr('aria-label', 'Thread Resolved');
 
+    // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
         $("[title='Mark thread as resolved']").remove();
     }
@@ -459,11 +460,11 @@ function socketAnnounceThreadHandler(thread_id) {
     const hr = $(thread_to_announce).next(); // saving the <hr> for inserting later below the thread div
     hr.remove(); // removing this sibling <hr>
     // if there exists other announcements
-    if ($('.thread-announcement').length != 0) {
+    if ($('.thread-announcement').length !== 0) {
     // if thread to announce is already bookmarked
-        if ($(thread_to_announce).find('.thread-favorite').length != 0) {
+        if ($(thread_to_announce).find('.thread-favorite').length !== 0) {
             // if there exists other bookmarked announcements
-            if ($('.thread-announcement').siblings('.thread-favorite').length != 0) {
+            if ($('.thread-announcement').siblings('.thread-favorite').length !== 0) {
                 // notice that ids in desc order are also in a chronological order (newest : oldest)
                 // get announcement threads ids as an array -> [7, 6, 4, 3]
                 const announced_pinned_threads_ids = $('.thread-announcement').siblings('.thread-favorite').parent().parent().map(function() {
@@ -479,7 +480,7 @@ function socketAnnounceThreadHandler(thread_id) {
                     }
 
                     // if last thread then insert after -> if inserting thread_id = 2
-                    if (i == announced_pinned_threads_ids.length-1) {
+                    if (i === announced_pinned_threads_ids.length-1) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${announced_pinned_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -496,7 +497,7 @@ function socketAnnounceThreadHandler(thread_id) {
             // find announcements that are not bookmarked
             const announced_pinned_threads = $('.thread-announcement').siblings('.thread-favorite').parent().parent();
             const announced_only_threads = $('.thread-announcement').parent().parent().not(announced_pinned_threads);
-            if (announced_only_threads.length != 0) {
+            if (announced_only_threads.length !== 0) {
                 const announced_only_threads_ids = $(announced_only_threads).map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
@@ -508,7 +509,7 @@ function socketAnnounceThreadHandler(thread_id) {
                         break;
                     }
 
-                    if (i == announced_only_threads_ids.length-1) {
+                    if (i === announced_only_threads_ids.length-1) {
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${announced_only_threads_ids[i]}']`;
                         $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -532,6 +533,7 @@ function socketAnnounceThreadHandler(thread_id) {
     $(thread_to_announce).children().prepend(announcement_icon);
     $(hr).insertAfter($(thread_to_announce)); // insert <hr> right after thread div
     // if user's current thread is the one modified -> update
+    // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
     // if is instructor
         const instructor_pin = $('.not-active-thread-announcement');
@@ -558,10 +560,10 @@ function socketUnpinThreadHandler(thread_id) {
     const not_pinned_threads = $('.thread_box').not($('.thread-announcement').parent()).parent();
     // if there exists other threads that are not pinned
     if (not_pinned_threads.length) {
-    // if thread is bookmarked
-        if ($(thread_to_unpin).find('.thread-favorite').length != 0) {
+        // if thread is bookmarked
+        if ($(thread_to_unpin).find('.thread-favorite').length !== 0) {
             // if there exists other threads that are bookmarked
-            if (not_pinned_threads.find('.thread-favorite').length != 0) {
+            if (not_pinned_threads.find('.thread-favorite').length !== 0) {
                 const bookmarked_threads_ids = not_pinned_threads.find('.thread-favorite').parent().parent().map(function() {
                     return Number($(this).attr('data-thread_id'));
                 }).get();
@@ -574,7 +576,7 @@ function socketUnpinThreadHandler(thread_id) {
                         break;
                     }
 
-                    if (i == bookmarked_threads_ids.length-1) {
+                    if (i === bookmarked_threads_ids.length-1) {
                         // eslint-disable-next-line no-var
                         var thread_to_insert_after = `[data-thread_id='${bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -603,7 +605,7 @@ function socketUnpinThreadHandler(thread_id) {
                         break;
                     }
 
-                    if (i == not_bookmarked_threads_ids.length-1) {
+                    if (i === not_bookmarked_threads_ids.length-1) {
                         // eslint-disable-next-line no-var, no-redeclare
                         var thread_to_insert_after = `[data-thread_id='${not_bookmarked_threads_ids[i]}']`;
                         $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn('slow');
@@ -629,6 +631,7 @@ function socketUnpinThreadHandler(thread_id) {
     $(thread_to_unpin).find('.thread-announcement').remove();
 
     // if user's current thread is the one modified -> update
+    // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
     // if is instructor
         const instructor_pin = $('.active-thread-remove-announcement');
@@ -670,27 +673,32 @@ function initSocketClient() {
                 socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
                 break;
             case 'new_post':
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id);
                 }
                 break;
             case 'delete_post':
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketDeletePostHandler(msg.post_id);
                 }
                 break;
             case 'edit_post':
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id, true);
                 }
                 break;
             case 'edit_thread':
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id, true);
                 }
                 socketNewOrEditThreadHandler(msg.thread_id, true);
                 break;
             case 'split_post':
+                // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketDeletePostHandler(msg.post_id);
                 }
@@ -774,7 +782,7 @@ function modifyOrSplitPost(e) {
             }
 
             // modify
-            if (form.attr('id') == 'thread_form') {
+            if (form.attr('id') === 'thread_form') {
                 const thread_id = form.find('#edit_thread_id').val();
                 // eslint-disable-next-line no-var
                 var post_id = form.find('#edit_post_id').val();
@@ -966,7 +974,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd?'next_page':'prev_page');
-    if (load_page == 0) {
+    if (load_page === 0) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -985,6 +993,7 @@ function dynamicScrollLoadPage(element, atEnd) {
         load_page_callback = function(content, count) {
             spinner_down.hide();
             arrow_down.before(content);
+            // eslint-disable-next-line eqeqeq
             if (count == 0) {
                 // Stop further loads
                 $(element).data('next_page', 0);
@@ -1006,7 +1015,7 @@ function dynamicScrollLoadPage(element, atEnd) {
         load_page_callback = function(content, count) {
             spinner_up.hide();
             arrow_up.after(content);
-            if (count == 0) {
+            if (count === 0) {
                 // Stop further loads
                 $(element).data('prev_page', 0);
             }
@@ -1038,7 +1047,9 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     // var thread_status_value = $("#thread_status_select").val();
     const unread_select_value = $('#unread').is(':checked');
+    // eslint-disable-next-line eqeqeq
     categories_value = (categories_value == null)?'':categories_value.join('|');
+    // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null)?'':thread_status_value.join('|');
     $.ajax({
         url: next_url,
@@ -1090,7 +1101,9 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            element.scrollTop = sensitivity;
+            if ($(element).data('prev_page') !== 0) {
+                element.scrollTop = sensitivity;
+            }
             dynamicScrollLoadPage(element,false);
         }
         else if (isBottom) {
@@ -1102,6 +1115,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
 
 // eslint-disable-next-line no-unused-vars
 function resetScrollPosition(id) {
+    // eslint-disable-next-line eqeqeq
     if (sessionStorage.getItem(`${id}_scrollTop`) != 0) {
         sessionStorage.setItem(`${id}_scrollTop`, 0);
     }
@@ -1158,7 +1172,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     let thread_status_value = readThreadStatusValues();
 
     const unread_select_value = $('#unread').is(':checked');
+    // eslint-disable-next-line eqeqeq
     categories_value = (categories_value == null)?'':categories_value.join('|');
+    // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null)?'':thread_status_value.join('|');
     document.cookie = `${course}_forum_categories=${categories_value}; path=/;`;
     document.cookie = `forum_thread_status=${thread_status_value}; path=/;`;
@@ -1203,6 +1219,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
             dynamicScrollLoadIfScrollVisible(jElement);
             loadThreadHandler();
+            // eslint-disable-next-line eqeqeq
             if (success_callback != null) {
                 success_callback();
             }
@@ -1217,7 +1234,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
 // eslint-disable-next-line no-unused-vars
 function replyPost(post_id) {
-    if ( $(`#${post_id}-reply`).css('display') == 'block' ) {
+    if ( $(`#${post_id}-reply`).css('display') === 'block' ) {
         $(`#${post_id}-reply`).css('display','none');
     }
     else {
@@ -1239,7 +1256,7 @@ function generateCodeMirrorBlocks(container_element) {
         });
 
         const lineCount = editor0.lineCount();
-        if (lineCount == 1) {
+        if (lineCount === 1) {
             editor0.setSize('100%', `${editor0.defaultTextHeight() * 2}px`);
         }
         else {
@@ -1375,7 +1392,7 @@ function showHistory(post_id) {
                 const first_name = post['user_info']['first_name'].trim();
                 const last_name = post['user_info']['last_name'].trim();
                 const author_user_id = post['user'];
-                const visible_username = `${first_name} ${(last_name.length == 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
+                const visible_username = `${first_name} ${(last_name.length === 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
                 let info_name = `${first_name} ${last_name} (${author_user_id})`;
                 const visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
@@ -1826,6 +1843,7 @@ function toggleMarkdown(post_box_id, triggered) {
         });
     }
     //set various settings related to new markdown state
+    // eslint-disable-next-line eqeqeq
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
     document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
@@ -1833,6 +1851,7 @@ function toggleMarkdown(post_box_id, triggered) {
 
 // eslint-disable-next-line no-unused-vars
 function checkInputMaxLength(obj) {
+    // eslint-disable-next-line eqeqeq
     if ($(obj).val().length == $(obj).attr('maxLength')) {
         alert('Maximum input length reached!');
         $(obj).val($(obj).val().substr(0, $(obj).val().length));
@@ -1852,12 +1871,14 @@ function sortTable(sort_element_index, reverse=false) {
             const a = rows[i].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
             const b = rows[i+1].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
             if (reverse) {
+                // eslint-disable-next-line eqeqeq
                 if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)) {
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
                 }
             }
             else {
+                // eslint-disable-next-line eqeqeq
                 if (sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)) {
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
@@ -2053,7 +2074,7 @@ if (!Array.prototype.toggleElement) {
         value: function(element, comparer) {
             const index = this.inArray(comparer);
             // eslint-disable-next-line valid-typeof
-            if ((typeof(index) == 'boolean' && !index) || (typeof(index) == 'int' && index === 0)) {
+            if ((typeof(index) === 'boolean' && !index) || (typeof(index) === 'int' && index === 0)) {
                 this.push(element);
             }
             else {
@@ -2101,7 +2122,7 @@ function loadFilterHandlers() {
             return e === filter_text;
         });
 
-        if (window.filters_applied.length == 0) {
+        if (window.filters_applied.length === 0) {
             clearForumFilter();
         }
         else {

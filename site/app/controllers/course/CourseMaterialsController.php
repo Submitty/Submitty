@@ -104,6 +104,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -242,6 +243,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
+     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
     public function setReleaseAll(): JsonResponse {
@@ -322,7 +324,7 @@ class CourseMaterialsController extends AbstractController {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $_POST['requested_path'] = $course_material->getPath();
+                    $_POST['id'] = $course_material->getId();
                     $this->ajaxEditCourseMaterialsFiles(false);
                 }
             }

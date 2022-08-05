@@ -109,18 +109,6 @@ function switch_feedback_modes() {
                         <span class='gradeable_comment'>{{ grader_info[user].comment | nl2br }}</span>
                     </p>
                     {% endif %}
-                    {% if grader_info[user].attachments is not empty %}
-                    <div id="attachments-{{ user | escape }}">
-                        {% for file in grader_info[user].attachments %}
-                            {% include "autograding/Attachments.twig" with {
-                                file: file,
-                                id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
-                                is_grader_view: false,
-                                can_modify: false
-                            } only %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -275,18 +263,6 @@ function switch_feedback_modes() {
                         <p class="overall-comment">
                             <span class='gradeable_comment'>{{ grader_info[anon_grader_id_mapping[grader]].comment | nl2br }}</span>
                         </p>
-                        {% endif %}
-                        {% if grader_info[anon_grader_id_mapping[grader]].attachments is not empty %}
-                        <div id="attachments-{{ anon_grader_id_mapping[grader] | escape }}">
-                            {% for file in grader_info[anon_grader_id_mapping[grader]].attachments %}
-                                {% include "autograding/Attachments.twig" with {
-                                    file: file,
-                                    id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
-                                    is_grader_view: false,
-                                    can_modify: false
-                                } only %}
-                            {% endfor %}
-                        </div>
                         {% endif %}
                     </div>
                 {% endif %}

@@ -284,7 +284,7 @@ $(document).ready(() => {
 
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
-                    if (response.data.utc_offset != offset) {
+                    if (response.data.utc_offset !== offset) {
                         // eslint-disable-next-line no-undef
                         displayWarningMessage('Selected time-zone does not match system time-zone.');
                     }
@@ -302,6 +302,13 @@ $(document).ready(() => {
                 console.log(response);
             },
         });
+    });
+
+    $('#user-image-button').bind('change', function() {
+        if ((this.files[0].size/1048576)>5.0) {
+            alert("Selected file's size exceeds 5 MB");
+            $('#user-image-button').val('');
+        }
     });
 
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)

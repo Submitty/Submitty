@@ -46,7 +46,10 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
         it('should check if you can access a course', () => {
+            cy.visit('authentication/login');
+            cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
             cy.login('pearsr');
+            cy.get('#courses > h1').contains('My Courses');
             cy.visit(['sample']);
             cy.get('.content').contains('You don\'t have access to this course.');
         });
@@ -57,28 +60,56 @@ describe('Test cases revolving around the logging in functionality of the site',
         it('should reject bad passwords', () => {
             cy.checkLogoutInAfterEach();
             cy.visit([]);
+            cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
 
-            cy.get('input[name=user_id]').type('instructor');
-            cy.get('input[name=password]').type('bad-password');
-            cy.get('input[name=login]').click();
-
-            cy.get('#error-0').should((val) => {
-                expect( val.text().trim() ).to.equal('Could not login using that user id or password');
-            });
+            cy.get('body')
+                .then(body => {
+                    if (body.find('input[name=user_id]').length > 0) {
+                        cy.get('input[name=user_id]').type('instructor');
+                        cy.get('input[name=password]').type('bad-password');
+                        cy.get('input[name=login]').click();
+                        cy.get('#error-0').should((val) => {
+                            expect( val.text().trim() ).to.equal('Could not login using that user id or password');
+                        });
+                    }
+                    else {
+                        cy.get('#saml-login').click();
+                        cy.get('input[name=username]').type('instructor', {force: true});
+                        cy.get('input[name=password]').type('bad-password', {force: true});
+                        cy.get('#submit > td:nth-child(3) > button').click();
+                        cy.get('#content > div > p:nth-child(3) > strong').should((val) => {
+                            expect(val.text().trim()).to.equal('Incorrect username or password');
+                        });
+                    }
+                });
         });
 
 
         it('should reject bad usernames', () => {
             cy.checkLogoutInAfterEach();
             cy.visit([]);
+            cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login` );
 
-            cy.get('input[name=user_id]').type('bad-username');
-            cy.get('input[name=password]').type('instructor');
-            cy.get('input[name=login]').click();
-
-            cy.get('#error-0').should((val) => {
-                expect( val.text().trim() ).to.equal('Could not login using that user id or password');
-            });
+            cy.get('body')
+                .then(body => {
+                    if (body.find('input[name=user_id]').length > 0) {
+                        cy.get('input[name=user_id]').type('bad-username');
+                        cy.get('input[name=password]').type('instructor');
+                        cy.get('input[name=login]').click();
+                        cy.get('#error-0').should((val) => {
+                            expect( val.text().trim() ).to.equal('Could not login using that user id or password');
+                        });
+                    }
+                    else {
+                        cy.get('#saml-login').click();
+                        cy.get('input[name=username]').type('bad-username', {force: true});
+                        cy.get('input[name=password]').type('instructor', {force: true});
+                        cy.get('#submit > td:nth-child(3) > button').click();
+                        cy.get('#content > div > p:nth-child(3) > strong').should((val) => {
+                            expect(val.text().trim()).to.equal('Incorrect username or password');
+                        });
+                    }
+                });
         });
     });
 });
