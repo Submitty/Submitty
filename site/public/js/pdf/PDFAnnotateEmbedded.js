@@ -110,6 +110,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
 }
 function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
     if (num < targetNum) {
+        // eslint-disable-next-line eqeqeq
         if (num != 1) {
             doc.addPage();
         }
@@ -130,7 +131,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     const annotations = annotationsPage.annotations;
                     for (let an = 0; an < annotations.length; an++) {
                         const annotation = annotations[an];
-                        if (annotation.type == 'drawing') {
+                        if (annotation.type === 'drawing') {
                             ctx.lineWidth = annotation.width;
                             ctx.strokeStyle = annotation.color;
                             ctx.beginPath();
@@ -141,10 +142,11 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                             }
                         }
 
-                        if (annotation.type == 'textbox') {
+                        if (annotation.type === 'textbox') {
                             ctx.font = `${annotation.size}px sans-serif`;
                             ctx.fillStyle = annotation.color;
                             const text = annotation.content;
+                            // eslint-disable-next-line eqeqeq
                             if (text != null) {
                                 ctx.fillText(text, annotation.x, annotation.y);
                             }
@@ -250,7 +252,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     const viewer = document.getElementById('viewer');
                     $(viewer).on('touchstart touchmove', (e) => {
                         //Let touchscreen work
-                        if (currentTool == 'pen' || currentTool == 'text') {
+                        if (currentTool === 'pen' || currentTool === 'text') {
                             e.preventDefault();
                         }
                     });
@@ -262,6 +264,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                         viewer.appendChild(page);
                         const page_id = i + 1;
                         PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(() => {
+                            // eslint-disable-next-line eqeqeq
                             if (i == page_num) {
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
@@ -271,7 +274,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             }
                             document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
                                 const selected = $('.tool-selected');
-                                if (selected.length != 0 && $(selected[0]).attr('value') != 'cursor') {
+                                if (selected.length !== 0 && $(selected[0]).attr('value') !== 'cursor') {
                                     $('#save_status').text('Changes not saved');
                                     $('#save_status').css('color', 'red');
                                     $('#save-pdf-btn').removeClass('btn-default');

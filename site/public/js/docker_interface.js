@@ -31,7 +31,7 @@ function filterOnClick() {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function () {
-            if ($(this).text() == this_filter) {
+            if ($(this).text() === this_filter) {
                 hide = false;
             }
         });
@@ -78,7 +78,7 @@ function addImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
-            if (json.status == 'success') {
+            if (json.status === 'success') {
                 $('#add-field').val('');
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
@@ -105,7 +105,7 @@ function updateImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
-            if (json.status == 'success') {
+            if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
