@@ -12,7 +12,7 @@ const collapse_all_toggle_div_name = '#tc_collapse_all';
 
 /**
  * Collapses test case output. If all test cases have been collapsed,
- * enables "Expand All Test Cases" toggle and disables  "Collapse All Test Cases" toggle.
+ * enables "Expand All Test Cases" toggle and disables "Collapse All Test Cases" toggle.
  *
  * @param {string} div_name - id of div containing the output of the test case
  * @param {string} index - index of test case
@@ -43,7 +43,7 @@ function CollapseTestcaseOutput(div_name, index, loadingTools, test_cases, show_
  * @global {collapse_all_loading_tools} : String - name of the div for collapse all toggle
  *
  * @param {boolean} enable_expand_all - should the "Expand All Test Cases" toggle (true) or
- *                                       the "Collapse All Test Cases" toggle be enabled
+ *                                      the "Collapse All Test Cases" toggle be enabled
  */
 function EnableExpandALLOrCollapseAllToggles(enable_expand_all) {
     if (enable_expand_all) {
@@ -116,7 +116,7 @@ function CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details,
  * Expands or Collapses test case output.
  *
  * @global {loading_testcases_xml_http_requests} : Map (div_name ("testcase_" + index); Value - XMLHttpRequest object)
- *                         to store the XMLHttpRequest object returned by getJSON when getting the output to display
+ *                        to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - ID of div containing the output of the test case
  * @param {string} gradeable_id - ID of the gradeable
@@ -206,7 +206,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, s
  * Expands or Collapses all test case outputs.
  *
  * @global {loading_testcases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
- *                         to store the XMLHttpRequest object returned by getJSON when getting the output to display
+ *                        to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - ID of div that calls this function
  * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
