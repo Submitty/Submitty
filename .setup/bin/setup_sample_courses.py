@@ -9,7 +9,7 @@ Usage: ./setup_sample_courses.py
        ./setup_sample_courses.py [course [course]]
        ./setup_sample_courses.py --help
 
-The first will create all couress in courses.yml while the second will only create the courses
+The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
 """
@@ -367,7 +367,6 @@ def generate_random_users(total, real_users):
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
                              "user_group": 4,
@@ -587,7 +586,6 @@ class User(object):
     Attributes:
         id
         numeric_id
-        anon_id
         password
         firstname
         lastname
@@ -604,7 +602,6 @@ class User(object):
     def __init__(self, user):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
-        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -850,11 +847,10 @@ class Course(object):
                                   registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
-                users_table.c.rotating_section: bindparam('rotating_section'),
-                users_table.c.anon_id: bindparam('anon_id')
+                users_table.c.rotating_section: bindparam('rotating_section')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -906,7 +902,21 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
 
+        anon_ids = {}
         for gradeable in self.gradeables:
+            #create gradeable specific anonymous ids for users
+            prev_state = random.getstate()
+            for user in self.users:
+                anon_id = generate_random_user_id(15)
+                while anon_id in anon_ids.values():
+                    anon_id = generate_random_user_id(15)
+                anon_ids[user.id] = anon_id
+                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
+                self.conn.execute(gradeable_anon.insert(),
+                                  user_id=user.id,
+                                  g_id=gradeable.id,
+                                  anon_id=anon_id)
+            random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
                 json_team_history = self.make_sample_teams(gradeable)
@@ -987,7 +997,7 @@ class Course(object):
                                     os.makedirs(annotation_path)
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
-                            # This is done my making other possibilities three times more likely
+                            # This is done by making other possibilities three times more likely
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
@@ -1041,7 +1051,7 @@ class Course(object):
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
                                 elif gradeable.annotated_pdf is True:
-                                    # Get a list of graders that has access to the submission
+                                    # Get a list of graders that have access to the submission
                                     assigned_graders = []
                                     stmt = select([
                                         peer_assign.columns.user_id,
@@ -1069,7 +1079,7 @@ class Course(object):
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
-                                            anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
+                                            anon_dst[9] = anon_team_id if team_id is not None else anon_ids[user.id]
                                             anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
 
                                             for i in range(len(graders)):
