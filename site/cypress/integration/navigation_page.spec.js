@@ -16,10 +16,6 @@ describe('navigation page', () => {
         cy.viewport(1920,1200);
     });
 
-    afterEach(() => {
-        cy.logout();
-    });
-
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
@@ -30,7 +26,7 @@ describe('navigation page', () => {
             open: 5,
             closed: 3,
             items_being_graded: 9,
-            graded: 10,
+            graded: 11,
         };
         const gradeable_id = 'future_no_tas_homework';
 
@@ -124,7 +120,7 @@ describe('navigation page', () => {
             open: 5,
             closed: 3,
             items_being_graded: 9,
-            graded: 10,
+            graded: 11,
         };
         validate_navigation_page_sections(sections);
         cy.get('.gradeable-row').each(($el) => {
@@ -140,7 +136,7 @@ describe('navigation page', () => {
             open: 5,
             closed: 3,
             items_being_graded: 5,
-            graded: 8,
+            graded: 9,
         };
         validate_navigation_page_sections(sections);
 

@@ -8,37 +8,25 @@
 
 # Submitty util module depends on:
 
-# Submodule dependency last updated: May 17 2021.
-
-# The two packages below are pinned to older versions which will install
-# cleanly on Ubuntu 18.04 with its older version of pip. Newer versions of
-# these dependencies require newer version of pip to install the binary, or
-# require additional dependencies and time to build from source. Once we drop
-# support for Ubuntu 18.04, we can update these packages.
-# It should be noted that we do not directly rely on cryptography, but pin it
-# as a transitive dependency of our actual dependencies. This line can be removed
-# once we move to a newer pip.
-cryptography==3.3.2
-
 # For QR bulk upload
-opencv-python==3.4.9.33
+opencv-python==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2021.3 # Submitty-util specific.
 
 python-pam==1.8.4
-ruamel.yaml==0.17.17
+ruamel.yaml==0.17.21
 psycopg2-binary==2.9.3
 sqlalchemy==1.4.29
-pylint==2.12.2
-psutil==5.9.0
+pylint==2.13.9
+psutil==5.9.1
 python-dateutil==2.8.2
-watchdog==2.1.6
+watchdog==2.1.9
 xlsx2csv==0.7.8
 pause==0.3
-paramiko==2.9.2
+paramiko==2.11.0
 tzlocal==2.1
-PyPDF2==1.26.0
+PyPDF2==2.4.1
 distro==1.7.0
 jsonschema==3.2.0
 jsonref==0.2
@@ -51,11 +39,10 @@ parso==0.8.3
 clang==14.0
 
 # Python libraries for QR bulk upload
-pyzbar==0.1.8
+pyzbar==0.1.9
 pdf2image==1.16.0
-numpy==1.19.5
+numpy==1.23.1
 
 # python libraries for OCR for digit recognition
-# newer versions are not supported on 18.04
-onnx==1.9.0
-onnxruntime==1.3.0
+onnx==1.12.0
+onnxruntime==1.11.1

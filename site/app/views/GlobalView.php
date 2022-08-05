@@ -55,7 +55,7 @@ class GlobalView extends AbstractView {
             "duck_img" => $duck_img,
             "use_mobile_viewport" => $this->output->useMobileViewport(),
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
-            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false,
+            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
         ]);
     }

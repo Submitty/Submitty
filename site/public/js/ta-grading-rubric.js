@@ -1792,7 +1792,7 @@ function onAddComponent(peer) {
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
-            return closeAllComponents(true);
+            return closeAllComponents(true, true);
         })
         .then(function () {
           return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
@@ -2254,7 +2254,7 @@ function setPdfPageAssignment(page) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(function () {
             return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
@@ -2665,14 +2665,15 @@ function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
         if(files[i].innerText.trim() == "upload.pdf"){
+            page_num = Math.min($("#viewer > .page").length, page_num);
             let page = $("#pageContainer" + page_num);
             if($("#file-view").is(":visible")){
                 if(page.length) {
-                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#submission_browser').scrollTop(page[0].offsetTop);
                 }
             }
             else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
+                viewFileFullPanel("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }

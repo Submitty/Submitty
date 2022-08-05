@@ -13,11 +13,11 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 7.2
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.6
+  PYTHON_VERSION: 3.8
 
 jobs:
     css-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -39,7 +39,7 @@ jobs:
 
 
     js-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -63,7 +63,7 @@ jobs:
 
 
     js-unit:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -89,7 +89,7 @@ jobs:
 
 
     php-lint:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         defaults:
             run:
                 working-directory: site
@@ -120,11 +120,11 @@ jobs:
             - name: Static analysis
               run: |
                   php vendor/bin/phpstan  --version
-                  php vendor/bin/phpstan analyze app
+                  php vendor/bin/phpstan analyze app public/index.php socket/index.php
 
 
     php-unit:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       defaults:
           run:
               working-directory: site
@@ -157,7 +157,7 @@ jobs:
 
 
     python-lint:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -179,7 +179,7 @@ jobs:
 
 
     python-unit:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
         - uses: actions/setup-python@v2
@@ -263,7 +263,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         services:
           postgres:
             image: postgres
@@ -365,9 +365,10 @@ jobs:
               unzip vnu.jar_20.3.16.zip
               sudo mv dist/vnu.jar /usr/bin/
 
-          - name: Create Database and default user
+          - name: Create Database and default users
             run: |
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+              PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
               PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
 
           - name: Install apt-get packages
@@ -546,6 +547,23 @@ jobs:
             uses: cypress-io/github-action@v2
             with:
               config: baseUrl=http://localhost
+              spec: cypress/integration/login.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              headless: true
+
+          - name: Setup SAML
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+
+          - name: Switch to SAML auth
+            run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+          - name: Run cypress e2e login tests with SAML auth
+            uses: cypress-io/github-action@v2
+            with:
+              config: baseUrl=http://localhost,chromeWebSecurity=false
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome

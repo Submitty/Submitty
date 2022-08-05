@@ -22,7 +22,6 @@ class TestSidebar(BaseTestCase):
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
-            'Plagiarism Detection': 'Plagiarism Detection -- WORK IN PROGRESS',
             'My Late Days/Extensions': 'My Late Day Usage'
         }
 
@@ -75,6 +74,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
@@ -82,6 +82,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/update', 'System Update'],
             [self.test_url + '/superuser/email', 'Email All'],
             [self.test_url + '/superuser/email_status', 'Email Status'],
+            [self.test_url + '/superuser/saml', 'SAML Management'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
@@ -92,6 +93,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             [self.test_url + '/calendar', 'Calendar'],  # calendar will show only in debug mode
             [self.test_url + '/admin/docker', 'Docker UI'],
             [self.test_url + '/home/courses/new', 'New Course'],
@@ -124,6 +126,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
@@ -161,6 +164,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             [self.test_url + '/admin/docker', 'Docker UI'],
@@ -176,6 +180,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -195,6 +200,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -210,13 +216,13 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/polls', 'Submini Polls'],
-            # sample course has no course materials to start, so this link will not appear
-            # [base_url + '/course_materials', 'Course Materials'],
+            [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/student_photos', 'Student Photos'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -229,6 +235,7 @@ class TestSidebar(BaseTestCase):
         expected = [
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -247,6 +254,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
@@ -262,12 +270,12 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/polls', 'Submini Polls'],
-            # sample course has no course materials in start, so this link will not appear
-            # [base_url + '/course_materials', 'Course Materials'],
+            [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/authentication_tokens', 'Authentication Tokens'],
             # calendar will show only in debug mode
             [self.test_url + '/calendar', 'Calendar'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],

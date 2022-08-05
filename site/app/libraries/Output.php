@@ -127,6 +127,10 @@ HTML;
             return $plural;
         }, ["is_safe" => ["html"]]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
+            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+        }));
+
         if ($full_load) {
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
@@ -147,7 +151,7 @@ HTML;
         $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
         $environment->mergeConfig([]);
 
-        $converter = new CommonMarkConverter(['html_input' => 'escape'], $environment);
+        $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
         $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
@@ -175,6 +179,7 @@ HTML;
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
+        $this->addInternalJs('testcase-output.js');
     }
 
     /**
@@ -512,6 +517,10 @@ HTML;
 
     public function addCss(string $url): void {
         $this->css->add($url);
+    }
+
+    public function addInternalModuleTwigJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs/twig'));
     }
 
     public function addInternalModuleJs(string $file) {

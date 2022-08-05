@@ -1,0 +1,33 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-auth-token-form{% endblock %}
+{% block title %}Create VCS (Git) Authentication Token{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Below you can create a new VCS (Git) Authentication Token. <br>
+        See also: <a href="https://submitty.org/student/account/authentication_tokens" target="_blank">Submitty Authentication Tokens</a>
+    </p>
+
+    <div class="flex-col">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label for="new-auth-token-name">Name (e.g. Laptop, Desktop, etc):</label>
+        <input type="text" name="name" id="new-auth-token-name">
+
+        <label for="new-auth-token-expiration">Expiration</label>
+        <select name="expiration" id="new-auth-token-expiration">
+            <option value="1">One Month</option>
+            <option value="6">Six Months</option>
+            <option value="12">One Year</option>
+            <option value="0">Never Expires</option>
+        </select>
+    </div>
+
+{% endblock %}
+{% block form %}
+    <form method="post" action="/authentication_tokens/vcs">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
