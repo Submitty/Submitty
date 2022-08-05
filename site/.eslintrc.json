@@ -15,6 +15,7 @@
         "sourceType": "script"
     },
     "rules": {
+        "eqeqeq": ["error", "always"],
         "arrow-spacing": ["error"],
         "block-spacing": ["error"],
         "brace-style": ["error", "stroustrup"],
