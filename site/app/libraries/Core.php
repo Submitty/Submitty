@@ -466,9 +466,9 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate(bool $persistent_cookie = true): bool {
-        $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
+                $user_id = $this->authentication->getUserId();
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
