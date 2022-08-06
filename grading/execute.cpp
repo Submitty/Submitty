@@ -39,42 +39,51 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-extern const char *GLOBAL_allowed_autograding_commands_default_string;  // defined in allowed_autograding_commands.cpp
-extern const char *GLOBAL_allowed_autograding_commands_custom_string;  // defined in allowed_autograding_commands.cpp
+extern const std::string GLOBAL_allowed_autograding_commands_default_string;  // defined in allowed_autograding_commands.cpp
+extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // defined in allowed_autograding_commands.cpp
 
 // =====================================================================================
 // =====================================================================================
+
+bool command_available_in_env(const nlohmann::json &program_object, const bool &running_in_docker) {
+  bool onlyDocker = program_object.value("onlyDocker", false);
+  if (!running_in_docker && onlyDocker) {
+    return false;
+  }
+  return true;
+}
 
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
-    nlohmann::json allowed_autograding_commands;
-    std::stringstream allowed_autograding_commands_default_sstr(GLOBAL_allowed_autograding_commands_default_string);
-    allowed_autograding_commands_default_sstr >> allowed_autograding_commands;
-    std::stringstream allowed_autograding_commands_custom_sstr(GLOBAL_allowed_autograding_commands_custom_string);
-    if (!allowed_autograding_commands_custom_sstr.str().empty()) {
-        nlohmann::json allowed_autograding_commands_custom;
-        allowed_autograding_commands_custom_sstr >> allowed_autograding_commands_custom;
-        allowed_autograding_commands.update(allowed_autograding_commands_custom);
-    }
-    if(running_in_docker){
-        allowed_autograding_commands["bash"] = "/bin/bash";
-        allowed_autograding_commands["php"] = "/usr/bin/php";
-    }
-    if (program.length() > 0 && program[0] == '/') {
-      for (auto& x : allowed_autograding_commands.items()) {
-          if (x.value() == program) {
-              full_path_executable = program;
-              return true;
-          }
-      }
-    }
-    else {
-      if (allowed_autograding_commands.contains(program)) {
-          full_path_executable = allowed_autograding_commands[program];
+  // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
+  // ignore_comment flag set in parse function to ignore comments
+  nlohmann::json allowed_autograding_commands = nlohmann::json::parse(GLOBAL_allowed_autograding_commands_default_string, nullptr, true, true);
+  if (!GLOBAL_allowed_autograding_commands_custom_string.empty()) {
+    nlohmann::json allowed_autograding_commands_custom = nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
+    allowed_autograding_commands.update(allowed_autograding_commands_custom);
+  }
+  if (program.length() > 0 && program[0] == '/') {
+    for (auto& entry : allowed_autograding_commands.items()) {
+      nlohmann::json program_obj = entry.value();
+      if (program_obj["path"] == program) {
+        if (command_available_in_env(program_obj, running_in_docker)) {
+          full_path_executable = program;
           return true;
+        }
+        return false;
       }
     }
-    return false;
+  }
+  else {
+    if (allowed_autograding_commands.contains(program)) {
+      nlohmann::json program_obj = allowed_autograding_commands[program];
+      if (command_available_in_env(program_obj, running_in_docker)) {
+        full_path_executable = program_obj["path"];
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {

@@ -23,17 +23,15 @@ file (READ ${allowed_autograding_commands_default} allowed_autograding_commands_
 file (READ ${allowed_autograding_commands_custom} allowed_autograding_commands_custom_obj)
 
 # Then embed the json files within a allowed_autograding_commands.cpp source file
-string (REGEX REPLACE "([\"\\\n])" "\\\\\\1" allowed_autograding_commands_default_obj "${allowed_autograding_commands_default_obj}")
-set (allowed_autograding_commands_default_definition "const char *GLOBAL_allowed_autograding_commands_default_string = \"")
-string (REGEX REPLACE "([\"\\\n])" "\\\\\\1" allowed_autograding_commands_custom_obj "${allowed_autograding_commands_custom_obj}")
-set (allowed_autograding_commands_custom_definition "const char *GLOBAL_allowed_autograding_commands_custom_string = \"")
-set (end_definition "\";\n")
+set (allowed_autograding_commands_headers "#include <string> \n#include <iostream> \n")
+set (allowed_autograding_commands_default_definition "extern const std::string GLOBAL_allowed_autograding_commands_default_string = R\"(")
+set (allowed_autograding_commands_custom_definition "extern const std::string GLOBAL_allowed_autograding_commands_custom_string = R\"(")
+set (end_definition ")\";\n")
 
 file (
   WRITE allowed_autograding_commands.cpp
-  "${allowed_autograding_commands_default_definition}${allowed_autograding_commands_default_obj}${end_definition}${allowed_autograding_commands_custom_definition}${allowed_autograding_commands_custom_obj}${end_definition}"
+  "${allowed_autograding_commands_headers}${allowed_autograding_commands_default_definition}${allowed_autograding_commands_default_obj}${end_definition}${allowed_autograding_commands_custom_definition}${allowed_autograding_commands_custom_obj}${end_definition}"
 )
-
 
 ###################################################################################
 # source files
