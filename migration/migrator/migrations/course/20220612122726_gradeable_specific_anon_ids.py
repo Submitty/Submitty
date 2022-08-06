@@ -54,17 +54,4 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE users DROP COLUMN IF EXISTS anon_id;")
 
 def down(config, database, semester, course):
-    """
-    Run down migration (rollback).
-
-    :param config: Object holding configuration details about Submitty
-    :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
-    :param course: Code of course being migrated
-    :type course: str
-    """
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS anon_id character varying(255);")
-    database.execute("UPDATE users u SET anon_id=(SELECT ga.anon_id FROM gradeable_anon ga WHERE ga.user_id=u.user_id LIMIT 1);")
+    pass
