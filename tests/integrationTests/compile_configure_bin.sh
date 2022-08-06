@@ -12,7 +12,7 @@ g++ ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/load_config_json.cpp ${GRAD
     ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/change.cpp ${GRADINGCODE}/difference.cpp \
     ${GRADINGCODE}/tokenSearch.cpp ${GRADINGCODE}/tokens.cpp ${GRADINGCODE}/clean.cpp \
     ${GRADINGCODE}/execute_limits.cpp ${GRADINGCODE}/seccomp_functions.cpp \
-    ${GRADINGCODE}/empty_custom_function.cpp ${GRADINGCODE}/allowed_commands.cpp\
+    ${GRADINGCODE}/empty_custom_function.cpp ${GRADINGCODE}/allowed_autograding_commands.cpp\
     -I${JSONCODE} \
     -pthread -g -std=c++11 -lseccomp -o ${OUTPUT_FILE}
 

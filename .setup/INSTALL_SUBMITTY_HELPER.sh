@@ -451,31 +451,30 @@ find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
 
 echo -e "Copy the grading code"
 
-# copy the files from the repo excluding autograding_allowed_commands_default.json
-sync_exclude=autograding_allowed_commands_default.json
-rsync -rtz --exclude "${sync_exclude}" "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
+# copy the files from the repo
+rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
 
-# copy the autograding_allowed_commands.json to config
-rsync -tz "${SUBMITTY_REPOSITORY}/grading/autograding_allowed_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
+# copy the allowed_autograding_commands_default.json to config
+rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
 
 # replace filling variables
-sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
-# # change permissions of autograding_allowed_commands_default.json
-chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
-chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_default.json"
+# # change permissions of allowed_autograding_commands_default.json
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
-# create autograding_allowed_commands_custom.json if doesnt exist
-if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json" ]]; then
-    touch "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+# create allowed_autograding_commands_custom.json if doesnt exist
+if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json" ]]; then
+    touch "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 fi
 
 # replace filling variables
-sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 
-# # change permissions of autograding_allowed_commands_custom.json
-chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
-chmod 644 "${SUBMITTY_INSTALL_DIR}/config/autograding_allowed_commands_custom.json"
+# # change permissions of allowed_autograding_commands_custom.json
+chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
+chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
@@ -587,7 +586,7 @@ g++ "${GRADINGCODE}/main_configure.cpp" \
     "${GRADINGCODE}/execute_limits.cpp" \
     "${GRADINGCODE}/seccomp_functions.cpp" \
     "${GRADINGCODE}/empty_custom_function.cpp" \
-    "${GRADINGCODE}/allowed_commands.cpp" \
+    "${GRADINGCODE}/allowed_autograding_commands.cpp" \
     "-I${JSONCODE}" \
     -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
 
