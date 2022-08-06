@@ -38,7 +38,7 @@ class TeamTester extends BaseUnitTest {
             'team_name' => 'TEST NAME',
             'registration_section' => 'test',
             'rotating_section' => 0,
-            'users' => $this->member_users;
+            'users' => $this->member_users
         ];
         $team = new Team($this->core, $details);
         $this->assertEquals($details['team_id'], $team->getId());
