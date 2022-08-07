@@ -840,6 +840,17 @@ CREATE TABLE public.gradeable_allowed_minutes_override (
 
 
 --
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255) NOT NULL
+);
+
+
+--
 -- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1636,7 +1647,6 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
-    anon_id character varying,
     user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
@@ -1891,6 +1901,14 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gradeable_anon gradeable_anon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_pkey PRIMARY KEY (g_id, anon_id);
 
 
 --
@@ -2511,6 +2529,22 @@ ALTER TABLE ONLY public.gradeable_access
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --
