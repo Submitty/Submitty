@@ -238,7 +238,7 @@ class DiffViewer {
             }
         }
         elseif ($expected_string != "") {
-            if (strlen($expected_file) < $size_limit) {
+            if (strlen($expected_string) < $size_limit) {
                 $tmp_expected = $expected_string;
                 $this->has_expected = trim($tmp_expected) !== "";
                 $this->expected = explode("\n", $tmp_expected);
