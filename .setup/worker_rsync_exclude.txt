@@ -1,0 +1,7 @@
+.github
+.vagrant
+.setup/data
+site
+sample_files
+more_autograding_examples
+tests
