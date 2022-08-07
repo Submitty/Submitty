@@ -214,7 +214,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           autocheck_j["messages"].push_back(new_message);
         }
       }
-      if (fm != "" && !failure_message_already_added) {
+      if (fm != "" && !failure_message_already_added && !test_case_success) {
         nlohmann::json new_message;
         new_message["message"] = fm;
         new_message["type"] = "failure";
