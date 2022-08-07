@@ -199,7 +199,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
     }
 
     std::string fm = tcg.value("failure_message","");
-    if (!test_case_success) {
+    if (!test_case_success || show_message) {
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
