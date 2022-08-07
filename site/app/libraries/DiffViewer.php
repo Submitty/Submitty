@@ -135,7 +135,7 @@ class DiffViewer {
     }
 
     /**
-     * Load the actual file, expected file, expected string and diff json, 
+     * Load the actual file, expected file, expected string and diff json,
      * using them to populate the necessary arrays for display them later back to the user
      *
      * @param string $actual_file
