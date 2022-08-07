@@ -15,6 +15,8 @@ class DiffViewer {
     /** @var string */
     private $expected_file;
     /** @var string */
+    private $expected_string;
+    /** @var string */
     private $diff_file;
     /** @var string */
     private $image_difference;
@@ -133,8 +135,8 @@ class DiffViewer {
     }
 
     /**
-     * Load the actual file, expected file, and diff json, using them to populate the necessary arrays for
-     * display them later back to the user
+     * Load the actual file, expected file, expected string and diff json, 
+     * using them to populate the necessary arrays for display them later back to the user
      *
      * @param string $actual_file
      * @param string $expected_file
@@ -147,6 +149,7 @@ class DiffViewer {
     public function __construct(
         string $actual_file,
         string $expected_file,
+        string $expected_string,
         string $diff_file,
         string $image_difference,
         string $id_prepend = "id"
@@ -154,6 +157,7 @@ class DiffViewer {
         $this->id = rtrim($id_prepend, "_") . "_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
+        $this->expected_string = $expected_string;
         $this->diff_file = $diff_file;
         $this->image_difference = $image_difference;
     }
@@ -177,6 +181,7 @@ class DiffViewer {
 
         $actual_file = $this->actual_file;
         $expected_file = $this->expected_file;
+        $expected_string = $this->expected_string;
         $diff_file = $this->diff_file;
         $can_diff = true;
         $image_difference = $this->image_difference;
@@ -230,6 +235,22 @@ class DiffViewer {
                     $this->expected = explode("\n", $tmp_expected);
                     $this->display_expected = true;
                 }
+            }
+        }
+        elseif ($expected_string != "") {
+            if (strlen($expected_file) < $size_limit) {
+                $tmp_expected = $expected_string;
+                $this->has_expected = trim($tmp_expected) !== "";
+                $this->expected = explode("\n", $tmp_expected);
+                $this->display_expected = true;
+            }
+            else {
+                $can_diff = false;
+                //load in the first sizelimit characters of the file (TEMP VALUE)
+                $tmp_expected = substr($expected_string, 0, $size_limit);
+                $this->has_expected = trim($tmp_expected) !== "";
+                $this->expected = explode("\n", $tmp_expected);
+                $this->display_expected = true;
             }
         }
 

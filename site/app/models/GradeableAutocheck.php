@@ -69,7 +69,7 @@ class GradeableAutocheck extends AbstractModel {
             $this->display_as_sequence_diagram = false;
         }
 
-        $actual_file = $expected_file = $difference_file = $image_difference = "";
+        $actual_file = $expected_file = $expected_string = $difference_file = $image_difference = "";
 
         if (isset($details["actual_file"])) {
             $this->public = (isset($details["results_public"]) && $details["results_public"]);
@@ -81,15 +81,11 @@ class GradeableAutocheck extends AbstractModel {
         }
 
         if (isset($details["use_expected_string"])) {
-            if (
-                isset($details["expected_file"])
-                && substr($details["expected_file"], 0, 11) == "test_output"
-                && file_exists($results_path . "/details/test_output/" . end(explode("/", $details["expected_file"])))
-            ) {
-                $expected_file = $results_path . "/details/test_output/" . end(explode("/", $details["expected_file"]));
+            if (isset($details["expected_string"])) {
+                $expected_string = $details["expected_string"];
             }
             else {
-                $this->core->addErrorMessage("Auto-generated expected file not found.");
+                $this->core->addErrorMessage("Expected string not specified.");
             }
         }
         elseif (isset($details["expected_file"])) {
@@ -143,6 +139,6 @@ class GradeableAutocheck extends AbstractModel {
             $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
 
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $expected_string, $difference_file, $image_difference, $this->index);
     }
 }
