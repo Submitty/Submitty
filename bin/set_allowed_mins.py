@@ -64,8 +64,9 @@ def send_data(db, allowed_minutes, override):
     db.execute(text(query), gradeable=GRADEABLE)
     if override is not None:
         for user in override:
-            query = """INSERT INTO gradeable_allowed_minutes_override (g_id, user_id, allowed_minutes)
-                       VALUES (:gradeable, :userid, :minutes)"""
+            query = """INSERT INTO gradeable_allowed_minutes_override
+                    (g_id, user_id, allowed_minutes)
+                    VALUES (:gradeable, :userid, :minutes)"""
             db.execute(text(query), gradeable=GRADEABLE, userid=user['user'],
                        minutes=user['allowed_minutes'])
 
