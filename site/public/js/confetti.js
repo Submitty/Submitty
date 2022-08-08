@@ -16,7 +16,7 @@ function addConfetti() {
         }
     });
     window.addEventListener('keypress', (e) => {
-        if (e.code === 'Enter' && canvas.style.display != 'none'){
+        if (e.code === 'Enter' && canvas.style.display !== 'none') {
             canvas.style.display = 'none';
             return;
         }
@@ -49,7 +49,7 @@ function addConfetti() {
     let month = d.getMonth();
 
     //if we parsed the submission due date, use that instead
-    if (submission_date.length >= 1){
+    if (submission_date.length >= 1) {
         month = parseInt(submission_date[0], 10) - 1;
     }
 
@@ -57,7 +57,7 @@ function addConfetti() {
         let colors = [];
 
         //JS month : 0-11
-        switch (month){
+        switch (month) {
             case 0: //jan
                 colors = ['#406bc9','#ffffff','#809bce','#9ac8de','#b6c7be'];
                 break;
@@ -128,7 +128,7 @@ function addConfetti() {
 
         times_ran ++;
 
-        if (times_ran >= max_times * 10){
+        if (times_ran >= max_times * 10) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             canvas.style.display = '';
             canvas.width = 0;
@@ -139,7 +139,7 @@ function addConfetti() {
 
     function draw () {
 
-        if (canvas.style.display === 'none'){
+        if (canvas.style.display === 'none') {
             cancelAnimationFrame(frame);
             return;
         }
