@@ -235,8 +235,37 @@ void enable_all_setrlimit(const std::string &program_name,
 
 // =====================================================================================
 
-void set_env_variables(const nlohmann::json &env_variables) {
-  for (auto& ev : env_variables.items()) {
+void set_environment_variables(const nlohmann::json &environment_variables) {
+  std::map<std::string,std::string> default_environment_variables = {
+    { "PATH",                    "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin" },
+
+    // set the locale so that special characters (e.g., the copyright
+    // symbol) are not interpreted as ascii
+    { "LC_ALL",                  "en_US.UTF-8" },
+
+    // Set a default for OpenMP desired threads
+    // Can be overridden by student to be higher or lower.
+    // Instructor still controls the RLIMIT_NPROC max threads.
+    // (without this, default desired threads may be based on the system specs)
+    { "OMP_NUM_THREADS",         "4" },
+
+    // Set an environment variable to override the defaults for the
+    // initial java virtual machine heap (xms) and maximum virtual
+    // machine heap.
+    { "JAVA_TOOL_OPTIONS",       "-Xms128m -Xmx256m" },
+    // NOTE: Instructors can still override this setting with the
+    // command line.  E.g.,
+    //    java -Xms128m -Xmx256m -cp . MyProgram
+
+    // Haskell compiler needs a home environment variable (but it can be anything)
+    { "HOME",                    "/tmp" }
+  };
+  // loop over default environment variables
+  for (auto const& ev : default_environment_variables) {
+    setenv(ev.first.c_str(), ev.second.c_str(), 1);
+  }
+  // loop over specified environment variables
+  for (auto& ev : environment_variables.items()) {
     setenv(ev.key().c_str(), ev.value().get_ref<const std::string&>().c_str(), 1);
   }
 }

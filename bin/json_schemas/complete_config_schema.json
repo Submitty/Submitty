@@ -118,7 +118,7 @@
           "type" : "string"
         }
       },
-      "enviroment_variables" : {
+      "environment_variables" : {
         "type" : "object"
       },
       "resource_limits" : {

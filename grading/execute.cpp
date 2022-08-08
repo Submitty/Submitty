@@ -918,13 +918,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
 
-  /*************************************************
-  *
-  * SET ENVIROMENT VARIABLES
-  *
-  **************************************************/
-  set_env_variables(whole_config.value("enviroment_variables",nlohmann::json()));
-
   // Student's shouldn't be forking & making threads/processes...
   // but if they do, let's set them in the same process group
   int pgrp = setpgid(getpid(), 0);
@@ -1000,35 +993,17 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   if (my_path != NULL) {
     // std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
-  setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
+
+  /*************************************************
+  *
+  * SET ENVIROMENT VARIABLES
+  *
+  **************************************************/
+  set_environment_variables(whole_config.value("environment_variables",nlohmann::json()));
 
   my_path = getenv("PATH");
 
   // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
-
-  // set the locale so that special characters (e.g., the copyright
-  // symbol) are not interpreted as ascii
-  setenv("LC_ALL", "en_US.UTF-8", 1);
-
-
-  // Set a default for OpenMP desired threads
-  // Can be overridden by student to be higher or lower.
-  // Instructor still controls the RLIMIT_NPROC max threads.
-  // (without this, default desired threads may be based on the system specs)
-  setenv("OMP_NUM_THREADS","4",1);
-
-
-  // Set an environment variable to override the defaults for the
-  // initial java virtual machine heap (xms) and maximum virtual
-  // machine heap.
-  setenv("JAVA_TOOL_OPTIONS","-Xms128m -Xmx256m",1);
-  // NOTE: Instructors can still override this setting with the
-  // command line.  E.g.,
-  //    java -Xms128m -Xmx256m -cp . MyProgram
-
-
-  // Haskell compiler needs a home environment variable (but it can be anything)
-  setenv("HOME","/tmp",1);
 
 
   // print this out here (before losing our output)
