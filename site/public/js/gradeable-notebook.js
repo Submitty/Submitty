@@ -52,7 +52,7 @@ function setCodeBox(codebox_id, state) {
     // Get the codebox
     const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
-    if (state == 'clear') {
+    if (state === 'clear') {
         codebox.setValue(initial_value);
     }
     else {
@@ -223,7 +223,7 @@ $(document).ready(() => {
 
         setCodeBox(`codebox_${index}`, action);
 
-        if (action == 'clear') {
+        if (action === 'clear') {
             $(`${button_selector}clear_button`).attr('disabled', true);
             $(`${button_selector}recent_button`).attr('disabled', false);
         }
@@ -275,12 +275,12 @@ $(document).ready(() => {
         const action = items[2];
         const field_set_id = `mc_field_${index}`;
 
-        if (action == 'clear') {
+        if (action === 'clear') {
             clearMultipleChoices(field_set_id);
             $(`#mc_${index}_clear_button`).attr('disabled', true);
             $(`#mc_${index}_recent_button`).attr('disabled', false);
         }
-        else if (action == 'recent') {
+        else if (action === 'recent') {
             setMultipleChoices(field_set_id);
             $(`#mc_${index}_clear_button`).attr('disabled', true);
             $(`#mc_${index}_recent_button`).attr('disabled', true);
@@ -325,7 +325,7 @@ $(document).ready(() => {
         let data_to_set = '';
 
         // Collect data from the data-* attribute of the text box
-        if (button_action == 'clear') {
+        if (button_action === 'clear') {
             data_to_set = $(field_id).attr('data-initial_value');
             $(`${field_id}_clear_button`).attr('disabled', true);
             $(`${field_id}_recent_button`).attr('disabled', false);
@@ -354,6 +354,7 @@ $(document).ready(() => {
         const clear_button_id = `#short_answer_${index_num}_clear_button`;
         const recent_button_id = `#short_answer_${index_num}_recent_button`;
 
+        // eslint-disable-next-line eqeqeq
         if ($(text_box_id).val() == initial_value) {
             $(clear_button_id).attr('disabled', true);
         }
@@ -361,6 +362,7 @@ $(document).ready(() => {
             $(clear_button_id).attr('disabled', false);
         }
 
+        // eslint-disable-next-line eqeqeq
         if ($(text_box_id).val() == recent_submission) {
             $(recent_button_id).attr('disabled', true);
         }

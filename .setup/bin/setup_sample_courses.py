@@ -9,7 +9,7 @@ Usage: ./setup_sample_courses.py
        ./setup_sample_courses.py [course [course]]
        ./setup_sample_courses.py --help
 
-The first will create all couress in courses.yml while the second will only create the courses
+The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
 """
@@ -45,6 +45,7 @@ yaml = YAML(typ='safe')
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
+# Default values, will be overwritten in `main()` if corresponding arguments are supplied
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
@@ -52,10 +53,9 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
-    database_config_json = json.load(database_config)
-    DB_USER = database_config_json["database_user"]
-    DB_PASS = database_config_json["database_password"]
+DB_PORT = 5432
+DB_USER = "submitty_dbuser"
+DB_PASS = "submitty_dbuser"
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -70,17 +70,34 @@ def main():
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
+    global DB_HOST, DB_PORT, DB_USER, DB_PASS
+    global SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR, SUBMITTY_REPOSITORY
+    global MORE_EXAMPLES_DIR, TUTORIAL_DIR
 
     args = parse_args()
     DB_ONLY = args.db_only
     NO_SUBMISSIONS = args.no_submissions
     NO_GRADING = args.no_grading
+    SUBMITTY_INSTALL_DIR = args.install_dir
+    SUBMITTY_DATA_DIR = args.data_dir
+    SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
+    MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
+    TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
+
+    if not os.path.isdir(SUBMITTY_INSTALL_DIR):
+        raise SystemError(f"The following directory does not exist: {SUBMITTY_INSTALL_DIR}")
     if not os.path.isdir(SUBMITTY_DATA_DIR):
-        raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
+        raise SystemError(f"The following directory does not exist: {SUBMITTY_DATA_DIR}")
     for directory in ["courses"]:
         if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
             raise SystemError("The following directory does not exist: " + os.path.join(
                 SUBMITTY_DATA_DIR, directory))
+    with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as database_config:
+        database_config_json = json.load(database_config)
+        DB_USER = database_config_json["database_user"]
+        DB_HOST = database_config_json["database_host"]
+        DB_PORT = database_config_json["database_port"]
+        DB_PASS = database_config_json["database_password"]
     use_courses = args.course
 
     # We have to stop all running daemon grading and jobs handling
@@ -139,7 +156,8 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+    submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
+                                    .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
@@ -240,7 +258,7 @@ def main():
 
     if not NO_GRADING:
         # queue up all of the newly created submissions to grade!
-        os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
+        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
 
 
 def get_random_text_from_file(filename):
@@ -349,7 +367,6 @@ def generate_random_users(total, real_users):
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
                              "user_group": 4,
@@ -494,6 +511,8 @@ def parse_args():
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
                         help="Path to the folder that contains .yml files to use for course creation. Defaults to "
                              "../data/courses")
+    parser.add_argument("--install_dir", type=str, default=SUBMITTY_INSTALL_DIR, help="install path of submitty")
+    parser.add_argument("--data_dir", type=str, default=SUBMITTY_DATA_DIR, help="data path of submitty")
     parser.add_argument("course", nargs="*",
                         help="course code to build. If no courses are passed in, then it'll use "
                              "all courses in courses.json")
@@ -567,7 +586,6 @@ class User(object):
     Attributes:
         id
         numeric_id
-        anon_id
         password
         firstname
         lastname
@@ -584,7 +602,6 @@ class User(object):
     def __init__(self, user):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
-        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -776,12 +793,14 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         print("Database created, now populating ", end="")
 
-        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+        submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
+                                        .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
         print("(Master DB connection made, metadata bound)...")
 
-        engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, database))
+        engine = create_engine("postgresql:///{}?host={}&port={}&user={}&password={}"
+                               .format(database, DB_HOST, DB_PORT, DB_USER, DB_PASS))
         self.conn = engine.connect()
         self.metadata = MetaData(bind=engine)
         print("(Course DB connection made, metadata bound)...")
@@ -828,11 +847,10 @@ class Course(object):
                                   registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
-                users_table.c.rotating_section: bindparam('rotating_section'),
-                users_table.c.anon_id: bindparam('anon_id')
+                users_table.c.rotating_section: bindparam('rotating_section')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -884,7 +902,21 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
 
+        anon_ids = {}
         for gradeable in self.gradeables:
+            #create gradeable specific anonymous ids for users
+            prev_state = random.getstate()
+            for user in self.users:
+                anon_id = generate_random_user_id(15)
+                while anon_id in anon_ids.values():
+                    anon_id = generate_random_user_id(15)
+                anon_ids[user.id] = anon_id
+                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
+                self.conn.execute(gradeable_anon.insert(),
+                                  user_id=user.id,
+                                  g_id=gradeable.id,
+                                  anon_id=anon_id)
+            random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
                 json_team_history = self.make_sample_teams(gradeable)
@@ -965,7 +997,7 @@ class Course(object):
                                     os.makedirs(annotation_path)
 
                             # Reduce the probability to get a cancelled submission (active_version = 0)
-                            # This is done my making other possibilities three times more likely
+                            # This is done by making other possibilities three times more likely
                             version_population = []
                             for version in range(1, versions_to_submit+1):
                                 version_population.append((version, 3))
@@ -1019,7 +1051,7 @@ class Course(object):
                                         dst = os.path.join(submission_path, str(version))
                                         create_gradeable_submission(src, dst)
                                 elif gradeable.annotated_pdf is True:
-                                    # Get a list of graders that has access to the submission
+                                    # Get a list of graders that have access to the submission
                                     assigned_graders = []
                                     stmt = select([
                                         peer_assign.columns.user_id,
@@ -1040,16 +1072,16 @@ class Course(object):
                                             annotation_version_path = os.path.join(annotation_path, str(versions_to_submit))
                                             if not os.path.exists(annotation_version_path):
                                                 os.makedirs(annotation_version_path)
-                                        
+
                                             annotations = random.sample(gradeable.annotations, random.randint(1, len(gradeable.annotations)))
                                             graders = random.sample(assigned_graders, len(annotations)-1) if len(assigned_graders) > 0 else []
                                             # Make sure instructor is responsible for one of the annotations
                                             graders.append("instructor")
 
                                             anon_dst = os.path.join(dst, submission).split("/")
-                                            anon_dst[9] = anon_team_id if team_id is not None else user.anon_id
+                                            anon_dst[9] = anon_team_id if team_id is not None else anon_ids[user.id]
                                             anon_dst = "/".join(anon_dst) # has the user id or the team id in the file path being anonymous
-                                            
+
                                             for i in range(len(graders)):
                                                 annotation_src = os.path.join(gradeable.annotation_path, annotations[i])
                                                 annotation_dst = os.path.join(annotation_path, str(version))
@@ -1174,7 +1206,7 @@ class Course(object):
                     dir_to_make=os.path.join(course_materials_folder, inner_dir)
                     os.mkdir(dir_to_make)
                     subprocess.run(["chown", "submitty_php:submitty_php", dir_to_make])
-                    self.conn.execute(course_materials_table.insert(), 
+                    self.conn.execute(course_materials_table.insert(),
                             path=dir_to_make,
                             type=2,
                             release_date='2022-01-01 00:00:00',
@@ -1185,7 +1217,7 @@ class Course(object):
                     filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, course_materials_source))
                     shutil.copy(tmpfilepath, filepath)
                     subprocess.run(["chown", "submitty_php:submitty_php", filepath])
-                    self.conn.execute(course_materials_table.insert(), 
+                    self.conn.execute(course_materials_table.insert(),
                                 path=filepath,
                                 type=0,
                                 release_date='2022-01-01 00:00:00',
@@ -1194,7 +1226,7 @@ class Course(object):
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
-        
+
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
