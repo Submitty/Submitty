@@ -222,11 +222,11 @@ class DateUtils {
      * to the given format.
      *
      * @param User $user
-     * @param string $time_stamp
+     * @param \DateTime|string $time_stamp
      * @param string $format
      * @return string
      */
-    public static function convertTimeStamp(User $user, string $time_stamp, string $format): string {
+    public static function convertTimeStamp(User $user, $time_stamp, string $format): string {
         $time = self::parseDateTime($time_stamp, $user->getUsableTimeZone());
         return $time->format($format);
     }

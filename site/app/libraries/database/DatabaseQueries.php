@@ -2982,17 +2982,60 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Fetch the session creation timestamp and other information for all active sessions of the given user
+     * @param string $user_id
+     *
+     * @return array
+     */
+    public function getSessionsInfoByUser($user_id) {
+        $this->submitty_db->query("SELECT session_id, csrf_token, session_created, browser_name, browser_version, platform FROM sessions WHERE user_id=? ORDER BY session_created", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * Update the boolean determining whether the user can have only one active session at a time
+     * @param string $user_id
+     * @param bool $to_set
+     * 
+     */
+    public function updateSecureSessionSetting(string $user_id, bool $to_set = false) {
+        $this->submitty_db->query("UPDATE users SET enforce_secure_session=? WHERE user_id=?", [$to_set, $user_id]);
+    }
+
+    /**
+     * Get the enforce_secure_session boolean of a user
+     * @param string $user_id
+     * 
+     * @return bool
+     */
+    public function getSecureSessionSetting(string $user_id): bool {
+        $this->submitty_db->query("SELECT enforce_secure_session FROM users WHERE user_id=?", [$user_id]);
+        return $this->submitty_db->rows()[0]['enforce_secure_session'];
+    }
+
+    /**
+     * Terminate all sessions of current user except the one with provided session_id 
+     * @param string $session_id
+     * @param string $user_id
+     */
+    public function removeUserSessionsExcept($session_id, $user_id = null) {
+        $user_id = $user_id ?? $this->core->getUser()->getId();
+        $this->submitty_db->query("DELETE FROM sessions WHERE user_id=? AND session_id!=?", [$user_id, $session_id]);
+    }
+
+    /**
      * @todo: write phpdoc
      *
      * @param string $session_id
      * @param string $user_id
      * @param string $csrf_token
+     * @param array $user_agent
      */
-    public function newSession($session_id, $user_id, $csrf_token) {
+    public function newSession($session_id, $user_id, $csrf_token, $user_agent) {
         $this->submitty_db->query(
-            "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '336 hours')",
-            [$session_id, $user_id, $csrf_token]
+            "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires, session_created, browser_name, browser_version, platform)
+                                   VALUES(?,?,?,current_timestamp + interval '336 hours',current_timestamp,?,?,?)",
+            [$session_id, $user_id, $csrf_token, $user_agent['browser'], $user_agent['version'], $user_agent['platform']]
         );
     }
 

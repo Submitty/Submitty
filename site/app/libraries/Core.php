@@ -418,6 +418,19 @@ class Core {
     }
 
     /**
+     * Get the session id of the current session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        $session_id = $this->session_manager->getCurrentSessionId();
+        if ($session_id) {
+            return $session_id;
+        }
+        return false;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager, returning bool
      * on whether this was done or not
      *
@@ -469,9 +482,20 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $user_id = $this->authentication->getUserId();
+                //get user's browser info
+                if (ini_get('browscap')) {
+                    $browser_info = get_browser(null, true);
+                }
+                if (!isset($browser_info) || $browser_info === false) {
+                    $browser_info = ["browser" => "Unknown", "version" => "", "platform" => "Unknown"];
+                }
+                $new_session_id = $this->session_manager->newSession($user_id, $browser_info);
+                if ($this->database_queries->getSecureSessionSetting($user_id)) {
+                    $this->database_queries->removeUserSessionsExcept($new_session_id, $user_id);
+                }
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
-                    $this->session_manager->newSession($user_id),
+                    $new_session_id,
                     $user_id,
                     $persistent_cookie
                 );

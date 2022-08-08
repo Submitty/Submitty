@@ -50,7 +50,7 @@ class SessionManager {
      *
      * @return string
      */
-    public function newSession(string $user_id): string {
+    public function newSession(string $user_id, array $user_agent): string {
         if (!isset($this->session['session_id'])) {
             $this->session['session_id'] = Utils::generateRandomString();
             $this->session['user_id'] = $user_id;
@@ -58,10 +58,23 @@ class SessionManager {
             $this->core->getQueries()->newSession(
                 $this->session['session_id'],
                 $this->session['user_id'],
-                $this->session['csrf_token']
+                $this->session['csrf_token'],
+                $user_agent
             );
         }
         return $this->session['session_id'];
+    }
+
+    /**
+     * Get the session id of the currently loaded session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        if (isset($this->session['session_id'])) {
+            return $this->session['session_id'];
+        }
+        return false;
     }
 
     /**

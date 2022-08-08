@@ -1,0 +1,43 @@
+<div class="content">
+    <div class="sessions-container">
+        <form method='POST' onsubmit="return terminateAll('{{ csrf_token }}')">
+            <button type="submit" class="btn btn-danger" id="terminate-all-button">
+                Terminate All
+            </button>
+            <em>(Terminate all sessions except current.)</em>
+        </form>
+        <div>
+            Enforce secure session: <input type="checkbox" class="enforce-checkbox" onclick="setSecureSession(this, event, '{{ csrf_token }}')" {{ (secure_session) ? 'checked' : '' }}><br>
+            <em>Note: If this option is checked then only one session can be active at a time.</em>
+        </div>
+        <table class="table table-bordered" id="sessions-table">
+            <thead>
+                <tr>
+                    <th class="session-th">Login Timestamp (month/day/year)</th>
+                    <th class="session-th">Browser Name</th>
+                    <th class="session-th">Platform</th>
+                    <th class="session-th">Action</th>
+                </tr>
+            </thead>
+            {% for session in user_sessions %}
+                <tr>
+                    <td>{{ session['session_created']|date('m/d/Y H:i:s T') }}</td>
+                    <td>{{ session['browser_name'] }} {{ session['browser_version'] }}</td>
+                    <td>{{ session['platform'] }}</td>
+                    <td>
+                    {% if current_session_id == session['session_id'] %}
+                        <form action="authentication/logout">
+                            <input type="submit" class="btn btn-primary" value="Logout">
+                        </form>
+                    {% else %}
+                        <form method='POST' class="other-session" onsubmit="return terminateSession(this, '{{ csrf_token }}')">
+                            <input type="hidden" name="session_id" value="{{ session['session_id'] }}">
+                            <input type="submit" class="btn btn-primary" value="Terminate">
+                        </form>
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
