@@ -79,13 +79,15 @@ function CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details,
     // Expand/Collapse all test cases
     let test_cases_have_same_state = true;
     parsed_test_cases.forEach((test_case, index) => {
-        const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
-        const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
+        if ($(`#tc_${index}`).find('.loading-tools').length === 1) {
+            const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
+            const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
 
-        // Check if test case can be expanded/collapsed
-        if (can_view_details && test_case.has_extra_results &&
-            ((are_test_cases_expanded && isTestCaseLoadingToolsShowVisible) || (!are_test_cases_expanded && !isTestCaseLoadingToolsShowVisible))) {
-            test_cases_have_same_state = false;
+            // Check if test case can be expanded/collapsed
+            if (can_view_details && test_case.has_extra_results &&
+                ((are_test_cases_expanded && isTestCaseLoadingToolsShowVisible) || (!are_test_cases_expanded && !isTestCaseLoadingToolsShowVisible))) {
+                test_cases_have_same_state = false;
+            }
         }
     });
 
@@ -228,14 +230,16 @@ function loadAllTestcaseOutput(div_name, test_cases, expand_all, show_hidden, sh
 
     // Expand/Collapse all test cases
     parsed_test_cases.forEach((test_case, index)  => {
-        const test_case_div_name = `testcase_${index}`;
-        const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
-        const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
+        if ($(`#tc_${index}`).find('.loading-tools').length === 1) {
+            const test_case_div_name = `testcase_${index}`;
+            const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
+            const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
 
-        // Check if test case should be expanded/collapsed
-        if (can_view_details && test_case.has_extra_results &&
-            ((expand_all && isTestCaseLoadingToolsShowVisible) || (!expand_all && !isTestCaseLoadingToolsShowVisible))) {
-            loadTestcaseOutput(test_case_div_name, gradeable_id, who_id, index, test_cases, version);
+            // Check if test case should be expanded/collapsed
+            if (can_view_details && test_case.has_extra_results &&
+                ((expand_all && isTestCaseLoadingToolsShowVisible) || (!expand_all && !isTestCaseLoadingToolsShowVisible))) {
+                loadTestcaseOutput(test_case_div_name, gradeable_id, who_id, index, test_cases, version);
+            }
         }
     });
 }
