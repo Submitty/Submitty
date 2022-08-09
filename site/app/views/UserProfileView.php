@@ -41,6 +41,8 @@ class UserProfileView extends AbstractView {
         $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'
             ?  $user->getTimeZone()
             : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
+        
+        $this->core->getOutput()->addInternalModuleJs('user-profile.js');
 
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
