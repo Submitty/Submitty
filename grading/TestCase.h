@@ -77,6 +77,18 @@ public:
     return false;
   }
 
+  bool isCommentCount() const {
+    std::vector<std::string> commands = getCommands();
+    for (int i = 0; i < commands.size(); i++) {
+      const std::string command_name = "comment_count";
+      if (commands[i].size() > command_name.size() &&
+          commands[i].substr(0,command_name.size()) == command_name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool isSubmissionLimit() const { return (isFileCheck() && _json.find("max_submissions") != _json.end()); }
   int getMaxSubmissions() const { assert (isSubmissionLimit()); return _json.value("max_submissions",20); }
   float getPenalty() const { assert (isSubmissionLimit()); return _json.value("penalty",-0.1); }

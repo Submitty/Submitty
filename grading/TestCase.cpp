@@ -433,6 +433,11 @@ const nlohmann::json TestCase::get_test_case_limits() const {
     adjust_test_case_limits(_test_case_limits,RLIMIT_SIGPENDING,100);
   }
 
+  if (isCommentCount()) {
+    // necessary for the comment count program
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,100);
+  }
+
   return _test_case_limits;
 }
 
