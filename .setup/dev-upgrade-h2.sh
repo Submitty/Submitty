@@ -111,10 +111,10 @@ update_apache() {
 
     info "Inserting TLS configurations to the apache config ${P_APACHE}"
     {
-        sed -i "/^<VirtualHost /a SSLEngine\ on" "${P_APACHE}"
-        sed -i "/^SSLE/a SSLCertificateFile\ \"${P_CERT}/${S_DOMAIN}.crt\"" "${P_APACHE}"
-        sed -i "/^SSLC/a SSLCertificateKeyFile\ \"${P_CERT}/${S_DOMAIN}.key\"" "${P_APACHE}"
-        sed -i "s/^SSL/\ \ \ \ SSL/" "${P_APACHE}"
+        sed -i --follow-symlinks "/^<VirtualHost /a SSLEngine\ on" "${P_APACHE}"
+        sed -i --follow-symlinks "/^SSLE/a SSLCertificateFile\ \"${P_CERT}/${S_DOMAIN}.crt\"" "${P_APACHE}"
+        sed -i --follow-symlinks "/^SSLC/a SSLCertificateKeyFile\ \"${P_CERT}/${S_DOMAIN}.key\"" "${P_APACHE}"
+        sed -i --follow-symlinks "s/^SSL/\ \ \ \ SSL/g" "${P_APACHE}"
     } || panic "Failed to update the apache config"
 
     info "Double check that HTTP/2 module is enabled"
@@ -130,17 +130,17 @@ update_apache() {
     }
 }
 update_nginx() {
-    grep "ssl_" "${P_NGINX}" && {
+    grep "ssl" "${P_NGINX}" && {
         warn "Found SSL configurations in nginx, removing"
         remove_nginx
     }
 
     info "Inserting TLS configurations to the nginx config ${P_NGINX}"
     {
-        sed -i "s/default_server/ssl\ default_server/" "${P_NGINX}"
-        sed -i "/^\ \{4\}server_n/a ssl_certificate\ \"${P_CERT}/${S_DOMAIN}.crt\";" "${P_NGINX}"
-        sed -i "/^ssl_c/a ssl_certificate_key\ \"${P_CERT}/${S_DOMAIN}.key\";" "${P_NGINX}"
-        sed -i "s/^ssl_/\ \ \ \ ssl_/" "${P_NGINX}"
+        sed -i --follow-symlinks "s/default_server/ssl\ default_server/g" "${P_NGINX}"
+        sed -i --follow-symlinks "/^\ *server_n/a ssl_certificate\ \"${P_CERT}/${S_DOMAIN}.crt\";" "${P_NGINX}"
+        sed -i --follow-symlinks "/^ssl_c/a ssl_certificate_key\ \"${P_CERT}/${S_DOMAIN}.key\";" "${P_NGINX}"
+        sed -i --follow-symlinks "s/^ssl_/\ \ \ \ ssl_/g" "${P_NGINX}"
     } || panic "Failed to update the nginx config"
 
     info "Checking the integrity of NginX configuration"
@@ -158,13 +158,13 @@ remove_config() {
 }
 remove_apache() {
     info "Removing TLS configurations from the apache config ${P_APACHE}"
-    sed -i "/^\ \{4\}SSL/d" "${P_APACHE}" || warn "Failed to remove SSL from apache"
+    sed -i --follow-symlinks "/^\ *SSL/d" "${P_APACHE}" || warn "Failed to remove SSL from apache"
 }
 remove_nginx() {
     info "Removing TLS configurations from the nginx config ${P_NGINX}"
     {
-        sed -i "/^\ \{4\}ssl_/d" "${P_NGINX}"
-        sed -i "s/\ ssl//" "${P_NGINX}"
+        sed -i --follow-symlinks "/^\ *ssl_/d" "${P_NGINX}"
+        sed -i --follow-symlinks "s/\ ssl//g" "${P_NGINX}"
     } || warn "Failed to remove SSL from nginx"
 }
 
@@ -225,7 +225,7 @@ reload_wsserver() {
 # upgrade submitty configuration to HTTPS
 upgrade_submitty() {
     info "Upgrading configurations for Submitty"
-    sed -i "s/http\:\/\/${S_DOMAIN}/https\:\/\/${S_DOMAIN}/"                             \
+    sed -i --follow-symlinks "s/http\:\/\/${S_DOMAIN}/https\:\/\/${S_DOMAIN}/"           \
             "${SUBMITTY_INSTALL_DIR}/config/submitty.json"                               \
         || panic "Failed to upgrade to HTTPS for Submitty"
 }
@@ -233,7 +233,7 @@ upgrade_submitty() {
 # downgrade submitty configuration to HTTP
 downgrade_submitty() {
     info "Downgrading configurations for Submitty"
-    sed -i "s/https\:\/\/${S_DOMAIN}/http\:\/\/${S_DOMAIN}/"                             \
+    sed -i --follow-symlinks "s/https\:\/\/${S_DOMAIN}/http\:\/\/${S_DOMAIN}/"           \
             "${SUBMITTY_INSTALL_DIR}/config/submitty.json"                               \
         || panic "Failed to downgrade to HTTP for Submitty"
 }
