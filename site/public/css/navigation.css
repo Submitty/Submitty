@@ -80,7 +80,7 @@
 }
 
 .seating-chart-table {
-    border:2px solid black;
+    border: 2px solid black;
     background: var(--standard-focus-cornflowe-blue);
 }
 
@@ -125,6 +125,7 @@
         display: inline;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .panel-head-active .collapse-icon,
     .expand-icon {
         display: none;
@@ -201,6 +202,7 @@
         width: 33px;
     }
 
+    /* stylelint-disable-next-line no-duplicate-selectors */
     .course-button {
         max-width: 95%;
         margin: auto;

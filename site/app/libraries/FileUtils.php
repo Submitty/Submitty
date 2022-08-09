@@ -717,4 +717,36 @@ class FileUtils {
             }
         }
     }
+
+    /**
+     * Given a path, searches for the topmost directory that's empty, here empty means having no files but there can be
+     * empty subdirectories inside that directory
+     *
+     * @param string $path Absolute path to file or directory
+     * @param string $base_path Recursion is stopped at this path i.e. this path isn't included in empty dirs
+     * @param array $results An array passed by reference will be populated if an empty dir is found. The array is
+     * populated as per the hierarchy i.e. at the end of execution the first element (if any) of the array will be
+     * the outermost empty directory and the last element (if any) will be the innermost empty directory
+     * If immediate parent directory is not empty, the array will remain empty
+     * @return void
+     */
+    public static function getTopEmptyDir(string $path, string $base_path, &$results = []): void {
+        $parent_dir = pathinfo($path, PATHINFO_DIRNAME);
+        if (!((str_starts_with($parent_dir, $base_path)) && $parent_dir != $base_path)) {
+            return;
+        }
+        $has_file = false;
+        $entities = []; // dirs or files
+        FileUtils::getDirContents($parent_dir, $entities);
+        foreach ($entities as $entity) {
+            if (is_file($entity)) {
+                $has_file = true;
+                break;
+            }
+        }
+        if ($has_file == false) {
+            FileUtils::getTopEmptyDir($parent_dir, $base_path, $results);
+            $results[] = $parent_dir;
+        }
+    }
 }

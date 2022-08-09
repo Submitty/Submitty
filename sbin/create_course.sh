@@ -35,10 +35,7 @@ echo $DATABASE_COURSE_USER
 ########################################################################################################################
 ########################################################################################################################
 
-CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER}"
-if [ -d "${DATABASE_HOST}" ]; then
-    CONN_EXTRA="${CONN_STRING} -p ${DATABASE_PORT}"
-fi
+CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER} -p ${DATABASE_PORT}"
 
 # Check that Submitty Master DB exists.
 PGPASSWORD="${DATABASE_PASS}" psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty

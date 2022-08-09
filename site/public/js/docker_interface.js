@@ -8,7 +8,7 @@ function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
 
-    if (tgt.style.display === 'block'){
+    if (tgt.style.display === 'block') {
         tgt.style.display = 'none';
         btn.innerHTML = 'Expand';
     }
@@ -21,7 +21,7 @@ function collapseSection(id,btn_id) {
 function filterOnClick() {
     const this_filter = $(this).data('capability');
 
-    $('.filter-buttons').each(function (){
+    $('.filter-buttons').each(function () {
         $(this).addClass('fully-transparent');
     });
 
@@ -30,8 +30,8 @@ function filterOnClick() {
     $('.image-row').each(function() {
         const this_row = $(this);
         let hide = true;
-        $(this).find('.badge').each(function (){
-            if ($(this).text() == this_filter) {
+        $(this).find('.badge').each(function () {
+            if ($(this).text() === this_filter) {
                 hide = false;
             }
         });
@@ -78,7 +78,7 @@ function addImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
-            if (json.status == 'success') {
+            if (json.status === 'success') {
                 $('#add-field').val('');
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
@@ -105,7 +105,7 @@ function updateImage(url) {
         },
         success: function(data) {
             const json = JSON.parse(data);
-            if (json.status == 'success') {
+            if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
