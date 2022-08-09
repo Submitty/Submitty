@@ -300,6 +300,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
