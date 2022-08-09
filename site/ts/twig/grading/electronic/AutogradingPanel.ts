@@ -9,7 +9,7 @@ function openAllAutoGrading() {
         const clickable_div = clickable_divs[i];
         const num = clickable_div.id.split('_')[1];
         const content_div = $(`#testcase_${num}`);
-        if (content_div.css('display') == 'none') {
+        if (content_div.css('display') === 'none') {
             clickable_div.click();
         }
     }

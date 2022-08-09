@@ -141,6 +141,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
         'display_version': displayVersion,
+        'student_grader': isStudentGrader()==='1' ? true : false
     });
 }
 
@@ -335,7 +336,8 @@ function renderOverallComment(comment, editable) {
         resolve(Twig.twig({ref: "OverallComment"}).render({
             'overall_comment': comment,
             'editable': editable,
-            'grading_disabled': false
+            'grading_disabled': false,
+            'student_grader': isStudentGrader()==='1' ? true : false
         }));
     });
 }

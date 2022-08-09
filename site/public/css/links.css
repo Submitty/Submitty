@@ -5,6 +5,7 @@ a:visited {
     cursor: pointer;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -13,6 +14,7 @@ a > i.fa:hover {
     color: #2627ee;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -21,6 +23,7 @@ a > i.fas:hover {
     color: #2627ee;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -37,6 +40,7 @@ a:active {
     color: #991313;
 }
 
+/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -48,7 +52,9 @@ a.btn-primary > i.fa,
 a.btn-danger > i.fa {
     color: var(--text-white);
 }
+/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
 
+/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -60,7 +66,9 @@ a.btn-primary > i.fas,
 a.btn-danger > i.fas {
     color: var(--text-white);
 }
+/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
 
+/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -72,7 +80,9 @@ a.btn-primary > i.far,
 a.btn-danger > i.far {
     color: var(--text-white);
 }
+/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
 
+/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.fa.btn-default,
 a.fa,
@@ -80,6 +90,7 @@ a > i.fa {
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.fas.btn-default,
 a.fas,
@@ -87,6 +98,7 @@ a > i.fas {
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.far.btn-default,
 a.far,
@@ -98,6 +110,7 @@ a.btn {
     text-decoration: none;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .black-btn,
 .black-btn > i.fas {
     color: var(--text-black) !important;

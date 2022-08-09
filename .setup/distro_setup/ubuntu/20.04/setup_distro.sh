@@ -125,3 +125,8 @@ if [ ${VAGRANT} == 1 ]; then
 
     dpkg-reconfigure -f noninteractive slapd
 fi
+
+# Install SAML IdP docker container for testing
+if [ ${VAGRANT} == 1 ]; then
+    docker pull submitty/docker-test-saml-idp:latest
+fi
