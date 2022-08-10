@@ -16,13 +16,11 @@ const collapse_all_toggle_div_name = '#tc_collapse_all';
  *
  * @param {string} div_name - id of div containing the output of the test case
  * @param {string} index - index of test case
+ * @param {int} num_test_cases - number of test cases
  * @param {object} loadingTools - loading tools used by span containing the text that
  *                                correspond to the state of the test case (show, hide, loading)
- * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
- * @param {boolean} show_hidden - should hidden test cases be displayed
- * @param {boolean} show_hidden_details - should hidden details be displayed
  */
-function CollapseTestcaseOutput(div_name, index, loadingTools, test_cases, show_hidden, show_hidden_details) {
+function CollapseTestcaseOutput(div_name, index, num_test_cases, loadingTools) {
     $(`#show_char_${index}`).toggle();
     $(`#${div_name}`).empty();
     // eslint-disable-next-line no-undef
@@ -33,7 +31,7 @@ function CollapseTestcaseOutput(div_name, index, loadingTools, test_cases, show_
     loadingTools.find('.loading-tools-show').show();
 
     // Check if all test cases are all collapsed
-    CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details, false);
+    CheckStatesOfAllTestcases(num_test_cases, false);
 }
 
 /**
@@ -69,27 +67,23 @@ function EnableExpandALLOrCollapseAllToggles(enable_expand_all) {
  * @global {expand_all_toggle_div_name} : String - name of the div for expand all toggle
  * @global {collapse_all_loading_tools} : String - name of the div for collapse all toggle
  *
- * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
- * @param {boolean} show_hidden - should hidden test cases be displayed
- * @param {boolean} show_hidden_details - should hidden details be displayed
+ * @param {int} num_test_cases - number of test cases
  * @param {boolean} are_test_cases_expanded - should the call check if all test cases have been expanded
  */
-function CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details, are_test_cases_expanded) {
-    const parsed_test_cases = JSON.parse(test_cases);
+function CheckStatesOfAllTestcases(num_test_cases, are_test_cases_expanded) {
     // Expand/Collapse all test cases
     let test_cases_have_same_state = true;
-    parsed_test_cases.forEach((test_case, index) => {
+    for (let index = 0; index < num_test_cases; index++) {
+        // Check if test case has loading tools (can be expanded/collapsed)
         if ($(`#tc_${index}`).find('.loading-tools').length === 1) {
             const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
-            const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
 
             // Check if test case can be expanded/collapsed
-            if (can_view_details && test_case.has_extra_results &&
-                ((are_test_cases_expanded && isTestCaseLoadingToolsShowVisible) || (!are_test_cases_expanded && !isTestCaseLoadingToolsShowVisible))) {
+            if ((are_test_cases_expanded && isTestCaseLoadingToolsShowVisible) || (!are_test_cases_expanded && !isTestCaseLoadingToolsShowVisible)) {
                 test_cases_have_same_state = false;
             }
         }
-    });
+    }
 
     // Are all test cases set to the same state
     if (test_cases_have_same_state) {
@@ -124,13 +118,11 @@ function CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details,
  * @param {string} gradeable_id - ID of the gradeable
  * @param {string} who_id - ID of the submitter
  * @param {string} index - index of test case
- * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
- * @param {boolean} show_hidden - should hidden test cases be displayed
- * @param {boolean} show_hidden_details - should hidden details be displayed
+ * @param {int} num_test_cases - number of test cases
  * @param {number} version - submission version
  */
 // eslint-disable-next-line no-unused-vars
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, show_hidden, show_hidden_details, version = '') {
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, num_test_cases, version = '') {
     const orig_div_name = div_name;
     div_name = `#${div_name}`;
 
@@ -150,7 +142,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, s
     // Checks if test case output is visible
     // Output is visible - Collapse test case output
     if ($(div_name).is(':visible')) {
-        CollapseTestcaseOutput(orig_div_name, index, loadingTools, test_cases, show_hidden, show_hidden_details);
+        CollapseTestcaseOutput(orig_div_name, index, num_test_cases, loadingTools);
     }
     // Output is not visible - Expand test case output
     else {
@@ -162,7 +154,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, s
         loadingTools.find('.loading-tools-in-progress').show();
 
         // Check if all test cases are all expanded
-        CheckStatesOfAllTestcases(test_cases, show_hidden, show_hidden_details, true);
+        CheckStatesOfAllTestcases(num_test_cases, true);
 
         loading_testcases_xml_http_requests.set(orig_div_name, $.getJSON({
             url: url,
@@ -186,11 +178,13 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, s
                 enableKeyToClick();
             },
             error: function(e) {
+                // Check if error was occured by candelling a test case
                 if (loading_testcases_xml_http_requests.has(orig_div_name) && loading_testcases_xml_http_requests.get(orig_div_name).readyState === 0) {
                     loading_testcases_xml_http_requests.delete(orig_div_name);
-                    CollapseTestcaseOutput(orig_div_name, index, loadingTools, test_cases, show_hidden, show_hidden_details);
+                    CollapseTestcaseOutput(orig_div_name, index, num_test_cases, loadingTools);
                 }
                 else {
+                    // Display error message once
                     loading_testcases_xml_http_requests.delete(orig_div_name);
                     if (loading_testcases_xml_http_requests.size === 0) {
                         alert('Could not load diff, please refresh the page and try again.');
@@ -211,35 +205,30 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, test_cases, s
  *                        to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - ID of div that calls this function
- * @param {Array.<JSON>} test_cases - array of test case objects encoded using JSON
  * @param {boolean} expand_all - should all test cases be expanded
- * @param {boolean} show_hidden - should hidden test cases be displayed
- * @param {boolean} show_hidden_details - should hidden details be displayed
+ * @param {int} num_test_cases - number of test cases
  * @param {string} gradeable_id - ID of the gradeable
  * @param {string} who_id - ID of the submitter
  * @param {number} version - submission version
  */
 // eslint-disable-next-line no-unused-vars
-function loadAllTestcaseOutput(div_name, test_cases, expand_all, show_hidden, show_hidden_details, gradeable_id, who_id, version = '') {
-    const parsed_test_cases = JSON.parse(test_cases);
-
+function loadAllTestcaseOutput(div_name, expand_all, num_test_cases, gradeable_id, who_id, version = '') {
     // Check if toggle should not be interacted with
     if ($(`#${div_name}`).css('cursor') === 'default') {
         return;
     }
 
     // Expand/Collapse all test cases
-    parsed_test_cases.forEach((test_case, index)  => {
+    for (let index = 0; index < num_test_cases; index++) {
+        // Check if test case has loading tools (can be expanded/collapsed)
         if ($(`#tc_${index}`).find('.loading-tools').length === 1) {
             const test_case_div_name = `testcase_${index}`;
             const isTestCaseLoadingToolsShowVisible = $(`#tc_${index}`).find('.loading-tools').find('.loading-tools-show').is(':visible');
-            const can_view_details = (!test_case.hidden || (show_hidden_details || test_case.release_hidden_details) && show_hidden);
 
             // Check if test case should be expanded/collapsed
-            if (can_view_details && test_case.has_extra_results &&
-                ((expand_all && isTestCaseLoadingToolsShowVisible) || (!expand_all && !isTestCaseLoadingToolsShowVisible))) {
-                loadTestcaseOutput(test_case_div_name, gradeable_id, who_id, index, test_cases, version);
+            if ((expand_all && isTestCaseLoadingToolsShowVisible) || (!expand_all && !isTestCaseLoadingToolsShowVisible)) {
+                loadTestcaseOutput(test_case_div_name, gradeable_id, who_id, index, num_test_cases, version);
             }
         }
-    });
+    }
 }

@@ -67,7 +67,7 @@
             <div id='tc_collapse_all' class="key_to_click" tabindex="0"
                 {% if hide_version_and_test_details == false %}
                     {% if not incomplete_autograding %}
-                        onclick="loadAllTestcaseOutput('tc_collapse_all', '{{ testcases|json_encode|e('js') }}', '{{false}}', '{{show_hidden}}', '{{show_hidden_details}}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
+                        onclick="loadAllTestcaseOutput('tc_collapse_all', '{{false}}', '{{ testcases|length }}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
                         style="cursor:default;"
                     {% endif %}
                 {% endif %}
@@ -84,7 +84,7 @@
             <div id='tc_expand_all' class="key_to_click" tabindex="0"
                 {% if hide_version_and_test_details == false %}
                     {% if not incomplete_autograding %}
-                        onclick="loadAllTestcaseOutput('tc_expand_all', '{{ testcases|json_encode|e('js') }}', '{{true}}', '{{show_hidden}}', '{{show_hidden_details}}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
+                        onclick="loadAllTestcaseOutput('tc_expand_all', '{{true}}', '{{ testcases|length }}', '{{ gradeable_id }}', '{{ submitter_id }}', {{ display_version }});"
                         style="cursor:pointer;"
                     {% endif %}
                 {% endif %}
@@ -112,7 +112,7 @@
 
                                 {% if can_view_details and testcase.has_extra_results %}
                                     style="cursor: pointer"
-                                    onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', '{{ testcases|json_encode|e('js') }}', '{{show_hidden}}', '{{show_hidden_details}}', {{ display_version }});"
+                                    onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', '{{ testcases|length }}', {{ display_version }});"
                                 {% endif %}
                         >
 
