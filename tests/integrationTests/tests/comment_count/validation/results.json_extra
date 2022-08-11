@@ -1,0 +1,15 @@
+{
+    "automatic_grading_total": 4,
+    "nonhidden_automatic_grading_total": 4,
+    "testcases": [
+        {
+            "points_awarded": 4,
+            "test_name": "Comment counting"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
