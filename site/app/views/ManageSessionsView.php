@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\libraries\DateUtils;
-
 class ManageSessionsView extends AbstractView {
     public function showSessionsPage() {
         $this->core->getOutput()->addBreadcrumb("Manage Sessions");

@@ -450,7 +450,11 @@ CREATE TABLE public.sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
+    session_expires timestamp(6) with time zone NOT NULL,
+    session_created timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    browser_name character varying(50),
+    browser_version character varying(15),
+    platform character varying(50)
 );
 
 
@@ -489,6 +493,7 @@ CREATE TABLE public.users (
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
+    enforce_secure_session boolean DEFAULT false,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 

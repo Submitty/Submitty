@@ -9,6 +9,7 @@ use app\libraries\SessionManager;
 use app\libraries\database\DatabaseQueries;
 
 class SessionManagerTester extends \PHPUnit\Framework\TestCase {
+    private $browser_info = ['browser' => 'Browser', 'version' => '1.0', 'platform' => 'OS'];
     public function testGetSessionInvalidId() {
         $core = new Core();
         $queries = $this->createMock(DatabaseQueries::class);
@@ -35,7 +36,7 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
         $core->setQueries($queries);
         $manager = new SessionManager($core);
         $this->assertEquals('test', $manager->getSession('id'));
-        $this->assertEquals('id', $manager->newSession('test'));
+        $this->assertEquals('id', $manager->newSession('test', $this->browser_info));
         $this->assertEquals('token', $manager->getCsrfToken());
         $this->assertTrue($manager->removeCurrentSession('id'));
         $this->assertFalse($manager->getCsrfToken());
@@ -47,13 +48,14 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
         $queries->expects($this->once())->method('newSession')->with(
             $this->matchesRegularExpression('/[a-f0-9]{32}/'),
             'test',
-            $this->matchesRegularExpression('/[a-f0-9]{32}/')
+            $this->matchesRegularExpression('/[a-f0-9]{32}/'),
+            $this->browser_info
         );
         $core->setQueries($queries);
         $manager = new SessionManager($core);
-        $session_id = $manager->newSession('test');
+        $session_id = $manager->newSession('test', $this->browser_info);
         $this->assertRegExp('/[a-f0-9]{32}/', $session_id);
-        $this->assertEquals($session_id, $manager->newSession('test'));
+        $this->assertEquals($session_id, $manager->newSession('test', $this->browser_info));
         $this->assertRegExp('/[a-f0-9]{32}/', $manager->getCsrfToken());
     }
 

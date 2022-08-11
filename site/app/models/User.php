@@ -197,7 +197,7 @@ class User extends AbstractModel {
         if ($this->access_level > 3 || $this->access_level < 1) {
             $this->access_level = 3;
         }
-        $this->enforce_secure_session = $details['enforce_secure_session'];
+        $this->enforce_secure_session = isset($details['enforce_secure_session']) && $details['enforce_secure_session'] === true;
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 

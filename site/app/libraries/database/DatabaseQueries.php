@@ -3003,7 +3003,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Update the boolean determining whether the user can have only one active session at a time
      * @param string $user_id
      * @param bool $to_set
-     * 
+     *
      */
     public function updateSecureSessionSetting(string $user_id, bool $to_set = false) {
         $this->submitty_db->query("UPDATE users SET enforce_secure_session=? WHERE user_id=?", [$to_set, $user_id]);
@@ -3012,7 +3012,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     /**
      * Get the enforce_secure_session boolean of a user
      * @param string $user_id
-     * 
+     *
      * @return bool
      */
     public function getSecureSessionSetting(string $user_id): bool {
@@ -3021,7 +3021,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * Terminate all sessions of current user except the one with provided session_id 
+     * Terminate all the sessions of current user except the one corresponding to the provided session_id
      * @param string $session_id
      * @param string $user_id
      */
@@ -3031,7 +3031,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * @todo: write phpdoc
+     * Create a new login session for a user along with the session expiration timestamp which can be extended later on
      *
      * @param string $session_id
      * @param string $user_id

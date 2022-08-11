@@ -381,6 +381,12 @@ class GlobalController extends AbstractController {
             "icon" => "fa-key"
         ]);
 
+        $sidebar_buttons[] = new NavButton($this->core, [
+            "href" => $this->core->buildUrl(['manage_sessions']),
+            "title" => "Manage Sessions",
+            "icon" => "fa-shield-quartered"
+        ]);
+
         $sidebar_buttons[] = new Button($this->core, [
             "href" => $this->core->buildUrl(['calendar']),
             "title" => "Calendar",
