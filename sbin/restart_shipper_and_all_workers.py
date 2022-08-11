@@ -8,14 +8,47 @@ shippers in the correct order.
 
 """
 
-import time
-import subprocess
+import json
 import os
 from os import path
+from submitty_utils import ssh_proxy_jump
+import subprocess
 import sys
+import time
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(path.dirname(path.realpath(__file__)),
                                      'shipper_utils', 'systemctl_wrapper.py')
+WORKER_CONFIG = path.join(path.dirname(path.realpath(__file__)), "..",
+                          "config", "autograding_workers.json")
+
+
+def retrieve_log(worker: str) -> None:
+    with open(WORKER_CONFIG, 'r') as worker_cfg:
+        worker_cfg = json.load(worker_cfg)
+
+    worker_url = worker_cfg[worker]["address"]
+    worker_usr = worker_cfg[worker]["username"]
+
+    try:
+        (target_conn, interm_conn) =                                        \
+            ssh_proxy_jump.ssh_connection_allowing_proxy_jump(worker_usr, worker_url)
+    except Exception as e:
+        print(f"Failed to connect to {worker} at {worker_usr}@{worker_url} due to {str(e)}")
+        sys.exit(1)
+
+    cmd = "tail -n 5 /var/local/submitty/logs/autograding/$(date +%Y%m%d).txt"
+
+    try:
+        (_stdin, stdout, _stderr) = target_conn.exec_command(cmd)
+        print(f"=== Printing logs from {worker} ==========")
+        print(stdout.read().decode('ascii'))
+    except Exception as e:
+        print(f"Failed to run {cmd} at {worker_usr}@{worker_url} ({worker}) due to {str(e)}")
+    finally:
+        target_conn.close()
+        if interm_conn:
+            interm_conn.close()
+
 
 if __name__ == '__main__':
 
@@ -68,6 +101,16 @@ if __name__ == '__main__':
                             stdout=subprocess.PIPE, universal_newlines=True)
     print(result.stdout)
     if "is inactive" in result.stdout:
-        print("Some workers are inactive, check workers' logs.")
+        err_workers = [worker.split(':')[0]
+                       for worker in filter(lambda w: ':' in w, result.stdout.split('\n'))]
+
+        print(f"Some workers failed to restart: {','.join(err_workers)}")
+
+        for err_worker in err_workers:
+            subprocess.run(["su", "submitty_daemon", "-c",
+                           f"python3 -c 'import restart_shipper_and_all_workers as r;    \
+                                         r.retrieve_log(\"{err_worker}\")'"],
+                           cwd=path.dirname(path.realpath(__file__)),
+                           stdout=sys.stdout, stderr=sys.stderr)
 
     print('Finished!')
