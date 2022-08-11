@@ -15,7 +15,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setId(string $id) Get the id of the loaded user
  * @method void getNumericId()
  * @method void setNumericId(string $id)
- * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred first name of the loaded user
@@ -81,8 +80,6 @@ class User extends AbstractModel {
     protected $id;
     /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
     protected $numeric_id = null;
-    /** @prop @var string The anonymous id of this user which should be unique for each course they are in*/
-    protected $anon_id;
     /**
      * @prop
      * @var string The password for the student used for database authentication. This should be hashed and salted.
@@ -177,10 +174,6 @@ class User extends AbstractModel {
 
         if (isset($details['user_numeric_id'])) {
             $this->setNumericId($details['user_numeric_id']);
-        }
-
-        if (!empty($details['anon_id'])) {
-            $this->anon_id = $details['anon_id'];
         }
 
         $this->setLegalFirstName($details['user_firstname']);
@@ -463,10 +456,19 @@ class User extends AbstractModel {
         }
     }
 
-    public function getAnonId() {
-        if ($this->anon_id === null) {
+    /**
+     * Get gradeable-specific anon_id of a user
+     * @param string $g_id
+     */
+    public function getAnonId($g_id) {
+        if ($g_id === "") {
+            return "";
+        }
+        $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+        $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
+        if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);
             $alpha_length = strlen($alpha) - 1;
             do {
                 $random = "";
@@ -478,10 +480,9 @@ class User extends AbstractModel {
                     $random .= $alpha[random_int(0, $alpha_length)];
                 }
             } while (in_array($random, $anon_ids));
-            $this->anon_id = $random;
-            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->insertGradeableAnonId($this->id, $g_id, $random);
         }
-        return $this->anon_id;
+        return $anon_id ?? $random ?? null;
     }
 
     /**
