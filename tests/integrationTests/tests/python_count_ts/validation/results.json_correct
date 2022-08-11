@@ -1,0 +1,15 @@
+{
+    "automatic_grading_total": 5,
+    "nonhidden_automatic_grading_total": 5,
+    "testcases": [
+        {
+            "points_awarded": 5,
+            "test_name": "Count TS Python static analysis"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

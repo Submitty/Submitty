@@ -1,0 +1,35 @@
+{
+    "automatic_grading_total": 3,
+    "nonhidden_automatic_grading_total": 3,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "Number of calls to print",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of functions defined named 'area'",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Count TS Python static analysis"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
