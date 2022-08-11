@@ -563,7 +563,7 @@ jobs:
           - name: Run cypress e2e login tests with SAML auth
             uses: cypress-io/github-action@v2
             with:
-              config: baseUrl=http://localhost,chromeWebSecurity=false
+              config: baseUrl=${{ env.HTTP_PROTO }}://localhost,chromeWebSecurity=false
               spec: cypress/integration/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
