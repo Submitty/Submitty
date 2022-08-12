@@ -222,7 +222,7 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric) %}
-    <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ grade.getSubmitter().getAnonId() }}" data-row="{{ index }}"
+    <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ grade.getSubmitter().getAnonId(gradeable.getId()) }}" data-row="{{ index }}"
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}

@@ -16,7 +16,7 @@ function addConfetti() {
         }
     });
     window.addEventListener('keypress', (e) => {
-        if (e.code === 'Enter' && canvas.style.display != 'none') {
+        if (e.code === 'Enter' && canvas.style.display !== 'none') {
             canvas.style.display = 'none';
             return;
         }

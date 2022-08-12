@@ -15,7 +15,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testUserNoPreferred() {
         $details = [
             'user_id' => "test",
-            'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
@@ -33,7 +32,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
-        $this->assertEquals($details['anon_id'], $user->getAnonId());
         $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
@@ -56,7 +54,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testUserPreferred() {
         $details = [
             'user_id' => "test",
-            'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_firstname' => "User",
             'user_preferred_firstname' => "Paul",
@@ -74,7 +71,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
-        $this->assertEquals($details['anon_id'], $user->getAnonId());
         $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
@@ -114,7 +110,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testToObject() {
         $details = [
             'user_id' => "test",
-            'anon_id' => "TestAnonymous",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
@@ -157,7 +152,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_type' => 'staff',
             'rotating_section' => null,
             'modified' => true,
-            'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
             'display_image_state' => null,
