@@ -184,7 +184,7 @@
                 {# Section header #}
                 <tbody>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
+                        <td colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -197,10 +197,14 @@
                                 </a>
                             {% endif %}
                         </td>
+                        <td colspan="{{ colspan - 6 }}" style="text-align: center; background-color: var(--alert-border-blue)">
+                        </td>
                     </tr>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
+                        <td colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
                             Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
+                        </td>
+                        <td colspan="{{ colspan - 6 }}" style="text-align: center; background-color: var(--alert-border-blue)">
                         </td>
                     </tr>
                 </tbody>
