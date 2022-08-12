@@ -11,7 +11,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     storedPrompt = e;
     pwalable[0].style.display='none';
     pwaBtn[0].style.display = 'block';
-    pwaBtn[0].addEventListener('click', (e) => {
+    pwaBtn[0].addEventListener('click', () => {
         pwaBtn[0].style.display = 'none';
 
         storedPrompt.prompt();
