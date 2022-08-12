@@ -33,6 +33,6 @@ a.popout-item > .fas:hover {
     flex-wrap: nowrap;
 }
 
-.btn.btn-primary {
-    margin-top: 4px;
+.action-buttons > a {
+    margin: 4px;
 }
