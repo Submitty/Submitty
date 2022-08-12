@@ -22,6 +22,14 @@ function addConfetti() {
         }
     });
 
+    // Resume confetti animation when window is visible again
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && is_drawing) {
+            lastUpdateTime = Date.now();
+            draw();
+        }
+    });
+
     canvas.width  = window.innerWidth;
     const body = document.body;
     const html = document.documentElement;
@@ -38,6 +46,8 @@ function addConfetti() {
     const max_times = 250;
     const size_const = 10;
     const gravity_const = 0.25;
+
+    let is_drawing = false;
 
     const date_box = document.getElementById('submission_timestamp');
     let submission_date = '';
@@ -141,6 +151,14 @@ function addConfetti() {
 
         if (canvas.style.display === 'none') {
             cancelAnimationFrame(frame);
+            is_drawing = false;
+            return;
+        }
+
+        is_drawing = true;
+
+        // Stop the confetti animation if the page is not visible
+        if (document.visibilityState === 'hidden') {
             return;
         }
 
