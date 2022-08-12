@@ -16,34 +16,35 @@ import subprocess
 import sys
 import time
 
+
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(path.dirname(path.realpath(__file__)),
                                      'shipper_utils', 'systemctl_wrapper.py')
-WORKER_CONFIG = path.join(path.dirname(path.realpath(__file__)), "..",
-                          "config", "autograding_workers.json")
 
 
-def retrieve_log(worker: str) -> None:
-    with open(WORKER_CONFIG, 'r') as worker_cfg:
-        worker_cfg = json.load(worker_cfg)
+def chguid(uid: int, gid: int) -> None:
+    def demote():
+        os.setgid(gid)
+        os.setuid(uid)
 
-    worker_url = worker_cfg[worker]["address"]
-    worker_usr = worker_cfg[worker]["username"]
+    return demote
 
+
+def get_log(worker: str, usr: str, url: str) -> None:
     try:
         (target_conn, interm_conn) =                                        \
-            ssh_proxy_jump.ssh_connection_allowing_proxy_jump(worker_usr, worker_url)
+            ssh_proxy_jump.ssh_connection_allowing_proxy_jump(usr, url)
     except Exception as e:
-        print(f"Failed to connect to {worker} at {worker_usr}@{worker_url} due to {str(e)}")
+        print(f"Failed to connect to {worker} at {usr}@{url} due to {str(e)}")
         sys.exit(1)
 
     cmd = "tail -n 5 /var/local/submitty/logs/autograding/$(date +%Y%m%d).txt"
 
     try:
         (_stdin, stdout, _stderr) = target_conn.exec_command(cmd)
-        print(f"=== Printing logs from {worker} ==========")
+        print(f"=== Printing last 5 lines of global autograding log from {worker} ==========")
         print(stdout.read().decode('ascii'))
     except Exception as e:
-        print(f"Failed to run {cmd} at {worker_usr}@{worker_url} ({worker}) due to {str(e)}")
+        print(f"Failed to run {cmd} at {usr}@{url} ({worker}) due to {str(e)}")
     finally:
         target_conn.close()
         if interm_conn:
@@ -100,17 +101,36 @@ if __name__ == '__main__':
     result = subprocess.run(["su", '-', "submitty_daemon", "-c", cmd],
                             stdout=subprocess.PIPE, universal_newlines=True)
     print(result.stdout)
+
+    # Check worker's log
     if "is inactive" in result.stdout:
         err_workers = [worker.split(':')[0]
-                       for worker in filter(lambda w: ':' in w, result.stdout.split('\n'))]
+                       for worker in filter(lambda w: ": worker" in w, result.stdout.split('\n'))]
 
         print(f"Some workers failed to restart: {','.join(err_workers)}")
 
-        for err_worker in err_workers:
-            subprocess.run(["su", "submitty_daemon", "-c",
-                           f"python3 -c 'import restart_shipper_and_all_workers as r;    \
-                                         r.retrieve_log(\"{err_worker}\")'"],
+        # get daemon uid and gid, worker info
+        USER_CONFIG = path.join(path.dirname(path.realpath(__file__)), "..", "config",
+                                "submitty_users.json")
+        WORKER_CONFIG = path.join(path.dirname(path.realpath(__file__)), "..",
+                                  "config", "autograding_workers.json")
+
+        with open(USER_CONFIG, 'r') as usr_cfg:
+            usr_cfg = json.load(usr_cfg)
+        with open(WORKER_CONFIG, 'r') as worker_cfg:
+            worker_cfg = json.load(worker_cfg)
+
+        for e_worker in err_workers:
+            # initiate new subprocess as submitty_daemon
+            # cannot use `su` here -- this script should only be called by root for security
+            w_url = worker_cfg[e_worker]["address"]
+            w_usr = worker_cfg[e_worker]["username"]
+
+            subprocess.run(["python3", "-x", "-c",
+                            f"""import restart_shipper_and_all_workers as r;    \
+                                r.get_log('{e_worker}', '{w_usr}', '{w_url}')"""],
                            cwd=path.dirname(path.realpath(__file__)),
-                           stdout=sys.stdout, stderr=sys.stderr)
+                           env={"HOME": os.path.expanduser("~submitty_daemon")},
+                           preexec_fn=chguid(usr_cfg["daemon_uid"], usr_cfg["daemon_gid"]))
 
     print('Finished!')
