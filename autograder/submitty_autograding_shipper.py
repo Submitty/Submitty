@@ -424,8 +424,6 @@ def prepare_job(
         os.remove(autograding_zip_tmp)
         os.remove(submission_zip_tmp)
         os.remove(todo_queue_file_tmp)
-        if host != 'localhost':
-            os.remove(todo_queue_file)
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
