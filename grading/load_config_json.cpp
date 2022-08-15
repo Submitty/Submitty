@@ -1101,7 +1101,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
-        grader["use_expected_string"] = "true";
+        grader["use_expected_string"] = true;
       }
     }
   }

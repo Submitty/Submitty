@@ -76,8 +76,6 @@ int main(int argc, char *argv[]) {
 
 
 bool ShowHelper(const std::string& when, bool success) {
-  if (when == "true") return true;
-  if (when == "false") return false;
   if (when == "always") return true;
   if (when == "never") return false;
   if (when == "on_success" && success) return true;
@@ -115,8 +113,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   bool show_message    = ShowHelper(tcg.value("show_message", "never"),test_case_success);
   bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
   bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
-  bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
-  bool use_expected_string = ShowHelper(tcg.value("use_expected_string","false"),test_case_success);
+  bool show_expected   = ShowHelper(tcg.value("show_expected", "never"),test_case_success);
+  bool use_expected_string = tcg.value("use_expected_string", false);
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
@@ -170,7 +168,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         } else if (expected_string != "") {
           //if expected file doesn't exist, use actual_file name to get the name of the expected string output file
           //ex: actual_file = math_1.txt, expected = AUTO_GENERATED_math_1.txt
-          expected = "AUTO_GENERATED_" + actual_file.substr(actual_file.find('/')+1);
+          expected = "AUTO_GENERATED_" + actual_file.substr(actual_file.find_last_of('/') + 1);
           autocheck_j["expected_string"] = expected_string;
         }
         std::cout << "expected: " << expected << std::endl;
