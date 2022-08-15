@@ -1093,6 +1093,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
+        assert(grader.find("expected_string") == grader.end());
       }
       if (grader.find("expected_string") != grader.end()) {
         itr2 = grader.find("show_expected");
@@ -1102,6 +1103,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
           assert (validShowValue(*itr2));
         }
         grader["use_expected_string"] = true;
+        assert(grader.find("expected_file") == grader.end());
       }
     }
   }

@@ -196,7 +196,7 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 
   std::cout << "expected_file: " << expected_file << std::endl;
   std::cout << "expected_string: " << expected_string << std::endl;
-  std::cout << "actual_file: " << expected_string << std::endl;
+  std::cout << "actual_file: " << actual_file << std::endl;
   assert(!(expected_file != "" && expected_string != ""));
 
   std::string filename;

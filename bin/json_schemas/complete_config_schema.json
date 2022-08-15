@@ -1192,31 +1192,25 @@
             }
           ]
         },
-        "oneOf": [
-          {
-          "expected_file" : {
-              "description" : "The professor specified expected output file(s).",
-              "oneOf" : [
-                {
-                  "type" : "string"
-                },
-                {
-                  "type" : "array",
-                  "items" : {
-                    "type": "string"
-                  },
-                  "minItems" : 1
-                }
-              ]
-            }
-          }, 
-          {
-            "expected_string" : {
-              "description" : "The professor specified an expected output string.",
+        "expected_file" : {
+          "description" : "The professor specified expected output file(s).",
+          "oneOf" : [
+            {
               "type" : "string"
+            },
+            {
+              "type" : "array",
+              "items" : {
+                "type": "string"
+              },
+              "minItems" : 1
             }
-          }
-        ],
+          ]
+        },
+        "expected_string" : {
+          "description" : "The professor specified an expected output string.",
+          "type" : "string"
+        },
         "deduction" : {
           "description" : "The amount of points that this validation step is worth, scaled between 0 and 1.",
           "type" : "number",
