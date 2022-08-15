@@ -371,6 +371,7 @@ def prepare_job(
             next_to_grade
         )
         autograding_zip_tmp, submission_zip_tmp = zips
+        todo_queue_file_tmp_fd, todo_queue_file_tmp = tempfile.mkstemp()
 
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
@@ -402,14 +403,14 @@ def prepare_job(
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    with open(todo_queue_file, 'w') as outfile:
+    with open(todo_queue_file_tmp, 'w') as outfile:
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
         copy_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
-            (todo_queue_file, todo_queue_file)
+            (todo_queue_file_tmp, todo_queue_file)
         ], CopyDirection.PUSH)
     except Exception as e:
         config.logger.log_stack_trace(traceback.format_exc(), job_id=JOB_ID)
@@ -419,8 +420,10 @@ def prepare_job(
         print(f"ERROR: could not move files due to the following error: {e}")
         return False
     finally:
+        os.close(todo_queue_file_tmp_fd)
         os.remove(autograding_zip_tmp)
         os.remove(submission_zip_tmp)
+        os.remove(todo_queue_file_tmp)
         if host != 'localhost':
             os.remove(todo_queue_file)
 
