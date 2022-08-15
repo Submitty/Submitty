@@ -159,6 +159,7 @@ function addConfetti() {
 
         // Stop the confetti animation if the page is not visible
         if (document.visibilityState === 'hidden') {
+            cancelAnimationFrame(frame);
             return;
         }
 
