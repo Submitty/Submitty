@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use app\libraries\Core;
 use app\libraries\response\WebResponse;
-use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\entities\Session;
+use app\repositories\SessionRepository;
 
 /**
  * Class ManageSessionsController
@@ -26,67 +28,84 @@ class ManageSessionsController extends AbstractController {
      * @Route("/manage_sessions", methods={"GET"})
      * @return WebResponse
      */
-    public function showSessionsPage() {
-        return new WebResponse('ManageSessions', 'showSessionsPage');
+    public function showSessionsPage(): WebResponse {
+        /** @var SessionRepository $repo */
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
+        $user_sessions = $repo->getAllByUser($this->core->getUser()->getId());
+        return new WebResponse(
+            'ManageSessions',
+            'showSessionsPage',
+            $user_sessions
+        );
     }
 
     /**
      * Terminate a session
      *
-     * @Route("/manage_sessions/terminate", methods={"POST"})
-     * @return JsonResponse
+     * @Route("/manage_sessions/logout", methods={"POST"})
+     * @return RedirectResponse
      */
-    public function terminateSession() {
+    public function logoutFromSession(): RedirectResponse {
         if (isset($_POST["session_id"])) {
             $session_id = $_POST["session_id"];
         }
         else {
-            return JsonResponse::getErrorResponse("Session id not provided.");
+            $this->core->addErrorMessage("Session id not provided.");
+            return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
         }
-        $fetched_session = $this->core->getQueries()->getSession($session_id);
-        if (count($fetched_session) === 0) {
-            return JsonResponse::getErrorResponse("Session doesn't exist.");
+        $session = $this->core->getSubmittyEntityManager()->getRepository(Session::class)
+            ->findOneBy(['session_id' => $session_id]);
+        if (empty($session)) {
+            $this->core->addErrorMessage("Session doesn't exist.");
+            return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
         }
-        if ($fetched_session['user_id'] === $this->core->getUser()->getId()) {
+        if ($session->getUserId() === $this->core->getUser()->getId()) {
             if ($this->core->getCurrentSessionId() === $session_id) {
-                return JsonResponse::getErrorResponse("Logout instead of terminating the current session.");
+                return new RedirectResponse($this->core->buildUrl(["authentication", "logout"]));
             }
-            $this->core->getQueries()->removeSessionById($session_id);
-            return JsonResponse::getSuccessResponse(["message" => "Session terminated successfully."]);
+            $this->core->getSubmittyEntityManager()->remove($session);
+            $this->core->getSubmittyEntityManager()->flush();
+            $this->core->addSuccessMessage("Session terminated successfully.");
         }
         else {
-            return JsonResponse::getErrorResponse("You don't have permission to terminate that session.");
+            $this->core->addErrorMessage("You don't have permission to terminate that session.");
         }
+        return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
     }
 
     /**
      * Terminate all sessions except current
      *
-     * @Route("/manage_sessions/terminate_all", methods={"POST"})
-     * @return JsonResponse
+     * @Route("/manage_sessions/logout_all", methods={"POST"})
+     * @return RedirectResponse
      */
-    public function terminateAllExceptCurrent() {
-        $this->core->getQueries()->removeUserSessionsExcept($this->core->getCurrentSessionId());
-        return JsonResponse::getSuccessResponse("Sessions other than current terminated successfully.");
+    public function logoutAllExceptCurrent(): RedirectResponse {
+        /** @var SessionRepository $repo */
+        $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
+        $repo->removeUserSessionsExcept($this->core->getUser()->getId(), $this->core->getCurrentSessionId());
+        return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
     }
 
     /**
-     * Update the enforce_secure_session boolean
+     * Update the enforce_single_session boolean
      *
-     * @Route("/manage_sessions/update_secure_session", methods={"POST"})
-     * @return JsonResponse
+     * @Route("/manage_sessions/update_single_session", methods={"POST"})
+     * @return RedirectResponse
      */
-    public function updateSecureSession() {
-        if (isset($_POST['secure_session'])) {
-            $secure_session = $_POST['secure_session'] === "true";
+    public function updateSingleSession(): RedirectResponse {
+        if (isset($_POST['single_session'])) {
+            $single_session = $_POST['single_session'] === "on";
         }
         else {
-            return JsonResponse::getErrorResponse("enfore_secure_session boolean is missing.");
+            $single_session = false;
         }
-        $this->core->getQueries()->updateSecureSessionSetting($this->core->getUser()->getId(), $secure_session);
-        if ($secure_session) {
-            $this->core->getQueries()->removeUserSessionsExcept($this->core->getCurrentSessionId());
+        $this->core->getQueries()->updateSingleSessionSetting($this->core->getUser()->getId(), $single_session);
+        if ($single_session) {
+            /** @var SessionRepository $repo */
+            $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
+            $repo->removeUserSessionsExcept($this->core->getUser()->getId(), $this->core->getCurrentSessionId());
         }
-        return JsonResponse::getSuccessResponse(['secure_session' => $secure_session]);
+        $this->core->addSuccessMessage("Single session setting set to " . ($single_session ? 'true.' : 'false.'));
+        return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
     }
 }

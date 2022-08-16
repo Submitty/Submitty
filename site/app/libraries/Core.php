@@ -11,10 +11,18 @@ use app\libraries\database\DatabaseQueries;
 use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
+use app\entities\Session;
+use app\repositories\SessionRepository;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Symfony\Component\HttpFoundation\Request;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\Filesystem;
+use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
+use MatthiasMullie\Scrapbook\Adapters\Flysystem;
+use Psr\Log\NullLogger;
+use BrowscapPHP\Browscap;
 
 /**
  * Class Core
@@ -482,16 +490,37 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $user_id = $this->authentication->getUserId();
-                //get user's browser info
-                if (ini_get('browscap')) {
-                    $browser_info = get_browser(null, true);
+                // Get information about user's browser
+                try {
+                    $file_cache = new LocalFilesystemAdapter(FileUtils::joinPaths(
+                        $this->getConfig()->getSubmittyInstallPath(),
+                        'site/vendor/browscap/browscap-php/resources'
+                    ));
+                    $filesystem = new Filesystem($file_cache);
+                    $cache = new SimpleCache(
+                        new Flysystem($filesystem)
+                    );
+                    $logger = new NullLogger();
+                    $bc = new Browscap($cache, $logger);
+                    $browser_info = $bc->getBrowser();
+                    $browser_info = [
+                        'browser' => $browser_info->browser,
+                        'version' => $browser_info->version,
+                        'platform' => $browser_info->platform,
+                    ];
                 }
-                if (!isset($browser_info) || $browser_info === false) {
-                    $browser_info = ["browser" => "Unknown", "version" => "", "platform" => "Unknown"];
+                catch (\Exception $e) {
+                    $browser_info = [
+                        'browser' => 'Unknown',
+                        'version' => '',
+                        'platform' => 'Unknown',
+                    ];
                 }
                 $new_session_id = $this->session_manager->newSession($user_id, $browser_info);
-                if ($this->database_queries->getSecureSessionSetting($user_id)) {
-                    $this->database_queries->removeUserSessionsExcept($new_session_id, $user_id);
+                if ($this->database_queries->getSingleSessionSetting($user_id)) {
+                    /** @var SessionRepository $repo */
+                    $repo = $this->getSubmittyEntityManager()->getRepository(Session::class);
+                    $repo->removeUserSessionsExcept($user_id, $new_session_id);
                 }
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(

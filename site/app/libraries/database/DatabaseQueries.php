@@ -2977,103 +2977,24 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * @todo: write phpdoc
-     *
-     * @param string $session_id
-     *
-     * @return array
-     */
-    public function getSession($session_id) {
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=?", [$session_id]);
-        return $this->submitty_db->row();
-    }
-
-    /**
-     * Fetch the session creation timestamp and other information for all active sessions of the given user
-     * @param string $user_id
-     *
-     * @return array
-     */
-    public function getSessionsInfoByUser($user_id) {
-        $this->submitty_db->query("SELECT session_id, csrf_token, session_created, browser_name, browser_version, platform FROM sessions WHERE user_id=? ORDER BY session_created", [$user_id]);
-        return $this->submitty_db->rows();
-    }
-
-    /**
      * Update the boolean determining whether the user can have only one active session at a time
      * @param string $user_id
      * @param bool $to_set
      *
      */
-    public function updateSecureSessionSetting(string $user_id, bool $to_set = false) {
-        $this->submitty_db->query("UPDATE users SET enforce_secure_session=? WHERE user_id=?", [$to_set, $user_id]);
+    public function updateSingleSessionSetting(string $user_id, bool $to_set = false) {
+        $this->submitty_db->query("UPDATE users SET enforce_single_session=? WHERE user_id=?", [$to_set, $user_id]);
     }
 
     /**
-     * Get the enforce_secure_session boolean of a user
+     * Get the enforce_single_session boolean of a user
      * @param string $user_id
      *
      * @return bool
      */
-    public function getSecureSessionSetting(string $user_id): bool {
-        $this->submitty_db->query("SELECT enforce_secure_session FROM users WHERE user_id=?", [$user_id]);
-        return $this->submitty_db->rows()[0]['enforce_secure_session'];
-    }
-
-    /**
-     * Terminate all the sessions of current user except the one corresponding to the provided session_id
-     * @param string $session_id
-     * @param string $user_id
-     */
-    public function removeUserSessionsExcept($session_id, $user_id = null) {
-        $user_id = $user_id ?? $this->core->getUser()->getId();
-        $this->submitty_db->query("DELETE FROM sessions WHERE user_id=? AND session_id!=?", [$user_id, $session_id]);
-    }
-
-    /**
-     * Create a new login session for a user along with the session expiration timestamp which can be extended later on
-     *
-     * @param string $session_id
-     * @param string $user_id
-     * @param string $csrf_token
-     * @param array $user_agent
-     */
-    public function newSession($session_id, $user_id, $csrf_token, $user_agent) {
-        $this->submitty_db->query(
-            "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires, session_created, browser_name, browser_version, platform)
-                                   VALUES(?,?,?,current_timestamp + interval '336 hours',current_timestamp,?,?,?)",
-            [$session_id, $user_id, $csrf_token, $user_agent['browser'], $user_agent['version'], $user_agent['platform']]
-        );
-    }
-
-    /**
-     * Updates a given session by setting it's expiration date to be 2 weeks into the future
-     *
-     * @param string $session_id
-     */
-    public function updateSessionExpiration($session_id) {
-        $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours')
-                                   WHERE session_id=?",
-            [$session_id]
-        );
-    }
-
-    /**
-     * Remove sessions which have their expiration date before the
-     * current timestamp
-     */
-    public function removeExpiredSessions() {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
-    }
-
-    /**
-     * Remove a session associated with a given session_id
-     *
-     * @param string $session_id
-     */
-    public function removeSessionById($session_id) {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_id=?", [$session_id]);
+    public function getSingleSessionSetting(string $user_id): bool {
+        $this->submitty_db->query("SELECT enforce_single_session FROM users WHERE user_id=?", [$user_id]);
+        return $this->submitty_db->rows()[0]['enforce_single_session'];
     }
 
     public function getAllGradeablesIdsAndTitles() {

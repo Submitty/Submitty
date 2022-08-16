@@ -624,6 +624,12 @@ popd > /dev/null
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${WORKER}" == 0 ]; then
     bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh"
+
+    if [ "${CI}" != true ]; then
+        echo -e "Checking for and fetching latest browscap.ini"
+        # fetch and convert browscap.ini to cache, may take some time on initial setup or if there's an update
+        ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php "${PHP_USER}"
+    fi
 fi
 
 ################################################################################################################

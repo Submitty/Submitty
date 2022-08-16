@@ -2,6 +2,9 @@
 
 namespace app\libraries;
 
+use app\entities\Session;
+use app\repositories\SessionRepository;
+
 /**
  * Class SessionManager
  *
@@ -16,7 +19,10 @@ class SessionManager {
      */
     private $core;
 
-    private $session = [];
+    /**
+     * @var Session|null
+     */
+    private $session = null;
 
     /**
      * SessionManager constructor.
@@ -35,14 +41,17 @@ class SessionManager {
      * @return bool|string
      */
     public function getSession(string $session_id) {
-        $this->core->getQueries()->removeExpiredSessions();
-        $this->session = $this->core->getQueries()->getSession($session_id);
+        $em = $this->core->getSubmittyEntityManager();
+        /** @var SessionRepository $repo */
+        $repo =  $em->getRepository(Session::class);
+        $repo->removeExpiredSessions();
+        $this->session = $repo->findOneBy(['session_id' => $session_id]);
         if (empty($this->session)) {
             return false;
         }
-        $this->core->getQueries()->updateSessionExpiration($session_id);
-
-        return $this->session['user_id'];
+        $this->session->updateSessionExpiration($this->core->getDateTimeNow());
+        $em->flush();
+        return $this->session->getUserId();
     }
 
     /**
@@ -51,18 +60,20 @@ class SessionManager {
      * @return string
      */
     public function newSession(string $user_id, array $user_agent): string {
-        if (!isset($this->session['session_id'])) {
-            $this->session['session_id'] = Utils::generateRandomString();
-            $this->session['user_id'] = $user_id;
-            $this->session['csrf_token'] = Utils::generateRandomString();
-            $this->core->getQueries()->newSession(
-                $this->session['session_id'],
-                $this->session['user_id'],
-                $this->session['csrf_token'],
+        if (empty($this->session)) {
+            $this->session = new Session(
+                Utils::generateRandomString(),
+                $user_id,
+                Utils::generateRandomString(),
+                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString('336 hours')),
+                $this->core->getDateTimeNow(),
                 $user_agent
             );
+            $em = $this->core->getSubmittyEntityManager();
+            $em->persist($this->session);
+            $em->flush();
         }
-        return $this->session['session_id'];
+        return $this->session->getSessionId();
     }
 
     /**
@@ -71,8 +82,8 @@ class SessionManager {
      * @return string|bool
      */
     public function getCurrentSessionId() {
-        if (isset($this->session['session_id'])) {
-            return $this->session['session_id'];
+        if (isset($this->session)) {
+            return $this->session->getSessionId();
         }
         return false;
     }
@@ -84,9 +95,12 @@ class SessionManager {
      * @return bool
      */
     public function removeCurrentSession(): bool {
-        if (isset($this->session['session_id'])) {
-            $this->core->getQueries()->removeSessionById($this->session['session_id']);
-            $this->session = [];
+        if (isset($this->session)) {
+            $em = $this->core->getSubmittyEntityManager();
+            $session = $em->getReference(Session::class, $this->session->getSessionId());
+            $em->remove($session);
+            $em->flush();
+            $this->session = null;
             return true;
         }
         return false;
@@ -99,8 +113,8 @@ class SessionManager {
      * @return bool|string
      */
     public function getCsrfToken() {
-        if (isset($this->session['csrf_token'])) {
-            return $this->session['csrf_token'];
+        if (isset($this->session)) {
+            return $this->session->getCsrfToken();
         }
         return false;
     }

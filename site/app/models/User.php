@@ -109,7 +109,7 @@ class User extends AbstractModel {
     /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
     /** @prop @var bool Should the user only have one active session at a time? */
-    protected $enforce_secure_session;
+    protected $enforce_single_session;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @prop @var int What is the assigned rotating section for the user */
@@ -197,7 +197,7 @@ class User extends AbstractModel {
         if ($this->access_level > 3 || $this->access_level < 1) {
             $this->access_level = 3;
         }
-        $this->enforce_secure_session = isset($details['enforce_secure_session']) && $details['enforce_secure_session'] === true;
+        $this->enforce_single_session = isset($details['enforce_single_session']) && $details['enforce_single_session'] === true;
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
