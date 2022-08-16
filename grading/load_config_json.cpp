@@ -1103,7 +1103,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
           assert (validShowValue(*itr2));
         }
         grader["use_expected_string"] = true;
-        assert(grader.find("expected_file") == grader.end());
+        assert(grader.find("expected_file") == grader.end() && "You cannot specify both expected_file and expected_string");
       }
     }
   }
