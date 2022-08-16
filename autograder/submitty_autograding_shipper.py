@@ -91,10 +91,13 @@ def copy_files(
         if `PULL` then the source file is on the remote machine and it should be pulled to the
         source file on the local machine.
     """
+    _COPY_SUFFIX = "_COPYING"
     if address == 'localhost':
         for src, dest in files:
+            dest_tmp = dest + _COPY_SUFFIX
             if src != dest:
-                shutil.copy(src, dest)
+                shutil.copy(src, dest_tmp)
+                shutil.move(dest_tmp, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -117,10 +120,14 @@ def copy_files(
         try:
             if direction == CopyDirection.PUSH:
                 for local, remote in files:
-                    sftp.put(local, remote)
+                    remote_tmp = remote + _COPY_SUFFIX
+                    sftp.put(local, remote_tmp)
+                    sftp.posix_rename(remote_tmp, remote)
             else:
                 for remote, local in files:
-                    sftp.get(remote, local)
+                    local_tmp = local + _COPY_SUFFIX
+                    sftp.get(remote, local_tmp)
+                    shutil.move(local_tmp, local)
         finally:
             if sftp is not None:
                 sftp.close()
