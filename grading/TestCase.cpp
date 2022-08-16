@@ -200,8 +200,7 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   assert(!(expected_file != "" && expected_string != ""));
 
   std::string filename;
-  if (expected_file == "") {
-    //if the expected file doesn't exist, write expected_string to it (but where?)
+  if (expected_string != "") {
     //use actual_file name to get the name of the expected string output file
     //ex: actual_file = math_1.txt, expected = AUTO_GENERATED_math_1.txt
     expected_file = "AUTO_GENERATED_" + actual_file.substr(actual_file.find_last_of('/') + 1);
@@ -209,7 +208,8 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
     std::ofstream expected_file_stream(filename);
     expected_file_stream << expected_string;
     expected_file_stream.close();
-  } else {
+  } 
+  else if (expected_file != "") {
     filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
   }
   
