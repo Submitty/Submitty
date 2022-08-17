@@ -1093,7 +1093,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
-        assert(grader.find("expected_string") == grader.end());
+        assert(grader.find("expected_string") == grader.end() && "You cannot specify both expected_file and expected_string");
       }
       if (grader.find("expected_string") != grader.end()) {
         itr2 = grader.find("show_expected");
