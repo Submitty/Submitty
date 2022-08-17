@@ -543,7 +543,7 @@ jobs:
             run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with SAML auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost,chromeWebSecurity=false
               spec: cypress/e2e/login.spec.js
