@@ -499,8 +499,8 @@ def unpack_job(
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
         copy_files(config, which_machine, [
-            (target_done_queue_file, local_done_queue_file),
-            (target_results_zip, local_results_zip)
+            (target_results_zip, local_results_zip),
+            (target_done_queue_file, local_done_queue_file)
         ], CopyDirection.PULL)
     except (socket.timeout, TimeoutError, FileNotFoundError):
         # These are expected error cases, so we clean up on our end and return a `WAITING` status.
