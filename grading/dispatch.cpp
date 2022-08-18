@@ -1439,7 +1439,7 @@ bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::s
   return false;
 }
 
-void dispatch::update_difference(TestResults* answer, std::map<unsigned int,std::vector<ToleranceChange>> t_changes) {
+void dispatch::update_difference(TestResults* answer, std::map<unsigned int, std::vector<ToleranceChange>> &t_changes) {
   if (!t_changes.empty()) {
     std::vector<Change> &changes = ((Difference*)answer)->changes;
     for (unsigned int block = 0; block < changes.size(); block++) {

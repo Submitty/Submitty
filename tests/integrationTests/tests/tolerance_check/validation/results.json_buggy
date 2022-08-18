@@ -1,0 +1,35 @@
+{
+    "automatic_grading_total": 2,
+    "nonhidden_automatic_grading_total": 2,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "Avg and SD -- without Tolerance",
+                    "difference_file": "test01/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt"
+                },
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "Avg and SD -- Ignoring Whitespace with Tolerance",
+                    "difference_file": "test01/1_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt"
+                },
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "Avg and SD -- Whitespace Comparison with Tolerance",
+                    "difference_file": "test01/2_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Avg and SD -- With and without Whitespace Comparison"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
