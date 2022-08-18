@@ -285,6 +285,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 fi
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# Permissions for PWA
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
@@ -298,6 +300,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc

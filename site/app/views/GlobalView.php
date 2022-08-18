@@ -57,6 +57,8 @@ class GlobalView extends AbstractView {
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
+            "manifast_path" => $this->core->getOutput()->getManifastPath(),
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
         ]);
     }
 
