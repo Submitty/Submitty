@@ -1322,8 +1322,9 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   bool lineSwapOk = j.value("lineSwapOk",false);
   float tolerance = j.value("tolerance", 0.0);
   bool extraStudentOutputOk = j.value("extra_student_output",false);
+  std::map<unsigned int,std::vector<ToleranceChange>> t_changes;
   if (tolerance != 0.0) {
-    bool within_tolerance = tolerance_diff(expected_file_contents, student_file_contents, tolerance, ignoreWhitespace, extraStudentOutputOk);
+    bool within_tolerance = tolerance_diff(expected_file_contents, student_file_contents, tolerance, t_changes, ignoreWhitespace, extraStudentOutputOk);
     if (within_tolerance) {
       return new TestResults(1);
     }
@@ -1334,6 +1335,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
+    update_difference(answer, t_changes);
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1347,6 +1349,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
       vectorOfLines text_b = stringToLines( expected_file_contents, j );
       answer = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
       ((Difference*)answer)->type = ByLineByChar;
+      update_difference(answer, t_changes);
     }
   } else {
     std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
@@ -1357,7 +1360,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
   return answer;
 }
 
-bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::string &student_file_contents, const float &tolerance, const bool &ignoreWhitespace, const bool &extraStudentOutputOk) {
+bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::string &student_file_contents, const float &tolerance, std::map<unsigned int,std::vector<ToleranceChange>> &t_changes, const bool &ignoreWhitespace, const bool &extraStudentOutputOk) {
   // split student and expected files into words and an space count array
   vectorOfSpaces student_spaces;
   vectorOfSpaces expected_spaces;
@@ -1381,8 +1384,13 @@ bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::s
         }
       } else {
         bool line_has_diff = false;
+        int student_char_index = 0;
         // iterating over words in the expected line
         for (size_t j = 0; j < expected_line_num_words; j++) {
+          student_char_index += student_line_words[j].length();
+          if (j != 0) {
+            student_char_index += student_spaces[i][j-1];
+          }
           if (j < student_line_num_words) {
             if (expected_line_words[j] == student_line_words[j]) {
               continue;
@@ -1394,6 +1402,18 @@ bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::s
               if (diff != 0 && diff < tolerance) {
                 // replace the deviated student value with the expected value
                 student_file_words[i][j] = expected_line_words[j];
+                if (expected_line_words[j].length() != student_line_words[j].length()) {
+                  ToleranceChange t_change;
+                  t_change.char_start = student_char_index;
+                  t_change.num_change = student_line_words[j].length() - expected_line_words[j].length();
+                  if (t_changes.find(i) != t_changes.end()) {
+                    t_changes[i].push_back(t_change);
+                  }
+                  else {
+                    std::vector<ToleranceChange> line_changes{ t_change };
+                    t_changes[i] = line_changes;
+                  }
+                }
                 continue;
               }
             }
@@ -1417,4 +1437,30 @@ bool dispatch::tolerance_diff (const std::string &expected_file_contents, std::s
   }
   student_file_contents = recreateStudentFile(student_file_words, student_spaces);
   return false;
+}
+
+void dispatch::update_difference(TestResults* answer, std::map<unsigned int,std::vector<ToleranceChange>> t_changes) {
+  if (!t_changes.empty()) {
+    std::vector<Change> &changes = ((Difference*)answer)->changes;
+    for (unsigned int block = 0; block < changes.size(); block++) {
+      for (unsigned int line = 0; line < changes[block].a_changes.size(); line++) {
+        int cur_line = changes[block].a_changes[line];
+        if (t_changes.find(cur_line) == t_changes.end()) {
+          continue;
+        }
+        std::vector<ToleranceChange> line_changes = t_changes[cur_line];
+        int cur = 0;
+        int num_change = t_changes[cur_line][cur].num_change;
+        for (int &character_index: changes[block].a_characters[line]) {
+          if (line_changes[cur].char_start < character_index) {
+            while (cur + 1 < line_changes.size() && line_changes[cur + 1].char_start < character_index) {
+              cur += 1;
+              num_change += line_changes[cur].num_change;
+            }
+            character_index += num_change;
+          }
+        }
+      }
+    }
+  }
 }

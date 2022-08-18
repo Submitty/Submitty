@@ -17,6 +17,7 @@
           "description": "Avg and SD -- Ignoring Whitespace with Tolerance",
           "method": "diff",
           "tolerance": 0.05,
+		      "comparison" : "byLine",
           "ignoreWhitespace": true,
           "actual_file": "STDOUT.txt",
           "expected_file": "test_output.txt",

@@ -173,6 +173,11 @@ protected:
 
 };
 
+struct ToleranceChange {
+  int char_start;
+  int num_change;
+};
+
 // ===================================================================================
 
 #endif

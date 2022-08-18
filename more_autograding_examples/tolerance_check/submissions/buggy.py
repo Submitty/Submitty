@@ -14,6 +14,12 @@ def standard_deviation(lst, avg):
         v += (element - avg)**2
     return (v/(n - 1))**0.5
 
+def format_line(line_lst):
+    first = len(line_lst[0])
+    n_spaces = 8 - first
+    spaces = " "*n_spaces
+    return spaces.join(line_lst)
+
 args = len(sys.argv)
 
 if (args != 2):
@@ -25,8 +31,11 @@ txt_file = open(file, "r")
 
 content_list = txt_file.readlines()
 
+print("     ".join(["AVG", "SD"]))
+
 for line in content_list:
     lst = list(map(float, line.rstrip().split(",")))
     avg = average(lst)
     sd = standard_deviation(lst, avg)
-    print("avg: " + str(round(avg, 3)) + " sd: " + str(round(sd, 3)))
+    print(format_line([str(round(avg, 2)), str(round(sd, 2))]))
+    
