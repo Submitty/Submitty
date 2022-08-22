@@ -63,7 +63,6 @@ class Container():
     def create(self, execution_script, arguments, more_than_one):
         """ Create (but don't start) this container. """
         container_create_time = timer()
-        self.log_container('CREATE BEGIN', self.full_name)
 
         client = docker.from_env(timeout=60)
 
@@ -120,7 +119,7 @@ class Container():
             raise
 
         self.log_container(
-            'CREATE END',
+            'CREATED',
             self.full_name,
             self.container.short_id,
             timer() - container_create_time
@@ -129,14 +128,13 @@ class Container():
 
     def start(self, logfile):
         container_start_time = timer()
-        self.log_container('START BEGIN', self.full_name, self.container.short_id)
 
         self.container.start()
         self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
 
-        self.container_grading_time = timer()
+        #self.container_grading_time = timer()
         self.log_container(
-            'START END',
+            'STARTED',
             self.full_name,
             self.container.short_id,
             timer() - container_start_time
@@ -150,6 +148,7 @@ class Container():
 
     def cleanup_container(self, logfile):
         """ Remove this container. """
+        cleanup_start = timer()
         if not self.is_server:
             status = self.container.wait()
             self.return_code = status['StatusCode']
@@ -171,9 +170,10 @@ class Container():
             f'{self.container.short_id} destroyed'
         )
         self.log_container(
-            'DESTROY',
+            'DESTROYED',
             self.full_name,
-            self.container.short_id, timer() - self.container_grading_time
+            self.container.short_id,
+            timer() - cleanup_start
         )
 
 
