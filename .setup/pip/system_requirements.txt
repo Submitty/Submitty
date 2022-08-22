@@ -28,7 +28,7 @@ paramiko==2.11.0
 tzlocal==2.1
 PyPDF2==2.4.1
 distro==1.7.0
-jsonschema==3.2.0
+jsonschema==4.14.0
 jsonref==0.2
 docker==5.0.3
 
