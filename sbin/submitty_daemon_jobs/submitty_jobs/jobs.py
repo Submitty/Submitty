@@ -124,12 +124,18 @@ class BuildConfig(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = os.path.join(DATA_DIR, 'courses', semester, course, 'BUILD_{}.sh'.format(course))
-        build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
+        build_script = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, f'BUILD_{course}.sh')
+        build_output = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, 'build', gradeable,
+                                    'build_script_output.txt')
 
         try:
+            res = subprocess.run([build_script, gradeable, "--clean"],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
             with open(build_output, "w") as output_file:
-                subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
+                output_file.write(res.stdout.decode("ascii"))
         except PermissionError:
             print("error, could not open "+output_file+" for writing")
 
