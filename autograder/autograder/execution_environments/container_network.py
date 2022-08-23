@@ -132,7 +132,6 @@ class Container():
         self.container.start()
         self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
 
-        #self.container_grading_time = timer()
         self.log_container(
             'STARTED',
             self.full_name,

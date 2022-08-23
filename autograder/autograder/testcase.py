@@ -97,8 +97,13 @@ class Testcase():
         else:
             print(self.machine, self.untrusted_user, f"{test_id} FAILURE")
             self.secure_environment.log_message(f"{test_id} FAILURE")
-        self.secure_environment.log_container(f"TESTCASE {self.testcase_id} END", "", "", timer() - testcase_start)
-        self.secure_environment.log_container('') # separator line
+        self.secure_environment.log_container(
+            f"TESTCASE {self.testcase_id} END",
+            "",
+            "",
+            timer() - testcase_start
+        )
+        self.secure_environment.log_container('')
 
     def _run_execution(self):
         """ Execute this testcase as an execution testcase. """

@@ -179,6 +179,7 @@ CONTAINER_ID_WIDTH = 10
 EVENT_MESSAGE_WIDTH = 30
 EVENT_DURATION_WIDTH = 10
 
+
 def log_container(log_path, event="", name="", container="", time=0.0):
     """ Given a log file, create or append container details. """
 
@@ -188,7 +189,7 @@ def log_container(log_path, event="", name="", container="", time=0.0):
     c_id = f'{container:<{CONTAINER_ID_WIDTH}}'
     event_msg = f'{event:<{EVENT_MESSAGE_WIDTH}}'
     time_str = f'{f"{time:.3f}sec":>{EVENT_DURATION_WIDTH}}'
-    write_to_log(log_path, ' | '.join((timestamp,c_name,c_id,event_msg,time_str)))
+    write_to_log(log_path, ' | '.join((timestamp, c_name, c_id, event_msg, time_str)))
 
 
 def write_to_log(log_path, message):
