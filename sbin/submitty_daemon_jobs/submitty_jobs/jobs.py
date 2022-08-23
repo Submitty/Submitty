@@ -133,7 +133,7 @@ class BuildConfig(CourseGradeableJob):
         try:
             res = subprocess.run([build_script, gradeable, "--clean"],
                                  stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+                                 stderr=subprocess.STDOUT)
             with open(build_output, "w") as output_file:
                 output_file.write(res.stdout.decode("ascii"))
         except PermissionError:
