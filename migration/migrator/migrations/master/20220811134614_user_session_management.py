@@ -9,9 +9,10 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
+    database.execute("ALTER TABLE sessions ALTER COLUMN session_expires TYPE timestamptz(0);");
     database.execute("""
         ALTER TABLE sessions
-        ADD COLUMN IF NOT EXISTS session_created timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS session_created timestamp(0) with time zone DEFAULT NULL,
         ADD COLUMN IF NOT EXISTS browser_name character varying(50) DEFAULT 'Unknown',
         ADD COLUMN IF NOT EXISTS browser_version character varying(15) DEFAULT '',
         ADD COLUMN IF NOT EXISTS platform character varying(50) DEFAULT 'Unknown';

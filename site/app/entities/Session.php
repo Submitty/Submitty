@@ -41,7 +41,7 @@ class Session {
 
     /**
      * @ORM\Column(type="datetimetz")
-     * @var \DateTime
+     * @var \DateTime | null
      */
     private $session_created;
 
@@ -86,7 +86,7 @@ class Session {
         return $this->csrf_token;
     }
 
-    public function getSessionCreated(): \DateTime {
+    public function getSessionCreated(): ?\DateTime {
         return $this->session_created;
     }
 

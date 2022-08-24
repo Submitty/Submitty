@@ -450,8 +450,8 @@ CREATE TABLE public.sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL,
-    session_created timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP,
+    session_expires timestamp(0) with time zone NOT NULL,
+    session_created timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
     browser_name character varying(50) DEFAULT 'Unknown'::character varying,
     browser_version character varying(15) DEFAULT ''::character varying,
     platform character varying(50) DEFAULT 'Unknown'::character varying

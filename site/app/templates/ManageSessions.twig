@@ -27,11 +27,11 @@
                         <div id="current-timestamp">
                             <td>
                             <button class="rounded-green">Current</button>
-                            {{ session.getSessionCreated | date('m/d/Y H:i:s T') }}
+                            {{ session.getSessionCreated ? (session.getSessionCreated | date('m/d/Y H:i:s T')) : '' }}
                             </td>
                         </div>
                     {% else %}
-                        <td>{{ session.getSessionCreated | date('m/d/Y H:i:s T') }}</td>
+                        <td>{{ session.getSessionCreated ? (session.getSessionCreated | date('m/d/Y H:i:s T')) : '' }}</td>
                     {% endif %}
                     <td>{{ session.getBrowserName }} {{ session.getBrowserVersion }}</td>
                     <td>{{ session.getPlatform }}</td>
