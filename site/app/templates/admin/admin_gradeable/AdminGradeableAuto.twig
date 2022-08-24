@@ -91,7 +91,7 @@
         </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <br />
-        
+
         {# text box with the path to the current config file, hidden but still used in js #}
         <input style='width: 83%' id='input-provide-full-path' type="hidden" name='autograding_config_path'
             value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
@@ -131,11 +131,6 @@
     <div class="log-container" hidden>
         <div class="option-title">CMake output:</div>
         <pre id="cmake-log-body"></pre>
-    </div>
-
-    <div class="log-container" hidden>
-        <div class="option-title">Make output:</div>
-        <pre id="make-log-body"></pre>
     </div>
 
 </div>
@@ -260,7 +255,7 @@
             $(options).hide();
         }
     }
-    
+
     function dropDownArrowOnClick() {
         let options = $(this).parent().parent().find(".drop-down-options");
         if ($(options).is(":visible")) {

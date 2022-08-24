@@ -216,12 +216,10 @@ function build_homework {
 
     # capture exit code of make
     make_res="$?"
-    chmod -f 660 "$hw_build_path/log_make_output.txt"
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
     if (( "$make_res" != 0 )); then
-        echo -e "\nMAKE ERROR\nlogfile: $hw_build_path/log_make_output.txt\n\n"
-        cat "$hw_build_path/log_make_output.txt"
+        echo -e "\nMAKE ERROR\n\n"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
         popd > /dev/null
         exit 1
