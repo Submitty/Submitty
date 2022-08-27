@@ -7,6 +7,8 @@ will be an instructor.
 
 import argparse
 import json
+import random
+import string
 from os import path
 import sys
 from sqlalchemy import create_engine, MetaData, Table, bindparam, and_
@@ -20,6 +22,8 @@ DATABASE_HOST = DATABASE_DETAILS['database_host']
 DATABASE_PORT = DATABASE_DETAILS['database_port']
 DATABASE_USER = DATABASE_DETAILS['database_user']
 DATABASE_PASS = DATABASE_DETAILS['database_password']
+DATABASE_COURSE_USER = DATABASE_DETAILS['database_course_user']
+DATABASE_COURSE_PASS = DATABASE_DETAILS['database_course_password']
 
 
 def parse_args():
@@ -106,6 +110,46 @@ def main():
             b_user_id=user_id,
             registration_section=registration_section
         )
+
+    # function taken from setup_sample_courses
+    def generate_random_user_id(length=15):
+        pick_from = string.ascii_lowercase + string.ascii_uppercase + string.digits
+        return ''.join(random.choice(pick_from) for _ in range(length))
+
+    course_conn_str = db_utils.generate_connect_string(
+        DATABASE_HOST,
+        DATABASE_PORT,
+        f"submitty_{semester}_{course}",
+        DATABASE_COURSE_USER,
+        DATABASE_COURSE_PASS,
+    )
+
+    course_engine = create_engine(course_conn_str)
+    course_connection = course_engine.connect()
+    course_metadata = MetaData(bind=course_engine)
+    gradeable_table = Table('gradeable', course_metadata, autoload=True)
+    g_anon_table = Table('gradeable_anon', course_metadata, autoload=True)
+    select = gradeable_table.select()
+    rows = course_connection.execute(select).fetchall()
+    for gradeable in rows:
+        g_id = gradeable['g_id']
+        select = g_anon_table.select().where(and_(
+            g_anon_table.c.user_id == bindparam('user_id'),
+            g_anon_table.c.g_id == bindparam('g_id')
+        ))
+        row = course_connection.execute(
+            select,
+            user_id=user_id,
+            g_id=g_id
+        ).fetchone()
+        if row is None:
+            query = g_anon_table.insert()
+            course_connection.execute(
+                query,
+                user_id=user_id,
+                g_id=g_id,
+                anon_id=generate_random_user_id()
+            )
 
 
 if __name__ == '__main__':
