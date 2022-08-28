@@ -23,8 +23,8 @@ def main():
     CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
     with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_DETAILS = json.load(open_file)
-    #COURSE = input("Course: ")
-    #SEMESTER = input("Semester: ")
+    # COURSE = input("Course: ")
+    # SEMESTER = input("Semester: ")
     DATABASE_HOST = DATABASE_DETAILS['database_host']
     DATABASE_PORT = DATABASE_DETAILS['database_port']
     DB_USER = DATABASE_DETAILS['database_user']
@@ -75,7 +75,9 @@ def main():
         print("Performing anonymization...\n")
         for g_row in gradeable_rows:
             gradeable_id = g_row["g_id"]
-            select = gradeable_anon.select().where(gradeable_anon.c.g_id == bindparam('gradeable_id'))
+            select = gradeable_anon.select().where(
+                gradeable_anon.c.g_id == bindparam('gradeable_id')
+            )
             existing_rows = conn.execute(select, gradeable_id=gradeable_id)
             existing_user_ids = []
             anon_ids = []
