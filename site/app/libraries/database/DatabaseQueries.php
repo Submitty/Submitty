@@ -1045,7 +1045,6 @@ VALUES (?,?,?,?,?,?)",
         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
         $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
-        $this->insertAnonIdForExistingGradeables($user);
     }
 
     /**
@@ -1098,7 +1097,6 @@ WHERE semester=? AND course=? AND user_id=?",
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
             $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
-            $this->insertAnonIdForExistingGradeables($user);
         }
     }
 
@@ -4443,12 +4441,7 @@ AND gc_id IN (
                 continue;
             }
             $params = [$user_id, $g_id, $anon_id];
-            $this->course_db->query(
-                "INSERT INTO gradeable_anon(user_id, g_id, anon_id)
-                VALUES (?, ?, ?)
-                ON CONFLICT DO NOTHING",
-                $params
-            );
+            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", $params);
         }
     }
 
@@ -4523,12 +4516,6 @@ AND gc_id IN (
         return $this->getUserFromAnon($anon_id, $g_id)[$anon_id] ??
             $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
                 null;
-    }
-
-    private function insertAnonIdForExistingGradeables(User $user) {
-        foreach ($this->getAllGradeablesIds() as $row) {
-            $this->insertGradeableAnonId($user->getId(), $row['g_id'], $user->getAnonId($row['g_id']));
-        }
     }
 
     // NOTIFICATION/EMAIL QUERIES
