@@ -23,71 +23,91 @@ def main():
     CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
     with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_DETAILS = json.load(open_file)
-    COURSE = input("Course: ")
-    SEMESTER = input("Semester: ")
+    #COURSE = input("Course: ")
+    #SEMESTER = input("Semester: ")
     DATABASE_HOST = DATABASE_DETAILS['database_host']
     DATABASE_PORT = DATABASE_DETAILS['database_port']
+    DB_USER = DATABASE_DETAILS['database_user']
+    DB_PASS = DATABASE_DETAILS['database_password']
     DB_COURSE_USER = DATABASE_DETAILS['database_course_user']
     DB_COURSE_PASS = DATABASE_DETAILS['database_course_password']
 
-    course_conn_str = db_utils.generate_connect_string(
+    conn_str = db_utils.generate_connect_string(
         DATABASE_HOST,
         DATABASE_PORT,
-        f"submitty_{SEMESTER}_{COURSE}",
-        DB_COURSE_USER,
-        DB_COURSE_PASS,
+        "submitty",
+        DB_USER,
+        DB_PASS,
     )
 
-    course_engine = create_engine(course_conn_str)
-    conn = course_engine.connect()
-    metadata = MetaData(bind=course_engine)
+    db_engine = create_engine(conn_str)
+    db_conn = db_engine.connect()
+    metadata = MetaData(bind=db_engine)
 
-    users = Table("users", metadata, autoload=True)
-    user_select = users.select()
-    user_rows_obj = conn.execute(user_select)
-    user_rows = list(user_rows_obj)
-
-    gradeable = Table("gradeable", metadata, autoload=True)
-    g_select = gradeable.select()
-    gradeable_rows = conn.execute(g_select)
-
+    courses = Table("courses", metadata, autoload=True)
+    courses_select = courses.select()
+    courses_rows = db_conn.execute(courses_select)
     num_rows = 0
-    gradeable_anon = Table("gradeable_anon", metadata, autoload=True)
-    print("\nPerforming anonymization...")
-    for g_row in gradeable_rows:
-        gradeable_id = g_row["g_id"]
-        select = gradeable_anon.select().where(gradeable_anon.c.g_id == bindparam('gradeable_id'))
-        existing_rows = conn.execute(select, gradeable_id=gradeable_id)
-        existing_user_ids = []
-        anon_ids = []
-        users_to_update = []
-        for row in existing_rows:
-            existing_user_ids.append(row['user_id'])
-            anon_ids.append(row['anon_id'])
-            if row['anon_id'] == '':
-                users_to_update.append(row['user_id'])
-        for row in user_rows:
-            user_id = row["user_id"]
-            if (user_id not in existing_user_ids) or (user_id in users_to_update):
-                anon = generate_random_user_id()
-                while (anon in anon_ids):
+    for course_row in courses_rows:
+        print(f"Course: {course_row['course']}\nSemester: {course_row['semester']}")
+        course_conn_str = db_utils.generate_connect_string(
+            DATABASE_HOST,
+            DATABASE_PORT,
+            f"submitty_{course_row['semester']}_{course_row['course']}",
+            DB_COURSE_USER,
+            DB_COURSE_PASS,
+        )
+
+        course_engine = create_engine(course_conn_str)
+        conn = course_engine.connect()
+        metadata = MetaData(bind=course_engine)
+
+        users = Table("users", metadata, autoload=True)
+        user_select = users.select()
+        user_rows_obj = conn.execute(user_select)
+        user_rows = list(user_rows_obj)
+
+        gradeable = Table("gradeable", metadata, autoload=True)
+        g_select = gradeable.select()
+        gradeable_rows = conn.execute(g_select)
+
+        gradeable_anon = Table("gradeable_anon", metadata, autoload=True)
+        print("Performing anonymization...\n")
+        for g_row in gradeable_rows:
+            gradeable_id = g_row["g_id"]
+            select = gradeable_anon.select().where(gradeable_anon.c.g_id == bindparam('gradeable_id'))
+            existing_rows = conn.execute(select, gradeable_id=gradeable_id)
+            existing_user_ids = []
+            anon_ids = []
+            users_to_update = []
+            for row in existing_rows:
+                existing_user_ids.append(row['user_id'])
+                anon_ids.append(row['anon_id'])
+                if row['anon_id'] == '':
+                    users_to_update.append(row['user_id'])
+            for row in user_rows:
+                user_id = row["user_id"]
+                if (user_id not in existing_user_ids) or (user_id in users_to_update):
                     anon = generate_random_user_id()
-                anon_ids.append(anon)
-                if user_id not in existing_user_ids:
-                    new_row = {'user_id': user_id, 'g_id': gradeable_id, 'anon_id': anon}
-                    insert = gradeable_anon.insert().values(new_row)
-                    conn.execute(insert)
-                    num_rows += 1
-                elif user_id in users_to_update:
-                    new_info = {'anon_id': anon}
-                    update = gradeable_anon.update(values=new_info).where(
-                        gradeable_anon.c.user_id == bindparam('b_user_id'),
-                        gradeable_anon.c.g_id == bindparam('b_g_id')
-                    )
-                    conn.execute(update, b_user_id=user_id, b_g_id=gradeable_id)
-                    num_rows += 1
-    conn.close()
-    print(f"\nRows created/updated: {num_rows}\n")
+                    while (anon in anon_ids):
+                        anon = generate_random_user_id()
+                    anon_ids.append(anon)
+                    if user_id not in existing_user_ids:
+                        new_row = {'user_id': user_id, 'g_id': gradeable_id, 'anon_id': anon}
+                        insert = gradeable_anon.insert().values(new_row)
+                        conn.execute(insert)
+                        num_rows += 1
+                    elif user_id in users_to_update:
+                        new_info = {'anon_id': anon}
+                        update = gradeable_anon.update(values=new_info).where(
+                            gradeable_anon.c.user_id == bindparam('b_user_id'),
+                            gradeable_anon.c.g_id == bindparam('b_g_id')
+                        )
+                        conn.execute(update, b_user_id=user_id, b_g_id=gradeable_id)
+                        num_rows += 1
+        conn.close()
+    db_conn.close()
+    print(f"Rows created/updated: {num_rows}\n")
 
 
 if __name__ == "__main__":
