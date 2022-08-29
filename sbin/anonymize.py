@@ -72,7 +72,7 @@ def main():
         gradeable_rows = conn.execute(g_select)
 
         gradeable_anon = Table("gradeable_anon", metadata, autoload=True)
-        print("Performing anonymization...\n")
+        print("Performing anonymization...")
         for g_row in gradeable_rows:
             gradeable_id = g_row["g_id"]
             select = gradeable_anon.select().where(
@@ -88,7 +88,7 @@ def main():
                 if row['anon_id'] == '':
                     users_to_update.append(row['user_id'])
                     user_id = row['user_id']
-                    print (f"Need to update: {user_id}")
+                    print (f"  Need to update: {user_id} for gradeable: {gradeable_id}")
             for row in user_rows:
                 user_id = row["user_id"]
                 if (user_id not in existing_user_ids) or (user_id in users_to_update):
@@ -100,7 +100,7 @@ def main():
                         new_row = {'user_id': user_id, 'g_id': gradeable_id, 'anon_id': anon}
                         insert = gradeable_anon.insert().values(new_row)
                         conn.execute(insert)
-                        print (f"Need to insert user: {user_id}")
+                        print (f"  Insert user: {user_id} for gradeable: {gradeable_id}")
                         num_rows += 1
                     elif user_id in users_to_update:
                         new_info = {'anon_id': anon}
@@ -108,10 +108,11 @@ def main():
                             gradeable_anon.c.user_id == bindparam('b_user_id'),
                             gradeable_anon.c.g_id == bindparam('b_g_id')
                         )
-                        print (f"Need to update user: {user_id}")
+                        print (f"  Update: {user_id} for gradeable: {gradeable_id}")
                         conn.execute(update, b_user_id=user_id, b_g_id=gradeable_id)
                         num_rows += 1
         conn.close()
+        print("...done\n")
     db_conn.close()
     print(f"Rows created/updated: {num_rows}\n")
 
