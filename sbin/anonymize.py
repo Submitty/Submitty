@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, Table, MetaData, bindparam
 import string
 import random
 import json
+import sys
 from os import path
 
 from submitty_utils import db_utils
@@ -20,6 +21,7 @@ def generate_random_user_id(length=15):
 
 
 def main():
+    max_retries = 3
     CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
     with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_DETAILS = json.load(open_file)
@@ -40,27 +42,49 @@ def main():
         DB_PASS,
     )
 
-    db_engine = create_engine(conn_str)
-    db_conn = db_engine.connect()
-    metadata = MetaData(bind=db_engine)
-
-    courses = Table("courses", metadata, autoload=True)
+    for i in range(max_retries):
+        try:
+            db_engine = create_engine(conn_str)
+            db_conn = db_engine.connect()
+            db_metadata = MetaData(bind=db_engine)
+            break
+        except Exception as e:
+            if i == (max_retries - 1):
+                print(e)
+                print(f"Attempted {max_retries} times but failed to "
+                      "establish a connection with main Submitty database.\n")
+                sys.exit()
+    courses = Table("courses", db_metadata, autoload=True)
     courses_select = courses.select()
     courses_rows = db_conn.execute(courses_select)
     num_rows = 0
     for course_row in courses_rows:
+        temp_num_rows = num_rows
         print(f"Course: {course_row['course']}\nSemester: {course_row['semester']}")
+        DB_NAME = f"submitty_{course_row['semester']}_{course_row['course']}"
         course_conn_str = db_utils.generate_connect_string(
             DATABASE_HOST,
             DATABASE_PORT,
-            f"submitty_{course_row['semester']}_{course_row['course']}",
+            DB_NAME,
             DB_COURSE_USER,
             DB_COURSE_PASS,
         )
 
-        course_engine = create_engine(course_conn_str)
-        conn = course_engine.connect()
-        metadata = MetaData(bind=course_engine)
+        connected = False
+        for i in range(max_retries):
+            try:
+                course_engine = create_engine(course_conn_str)
+                conn = course_engine.connect()
+                metadata = MetaData(bind=course_engine)
+                connected = True
+                break
+            except Exception as e:
+                if i == (max_retries - 1):
+                    print(e)
+        if not connected:
+            print(f"Attempted {max_retries} times but failed to "
+                  f"establish a connection with database '{DB_NAME}'.\n")
+            continue
 
         users = Table("users", metadata, autoload=True)
         user_select = users.select()
@@ -112,9 +136,10 @@ def main():
                         conn.execute(update, b_user_id=user_id, b_g_id=gradeable_id)
                         num_rows += 1
         conn.close()
+        print(f"Rows created/updated: {num_rows-temp_num_rows}\n")
         print("...done\n")
     db_conn.close()
-    print(f"Rows created/updated: {num_rows}\n")
+    print(f"Total rows created/updated: {num_rows}\n")
 
 
 if __name__ == "__main__":
