@@ -74,13 +74,15 @@
                 }
 
                 let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
-                reg_sectionArray.forEach(function(element){
-                    let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
-                    if  ($(currentSectionEdit).is(':checked'))  {
-                        sectionsEdit.push(element['sections_registration_id']);
-                    }
-                });
                 let sections_lock = document.getElementById('all-sections-showing-yes').checked === true;
+                if (sections_lock) {
+                    reg_sectionArray.forEach(function(element){
+                        let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
+                        if  ($(currentSectionEdit).is(':checked'))  {
+                            sectionsEdit.push(element['sections_registration_id']);
+                        }
+                    });
+                }
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }

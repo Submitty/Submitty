@@ -370,8 +370,11 @@ class CourseMaterialsController extends AbstractController {
         //handle sections here
 
         if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
-            if ($_POST['sections'] === "") {
+            if (!isset($_POST['sections'])) {
                 $sections = null;
+            }
+            elseif ($_POST['sections'] === "") {
+                $sections = [];
             }
             else {
                 $sections = explode(",", $_POST['sections']);
@@ -382,7 +385,7 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $partial_sections = explode(",", $_POST['partial_sections']);
             }
-            if ($sections != null) {
+            if ($sections !== null) {
                 $keep_ids = [];
 
                 foreach ($sections as $section) {

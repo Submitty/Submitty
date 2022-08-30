@@ -33,6 +33,6 @@ a.popout-item > .fas:hover {
     flex-wrap: nowrap;
 }
 
-.partial-section:checked {
+.partial-checkbox:checked {
     background-color: var(--standard-medium-gray) !important;
 }

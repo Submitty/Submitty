@@ -80,7 +80,20 @@
                         {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm(this)' data-id="{{ course_material.getId }}" data-priority="{{ course_material.getPriority }}" data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}} data-hidden-state="{{course_material.isHiddenFromStudents}}" data-release-time="{{ course_material.getReleaseDate|date(date_format) }}" data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}" data-link-url="{{ url_url }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a
+                        class="key_to_click"
+                        tabindex="0"
+                        onclick='newEditCourseMaterialsForm(this)'
+                        data-id="{{ course_material.getId }}"
+                        data-priority="{{ course_material.getPriority }}"
+                        data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}
+                        data-hidden-state="{{course_material.isHiddenFromStudents}}"
+                        data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
+                        data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}"
+                        data-link-url="{{ url_url }}"
+                    >
+                        <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>
+                    </a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ course_material.getId }}", "{{ name }}");' aria-label="Delete {{ name }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                     <label for="date_to_release_{{ id }}">Share to student on</label>
                     <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ course_material.getReleaseDate|date(date_format) }}"/>
@@ -191,15 +204,30 @@
 
     {% if user_group == 1 %}
 
-        function toggleHideMaterialsWarning(clicked) {
+        function handleHideMaterialsCheckboxChange(clicked) {
             const warningIds = {"hide-materials-checkbox": "upload-form", "hide-materials-checkbox-edit": "edit-form", "hide-folder-materials-checkbox-edit": "edit-folder-form"};
             var callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
+            var caller = $('#'+callerId);
             var warningMessage = $('#'+callerId+' ~ #'+warningIds[callerId]+'-hide-warning');
-            if($('#'+callerId).is(':checked') && warningMessage.length === 0) {
-                var callerParent = $('#'+callerId).parent().get(0);
-                callerParent.insertAdjacentHTML('beforeend', '<span id="'+warningIds[callerId]+'-hide-warning" class="red-message full-width">\nWarning: Students can view the hidden course material by guessing the corresponding course material ID (a simple number).  It is recommended to instead use the release date feature if it is necessary to prevent students from accessing course materials.\n</span>');
+            if (caller.hasClass('partial-checkbox')) {
+                caller.removeClass('partial-checkbox');
+                caller.siblings()[0].remove();
+                if (caller.attr('class') === '') {
+                    caller.removeAttr('class');
+                }
+                caller.prop('checked', true);
             }
-            else if($('#'+callerId).is(':not(:checked)')) {
+            if(caller.is(':checked') && warningMessage.length === 0) {
+                var callerParent = caller.parent().get(0);
+                callerParent.insertAdjacentHTML(
+                    'beforeend',
+                    '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width">\nWarning:
+                    Students can view the hidden course material by guessing the corresponding
+                    course material ID (a simple number). It is recommended to instead use the release date feature
+                    if it is necessary to prevent students from accessing course materials.\n</span>`
+                );
+            }
+            else if(caller.is(':not(:checked)')) {
                 warningMessage.remove();
             }
         }
@@ -254,6 +282,7 @@
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         {% if user_group == 1 %}
             var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
+            const partiallyHidden = 2;
 
             function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
                 let residualSections = [];
@@ -313,6 +342,9 @@
                 editButton.attr('data-sections', JSON.stringify(commonSections));
                 editButton.attr('data-partial-sections', JSON.stringify(partialSections));
                 editButton.attr('data-release-time', releaseTime);
+                if (hiddenStateMismatch) {
+                    hiddenState = partiallyHidden;
+                }
                 editButton.attr('data-hidden-state', hiddenState);
             }
 
@@ -364,11 +396,11 @@
         }
         {% if user_group == 1 %}
 
-            $('#hide-materials-checkbox').on('change', toggleHideMaterialsWarning);
-            $('#hide-materials-checkbox-edit').on('change', toggleHideMaterialsWarning);
+            $('#hide-materials-checkbox').on('change', handleHideMaterialsCheckboxChange);
+            $('#hide-materials-checkbox-edit').on('change', handleHideMaterialsCheckboxChange);
             $('[id^="section-folder-edit"]').on('change', function() {
-                if ($(this).hasClass('partial-section')) {
-                    $(this).removeClass('partial-section');
+                if ($(this).hasClass('partial-checkbox')) {
+                    $(this).removeClass('partial-checkbox');
                     if ($(this).attr('class') === '') {
                         $(this).removeAttr('class');
                     }

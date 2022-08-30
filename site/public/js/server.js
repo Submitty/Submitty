@@ -221,14 +221,19 @@ function newEditCourseMaterialsFolderForm(tag) {
     let partial_sections = $(tag).data('partial-sections');
     let release_time =  $(tag).data('release-time');
     let is_hidden = $(tag).data('hidden-state');
+    const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
 
     let element = document.getElementById("edit-folder-picker");
     element._flatpickr.setDate(release_time);
 
     let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
-    if (is_hidden === 1) {
+    if (is_hidden > 0) {
         hide_materials_box.prop('checked', true).trigger('change');
+        if (is_hidden === partially_hidden) {
+            hide_materials_box.attr('class', 'partial-checkbox');
+            $(hide_materials_box.siblings()[0]).before("<span><br><em>(Currently, some materials inside this folder are hidden.)</em></span>");
+        }
     }
     else {
         hide_materials_box.prop('checked', false).trigger('change');
@@ -244,7 +249,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     if (folder_sections.length !== 0) {
         for(let index = 0; index < folder_sections.length; ++index) {
             $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
-            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-section');
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
             if ($(this).attr('class') === '') {
                 $(this).removeAttr('class');
             }
@@ -259,7 +264,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     }
     if (partial_sections.length !== 0) {
         for(let index = 0; index < partial_sections.length; ++index) {
-            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-section');
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
             $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
         }
         if (!sectionsVisible) {

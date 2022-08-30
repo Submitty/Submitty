@@ -1282,15 +1282,27 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         return;
     }
 
+    if (sections_lock === true) {
+        var numSections = sectionsEdit.length;
+        if (partialSections !== null) {
+            numSections += partialSections.length;
+            formData.append('partial_sections', partialSections);
+        }
+    }
+
+    if (sections_lock === true && numSections === 0) {
+        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        return;
+    }
+
     formData.append('csrf_token', csrf_token);
-    formData.append('hide_from_students', hide_from_students);
     formData.append('id', id);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
     formData.append('sections_lock', sections_lock);
-    if (sections_lock === true && sectionsEdit.length===0) {
-        alert("Restrict to at least one section or select 'No'.");
-        return;
+
+    if(hide_from_students !== null) {
+        formData.append('hide_from_students', hide_from_students);
     }
     if(link_url !== null) {
         formData.append('link_url', link_url);
@@ -1304,9 +1316,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
-    }
-    if (partialSections !== null) {
-        formData.append('partial_sections', partialSections);
     }
 
     $.ajax({
