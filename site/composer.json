@@ -2,7 +2,7 @@
   "name": "submitty/submitty",
   "config": {
     "platform": {
-      "php": "7.2"
+      "php": "7.4"
     },
     "sort-packages": true,
     "allow-plugins": {
@@ -33,12 +33,12 @@
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
     "symfony/cache": "4.4.44",
-    "symfony/config": "4.4.42",
-    "symfony/http-foundation": "4.4.43",
+    "symfony/config": "4.4.44",
+    "symfony/http-foundation": "4.4.44",
     "symfony/polyfill-php80": "1.26.0",
-    "symfony/routing": "4.4.41",
+    "symfony/routing": "4.4.44",
     "textalk/websocket": "1.5.8",
-    "twig/twig": "2.15.1"
+    "twig/twig": "2.15.2"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",

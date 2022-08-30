@@ -1101,7 +1101,9 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            element.scrollTop = sensitivity;
+            if ($(element).data('prev_page') !== 0) {
+                element.scrollTop = sensitivity;
+            }
             dynamicScrollLoadPage(element,false);
         }
         else if (isBottom) {
