@@ -65,7 +65,7 @@ class SessionManager {
                 Utils::generateRandomString(),
                 $user_id,
                 Utils::generateRandomString(),
-                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString('336 hours')),
+                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString('2 weeks')),
                 $this->core->getDateTimeNow(),
                 $user_agent
             );

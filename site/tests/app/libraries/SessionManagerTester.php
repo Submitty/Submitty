@@ -52,7 +52,7 @@ class SessionManagerTester extends BaseUnitTest {
                 'id',
                 'test',
                 'token',
-                $core->getDateTimeNow()->add(\DateInterval::createFromDateString('336 hours')),
+                $core->getDateTimeNow()->add(\DateInterval::createFromDateString('2 weeks')),
                 $core->getDateTimeNow(),
                 $this->browser_info
             ])

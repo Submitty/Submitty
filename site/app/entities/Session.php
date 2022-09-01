@@ -107,6 +107,6 @@ class Session {
     }
 
     public function updateSessionExpiration(\DateTime $current_dt) {
-        $this->session_expires = $current_dt->add(\DateInterval::createFromDateString('336 hours'));
+        $this->session_expires = $current_dt->add(\DateInterval::createFromDateString('2 weeks'));
     }
 }
