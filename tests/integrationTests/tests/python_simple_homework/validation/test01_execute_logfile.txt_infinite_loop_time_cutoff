@@ -1,2 +1,3 @@
 ERROR: KILL SIGNAL
-Program Terminated 
+Program Terminated
+ERROR: Program has either runout of time or tried to use unallowed resources
