@@ -895,7 +895,7 @@ class ForumThreadView extends AbstractView {
             foreach ($result[1] as $url) {
                 $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
                 $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-                if (filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)) {
+                if (filter_var($decoded_url, FILTER_VALIDATE_URL) !== false && in_array($parsed_url, $accepted_schemes, true)) {
                     $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">' . $result[2][$pos] . '</a>', $post_content, 1);
                 }
                 else {

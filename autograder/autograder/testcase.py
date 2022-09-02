@@ -84,7 +84,7 @@ class Testcase():
         testcase type.
         """
         if self.type in ['Compilation', 'FileCheck']:
-            self.secure_environment.log_container_meta("", "", "AUTOGRADING BEGIN", 0)
+            self.secure_environment.log_container("", "", "AUTOGRADING BEGIN", 0)
             success = self._run_compilation()
         else:
             success = self._run_execution()
