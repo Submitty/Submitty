@@ -66,7 +66,7 @@ apt-get install -qqy scrot
 
 apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb \
 p7zip-full patchutils libpq-dev unzip valgrind zip libboost-all-dev gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
+jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
 apt-get install -qqy ninja-build
 
@@ -89,6 +89,7 @@ apt-get install -qqy emacs
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 apt-key fingerprint 0EBFCD88
+
 add-apt-repository "deb [arch=amd64,arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get update
 apt-get install -qqy docker-ce docker-ce-cli
@@ -123,4 +124,9 @@ if [ ${VAGRANT} == 1 ]; then
     echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
 
     dpkg-reconfigure -f noninteractive slapd
+fi
+
+# Install SAML IdP docker container for testing
+if [ ${VAGRANT} == 1 ]; then
+    docker pull submitty/docker-test-saml-idp:latest
 fi

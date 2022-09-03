@@ -14,20 +14,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -41,7 +27,6 @@ CREATE TYPE public.notifications_component AS ENUM (
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
 
 --
 -- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
@@ -92,7 +77,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
         END LOOP;
         
         -- Get the number of late days charged up to this point
-        late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
+        late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
@@ -851,6 +836,17 @@ CREATE TABLE public.gradeable_allowed_minutes_override (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     allowed_minutes integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255) NOT NULL
 );
 
 
@@ -1651,7 +1647,6 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
-    anon_id character varying,
     user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
@@ -1670,6 +1665,8 @@ CREATE TABLE public.users (
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1904,6 +1901,14 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gradeable_anon gradeable_anon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_pkey PRIMARY KEY (g_id, anon_id);
 
 
 --
@@ -2524,6 +2529,22 @@ ALTER TABLE ONLY public.gradeable_access
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

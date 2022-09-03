@@ -1,4 +1,4 @@
-@import url("google/inconsolata.css");
+@import "google/inconsolata.css";
 
 .diff-container-box {
     overflow: auto;
@@ -27,6 +27,7 @@
     background-color: var(--focus-danger-red);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .line_number {
     color: gray;
     border-right: 1px solid lightgrey;
@@ -34,6 +35,9 @@
     width: auto;
 }
 
+/* stylelint-disable selector-class-pattern */
+
+/* Not sure why the linter can't use disable-next-line here... */
 .line_number,
 .line_code {
     vertical-align: top;
@@ -42,9 +46,11 @@
     font-family: "Courier New", Courier, monospace;
     font-size: 16px;
     line-height: 20px !important;
-    padding: 0 5px 0 5px;
+    padding: 0 5px;
 }
+/* stylelint-enable selector-class-pattern */
 
+/* stylelint-disable-next-line selector-class-pattern */
 .line_code_inner {
     max-height: 20px !important;
     height: 20px !important;
@@ -53,6 +59,7 @@
     overflow-x: scroll !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .line_code {
     white-space: pre;
     padding-left: 10px;

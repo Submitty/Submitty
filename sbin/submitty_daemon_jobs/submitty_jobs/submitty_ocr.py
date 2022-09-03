@@ -68,10 +68,13 @@ def preprocess(img):
                                           cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     img_final_bin = 255 - img_final_bin
-    # the return values has been changed in opencv 3.x and is reverted in 4.x
-    # after upgrading the function only returns contours and hierarchy
-    _, contours, hierarchy = cv2.findContours(img_final_bin, cv2.RETR_TREE,
-                                              cv2.CHAIN_APPROX_SIMPLE)
+
+    contours, _ = cv2.findContours(img_final_bin, cv2.RETR_TREE,
+                                   cv2.CHAIN_APPROX_SIMPLE)
+
+    if len(contours) == 0:
+        return []
+
     contours, boundingBoxes = sort_contours(contours)
 
     sub_boxes = []
@@ -79,7 +82,7 @@ def preprocess(img):
     # get the individual images
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
-        if(w > 20 and w < 75 and h > 35 and h < 125):
+        if w > 20 and w < 75 and h > 35 and h < 125:
             idx += 1
             new_img = img[y:y+h, x:x+w]
             # convert to MNIST expected img
@@ -95,8 +98,8 @@ def preprocess(img):
 
             # the return values has been changed in opencv 3.x and is reverted in 4.x
             # after upgrading the function only returns contours and hierarchy
-            _, contours, h = cv2.findContours(thresh_gray, cv2.RETR_TREE,
-                                              cv2.CHAIN_APPROX_NONE)
+            contours, _ = cv2.findContours(thresh_gray, cv2.RETR_TREE,
+                                           cv2.CHAIN_APPROX_NONE)
             if len(contours) < 1:
                 continue
 
