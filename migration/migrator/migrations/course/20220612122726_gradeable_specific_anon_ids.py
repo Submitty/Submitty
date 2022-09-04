@@ -36,15 +36,13 @@ def up(config, database, semester, course):
         db_info = json.load(db_file, object_pairs_hook=OrderedDict)
         database.execute("GRANT SELECT, INSERT, UPDATE, DELETE ON gradeable_anon TO {}".format(db_info['database_course_user']))
 
-    database.execute(
-        """
+    database.execute("""
         INSERT INTO gradeable_anon (
             SELECT u.user_id, g_id, u.anon_id
-            FROM gradeable g JOIN users u ON 1=1 WHERE NOT EXISTS (SELECT 1 FROM gradeable_anon WHERE user_id=u.user_id AND g_id=g.g_id)
+            FROM gradeable g JOIN users u ON 1=1 WHERE NOT EXISTS (SELECT 1 FROM gradeable_anon WHERE user_id=u.user_id AND g_id=g.g_id) AND u.anon_id IS NOT NULL
         );
-        """
-    )
-    database.execute("ALTER TABLE users DROP COLUMN anon_id;")
+    """)
+    database.execute("ALTER TABLE users DROP COLUMN IF EXISTS anon_id;")
 
 def down(config, database, semester, course):
     """

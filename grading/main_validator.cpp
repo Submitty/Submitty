@@ -225,7 +225,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
     }
 
     std::string fm = tcg.value("failure_message","");
-    if (!test_case_success) {
+    if (!test_case_success || show_message) {
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
@@ -240,7 +240,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           autocheck_j["messages"].push_back(new_message);
         }
       }
-      if (fm != "" && !failure_message_already_added) {
+      if (fm != "" && !failure_message_already_added && !test_case_success) {
         nlohmann::json new_message;
         new_message["message"] = fm;
         new_message["type"] = "failure";
