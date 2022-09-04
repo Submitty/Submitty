@@ -7444,7 +7444,7 @@ AND gc_id IN (
                     $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
                     $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
                 }
-                
+
 
                 // Create containers for each component
                 $containers = [];
