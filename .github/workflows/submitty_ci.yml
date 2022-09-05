@@ -244,7 +244,7 @@ jobs:
         - name: install ShellCheck
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
-          run: bash run_shellcheck.sh
+          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
 
     e2e:
