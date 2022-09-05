@@ -11,7 +11,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.2
+  PHP_VER: 7.4
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
@@ -481,7 +481,7 @@ jobs:
               BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
@@ -495,10 +495,10 @@ jobs:
               sudo systemctl stop submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_1.spec.js
+              spec: cypress/e2e/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -509,10 +509,10 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_2.spec.js
+              spec: cypress/e2e/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -526,10 +526,10 @@ jobs:
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with databse auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -538,10 +538,10 @@ jobs:
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -555,10 +555,10 @@ jobs:
             run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with SAML auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost,chromeWebSecurity=false
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true

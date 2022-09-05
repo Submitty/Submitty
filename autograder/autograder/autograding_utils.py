@@ -175,8 +175,8 @@ def just_write_grade_history(json_file, assignment_deadline, submission_time, se
 # ==================================================================================
 
 
-def log_container_meta(log_path, event="", name="", container="", time=0):
-    """ Given a log file, create or append container meta data to a log file. """
+def log_container(log_path, event="", name="", container="", time=0):
+    """ Given a log file, create or append container details. """
 
     now = dateutils.get_current_time()
     easy_to_read_date = dateutils.write_submitty_date(now, True)

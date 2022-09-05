@@ -285,6 +285,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 fi
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# Permissions for PWA
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
