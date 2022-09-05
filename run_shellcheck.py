@@ -4,7 +4,6 @@
 
 from pathlib import Path
 import subprocess
-import os
 
 ignored_files = set()
 with open('.shellcheckignore', 'r') as ignore_file:
