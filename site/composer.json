@@ -27,7 +27,7 @@
     "egulias/email-validator": "3.2.1",
     "lcobucci/jwt": "3.4.6",
     "league/commonmark": "1.6.7",
-    "maennchen/zipstream-php": "2.1.0",
+    "maennchen/zipstream-php": "2.2.1",
     "onelogin/php-saml": "^3.6",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
