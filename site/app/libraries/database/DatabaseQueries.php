@@ -4424,6 +4424,8 @@ AND gc_id IN (
         return false;
     }
 
+    // ANONYMOUS ID QUERIES
+
     /**
      * Set gradeable-specific user anon_id
      *
@@ -4439,7 +4441,7 @@ AND gc_id IN (
                 continue;
             }
             $params = [$user_id, $g_id, $anon_id];
-            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
+            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", $params);
         }
     }
 
