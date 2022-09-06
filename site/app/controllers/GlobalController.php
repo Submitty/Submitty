@@ -370,22 +370,11 @@ class GlobalController extends AbstractController {
             "title" => "My Courses",
             "icon" => "fa-book-reader"
         ]);
+
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['user_profile']),
             "title" => "My Profile",
             "icon" => "fa-user"
-        ]);
-
-        $sidebar_buttons[] = new NavButton($this->core, [
-            "href" => $this->core->buildUrl(['authentication_tokens']),
-            "title" => "Authentication Tokens",
-            "icon" => "fa-key"
-        ]);
-
-        $sidebar_buttons[] = new NavButton($this->core, [
-            "href" => $this->core->buildUrl(['manage_sessions']),
-            "title" => "Manage Sessions",
-            "icon" => "fa-user-shield"
         ]);
 
         $sidebar_buttons[] = new Button($this->core, [

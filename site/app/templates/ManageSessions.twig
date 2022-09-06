@@ -38,13 +38,13 @@
                     <td>
                     {% if session.isCurrent(current_session_id) %}
                         <form action="authentication/logout">
-                            <input type="submit" class="btn btn-primary" value="Logout">
+                            <input type="submit" class="btn btn-danger" value="Logout">
                         </form>
                     {% else %}
                         <form method='POST' action="manage_sessions/logout" class="other-session">
                             <input type="hidden" name="session_id" value="{{ session.getSessionId }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                            <input type="submit" class="btn btn-primary" value="Logout">
+                            <input type="submit" class="btn btn-danger" value="Logout">
                         </form>
                     {% endif %}
                     </td>

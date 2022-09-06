@@ -29,7 +29,7 @@
     "lcobucci/jwt": "3.4.6",
     "league/commonmark": "1.6.7",
     "league/flysystem": "^2.4",
-    "maennchen/zipstream-php": "2.1.0",
+    "maennchen/zipstream-php": "2.2.1",
     "matthiasmullie/scrapbook": "^1.4",
     "onelogin/php-saml": "^3.6",
     "php-ds/php-ds": "1.4.1",
@@ -46,7 +46,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.8.2",
+    "phpstan/phpstan": "1.8.4",
     "phpstan/phpstan-deprecation-rules": "1.0",
     "phpunit/phpunit": "8.5.28",
     "submitty/php-codesniffer": "2.5.0"

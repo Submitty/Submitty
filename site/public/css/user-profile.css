@@ -142,4 +142,8 @@
     .flex-row-col {
         flex-direction: column;
     }
+
+    #auth-tokens-btn {
+        margin-bottom: 10px;
+    }
 }
