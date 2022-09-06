@@ -284,6 +284,8 @@
             var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
             const partiallyHidden = 2;
 
+            // accepts an element (editButton) having required data attributes; other parameters represent the properties known to be common until now
+            // returns an updated set of common props by comparing with the props of the given element
             function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
                 let residualSections = [];
                 if (first) {
@@ -312,6 +314,7 @@
                 return [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch];
             }
 
+            // sets the common properties of a given folder
             function folderSetter(elem) {
                 let insideFileMatcher = new RegExp(`^${elem.attr("id").replace("div", "file")}f[0-9]{0,}$`);
                 let insideFolderMatcher = new RegExp(`^${elem.attr("id")}d[0-9]{0,}$`);
