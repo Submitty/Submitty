@@ -7417,37 +7417,36 @@ AND gc_id IN (
 
             if (isset($db_row_split['comp_id'])) {
                 // Create all of the GradedComponents
-                if (isset($db_row_split['comp_id'])) {
-                    for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
-                        // Create a temporary array for each graded component instead of trying
-                        //  to transpose the entire $db_row_split array
-                        $comp_array = [];
-                        foreach ($comp_array_properties as $property) {
-                            $comp_array[$property] = $db_row_split[$property][$i];
-                        }
-
-                        //  Similarly, transpose just this grader
-                        $user_array = [];
-                        foreach ($user_properties as $property) {
-                            $user_array[$property] = $db_row_split['grader_' . $property][$i];
-                        }
-
-                        // Create the grader user
-                        $grader = new User($this->core, $user_array);
-
-                        // Create the component
-                        $graded_component = new GradedComponent(
-                            $this->core,
-                            $ta_graded_gradeable,
-                            $gradeable->getComponent($db_row_split['comp_id'][$i]),
-                            $grader,
-                            $comp_array
-                        );
-
-                        $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
-                        $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
+                for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
+                    // Create a temporary array for each graded component instead of trying
+                    //  to transpose the entire $db_row_split array
+                    $comp_array = [];
+                    foreach ($comp_array_properties as $property) {
+                        $comp_array[$property] = $db_row_split[$property][$i];
                     }
+
+                    //  Similarly, transpose just this grader
+                    $user_array = [];
+                    foreach ($user_properties as $property) {
+                        $user_array[$property] = $db_row_split['grader_' . $property][$i];
+                    }
+
+                    // Create the grader user
+                    $grader = new User($this->core, $user_array);
+
+                    // Create the component
+                    $graded_component = new GradedComponent(
+                        $this->core,
+                        $ta_graded_gradeable,
+                        $gradeable->getComponent($db_row_split['comp_id'][$i]),
+                        $grader,
+                        $comp_array
+                    );
+
+                    $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
+                    $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
                 }
+
 
                 // Create containers for each component
                 $containers = [];
