@@ -487,7 +487,7 @@ class SecureExecutionEnvironment():
             trace=trace
         )
 
-    def log_container(self, event, name='', container='', time=0):
+    def log_container(self, event, name='', container='', time=0.0):
         """ A useful wrapper for the atuograding_utils.log_message function. """
         log_path = os.path.join(self.tmp_logs, 'container_log.txt')
         autograding_utils.log_container(log_path, event, name, container, time)
