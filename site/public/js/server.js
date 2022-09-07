@@ -651,7 +651,7 @@ function checkColorActivated() {
     pos = 0;
     seq = "&&((%'%'BA\r";
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
-    
+
     function inject() {
         $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
     }
@@ -809,6 +809,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -925,7 +928,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })  
+    })
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
@@ -1569,7 +1572,7 @@ function previewMarkdown(mode) {
     if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
-    if (mode === 'preview') { 
+    if (mode === 'preview') {
         if (markdown_header.attr('data-mode') === 'preview') return;
         accessibility_message.hide();
         markdown_textarea.hide();
