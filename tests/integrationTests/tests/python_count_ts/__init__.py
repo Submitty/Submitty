@@ -1,7 +1,6 @@
 # Necessary imports. Provides library functions to ease writing tests.
 from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
-import subprocess
 import os
 import glob
 import shutil
@@ -26,19 +25,20 @@ def initialize(test):
         os.mkdir(data_path)
     except OSError:
         pass
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-                     os.path.join(test.testcase_path, "assignment_config")])
+    shutil.copyfile(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+                    os.path.join(test.testcase_path, "assignment_config", "config.json"))
 
 
 ############################################################################
 
 def cleanup(test):
-    subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "*")))
-
+    data_dir = os.path.join(test.testcase_path, "data")
+    for filename in os.listdir(data_dir):
+        file_path = os.path.join(data_dir, filename)
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
 
 @testcase
 def schema_validation(test):
@@ -53,9 +53,8 @@ def schema_validation(test):
 @testcase
 def correct(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
-                     os.path.join(test.testcase_path, "data")])
+    shutil.copyfile(os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
+                    os.path.join(test.testcase_path, "data", "solution.py"))
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_correct", "-b")
@@ -66,9 +65,8 @@ def correct(test):
 @testcase
 def buggy(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy.py"),
-                     os.path.join(test.testcase_path, "data")])
+    shutil.copyfile(os.path.join(SAMPLE_SUBMISSIONS, "buggy.py"),
+                    os.path.join(test.testcase_path, "data", "buggy.py"))
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_buggy", "-b")
@@ -78,9 +76,8 @@ def buggy(test):
 @testcase
 def syntax_error(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "syntax_error.py"),
-                     os.path.join(test.testcase_path, "data")])
+    shutil.copyfile(os.path.join(SAMPLE_SUBMISSIONS, "syntax_error.py"),
+                    os.path.join(test.testcase_path, "data", "syntax_error.py"))
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_syntax_error", "-b")
