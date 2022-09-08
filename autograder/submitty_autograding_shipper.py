@@ -91,10 +91,13 @@ def copy_files(
         if `PULL` then the source file is on the remote machine and it should be pulled to the
         source file on the local machine.
     """
+    _COPY_SUFFIX = "_COPYING"
     if address == 'localhost':
         for src, dest in files:
+            dest_tmp = dest + _COPY_SUFFIX
             if src != dest:
-                shutil.copy(src, dest)
+                shutil.copy(src, dest_tmp)
+                shutil.move(dest_tmp, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -117,10 +120,14 @@ def copy_files(
         try:
             if direction == CopyDirection.PUSH:
                 for local, remote in files:
-                    sftp.put(local, remote)
+                    remote_tmp = remote + _COPY_SUFFIX
+                    sftp.put(local, remote_tmp)
+                    sftp.posix_rename(remote_tmp, remote)
             else:
                 for remote, local in files:
-                    sftp.get(remote, local)
+                    local_tmp = local + _COPY_SUFFIX
+                    sftp.get(remote, local_tmp)
+                    shutil.move(local_tmp, local)
         finally:
             if sftp is not None:
                 sftp.close()
@@ -371,6 +378,7 @@ def prepare_job(
             next_to_grade
         )
         autograding_zip_tmp, submission_zip_tmp = zips
+        todo_queue_file_tmp_fd, todo_queue_file_tmp = tempfile.mkstemp()
 
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
@@ -402,14 +410,14 @@ def prepare_job(
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    with open(todo_queue_file, 'w') as outfile:
+    with open(todo_queue_file_tmp, 'w') as outfile:
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
         copy_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
-            (todo_queue_file, todo_queue_file)
+            (todo_queue_file_tmp, todo_queue_file)
         ], CopyDirection.PUSH)
     except Exception as e:
         config.logger.log_stack_trace(traceback.format_exc(), job_id=JOB_ID)
@@ -419,10 +427,10 @@ def prepare_job(
         print(f"ERROR: could not move files due to the following error: {e}")
         return False
     finally:
+        os.close(todo_queue_file_tmp_fd)
         os.remove(autograding_zip_tmp)
         os.remove(submission_zip_tmp)
-        if host != 'localhost':
-            os.remove(todo_queue_file)
+        os.remove(todo_queue_file_tmp)
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
@@ -491,8 +499,8 @@ def unpack_job(
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
         copy_files(config, which_machine, [
-            (target_done_queue_file, local_done_queue_file),
-            (target_results_zip, local_results_zip)
+            (target_results_zip, local_results_zip),
+            (target_done_queue_file, local_done_queue_file)
         ], CopyDirection.PULL)
     except (socket.timeout, TimeoutError, FileNotFoundError):
         # These are expected error cases, so we clean up on our end and return a `WAITING` status.

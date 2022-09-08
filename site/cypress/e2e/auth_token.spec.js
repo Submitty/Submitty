@@ -8,7 +8,7 @@ describe('Test cases revolving around authentication tokens', () => {
     });
 
     it('Should create new token, receive it\'s value back, and pass vcs_login', () => {
-        cy.get('#main > div.content > p:nth-child(7)').should('have.text', 'You don\'t have any Authentication Tokens.');
+        cy.get('#main > div.content > p:nth-child(16)').should('have.text', 'You don\'t have any Authentication Tokens.');
 
         cy.get('#new-auth-token-button').click();
 
@@ -88,7 +88,7 @@ describe('Test cases revolving around authentication tokens', () => {
             cy.get('#main > div.content > table > tbody > tr:nth-child(2) > td:nth-child(2)').should('have.text', 'Never expires');
 
             cy.get('#main > div.content > table > tbody > tr:nth-child(2) > td:nth-child(3) > form > input.btn.btn-danger').click();
-            cy.get('#main > div.content > p:nth-child(7)').should('have.text', 'You don\'t have any Authentication Tokens.');
+            cy.get('#main > div.content > p:nth-child(16)').should('have.text', 'You don\'t have any Authentication Tokens.');
 
         });
     });

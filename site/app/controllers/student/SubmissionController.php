@@ -1871,6 +1871,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();

@@ -315,6 +315,9 @@ class AdminGradeableController extends AbstractController {
             }
             // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if ($student_id === $grader_id) {
+                    return JsonResponse::getErrorResponse("Please note that student is not able to grade themselves");
+                }
                 $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
