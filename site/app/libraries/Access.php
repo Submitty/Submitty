@@ -464,7 +464,7 @@ class Access {
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
-                if (!$this->isGradeableInStudentPeerAssignment($gradeable, $user)) {
+                if (!$this->isGradedGradeableInPeerAssignment($gradeable, $graded_gradeable, $user)) {
                     $grading_checks = false;
                 }
             }
@@ -644,27 +644,50 @@ class Access {
     }
 
     /**
-     * Check if a Gradeable is in a user's peer grading assignment
-     * @param Gradeable $gradeable Gradeable to be peer graded
+     * Check if a graded-gradeable is in a user's peer grading assignment
+     * If graded-gradeable is null, then simply check if the grader has any peer grading assignment for this gradeable
+     *
+     * @param Gradeable|null $gradeable Gradeable to be peer graded
+     * @param GradedGradeable|null $graded_gradeable Graded-gradeable to be peer graded
      * @param User $user User doing the peer grading
      * @return bool
      */
-    public function isGradeableInStudentPeerAssignment($gradeable, User $user) {
-        if ($gradeable === null) {
+    public function isGradedGradeableInPeerAssignment(?Gradeable $gradeable, ?GradedGradeable $graded_gradeable, User $user) {
+        if ($gradeable === null && $graded_gradeable === null) {
             return false;
+        }
+
+        $any_peer = true;
+
+        if ($graded_gradeable !== null) {
+            $any_peer = false;
+            if ($gradeable === null) {
+                $gradeable = $graded_gradeable->getGradeable();
+            }
         }
 
         if (!$gradeable->hasPeerComponent()) {
             return false;
         }
         else {
-            /*
-            * When this check is run, the submitter of a gradeable is set to the grader, even on master.
-            * This means the in_array will always be false. Hence the return true so that peer grading is even possible.
-            */
-            //$user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
-            //return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
-            return true;
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
+            if ($any_peer) {
+                if (empty($user_ids_to_grade)) {
+                    return false;
+                }
+                return true;
+            }
+            $submitter = $graded_gradeable->getSubmitter();
+            if ($submitter->isTeam()) {
+                $team_members = $submitter->getTeam()->getMemberUserIds();
+                foreach ($user_ids_to_grade as $user_to_grade) {
+                    if (in_array($user_to_grade, $team_members)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
     }
 
