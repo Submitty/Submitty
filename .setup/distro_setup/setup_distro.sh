@@ -41,7 +41,7 @@ fi
 
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 
-if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
+if [ "${VAGRANT}" == 1 ] && [ "${UTM_ARM}" == 0 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
         chmod -x /etc/update-motd.d/*
@@ -101,16 +101,4 @@ ${DATABASE_LINE}
 ############################################################
 " > /etc/motd
     chmod 644 /etc/motd
-
-    # setup up LDAP stuff
-    echo "" >> /etc/ldap/ldap.conf
-    echo "BASE   dc=vagrant,dc=local" >> /etc/ldap/ldap.conf
-    echo "URI    ldap://localhost" >> /etc/ldap/ldap.conf
-
-    echo -e "dn: ou=users,dc=vagrant,dc=local
-objectClass: organizationalUnit
-objectClass: top
-ou: users" > /tmp/base.ldif
-    ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f /tmp/base.ldif
-    rm -f /tmp/base.ldif
 fi
