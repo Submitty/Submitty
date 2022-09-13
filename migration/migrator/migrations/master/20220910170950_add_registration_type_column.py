@@ -12,7 +12,8 @@ def up(config, database):
     """
     database.execute("""
 ALTER TABLE public.courses_users
-ADD registration_type varying(255);
+ADD registration_type character varying(255) DEFAULT 'graded':character varying NOT NULL
+ADD CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text])));
 """)
 
 
