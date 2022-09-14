@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\libraries\Access;
 use app\libraries\DateUtils;
 use app\models\User;
 
@@ -31,12 +32,6 @@ class UserProfileView extends AbstractView {
             $autofill_preferred_name[1] = $user->getPreferredLastName();
         }
 
-        $access_levels = [
-            User::LEVEL_USER        => "User",
-            User::LEVEL_FACULTY     => "Faculty",
-            User::LEVEL_SUPERUSER   => "Superuser"
-        ];
-
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -47,6 +42,8 @@ class UserProfileView extends AbstractView {
             ?  $user->getTimeZone()
             : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
 
+        $this->core->getOutput()->addInternalModuleJs('user-profile.js');
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
@@ -54,7 +51,7 @@ class UserProfileView extends AbstractView {
             "change_name_text" => $change_name_text,
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,
-            "access_level" => $access_levels[$user->getAccessLevel()],
+            "access_level" => Access::ACCESS_LEVELS[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['user_profile', 'change_password']),
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),

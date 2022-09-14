@@ -10,7 +10,13 @@
             "autochecks": [
                 {
                     "actual_file": "test02/STDOUT.txt",
-                    "description": "STDOUT.txt"
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "Success: numbers summed correctly.",
+                            "type": "success"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 8,
@@ -36,7 +42,13 @@
             "autochecks": [
                 {
                     "actual_file": "test04/STDOUT_0.txt",
-                    "description": "STDOUT_0.txt"
+                    "description": "STDOUT_0.txt",
+                    "messages": [
+                        {
+                            "message": "Success: numbers summed correctly.",
+                            "type": "success"
+                        }
+                    ]
                 },
                 {
                     "actual_file": "test04/STDOUT_1.txt",

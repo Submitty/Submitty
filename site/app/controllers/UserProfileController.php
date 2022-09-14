@@ -9,6 +9,8 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\FileUtils;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -143,14 +145,19 @@ class UserProfileController extends AbstractController {
             return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
         }
         else {
-            $meta = explode('.', $_FILES['user_image']['name']);
-            $extension = $meta[1];
+            preg_match("/^.*\.(jpg|jpeg|png|gif)$/i", $_FILES['user_image']['name'], $extension);
+            if (!(FileUtils::isValidImage($_FILES['user_image']['tmp_name']) && FileUtils::validateUploadedFiles($_FILES['user_image'])[0]['success'] && (count($extension) >= 2) && $_FILES['user_image']['size'] <= 5 * 1048576)) {
+                return JsonResponse::getErrorResponse("Something's wrong with the uploaded file.");
+            }
 
             // Save image for user
-            $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
+            $result = $user->setDisplayImage($extension[1], $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
+            if ($result === User::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
+            }
 
-            if (!$result) {
+            if ($result === User::PROFILE_IMG_SET_FAILURE) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {

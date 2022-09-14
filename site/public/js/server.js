@@ -29,8 +29,6 @@ function adjustBreadcrumbLinks(){
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
 
-
-
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -133,50 +131,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    let orig_div_name = div_name;
-    div_name = "#" + div_name;
-
-    let loadingTools = $("#tc_" + index).find(".loading-tools");
-
-    if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
-    }
-    else{
-        $("#show_char_"+index).toggle();
-        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
-            url: url,
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Error getting file diff: ' + response.message);
-                    return;
-                }
-                $(div_name).empty();
-                $(div_name).html(response.data);
-                toggleDiv(orig_div_name);
-
-                loadingTools.find("span").hide();
-                loadingTools.find(".loading-tools-hide").show();
-                enableKeyToClick();
-            },
-            error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
-            }
-        })
-    }
-}
-
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
@@ -260,10 +214,14 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(id, dir) {
+function newEditCourseMaterialsFolderForm(id, dir, is_hidden) {
     let form = $('#edit-course-materials-folder-form');
-
-    $('#hide-materials-checkbox-edit', form).prop('checked', false);
+    $('#hide-folder-materials-checkbox-edit', form).prop('checked', false);
+    if (is_hidden === true) {
+        $('#hide-folder-materials-checkbox-edit', form).prop('checked', true);
+    }
+    $('#hide-folder-materials-checkbox-edit:checked ~ #edit-folder-form-hide-warning').show();
+    $('#hide-folder-materials-checkbox-edit:not(:checked) ~ #edit-folder-form-hide-warning').hide();
     $('#material-folder-edit-form', form).attr('data-id', id);
     $("#show-some-section-selection-edit", form).hide();
     $("#all-sections-showing-yes", form).prop('checked',false);
@@ -289,6 +247,9 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
+
+    $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
+    $('#hide-materials-checkbox-edit:not(:checked) ~ #edit-form-hide-warning').hide();
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
@@ -658,7 +619,11 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    let download_path = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    if ($("#submission_browser").length > 0) {
+        download_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.location = download_path;
 }
 
 function downloadCourseMaterial(id) {
@@ -686,7 +651,7 @@ function checkColorActivated() {
     pos = 0;
     seq = "&&((%'%'BA\r";
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
-    
+
     function inject() {
         $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
     }
@@ -844,6 +809,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -960,7 +928,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })  
+    })
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
@@ -1474,7 +1442,11 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("attachments")) {
       directory = "attachments";
     }
-    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    if ($("#submission_browser").length > 0) {
+        file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
 
@@ -1600,7 +1572,7 @@ function previewMarkdown(mode) {
     if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
-    if (mode === 'preview') { 
+    if (mode === 'preview') {
         if (markdown_header.attr('data-mode') === 'preview') return;
         accessibility_message.hide();
         markdown_textarea.hide();

@@ -9,6 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
     public function header() {
+        $this->core->getOutput()->addServiceWorker();
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
@@ -381,15 +382,13 @@ class GlobalController extends AbstractController {
             "icon" => "fa-key"
         ]);
 
-        if ($this->core->getConfig()->isDebug()) {
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['calendar']),
-                "title" => "Calendar",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-calendar",
-                "icon" => "fa-calendar"
-            ]);
-        }
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['calendar']),
+            "title" => "Calendar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-calendar",
+            "icon" => "fa-calendar"
+        ]);
 
         $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
         // Create the line for all faculties, superusers, and instructors
@@ -446,6 +445,12 @@ class GlobalController extends AbstractController {
                 "href" => $this->core->buildUrl(['superuser', 'email_status']),
                 "title" => "Email Status",
                 "icon" => "fas fa-mail-bulk"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['superuser', 'saml']),
+                "title" => "SAML Management",
+                "icon" => "fas fa-user-lock"
             ]);
         }
 
