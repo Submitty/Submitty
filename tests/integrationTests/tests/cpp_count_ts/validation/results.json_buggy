@@ -1,0 +1,35 @@
+{
+    "automatic_grading_total": 2,
+    "nonhidden_automatic_grading_total": 2,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "Number of `auto`",
+                    "messages": [
+                        {
+                            "message": "You must not use the `auto` keyword.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Use of identifier `numbers`",
+                    "messages": [
+                        {
+                            "message": "Re read problem instructions",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Count TS cpp"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
