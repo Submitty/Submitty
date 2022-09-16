@@ -15,14 +15,6 @@ use app\repositories\SessionRepository;
  */
 class ManageSessionsController extends AbstractController {
     /**
-     * ManageSessionsController constructor.
-     *
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
-    /**
      * Show manage sessions page
      *
      * @Route("/manage_sessions", methods={"GET"})
