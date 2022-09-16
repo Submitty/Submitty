@@ -185,6 +185,15 @@ else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+
+if [ "${CI}" != true ]; then
+    echo -e "Checking for and fetching latest browscap.ini if needed"
+    # browscap.ini is needed for users' browser identification, this information is shown on session management page
+    # fetch and convert browscap.ini to cache, may take some time on initial setup or if there's an update
+    ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/browscap/browscap-php/resources
+fi
+
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
