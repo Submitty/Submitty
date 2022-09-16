@@ -1,6 +1,6 @@
 
-<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
+<div id="queue_status">
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -47,7 +47,7 @@
             }
         });
     </script>
-
+</div>
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
     {% if viewer.getQueueSocketMessage() %}
         <div class = "queue-message">
