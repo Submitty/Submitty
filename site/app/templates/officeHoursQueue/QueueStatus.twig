@@ -215,7 +215,7 @@
     </form>
   </div>
 {% endif %}
-<br>
+{# <br>
 <a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
 <a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-primary">Close Table</button></a>
 <br><br>
@@ -236,7 +236,7 @@
         {% endfor %}
         </tbody>
     </table>
-</div>
+</div> #}
 <script>
 
     function queueMessage(message) {
@@ -263,11 +263,11 @@
     }
 
 
-    function toggleQueueOccupancy(){
+    {# function toggleQueueOccupancy(){
         $('.queue_occupancy').toggle();
         $('#close_queue_occupancy').toggle();
         $('#view_queue_occupancy').toggle();
-    }
+    } #}
 
     function toggleSwitchQueueForm(){
         $("#switch_queue_form").css('display', 'block');
