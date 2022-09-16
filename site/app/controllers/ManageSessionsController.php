@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;

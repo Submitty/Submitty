@@ -186,6 +186,9 @@ else
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
 if [ "${CI}" != true ]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
     # browscap.ini is needed for users' browser identification, this information is shown on session management page
@@ -193,9 +196,6 @@ if [ "${CI}" != true ]; then
     ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/browscap/browscap-php/resources
 fi
-
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
