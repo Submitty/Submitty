@@ -836,7 +836,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 void OutputSignalDescriptiveErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile, std::string std_errfile) {
   // if kill signal
   if (what_signal == 9) {
-    logfile << "ERROR: Program has either runout of time or tried to use unallowed resources" << std::endl;
+    logfile << "ERROR: Program has either run out of time or tried to use unallowed resources" << std::endl;
   }
   else {
     std::ifstream stderr(std_errfile);
