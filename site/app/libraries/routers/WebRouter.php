@@ -10,15 +10,16 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
+use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use Doctrine\Common\Annotations\PsrCachedReader;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class WebRouter {
     /** @var Core  */
@@ -27,7 +28,7 @@ class WebRouter {
     /** @var Request  */
     protected $request;
 
-    /** @var PsrCachedReader */
+    /** @var AnnotationReader */
     protected $reader;
 
     /** @var array */
@@ -43,21 +44,34 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'annotations');
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
+        $cache = new FilesystemAdapter("", 0, $cache_path);
 
-        $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
-        $this->reader = new PsrCachedReader(
-            new AnnotationReader(),
-            new FilesystemAdapter("", 0, $cache_path),
-            $this->core->getConfig()->isDebug()
-        );
+        $this->reader = new AnnotationReader();
+        // This will fetch the cache for routes. If it doesn't find it then it will
+        // compile them, set the cache, and set compiledRoutes to that.
+        $compiledRoutes = $cache->get('routes', function (ItemInterface $item) {
+            return $this->getCompiledRoutes();
+        });
+
+        $context = new RequestContext();
+        $matcher = new CompiledUrlMatcher($compiledRoutes, $context->fromRequest($this->request));
+        $this->parameters = $matcher->matchRequest($this->request);
+    }
+
+    /**
+     * Returns Symfony compiled routes
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getCompiledRoutes(): array {
+        $fileLocator = new FileLocator();
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
-        $context = new RequestContext();
-        $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
-        $this->parameters = $matcher->matchRequest($this->request);
+        return (new CompiledUrlMatcherDumper($collection))->getCompiledRoutes();
     }
 
 

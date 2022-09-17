@@ -124,11 +124,11 @@ fi
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
 # clear old annotation cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
 fi
 # create annotation cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
