@@ -18,7 +18,7 @@
     "codemirror": "5.65.8",
     "codemirror-spell-checker": "1.1.2",
     "flatpickr": "4.6.6",
-    "jquery": "3.6.0",
+    "jquery": "3.6.1",
     "jquery-ui-dist": "1.12.1",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^2.4.0",
