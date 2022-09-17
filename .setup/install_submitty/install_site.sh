@@ -123,6 +123,12 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
+# TODO: remove this. see #8404
+# clear old annotations cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
+fi
+
 # clear old routes cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
