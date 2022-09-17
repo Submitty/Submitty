@@ -656,7 +656,7 @@ CREATE TABLE public.course_materials (
     path character varying(255),
     type smallint NOT NULL,
     release_date timestamp with time zone,
-    hidden_from_students boolean,
+    hidden_from_students boolean NOT NULL,
     priority double precision NOT NULL,
     url text,
     url_title character varying(255)
