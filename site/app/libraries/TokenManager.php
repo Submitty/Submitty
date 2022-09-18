@@ -3,7 +3,7 @@
 namespace app\libraries;
 
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Token;
+use Lcobucci\JWT\Token\Plain as Token;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
@@ -93,8 +93,13 @@ class TokenManager {
         return $token;
     }
 
-    private static function parseToken(string $token): Token {
-        $token = self::$configuration->parser()->parse($token);
+    private static function parseToken(string $jwt): Token {
+        $token = self::$configuration->parser()->parse($jwt);
+
+        // Narrow the type from an abstract token to concrete Plain token type
+        if (!$token instanceof Token) {
+            throw new \InvalidArgumentException("Invalid token type: " . get_class($token));
+        }
 
         if (!self::$configuration->validator()->validate($token, ...self::$configuration->validationConstraints())) {
             throw new \InvalidArgumentException("Invalid signature for token");
