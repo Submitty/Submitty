@@ -14,7 +14,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
 
     public function testInvalidSecretLength() {
         $this->expectException(\LengthException::class);
-        $this->expectExceptionMessage('Invalid secret length, expect at least 64-bits, got 5 bits');
+        $this->expectExceptionMessage('Invalid secret length, expect at least 64 characters, got 5 characters');
         TokenManager::initialize('short', 'https://submitty.org');
     }
 
