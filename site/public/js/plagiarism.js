@@ -345,6 +345,7 @@ function requestAjaxData(url, f, es) {
                 data = JSON.parse(data);
             }
             catch (e) {
+                console.log(url);
                 console.log(data);
                 throw e;
             }
