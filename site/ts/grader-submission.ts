@@ -21,7 +21,9 @@ function init() {
     document.getElementsByName('submission-type')
         .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
 
-    warning_banner!.textContent = '';
+    if (warning_banner) {
+        warning_banner!.textContent = '';
+    }
 
     //load previous setting if any
     const prevSetting = sessionStorage.getItem(`${window.gradeable_id}-submission_mode`);
@@ -42,21 +44,23 @@ function init() {
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
 
-    qrPrefixInput.addEventListener('change', (event: Event) => {
+    if (qrPrefixInput) {
+        qrPrefixInput.addEventListener('change', (event: Event) => {
         sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
-    });
-    qrSuffixInput.addEventListener('change', (event: Event) => {
-        sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
-    });
-
-    useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
-    if (useScanIdsCheckBox !== null) {
-        useScanIdsCheckBox.addEventListener('click', (event: Event) => {
-            sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
+        });
+        qrSuffixInput.addEventListener('change', (event: Event) => {
+            sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
         });
     }
 
-
+    if (useQRCheckBox) {
+        useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
+        if (useScanIdsCheckBox !== null) {
+            useScanIdsCheckBox.addEventListener('click', (event: Event) => {
+                sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
+            });
+        }
+    }
 
     const prevQRPrefix = sessionStorage.getItem(`${window.gradeable_id}-qr-prefix`);
     const prevQRSuffix = sessionStorage.getItem(`${window.gradeable_id}-qr-suffix`);
@@ -141,12 +145,14 @@ function changeSubmissionMode(event: Event) {
             }
     }
 
-    if (!warning_banner!.hasChildNodes()) {
-        const child = warning_banner!.appendChild( document.createElement('h2') );
-        child.classList.add('warning');
-    }
+    if (warning_banner) {
+        if (!warning_banner!.hasChildNodes()) {
+            const child = warning_banner!.appendChild( document.createElement('h2') );
+            child.classList.add('warning');
+        }
 
-    warning_banner!.firstChild!.textContent = message;
+        warning_banner!.firstChild!.textContent = message;
+    }
 }
 
 
