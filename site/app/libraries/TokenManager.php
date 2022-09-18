@@ -27,6 +27,9 @@ class TokenManager {
     private static $issuer;
 
     public static function initialize(string $secret, string $issuer): void {
+        if (mb_strlen($secret) < 64) {
+            throw new \LengthException('Invalid secret length, expect at least 64-bits, got ' . mb_strlen($secret) . ' bits');
+        }
         self::$configuration = Configuration::forSymmetricSigner(
             new Sha256(),
             InMemory::plainText($secret)
