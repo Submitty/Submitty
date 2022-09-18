@@ -12,7 +12,7 @@
 opencv-python-headless==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2021.3 # Submitty-util specific.
+pytz==2022.2.1 # Submitty-util specific.
 
 python-pam==1.8.4
 ruamel.yaml==0.17.21
