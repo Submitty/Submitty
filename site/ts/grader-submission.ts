@@ -46,7 +46,7 @@ function init() {
 
     if (qrPrefixInput) {
         qrPrefixInput.addEventListener('change', (event: Event) => {
-        sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
+            sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
         });
         qrSuffixInput.addEventListener('change', (event: Event) => {
             sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
