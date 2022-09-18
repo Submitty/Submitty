@@ -19,7 +19,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    And also create directory:
    vendor/
-   in GIT_CHEXKOUT directory and checkout from:
+   in GIT_CHECKOUT directory and checkout from:
    git clone https://github.com/nlohmann/json.git
    to this path:
    vendor/nlohmann/json/
