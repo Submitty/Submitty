@@ -40,7 +40,7 @@
     "@types/twig": "^1.12.9",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.33.1",
-    "babel-jest": "^28.1.3",
+    "babel-jest": "^29.0.3",
     "cypress": "^10.6.0",
     "cypress-file-upload": "^5.0.8",
     "esbuild": "^0.15.7",
