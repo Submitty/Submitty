@@ -40,8 +40,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
 
 3. Download and save the Ubuntu 20.04 ARM Server ISO
-   https://mac.getutm.app/gallery/ubuntu-20-04 (click "Alternative and previous releases")
+   https://mac.getutm.app/gallery/ubuntu-20-04 *
    https://cdimage.ubuntu.com/releases/20.04.4/release/
+
+   * click "Ubuntu Server for ARM", then click "Alternative and previous releases"
 
 
 4. Launch UTM, and through the UTM GUI, press "+" to create a new VM:
