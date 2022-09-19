@@ -155,12 +155,12 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $config = new Config($core);
         $core->setConfig($config);
         $time = DateUtils::getServerTimeJson($core);
-        $this->assertRegExp("/20[0-9]{2}/", $time['year']);
-        $this->assertRegExp("/[0-1][0-9]/", $time['month']);
-        $this->assertRegExp("/([0-9]|[1-3][0-9])/", $time['day']);
-        $this->assertRegExp("/^([0-9]|1[0-9]|2[0-3])$/", $time['hour']);
-        $this->assertRegExp("/[0-5][0-9]/", $time['minute']);
-        $this->assertRegExp("/[0-5][0-9]/", $time['second']);
+        $this->assertMatchesRegularExpression("/20[0-9]{2}/", $time['year']);
+        $this->assertMatchesRegularExpression("/[0-1][0-9]/", $time['month']);
+        $this->assertMatchesRegularExpression("/([0-9]|[1-3][0-9])/", $time['day']);
+        $this->assertMatchesRegularExpression("/^([0-9]|1[0-9]|2[0-3])$/", $time['hour']);
+        $this->assertMatchesRegularExpression("/[0-5][0-9]/", $time['minute']);
+        $this->assertMatchesRegularExpression("/[0-5][0-9]/", $time['second']);
     }
 
     public function testGetAvailableTimeZones(): void {

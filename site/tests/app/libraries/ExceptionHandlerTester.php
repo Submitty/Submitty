@@ -29,7 +29,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
 
     public function testThrowRuntimeException() {
         ExceptionHandler::setDisplayExceptions(true);
-        $this->assertRegExp("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test")));
+        $this->assertMatchesRegularExpression("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test")));
         ExceptionHandler::setDisplayExceptions(false);
     }
 
@@ -47,8 +47,8 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         $file = FileUtils::joinPaths($tmp_dir, 'site_errors', $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);
-        $this->assertRegExp('/[0-9]{2}\:[0-9]{2}\:[0-9]{2}\ [0-9]{2}\/[0-9]{2}\/[0-9]{4} \- FATAL ERROR\napp.+/', $actual);
-        $this->assertRegExp('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual);
+        $this->assertMatchesRegularExpression('/[0-9]{2}\:[0-9]{2}\:[0-9]{2}\ [0-9]{2}\/[0-9]{2}\/[0-9]{4} \- FATAL ERROR\napp.+/', $actual);
+        $this->assertMatchesRegularExpression('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual);
         ExceptionHandler::setLogExceptions(false);
         $this->assertTrue(FileUtils::recursiveRmdir($tmp_dir));
     }
@@ -65,7 +65,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         catch (AuthenticationException $e) {
             ExceptionHandler::setDisplayExceptions(true);
             $message = ExceptionHandler::handleException($e);
-            $this->assertRegExp("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);
+            $this->assertMatchesRegularExpression("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);
         }
     }
 
