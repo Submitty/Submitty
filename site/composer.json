@@ -42,10 +42,10 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
-    "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.8.4",
+    "php-mock/php-mock-phpunit": "2.6.1",
+    "phpstan/phpstan": "1.8.5",
     "phpstan/phpstan-deprecation-rules": "1.0",
-    "phpunit/phpunit": "8.5.28",
+    "phpunit/phpunit": "9.5.24",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
