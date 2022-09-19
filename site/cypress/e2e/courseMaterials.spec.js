@@ -709,4 +709,73 @@ describe('Test cases revolving around course material uploading and access contr
 
         cy.get('.file-viewer').should('have.length', 6);
     });
+
+    it('Should show partially and fully restricted sections correctly', () => {
+        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(0).click();
+        cy.get('input[id=all-sections-showing-yes]').click();
+        cy.get('input[id=section-edit-1]').click();
+        cy.waitPageChange(() => {
+            cy.get('input[id=submit-edit]').click();
+        });
+        cy.get('#div_viewer_sd1 > .folder-container > .div-viewer > a[onclick^=newEditCourseMaterialsFolderForm]').click();
+        cy.get('input[id=all-sections-showing-yes-folder]').should('be.checked');
+        cy.get('input[id=section-folder-edit-1]').should('be.checked').and('have.class', 'partial-checkbox');
+        cy.get('input[id=section-folder-edit-1]').click();
+        cy.waitPageChange(() => {
+            cy.get('input[id=submit-folder-edit-full]').click();
+        });
+        cy.get('#div_viewer_sd1 > .folder-container > .div-viewer > a[onclick^=newEditCourseMaterialsFolderForm]').click();
+        cy.get('input[id=all-sections-showing-yes-folder]').should('be.checked');
+        cy.get('input[id=section-folder-edit-1]').should('be.checked').and('not.have.class', 'partial-checkbox');
+        cy.get('.popup-box:visible .form-title .close-button').click();
+        for (let i = 0; i <=1; i++) {
+            cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(i).click();
+            cy.get('input[id=all-sections-showing-yes]').should('be.checked');
+            cy.get('input[id=section-edit-1]').should('be.checked');
+            cy.get('input[id=all-sections-showing-no]').click();
+            cy.waitPageChange(() => {
+                cy.get('input[id=submit-edit]').click();
+            });
+        }
+        cy.get('#div_viewer_sd1 > .folder-container > .div-viewer > a[onclick^=newEditCourseMaterialsFolderForm]').click();
+        cy.get('input[id=all-sections-showing-no-folder]').should('be.checked');
+        cy.get('.popup-box:visible .form-title .close-button').click();
+    });
+
+    it('Should also let a folder to have only partial sections when applying recursive updates', () => {
+        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        for (let i = 0; i <= 1; i++) {
+            cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(i).click();
+            cy.get('input[id=all-sections-showing-yes]').click();
+            cy.get(`input[id=section-edit-${i+1}]`).click();
+            cy.waitPageChange(() => {
+                cy.get('input[id=submit-edit]').click();
+            });
+        }
+        cy.get('#div_viewer_sd1 > .folder-container > .div-viewer > a[onclick^=newEditCourseMaterialsFolderForm]').click();
+        cy.get('input[id=all-sections-showing-yes-folder]').should('be.checked');
+        cy.get('input[id=section-folder-edit-1]').should('be.checked').and('have.class', 'partial-checkbox');
+        cy.get('input[id=section-folder-edit-2]').should('be.checked').and('have.class', 'partial-checkbox');
+        cy.get('#edit-folder-picker').should('have.value', '2022-01-01 00:00:00');
+        cy.get('#edit-folder-picker').clear().type('2022-01-01 12:00:00');
+        cy.get('input[id=all-sections-showing-yes-folder]').click();
+        cy.get('input[id=hide-folder-materials-checkbox-edit]').check();
+        cy.waitPageChange(() => {
+            cy.get('input[id=submit-folder-edit-full]').click();
+        });
+        for (let i = 0; i <= 1; i++) {
+            cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(i).click();
+            cy.get('input[id=all-sections-showing-yes]').should('be.checked');
+            cy.get(`input[id=section-edit-${i+1}]`).should('be.checked');
+            cy.get('#edit-picker').should('have.value', '2022-01-01 12:00:00');
+            cy.get('#edit-picker').clear().type('2022-01-01 00:00:00');
+            cy.get('input[id=all-sections-showing-no]').click();
+            cy.get('input[id=hide-materials-checkbox-edit]').should('be.checked');
+            cy.get('input[id=hide-materials-checkbox-edit]').uncheck();
+            cy.waitPageChange(() => {
+                cy.get('input[id=submit-edit]').click();
+            });
+        }
+    });
 });
