@@ -100,7 +100,7 @@ function changeSubmissionMode(event: Event) {
         useScanIdsCheckBox.checked = false;
     }
 
-    if (window.file_array[0].length > 0) {
+    if (window.file_array[0] && window.file_array[0].length > 0) {
         if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')) {
             return;
         }

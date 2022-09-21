@@ -64,142 +64,138 @@
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
     {# Admin submission type selector #}
-    {% if is_notebook %}
-        {% include 'notebook/Notebook.twig' with {
-            "notebook": notebook,
-            "testcase_messages" : testcase_messages,
-            "image_data" : image_data,
-            "numberUtils" : numberUtils,
-            "student_id" : student_id,
-            "gradeable_id" : gradeable_id,
-            "highest_version" : highest_version,
-            "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files,
-            "viewing_inactive_version" : viewing_inactive_version,
-            "is_timed" : is_timed,
-            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
-            "is_grader_view" : false
-        } %}
+    {% if core.getUser().accessFullGrading() %}
+        <form id="submission-form" method="post">
+            <fieldset id="submission-mode">
+                <legend> Select submission mode: </legend>
+                <label for="radio-normal">
+                    <input type='radio' id="radio-normal" name="submission-type" checked="checked">
+                    Normal Submission
+                </label>
+                <label for="radio-student">
+                    <input type='radio' id="radio-student" name="submission-type">
+                    Make Submission for a Student
+                </label>
+                {% if part_names|length == 1 and not is_vcs %}
+                    <label for="radio-bulk">
+                        <input type='radio' id="radio-bulk" name="submission-type">
+                        Bulk PDF Upload
+                        <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
+                            <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
+                {% endif %}
+            </fieldset>
+            <div id="user-id-input" class="hide">
+                <div class="sub">
+                    Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
+                </div>
+                <div class="sub">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <label for="user_id"> user_id: </label>
+		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+                </div>
+            </div>
+            <div class="sub hide" id="pdf-submit-button">
+                <div class="sub">
 
-    {% else%}
-        {% if core.getUser().accessFullGrading() %}
-            <form id="submission-form" method="post">
-                <fieldset id="submission-mode">
-                    <legend> Select submission mode: </legend>
-                    <label for="radio-normal">
-                        <input type='radio' id="radio-normal" name="submission-type" checked="checked">
-                        Normal Submission
-                    </label>
-                    <label for="radio-student">
-                        <input type='radio' id="radio-student" name="submission-type">
-                        Make Submission for a Student
-                    </label>
-                    {% if part_names|length == 1 and not is_vcs %}
-                        <label for="radio-bulk">
-                            <input type='radio' id="radio-bulk" name="submission-type">
-                            Bulk PDF Upload
-                            <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
-                                <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
-                            </a>
-                        </label>
-                    {% endif %}
-                </fieldset>
-                <div id="user-id-input" class="hide">
-                    <div class="sub">
-                        Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
+                    <div id="toggle-qr-split">
+                        <label for="use-qr">Split by QR code?</label>
+                        <input type="checkbox" id="use-qr">
+
+                        {% if feature_flag_enabled('submitty_ocr') %}
+                        <span id="toggle-id-scan">
+                            <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
+                            <input type="checkbox" id="use-ocr">
+                        </span>
+                        {% endif %}
                     </div>
-                    <div class="sub">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                        <label for="user_id"> user_id: </label>
-    		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+
+                    <div id="qr-split-opts">
+                        <br>
+
+                        <span id="prefix-prompt">QR code prefix/suffix:
+                            <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
+    	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
+                        </span>
+
+                        <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
+                        <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
+                        <div id="expected-num-box">
+                            <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
+                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
+                        </div>
+                    </div>
+
+                    <div id="numeric-split-opts">
+                        <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
+                        <input type="number" id= "num_pages" placeholder="required"/>
                     </div>
                 </div>
-                <div class="sub hide" id="pdf-submit-button">
-                    <div class="sub">
-
-                        <div id="toggle-qr-split">
-                            <label for="use-qr">Split by QR code?</label>
-                            <input type="checkbox" id="use-qr">
-
-                            {% if feature_flag_enabled('submitty_ocr') %}
-                            <span id="toggle-id-scan">
-                                <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
-                                <input type="checkbox" id="use-ocr">
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        <div id="qr-split-opts">
-                            <br>
-
-                            <span id="prefix-prompt">QR code prefix/suffix:
-                                <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
-        	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
-                            </span>
-
-                            <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
-                            <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
-                            <div id="expected-num-box">
-                                <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
-                                <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
-                            </div>
-                        </div>
-
-                        <div id="numeric-split-opts">
-                            <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
-                            <input type="number" id= "num_pages" placeholder="required"/>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <div id="submission-mode-warning" class="text-center">
             </div>
-        {% endif %}
-        {# /Admin submission type selector #}
+        </form>
 
-        {% if is_vcs %}
-            {% if vcs_host_type == 0 or vcs_host_type == 1 %}
-                <h3>To access your Repository:</h3>
-                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-                <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-                {# Below will get uncommented once SAML is active #}
-                {# <p>You will need to use an Authentication Token.</p> #}
-                <br><br>
-                {% if git_auth_token_required %}
-                    <span>Note: Your school requires that you use Authentication Tokens.</span><br>
-                {% endif %}
-                <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
-                <br><br>
-            {% endif %}
-
-            {% if vcs_host_type == 2 or vcs_host_type == 3 %}
-                <h3>Please enter your GitHub URL: </h3>
-
-                GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
-                <input type="text" id="github-user-id" name="git_user_id" class="required github-id" value="{{ github_user_id }}" placeholder="user_name"/>
-                <kbd>/</kbd>
-                <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
-
-                {% if vcs_host_type == 2 %}
-                Note: This should be a <em>public repository</em>, visible to everyone.
-                {% else %}
-                Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
-                {% endif %}
-
-            {% endif %}
-
-            <h3>Grade your repository:</h3>
-            <div class="upload-message">
-                {% include "misc/Markdown.twig" with {
-                    "content" : upload_message
-                } only %}
-            </div>
-            <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
-        {% else %}
-
+        <div id="submission-mode-warning" class="text-center">
+        </div>
     {% endif %}
+    {# /Admin submission type selector #}
 
+    {% include 'notebook/Notebook.twig' with {
+        "notebook": notebook,
+        "testcase_messages" : testcase_messages,
+        "image_data" : image_data,
+        "numberUtils" : numberUtils,
+        "student_id" : student_id,
+        "gradeable_id" : gradeable_id,
+        "highest_version" : highest_version,
+        "max_file_uploads" : max_file_uploads,
+        "old_files" : old_files,
+        "viewing_inactive_version" : viewing_inactive_version,
+        "is_timed" : is_timed,
+        "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
+        "is_grader_view" : false
+    } %}
+
+    {% if is_vcs %}
+        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+            {# Below will get uncommented once SAML is active #}
+            {# <p>You will need to use an Authentication Token.</p> #}
+            <br><br>
+            {% if git_auth_token_required %}
+                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+            {% endif %}
+            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
+            <br><br>
+        {% endif %}
+
+        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+            <h3>Please enter your GitHub URL: </h3>
+
+            GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
+            <input type="text" id="github-user-id" name="git_user_id" class="required github-id" value="{{ github_user_id }}" placeholder="user_name"/>
+            <kbd>/</kbd>
+            <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
+
+            {% if vcs_host_type == 2 %}
+            Note: This should be a <em>public repository</em>, visible to everyone.
+            {% else %}
+            Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
+            {% endif %}
+
+        {% endif %}
+
+        <h3>Grade your repository:</h3>
+        <div class="upload-message">
+            {% include "misc/Markdown.twig" with {
+                "content" : upload_message
+            } only %}
+        </div>
+        <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
+    
+    {% else %}
         {# File upload boxes #}
         <div id="upload-boxes">
             {# Submit boxes #}
