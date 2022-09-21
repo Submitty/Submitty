@@ -69,8 +69,17 @@ switch ($action) {
 }
 
 function add_users(Core $core, SamlAuthentication $auth) {
+    echo "This may take a minute..." . PHP_EOL;
     $core->loadMasterDatabase();
     $users = $core->getQueries()->getAllSubmittyUsers();
+    $saml_users = $core->getQueries()->getSamlMappedUsers();
+    $already_added = 0;
+    foreach ($saml_users as $user) {
+        if (array_key_exists($user["user_id"], $users)) {
+            unset($users[$user["user_id"]]);
+            $already_added++;
+        }
+    }
     $added = 0;
     $skipped = 0;
     $usernames = [];
@@ -87,7 +96,7 @@ function add_users(Core $core, SamlAuthentication $auth) {
             $skipped++;
         }
     }
-    echo "Added {$added} users to mapping and skipped {$skipped} users." . PHP_EOL;
+    echo "{$already_added} users already directly mapped. Added {$added} users to mapping and skipped {$skipped} users." . PHP_EOL;
 }
 
 function generate_metadata(Core $core, SamlAuthentication $saml_auth) {
@@ -100,6 +109,7 @@ function generate_metadata(Core $core, SamlAuthentication $saml_auth) {
 }
 
 function validate_users(Core $core, SamlAuthentication $saml_auth) {
+    $valid = true;
     $core->loadMasterDatabase();
     $user_checks = [];
     $proxy_users = $core->getQueries()->getProxyMappedUsers();
@@ -114,15 +124,21 @@ function validate_users(Core $core, SamlAuthentication $saml_auth) {
     $saml_auth->setValidUsernames($user_checks);
     foreach ($proxy_users as $proxy_user) {
         if ($saml_auth->isInvalidUsername($proxy_user['saml_id'])) {
+            $valid = false;
             echo "Proxy user " . $proxy_user['user_id'] . " has invalid SAML ID: " . $proxy_user['saml_id'] . "\n";
         }
         if ($saml_auth->isValidUsername($proxy_user['user_id'])) {
+            $valid = false;
             echo "Proxy user " . $proxy_user['user_id'] . " has a Submitty user ID which is a valid SAML ID\n";
         }
     }
     foreach ($saml_users as $saml_user) {
         if ($saml_auth->isInvalidUsername($saml_user['user_id'])) {
+            $valid = false;
             echo "SAML user " . $saml_user['user_id'] . " has a SAML ID which is not valid\n";
         }
+    }
+    if ($valid) {
+        echo "No invalid users!" . PHP_EOL;
     }
 }
