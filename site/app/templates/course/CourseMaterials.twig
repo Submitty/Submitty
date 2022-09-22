@@ -17,6 +17,10 @@
                     tabindex="0">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
         </div>
+    {% elseif user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
+        <div class="action-buttons" style="float: right; margin-bottom: 20px;">
+            <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
+        </div>
     {% endif %}
     <h1>Course Materials</h1>
     {% if user_group==1 %}
