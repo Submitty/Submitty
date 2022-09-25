@@ -47,6 +47,8 @@ echo -e "localhost
 5432
 submitty_dbuser
 submitty_dbuser
+submitty_course_dbuser
+submitty_course_dbuser
 America/New_York
 http://localhost
 

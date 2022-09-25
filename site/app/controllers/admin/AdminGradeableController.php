@@ -315,6 +315,9 @@ class AdminGradeableController extends AbstractController {
             }
             // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if ($student_id === $grader_id) {
+                    return JsonResponse::getErrorResponse("Please note that student is not able to grade themselves");
+                }
                 $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
@@ -1156,6 +1159,10 @@ class AdminGradeableController extends AbstractController {
                 if ($post_val !== $gradeable->isRegradeAllowed()) {
                     $regrade_modified = true;
                 }
+            }
+
+            if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === false && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                $this->core->getQueries()->convertInquiryComponentId($gradeable);
             }
 
             // Try to set the property

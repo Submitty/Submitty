@@ -65,10 +65,19 @@ CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
-echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
-chmod 644 /tmp/index.html
-chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
-mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+pushd /tmp > /dev/null
+# Make a temporary directory that root will own so there is no risk of
+# index.html existing before hand and causing issues
+TMP_DIR=$(mktemp -d)
+
+echo "Submitty is being updated. Please try again in 2 minutes." > ${TMP_DIR}/index.html
+chmod 644 ${TMP_DIR}/index.html
+chown ${CGI_USER}:${CGI_GROUP} ${TMP_DIR}/index.html
+mv ${TMP_DIR}/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
+popd > /dev/null
+rm -rf ${TMP_DIR}
 
 if [ ! -d "${SUBMITTY_DATA_DIR}/run/websocket" ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/run/websocket
@@ -114,12 +123,18 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
-# clear old annotation cache
+# TODO: remove this. see #8404
+# clear old annotations cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
 fi
-# create annotation cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+
+# clear old routes cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
+fi
+# create routes cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -276,18 +291,27 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 fi
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# Permissions for PWA
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
 chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
+mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs

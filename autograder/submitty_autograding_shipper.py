@@ -30,6 +30,7 @@ from typing import List, Tuple
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
+from autograder import scheduler
 from autograder import config as submitty_config
 
 
@@ -90,10 +91,13 @@ def copy_files(
         if `PULL` then the source file is on the remote machine and it should be pulled to the
         source file on the local machine.
     """
+    _COPY_SUFFIX = "_COPYING"
     if address == 'localhost':
         for src, dest in files:
+            dest_tmp = dest + _COPY_SUFFIX
             if src != dest:
-                shutil.copy(src, dest)
+                shutil.copy(src, dest_tmp)
+                shutil.move(dest_tmp, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -116,10 +120,14 @@ def copy_files(
         try:
             if direction == CopyDirection.PUSH:
                 for local, remote in files:
-                    sftp.put(local, remote)
+                    remote_tmp = remote + _COPY_SUFFIX
+                    sftp.put(local, remote_tmp)
+                    sftp.posix_rename(remote_tmp, remote)
             else:
                 for remote, local in files:
-                    sftp.get(remote, local)
+                    local_tmp = local + _COPY_SUFFIX
+                    sftp.get(remote, local_tmp)
+                    shutil.move(local_tmp, local)
         finally:
             if sftp is not None:
                 sftp.close()
@@ -370,6 +378,7 @@ def prepare_job(
             next_to_grade
         )
         autograding_zip_tmp, submission_zip_tmp = zips
+        todo_queue_file_tmp_fd, todo_queue_file_tmp = tempfile.mkstemp()
 
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
@@ -401,14 +410,14 @@ def prepare_job(
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    with open(todo_queue_file, 'w') as outfile:
+    with open(todo_queue_file_tmp, 'w') as outfile:
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
         copy_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
-            (todo_queue_file, todo_queue_file)
+            (todo_queue_file_tmp, todo_queue_file)
         ], CopyDirection.PUSH)
     except Exception as e:
         config.logger.log_stack_trace(traceback.format_exc(), job_id=JOB_ID)
@@ -418,10 +427,10 @@ def prepare_job(
         print(f"ERROR: could not move files due to the following error: {e}")
         return False
     finally:
+        os.close(todo_queue_file_tmp_fd)
         os.remove(autograding_zip_tmp)
         os.remove(submission_zip_tmp)
-        if host != 'localhost':
-            os.remove(todo_queue_file)
+        os.remove(todo_queue_file_tmp)
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
@@ -490,8 +499,8 @@ def unpack_job(
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
         copy_files(config, which_machine, [
-            (target_done_queue_file, local_done_queue_file),
-            (target_results_zip, local_results_zip)
+            (target_results_zip, local_results_zip),
+            (target_done_queue_file, local_done_queue_file)
         ], CopyDirection.PULL)
     except (socket.timeout, TimeoutError, FileNotFoundError):
         # These are expected error cases, so we clean up on our end and return a `WAITING` status.
@@ -1580,12 +1589,12 @@ def cleanup_shippers(config, worker_status_map, autograding_workers):
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers(config, worker_status_map, autograding_workers):
+def launch_shippers(config, worker_status_map, autograding_workers) -> List[scheduler.Worker]:
     print("LAUNCH SHIPPERS")
     config.logger.log_message("submitty_autograding_shipper.py launched")
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
-    processes = list()
+    shippers = []
     for name, machine in autograding_workers.items():
         # SKIP MACHINES THAT ARE NOT ENABLED OR NOT REACHABLE
         if not machine['enabled']:
@@ -1647,9 +1656,10 @@ def launch_shippers(config, worker_status_map, autograding_workers):
                 args=(config, thread_name, single_machine_data[name], full_address, u)
             )
             p.start()
-            processes.append((thread_name, p))
+            shipper = scheduler.Worker(config, thread_name, machine, p)
+            shippers.append(shipper)
 
-    return processes
+    return shippers
 
 
 def get_job_requirements(job_file):
@@ -1674,63 +1684,17 @@ def worker_job_match(worker, autograding_workers, job_requirements):
 
 def monitoring_loop(
     config: submitty_config.Config,
-    autograding_workers: dict,
-    processes: List[Tuple[str, multiprocessing.Process]]
+    processes: List[scheduler.Worker]
 ):
 
     print("MONITORING LOOP")
+    sched = scheduler.FCFSScheduler(config, processes)
     total_num_workers = len(processes)
 
     # main monitoring loop
     try:
         while True:
-            alive = 0
-            for name, p in processes:
-                if p.is_alive:
-                    alive = alive+1
-                else:
-                    config.logger.log_message(f"ERROR: process {name} is not alive")
-            if alive != total_num_workers:
-                config.logger.log_message(
-                    f"ERROR: #shippers={total_num_workers} != #alive={alive}"
-                )
-
-            # Find which workers are currently idle, as well as any autograding
-            # jobs which need to be scheduled.
-            workers = [name for (name, p) in processes if p.is_alive]
-            idle_workers = list(filter(
-                lambda n: len(os.listdir(worker_folder(n))) == 0,
-                workers
-            ))
-            jobs = filter(
-                os.path.isfile,
-                map(
-                    lambda f: os.path.join(INTERACTIVE_QUEUE, f),
-                    os.listdir(INTERACTIVE_QUEUE)
-                )
-            )
-
-            # Distribute available jobs randomly among workers currently idle.
-            for job in jobs:
-                if len(idle_workers) == 0:
-                    break
-                job_requirements = get_job_requirements(job)
-                # prune the list to the workers that have the necessary capabilities for this job
-                matching_workers = list(filter(
-                    lambda n: worker_job_match(n, autograding_workers, job_requirements),
-                    idle_workers
-                ))
-                if len(matching_workers) == 0:
-                    # skip this job for now if none of the idle workers can handle this job
-                    continue
-                # pick one of the matching workers randomly
-                dest = random.choice(matching_workers)
-                config.logger.log_message(
-                    f"Pushing job {os.path.basename(job)} to {dest}."
-                )
-                shutil.move(job, worker_folder(dest))
-                idle_workers.remove(dest)
-
+            sched.update_and_schedule()
             time.sleep(1)
 
     except KeyboardInterrupt:
@@ -1811,4 +1775,4 @@ if __name__ == "__main__":
     worker_status_map = update_remote_autograding_workers(config, autograding_workers)
     cleanup_shippers(config, worker_status_map, autograding_workers)
     processes = launch_shippers(config, worker_status_map, autograding_workers)
-    monitoring_loop(config, autograding_workers, processes)
+    monitoring_loop(config, processes)

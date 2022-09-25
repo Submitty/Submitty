@@ -234,7 +234,7 @@ class QueueItem:
         # the 'GRADING_' file.
         if is_grading:
             base, tail = os.path.split(json_file)
-            assert(tail.startswith('GRADING_'))
+            assert tail.startswith('GRADING_')
 
             with open(json_file, 'r') as infile:
                 self.grading_queue_obj = json.load(infile)

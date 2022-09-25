@@ -11,19 +11,51 @@ parameters:
 			path: app/controllers/AbstractController.php
 
 		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 13
+			path: app/controllers/AuthenticationController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/AuthenticationController.php
+
+		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
 			path: app/controllers/AuthenticationController.php
 
 		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 2
+			count: 3
 			path: app/controllers/DockerInterfaceController.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"
 			count: 1
 			path: app/controllers/GlobalController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/HomePageController.php
 
 		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
@@ -36,14 +68,134 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
-			count: 1
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 3
 			path: app/controllers/MiscController.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/NotificationController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 3
+			path: app/controllers/NotificationController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/NotificationController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 41
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 5
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 25
+			path: app/controllers/PollController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 5
+			path: app/controllers/PollController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/UserProfileController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 9
+			path: app/controllers/admin/ConfigurationController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 18
+			path: app/controllers/admin/LateController.php
 
 		-
 			message: "#^Negated boolean expression is always true\\.$#"
@@ -59,6 +211,46 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between mixed and '' will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 2
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 7
+			path: app/controllers/admin/WrapperController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 3
+			path: app/controllers/admin/WrapperController.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
@@ -86,9 +278,49 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 11
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 4
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 4
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 11
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
 
 		-
 			message: "#^Else branch is unreachable because previous condition is always true\\.$#"
@@ -109,6 +341,14 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: """
+				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return WebResponse directly$#
+			"""
+			count: 1
+			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
@@ -269,6 +509,22 @@ parameters:
 			message: "#^PHPDoc tag @var for constant app\\\\libraries\\\\plagiarism\\\\PlagiarismUtils\\:\\:SUPPORTED_LANGUAGES with type int is incompatible with value array\\{plaintext\\: array\\{hash_size\\: 14\\}, python\\: array\\{hash_size\\: 14\\}, java\\: array\\{hash_size\\: 14\\}, cpp\\: array\\{hash_size\\: 14\\}, mips\\: array\\{hash_size\\: 5\\}\\}\\.$#"
 			count: 1
 			path: app/libraries/plagiarism/PlagiarismUtils.php
+
+		-
+			message: """
+				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return JsonResponse directly$#
+			"""
+			count: 3
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: """
+				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
+				should not be used, just return RedirectResponse directly$#
+			"""
+			count: 7
+			path: app/libraries/routers/WebRouter.php
 
 		-
 			message: "#^Instanceof between bool and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
@@ -536,11 +792,6 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Offset string on array\\{\\} in isset\\(\\) does not exist\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
 			count: 2
 			path: app/views/grading/ElectronicGraderView.php
@@ -549,4 +800,13 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+
+		-
+			message: """
+				#^Call to deprecated method registerLoader\\(\\) of class Doctrine\\\\Common\\\\Annotations\\\\AnnotationRegistry\\:
+				This method is deprecated and will be removed in
+				            doctrine/annotations 2\\.0\\. Annotations will be autoloaded in 2\\.0\\.$#
+			"""
+			count: 1
+			path: public/index.php
 

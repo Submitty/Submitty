@@ -1,6 +1,6 @@
 
-<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
+<div id="queue_status">
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -47,7 +47,7 @@
             }
         });
     </script>
-
+</div>
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
     {% if viewer.getQueueSocketMessage() %}
         <div class = "queue-message">
@@ -123,10 +123,9 @@
       {% endif %}
       {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
-          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
-          <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}">
           <div class="form-group">
               <br>
               <h2>Switch My Queue</h2>

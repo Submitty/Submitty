@@ -9,7 +9,7 @@
     "testcases" : [
         {
             "title" : "CORRECT SOLUTION",
-            "command" : "python code_correct.py gettysburg_address.txt output_correct.txt",
+            "command" : "python3 code_correct.py gettysburg_address.txt output_correct.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -30,7 +30,7 @@
 
         {
             "title" : "DUPLICATE LINES - Required Order",
-            "command" : "python code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
+            "command" : "python3 code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -43,7 +43,7 @@
         },
         {
             "title" : "DUPLICATE LINES - Re-Ordering OK",
-            "command" : "python code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
+            "command" : "python3 code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -58,7 +58,7 @@
 
         {
             "title" : "EXTRA LINES - Required Order",
-            "command" : "python code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
+            "command" : "python3 code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -71,7 +71,7 @@
         },
         {
             "title" : "EXTRA LINES - Re-Ordering OK",
-            "command" : "python code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
+            "command" : "python3 code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -86,7 +86,7 @@
 
         {
             "title" : "MISSING LINES - Required Order",
-            "command" : "python code_missing_lines.py gettysburg_address.txt output_missing.txt",
+            "command" : "python3 code_missing_lines.py gettysburg_address.txt output_missing.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -99,7 +99,7 @@
         },
         {
             "title" : "MISSING LINES - Re-Ordering OK",
-            "command" : "python code_missing_lines.py gettysburg_address.txt output_missing.txt",
+            "command" : "python3 code_missing_lines.py gettysburg_address.txt output_missing.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -114,7 +114,7 @@
 
         {
             "title" : "OUT OF ORDER - Required Order",
-            "command" : "python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
+            "command" : "python3 code_out_of_order.py gettysburg_address.txt output_reordered.txt",
             "points" : 10,
             "validation" : [
                 {
@@ -127,7 +127,7 @@
         },
         {
             "title" : "OUT OF ORDER - Re-Ordering OK",
-            "command" : "python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
+            "command" : "python3 code_out_of_order.py gettysburg_address.txt output_reordered.txt",
             "points" : 10,
             "validation" : [
                 {

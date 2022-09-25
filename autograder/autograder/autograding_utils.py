@@ -174,15 +174,22 @@ def just_write_grade_history(json_file, assignment_deadline, submission_time, se
 #
 # ==================================================================================
 
+CONTAINER_NAME_WIDTH = 30
+CONTAINER_ID_WIDTH = 10
+EVENT_MESSAGE_WIDTH = 30
+EVENT_DURATION_WIDTH = 10
 
-def log_container_meta(log_path, event="", name="", container="", time=0):
-    """ Given a log file, create or append container meta data to a log file. """
+
+def log_container(log_path, event="", name="", container="", time=0.0):
+    """ Given a log file, create or append container details. """
 
     now = dateutils.get_current_time()
-    easy_to_read_date = dateutils.write_submitty_date(now, True)
-    time_unit = "sec"
-    parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
-    write_to_log(log_path, ' | '.join(parts))
+    timestamp = dateutils.write_submitty_date(now, True)
+    c_name = f'{name:<{CONTAINER_NAME_WIDTH}}'
+    c_id = f'{container:<{CONTAINER_ID_WIDTH}}'
+    event_msg = f'{event:<{EVENT_MESSAGE_WIDTH}}'
+    time_str = f'{f"{time:.3f}sec":>{EVENT_DURATION_WIDTH}}'
+    write_to_log(log_path, ' | '.join((timestamp, c_name, c_id, event_msg, time_str)))
 
 
 def write_to_log(log_path, message):

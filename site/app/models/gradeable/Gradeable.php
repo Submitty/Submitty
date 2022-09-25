@@ -568,6 +568,7 @@ class Gradeable extends AbstractModel {
     }
     public function setPeerGradersList($input) {
         $bad_rows = [];
+        $self_grade_rows = [];
         foreach ($input as $row_num => $vals) {
             if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
@@ -575,13 +576,25 @@ class Gradeable extends AbstractModel {
             if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
+            if ($vals["grader"] === $vals["student"]) {
+                array_push($self_grade_rows, ($vals["grader"]));
+            }
         }
-        if (!empty($bad_rows)) {
-            $msg = "The given user id is not valid: ";
-            array_walk($bad_rows, function ($val) use (&$msg) {
-                $msg .= " {$val}";
-            });
-            $this->core->addErrorMessage($msg);
+        if (!empty($bad_rows) || !empty($self_grade_rows)) {
+            if (!empty($bad_rows)) {
+                $bad_row_msg = "The given user id is not valid: ";
+                array_walk($bad_rows, function ($val) use (&$bad_row_msg) {
+                    $bad_row_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($bad_row_msg);
+            }
+            if (!empty($self_grade_rows)) {
+                $self_grade_msg = "The given users have self gradings: ";
+                array_walk($self_grade_rows, function ($val) use (&$self_grade_msg) {
+                    $self_grade_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($self_grade_msg);
+            }
         }
         else {
             $query_string = "";
@@ -623,7 +636,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
-        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $this->getId());
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
         if ($feedback == 'thanks') {
             return 'Thank you!';

@@ -113,10 +113,10 @@ class AutogradingConfig extends AbstractModel {
         $this->max_submission_size = floatval($details['max_submission_size'] ?? 0);
         $this->max_submissions = intval($details['max_submissions'] ?? 0);
         if (isset($details['assignment_message'])) {
-            $this->gradeable_message = $details['assignment_message'] ?? '';
+            $this->gradeable_message = $details['assignment_message'];
         }
         elseif (isset($details['gradeable_message'])) {
-            $this->gradeable_message = $details['gradeable_message'] ?? '';
+            $this->gradeable_message = $details['gradeable_message'];
         }
 
         if (isset($details['load_gradeable_message'])) {

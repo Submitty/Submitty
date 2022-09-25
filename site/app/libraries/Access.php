@@ -95,6 +95,12 @@ class Access {
     const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
     const DENY_ALL                        = -1;
 
+    const ACCESS_LEVELS = [
+        User::LEVEL_USER        => "User",
+        User::LEVEL_FACULTY     => "Faculty",
+        User::LEVEL_SUPERUSER   => "Superuser"
+    ];
+
     /**
      * @var Core
      */
