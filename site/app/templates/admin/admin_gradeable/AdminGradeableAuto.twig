@@ -247,12 +247,10 @@
             }
         }
         if($('#yes_student_view').is(':checked')) {
-            //$('#student_submit_download_view').show();
-            disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
-            disableElementChildren('#student_download_view', !$('#no_student_view_after_grades').is(':checked'));
+            disableElementChildren('#student_submit_view', false);
+            disableElementChildren('#student_download_view', false);
         }
         else {
-            // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_view', true);
             disableElementChildren('#student_download_view', true);
             const studentSubmit = $('#no_student_submit');
