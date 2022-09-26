@@ -25,7 +25,7 @@
     "doctrine/annotations": "1.13.3",
     "doctrine/orm": "2.12.3",
     "egulias/email-validator": "3.2.1",
-    "lcobucci/jwt": "3.4.6",
+    "lcobucci/jwt": "4.2.1",
     "league/commonmark": "1.6.7",
     "maennchen/zipstream-php": "2.2.1",
     "onelogin/php-saml": "^3.6",
@@ -43,9 +43,9 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
     "php-mock/php-mock-phpunit": "2.6.1",
-    "phpstan/phpstan": "1.8.5",
+    "phpstan/phpstan": "1.8.6",
     "phpstan/phpstan-deprecation-rules": "1.0",
-    "phpunit/phpunit": "9.5.24",
+    "phpunit/phpunit": "9.5.25",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
