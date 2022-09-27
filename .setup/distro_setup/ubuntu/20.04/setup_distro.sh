@@ -87,13 +87,13 @@ apt-get install -qqy imagemagick
 # miscellaneous usability
 apt-get install -qqy emacs
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-apt-key fingerprint 0EBFCD88
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+# apt-key fingerprint 0EBFCD88
 
-add-apt-repository "deb [arch=amd64,arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get update
-apt-get install -qqy docker-ce docker-ce-cli
-systemctl status docker | head -n 100
+# add-apt-repository "deb [arch=amd64,arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# apt-get update
+# apt-get install -qqy docker-ce docker-ce-cli
+# systemctl status docker | head -n 100
 
 apt-get -qqy autoremove
 
