@@ -5,7 +5,7 @@ git config --global user.email "instructor"
 git config --global user.name "instructor"
 
 test_git() {
-    git clone https://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
+    git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 open_homework
     cd open_homework
     echo "foo" >> test.txt
     git add .
@@ -43,9 +43,9 @@ test_git instructor student
 test_git student student
 
 EXIT_CODE=0
-git clone https://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor > /tmp/submitty_git/git_stdout 2> /tmp/submitty_git/git_stderr || EXIT_CODE=$?
+git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor > /tmp/submitty_git/git_stdout 2> /tmp/submitty_git/git_stderr || EXIT_CODE=$?
 test ${EXIT_CODE} -ne 0
-test "$(echo -e "Cloning into 'instructor'...\nfatal: Authentication failed for 'https://localhost/git/${SEMESTER}/sample/open_homework/instructor/'")" = "$(</tmp/submitty_git/git_stderr)"
+test "$(echo -e "Cloning into 'instructor'...\nfatal: Authentication failed for 'http://localhost/git/${SEMESTER}/sample/open_homework/instructor/'")" = "$(</tmp/submitty_git/git_stderr)"
 
 cleanup
 popd

@@ -1,6 +1,6 @@
 name: Vagrant Up
 
-on:
+on: 
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
 jobs:
   vagrant-up:
     runs-on: macos-10.15
-
+    
     strategy:
       matrix:
         include:
@@ -27,5 +27,4 @@ jobs:
       # - run: vagrant plugin install vagrant-vbguest
       - run: NO_SUBMISSIONS=1 vagrant up ${{ matrix.image }}
       - name: Validate image
-        # Using --insecure / -k might not be a good option here
-        run: curl --show-error --fail --include --insecure https://localhost:${{ matrix.port }}
+        run: curl --show-error --fail --include http://localhost:${{ matrix.port }}

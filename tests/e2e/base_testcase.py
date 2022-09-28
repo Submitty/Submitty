@@ -33,7 +33,7 @@ class BaseTestCase(unittest.TestCase):
     override user_id, user_name, and user_password as necessary for a
     particular testcase and this class will handle the rest to setup the test.
     """
-    TEST_URL = "https://localhost:1511"
+    TEST_URL = "http://localhost:1511"
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
@@ -55,7 +55,6 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
-        self.options.add_argument('--ignore-certificate-errors')
 
         self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         # https://stackoverflow.com/a/26916386/214063

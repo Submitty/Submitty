@@ -45,7 +45,6 @@ SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
 WORKER=$([[ $(jq -r '.worker' "${CONF_DIR}/submitty.json") == "true" ]] && echo 1 || echo 0)
 
-export SUBMITTY_INSTALL_DIR
 source "${THIS_DIR}/bin/versions.sh"
 
 if [ "${WORKER}" == 0 ]; then
@@ -912,12 +911,6 @@ if [ "${WORKER}" == 0 ]; then
     fi
 fi
 
-# Upgrade to http/2 with TLS for non-worker Vagrant VMs
-if [[ "${WORKER}" == 0 && "${VAGRANT}" == 1 ]]; then
-    echo "Upgrading to http/2"
-    chmod +x "${SUBMITTY_REPOSITORY}/.setup/dev-upgrade-h2.sh"
-    /usr/bin/env bash "${SUBMITTY_REPOSITORY}/.setup/dev-upgrade-h2.sh" up
-fi
 
 # If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload

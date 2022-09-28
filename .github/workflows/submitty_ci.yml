@@ -367,7 +367,6 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
-              sudo apt-get install ca-certificates
 
           - name: Install third party dependencies
             run: |
@@ -395,7 +394,7 @@ jobs:
           - name: Set up apache
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
               sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
               sudo mkdir -p /run/php
               sudo chown www-data:www-data /run/php
@@ -426,22 +425,6 @@ jobs:
               sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
               sudo service nginx restart
 
-          - name: Upgrade to HTTPS
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              if [ -f .setup/dev-upgrade-h2.sh ]; then
-                sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
-                sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
-                  && echo "HTTP_PROTO=https" >> $GITHUB_ENV                                                        \
-                  || {  # Note that we assume the echo above is always true
-                    echo "HTTP_PROTO=http"  >> $GITHUB_ENV
-                    sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
-                  }
-              else
-                echo "HTTP_PROTO=http" >> $GITHUB_ENV
-                echo "Cannot find .setup/dev-upgrade-h2.sh, keep HTTP"
-              fi
-
           - name: Run git tests
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -461,7 +444,7 @@ jobs:
             run: |
               pushd ${SUBMITTY_REPOSITORY}
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-              TEST_URL="${{ env.HTTP_PROTO }}://localhost" python3 -m unittest discover -v --start-directory tests
+              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
 
           # TODO: Remove this block after upgrading jsPDF
@@ -483,13 +466,12 @@ jobs:
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             run: npm run test:api
             env:
-              BASE_URL: ${{ env.HTTP_PROTO }}://localhost
-              NODE_EXTRA_CA_CERTS: "/etc/ssl/selfcert/localhost.crt"
+              BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
+              config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -503,8 +485,8 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
-              spec: cypress/e2e/autograding_status_1.spec.js
+              config: baseUrl=http://localhost
+              spec: cypress/integration/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -517,8 +499,8 @@ jobs:
           - name: Run autograding status test
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
-              spec: cypress/e2e/autograding_status_2.spec.js
+              config: baseUrl=http://localhost
+              spec: cypress/integration/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
@@ -534,7 +516,7 @@ jobs:
           - name: Run cypress e2e login tests with databse auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
+              config: baseUrl=http://localhost
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
@@ -546,7 +528,7 @@ jobs:
           - name: Run cypress e2e login tests with LDAP auth
             uses: cypress-io/github-action@v4
             with:
-              config: baseUrl=${{ env.HTTP_PROTO }}://localhost
+              config: baseUrl=http://localhost
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
