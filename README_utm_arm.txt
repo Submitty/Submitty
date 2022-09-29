@@ -132,7 +132,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    ssh -p 1234 <USERNAME>@localhost
 
-   Run sudo su to connect as the root user
+   Run `sudo su` to connect as the root user
 
 
 8. To share directories between host & guest machines:
