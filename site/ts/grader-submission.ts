@@ -1,6 +1,6 @@
 /**
  * grader-submission.ts contains logic for special submission modes available to full access graders and instructors
- * 
+ *
  * Some of the logic is shared between notebook gradeables which does not have the full set of grader submission options
  * like bulk upload, so for certain UI elements their presence needs to be checked like the QR input fields or file dropzones
  */
