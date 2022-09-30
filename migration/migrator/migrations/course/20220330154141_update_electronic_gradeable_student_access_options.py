@@ -15,7 +15,6 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    # database.execute("ALTER TABLE electronic_gradeable ADD IF NOT EXISTS eg_student_download boolean DEFAULT true NOT NULL")
     database.execute("ALTER TABLE electronic_gradeable RENAME COLUMN eg_scanned_exam TO eg_student_download")
     database.execute("UPDATE electronic_gradeable SET eg_student_download = NOT eg_student_download")
     
@@ -34,7 +33,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    # database.execute("ALTER TABLE electronic_gradeable DROP COLUMN eg_student_download")
     database.execute("ALTER TABLE electronic_gradeable RENAME COLUMN eg_student_download TO eg_scanned_exam")
     database.execute("UPDATE electronic_gradeable SET eg_scanned_exam = eg_student_view AND eg_student_view_after_grades")
 
