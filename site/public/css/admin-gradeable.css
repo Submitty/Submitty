@@ -162,6 +162,10 @@ table#grader-history td {
     text-align: center;
 }
 
+#checkpoint-numeric-gradeables-message {
+    font-style: italic;
+}
+
 #late-days-message {
     font-style: italic;
 }
