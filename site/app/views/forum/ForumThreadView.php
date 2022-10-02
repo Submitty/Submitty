@@ -91,6 +91,10 @@ class ForumThreadView extends AbstractView {
                 $last_name = trim($user_info["last_name"]);
                 $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
 
+                if ($this->core->getUser()->getGroup() == 1 || $this->core->getUser()->getGroup() == 2) {
+                    $visible_username = $first_name . " " . $last_name;
+                }
+
                 if ($post["anonymous"]) {
                     $visible_username = 'Anonymous';
                 }
@@ -841,10 +845,15 @@ class ForumThreadView extends AbstractView {
                 $email = trim($user_info['user_email']);
                 $first_name = trim($user_info["first_name"]);
                 $last_name = trim($user_info["last_name"]);
+                $poster_name = $first_name . " " . substr($last_name, 0, 1) . ".";
+
+                if ($this->core->getUser()->getGroup() == 1 || $this->core->getUser()->getGroup() == 2) {
+                    $poster_name = $first_name . " " . $last_name;
+                }
 
                 $author_info = [
                     "user_id" => $first_post['author_user_id'],
-                    "name" => $first_post['anonymous'] ? "Anonymous" : $first_name . " " . substr($last_name, 0, 1) . ".",
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $poster_name,
                     "email" => $email,
                     "full_name" => $first_name . " " . $last_name . " (" . $first_post['author_user_id'] . ")",
                 ];
@@ -944,6 +953,10 @@ class ForumThreadView extends AbstractView {
         $last_name = trim($user_info["last_name"]);
         $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+
+        if ($this->core->getUser()->getGroup() == 1 || $this->core->getUser()->getGroup() == 2) {
+            $visible_username = $first_name . " " . $last_name;
+        }
 
         if ($display_option != 'tree') {
             $reply_level = 1;

@@ -1393,6 +1393,9 @@ function showHistory(post_id) {
                 const last_name = post['user_info']['last_name'].trim();
                 const author_user_id = post['user'];
                 const visible_username = `${first_name} ${(last_name.length === 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
+                if (this.core.getUser().getGroup() == 1 || this.core.getUser().getGroup() == 2) {
+                    visible_username = `${first_name} ${last_name}`;
+                }
                 let info_name = `${first_name} ${last_name} (${author_user_id})`;
                 const visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
