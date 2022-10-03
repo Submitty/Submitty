@@ -9,6 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
     public function header() {
+        $this->core->getOutput()->addServiceWorker();
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
@@ -171,7 +172,7 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['course_materials']),
                 "title" => "Course Materials",
-                "icon" => "fa-copy"
+                "icon" => "fa-file"
             ]);
         }
 

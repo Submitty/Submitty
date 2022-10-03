@@ -123,12 +123,18 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
-# clear old annotation cache
+# TODO: remove this. see #8404
+# clear old annotations cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
 fi
-# create annotation cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+
+# clear old routes cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
+fi
+# create routes cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -285,6 +291,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 fi
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# Permissions for PWA
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
