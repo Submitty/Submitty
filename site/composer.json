@@ -25,10 +25,10 @@
     "doctrine/annotations": "1.13.3",
     "doctrine/orm": "2.12.3",
     "egulias/email-validator": "3.2.1",
-    "lcobucci/jwt": "3.4.6",
+    "lcobucci/jwt": "4.2.1",
     "league/commonmark": "1.6.7",
-    "maennchen/zipstream-php": "2.1.0",
-    "onelogin/php-saml": "^3.6",
+    "maennchen/zipstream-php": "2.2.1",
+    "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
@@ -42,10 +42,10 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
-    "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "1.8.2",
+    "php-mock/php-mock-phpunit": "2.6.1",
+    "phpstan/phpstan": "1.8.6",
     "phpstan/phpstan-deprecation-rules": "1.0",
-    "phpunit/phpunit": "8.5.28",
+    "phpunit/phpunit": "9.5.25",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {

@@ -81,6 +81,10 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
     { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
+    // Submitty Analysis ToolsTS
+    { "submitty_count_ts",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_count_ts" },
+    { "submitty_diagnostics_ts", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts"},
+
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
     { "python2",                 "/usr/bin/python2" },
@@ -754,6 +758,16 @@ void parse_command_line(const std::string &cmd,
 // =====================================================================================
 // =====================================================================================
 
+std::string get_std_errfile(std::string cmd)
+{
+	size_t index = cmd.find("2>");
+	std::string file;
+	if (index != -1) {
+		file = cmd.substr(index + 2);
+	}
+	return file;
+}
+
 void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile) {
 
 
@@ -821,6 +835,31 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
     std::cout << message << std::endl;
     logfile   << message << "\nProgram Terminated " << std::endl;
 
+}
+
+void OutputSignalDescriptiveErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile, std::string std_errfile) {
+  // if kill signal
+  if (what_signal == 9) {
+    logfile << "ERROR: Program has either run out of time or tried to use unallowed resources" << std::endl;
+  }
+  else {
+    std::ifstream stderr(std_errfile);
+    std::string err;
+    if(stderr) {
+      std::ostringstream ss;
+      ss << stderr.rdbuf();
+      err = ss.str();
+      int num_mem_msgs = 2;
+      std::string memory_overuse_messages[num_mem_msgs] = {"bad_alloc", "MemoryError"};
+      for (size_t i = 0; i < num_mem_msgs; i++)
+      {
+        if (err.find(memory_overuse_messages[i]) != std::string::npos) {
+          logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+          break;
+        }
+      }
+    }
+  }
 }
 
 // =====================================================================================
@@ -1486,6 +1525,9 @@ int execute(const std::string &cmd,
         }
         else{
           logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(WEXITSTATUS(status), logfile, get_std_errfile(cmd));
+          }
           result=1;
           //
           // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
@@ -1500,6 +1542,9 @@ int execute(const std::string &cmd,
           int what_signal =  WTERMSIG(status);
           OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
           std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(what_signal, logfile, get_std_errfile(cmd));
+          }
           if (WTERMSIG(status) == 0){
             result=0;
           }

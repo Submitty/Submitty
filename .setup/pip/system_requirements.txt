@@ -12,17 +12,17 @@
 opencv-python-headless==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2021.3 # Submitty-util specific.
+pytz==2022.2.1 # Submitty-util specific.
 
 python-pam==1.8.4
 ruamel.yaml==0.17.21
 psycopg2-binary==2.9.3
 sqlalchemy==1.4.29
 pylint==2.13.9
-psutil==5.9.1
+psutil==5.9.2
 python-dateutil==2.8.2
 watchdog==2.1.9
-xlsx2csv==0.7.8
+xlsx2csv==0.8.0
 pause==0.3
 paramiko==2.11.0
 tzlocal==2.1
@@ -41,7 +41,7 @@ clang==14.0
 # Python libraries for QR bulk upload
 pyzbar==0.1.9
 pdf2image==1.16.0
-numpy==1.23.1
+numpy==1.23.3
 
 # python libraries for OCR for digit recognition
 onnx==1.12.0
