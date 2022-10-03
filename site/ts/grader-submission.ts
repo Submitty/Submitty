@@ -1,5 +1,8 @@
 /**
  * grader-submission.ts contains logic for special submission modes available to full access graders and instructors
+ *
+ * Some of the logic is shared between notebook gradeables which does not have the full set of grader submission options
+ * like bulk upload, so for certain UI elements their presence needs to be checked like the QR input fields or file dropzones
  */
 
 
@@ -17,22 +20,24 @@ declare global {
 
 const warning_banner = document.getElementById('submission-mode-warning');
 
-function init(){
+function init() {
     document.getElementsByName('submission-type')
         .forEach(radio_btn => radio_btn.addEventListener('click', changeSubmissionMode));
 
-    warning_banner!.textContent = '';
+    if (warning_banner) {
+        warning_banner!.textContent = '';
+    }
 
     //load previous setting if any
     const prevSetting = sessionStorage.getItem(`${window.gradeable_id}-submission_mode`);
-    if (prevSetting){
-        if (prevSetting === 'normal'){
+    if (prevSetting) {
+        if (prevSetting === 'normal') {
             document.getElementById('radio-normal')!.click();
         }
-        else if (prevSetting === 'for-student'){
+        else if (prevSetting === 'for-student') {
             document.getElementById('radio-student')!.click();
         }
-        else if (prevSetting === 'bulk-upload'){
+        else if (prevSetting === 'bulk-upload') {
             document.getElementById('radio-bulk')!.click();
         }
     }
@@ -42,35 +47,37 @@ function init(){
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
 
-    qrPrefixInput.addEventListener('change', (event: Event) => {
-        sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
-    });
-    qrSuffixInput.addEventListener('change', (event: Event) => {
-        sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
-    });
-
-    useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
-    if (useScanIdsCheckBox !== null) {
-        useScanIdsCheckBox.addEventListener('click', (event: Event) => {
-            sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
+    if (qrPrefixInput) {
+        qrPrefixInput.addEventListener('change', (event: Event) => {
+            sessionStorage.setItem(`${window.gradeable_id}-qr-prefix`, (event.target as HTMLInputElement).value );
+        });
+        qrSuffixInput.addEventListener('change', (event: Event) => {
+            sessionStorage.setItem(`${window.gradeable_id}-qr-suffix`, (event.target as HTMLInputElement).value );
         });
     }
 
-
+    if (useQRCheckBox) {
+        useQRCheckBox.addEventListener('click', switchBulkUploadOptions);
+        if (useScanIdsCheckBox !== null) {
+            useScanIdsCheckBox.addEventListener('click', (event: Event) => {
+                sessionStorage.setItem(`${window.gradeable_id}-scan_setting`, (event.target as HTMLInputElement).checked.toString());
+            });
+        }
+    }
 
     const prevQRPrefix = sessionStorage.getItem(`${window.gradeable_id}-qr-prefix`);
     const prevQRSuffix = sessionStorage.getItem(`${window.gradeable_id}-qr-suffix`);
     const prevScanSetting = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`);
 
-    if (prevQRPrefix){
+    if (prevQRPrefix) {
         qrPrefixInput.value = prevQRPrefix;
     }
 
-    if (prevQRSuffix){
+    if (prevQRSuffix) {
         qrSuffixInput.value = prevQRSuffix;
     }
 
-    if (prevScanSetting){
+    if (prevScanSetting) {
         useScanIdsCheckBox!.checked = prevScanSetting === 'true';
     }
 }
@@ -79,7 +86,7 @@ function init(){
 /**
  * handle switching between normal, submit for student, and bulk upload modes
  */
-function changeSubmissionMode(event: Event){
+function changeSubmissionMode(event: Event) {
     const element = event.target as HTMLInputElement;
 
     const submitForStudentOpts = document.getElementById('user-id-input');
@@ -96,21 +103,21 @@ function changeSubmissionMode(event: Event){
         useScanIdsCheckBox.checked = false;
     }
 
-    if (window.file_array[0].length > 0){
-        if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')){
+    if (window.file_array[0] && window.file_array[0].length > 0) {
+        if (!confirm('Switching submission modes will remove all unsubmitted files, are you sure?')) {
             return;
         }
     }
 
     //remove all files in each submission box
-    for (let idx = 1; idx <= window.num_submission_boxes; idx++){
+    for (let idx = 1; idx <= window.num_submission_boxes; idx++) {
         window.deleteFiles(idx);
     }
 
     const prevBulkSetting = sessionStorage.getItem(`${window.gradeable_id}-bulk_setting`);
 
     let message = '';
-    switch (element.id){
+    switch (element.id) {
         case 'radio-normal':
             window.loadPreviousFilesOnDropBoxes();
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'normal');
@@ -127,7 +134,7 @@ function changeSubmissionMode(event: Event){
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
             message = 'Warning: Submitting files for bulk upload!';
 
-            if (prevBulkSetting && prevBulkSetting === 'qr'){
+            if (prevBulkSetting && prevBulkSetting === 'qr') {
                 qrUploadOpts!.style.display = 'inline';
                 useQRCheckBox.click();
             }
@@ -141,16 +148,18 @@ function changeSubmissionMode(event: Event){
             }
     }
 
-    if (!warning_banner!.hasChildNodes()){
-        const child = warning_banner!.appendChild( document.createElement('h2') );
-        child.classList.add('warning');
-    }
+    if (warning_banner) {
+        if (!warning_banner!.hasChildNodes()) {
+            const child = warning_banner!.appendChild( document.createElement('h2') );
+            child.classList.add('warning');
+        }
 
-    warning_banner!.firstChild!.textContent = message;
+        warning_banner!.firstChild!.textContent = message;
+    }
 }
 
 
-function switchBulkUploadOptions(event : Event){
+function switchBulkUploadOptions(event : Event) {
     const element = event.target as HTMLInputElement;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
@@ -162,7 +171,7 @@ function switchBulkUploadOptions(event : Event){
     if (useScanIdsCheckBox !== null) {
         useScanIdsCheckBox.checked = sessionStorage.getItem(`${window.gradeable_id}-scan_setting`) === 'true';
     }
-    if (element.checked){
+    if (element.checked) {
         qrUploadOpts!.style.display = 'block';
         numericUploadOpts!.style.display = 'none';
 

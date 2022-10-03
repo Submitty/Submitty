@@ -25,6 +25,42 @@ CREATE TYPE public.notifications_component AS ENUM (
 );
 
 
+--
+-- Name: add_course_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.add_course_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            temp_row RECORD;
+            random_str TEXT;
+            num_rows INT;
+        BEGIN
+            FOR temp_row IN SELECT g_id FROM gradeable LOOP
+                LOOP
+                    random_str = random_string(15);
+                    PERFORM 1 FROM gradeable_anon
+                    WHERE g_id=temp_row.g_id AND anon_id=random_str;
+                    GET DIAGNOSTICS num_rows = ROW_COUNT;
+                    IF num_rows = 0 THEN
+                        EXIT;
+                    END IF;
+                END LOOP;
+                INSERT INTO gradeable_anon (
+                    SELECT NEW.user_id, temp_row.g_id, random_str
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM gradeable_anon
+                        WHERE user_id=NEW.user_id AND g_id=temp_row.g_id
+                    )
+                );
+            END LOOP;
+            RETURN NULL;
+        END;
+    $$;
+
+
 SET default_tablespace = '';
 
 
@@ -536,6 +572,29 @@ CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
 
 
 --
+-- Name: random_string(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.random_string(length integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+            result text := '';
+            i integer := 0;
+        BEGIN
+            IF length < 0 THEN
+                raise exception 'Given length cannot be less than 0';
+            END IF;
+            FOR i IN 1..length LOOP
+                result := result || chars[1+random()*(array_length(chars, 1)-1)];
+            END LOOP;
+            RETURN result;
+        END;
+    $$;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -836,6 +895,17 @@ CREATE TABLE public.gradeable_allowed_minutes_override (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     allowed_minutes integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255) NOT NULL
 );
 
 
@@ -1636,7 +1706,6 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
-    anon_id character varying,
     user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
@@ -1891,6 +1960,14 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gradeable_anon gradeable_anon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_pkey PRIMARY KEY (g_id, anon_id);
 
 
 --
@@ -2287,6 +2364,13 @@ CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric
 
 
 --
+-- Name: users add_course_user; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
+
+
+--
 -- Name: electronic_gradeable electronic_gradeable_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -2511,6 +2595,22 @@ ALTER TABLE ONLY public.gradeable_access
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

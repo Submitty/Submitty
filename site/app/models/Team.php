@@ -57,7 +57,7 @@ class Team extends AbstractModel {
         $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
-            if (array_key_exists('anon_id', $user_details)) {
+            if (array_key_exists('user_id', $user_details)) {
                 $user = new User($core, $user_details);
             }
             else {

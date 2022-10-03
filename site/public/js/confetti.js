@@ -16,9 +16,17 @@ function addConfetti() {
         }
     });
     window.addEventListener('keypress', (e) => {
-        if (e.code === 'Enter' && canvas.style.display != 'none'){
+        if (e.code === 'Enter' && canvas.style.display !== 'none') {
             canvas.style.display = 'none';
             return;
+        }
+    });
+
+    // Resume confetti animation when window is visible again
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && is_drawing) {
+            lastUpdateTime = Date.now();
+            draw();
         }
     });
 
@@ -39,6 +47,8 @@ function addConfetti() {
     const size_const = 10;
     const gravity_const = 0.25;
 
+    let is_drawing = false;
+
     const date_box = document.getElementById('submission_timestamp');
     let submission_date = '';
     if (date_box !== undefined && date_box !== null) {
@@ -49,7 +59,7 @@ function addConfetti() {
     let month = d.getMonth();
 
     //if we parsed the submission due date, use that instead
-    if (submission_date.length >= 1){
+    if (submission_date.length >= 1) {
         month = parseInt(submission_date[0], 10) - 1;
     }
 
@@ -57,7 +67,7 @@ function addConfetti() {
         let colors = [];
 
         //JS month : 0-11
-        switch (month){
+        switch (month) {
             case 0: //jan
                 colors = ['#406bc9','#ffffff','#809bce','#9ac8de','#b6c7be'];
                 break;
@@ -128,7 +138,7 @@ function addConfetti() {
 
         times_ran ++;
 
-        if (times_ran >= max_times * 10){
+        if (times_ran >= max_times * 10) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             canvas.style.display = '';
             canvas.width = 0;
@@ -139,7 +149,16 @@ function addConfetti() {
 
     function draw () {
 
-        if (canvas.style.display === 'none'){
+        if (canvas.style.display === 'none') {
+            cancelAnimationFrame(frame);
+            is_drawing = false;
+            return;
+        }
+
+        is_drawing = true;
+
+        // Stop the confetti animation if the page is not visible
+        if (document.visibilityState === 'hidden') {
             cancelAnimationFrame(frame);
             return;
         }

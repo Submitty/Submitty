@@ -141,6 +141,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
         'display_version': displayVersion,
+        'student_grader': isStudentGrader()==='1' ? true : false
     });
 }
 
@@ -211,8 +212,6 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
         graded_component = prepGradedComponent(component, graded_component);
         if (is_student) {
             component.ta_comment = "";
-        } else {
-            component.student_comment = "";
         }
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
@@ -335,7 +334,8 @@ function renderOverallComment(comment, editable) {
         resolve(Twig.twig({ref: "OverallComment"}).render({
             'overall_comment': comment,
             'editable': editable,
-            'grading_disabled': false
+            'grading_disabled': false,
+            'student_grader': isStudentGrader()==='1' ? true : false
         }));
     });
 }

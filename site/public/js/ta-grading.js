@@ -506,7 +506,7 @@ function adjustGradingPanelHeader () {
       height += $(this).outerHeight(true);
     }
   });
-  
+
   document.querySelector('.panels-container').style.height = "calc(100% - " + (height) + "px)";
 }
 
@@ -899,7 +899,7 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: false,
@@ -919,7 +919,7 @@ function togglePanelLayoutModes(forceVal = false) {
       rightTop: true,
       rightBottom: false,
     }
-  
+
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
@@ -936,7 +936,7 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: true,
@@ -1198,7 +1198,7 @@ function checkOpenComponentMark(index) {
 function openAll(click_class, class_modifier) {
 
   let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
-  
+
   $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
     let viewerID = $(this).attr("data-viewer_id");
@@ -1433,7 +1433,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
     boundsHeight = iFrameBody[0].scrollHeight;
     let height = 500;
     if (iFrameTarget.css("max-height").length !== 0 && parseInt(iFrameTarget.css("max-height")) >= 0) {
-      height = parseInt(iFrameTarget.css("max-height"));      
+      height = parseInt(iFrameTarget.css("max-height"));
     }
     if (boundsHeight > height) {
       iFrameBody.css("overflow-y", "");
@@ -1448,7 +1448,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
 function imageRotateIcons(iframe) {
   let iframeTarget = $('iframe#' + iframe);
   let contentType = iframeTarget.contents().get(0).contentType;
-  
+
   if (contentType != undefined && contentType.startsWith('image')) {
     if (iframeTarget.attr("id").endsWith("_full_panel_iframe")) {
       let imageRotateBar = iframeTarget.parent().parent().parent().find(".image-rotate-bar").first();
@@ -1466,12 +1466,12 @@ function imageRotateIcons(iframe) {
                               <a class="image-rotate-icon-cw" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
                               <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
                               </div>`);
-      
+
       if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
         rotateImage(iframeTarget.attr("src"), "none");
       }
     }
-    
+
   }
 }
 
@@ -1508,7 +1508,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
         <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull}); imageRotateIcons('${iframeId}');"
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true&gradeable_id=${$("#submission_browser").data("gradeable-id")}"
                 width="95%">
         </iframe>
       `;
