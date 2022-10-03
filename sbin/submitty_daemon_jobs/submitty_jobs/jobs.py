@@ -187,7 +187,7 @@ class RunLichen(CourseGradeableJob):
             json.dump(config_data, file, indent=4)
 
         # run Lichen
-        subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
+        subprocess.call(['/usr/local/submitty/Lichen/bin/run_lichen.sh', config_path, data_path])
 
 
 class DeleteLichenResult(CourseGradeableJob):
