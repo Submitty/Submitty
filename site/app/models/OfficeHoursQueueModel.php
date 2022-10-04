@@ -223,7 +223,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_paused_start'];
     }
 
-    public function getHelperName(){
+    public function getHelperName() {
         if ($this->current_queue_state['helper_group'] <= 2) {
             return $this->current_queue_state['helper_firstname'] . ' ' . $this->current_queue_state['helper_lastname'];
         }
