@@ -64,11 +64,7 @@
             {% endif %}
 
             {% if entry['removal_type'] == 'self' %}
-              <td class="mobile-hide">
-                <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
-                  <i class="fas fa-eye"></i>
-                </a>
-              </td>
+              <td class="mobile-hide"></td>
             {% else %}
               {% if entry['remover_group'] <= 2 %}
                 <td class="mobile-hide">{{ entry['remover_firstname'] ~ ' ' ~ entry['remover_lastname'] }}</td>
