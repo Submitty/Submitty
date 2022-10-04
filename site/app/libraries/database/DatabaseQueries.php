@@ -6459,7 +6459,30 @@ AND gc_id IN (
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $query = "
+            SELECT ROW_NUMBER()
+                OVER (ORDER BY time_out DESC, time_in DESC),
+                    queue.*,
+                    helper.user_firstname            AS helper_firstname,
+                    helper.user_preferred_firstname  AS helper_preferred_firstname,
+                    helper.user_lastname             AS helper_lastname,
+                    helper.user_preferred_lastname   AS helper_preferred_lastname,
+                    helper.user_group                AS helper_group,
+                    remover.user_firstname           AS remover_firstname,
+                    remover.user_preferred_firstname AS remover_preferred_firstname,
+                    remover.user_lastname            AS remover_lastname,
+                    remover.user_preferred_lastname  AS remover_preferred_lastname,
+                    remover.user_group               AS remover_group
+            FROM      queue
+            LEFT JOIN users helper
+                ON helper.user_id = queue.help_started_by
+            LEFT JOIN users remover
+                ON remover.user_id = queue.removed_by
+            WHERE     time_in > ?
+                    AND current_state IN ( 'done' )
+            ORDER BY  ROW_NUMBER
+        ";
+        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 

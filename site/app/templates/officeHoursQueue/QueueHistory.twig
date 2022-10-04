@@ -57,7 +57,36 @@
               <td>Not in queue</td>
             {% endif %}
 
-            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+            {% if entry['helper_group'] <= 2 %}
+              {% if entry['helper_preferred_firstname'] == '' %}
+                {% if entry['helper_preferred_lastname'] == '' %}
+                  <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] }}</td>
+                {% else %}
+                  <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_preferred_lastname'] }}</td>
+                {% endif %}
+              {% else %}
+                {% if entry['helper_preferred_lastname'] == '' %}
+                  <td class="mobile-hide">{{ entry['helper_preferred_firstname'] ~ ' ' ~ entry['helper_lastname'] }}</td>
+                {% else %}
+                  <td class="mobile-hide">{{ entry['helper_preferred_firstname'] ~ ' ' ~ entry['helper_preferred_lastname'] }}</td>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              {% if entry['helper_preferred_firstname'] == '' %}
+                {% if entry['helper_preferred_lastname'] == '' %}
+                  <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.' }}</td>
+                {% else %}
+                  <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_preferred_lastname'] | first ~ '.' }}</td>
+                {% endif %}
+              {% else %}
+                {% if entry['helper_preferred_lastname'] == '' %}
+                  <td class="mobile-hide">{{ entry['helper_preferred_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.' }}</td>
+                {% else %}
+                  <td class="mobile-hide">{{ entry['helper_preferred_firstname'] ~ ' ' ~ entry['helper_preferred_lastname'] | first ~ '.' }}</td>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+
             {% if entry['removal_type'] == 'self' %}
               <td class="mobile-hide">
                 <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
