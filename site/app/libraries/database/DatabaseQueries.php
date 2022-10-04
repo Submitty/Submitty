@@ -6454,7 +6454,25 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where current_state IN ('waiting','being_helped') order by ROW_NUMBER");
+        $query = "
+        SELECT ROW_NUMBER()
+            OVER (order by time_in ASC),
+                queue.*,
+                CASE
+                    WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
+                    ELSE helper.user_preferred_firstname
+                END AS helper_firstname,
+                CASE
+                    WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
+                    ELSE helper.user_preferred_lastname
+                END AS helper_lastname,
+                helper.user_group AS helper_group
+            FROM queue
+            LEFT JOIN users helper on helper.user_id = queue.help_started_by
+            WHERE current_state IN ('waiting','being_helped')
+            ORDER BY ROW_NUMBER
+        ";
+        $this->course_db->query($query);
         return $this->course_db->rows();
     }
 

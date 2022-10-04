@@ -63,9 +63,17 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['help_started_by'] == viewer.getUserId() %}
-                  <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['help_started_by']}}">Finish Helping</button>
+                  {% if entry['helper_group'] <= 2 %}
+                    <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}}">Finish Helping</button>
+                  {% else %}
+                    <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}}">Finish Helping</button>
+                  {% endif %}
                 {% else %}
-                  <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['help_started_by']}}">Finish Helping</button>
+                  {% if entry['helper_group'] <= 2 %}
+                    <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}}">Finish Helping</button>
+                  {% else %}
+                    <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}}">Finish Helping</button>
+                  {% endif %}
                 {% endif %}
               </form>
             </td>
