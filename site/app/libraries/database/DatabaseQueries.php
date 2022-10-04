@@ -6460,27 +6460,32 @@ AND gc_id IN (
 
     public function getPastQueue() {
         $query = "
-            SELECT ROW_NUMBER()
-                OVER (ORDER BY time_out DESC, time_in DESC),
-                    queue.*,
-                    helper.user_firstname            AS helper_firstname,
-                    helper.user_preferred_firstname  AS helper_preferred_firstname,
-                    helper.user_lastname             AS helper_lastname,
-                    helper.user_preferred_lastname   AS helper_preferred_lastname,
-                    helper.user_group                AS helper_group,
-                    remover.user_firstname           AS remover_firstname,
-                    remover.user_preferred_firstname AS remover_preferred_firstname,
-                    remover.user_lastname            AS remover_lastname,
-                    remover.user_preferred_lastname  AS remover_preferred_lastname,
-                    remover.user_group               AS remover_group
-            FROM      queue
-            LEFT JOIN users helper
-                ON helper.user_id = queue.help_started_by
-            LEFT JOIN users remover
-                ON remover.user_id = queue.removed_by
-            WHERE     time_in > ?
-                    AND current_state IN ( 'done' )
-            ORDER BY  ROW_NUMBER
+        SELECT Row_number()
+            OVER (ORDER BY time_out DESC, time_in DESC),
+                queue.*,
+                CASE
+                    WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
+                    ELSE helper.user_preferred_firstname
+                END AS helper_firstname,
+                CASE
+                    WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
+                    ELSE helper.user_preferred_lastname
+                END AS helper_lastname,
+                helper.user_group AS helper_group,
+                CASE
+                    WHEN remover.user_preferred_firstname IS NULL THEN remover.user_firstname
+                    ELSE remover.user_preferred_firstname
+                END AS remover_firstname,
+                CASE
+                    WHEN remover.user_preferred_lastname IS NULL THEN remover.user_lastname
+                    ELSE remover.user_preferred_lastname
+                END AS remover_lastname,
+                remover.user_group AS remover_group
+            FROM    queue
+            LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+            LEFT JOIN users remover ON remover.user_id = queue.removed_by
+            WHERE   time_in > ? AND current_state IN ( 'done' )
+            ORDER BY row_number
         ";
         $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
