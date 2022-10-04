@@ -54,7 +54,11 @@
               {% if entry['help_started_by'] == viewer.getUserId() %}
                 <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp">
               {% else %}
-                <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['help_started_by']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
+                {% if entry['helper_group'] <= 2 %}
+                  <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
+                {% else %}
+                  <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
+                {% endif %}
               {% endif %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>

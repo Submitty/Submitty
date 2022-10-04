@@ -6751,7 +6751,22 @@ AND gc_id IN (
     }
 
     public function getCurrentQueueState() {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$this->core->getUser()->getId()]);
+        $query = "
+        SELECT
+            queue.*,
+            CASE
+                WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
+                ELSE helper.user_preferred_firstname
+            END AS helper_firstname,
+            CASE
+                WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
+                ELSE helper.user_preferred_lastname
+            END AS helper_lastname,
+            helper.user_group AS helper_group
+        FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+        WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
+        ";
+        $this->course_db->query($query, [$this->core->getUser()->getId()]);
         if ($this->course_db->rows()) {
             return $this->course_db->rows()[0];
         }
