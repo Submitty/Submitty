@@ -63,7 +63,12 @@ class SamlManagerController extends AbstractController {
             $this->core->addErrorMessage("User ID already exists.");
             return new RedirectResponse($return_url);
         }
-        $auth->setValidUsernames([$user_id]);
+        $saml_id = trim($_POST['user_saml']);
+        if (empty($saml_id)) {
+            $this->core->addSuccessMessage("SAML ID not provided.");
+            return new RedirectResponse($return_url);
+        }
+        $auth->setValidUsernames([$user_id, $saml_id]);
         if ($auth->isValidUsername($user_id)) {
             $this->core->addErrorMessage("User ID is a valid SAML username and cannot be used for a proxy user.");
             return new RedirectResponse($return_url);
@@ -81,12 +86,6 @@ class SamlManagerController extends AbstractController {
 
         if (!empty($error_msg)) {
             $this->core->addErrorMessage($error_msg);
-            return new RedirectResponse($return_url);
-        }
-
-        $saml_id = trim($_POST['user_saml']);
-        if (empty($saml_id)) {
-            $this->core->addSuccessMessage("SAML ID not provided.");
             return new RedirectResponse($return_url);
         }
 
