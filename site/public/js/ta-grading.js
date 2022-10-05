@@ -1531,7 +1531,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
   return false;
 }
 
-let fileFullPanelOptions = {
+const fileFullPanelOptions = {
   submission: { //Main viewer (submission panel)
     viewer: "#viewer",
     fileView: "#file-view",
@@ -1580,6 +1580,8 @@ function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
 }
 
 function loadPDF(name, path, page_num, panel="submission") {
+  // Store the file name of the last opened file for scrolling when switching between students
+  localStorage.setItem("ta-grading-files-full-view-last-opened", name);
   let extension = name.split('.').pop();
   if (fileFullPanelOptions[panel]["pdf"] && extension == "pdf") {
     let gradeable_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.gradeableId;
@@ -1603,6 +1605,7 @@ function loadPDF(name, path, page_num, panel="submission") {
     });
   }
   else {
+    $(fileFullPanelOptions[panel]["pdfAnnotationBar"]).hide();
     $(fileFullPanelOptions[panel]["saveStatus"]).hide();
     $(fileFullPanelOptions[panel]["fileContent"]).append("<div id=\"file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
     $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).empty();
