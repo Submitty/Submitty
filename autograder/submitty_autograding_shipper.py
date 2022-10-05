@@ -92,7 +92,6 @@ def copy_files(
         if `PULL` then the source file is on the remote machine and it should be pulled to the
         source file on the local machine.
     """
-    config.logger.log_message(f"Copying {files} at {address}({direction})")
     if address == 'localhost':
         for src, dest in files:
             dest_tmp = dest + _COPY_SUFFIX
@@ -380,7 +379,7 @@ def prepare_job(
         )
         autograding_zip_tmp, submission_zip_tmp = zips
         todo_queue_file_tmp_fd, todo_queue_file_tmp = tempfile.mkstemp()
-        config.logger.log_message(f"Created {todo_queue_file_tmp} in prepare_job")
+
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
         autograding_zip = os.path.join(
@@ -508,7 +507,6 @@ def unpack_job(
         # Try to pull in the finished files into temporary work files.
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
-        config.logger.log_message(f"Created {local_done_queue_file} and {local_results_zip} in unpack_job")
         copy_files(config, which_machine, [
             (target_results_zip, local_results_zip),
             (target_done_queue_file, local_done_queue_file)
