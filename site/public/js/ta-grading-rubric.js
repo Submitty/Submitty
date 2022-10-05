@@ -2668,7 +2668,7 @@ function scrollToPage(page_num){
     let lastLoadedFile = activeView ? $("#grading_file_name").text().trim() : localStorage.getItem("ta-grading-files-full-view-last-opened") ?? "upload.pdf";
     if (lastLoadedFile.startsWith(".upload_page_")) {
         let targetFile = ".upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
-        if (activeView && lastLoadedFile == targetFile) {
+        if (activeView && lastLoadedFile === targetFile) {
             return;
         }
         let maxPage = -1;
@@ -2694,7 +2694,7 @@ function scrollToPage(page_num){
         }
     }
     for(let i = 0; i < files.length; i++){
-        if(files[i].innerText.trim() == "upload.pdf"){
+        if(files[i].innerText.trim() === "upload.pdf"){
             if(activeView){
                 page_num = Math.min($("#viewer > .page").length, page_num);
                 let page = $("#pageContainer" + page_num);
