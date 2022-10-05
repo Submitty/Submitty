@@ -2649,7 +2649,6 @@ function openComponentGrading(component_id) {
     return reloadGradingComponent(component_id, isEditModeEnabled(), true)
         .then(function () {
             let page = getComponentPageNumber(component_id);
-            console.log("PageNum: " + page);
             if(page){
                 scrollToPage(page);
             }
