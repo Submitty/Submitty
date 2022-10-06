@@ -6557,10 +6557,10 @@ AND gc_id IN (
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
-        if (is_null($time) || DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
+        if (is_null($last_time_in_queue) || DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
             $star_type = 'full';
         }
-        elseif (DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
+        elseif (DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
             $star_type = 'half';
         }
 
