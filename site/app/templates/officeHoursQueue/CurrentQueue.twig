@@ -32,12 +32,12 @@
                     <i class="fas fa-pause"></i>
                     Help
                   </button>
-                {% elseif viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
+                {% elseif entry['star_type'] == 'full' %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week" data-ready="true">
                     <i class="fas fa-star"></i>
                     Help
                   </button>
-                {% elseif viewer.firstTimeInQueueToday(entry['last_time_in_queue']) %}
+                {% elseif entry['star_type'] == 'half' %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today" data-ready="true">
                     <i class="fas fa-star-half"></i>
                     Help

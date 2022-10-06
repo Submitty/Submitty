@@ -223,6 +223,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_paused_start'];
     }
 
+    public function getCurrentStarType(): ?string {
+        return $this->current_queue_state['star_type'];
+    }
+
     public function cleanForId($str) {
         return $this->core->getQueries()->getQueueId($str);
     }

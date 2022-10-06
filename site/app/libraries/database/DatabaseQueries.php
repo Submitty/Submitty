@@ -6552,6 +6552,19 @@ AND gc_id IN (
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        
+        $star_type = 'none';
+        $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
+        date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
+        $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
+        date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
+        if (is_null($time) or DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
+            $star_type = 'full';
+        }
+        elseif (DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
+            $star_type = 'half';
+        }
+
         $entry_time = $time_in == 0 ? $this->core->getDateTimeNow() : $time_in;
         $this->course_db->query("INSERT INTO queue
             (
@@ -6569,7 +6582,8 @@ AND gc_id IN (
                 contact_info,
                 last_time_in_queue,
                 time_paused,
-                time_paused_start
+                time_paused_start,
+                star_type
             ) VALUES (
                 'waiting',
                 NULL,
@@ -6585,8 +6599,9 @@ AND gc_id IN (
                 ?,
                 ?,
                 ?,
-                NULL
-            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
+                NULL,
+                ?
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0,$star_type]);
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -6629,7 +6644,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = 'none' WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
     }
 
     public function setQueuePauseState($new_state) {

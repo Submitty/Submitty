@@ -77,9 +77,11 @@
     </p>
 
     <p>
-      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+      {{ dump(viewer.getCurrentStarType()) }}
+      {{ dump(viewer.getCurrentQueueLastHelped()) }}
+      {% if viewer.getCurrentStarType() == 'full' %}
         Because you have not yet been helped through this queue during the last week, you may be prioritized.
-      {% elseif viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+      {% elseif viewer.getCurrentStarType() == 'half' %}
         Because you have not yet been helped through this queue today, you may be prioritized.
       {% else %}
         However, because you have been helped through this queue today, you may be de-prioritized.
@@ -92,9 +94,9 @@
       {% set queue_text = 'in the queue who' %}
       {% set position_text = 'not yet been helped in the last week, and' %}
       {% set end_text = 'ahead of you in the queue who have not yet been helped today' %}
-      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+      {% if viewer.getCurrentStarType() == 'full' %}
           {% set queue_text = 'ahead of you in the queue who' %}
-      {% elseif not viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+      {% elseif viewer.getCurrentStarType() == 'half' %}
           {% set end_text = 'in the queue who have not yet been helped today' %}
       {% endif %}
       There {{plurality_picker(num_ahead_week, 'is', 'are')}} currently
