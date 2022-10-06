@@ -77,8 +77,6 @@
     </p>
 
     <p>
-      {{ dump(viewer.getCurrentStarType()) }}
-      {{ dump(viewer.getCurrentQueueLastHelped()) }}
       {% if viewer.getCurrentStarType() == 'full' %}
         Because you have not yet been helped through this queue during the last week, you may be prioritized.
       {% elseif viewer.getCurrentStarType() == 'half' %}
