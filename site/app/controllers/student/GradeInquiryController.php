@@ -12,14 +12,12 @@ use app\libraries\response\WebResponse;
 use RuntimeException;
 use Symfony\Component\Routing\Annotation\Route;
 
-class GradeInquiryController extends AbstractController
-{
+class GradeInquiryController extends AbstractController {
     /**
      * @param                                                                              string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      */
-    public function requestGradeInquiry($gradeable_id)
-    {
+    public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
         $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
@@ -80,8 +78,7 @@ class GradeInquiryController extends AbstractController
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return                                                                              MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
-    public function makeGradeInquiryPost($gradeable_id)
-    {
+    public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
         $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
@@ -153,8 +150,7 @@ class GradeInquiryController extends AbstractController
      * @param                                                                                 string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
      */
-    public function getSingleGradeInquiryPost($gradeable_id)
-    {
+    public function getSingleGradeInquiryPost($gradeable_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         //TODO: look into why these aren't getting sent by websockets
@@ -217,8 +213,7 @@ class GradeInquiryController extends AbstractController
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return                                                                                       JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
-    public function changeGradeInquiryStatus($gradeable_id)
-    {
+    public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
         $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
@@ -293,8 +288,7 @@ class GradeInquiryController extends AbstractController
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
      * @return                                                                                    MultiResponse
      */
-    public function getGradeInquiryDiscussion($gradeable_id)
-    {
+    public function getGradeInquiryDiscussion($gradeable_id) {
         $submitter_id = $_POST['submitter_id'];
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -321,8 +315,7 @@ class GradeInquiryController extends AbstractController
      * @param string          $type
      * @param int|null        $gc_id
      */
-    private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id)
-    {
+    private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id) {
         $component = "";
         $component_title = "";
         $component_string = "";
