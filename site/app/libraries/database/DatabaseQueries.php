@@ -6552,13 +6552,12 @@ AND gc_id IN (
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
-        
         $star_type = 'none';
         $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
-        if (is_null($time) or DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
+        if (is_null($time) || DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
             $star_type = 'full';
         }
         elseif (DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
