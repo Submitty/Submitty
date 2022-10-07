@@ -6649,10 +6649,10 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if (getStarType($user_id, $queue_code) == 'full') {
+        if ($this->getStarType($user_id, $queue_code) == 'full') {
             $star_type = 'prev_full';
         }
-        elseif (getStarType($user_id, $queue_code) == 'half') {
+        elseif ($this->getStarType($user_id, $queue_code) == 'half') {
             $star_type = 'prev_half';
         }
 
@@ -6709,10 +6709,10 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if (getStarType($user_id, $queue_code) == 'prev_full') {
+        if ($this->getStarType($user_id, $queue_code) == 'prev_full') {
             $star_type = 'full';
         }
-        elseif (getStarType($user_id, $queue_code) == 'prev_half') {
+        elseif ($this->getStarType($user_id, $queue_code) == 'prev_half') {
             $star_type = 'half';
         }
 
