@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE queue ADD COLUMN IF NOT EXISTS star_type VARCHAR(4) DEFAULT 'none';")
+    database.execute("ALTER TABLE queue ADD COLUMN IF NOT EXISTS star_type VARCHAR(16) DEFAULT 'none';")
 
 
 def down(config, database, semester, course):

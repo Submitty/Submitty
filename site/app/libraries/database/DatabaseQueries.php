@@ -6539,6 +6539,11 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    public function getStarType($user_id, $queue_code)  {
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        return $this->course_db->rows();
+    }
+
     public function getQueueId($queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
@@ -6551,8 +6556,8 @@ AND gc_id IN (
 
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
-        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $star_type = 'none';
+        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
@@ -6643,7 +6648,15 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = 'none' WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $star_type = 'none';
+        if (getStarType($user_id, $queue_code) == 'full') {
+            $star_type = 'prev_full';
+        }
+        elseif (getStarType($user_id, $queue_code) == 'half') {
+            $star_type = 'prev_half';
+        }
+
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code, $star_type]);
     }
 
     public function setQueuePauseState($new_state) {
@@ -6694,8 +6707,17 @@ AND gc_id IN (
             $this->core->addErrorMessage("Cannot restore a user that is currently in the queue. Please remove them first.");
             return;
         }
+
+        $star_type = 'none';
+        if (getStarType($user_id, $queue_code) == 'prev_full') {
+            $star_type = 'full';
+        }
+        elseif (getStarType($user_id, $queue_code) == 'prev_half') {
+            $star_type = 'half';
+        }
+
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
-        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ? where entry_id = ?", [$last_time_in_queue, $entry_id]);
+        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ?, star_type = ? where entry_id = ?", [$last_time_in_queue, $entry_id, $star_type]);
         $this->core->addSuccessMessage("Student restored");
     }
 
