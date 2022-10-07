@@ -6539,7 +6539,7 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
-    public function getStarType($user_id, $queue_code)  {
+    public function getStarType($user_id, $queue_code) {
         $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
         return $this->course_db->rows();
     }
