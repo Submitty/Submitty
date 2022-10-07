@@ -15,7 +15,7 @@
     "@submitty/pdf-annotate.js": "2.5.1",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
-    "codemirror": "5.65.8",
+    "codemirror": "5.65.9",
     "codemirror-spell-checker": "1.1.2",
     "flatpickr": "4.6.6",
     "jquery": "3.6.1",
