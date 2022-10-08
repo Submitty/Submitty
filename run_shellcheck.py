@@ -17,12 +17,12 @@ all_shell_scripts = set(Path('.').rglob('*.sh'))
 
 shell_scripts_to_check = [str(x) for x in all_shell_scripts.difference(ignored_files)]
 
-print(['shellcheck'] + shell_scripts_to_check)
-
 return_code = 0
 for script in shell_scripts_to_check:
-    process = subprocess.run(['shellcheck', script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print(process.stdout.decode("utf-8"))
+    process = subprocess.run(['shellcheck', '-Calways', script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out = process.stdout.decode("utf-8")
+    if out != '':
+        print(out)
     if process.returncode != 0:
         return_code = process.returncode
 
