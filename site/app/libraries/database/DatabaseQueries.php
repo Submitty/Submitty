@@ -1085,17 +1085,18 @@ WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
 
         if (!empty($semester) && !empty($course)) {
             $params = [$user->getGroup(), $user->getRegistrationSection(),
-                            $this->submitty_db->convertBoolean($user->isManualRegistration()), $semester, $course,
+                            $this->submitty_db->convertBoolean($user->isManualRegistration()),
+                            $user->getRegistrationType(), $semester, $course,
                             $user->getId()];
             $this->submitty_db->query(
                 "
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
+UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
 WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
+            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -4424,6 +4425,8 @@ AND gc_id IN (
         return false;
     }
 
+    // ANONYMOUS ID QUERIES
+
     /**
      * Set gradeable-specific user anon_id
      *
@@ -4439,7 +4442,7 @@ AND gc_id IN (
                 continue;
             }
             $params = [$user_id, $g_id, $anon_id];
-            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?)", $params);
+            $this->course_db->query("INSERT INTO gradeable_anon(user_id, g_id, anon_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", $params);
         }
     }
 
@@ -7415,37 +7418,36 @@ AND gc_id IN (
 
             if (isset($db_row_split['comp_id'])) {
                 // Create all of the GradedComponents
-                if (isset($db_row_split['comp_id'])) {
-                    for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
-                        // Create a temporary array for each graded component instead of trying
-                        //  to transpose the entire $db_row_split array
-                        $comp_array = [];
-                        foreach ($comp_array_properties as $property) {
-                            $comp_array[$property] = $db_row_split[$property][$i];
-                        }
-
-                        //  Similarly, transpose just this grader
-                        $user_array = [];
-                        foreach ($user_properties as $property) {
-                            $user_array[$property] = $db_row_split['grader_' . $property][$i];
-                        }
-
-                        // Create the grader user
-                        $grader = new User($this->core, $user_array);
-
-                        // Create the component
-                        $graded_component = new GradedComponent(
-                            $this->core,
-                            $ta_graded_gradeable,
-                            $gradeable->getComponent($db_row_split['comp_id'][$i]),
-                            $grader,
-                            $comp_array
-                        );
-
-                        $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
-                        $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
+                for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
+                    // Create a temporary array for each graded component instead of trying
+                    //  to transpose the entire $db_row_split array
+                    $comp_array = [];
+                    foreach ($comp_array_properties as $property) {
+                        $comp_array[$property] = $db_row_split[$property][$i];
                     }
+
+                    //  Similarly, transpose just this grader
+                    $user_array = [];
+                    foreach ($user_properties as $property) {
+                        $user_array[$property] = $db_row_split['grader_' . $property][$i];
+                    }
+
+                    // Create the grader user
+                    $grader = new User($this->core, $user_array);
+
+                    // Create the component
+                    $graded_component = new GradedComponent(
+                        $this->core,
+                        $ta_graded_gradeable,
+                        $gradeable->getComponent($db_row_split['comp_id'][$i]),
+                        $grader,
+                        $comp_array
+                    );
+
+                    $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
+                    $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
                 }
+
 
                 // Create containers for each component
                 $containers = [];

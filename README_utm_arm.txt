@@ -19,7 +19,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    And also create directory:
    vendor/
-   and checkout from:
+   in GIT_CHECKOUT directory and checkout from:
    git clone https://github.com/nlohmann/json.git
    to this path:
    vendor/nlohmann/json/
@@ -39,10 +39,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    Current version: 3.5.1
 
 
-3. Download and save the Ubuntu 20.04 ARM Server ISO
-   https://mac.getutm.app/gallery/ubuntu-20-04
-   https://cdimage.ubuntu.com/releases/20.04.4/release/
+3. Go to: https://cdimage.ubuntu.com/releases/20.04.4/release/
+   Then download and save the Ubuntu 20.04 ARM Server ISO (arm64 image)
 
+   (UTM site reference: https://mac.getutm.app/gallery/ubuntu-20-04)
 
 4. Launch UTM, and through the UTM GUI, press "+" to create a new VM:
 
@@ -76,10 +76,11 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    * "Done" on configure proxy
    * "Done" on alternate mirror
    * "Done" on default for storage configuration / storage layout
-   * "Done" on default for storage configuration / file system
+   * Guided storage configuration / file system:
 
-      - set the "device" "mounted at /" to be most of your space (e.g. 60GB)
-        it probably defaulted to 30BG (leaving 30GB of free)
+      - Select "Custom storage layout" and then "Done"
+      - Select "free space" then "Add GPT Partition"
+      - Keep the defaults and select "Create"
 
    * "Continue" on confirm destructive action
    * Fill in the profile setup (set a <USERNAME> & <PASSWORD>)
@@ -114,10 +115,13 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
      settings again.
 
      under the "Network" tab, add port forwarding:
-       guest port 22 -> host 1234 (or anything for ssh below)
-       guest port 1511 -> host 1511
-       guest port 8443 -> host 8443
-       guest port 5432 -> host 16442
+       select "Emulated VLAN" for "Network Mode"
+       click "New" button to right of "Port Forward"
+       add the following Guest Port/Host Port pairings:
+         guest port 22 -> host 1234 (or anything for ssh below)
+         guest port 1511 -> host 1511
+         guest port 8443 -> host 8443
+         guest port 5432 -> host 16442
 
      press "save".
 
@@ -127,6 +131,8 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 7. To ssh from your host machine to the guest vm:
 
    ssh -p 1234 <USERNAME>@localhost
+
+   Run `sudo su` to connect as the root user
 
 
 8. To share directories between host & guest machines:

@@ -357,6 +357,9 @@ class UsersController extends AbstractController {
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
+                if ($authentication instanceof SamlAuthentication) {
+                    $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
+                }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
@@ -815,6 +818,9 @@ class UsersController extends AbstractController {
                         //User must first exist in Submitty before being enrolled to a course.
                         if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
+                            if ($this->core->getAuthentication() instanceof SamlAuthentication) {
+                                $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
+                            }
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                         break;

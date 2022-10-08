@@ -214,25 +214,80 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(id, dir, is_hidden) {
+function newEditCourseMaterialsFolderForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let folder_sections = $(tag).data('sections');
+    let partial_sections = $(tag).data('partial-sections');
+    let release_time =  $(tag).data('release-time');
+    let is_hidden = $(tag).data('hidden-state');
+    const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
-    $('#hide-folder-materials-checkbox-edit', form).prop('checked', false);
-    if (is_hidden === true) {
-        $('#hide-folder-materials-checkbox-edit', form).prop('checked', true);
+
+    let element = document.getElementById("edit-folder-picker");
+    element._flatpickr.setDate(release_time);
+
+    let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
+    if (is_hidden > 0) {
+        hide_materials_box.prop('checked', true).trigger('change');
+        if (is_hidden === partially_hidden) {
+            hide_materials_box.attr('class', 'partial-checkbox');
+            $(hide_materials_box.siblings()[0]).before("<span><br><em>(Currently, some materials inside this folder are hidden.)</em></span>");
+        }
     }
-    $('#hide-folder-materials-checkbox-edit:checked ~ #edit-folder-form-hide-warning').show();
-    $('#hide-folder-materials-checkbox-edit:not(:checked) ~ #edit-folder-form-hide-warning').hide();
+    else {
+        hide_materials_box.prop('checked', false).trigger('change');
+    }
+
+    $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
+    let showSections = function() {
+        $("#all-sections-showing-no-folder", form).prop('checked',false);
+        $("#all-sections-showing-yes-folder", form).prop('checked',true);
+        $("#show-some-section-selection-folder-edit", form).show();
+    }
+    let sectionsVisible = false;
+    if (folder_sections.length !== 0) {
+        for(let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
+            if ($(this).attr('class') === '') {
+                $(this).removeAttr('class');
+            }
+        }
+        showSections();
+        sectionsVisible = true;
+    }
+    else{
+        $("#show-some-section-selection-folder-edit", form).hide();
+        $("#all-sections-showing-yes-folder", form).prop('checked',false);
+        $("#all-sections-showing-no-folder", form).prop('checked',true);
+    }
+    if (partial_sections.length !== 0) {
+        for(let index = 0; index < partial_sections.length; ++index) {
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
+            $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
+        }
+        if (!sectionsVisible) {
+            showSections();
+        }
+    }
+
     $('#material-folder-edit-form', form).attr('data-id', id);
-    $("#show-some-section-selection-edit", form).hide();
-    $("#all-sections-showing-yes", form).prop('checked',false);
-    $("#all-sections-showing-no", form).prop('checked',true);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
+function newEditCourseMaterialsForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let this_file_section = $(tag).data('sections');
+    let this_hide_from_students = $(tag).data('hidden-state');
+    let release_time = $(tag).data('release-time');
+    let is_link = $(tag).data('is-link');
+    let link_title = $(tag).data('link-title');
+    let link_url = $(tag).data('link-url');
 
     let form = $("#edit-course-materials-form");
 
@@ -240,12 +295,12 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students === "1"){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    if(this_hide_from_students === 1){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
     }
 
     else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
     }
 
     $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
@@ -266,7 +321,7 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    if (is_link === "1") {
+    if (is_link === 1) {
         const title_label = $("#edit-url-title-label", form);
         const url_label = $("#edit-url-url-label", form);
         title_label.prop('hidden', false);
@@ -651,7 +706,7 @@ function checkColorActivated() {
     pos = 0;
     seq = "&&((%'%'BA\r";
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
-    
+
     function inject() {
         $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
     }
@@ -809,6 +864,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -925,7 +983,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })  
+    })
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
@@ -1569,7 +1627,7 @@ function previewMarkdown(mode) {
     if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
-    if (mode === 'preview') { 
+    if (mode === 'preview') {
         if (markdown_header.attr('data-mode') === 'preview') return;
         accessibility_message.hide();
         markdown_textarea.hide();

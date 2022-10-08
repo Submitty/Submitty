@@ -18,7 +18,7 @@ class AuthTokenControllerTester extends BaseUnitTest {
 
     public function setUp(): void {
         $this->tokens = [];
-        TokenManager::initialize("secret", "https://submitty.org");
+        TokenManager::initialize("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl", "https://submitty.org");
     }
 
     private function makeCore(bool $removeToken = false): Core {
