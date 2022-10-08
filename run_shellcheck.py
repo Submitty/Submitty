@@ -7,8 +7,11 @@ import subprocess
 
 ignored_files = set()
 with open('.shellcheckignore', 'r') as ignore_file:
-    for line in ignore_file.readlines():
-        ignored_files.update(Path('.').rglob(line.strip()))
+    for line in map(str.strip, ignore_file.readlines()):
+        if '*' in line:
+            ignored_files.update(Path('.').rglob(line))
+        else:
+            ignored_files.add(Path('.') / line)
 
 all_shell_scripts = set(Path('.').rglob('*.sh'))
 
