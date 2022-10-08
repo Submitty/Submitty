@@ -9,7 +9,6 @@ tests/**/*.sh
 .setup/testing/autograder.sh
 .setup/testing/setup_test_suite.sh
 .setup/testing/setup_ldap.sh
-.setup/testing/setup.sh
 .setup/vagrant/db_users.sh
 .setup/install_submitty/install_bin.sh
 .setup/install_submitty/install_site.sh
