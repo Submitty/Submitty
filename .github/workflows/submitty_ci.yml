@@ -236,6 +236,17 @@ jobs:
             flags: autograder
 
 
+    shellcheck:
+      name: ShellCheck
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v2
+        - name: install ShellCheck
+          run: sudo apt-get install -y shellcheck
+        - name: Run ShellCheck
+          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
+
     e2e:
         needs:
           - js-lint
@@ -245,6 +256,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
