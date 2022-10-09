@@ -1124,6 +1124,11 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        if (strpos($_POST['attachment'], "..") !== false) {
+            $this->core->getOutput()->renderJsonFail('Invalid path.');
+            return;
+        }
+
         $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId(), $_POST["attachment"]);
         if (is_file($attachment_path)) {
             if (@unlink($attachment_path)) {
