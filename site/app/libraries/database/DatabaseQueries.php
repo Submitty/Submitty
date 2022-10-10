@@ -1085,17 +1085,18 @@ WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
 
         if (!empty($semester) && !empty($course)) {
             $params = [$user->getGroup(), $user->getRegistrationSection(),
-                            $this->submitty_db->convertBoolean($user->isManualRegistration()), $semester, $course,
+                            $this->submitty_db->convertBoolean($user->isManualRegistration()),
+                            $user->getRegistrationType(), $semester, $course,
                             $user->getId()];
             $this->submitty_db->query(
                 "
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
+UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
 WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
+            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }

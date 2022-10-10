@@ -253,7 +253,9 @@ class PlagiarismController extends AbstractController {
         $ranking = preg_split('/\R/', $content);
         $ranking_array = [];
         foreach ($ranking as $row) {
-            $ranking_array[] = preg_split('/\s+/', $row);
+            if (strlen(trim($row)) !== 0) { // filter out whitespace-only rows
+                $ranking_array[] = preg_split('/\s+/', $row);
+            }
         }
         return $ranking_array;
     }
@@ -1585,6 +1587,11 @@ class PlagiarismController extends AbstractController {
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
+        }
+
+        // If there were no matches for this version, show nothing in the right dropdown
+        if (count($ranking) === 0) {
+            return JsonResponse::getSuccessResponse([]);
         }
 
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();

@@ -185,25 +185,25 @@
         </div>
         
         <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
+    
     {% else %}
-
-    {% if is_notebook %}
-        {% include 'notebook/Notebook.twig' with {
-            "notebook": notebook,
-            "testcase_messages" : testcase_messages,
-            "image_data" : image_data,
-            "numberUtils" : numberUtils,
-            "student_id" : student_id,
-            "gradeable_id" : gradeable_id,
-            "highest_version" : highest_version,
-            "max_file_uploads" : max_file_uploads,
-            "old_files" : old_files,
-            "viewing_inactive_version" : viewing_inactive_version,
-            "is_timed" : is_timed,
-            "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
-            "is_grader_view" : false
-        } %}
-    {% endif %}
+        {% if is_notebook %}
+            {% include 'notebook/Notebook.twig' with {
+                "notebook": notebook,
+                "testcase_messages" : testcase_messages,
+                "image_data" : image_data,
+                "numberUtils" : numberUtils,
+                "student_id" : student_id,
+                "gradeable_id" : gradeable_id,
+                "highest_version" : highest_version,
+                "max_file_uploads" : max_file_uploads,
+                "old_files" : old_files,
+                "viewing_inactive_version" : viewing_inactive_version,
+                "is_timed" : is_timed,
+                "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
+                "is_grader_view" : false
+            } %}
+        {% endif %}
 
         {# File upload boxes #}
         <div id="upload-boxes">
@@ -363,7 +363,9 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}
-    {% include 'submission/homework/BulkUploadProgressBox.twig' %}
+    {% if not is_vcs and not is_notebook %}
+        {% include 'submission/homework/BulkUploadProgressBox.twig' %}
+    {% endif %}
 {% endif %}
 
 <script>
