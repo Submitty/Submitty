@@ -4,6 +4,7 @@ Module that contains all of the jobs that the Submitty Daemon can do
 
 from abc import ABC, abstractmethod
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -167,21 +168,26 @@ class RunLichen(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        # We cast to an int to prevent malicious json files from containing invalid path components
+        config_id = int(self.job_details['config_id'])
+        config_data = self.job_details['config_data']
 
         # error checking
-        # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
-            print('invalid path component ".." in string')
+        # prevent backwards crawling
+        if '..' in semester or '..' in course or '..' in gradeable:
+            print('Error: Invalid path component ".." in string')
             return
 
         # paths
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
-        config_path = os.path.join(lichen_dir, gradeable, config_id)
+        config_path = os.path.join(lichen_dir, gradeable, str(config_id))
         data_path = os.path.join(DATA_DIR, 'courses')
 
+        with open(os.path.join(config_path, 'config.json'), 'w') as file:
+            json.dump(config_data, file, indent=4)
+
         # run Lichen
-        subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
+        subprocess.call(['/usr/local/submitty/Lichen/bin/run_lichen.sh', config_path, data_path])
 
 
 class DeleteLichenResult(CourseGradeableJob):
@@ -189,13 +195,13 @@ class DeleteLichenResult(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        config_id = self.job_details['config_id']
+        config_id = int(self.job_details['config_id'])
 
         lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
 
         # error checking
         # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable or '..' in config_id:
+        if '..' in semester or '..' in course or '..' in gradeable:
             print('invalid path component ".." in string')
             return
 
@@ -203,7 +209,7 @@ class DeleteLichenResult(CourseGradeableJob):
             return
 
         # delete the config directory
-        shutil.rmtree(os.path.join(lichen_dir, gradeable, config_id), ignore_errors=True)
+        shutil.rmtree(os.path.join(lichen_dir, gradeable, str(config_id)), ignore_errors=True)
 
         # if there are no other configs in this gradeable directory, remove it
         if len(os.listdir(os.path.join(lichen_dir, gradeable))) == 0:

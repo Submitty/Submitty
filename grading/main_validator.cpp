@@ -199,7 +199,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
     }
 
     std::string fm = tcg.value("failure_message","");
-    if (!test_case_success) {
+    if (!test_case_success || show_message) {
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
@@ -214,7 +214,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           autocheck_j["messages"].push_back(new_message);
         }
       }
-      if (fm != "" && !failure_message_already_added) {
+      if (fm != "" && !failure_message_already_added && !test_case_success) {
         nlohmann::json new_message;
         new_message["message"] = fm;
         new_message["type"] = "failure";
@@ -251,6 +251,7 @@ void WriteToResultsJSON(const TestCase &my_testcase,
                         const std::string &testcase_label,
                         const std::string &testcase_message,
                         int testcase_pts,
+                        const nlohmann::json &metrics,
                         nlohmann::json &all_testcases) {
 
   nlohmann::json tc_j;
@@ -262,6 +263,8 @@ void WriteToResultsJSON(const TestCase &my_testcase,
   if (autocheck_js.size() > 0) {
     tc_j["autochecks"] = autocheck_js;
   }
+
+  tc_j["metrics"] = metrics;
 
   if (testcase_label != "") tc_j["testcase_label"] = testcase_label;
 
@@ -387,6 +390,12 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
       max_penalty_possible += possible_points;
     }
 
+    nlohmann::json metrics;
+    std::ifstream metrics_json(my_testcase.getPrefix() + "submitty_metrics.json");
+    if (metrics_json.good()) {
+      metrics = nlohmann::json::parse(metrics_json);
+    }
+
     // EXPORT TO results.json and grade.txt
     WriteToResultsJSON(
     my_testcase,
@@ -396,6 +405,7 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
     my_testcase.getTestcaseLabel(),
     testcase_message,
     testcase_pts,
+    metrics,
     all_testcases);
     WriteToGradefile(my_testcase,gradefile,testcase_pts);
 }

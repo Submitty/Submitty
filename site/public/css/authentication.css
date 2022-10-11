@@ -40,10 +40,13 @@
         min-width: 450px;
         width: 30%;
         height: fit-content;
-        height: -moz-fit-content;
     }
 
     #login input[type="submit"] {
         width: auto;
     }
+}
+
+#saml-login {
+    color: var(--btn-text-white);
 }

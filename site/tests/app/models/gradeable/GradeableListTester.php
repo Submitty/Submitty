@@ -540,7 +540,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            '9999-01-01',
+            '1001-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -553,7 +553,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            '9999-01-01',
+            '1001-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -566,7 +566,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            '9999-01-01',
+            '1001-01-01',
             '1003-02-01',
             '9999-01-01',
             true,
@@ -579,7 +579,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            '9999-01-01',
+            '1001-01-01',
             '1003-01-01',
             '1004-01-01',
             true,
@@ -592,7 +592,7 @@ class GradeableListTester extends BaseUnitTest {
             GradeableType::ELECTRONIC_FILE,
             '1000-01-01',
             '1001-01-01',
-            '9999-01-01',
+            '1001-01-01',
             '1003-01-01',
             '1004-01-01',
             true,
@@ -604,7 +604,7 @@ class GradeableListTester extends BaseUnitTest {
         $core->getQueries()->method('getHasSubmission')->will($this->onConsecutiveCalls(false, true, false, false, true));
 
         $list = new GradeableList($core);
-        $this->assertCount(5, $list->getSubmittableElectronicGradeables());
+        $this->assertCount(4, $list->getSubmittableElectronicGradeables());
 
         $actual = $list->getFutureGradeables();
         $this->assertCount(0, $actual);
@@ -721,6 +721,7 @@ class GradeableListTester extends BaseUnitTest {
         ]);
         $core->setUser($user);
         $core->setConfig(new Config($core));
+        $core->setTesting(true);
         return $core;
     }
 

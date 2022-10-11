@@ -10,13 +10,16 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
+use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-use app\models\User;
+use app\libraries\FileUtils;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class WebRouter {
     /** @var Core  */
@@ -41,20 +44,39 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
-        $fileLocator = new FileLocator();
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
+        $cache = new FilesystemAdapter("", 0, $cache_path);
+
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->reader = new AnnotationReader();
+        // This will fetch the cache for routes. If it doesn't find it then it will
+        // compile them, set the cache, and set compiledRoutes to that.
+        $compiledRoutes = $cache->get('routes', function (ItemInterface $item) {
+            return $this->getCompiledRoutes();
+        });
+
+        $context = new RequestContext();
+        $matcher = new CompiledUrlMatcher($compiledRoutes, $context->fromRequest($this->request));
+        $this->parameters = $matcher->matchRequest($this->request);
+    }
+
+    /**
+     * Returns Symfony compiled routes
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getCompiledRoutes(): array {
+        $fileLocator = new FileLocator();
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
-        $context = new RequestContext();
-        $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
-        $this->parameters = $matcher->matchRequest($this->request);
+        return (new CompiledUrlMatcherDumper($collection))->getCompiledRoutes();
     }
 
 
     /**
-     * If a request is a post request check to see if its less than the post_max_size or if its empty
+     * If a request is a post request check to see if its less than the post_max_size
      * @return MultiResponse|bool
      */
     private function checkPostMaxSize(Request $request) {
@@ -63,7 +85,7 @@ class WebRouter {
             $max_post_bytes = Utils::returnBytes($max_post_length);
             /** if a post request exceeds the max length set in the ini, php will drop everything set under $_POST, however the router might add routing information later so check both cases
             */
-            if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
+            if ($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) {
                 $msg = "POST request exceeds maximum size of " . $max_post_length;
                 $this->core->addErrorMessage($msg);
 
@@ -93,7 +115,7 @@ class WebRouter {
             // prevent user that is not logged in from going anywhere except AuthenticationController
             if (
                 !$logged_in
-                && !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')
+                && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
@@ -107,6 +129,11 @@ class WebRouter {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
             }
 
             if (!$router->checkFeatureFlag()) {
@@ -169,6 +196,15 @@ class WebRouter {
                 return new MultiResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                $errorString = "The {$enabled->getFeature()} feature is not enabled.";
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($errorString),
+                    new WebResponse("Error", "courseErrorPage", $errorString)
                 );
             }
 
@@ -245,11 +281,6 @@ class WebRouter {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
-
-            if ($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
-                /** @noinspection PhpUnhandledExceptionInspection */
-                $this->core->loadForum();
-            }
         }
     }
 
@@ -259,7 +290,7 @@ class WebRouter {
      * @return MultiResponse|bool
      */
     private function loginRedirectCheck(bool $logged_in) {
-        if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+        if (!$logged_in && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
 
             $query_obj = $this->request->query->all();
@@ -278,7 +309,7 @@ class WebRouter {
         elseif (
             $this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
-            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
             return MultiResponse::RedirectOnlyResponse(
@@ -287,7 +318,7 @@ class WebRouter {
         }
         elseif (
             $logged_in
-            && Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'logout'
         ) {
             return MultiResponse::RedirectOnlyResponse(
@@ -295,7 +326,7 @@ class WebRouter {
             );
         }
 
-        if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
+        if (!$this->core->getConfig()->isCourseLoaded() && !str_ends_with($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
                 if (isset($this->parameters['_semester']) && isset($this->parameters['_course'])) {
                     return MultiResponse::RedirectOnlyResponse(
@@ -303,7 +334,7 @@ class WebRouter {
                     );
                 }
             }
-            elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+            elseif (!str_ends_with($this->parameters['_controller'], 'AuthenticationController')) {
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
                 );
@@ -320,7 +351,7 @@ class WebRouter {
     private function csrfCheck() {
         if (
             $this->request->isMethod('POST')
-            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && !$this->core->checkCsrfToken()
         ) {
             $msg = "Invalid CSRF token.";
@@ -386,13 +417,13 @@ class WebRouter {
             $access_test = false;
             switch ($access_control->getLevel()) {
                 case 'SUPERUSER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    $access_test = $user->isSuperUser();
                     break;
                 case 'FACULTY':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    $access_test = $user->accessFaculty();
                     break;
                 case 'USER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    $access_test = $user !== null;
                     break;
             }
             $access = $access && $access_test;
@@ -424,5 +455,17 @@ class WebRouter {
         }
 
         return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
+    }
+
+    private function getEnabled(): ?Enabled {
+        return $this->reader->getClassAnnotation(
+            new \ReflectionClass($this->parameters['_controller']),
+            Enabled::class
+        );
+    }
+
+    private function checkEnabled(Enabled $enabled): bool {
+        $method = "is" . ucFirst($enabled->getFeature()) . "Enabled";
+        return $this->core->getConfig()->$method();
     }
 }

@@ -59,6 +59,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
     { "convert",                 "/usr/bin/convert" }, //image magick!
+    { "wkhtmltoimage",           "/usr/bin/wkhtmltoimage" },
+    { "wkhtmltopdf",             "/usr/bin/wkhtmltopdf" },
+    { "xvfb-run",                "/xvfb-run" },   // allow htmltoimage and htmltopdf to run headless
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
@@ -77,6 +80,10 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
     { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
+
+    // Submitty Analysis ToolsTS
+    { "submitty_count_ts",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_count_ts" },
+    { "submitty_diagnostics_ts", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts"},
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -751,6 +758,16 @@ void parse_command_line(const std::string &cmd,
 // =====================================================================================
 // =====================================================================================
 
+std::string get_std_errfile(std::string cmd)
+{
+	size_t index = cmd.find("2>");
+	std::string file;
+	if (index != -1) {
+		file = cmd.substr(index + 2);
+	}
+	return file;
+}
+
 void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile) {
 
 
@@ -818,6 +835,31 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
     std::cout << message << std::endl;
     logfile   << message << "\nProgram Terminated " << std::endl;
 
+}
+
+void OutputSignalDescriptiveErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile, std::string std_errfile) {
+  // if kill signal
+  if (what_signal == 9) {
+    logfile << "ERROR: Program has either run out of time or tried to use unallowed resources" << std::endl;
+  }
+  else {
+    std::ifstream stderr(std_errfile);
+    std::string err;
+    if(stderr) {
+      std::ostringstream ss;
+      ss << stderr.rdbuf();
+      err = ss.str();
+      int num_mem_msgs = 2;
+      std::string memory_overuse_messages[num_mem_msgs] = {"bad_alloc", "MemoryError"};
+      for (size_t i = 0; i < num_mem_msgs; i++)
+      {
+        if (err.find(memory_overuse_messages[i]) != std::string::npos) {
+          logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+          break;
+        }
+      }
+    }
+  }
 }
 
 // =====================================================================================
@@ -1352,6 +1394,7 @@ int execute(const std::string &cmd,
       float next_checkpoint = 0;
       std::string windowName;
       int rss_memory = 0;
+      int max_rss_memory = 0;
       int actions_taken = 0;
       do {
           //dispatcher actions
@@ -1425,7 +1468,8 @@ int execute(const std::string &cmd,
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
               delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                    time_kill, logfile);
               moveMouseToOrigin(windowName);
               centerMouse(windowName); //center our mouse on its screen
             }
@@ -1457,12 +1501,14 @@ int execute(const std::string &cmd,
               //if we are out of actions or there were none, delay 1/10th second.
               else{
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                    time_kill, logfile);
               }
             }
          }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions).
             delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
-                                rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,
+                                time_kill, logfile);
             //this wpid is necessary to make sure allowed_to_die is up to date.
          }
          wpid = waitpid(childPID, &status, WNOHANG);
@@ -1479,6 +1525,9 @@ int execute(const std::string &cmd,
         }
         else{
           logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(WEXITSTATUS(status), logfile, get_std_errfile(cmd));
+          }
           result=1;
           //
           // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
@@ -1493,6 +1542,9 @@ int execute(const std::string &cmd,
           int what_signal =  WTERMSIG(status);
           OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
           std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(what_signal, logfile, get_std_errfile(cmd));
+          }
           if (WTERMSIG(status) == 0){
             result=0;
           }
@@ -1510,6 +1562,13 @@ int execute(const std::string &cmd,
        logfile << "Program Terminated" << std::endl;
        result=3;
       }
+
+      nlohmann::json metrics;
+      metrics["elapsed_time"] = elapsed;
+      metrics["max_rss_size"] = max_rss_memory;
+      std::ofstream json_file("submitty_metrics.json");
+      json_file << metrics.dump(4);
+
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");
       assert (parent_result == 0);
@@ -1561,8 +1620,8 @@ bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
 * Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
 */
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint,
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
-                std::ostream &logfile){
+                float seconds_to_run, int& rss_memory, int& max_rss_memory, int allowed_rss_memory, int& memory_kill,
+                int& time_kill, std::ostream &logfile){
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left.
@@ -1577,6 +1636,7 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
     }
     if (elapsed >= next_checkpoint){ //if it is time to update our knowledge of the student's memory usage, do so.
       rss_memory = resident_set_size(childPID);
+      max_rss_memory = std::max(max_rss_memory, rss_memory);
       std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }

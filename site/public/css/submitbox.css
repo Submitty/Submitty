@@ -66,10 +66,12 @@
     margin-bottom: 10px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #submission_header {
     margin-right: 10px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
 }
@@ -92,6 +94,17 @@
     border-radius: 13px;
 }
 
+.notebook-submit-popup {
+    z-index: 2;
+    border-radius: 1rem;
+    padding: 1rem;
+    background-color: var(--standard-light-medium-gray);
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 2rem;
+}
+
 @media (max-width: 401px) {
     .grade-results {
         display: flex;
@@ -102,6 +115,7 @@
         margin: 5px;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .badge {
         margin-left: 5px;
     }
@@ -144,6 +158,7 @@
         margin-bottom: 10px;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .upload-box {
         margin-top: 10px;
     }

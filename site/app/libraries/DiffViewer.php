@@ -10,7 +10,6 @@ namespace app\libraries;
  * HTML or plain-text)
  */
 class DiffViewer {
-
     /** @var string */
     private $actual_file;
     /** @var string */

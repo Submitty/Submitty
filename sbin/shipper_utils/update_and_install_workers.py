@@ -2,14 +2,14 @@
 
 import os
 from os import path
-import sys
 import json
-import paramiko
 import subprocess
 import docker
 import traceback
 import argparse
+import get_docker_info
 from submitty_utils import ssh_proxy_jump
+import platform
 
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
@@ -50,21 +50,42 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
+        res = subprocess.run(['lsb_release', '-a'], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=True, universal_newlines=True)
+        if res.returncode != 0:
+            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
+        else:
+            print(res.stdout)
         client = docker.from_env()
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:
-              repo, tag = image.split(':')
-              client.images.pull(repository=repo, tag=tag)
+                repo, tag = image.split(':')
+                client.images.pull(repository=repo, tag=tag)
             except Exception as e:
               print(f"ERROR: Could not pull {image}")
               traceback.print_exc()
-              success = False
+
+              # check for machine
+              if platform.machine() == "aarch64":
+                  # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+                  # docker pull often fails on ARM installation
+                  print("WARNING: SKIPPING DOCKER PULL ERROR")
+              else:
+                  # normal case
+                  success = False
+
+        docker_info = client.info()
+        docker_images_obj = client.images.list()
+        #print the details of the image
+        get_docker_info.printDockerInfo()
     else:
         commands = list()
+        commands.append('lsb_release -a')
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
+        commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_docker_info.py')}")
         success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
     return success
@@ -80,13 +101,17 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             (target_connection,
              intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
         except Exception as e:
-            print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
+            if str(e) == "timed out":
+                print(f"WARNING: Timed out when trying to ssh to {user}@{host}\nskipping {host} machine...")
+            else:
+                print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False
         try:
             success = True
             for command in commands:
                 print(f'{host}: performing {command}')
-                (stdin, stdout, stderr) = target_connection.exec_command(command, timeout=60)
+                (_, stdout, _) = target_connection.exec_command(command, timeout=600)
+                print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
                     print(f"ERROR: Failure performing {operation} on {user}@{host}")
@@ -108,20 +133,27 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
         exit_code = run_systemctl_command(worker, 'stop', False)
         if exit_code != 0:
             print(f"Could not turn off {worker}'s daemon. Please allow rsyncing to continue and then attempt another install.")
+    elif exit_code == 4:
+        print(f"WARNING: Connection to machine {worker} timed out. Skipping code copying...")
+        return True
 
     local_directory = submitty_repository
     remote_host = '{0}@{1}'.format(user, host)
     foreign_directory = submitty_repository
+    rsync_exclude = os.path.join(submitty_repository, ".setup", "worker_rsync_exclude.txt")
 
     # rsync the file
     print(f"performing rsync to {worker}...")
     # If this becomes too slow, we can exculde directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
-    command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
-    os.system(command)
-
-
-
+    command = "rsync -a --exclude-from={3} --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
+              local_directory, remote_host, foreign_directory, rsync_exclude).split()
+    res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         check=True, universal_newlines=True)
+    if res.returncode != 0:
+        print(f"rsync ended in error with code {res.returncode}\n {res.stderr}")
+    else:
+        print(res.stdout)
 
 def run_systemctl_command(machine, command, is_primary):
     command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
@@ -138,7 +170,6 @@ def parse_arguments():
 
 
 def update_machine(machine,stats,args):
-
     print(f"UPDATE MACHINE: {machine}")
 
     user = stats['username']
@@ -153,7 +184,10 @@ def update_machine(machine,stats,args):
     # We don't have to update the code for the primary machine or if docker_images is specified.
     if not primary and not args.docker_images:
         print("copy Submitty source code...")
-        copy_code_to_worker(machine, user, host, submitty_repository)
+        timed_out = copy_code_to_worker(machine, user, host, submitty_repository)
+        if timed_out == True:
+            print(f"WARNING: Connection to machine {machine} timed out. Skipping Submitty installation...")
+            return True
         print("beginning installation...")
         success = install_worker(user, host)
         if success == False:
@@ -166,10 +200,7 @@ def update_machine(machine,stats,args):
     if success == False:
         print(f"ERROR: Failed to pull one or more required docker images on {machine}")
         return False
-
-    print(f"finished updating machine: {machine}")
     return True
-
 
 if __name__ == "__main__":
 

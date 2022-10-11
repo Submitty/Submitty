@@ -1,6 +1,6 @@
 .access-grading td,
 .access-grading i {
-    background: var(--standard-focus-cornflowe-blue) !important;
+    background: var(--standard-focus-cornflower-blue) !important;
 }
 
 #student-table td:nth-of-type(1) { display: none; }
@@ -38,6 +38,6 @@
     #grader-table td:nth-of-type(1) { display: table-cell; }
 
     tr.access-grading {
-        background: var(--standard-focus-cornflowe-blue) !important;
+        background: var(--standard-focus-cornflower-blue) !important;
     }
 }

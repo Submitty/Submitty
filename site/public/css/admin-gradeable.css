@@ -18,23 +18,23 @@ input.readonly.peerstudents {
     width: 200px;
 }
 
-input[type=text]:invalid {
+/* stylelint-disable-next-line no-descending-specificity */
+input[type="text"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
 
-[data-theme="dark"] input[type=text]:invalid {
+/* stylelint-disable-next-line no-descending-specificity */
+[data-theme="dark"] input[type="text"]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-[data-theme="dark"] input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type="text"]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }
 
 select {
     margin-top: 7px;
-    width: -webkit-fill-available;
-    width: -moz-available;
-    width: fill-available;
+    width: available;
     min-width: 60px;
 }
 
@@ -67,7 +67,7 @@ select {
     top: -96px;
     left: -313px;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .ui_tpicker_unit_hide {
     display: none;
 }
@@ -105,6 +105,7 @@ a.nav-bar.disabled-btn {
     pointer-events: none;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a.nav-bar.normal-btn {
     background-color: var(--default-white);
     color: var(--text-black);
@@ -130,6 +131,7 @@ input[type="checkbox"] {
     border-radius: 4px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #electronic_file {
     padding-left: 20px;
 }
@@ -172,6 +174,7 @@ table#grader-history td {
     margin-top: 20px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .config_search_error {
     font-weight: normal;
 
@@ -188,10 +191,12 @@ div.btn-container {
     margin-bottom: 5px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #regrade_request_enable_container {
     margin-top: 10px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #discussion_grading_enable_container {
     margin-top: 10px;
 }
@@ -248,6 +253,7 @@ div.btn-container {
     float: right;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #zip_link_limited {
     text-decoration: none;
     color: var(--btn-text-white);
@@ -255,6 +261,7 @@ div.btn-container {
     padding-left: 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #zip_link_full {
     text-decoration: none;
     color: var(--btn-default-text);
@@ -262,6 +269,7 @@ div.btn-container {
     padding-left: 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #details_button {
     padding-right: 0;
 }
@@ -290,8 +298,10 @@ select[name="component-itempool"] {
     padding-right: 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #config_search {
     width: 100%;
+    padding-right: 45px;
 }
 
 .drop-down {
@@ -312,7 +322,6 @@ select[name="component-itempool"] {
 }
 
 body::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 3px black;
     box-shadow: inset 0 0 3px black;
 }
 
@@ -332,19 +341,17 @@ body::-webkit-scrollbar-track {
 
 [data-theme="dark"] .drop-down-options {
     background-color: var(--standard-medium-dark-gray);
-    border: 1px solid var(--standard-focus-cornflowe-blue);
+    border: 1px solid var(--standard-focus-cornflower-blue);
 }
 
-#config_search {
-    padding-right: 45px;
-}
-
+/* stylelint-disable-next-line selector-id-pattern */
 #clear_search_button {
     padding-right: 6px;
     color: red;
 }
 
-#custom_marks_warning{
+/* stylelint-disable-next-line selector-id-pattern */
+#custom_marks_warning {
     color: red;
-    font-style:italic;
+    font-style: italic;
 }

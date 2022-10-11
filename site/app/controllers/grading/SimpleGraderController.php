@@ -20,10 +20,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SimpleGraderController extends AbstractController {
     /**
-     * @param $gradeable_id
-     * @param $section
-     * @param $section_type
-     * @param $sort
+     * @param string $gradeable_id
+     * @param int|string|null $section
+     * @param string|null $section_type
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return MultiResponse
      */
@@ -93,9 +93,9 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
-     * @param $view
-     * @param $sort
+     * @param string $gradeable_id
+     * @param null|string $view
+     * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return MultiResponse
      */
@@ -192,7 +192,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
@@ -241,19 +241,25 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
-            // This catches both the not-set and blank-data case
-            if ($data !== '') {
-                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                $component_grade->setGrader($grader);
 
-                if ($component->isText()) {
-                    $component_grade->setComment($data);
-                }
-                else {
+            $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+            $component_grade->setGrader($grader);
+
+            if ($component->isText()) {
+                $component_grade->setComment($data);
+            }
+            else {
+                // This catches both the not-set and blank-data case for numeric cells
+                if ($data !== '') {
                     if (
-                        $component->getUpperClamp() < $data
-                        || !is_numeric($data)
+                        !is_numeric($data)
+                        || $data < 0
                     ) {
+                        return MultiResponse::JsonOnlyResponse(
+                            JsonResponse::getFailResponse("Save error: score must be a positive number")
+                        );
+                    }
+                    if ($component->getUpperClamp() < $data) {
                         return MultiResponse::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
                         );
@@ -266,9 +272,12 @@ class SimpleGraderController extends AbstractController {
                     }
                     $component_grade->setScore($data);
                 }
-                $component_grade->setGradeTime($this->core->getDateTimeNow());
-                $return_data[$component->getId()] = $data;
+                else {
+                    continue;
+                }
             }
+            $component_grade->setGradeTime($this->core->getDateTimeNow());
+            $return_data[$component->getId()] = $data;
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
@@ -279,7 +288,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     /**
-     * @param $gradeable_id
+     * @param string $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
      * @return MultiResponse
      */

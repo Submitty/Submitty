@@ -1,19 +1,19 @@
 {# This is a layout table #}
-<table style="border:1px solid yellowgreen; background-color:#ddffdd; width:auto;">
+<table style="background-color:var( --standard-focus-cornflowe-blue); width:auto;">
     {% if seating_only_for_instructor %}
         <div class="option-alt">Visible only to Instructors</div>
     {% endif %}
     <tr><td>
         <table border=0 cellpadding=5 cellspacing=0>
-            <tr><td colspan=2>{{ core.getDisplayedCourseName() }}{{ gradeable_title != null ? ': '~gradeable_title : ''}}</td></tr>
-            <tr><td>{{ user_seating_details.date }} </td><td align=center>{{ user_seating_details.time }}</td></tr>
-            <tr><td>Your room assignment: </td><td align=center>{{ user_seating_details.building }} {{ user_seating_details.room }}</td></tr>
-            <tr><td>Your zone assignment: </td><td align=center>{{ user_seating_details.zone }}</td></tr>
-            <tr><td>Your row assignment: </td><td align=center>{{ user_seating_details.row }}</td></tr>
-            <tr><td>Your seat assignment: </td><td align=center>{{ user_seating_details.seat }}</td></tr>
+            <tr class="seating-chart-table"><td colspan=2>{{ core.getDisplayedCourseName() }}{{ gradeable_title != null ? ': '~gradeable_title : ''}}</td></tr>
+            <tr class="seating-chart-table"><td>{{ user_seating_details.date }} </td><td align=center>{{ user_seating_details.time }}</td></tr>
+            <tr class="seating-chart-table"><td>Your room assignment: </td><td align=center>{{ user_seating_details.building }} {{ user_seating_details.room }}</td></tr>
+            <tr class="seating-chart-table"><td>Your zone assignment: </td><td align=center>{{ user_seating_details.zone }}</td></tr>
+            <tr class="seating-chart-table"><td>Your row assignment: </td><td align=center>{{ user_seating_details.row }}</td></tr>
+            <tr class="seating-chart-table"><td>Your seat assignment: </td><td align=center>{{ user_seating_details.seat }}</td></tr>
         </table>
     </td></tr>
-    <tr><td style="background-color:#ffffff;">
+    <tr><td style="background-color:var(--always-default-white);">
         {% if seating_config != null %}
             {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
         {% else %}

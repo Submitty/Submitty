@@ -273,7 +273,7 @@
         <label for="syllabus_bucket">
             <span class="option-title">Syllabus Category</span>
             <br>
-            <span class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="fa-question-circle"></i></a></span>
+            <span class="option-alt"><a target=_blank href="https://submitty.org/instructor/course_settings/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="fa-question-circle"></i></a></span>
         </label>
     </div>
 
@@ -303,7 +303,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 
@@ -346,8 +346,6 @@
             const has_due_date = $('#has_due_date_yes').is(':checked');
 
             $('#date_due').prop('disabled', !has_due_date);
-            $('#date_grade').prop('disabled', !has_due_date);
-            $('#date_grade_due').prop('disabled', !has_due_date);
 
 
         }
@@ -535,6 +533,21 @@
         //
         // Gradeable Type Radio Button Events
         //
+        
+        $("input[type='radio']").change(validate);
+        
+        function validate() {
+            const sub1 = $('input[type]');
+            const sub2 = $('input[electronic_gradeable_presets]');
+           
+            if ( $(sub1).is(':checked') || $(sub2).is(':checked')) {
+                $(".btn#create-gradeable-btn").removeAttr("disabled", false);
+            } 
+            else {
+                $(".btn#create-gradeable-btn").attr("disabled", true);
+            }
+        }
+
 
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
@@ -581,6 +594,11 @@
         //Hide Grade Inquiry Date if Grade Inquiries are not enabled
         onIsRegradeAllowedChange();
         $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
+        $('[name="grade_inquiry_per_component_allowed"]').click(function() {
+            if ($('#no_grade_inquiry_per_component_allowed').prop('checked') && !confirm('* WARNING *\nThere are already grade inquiries, continuing with this action will permanently convert all component inquiries to general inquiries.  Do you want to proceed?')) {
+                return false;
+            }
+        });
 
         onLateSubmissionAllowedChanged();
         $('input[name=late_submission_allowed]').change(onLateSubmissionAllowedChanged);

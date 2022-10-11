@@ -1,9 +1,8 @@
-window.addEventListener("resize", checkSidebarCollapse);
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
+  loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
 
@@ -15,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadInBreadcrumbLinks(){
-  mobileHomeLink = $("#home-button").attr('href');
-  desktopHomeLink = $("#desktop_home_link").attr('href');
+  mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
+  desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
 }
 
 function adjustBreadcrumbLinks(){
@@ -29,8 +28,6 @@ function adjustBreadcrumbLinks(){
   }
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
-
-
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -134,50 +131,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    let orig_div_name = div_name;
-    div_name = "#" + div_name;
-
-    let loadingTools = $("#tc_" + index).find(".loading-tools");
-
-    if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
-    }
-    else{
-        $("#show_char_"+index).toggle();
-        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
-            url: url,
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Error getting file diff: ' + response.message);
-                    return;
-                }
-                $(div_name).empty();
-                $(div_name).html(response.data);
-                toggleDiv(orig_div_name);
-
-                loadingTools.find("span").hide();
-                loadingTools.find(".loading-tools-hide").show();
-                enableKeyToClick();
-            },
-            error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
-            }
-        })
-    }
-}
-
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
@@ -199,8 +152,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(path, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?path=" + path;
+function newDeleteCourseMaterialForm(id, file_name) {
+    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
@@ -261,21 +214,80 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(path, dir) {
+function newEditCourseMaterialsFolderForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let folder_sections = $(tag).data('sections');
+    let partial_sections = $(tag).data('partial-sections');
+    let release_time =  $(tag).data('release-time');
+    let is_hidden = $(tag).data('hidden-state');
+    const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
 
-    $('#hide-materials-checkbox-edit', form).prop('checked', false);
-    $('#material-folder-edit-form', form).attr('data-directory', path);
-    $("#show-some-section-selection-edit", form).hide();
-    $("#all-sections-showing-yes", form).prop('checked',false);
-    $("#all-sections-showing-no", form).prop('checked',true);
+    let element = document.getElementById("edit-folder-picker");
+    element._flatpickr.setDate(release_time);
+
+    let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
+    if (is_hidden > 0) {
+        hide_materials_box.prop('checked', true).trigger('change');
+        if (is_hidden === partially_hidden) {
+            hide_materials_box.attr('class', 'partial-checkbox');
+            $(hide_materials_box.siblings()[0]).before("<span><br><em>(Currently, some materials inside this folder are hidden.)</em></span>");
+        }
+    }
+    else {
+        hide_materials_box.prop('checked', false).trigger('change');
+    }
+
+    $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
+    let showSections = function() {
+        $("#all-sections-showing-no-folder", form).prop('checked',false);
+        $("#all-sections-showing-yes-folder", form).prop('checked',true);
+        $("#show-some-section-selection-folder-edit", form).show();
+    }
+    let sectionsVisible = false;
+    if (folder_sections.length !== 0) {
+        for(let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
+            if ($(this).attr('class') === '') {
+                $(this).removeAttr('class');
+            }
+        }
+        showSections();
+        sectionsVisible = true;
+    }
+    else{
+        $("#show-some-section-selection-folder-edit", form).hide();
+        $("#all-sections-showing-yes-folder", form).prop('checked',false);
+        $("#all-sections-showing-no-folder", form).prop('checked',true);
+    }
+    if (partial_sections.length !== 0) {
+        for(let index = 0; index < partial_sections.length; ++index) {
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
+            $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
+        }
+        if (!sectionsVisible) {
+            showSections();
+        }
+    }
+
+    $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
+function newEditCourseMaterialsForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let this_file_section = $(tag).data('sections');
+    let this_hide_from_students = $(tag).data('hidden-state');
+    let release_time = $(tag).data('release-time');
+    let is_link = $(tag).data('is-link');
+    let link_title = $(tag).data('link-title');
+    let link_url = $(tag).data('link-url');
 
     let form = $("#edit-course-materials-form");
 
@@ -283,13 +295,16 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students === "1"){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    if(this_hide_from_students === 1){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
     }
 
     else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
     }
+
+    $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
+    $('#hide-materials-checkbox-edit:not(:checked) ~ #edit-form-hide-warning').hide();
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
@@ -306,7 +321,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    if (is_link === "1") {
+    if (is_link === 1) {
         const title_label = $("#edit-url-title-label", form);
         const url_label = $("#edit-url-url-label", form);
         title_label.prop('hidden', false);
@@ -320,7 +335,7 @@ function newEditCourseMaterialsForm(path, dir, this_file_section, this_hide_from
         url.prop('disabled', false);
         url.val(link_url);
     }
-    $("#material-edit-form", form).attr('data-directory', path);
+    $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     form.css("display", "block");
@@ -337,7 +352,7 @@ function captureTabInModal(formName, resetFocus=true){
     form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
-    var inputs = form.find(':focusable').filter(':visible');
+    var inputs = form.find(':tabbable').filter(':visible');
     var firstInput = inputs.first();
     var lastInput = inputs.last();
 
@@ -373,7 +388,7 @@ function releaseTabFromModal(formName){
     lastActiveElement.focus();
 }
 
-function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
+function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
 
     $('.popup-form').css('display', 'none');
 
@@ -387,9 +402,8 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('[name="release_date"]', form).val(releaseDates);
     $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
 
-    inDir = JSON.stringify(inDir);
     $('[name="submit"]',form).attr('data-iden',id);
-    $('[name="submit"]',form).attr('data-inDir',inDir);
+    $('[name="submit"]',form).attr('data-id',cm_id);
 
 }
 
@@ -625,11 +639,6 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
-function checkTaVersionChange(){
-    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
-    return confirm(message);
-}
-
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
@@ -665,7 +674,15 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    let download_path = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    if ($("#submission_browser").length > 0) {
+        download_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.location = download_path;
+}
+
+function downloadCourseMaterial(id) {
+    window.location = buildCourseUrl(['download']) + `?course_material_id=${id}`;
 }
 
 function downloadTestCaseResult(testcase, name, version, gradeable, user) {
@@ -681,18 +698,38 @@ function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_ano
     return false;
 }
 
-function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
+function downloadCourseMaterialZip(id) {
+    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?course_material_id=' + id;
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+    const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
+
+    function inject() {
+        $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
+    }
+    function remove() {
+        $(document.body).find('#rainbow-mode').remove();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
         pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = JSON.parse(localStorage.getItem('rainbow-mode')) === true;
+            localStorage.setItem('rainbow-mode', !flag);
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
@@ -734,11 +771,17 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
-function hideEmptyCourseMaterialFolders() {
-  // fetch all the folders and remove those one which have no `file` within.
-  $('.folder-container').each(function() {
-    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
-  });
+function markViewed(ids, redirect) {
+    let data = new FormData();
+    data.append("ids", ids);
+    data.append("csrf_token", csrfToken);
+    $.ajax({
+        url: buildCourseUrl(['course_materials', 'view']),
+        type: "POST",
+        data: data,
+        contentType: false,
+        processData: false
+    });
 }
 
 function closeDivForCourseMaterials(num) {
@@ -816,7 +859,13 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             else if (url.includes("checkout")) {
                 directory = "checkout";
             }
+            else if (url.includes("attachments")) {
+                directory = "attachments";
+            }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
         }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
@@ -979,20 +1028,24 @@ function displaySuccessMessage(message) {
     displayMessage(message, 'success');
 }
 
+function displayWarningMessage(message) {
+    displayMessage(message, 'warning');
+}
+
 /**
  * Display a toast message after an action.
  *
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type either 'error' or 'success'
+ * @param {string} type either 'error', 'success', or 'warning'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
     $('#messages').fadeIn('slow');
-    if (type === 'success') {
+    if (type === 'success' || type === 'warning') {
         setTimeout(() => {
             $(`#${id}`).fadeOut();
         }, 5000);
@@ -1016,8 +1069,8 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t) {
-        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+    t.keydown(function(event) {
+        if (event.which == 27) {  //ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
@@ -1026,7 +1079,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
+        else if (!event.shiftKey && event.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1188,14 +1241,34 @@ function setChildNewDateTime(path, changeDate,handleData) {
     });
 }
 
-function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+function openSetAllRelease() {
+    $('#set-all-release-form').css('display', 'block');
+}
+
+function setAllRelease(newdatatime) {
+    let url = buildCourseUrl(['course_materials', 'release_all']);
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'csrf_token': csrfToken, 'newdatatime': newdatatime},
+        success: function (res) {
+            const jsondata = JSON.parse(res);
+            if (jsondata.status !== 'success') {
+                alert("Failed to set dates");
+            }
+            location.reload();
+        }
+    })
+}
+
+function changeFolderNewDateTime(id, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?newdatatime=' + newdatatime;
     var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
+        data: {'id':id, 'csrf_token': csrfToken},
         success: function(data) {
             var jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {
@@ -1230,13 +1303,12 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    var size = $(document.body).width();
-    if (size < 1150) {
-        document.cookie = "collapse_sidebar=true;";
+    if ($(document.body).width() < 1150) {
+        document.cookie = "collapse_sidebar=true;path=/";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;";
+        document.cookie = "collapse_sidebar=false;path=/";
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1282,10 +1354,10 @@ $(document).ready(function() {
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("aside");
-    var shown = sidebar.hasClass("collapsed");
+    const sidebar = $("aside");
+    const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1306,10 +1378,7 @@ $(document).ready(function() {
         }
     });
 
-    //If they make their screen too small, collapse the sidebar to allow more horizontal space
-    $(document.body).resize(function() {
-        checkSidebarCollapse();
-    });
+    window.addEventListener("resize", checkSidebarCollapse);
 });
 
 function checkBulkProgress(gradeable_id){
@@ -1385,7 +1454,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
     formData.append('grader_id', grader_id);
     formData.append('user_id', user_id);
     formData.append('feedback', feedback);
-    $.ajax({
+    $.getJSON({
         url: url,
         type: "POST",
         data: formData,
@@ -1393,10 +1462,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         cache: false,
         contentType: false,
         success: function(data) {
-            try {
+            if (data.status === 'success') {
                 $('#save_status').html('All Changes Saved');
-            } catch(err){
-                return;
+            } else {
+                $('#save_status').html('Error Saving Changes');
             }
         },
         error: function() {
@@ -1425,7 +1494,14 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("split_pdf")) {
       directory = "split_pdf";
     }
-    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
+    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    if ($("#submission_browser").length > 0) {
+        file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
 
@@ -1525,46 +1601,64 @@ function getFocusableElements() {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
- * @param preview_element JQuery element of the span the markdown will be inserted into
- * @param preview_button JQuery element of the "Preview Markdown" button
- *                       Should have title="Preview Markdown"
- * @param data Object whose properties will get sent through a POST request
+ * @param {string} mode String representing what mode to switch the markdown area to.
+ *                      - `'preview'` activates preview mode
+ *                      - Anything else will activate write/edit mode
  */
-function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
-    const enablePreview = preview_element.is(':hidden');
+function previewMarkdown(mode) {
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    const markdown_toolbar = markdown_area.find('.markdown-area-toolbar');
+    const markdown_textarea = markdown_area.find('.markdown-textarea');
+    const markdown_preview = markdown_area.find('.markdown-preview');
+    const markdown_preview_load_spinner = markdown_area.find('.markdown-preview-load-spinner');
+    const accessibility_message = markdown_area.find('.accessibility-message');
 
-    $.ajax({
-        url: buildCourseUrl(['markdown', 'preview']),
-        type: 'POST',
-        data: {
-            enablePreview: enablePreview,
-            ...data,
-            csrf_token: csrfToken
-        },
-        success: function(data){
-            if (enablePreview) {
-                preview_element.empty();
-                preview_element.append(data);
-                preview_element.show();
-                markdown_textarea.hide();
+    const data = {
+        content: markdown_textarea.val()
+    }
 
-                preview_button.empty();
-                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
+    //basic sanity checking
+    if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (!(typeof data === 'object'))   throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
+    if (!markdown_area.length)         throw new Error(`Could not obtain markdown_area.`);
+    if (!markdown_header.length)       throw new Error(`Could not obtain markdown_header.`);
+    if (!markdown_textarea.length)     throw new Error(`Could not obtain markdown_textarea`);
+    if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
+    if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
+    if (mode === 'preview') {
+        if (markdown_header.attr('data-mode') === 'preview') return;
+        accessibility_message.hide();
+        markdown_textarea.hide();
+        markdown_preview.show();
+        markdown_preview_load_spinner.show();
+        markdown_toolbar.hide();
+        $.ajax({
+            url: buildUrl(['markdown']),
+            type: 'POST',
+            data: {
+                ...data,
+                csrf_token: csrfToken
+            },
+            success: function(markdown_data){
+                markdown_preview_load_spinner.hide();
+                markdown_preview.html(markdown_data);
+                markdown_header.attr('data-mode', 'preview');
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             }
-            else {
-                preview_element.hide();
-                markdown_textarea.show();
-
-                preview_button.empty();
-                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
-            }
-        },
-        error: function() {
-            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-        }
-    });
+        });
+    }
+    else {
+        markdown_preview.empty();
+        markdown_preview.hide();
+        markdown_textarea.show();
+        markdown_toolbar.show();
+        markdown_header.attr('data-mode', 'edit');
+        accessibility_message.show();
+    }
 }
 
 /**
@@ -1596,29 +1690,40 @@ function renderMarkdown(markdownContainer, url, content) {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param type Number representing the type of markdown preset to insert
- *             0: code
- *             1: link
- *             2: bold text
- *             3: italic text
- * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ * @param {string} type string representing what type of markdown preset to insert.
+ *                      * `'code'`
+ *                      * `'link'`
+ *                      * `'bold'`
+ *                      * `'italic'`
  */
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
+function addMarkdownCode(type){
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    //don't allow markdown insertion if we are in preview mode
+    if (markdown_header.attr('data-mode') === 'preview') return;
+
+    const cursor = $(this).prop('selectionStart');
+    const text = $(this).val();
+    let insert = '';
+    switch (type) {
+        case 'code':
+            const last_newline_pos = text.substring(0, cursor).split('').lastIndexOf('\n');
+            if (text.substring(last_newline_pos, cursor).length !== 1) {
+                insert = '\n';
+            }
+            insert += '```\ncode\n```\n';
+            break;
+        case 'link':
+            insert = '[display text](url)';
+            break;
+        case 'bold':
+            insert = '__bold text__';
+            break;
+        case 'italic':
+            insert = '_italic text_';
+            break;
     }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).focus();
+    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }

@@ -15,7 +15,6 @@ use app\libraries\FileUtils;
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-
     /** @property string $semester the semester (or term) code in which the course is taking place. */
     protected $semester;
     /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
@@ -26,6 +25,8 @@ class Course extends AbstractModel {
     protected $display_name;
     /** @property int $user_group used to rank courses in homepage view. */
     protected $user_group;
+    /** @property string $registration_section for homepage view */
+    protected $registration_section;
 
     /**
      * Course constructor.
@@ -40,6 +41,7 @@ class Course extends AbstractModel {
         $this->title = $details['course'];
         $this->display_name = "";
         $this->user_group = $details['user_group'] ?? 3;
+        $this->registration_section = $details['registration_section'] ?? null;
     }
 
     public function loadDisplayName() {
@@ -75,7 +77,8 @@ class Course extends AbstractModel {
             "title" => $this->title,
             "display_name" => $this->display_name,
             "display_semester" => $this->semester_name,
-            "user_group" => $this->user_group
+            "user_group" => $this->user_group,
+            "registration_section" => $this->registration_section
         ];
     }
 }

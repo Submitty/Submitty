@@ -8,11 +8,12 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\database\DatabaseUtils;
 use app\models\Config;
-use app\models\forum\Forum;
 use app\models\User;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -36,8 +37,14 @@ class Core {
     /** @var EntityManager */
     private $submitty_entity_manager;
 
+    /** @var DebugStack */
+    private $submitty_debug_stack;
+
     /** @var EntityManager */
     private $course_entity_manager;
+
+    /** @var DebugStack */
+    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -65,9 +72,6 @@ class Core {
 
     /** @var Access $access */
     private $access = null;
-
-    /** @var Forum $forum */
-    private $forum  = null;
 
     /** @var NotificationFactory */
     private $notification_factory;
@@ -140,7 +144,7 @@ class Core {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
-                  "sudo service php7.2-fpm restart";
+                  "sudo service php" . PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "-fpm restart";
                 $this->addErrorMessage($message);
             }
         }
@@ -170,14 +174,12 @@ class Core {
         $this->session_manager = $manager;
     }
 
-    private function createEntityManager(AbstractDatabase $database): EntityManager {
-        $config = Setup::createAnnotationMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
-            $this->config->isDebug(),
-            null,
-            null,
-            false
-        );
+    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
+        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
+
+        if ($debug_stack) {
+            $config->setSQLLogger($debug_stack);
+        }
 
         $conn = [
             'driver' => 'pdo_pgsql',
@@ -205,7 +207,8 @@ class Core {
         $this->submitty_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
+        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -216,6 +219,17 @@ class Core {
         return $this->submitty_entity_manager;
     }
 
+    public function getSubmittyQueries(): array {
+        if (!$this->config->isDebug() || !$this->submitty_db) {
+            return [];
+        }
+        $queries = $this->submitty_db->getPrintQueries();
+        foreach ($this->submitty_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
+    }
+
     public function loadCourseDatabase(): void {
         if (!$this->config->isCourseLoaded()) {
             return;
@@ -224,7 +238,8 @@ class Core {
         $this->course_db->connect();
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->course_entity_manager = $this->createEntityManager($this->course_db);
+        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
+        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
@@ -239,12 +254,15 @@ class Core {
         return $this->course_entity_manager;
     }
 
-    public function loadForum() {
-        if ($this->config === null) {
-            throw new \Exception("Need to load the config before we can create a forum instance.");
+    public function getCourseQueries(): array {
+        if (!$this->config->isDebug() || !$this->course_db) {
+            return [];
         }
-
-        //$this->forum = new Forum($this);
+        $queries = $this->course_db->getPrintQueries();
+        foreach ($this->course_debug_stack->queries as $query) {
+            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
+        }
+        return $queries;
     }
 
     /**
@@ -333,13 +351,6 @@ class Core {
      */
     public function getQueries() {
         return $this->database_queries;
-    }
-
-    /**
-     * @return Forum
-     */
-    public function getForum() {
-        return $this->forum;
     }
 
     public function loadUser(string $user_id) {
@@ -455,16 +466,16 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate(bool $persistent_cookie = true): bool {
-        $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
+                $user_id = $this->authentication->getUserId();
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
                     $user_id,
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $token->claims()->get('expire_time'));
+                return Utils::setCookie('submitty_session', $token->toString(), $token->claims()->get('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -490,9 +501,9 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                return (string) TokenManager::generateApiToken(
+                return TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id)
-                );
+                )->toString();
             }
         }
         catch (\Exception $e) {
@@ -762,10 +773,10 @@ class Core {
                     if ($expire_time > 0) {
                         Utils::setCookie(
                             $cookie_key,
-                            (string) TokenManager::generateSessionToken(
+                            TokenManager::generateSessionToken(
                                 $session_id,
                                 $token->claims()->get('sub')
-                            ),
+                            )->toString(),
                             $expire_time
                         );
                     }

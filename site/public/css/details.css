@@ -10,6 +10,7 @@
     padding-left: 20px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 #details-table tbody.details-content td {
     text-align: center;
 }
@@ -46,6 +47,20 @@
     flex-direction: column-reverse;
 }
 
+.details-warning-box {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.details-warning-highlight {
+    background-color: var(--standard-vibrant-orange);
+}
+
+.details-warning-neutral {
+    background-color: var(--standard-hover-light-gray);
+}
+
 .details-action-box > * {
     margin-top: 0;
     white-space: initial;
@@ -68,6 +83,7 @@
     width: 100%;
     flex-direction: row;
     justify-self: flex-end;
+    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     flex-wrap: wrap;
     justify-content: space-between;
     margin: 10px 0;
@@ -113,6 +129,7 @@
         border: 0;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
         background: none !important;
@@ -139,6 +156,7 @@
         display: inline;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .panel-head-active .collapse-icon,
     .expand-icon {
         display: none;
@@ -152,10 +170,12 @@
         #details-table td:nth-of-type(2):before { content: "User ID"; }
      */
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr:nth-child(even) td {
         background: var(--standard-hover-light-gray);
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr:nth-child(odd) td {
         background: var(--standard-light-gray);
     }
@@ -183,6 +203,7 @@
         cursor: pointer;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     #details-table .empty-info-header tr td {
         display: block;
         background: none;
@@ -289,11 +310,13 @@
     }
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .randomize_cancel_btn {
     float: left;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .gradeable_message li {
-    margin-left:30px;
-    margin-bottom:10px;
+    margin-left: 30px;
+    margin-bottom: 10px;
 }

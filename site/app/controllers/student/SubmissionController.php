@@ -18,12 +18,10 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
-
     private $upload_details = [
         'version' => -1,
         'version_path' => null,
@@ -82,8 +80,8 @@ class SubmissionController extends AbstractController {
             !$this->core->getUser()->accessGrading()
             && (
                 !$gradeable->isSubmissionOpen()
-                || $gradeable->isStudentView()
-                && $gradeable->isStudentViewAfterGrades()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
                 && !$gradeable->isTaGradeReleased()
             )
         ) {
@@ -277,7 +275,7 @@ class SubmissionController extends AbstractController {
 
         //For every userid, we have to check that its real.
         foreach ($user_ids as $id) {
-            $user = $this->core->getQueries()->getUserById($id);
+            $user = is_numeric($id) ? $this->core->getQueries()->getUserByNumericId($id) : $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
                 return $this->core->getOutput()->renderJsonFail($msg);
@@ -295,8 +293,8 @@ class SubmissionController extends AbstractController {
 
         $null_team_count = 0;
         $inconsistent_teams = false;
+        $teams = [];
         if ($gradeable->isTeamAssignment()) {
-            $teams = [];
             foreach ($user_ids as $user) {
                 $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
                 if ($tmp === null) {
@@ -361,10 +359,10 @@ class SubmissionController extends AbstractController {
         $num_pages = $_POST['num_pages'];
 
         // making sure files have been uploaded
-
-        if (isset($_FILES["files1"])) {
-            $uploaded_file = $_FILES["files1"];
+        if (!isset($_FILES["files1"])) {
+            return $this->core->getOutput()->renderResultMessage("Missing upload", false);
         }
+        $uploaded_file = $_FILES["files1"];
 
         $status = FileUtils::validateUploadedFiles($uploaded_file);
         $count = count($uploaded_file["name"]);
@@ -412,21 +410,19 @@ class SubmissionController extends AbstractController {
 
         // save the pdf in that directory
         // delete the temporary file
-        if (isset($uploaded_file)) {
-            for ($j = 0; $j < $count; $j++) {
-                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
-                    $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
-                    if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
-                        return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
-                    }
+        for ($j = 0; $j < $count; $j++) {
+            if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
+                if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
+                    return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
                 }
-                else {
-                    return $this->uploadResult("The tmp file '{$uploaded_file['name'][$j]}' was not properly uploaded.", false);
-                }
-                // Is this really an error we should fail on?
-                if (!@unlink($uploaded_file["tmp_name"][$j])) {
-                    return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
-                }
+            }
+            else {
+                return $this->uploadResult("The tmp file '{$uploaded_file['name'][$j]}' was not properly uploaded.", false);
+            }
+            // Is this really an error we should fail on?
+            if (!@unlink($uploaded_file["tmp_name"][$j])) {
+                return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
             }
         }
 
@@ -534,6 +530,15 @@ class SubmissionController extends AbstractController {
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
+        if (is_numeric($user_id)) {
+            //get the correct id if we're given a numeric id
+            $user_obj = $this->core->getQueries()->getUserByNumericId($user_id);
+            if (!$user_obj) {
+                return $this->uploadResult("Failed to get user from numeric id", false);
+            }
+
+            $user_id = $user_obj->getId();
+        }
 
         $path = $_POST['path'];
 
@@ -597,6 +602,10 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        if ($graded_gradeable === null) {
+            return $this->uploadResult("Failed to get graded gradeable for the user.", false);
+        }
+
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
@@ -636,57 +645,55 @@ class SubmissionController extends AbstractController {
 
         $image_extension = count($image_files) > 0 ? pathinfo(reset($image_files), PATHINFO_EXTENSION) : "";
 
-        if (isset($uploaded_file)) {
-            // if we are merging in the previous submission (TODO check folder support)
-            if ($merge_previous && $new_version !== 1) {
-                $old_version = $new_version - 1;
-                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
-                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
-                $files = glob($to_search);
-                foreach ($files as $file) {
-                    $file_base_name = basename($file);
-                    if (!$clobber && $file_base_name === $uploaded_file_base_name) {
-                        $parts = explode(".", $file_base_name);
-                        $parts[0] .= "_version_" . $old_version;
-                        $file_base_name = implode(".", $parts);
-                    }
+        // if we are merging in the previous submission (TODO check folder support)
+        if ($merge_previous && $new_version !== 1) {
+            $old_version = $new_version - 1;
+            $old_version_path = FileUtils::joinPaths($user_path, $old_version);
+            $to_search = FileUtils::joinPaths($old_version_path, "*.*");
+            $files = glob($to_search);
+            foreach ($files as $file) {
+                $file_base_name = basename($file);
+                if (!$clobber && $file_base_name === $uploaded_file_base_name) {
+                    $parts = explode(".", $file_base_name);
+                    $parts[0] .= "_version_" . $old_version;
+                    $file_base_name = implode(".", $parts);
+                }
 
-                    $image_name = pathinfo($file, PATHINFO_FILENAME);
-                    preg_match("/\d*$/", $image_name, $matches);
-                    $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
+                $image_name = pathinfo($file, PATHINFO_FILENAME);
+                preg_match("/\d*$/", $image_name, $matches);
+                $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
 
-                    if (!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0) {
-                        $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
-                    }
+                if (!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0) {
+                    $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                }
 
-                    $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                    if (!@copy($file, $move_here)) {
-                        return $this->uploadResult("Failed to merge previous version on file {$file_base_name}", false);
-                    }
+                $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                if (!@copy($file, $move_here)) {
+                    return $this->uploadResult("Failed to merge previous version on file {$file_base_name}", false);
                 }
             }
-            // copy over the uploaded file
-            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path, $uploaded_file_base_name))) {
-                return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
+        }
+        // copy over the uploaded file
+        if (!@copy($uploaded_file, FileUtils::joinPaths($version_path, $uploaded_file_base_name))) {
+            return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
+        }
+        if (!@unlink($uploaded_file)) {
+            return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+        }
+        if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
+            return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+        }
+        //do the same thing for images
+        $i = 1;
+        foreach ($image_files as $image) {
+            // copy over the uploaded image
+            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
+                return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
             }
-            if (!@unlink($uploaded_file)) {
-                return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            if (!@unlink($image)) {
+                return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
             }
-            if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
-                return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
-            }
-            //do the same thing for images
-            $i = 1;
-            foreach ($image_files as $image) {
-                // copy over the uploaded image
-                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
-                    return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
-                }
-                if (!@unlink($image)) {
-                    return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
-                }
-                $i++;
-            }
+            $i++;
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
@@ -777,7 +784,6 @@ class SubmissionController extends AbstractController {
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
-
         // FIXME: Add this as part of the graded gradeable saving query
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
@@ -1571,7 +1577,7 @@ class SubmissionController extends AbstractController {
             "vcs_checkout" => $vcs_checkout
         ];
 
-        if ($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment() && isset($team)) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
@@ -1594,7 +1600,6 @@ class SubmissionController extends AbstractController {
             $_COOKIE['submitty_token'],
             "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
-
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
@@ -1765,6 +1770,9 @@ class SubmissionController extends AbstractController {
         $version = ($new_version > 0) ? $new_version : null;
 
         // FIXME: Add this kind of operation to the graded gradeable saving query
+
+        // TO DO: Update late day cache for version change
+        $late_day_status = null;
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $submitter_id, $version);
         }
@@ -1863,6 +1871,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();

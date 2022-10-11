@@ -1,5 +1,5 @@
 body {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: "Source Sans Pro", sans-serif;
     margin: 0;
     min-height: 100vh;
     position: relative;
@@ -20,7 +20,6 @@ nav {
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
-    min-height: -moz-min-content;
 }
 
 nav a,
@@ -80,7 +79,7 @@ nav a > i.f {
     padding-left: 7px;
 }
 
-.breadcrumb_heading {
+.breadcrumb-heading {
     font-size: 24px;
 }
 
@@ -112,13 +111,13 @@ nav a > i.f {
 #wrapper {
     display: flex;
     flex-grow: 1;
+    min-height: max-content;
 }
 
 main {
     width: 100%;
     min-width: 0;
     position: relative;
-    min-width: 0;
 }
 
 footer {
@@ -127,6 +126,7 @@ footer {
     padding: 10px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 footer a {
     text-decoration: none !important;
 }

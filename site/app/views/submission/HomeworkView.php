@@ -6,24 +6,18 @@ use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
-use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
-use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 /* Notebook */
 use app\models\notebook\AbstractNotebookInput;
-use app\models\notebook\UserSpecificNotebook;
-use app\models\notebook\SubmissionMultipleChoice;
 
 class HomeworkView extends AbstractView {
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -48,14 +42,19 @@ class HomeworkView extends AbstractView {
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
         $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+        $is_team_assignment = $gradeable->isTeamAssignment();
+
+        if ($this->core->getUser()->accessFullGrading()) {
+            $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
+        }
 
         // Only show the late banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
-        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
-        if (!$gradeable->canStudentSubmit()) {
+        if (!$gradeable->canStudentSubmit() && $gradeable->getSubmissionOpenDate() < $this->core->getDateTimeNow()) {
             $return .= $this->renderSubmissionsClosedBox();
         }
 
@@ -114,11 +113,15 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        if ($gradeable->hasLeaderboard()) {
+            $return .= $this->renderLeaderboardBox($graded_gradeable);
+        }
+
         if ($submission_count > 0 && $num_parts > 1) {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        if ($submission_count > 0) {
+        if ($submission_count > 0 && $active_version !== 0) {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -156,20 +159,26 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
-        $extensions = 0;
-        $active_version_instance = null;
         $active_version = 0;
         if ($graded_gradeable !== null) {
-            $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
-            $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
             $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
+        // LateDays data
         $late_days_remaining = $late_days->getLateDaysRemaining();
-        $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
+
+        // Default gradeable information
+        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+
+        // LateDayInfo data
+        $active_days_late =  $late_day_info !== null ? $late_day_info->getDaysLate() : 0;
+        $extensions = $late_day_info !== null ? $late_day_info->getLateDayException() : 0;
+        $active_days_charged = $late_day_info !== null ? $late_day_info->getLateDaysCharged() : $active_days_late - $extensions;
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() :  $late_days_remaining;
+
+        $would_be_days_late = $gradeable->getWouldBeDaysLate();
+        $late_days_allowed = $gradeable->getLateDays();
 
         $error = false;
         $messages = [];
@@ -183,32 +192,37 @@ class HomeworkView extends AbstractView {
         }
 
         // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
-        $active_days_charged = max(0, $active_days_late - $extensions);
+        if ($active_days_charged > 0) {
+            $active_days_charged = max(0, $active_days_late - $extensions);
+        }
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
-            // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_day_budget) {
+            // BAD STATUS
+            if ($active_days_charged == 0 && $active_days_late > $extensions) {
                 $error = true;
-                $messages[] = ['type' => 'too_few_remain', 'info' => [
-                    'late' => $active_days_late,
-                    'remaining' => $late_days_remaining
-                ]];
-            } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
-            elseif ($active_days_charged > $late_days_allowed) {
-                $error = true;
-                $messages[] = ['type' => 'too_many_used', 'info' => [
-                    'late' => $active_days_late,
-                    'charged' => $active_days_charged,
-                    'allowed' => $late_days_allowed
-                ]];
+
+                // AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
+                if ($active_days_late > $late_day_budget) {
+                    $messages[] = ['type' => 'too_few_remain', 'info' => [
+                        'late' => $active_days_late,
+                        'remaining' => $late_day_budget
+                    ]];
+                } // AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
+                else {
+                    $messages[] = ['type' => 'too_many_used', 'info' => [
+                        'late' => $active_days_late,
+                        'charged' => $active_days_late - $extensions,
+                        'allowed' => $late_days_allowed
+                    ]];
+                }
             } // LATE STATUS
             else {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_days_remaining
+                    'remaining' => $late_day_budget
                 ]];
             }
             if ($error) {
@@ -227,7 +241,7 @@ class HomeworkView extends AbstractView {
             if (
                 $active_version < 1
                 || (
-                    $new_late_charged <= $late_days_remaining
+                    $new_late_charged <= $late_day_budget
                     && $new_late_charged <= $late_days_allowed
                 )
             ) {
@@ -237,9 +251,9 @@ class HomeworkView extends AbstractView {
                 ]];
 
                 // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
-                if ($new_late_charged > $late_days_remaining) {
+                if ($new_late_charged > $late_day_budget) {
                     $messages[] = ['type' => 'would_too_few_remain', 'info' => [
-                        'remaining' => $late_days_remaining
+                        'remaining' => $late_day_budget
                     ]];
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
@@ -253,7 +267,7 @@ class HomeworkView extends AbstractView {
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
                     $new_late_charged = max(0, $would_be_days_late - $active_days_late - $extensions);
-                    $new_late_days_remaining = $late_days_remaining - $new_late_charged;
+                    $new_late_days_remaining = $late_day_budget - $new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
                         'remaining' => $new_late_days_remaining,
@@ -275,10 +289,6 @@ class HomeworkView extends AbstractView {
             'messages' => $messages,
             'error' => $error
         ]);
-    }
-
-    private function renderSubmitNotAllowedBox() {
-        $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
     private function renderSubmissionsClosedBox() {
@@ -423,7 +433,7 @@ class HomeworkView extends AbstractView {
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
-        $viewing_inactive_version = $highest_version !== $display_version;
+        $viewing_inactive_version = $display_version !== 0 && $highest_version !== $display_version;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
@@ -440,6 +450,7 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
+        $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -498,7 +509,12 @@ class HomeworkView extends AbstractView {
             'max_file_uploads' => ini_get('max_file_uploads'),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
+            'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
             'can_student_submit' => $canStudentSubmit,
+            'is_grader_view' => false,
+            'recent_version_url' => $recent_version_url,
+            'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
+            'git_auth_token_required' => false
         ]);
     }
 
@@ -542,7 +558,8 @@ class HomeworkView extends AbstractView {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
-                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                    // later submissions should replace the previous ones
+                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -691,6 +708,24 @@ class HomeworkView extends AbstractView {
             'team_assignment' => $team_assignment,
             'member_list' => $member_list,
             'team_name' => $team_name
+        ]);
+    }
+
+     /**
+      * @param GradedGradeable $graded_gradeable
+      * @return string
+      */
+    private function renderLeaderboardBox(GradedGradeable $graded_gradeable): string {
+        $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
+        if (is_null($autograding_config)) {
+            return "";
+        }
+
+        $leaderboards = $autograding_config->getLeaderboards();
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/LeaderboardBox.twig', [
+          'leaderboard_count' => count($leaderboards),
+          'url' => $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'leaderboard'])
         ]);
     }
 

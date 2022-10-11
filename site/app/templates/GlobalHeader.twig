@@ -4,12 +4,22 @@
 <head>
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
-
+    <link rel="manifest" href="{{ manifast_path }}">
+    <script type="module" src="{{ service_worker_path }}"></script>
     <script>
         window.baseUrl = "{{ base_url }}";
         window.courseUrl = "{{ course_url }}";
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("{{ service_worker_path }}")
+                    .then(res => console.log("service worker registered"))
+                    .catch(err => console.log("service worker not registered", err))
+            })
+        }
     </script>
 
     {% for css_ref in css %}
@@ -25,6 +35,7 @@
     <script src='{{ js_ref }}'></script>
     {% endfor %}
 
+    {% if not content_only %}
     <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
@@ -97,20 +108,25 @@
         }
         detectColorScheme();
     </script>
+    {% endif %}
 
 </head>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
-    {% if wrapper_urls['top_bar.html'] is defined %}
-        {# uploaded homepage redirect can go here? #}
-        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
-    {% endif %}
+    {% if not content_only %}
+        {% if wrapper_urls['top_bar.html'] is defined %}
+            {# uploaded homepage redirect can go here? #}
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
+        {% endif %}
         {% if wrapper_urls['left_sidebar.html'] is defined %}
             {# uploaded sidebar can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
         {# separates our content from user custom bars #}
-        <div id="submitty-body" class="flex-col">
+    {% endif %}
+
+    <div id="submitty-body" class="flex-col">
+        {% if not content_only %}
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
@@ -132,15 +148,15 @@
             <nav class="flex-row shadow">
                 <div id="nav-links">
                     <a id="home-button"
-                       class="black-btn"
-                       href="{{ base_url }}"
-                       aria-label="Go to Submitty Home"
+                        class="black-btn"
+                        href="{{ base_url }}"
+                        aria-label="Go to Submitty Home"
                     >
                         <img id="submitty-mascot-home-btn"
-                             src="{{ base_url }}/img/{{ duck_img }}"
-                             alt="Moorthy - Submitty's Duck Mascot!"
-                             height="60"
-                         />
+                                src="{{ base_url }}/img/{{ duck_img }}"
+                                alt="Moorthy - Submitty's Duck Mascot!"
+                                height="60"
+                            />
                     </a>
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
@@ -153,7 +169,7 @@
                                 {% if b.getUrl() is not empty and not loop.last %}
                                     <a {% if loop.first %}id="desktop_home_link"{% endif %} href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% elseif b.useAsHeading() %}
-                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
+                                    <h1 class="breadcrumb-heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
@@ -168,20 +184,20 @@
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
                     <a id="duck-desktop"
-                       href="http://submitty.org/developer/rcos_moorthy"
-                       target="_blank"
-                       aria-label="Learn more about Moorthy"
+                        href="http://submitty.org/developer/rcos_moorthy"
+                        target="_blank"
+                        aria-label="Learn more about Moorthy"
                     >
                     {% endif %}
                         <img id="moorthy-duck"
-                             src="{{ base_url }}/img/{{ duck_img }}"
-                             alt="Moorthy - Submitty's Duck Mascot!"
-                             height="80"
-                             {% if enable_banner %}
+                                src="{{ base_url }}/img/{{ duck_img }}"
+                                alt="Moorthy - Submitty's Duck Mascot!"
+                                height="80"
+                                {% if enable_banner %}
                                 class="key_to_click"
                                 onclick="ducky();"
                                 tabindex="0"
-                             {% endif %}
+                                {% endif %}
                         />
                     {% if not enable_banner %}
                     </a>
@@ -189,10 +205,10 @@
 
                     {% if enable_banner %}
                     <img id="submitty-banner"
-                         src="{{ base_url }}/img/submitty-banner.png"
-                         alt="Happy Submitty Week!"
-                         height="70"
-                         style="position:absolute;right: -380px; top:6px;display:none;"
+                            src="{{ base_url }}/img/submitty-banner.png"
+                            alt="Happy Submitty Week!"
+                            height="70"
+                            style="position:absolute;right: -380px; top:6px;display:none;"
                     />
                     {% endif %}
                     </span>
@@ -215,41 +231,49 @@
                     <a id="logout-button" class="black-btn" href="{{ core.buildUrl(['authentication', 'logout']) }}" aria-label="Logout"><i class="fas fa-power-off"></i></a>
                 {% endif %}
             </nav>
-            <noscript class="system-message danger">
-                You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
-            </noscript>
-            {% if system_message is not null and system_message|length > 0 %}
+        {% endif %}
+        <noscript class="system-message danger">
+            You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
+        </noscript>
+        {% if system_message is not null and system_message|length > 0 %}
             <div class="system-message warning">
                 {{ system_message }}
             </div>
+        {% endif %}
+        <div class="system-message warning" id="socket-server-system-message" hidden>
+            Warning: Failed to connect to websocket server. This page will not dynamically update.
+            Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
+            sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
+        </div>
+        <div id='messages'>
+            <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
+            {% for message in messages %}
+                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
+                    <span>
+                        {% if message.type == "error" %}
+                        <i class="fas fa-times-circle"></i>
+                        {% elseif message.type == "success" %}
+                        <i class="fas fa-check-circle"></i>
+                        {% else %}
+                        <i class="fas fa-circle-exclamation"></i>
+                        {% endif %}
+                        {{ message.error | nl2br }}
+                    </span>
+                    <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="wrapper">
+            {% if not content_only and sidebar_buttons|length > 0 %}
+                <aside class="{{collapse_sidebar?'collapsed':''}}">
+                    <ul>
+                        {% for button in sidebar_buttons %}
+                            {{ self.render_sidebar_button(button, false) }}
+                        {% endfor %}
+                    </ul>
+                </aside>
             {% endif %}
-            <div id='messages'>
-                <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
-                {% for message in messages %}
-                    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
-                        <span>
-                            {% if message.type == "error" %}
-                            <i class="fas fa-times-circle"></i>
-                            {% else %}
-                            <i class="fas fa-check-circle"></i>
-                            {% endif %}
-                            {{ message.error | nl2br }}
-                        </span>
-                        <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                    </div>
-                {% endfor %}
-            </div>
-            <div id="wrapper">
-                {% if sidebar_buttons|length > 0 %}
-                    <aside class="{{collapse_sidebar?'collapsed':''}}">
-                        <ul>
-                            {% for button in sidebar_buttons %}
-                                {{ self.render_sidebar_button(button, false) }}
-                            {% endfor %}
-                        </ul>
-                    </aside>
-                {% endif %}
-                <main id="main">
+            <main id="main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button, mobile) %}
