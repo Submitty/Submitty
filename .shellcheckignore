@@ -13,7 +13,6 @@ tests/**/*.sh
 .setup/vagrant/db_users.sh
 .setup/install_submitty/install_bin.sh
 .setup/install_submitty/install_site.sh
-.setup/vagrant/setup_vagrant.sh
 .setup/vagrant/setup_ldap.sh
 .setup/update_system.sh
 .setup/bin/recreate_sample_courses.sh
