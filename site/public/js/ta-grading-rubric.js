@@ -2666,8 +2666,11 @@ function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
     let activeView = $("#file-view").is(":visible");
     let lastLoadedFile = activeView ? $("#grading_file_name").text().trim() : localStorage.getItem("ta-grading-files-full-view-last-opened") ?? "upload.pdf";
-    if (lastLoadedFile.startsWith(".upload_page_")) {
-        let targetFile = ".upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
+    if (lastLoadedFile.charAt(0) === ".") {
+        lastLoadedFile = lastLoadedFile.substring(1);
+    }
+    if (lastLoadedFile.startsWith(".upload_page_") || lastLoadedFile.startsWith("upload_page_")) {
+        let targetFile = "upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
         if (activeView && lastLoadedFile === targetFile) {
             return;
         }
@@ -2676,10 +2679,11 @@ function scrollToPage(page_num){
         let maxPageLoc = null;
         for (let i = 0; i < files.length; i++) {
             let filename = files[i].innerText.trim();
-            if (filename === targetFile) {
+            let filenameNoPeriod = filename.substring(1);
+            if (filename === targetFile || filenameNoPeriod === targetFile) {
                 viewFileFullPanel(filename, files[i].getAttribute("file-url"));
                 return;
-            } else if (filename.startsWith(".upload_page_")) {
+            } else if (filenameNoPeriod.startsWith("upload_page_")) {
                 let pageNum = parseInt(filename.split("_")[2].split(".")[0]);
                 if (pageNum > maxPage) {
                     maxPage = pageNum;
