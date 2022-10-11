@@ -37,6 +37,7 @@ from autograder import config as submitty_config
 INTERACTIVE_QUEUE = ''
 IN_PROGRESS_PATH = ''
 JOB_ID = '~SHIP~'
+_COPY_SUFFIX = "_COPYING"
 
 
 def instantiate_global_variables(config):
@@ -91,13 +92,12 @@ def copy_files(
         if `PULL` then the source file is on the remote machine and it should be pulled to the
         source file on the local machine.
     """
-    _COPY_SUFFIX = "_COPYING"
     if address == 'localhost':
         for src, dest in files:
             dest_tmp = dest + _COPY_SUFFIX
             if src != dest:
                 shutil.copy(src, dest_tmp)
-                shutil.move(dest_tmp, dest)
+                os.rename(dest_tmp, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -127,7 +127,7 @@ def copy_files(
                 for remote, local in files:
                     local_tmp = local + _COPY_SUFFIX
                     sftp.get(remote, local_tmp)
-                    shutil.move(local_tmp, local)
+                    os.rename(local_tmp, local)
         finally:
             if sftp is not None:
                 sftp.close()
@@ -428,9 +428,18 @@ def prepare_job(
         return False
     finally:
         os.close(todo_queue_file_tmp_fd)
-        os.remove(autograding_zip_tmp)
-        os.remove(submission_zip_tmp)
-        os.remove(todo_queue_file_tmp)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(autograding_zip_tmp)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(autograding_zip_tmp + _COPY_SUFFIX)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(submission_zip_tmp)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(submission_zip_tmp + _COPY_SUFFIX)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(todo_queue_file_tmp)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(todo_queue_file_tmp + _COPY_SUFFIX)
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
@@ -532,7 +541,12 @@ def unpack_job(
         # We've assigned a value to status, so return the status
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_done_queue_file)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(local_done_queue_file + _COPY_SUFFIX)
+        with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(local_results_zip + _COPY_SUFFIX)
         return status
 
     try:
@@ -618,9 +632,13 @@ def unpack_job(
     finally:
         # Whether we succeeded or failed, make sure that we've cleaned up after ourselves.
         with contextlib.suppress(FileNotFoundError):
+            os.remove(local_done_queue_file)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(local_done_queue_file + _COPY_SUFFIX)
+        with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
         with contextlib.suppress(FileNotFoundError):
-            os.remove(local_done_queue_file)
+            os.remove(local_results_zip + _COPY_SUFFIX)
 
     if status == GradingStatus.SUCCESS:
         config.logger.log_message(f"Unpacked job from {worker_name}", jobname=item_name)
