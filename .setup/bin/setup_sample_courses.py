@@ -596,6 +596,8 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         # use the above function to copy the files into the git repo for us
         create_gradeable_submission(src_file, os.getcwd())
         os.system('git add --all')
+        os.system(f"git config user.email '{user_id}@example.com'")
+        os.system(f"git config user.name '{user_id}'")
         os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
         os.system('git push')
     os.chdir(my_cwd)
