@@ -266,21 +266,6 @@
         }
     }
 
-    function onStudentSubmitChange() {
-        const cont = $('#due_date_options_container');
-        const bulk_upload = {{ is_bulk_upload ? "true": "false" }};
-
-        const no_due_date = $('#has_due_date_no');
-        if($('#yes_student_submit').is(':checked') || bulk_upload) {
-            cont.show();
-        }
-        else {
-            no_due_date.prop('checked', true);
-            cont.hide();
-        }
-        no_due_date.change();
-    }
-
     function dropDownBoxOnClick() {
         let options = $(this).parent().find(".drop-down-options");
         if (!$(options).is(":visible")) {
@@ -326,10 +311,6 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
-
-        // Only show the dates if the setting is enabled
-        onStudentSubmitChange();
-        $('[name=student_submit]').change(onStudentSubmitChange);
 
         // Update the text box when the path config changes
         onConfigPathChange();
