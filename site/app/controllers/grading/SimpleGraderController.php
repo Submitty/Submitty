@@ -10,6 +10,7 @@ use app\libraries\GradeableType;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -45,11 +46,11 @@ class SimpleGraderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl());
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-
-        if ($gradeable == null) {
-            $this->core->addErrorMessage('Invalid Gradeable ID');
-            return new RedirectResponse($this->core->buildCourseUrl());
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return new WebResponse('Error', 'noGradeable');
         }
 
         // Make sure this gradeable is an electronic file gradeable
@@ -203,13 +204,14 @@ class SimpleGraderController extends AbstractController {
         $user_id = $_POST['user_id'];
 
         $grader = $this->core->getUser();
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-
-        $user = $this->core->getQueries()->getUserById($user_id);
-        if ($gradeable === null) {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
-        elseif ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
+
+        $user = $this->core->getQueries()->getUserById($user_id);
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
             return JsonResponse::getFailResponse('This gradeable is not a checkpoint or numeric text gradeable');
         }
         elseif ($user === null) {
@@ -279,11 +281,13 @@ class SimpleGraderController extends AbstractController {
      */
     public function UploadCSV($gradeable_id) {
         $users = $_POST['users'];
-
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if ($gradeable === null) {
+        
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
+
         if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
             return JsonResponse::getFailResponse('This gradeable is not a checkpoint or numeric text gradeable');
         }

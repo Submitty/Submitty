@@ -283,35 +283,6 @@ parameters:
 				should not be used, just return JsonResponse directly$#
 			"""
 			count: 11
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 4
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 4
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return JsonResponse directly$#
-			"""
-			count: 11
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
