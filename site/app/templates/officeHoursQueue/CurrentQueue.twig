@@ -13,7 +13,6 @@
     </thead>
     <tbody>
       {% for entry in viewer.getCurrentQueue() %}
-        {{ dump(entry) }}
         <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
           <th scope="row" class="row_number">{{entry['row_number'] }}</th>
           <td>
