@@ -17,14 +17,14 @@ class PDFController extends AbstractController {
     public function getRealPath(string $file_path, string $id): string {
         $real_path = "";
         $file_path_parts = explode("/", $file_path);
-            for ($index = 1; $index < count($file_path_parts); $index++) {
-                if ($index === 9) {
-                    $real_path .= "/" . $id;
-                }
-                else {
-                    $real_path = $real_path . "/" . $file_path_parts[$index];
-                }
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index === 9) {
+                $real_path .= "/" . $id;
             }
+            else {
+                $real_path = $real_path . "/" . $file_path_parts[$index];
+            }
+        }
         return $real_path;
     }
 
