@@ -14,6 +14,20 @@ class PDFController extends AbstractController {
         parent::__construct($core);
     }
 
+    public function getRealPath(string $file_path, string $id): string {
+        $real_path = "";
+        $file_path_parts = explode("/", $file_path);
+            for ($index = 1; $index < count($file_path_parts); $index++) {
+                if ($index === 9) {
+                    $real_path .= "/" . $id;
+                }
+                else {
+                    $real_path = $real_path . "/" . $file_path_parts[$index];
+                }
+            }
+        return $real_path;
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
      */
@@ -65,6 +79,8 @@ class PDFController extends AbstractController {
             $id = $student_id;
         }
 
+        $real_path = $this->getRealPath($anon_path, $id);
+
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
@@ -75,7 +91,7 @@ class PDFController extends AbstractController {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
 
-        $latest_timestamp = filemtime($path);
+        $latest_timestamp = filemtime($real_path);
         $md5_path = md5($anon_path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
@@ -173,16 +189,7 @@ class PDFController extends AbstractController {
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-
-            $file_path_parts = explode("/", $file_path);
-            for ($index = 1; $index < count($file_path_parts); $index++) {
-                if ($index === 9) {
-                    $real_path .= "/" . $id;
-                }
-                else {
-                    $real_path = $real_path . "/" . $file_path_parts[$index];
-                }
-            }
+            $real_path = $this->getRealPath($file_path, $id);
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
