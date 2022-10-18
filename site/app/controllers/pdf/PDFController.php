@@ -157,22 +157,6 @@ class PDFController extends AbstractController {
         return JsonResponse::getSuccessResponse('Annotation saved successfully!');
     }
 
-    public function getAnonPath(string $file_path, string $g_id): string {
-        $file_path_parts = explode("/", $file_path);
-        $anon_path = "";
-        for ($index = 1; $index < count($file_path_parts); $index++) {
-            if ($index === 9) {
-                $user_id = $file_path_parts[$index];
-                $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $g_id);
-                $anon_path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
-            }
-            else {
-                $anon_path = $anon_path . "/" . $file_path_parts[$index];
-            }
-        }
-        return $anon_path;
-    }
-
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
      */
@@ -185,9 +169,20 @@ class PDFController extends AbstractController {
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
+        $real_path = $is_anon ? "" : urldecode($_POST['file_path']);
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
+
+            $file_path_parts = explode("/", $file_path);
+            for ($index = 1; $index < count($file_path_parts); $index++) {
+                if ($index === 9) {
+                    $real_path .= "/" . $id;
+                }
+                else {
+                    $real_path = $real_path . "/" . $file_path_parts[$index];
+                }
+            }
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -226,6 +221,6 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $this->getAnonPath($file_path, $gradeable_id), $annotation_jsons, false, $page_num, false, $is_peer_grader);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $real_path, $file_path, $file_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
 }
