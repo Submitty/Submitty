@@ -1,8 +1,36 @@
 /* global attachCollapsiblePanel, courseUrl */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage */
+const MOBILE_BREAKPOINT = 951;
+
+let COLLAPSE_ITEMS_KEY;
+let collapseItems;
 $(document).ready(() => {
+    COLLAPSE_ITEMS_KEY = courseUrl + "_gradeable-details-collapse-groups";
+    collapseItems = new Set(JSON.parse(localStorage.getItem(COLLAPSE_ITEMS_KEY) ?? "[]"));
+    collapseItems.forEach((val) => {
+        $("#" + val).removeClass('panel-head-active');
+        $("#" + val).next().hide();
+    });
+
     // Attach the collapsible panel on details-table
-    attachCollapsiblePanel('#details-table .details-info-header', 951, 'panel-head-active');
+    const ANIMATION_DURATION = 600;
+    $("#details-table .details-info-header").click(function() {
+        $(this).toggleClass('panel-head-active');
+        let id = $(this).attr("id");
+        if (collapseItems.has(id)) {
+            collapseItems.delete(id);
+        } else {
+            collapseItems.add(id);
+        }
+        localStorage.setItem(COLLAPSE_ITEMS_KEY, JSON.stringify([...collapseItems]));
+        if (window.innerWidth < MOBILE_BREAKPOINT) {
+            $(this).next().slideToggle({
+                duration: ANIMATION_DURATION,
+            });
+        } else {
+            $(this).next().toggle();
+        }
+    });
 
     // Creating and adding style for the psuedo selector in the details-table
     const style = document.createElement('style');
@@ -60,4 +88,23 @@ function showGradeableMessage() {
 function hideGradeableMessage() {
     const message = $('#gradeable-message-popup');
     message.css('display', 'none');
+}
+
+function expandAllSections() {
+    $("#details-table .details-info-header").each(function() {
+        $(this).addClass('panel-head-active');
+        $(this).next().show();
+    });
+    collapseItems.clear();
+    localStorage.setItem(COLLAPSE_ITEMS_KEY, JSON.stringify([...collapseItems]));
+}
+
+function collapseAllSections() {
+    collapseItems.clear();
+    $("#details-table .details-info-header").each(function() {
+        $(this).removeClass('panel-head-active');
+        $(this).next().hide();
+        collapseItems.add($(this).attr("id"));
+    });
+    localStorage.setItem(COLLAPSE_ITEMS_KEY, JSON.stringify([...collapseItems]));
 }

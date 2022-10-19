@@ -71,6 +71,10 @@
             </div>
         </div>
     {% endif %}
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+        <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
+    </div>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message }}
@@ -151,7 +155,7 @@
         {% else %}
             {% for section in sections %}
                 {# Section heading #}
-                <tbody class="details-info-header panel-head-active">
+                <tbody class="details-info-header panel-head-active" id="details-content-section-{{section.title}}">
                     <tr class="info">
                         {% if core.getUser().accessGrading() %}
                             <td colspan="{{ columns|length }}" style="text-align: center">
