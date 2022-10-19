@@ -5,18 +5,22 @@ const MOBILE_BREAKPOINT = 951;
 let COLLAPSE_ITEMS_KEY;
 let collapseItems;
 $(document).ready(() => {
-    COLLAPSE_ITEMS_KEY = courseUrl + "_gradeable-details-collapse-groups";
-    collapseItems = new Set(JSON.parse(localStorage.getItem(COLLAPSE_ITEMS_KEY) ?? "[]"));
+    COLLAPSE_ITEMS_KEY = courseUrl + '_gradeable-details-collapse-groups';
+    let collapseItemLocal = localStorage.getItem(COLLAPSE_ITEMS_KEY);
+    if (!collapseItemLocal) {
+        collapseItemLocal = "[]";
+    }
+    collapseItems = new Set(JSON.parse(localStorage.getItem(COLLAPSE_ITEMS_KEY) ?? '[]'));
     collapseItems.forEach((val) => {
-        $("#" + val).removeClass('panel-head-active');
-        $("#" + val).next().hide();
+        $('#' + val).removeClass('panel-head-active');
+        $('#' + val).next().hide();
     });
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
-    $("#details-table .details-info-header").click(function() {
+    $('#details-table .details-info-header').click(function() {
         $(this).toggleClass('panel-head-active');
-        let id = $(this).attr("id");
+        let id = $(this).attr('id');
         if (collapseItems.has(id)) {
             collapseItems.delete(id);
         } else {
@@ -91,7 +95,7 @@ function hideGradeableMessage() {
 }
 
 function expandAllSections() {
-    $("#details-table .details-info-header").each(function() {
+    $('#details-table .details-info-header').each(function() {
         $(this).addClass('panel-head-active');
         $(this).next().show();
     });
@@ -101,10 +105,10 @@ function expandAllSections() {
 
 function collapseAllSections() {
     collapseItems.clear();
-    $("#details-table .details-info-header").each(function() {
+    $('#details-table .details-info-header').each(function() {
         $(this).removeClass('panel-head-active');
         $(this).next().hide();
-        collapseItems.add($(this).attr("id"));
+        collapseItems.add($(this).attr('id'));
     });
     localStorage.setItem(COLLAPSE_ITEMS_KEY, JSON.stringify([...collapseItems]));
 }
