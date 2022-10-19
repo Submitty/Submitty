@@ -873,11 +873,6 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
-            $this->core->addErrorMessage('This gradeable is not an electronic file gradeable');
-            $this->core->redirect($this->core->buildCourseUrl());
-        }
-
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 

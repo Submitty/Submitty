@@ -108,11 +108,6 @@ class SimpleGraderController extends AbstractController {
         catch (\InvalidArgumentException $e) {
             return new WebResponse('Error', 'noGradeable');
         }
-        // Make sure this gradeable is an electronic file gradeable
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            $this->core->addErrorMessage('This gradeable is not a checkpoint or numeric text gradeable');
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
 
         //If you can see the page, you can grade the page
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
@@ -206,7 +201,8 @@ class SimpleGraderController extends AbstractController {
         $grader = $this->core->getUser();
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
 
@@ -281,10 +277,11 @@ class SimpleGraderController extends AbstractController {
      */
     public function UploadCSV($gradeable_id) {
         $users = $_POST['users'];
-        
+
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
 
