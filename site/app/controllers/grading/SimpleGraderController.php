@@ -8,11 +8,9 @@ use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
-use app\libraries\GradeableType;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 

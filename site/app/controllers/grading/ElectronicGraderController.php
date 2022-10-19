@@ -23,7 +23,6 @@ use app\models\User;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
-use app\libraries\GradeableType;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
