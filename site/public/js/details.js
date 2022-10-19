@@ -1,4 +1,4 @@
-/* global attachCollapsiblePanel, courseUrl */
+/* global courseUrl */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage */
 const MOBILE_BREAKPOINT = 951;
 
@@ -10,7 +10,7 @@ $(document).ready(() => {
     if (!collapseItemLocal) {
         collapseItemLocal = "[]";
     }
-    collapseItems = new Set(JSON.parse(localStorage.getItem(COLLAPSE_ITEMS_KEY) ?? '[]'));
+    collapseItems = new Set(JSON.parse(collapseItemLocal));
     collapseItems.forEach((val) => {
         $('#' + val).removeClass('panel-head-active');
         $('#' + val).next().hide();
@@ -20,10 +20,11 @@ $(document).ready(() => {
     const ANIMATION_DURATION = 600;
     $('#details-table .details-info-header').click(function() {
         $(this).toggleClass('panel-head-active');
-        let id = $(this).attr('id');
+        const id = $(this).attr('id');
         if (collapseItems.has(id)) {
             collapseItems.delete(id);
-        } else {
+        }
+        else {
             collapseItems.add(id);
         }
         localStorage.setItem(COLLAPSE_ITEMS_KEY, JSON.stringify([...collapseItems]));
@@ -31,7 +32,8 @@ $(document).ready(() => {
             $(this).next().slideToggle({
                 duration: ANIMATION_DURATION,
             });
-        } else {
+        }
+        else {
             $(this).next().toggle();
         }
     });
