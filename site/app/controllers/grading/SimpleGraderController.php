@@ -2,7 +2,9 @@
 
 namespace app\controllers\grading;
 
+use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
@@ -107,6 +109,10 @@ class SimpleGraderController extends AbstractController {
         }
         catch (\InvalidArgumentException $e) {
             return new WebResponse('Error', 'noGradeable');
+        }
+
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']));
         }
 
         //If you can see the page, you can grade the page

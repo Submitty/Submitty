@@ -91,7 +91,7 @@ class DockerInterfaceController extends AbstractController {
 
         $image_arr = explode(":", $_POST['image']);
         // ping the dockerhub API to check if docker exists
-        $url = "https://registry.hub.docker.com/v1/repositories/" . $image_arr[0] . "/tags";
+        $url = "https://registry.hub.docker.com/v2/repositories/" . $image_arr[0] . "/tags";
         $tag = $image_arr[1];
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -102,11 +102,13 @@ class DockerInterfaceController extends AbstractController {
         if (curl_errno($ch) || $http_code !== 200) {
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
-        $return_json = json_decode($return_str);
+        $return_json = (array) json_decode($return_str);
+        if (!isset($return_json['results'])) {
+            return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
+        }
         $found = false;
-
-        foreach ($return_json as $image) {
-            if ($image->name == $tag) {
+        foreach ($return_json['results'] as $result) {
+            if ($result->name === $tag) {
                 $found = true;
                 break;
             }

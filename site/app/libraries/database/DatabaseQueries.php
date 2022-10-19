@@ -3113,7 +3113,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             SELECT gradeable.g_id, g_title, eg_submission_due_date
             FROM gradeable INNER JOIN electronic_gradeable
                 ON gradeable.g_id = electronic_gradeable.g_id
-            WHERE g_gradeable_type=0 and eg_scanned_exam=FALSE and eg_has_due_date=TRUE
+            WHERE g_gradeable_type=0 and not (eg_student_view=TRUE and eg_student_view_after_grades=TRUE) and eg_has_due_date=TRUE
             ORDER BY g_grade_released_date DESC
         "
         );
@@ -5015,9 +5015,9 @@ AND gc_id IN (
                   eg_thread_ids AS discussion_thread_ids,
                   eg_has_discussion AS discussion_based,
                   eg_use_ta_grading AS ta_grading,
-                  eg_scanned_exam AS scanned_exam,
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
+                  eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
@@ -5685,9 +5685,9 @@ AND gc_id IN (
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                 $gradeable->isTaGrading(),
-                $gradeable->isScannedExam(),
                 $gradeable->isStudentView(),
                 $gradeable->isStudentViewAfterGrades(),
+                $gradeable->canStudentDownload(),
                 $gradeable->isStudentSubmit(),
                 $gradeable->hasDueDate(),
                 $gradeable->getAutogradingConfigPath(),
@@ -5719,9 +5719,9 @@ AND gc_id IN (
                   eg_max_team_size,
                   eg_team_lock_date,
                   eg_use_ta_grading,
-                  eg_scanned_exam,
                   eg_student_view,
                   eg_student_view_after_grades,
+                  eg_student_download,
                   eg_student_submit,
                   eg_has_due_date,
                   eg_config_path,
@@ -5845,9 +5845,9 @@ AND gc_id IN (
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                     $gradeable->isTaGrading(),
-                    $gradeable->isScannedExam(),
                     $gradeable->isStudentView(),
                     $gradeable->isStudentViewAfterGrades(),
+                    $gradeable->canStudentDownload(),
                     $gradeable->isStudentSubmit(),
                     $gradeable->hasDueDate(),
                     $gradeable->hasReleaseDate(),
@@ -5880,9 +5880,9 @@ AND gc_id IN (
                       eg_max_team_size=?,
                       eg_team_lock_date=?,
                       eg_use_ta_grading=?,
-                      eg_scanned_exam=?,
                       eg_student_view=?,
                       eg_student_view_after_grades=?,
+                      eg_student_download=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
                       eg_has_release_date=?,

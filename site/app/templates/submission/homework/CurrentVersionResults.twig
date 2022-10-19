@@ -5,7 +5,7 @@
 {% endif %}
 
 {# Submitted files #}
-{% if hide_submitted_files == false %}
+{% if student_download == true or core.getUser().accessGrading() %}
     <h4>Submitted Files</h4>
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
@@ -116,6 +116,6 @@
     </div>
 {% else %}
     {# Keep the Submission date to let Confetti parse the date #}
-    <span hidden id="submission_timestamp"> Submission timestamp: {{ submission_time|date(date_time_format) }}</span> <br />
+    <span hidden id="submission_timestamp"> Submission timestamp: {{ submission_time|date(date_time_format) }}</span>
 {% endif %}
 {# /Submitted files #}
