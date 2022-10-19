@@ -1,19 +1,19 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
 const MOBILE_BREAKPOINT = 951;
 
 let COLLAPSE_ITEMS_KEY;
 let collapseItems;
 $(document).ready(() => {
-    COLLAPSE_ITEMS_KEY = courseUrl + '_gradeable-details-collapse-groups';
+    COLLAPSE_ITEMS_KEY = `${courseUrl}_gradeable-details-collapse-groups`;
     let collapseItemLocal = localStorage.getItem(COLLAPSE_ITEMS_KEY);
     if (!collapseItemLocal) {
-        collapseItemLocal = "[]";
+        collapseItemLocal = '[]';
     }
     collapseItems = new Set(JSON.parse(collapseItemLocal));
     collapseItems.forEach((val) => {
-        $('#' + val).removeClass('panel-head-active');
-        $('#' + val).next().hide();
+        $(`#${val}`).removeClass('panel-head-active');
+        $(`#${val}`).next().hide();
     });
 
     // Attach the collapsible panel on details-table
