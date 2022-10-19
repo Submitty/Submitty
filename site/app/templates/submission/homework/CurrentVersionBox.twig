@@ -1,13 +1,13 @@
 {% import 'functions/Badge.twig' as Badge %}
 
 {# If we have any reason to display this box. #}
-{% if hide_submitted_files == false or team_assignment == true or hide_version_and_test_details == false %}
-    <div class="content">
+{% if student_download == true or team_assignment == true or hide_test_details == false or core.getUser().accessGrading() %}
+    <div class="content" {% if student_download == false and team_assignment == false and can_see_all_versions == false and not core.getUser().accessGrading() %}style="display: none;"{% endif %}>
         {% if team_assignment %}
             <h3>Team{% if team_name is not null %} ({{ team_name }}){% endif %}: {{ team_members }}</h3><br />
         {% endif %}
 
-        {% if hide_version_and_test_details == false %}
+        {% if can_see_all_versions == true %}
             <div id="version-cont">
                 <h3 class='label' id="submission_header">Select Submission Version:</h3>
                 {% include 'grading/VersionChoice.twig' with({

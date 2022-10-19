@@ -89,6 +89,8 @@
 #
 #     eg_student_view: [optional] Boolean for whether or not student can view submissions. Defaults to TRUE.
 #
+#     eg_student_download: [optional] Boolean for whether or not student can download submission files. Defaults to TRUE.
+#
 #     eg_student_submit: [optional] Boolean for whether or not student can make submissions. Defaults to TRUE.
 #
 #     eg_late_days: [optional] integer for how many late days are allowed for this gradeable. Defaults to 2.

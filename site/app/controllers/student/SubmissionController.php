@@ -122,7 +122,7 @@ class SubmissionController extends AbstractController {
 
         // Attempt to put the version number to be in bounds of the gradeable
         $version = intval($gradeable_version ?? 0);
-        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0) || (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit())) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
 
@@ -664,7 +664,7 @@ class SubmissionController extends AbstractController {
                 $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
 
                 if (!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0) {
-                    $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    $file_base_name = ".upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
                 }
 
                 $move_here = FileUtils::joinPaths($version_path, $file_base_name);
@@ -687,7 +687,7 @@ class SubmissionController extends AbstractController {
         $i = 1;
         foreach ($image_files as $image) {
             // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
+            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . $i . "." . $image_extension))) {
                 return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
             }
             if (!@unlink($image)) {
@@ -753,7 +753,7 @@ class SubmissionController extends AbstractController {
             "filepath" => $uploaded_file
         ];
 
-        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
+        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
@@ -1885,9 +1885,12 @@ class SubmissionController extends AbstractController {
             }
             $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+            $json_path = FileUtils::joinPaths($user_path, $num_files, ".bulk_upload_data.json");
             if (!file_exists($json_path)) {
-                continue;
+                $json_path = FileUtils::joinPaths($user_path, $num_files, "bulk_upload_data.json");
+                if (!file_exists($json_path)) {
+                    continue;
+                }
             }
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
             if ($user === null) {
