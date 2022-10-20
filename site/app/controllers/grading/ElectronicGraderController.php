@@ -941,15 +941,18 @@ class ElectronicGraderController extends AbstractController {
             $overrides[] = $o['user_id'];
         }
 
+        $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
         if ($gradeable->isTeamAssignment()) {
-            $rawAnonIds = $this->core->getQueries()->getAllTeamAnonIdsByGradeable($gradeable->getId());
-        }
-        else {
-            $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
+            $rawAnonIds = array_merge($rawAnonIds, $this->core->getQueries()->getAllTeamAnonIdsByGradeable($gradeable->getId()));
         }
         $anon_ids = [];
         foreach ($rawAnonIds as $anon) {
-            $anon_ids[$anon[$gradeable->isTeamAssignment() ? 'team_id' : 'user_id']] = $anon['anon_id'];
+            if (key_exists('team_id', $anon)) {
+                $anon_ids[$anon['team_id']] = $anon['anon_id'];
+            }
+            else {
+                $anon_ids[$anon['user_id']] = $anon['anon_id'];
+            }
         }
 
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids);

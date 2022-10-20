@@ -265,7 +265,7 @@
             {% elseif column.function == "user_id_anon" %}
                 {{ _self.render_column_user_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_members_anon" %}
-                {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "user_last" %}
                 {{ _self.render_column_user_last(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
