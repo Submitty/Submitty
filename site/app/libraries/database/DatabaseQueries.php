@@ -4465,6 +4465,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function getAllTeamAnonIdsByGradeable($g_id) {
+        $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
     /**
      * Get gradeable-specific user anon_id
      *
