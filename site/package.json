@@ -41,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.40.1",
     "babel-jest": "^29.0.3",
-    "cypress": "^10.9.0",
+    "cypress": "^10.10.0",
     "cypress-file-upload": "^5.0.8",
     "esbuild": "^0.15.10",
     "eslint": "^8.25.0",
