@@ -3723,7 +3723,7 @@ ORDER BY gt.{$section_key}",
      * @param  string $gradeable_id
      * @return SimpleGradeOverriddenUser[]
      */
-    public function getUsersWithOverriddenGrades($gradeable_id) {
+    public function getUsersWithOverriddenGrades(string $gradeable_id): array {
         $return = [];
         foreach ($this->getRawUsersWIthOverriddenGrades($gradeable_id) as $row) {
             $return[] = new SimpleGradeOverriddenUser($this->core, $row);
@@ -4455,17 +4455,17 @@ AND gc_id IN (
         }
     }
 
-    public function getAllAnonIdsByGradeable($g_id) {
+    public function getAllAnonIdsByGradeable(string $g_id): array {
         $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
 
-    public function getAllAnonIdsByGradeableWithUserIds($g_id) {
+    public function getAllAnonIdsByGradeableWithUserIds(string $g_id): array {
         $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
 
-    public function getAllTeamAnonIdsByGradeable($g_id) {
+    public function getAllTeamAnonIdsByGradeable(string $g_id): array {
         $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
