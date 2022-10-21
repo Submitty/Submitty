@@ -3737,7 +3737,7 @@ ORDER BY gt.{$section_key}",
      * @param  string $gradeable_id
      * @return array
      */
-    public function getRawUsersWithOverriddenGrades(string $gradeable_id) {
+    public function getRawUsersWithOverriddenGrades(string $gradeable_id): array {
         $this->course_db->query(
             "
         SELECT u.user_id, user_firstname,
