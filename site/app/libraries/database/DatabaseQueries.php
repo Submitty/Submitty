@@ -7152,6 +7152,21 @@ AND gc_id IN (
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
+              
+              /* Aggregate Gradeable Component Verifier Data */
+              gcd.array_verifier_user_id,
+              gcd.array_verifier_user_firstname,
+              gcd.array_verifier_user_preferred_firstname,
+              gcd.array_verifier_user_lastname,
+              gcd.array_verifier_user_email,
+              gcd.array_verifier_user_email_secondary,
+              gcd.array_verifier_user_email_secondary_notify,
+              gcd.array_verifier_user_group,
+              gcd.array_verifier_manual_registration,
+              gcd.array_verifier_last_updated,
+              gcd.array_verifier_registration_section,
+              gcd.array_verifier_rotating_section,
+              gcd.array_verifier_registration_type,
 
               /* Aggregate Gradeable Component Data (versions) */
               egd.array_version,
@@ -7227,6 +7242,19 @@ AND gc_id IN (
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  json_agg(uv.user_id) AS array_verifier_user_id,
+                  json_agg(uv.user_firstname) AS array_verifier_user_firstname,
+                  json_agg(uv.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
+                  json_agg(uv.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(uv.user_email) AS array_verifier_user_email,
+                  json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
+                  json_agg(uv.user_email_secondary_notify) AS array_verifier_user_email_secondary_notify,
+                  json_agg(uv.user_group) AS array_verifier_user_group,
+                  json_agg(uv.manual_registration) AS array_verifier_manual_registration,
+                  json_agg(uv.last_updated) AS array_verifier_last_updated,
+                  json_agg(uv.registration_section) AS array_verifier_registration_section,
+                  json_agg(uv.rotating_section) AS array_verifier_rotating_section,
+                  json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
                   ug.g_id
                 FROM gradeable_component_data in_gcd
@@ -7260,6 +7288,10 @@ AND gc_id IN (
                         FROM gradeable_anon
                       ) AS ga ON u.user_id=ga.user_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
+                  LEFT JOIN (
+                    SELECT u.*
+                    FROM users u
+                  ) AS uv ON uv.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id, ug.g_id
               ) AS gcd ON gcd.gd_id=gd.gd_id AND gcd.g_id=g.g_id
 
@@ -7429,9 +7461,18 @@ AND gc_id IN (
                             return 'grader_' . $elem;
                         },
                         $user_properties
+                    ),
+                    array_map(
+                        function ($elem) {
+                            return 'verifier_' . $elem;
+                        },
+                        $user_properties
                     )
                 ) as $property
             ) {
+                if (in_array($property, ['verifier_anon_id', 'verifier_grading_registration_sections'], true)) {
+                    continue;
+                }
                 $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
@@ -7454,13 +7495,26 @@ AND gc_id IN (
                     // Create the grader user
                     $grader = new User($this->core, $user_array);
 
+                    // Transpose the verifier if it exists
+                    $verifier = null;
+                    $verifier_array = [];
+                    if (isset($db_row_split['verifier_user_id'][$i])) {
+                        foreach ($user_properties as $property) {
+                            if (isset($db_row_split['verifier' . $property][$i])) {
+                                $verifier_array[$property] = $db_row_split['verifier' . $property][$i];
+                            }
+                        }
+                        $verifier = new User($this->core, $verifier_array);
+                    }
+
                     // Create the component
                     $graded_component = new GradedComponent(
                         $this->core,
                         $ta_graded_gradeable,
                         $gradeable->getComponent($db_row_split['comp_id'][$i]),
                         $grader,
-                        $comp_array
+                        $comp_array,
+                        $verifier
                     );
 
                     $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
