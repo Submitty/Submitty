@@ -2657,19 +2657,53 @@ function openComponentGrading(component_id) {
 
 /**
  * Scrolls the submission panel to the page number specified by the component
+ * Will open the associated image or PDF depending on if the last opened file was a bulk upload image.
  * TODO: This is currently very clunky, and only works with test files (aka upload.pdf).
  * @param {int} page_num
  * @return {void}
  */
 function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
+    let activeView = $("#file-view").is(":visible");
+    let lastLoadedFile = activeView ? $("#grading_file_name").text().trim() : localStorage.getItem("ta-grading-files-full-view-last-opened") ?? "upload.pdf";
+    if (lastLoadedFile.charAt(0) === ".") {
+        lastLoadedFile = lastLoadedFile.substring(1);
+    }
+    if (lastLoadedFile.startsWith(".upload_page_") || lastLoadedFile.startsWith("upload_page_")) {
+        let targetFile = "upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
+        if (activeView && lastLoadedFile === targetFile) {
+            return;
+        }
+        let maxPage = -1;
+        let maxPageName = null;
+        let maxPageLoc = null;
+        for (let i = 0; i < files.length; i++) {
+            let filename = files[i].innerText.trim();
+            let filenameNoPeriod = filename.substring(1);
+            if (filename === targetFile || filenameNoPeriod === targetFile) {
+                viewFileFullPanel(filename, files[i].getAttribute("file-url"));
+                return;
+            } else if (filenameNoPeriod.startsWith("upload_page_")) {
+                let pageNum = parseInt(filename.split("_")[2].split(".")[0]);
+                if (pageNum > maxPage) {
+                    maxPage = pageNum;
+                    maxPageName = filename;
+                    maxPageLoc = files[i].getAttribute("file-url");
+                }
+            }
+        }
+        if (maxPage !== -1) {
+            viewFileFullPanel(maxPageName, maxPageLoc);
+            return;
+        }
+    }
     for(let i = 0; i < files.length; i++){
-        if(files[i].innerText.trim() == "upload.pdf"){
-            page_num = Math.min($("#viewer > .page").length, page_num);
-            let page = $("#pageContainer" + page_num);
-            if($("#file-view").is(":visible")){
+        if(files[i].innerText.trim() === "upload.pdf"){
+            if(activeView){
+                page_num = Math.min($("#viewer > .page").length, page_num);
+                let page = $("#pageContainer" + page_num);
                 if(page.length) {
-                    $('#submission_browser').scrollTop(page[0].offsetTop);
+                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $("#file-view > .sticky-file-info").first().height(), 0));
                 }
             }
             else {

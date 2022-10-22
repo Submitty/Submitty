@@ -1817,6 +1817,7 @@ class Gradeable(object):
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
+            self.student_download = True
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
@@ -1828,6 +1829,8 @@ class Gradeable(object):
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_student_view' in gradeable:
                 self.student_view = gradeable['eg_student_view'] is True
+            if 'eg_student_download' in gradeable:
+                self.student_download = gradeable['eg_student_download'] is True
             if 'eg_student_submit' in gradeable:
                 self.student_submit = gradeable['eg_student_submit'] is True
             if 'eg_late_days' in gradeable:
@@ -1942,6 +1945,7 @@ class Gradeable(object):
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
+                         eg_student_download=self.student_download,
                          eg_student_submit=self.student_submit,
                          eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,

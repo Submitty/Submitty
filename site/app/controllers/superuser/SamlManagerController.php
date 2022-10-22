@@ -63,6 +63,10 @@ class SamlManagerController extends AbstractController {
             $this->core->addErrorMessage("User ID already exists.");
             return new RedirectResponse($return_url);
         }
+        if (empty(trim($_POST['user_numeric_id']))) {
+            $this->core->addErrorMessage("Numeric ID can't be empty.");
+            return new RedirectResponse($return_url);
+        }
         $saml_id = trim($_POST['user_saml']);
         if (empty($saml_id)) {
             $this->core->addSuccessMessage("SAML ID not provided.");

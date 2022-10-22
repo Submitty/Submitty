@@ -4,6 +4,8 @@ namespace app\controllers\grading;
 
 use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
+use app\libraries\GradeableType;
+use app\libraries\response\RedirectResponse;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
@@ -850,6 +852,10 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']));
+        }
+
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
@@ -935,7 +941,27 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode);
+        $rawOverrides = $this->core->getQueries()->getRawUsersWithOverriddenGrades($gradeable->getId());
+        $overrides = [];
+        foreach ($rawOverrides as $o) {
+            $overrides[] = $o['user_id'];
+        }
+
+        $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
+        if ($gradeable->isTeamAssignment()) {
+            $rawAnonIds = array_merge($rawAnonIds, $this->core->getQueries()->getAllTeamAnonIdsByGradeable($gradeable->getId()));
+        }
+        $anon_ids = [];
+        foreach ($rawAnonIds as $anon) {
+            if (key_exists('team_id', $anon)) {
+                $anon_ids[$anon['team_id']] = $anon['anon_id'];
+            }
+            else {
+                $anon_ids[$anon['user_id']] = $anon['anon_id'];
+            }
+        }
+
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -1121,6 +1147,11 @@ class ElectronicGraderController extends AbstractController {
 
         if (empty($_POST['attachment'])) {
             $this->core->getOutput()->renderJsonFail('Missing attachment to delete.');
+            return;
+        }
+
+        if (strpos($_POST['attachment'], "..") !== false) {
+            $this->core->getOutput()->renderJsonFail('Invalid path.');
             return;
         }
 

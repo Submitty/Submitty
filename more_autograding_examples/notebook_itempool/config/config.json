@@ -1,9 +1,6 @@
 {
 	"required_capabilities": "notebook",
 
-    "hide_submitted_files" : true,
-//    "hide_version_and_test_details" : true,
-
     "assignment_message" : "# Welcome To My Favorite Notebook Gradeable\n  \
 \n  \
 This message will appear in a blue box at the top of the page.",
