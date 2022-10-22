@@ -7498,10 +7498,10 @@ AND gc_id IN (
                     // Transpose the verifier if it exists
                     $verifier = null;
                     $verifier_array = [];
-                    if (isset($db_row_split['verifier_user_id'][$i])) {
+                    if (isset($db_row_split['verifier_user_id'][$i]) && $db_row_split['verifier_user_id'][$i] !== null) {
                         foreach ($user_properties as $property) {
-                            if (isset($db_row_split['verifier' . $property][$i])) {
-                                $verifier_array[$property] = $db_row_split['verifier' . $property][$i];
+                            if (isset($db_row_split['verifier_' . $property][$i])) {
+                                $verifier_array[$property] = $db_row_split['verifier_' . $property][$i];
                             }
                         }
                         $verifier = new User($this->core, $verifier_array);
