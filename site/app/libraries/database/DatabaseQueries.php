@@ -7466,13 +7466,13 @@ AND gc_id IN (
                         function ($elem) {
                             return 'verifier_' . $elem;
                         },
-                        $user_properties
+                        array_diff(
+                            $user_properties,
+                            ['anon_id', 'grading_registration_sections']
+                        )
                     )
                 ) as $property
             ) {
-                if (in_array($property, ['verifier_anon_id', 'verifier_grading_registration_sections'], true)) {
-                    continue;
-                }
                 $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
