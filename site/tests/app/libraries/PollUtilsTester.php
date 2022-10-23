@@ -6,13 +6,10 @@ use app\libraries\Core;
 use app\libraries\PollUtils;
 use app\models\PollModel;
 
-class PollUtilsTester extends \PHPUnit\Framework\TestCase {
+class PollUtilsTester extends \tests\BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
-    private $core;
-
     public function setUp(): void {
-        $this->core = new Core();
     }
 
     public function tearDown(): void {
@@ -27,9 +24,51 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testExportDataWithNonEmptyPolls() {
         $polls = [
-            new PollModel($this->core, 0, "Poll #1", "Is this the first poll?", "single-response", "closed", "2020-01-11", null, "never"),
-            new PollModel($this->core, 1, "Poll #2", "Is this the second poll?", "single-response", "open", "2020-01-12", null, "always"),
-            new PollModel($this->core, 2, "Poll #3", "Is this the fourth poll?", "multiple-response", "ended", "2020-01-13", null, "when_ended"),
+            new PollModel(
+                $this->createMockCore([],[],[
+                    "getResponses" => ["Yes", "No", "Maybe"],
+                    "getAnswers" => [0, 2],
+                    "getUserResponses" => ["bitdiddle" => 0, "aphacker" => 1]
+                ]),
+                0,
+                "Poll #1",
+                "Is this the first poll?",
+                "single-response",
+                "closed",
+                "2020-01-11",
+                null,
+                "never"
+            ),
+            new PollModel(
+                $this->createMockCore([],[],[
+                    "getResponses" => ["Yes", "No", "Definitely not"],
+                    "getAnswers" => [0],
+                    "getUserResponses" => ["bitdiddle" => 2, "aphacker" => 0]
+                ]),
+                1,
+                "Poll #2",
+                "Is this the second poll?",
+                "single-response",
+                "open",
+                "2020-01-12",
+                null,
+                "always"
+            ),
+            new PollModel(
+                $this->createMockCore([],[],[
+                    "getResponses" => ["Yes", "No", "Maybe"],
+                    "getAnswers" => [1],
+                    "getUserResponses" => ["bitdiddle" => 1, "aphacker" => 2]
+                ]),
+                2,
+                "Poll #3",
+                "Is this the fourth poll?",
+                "multiple-response",
+                "ended",
+                "2020-01-13",
+                null,
+                "when_ended"
+            ),
         ];
         $expected_data = [
             [

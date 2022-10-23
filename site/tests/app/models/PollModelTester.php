@@ -5,51 +5,52 @@ namespace tests\app\models;
 use app\libraries\Core;
 use app\models\PollModel;
 
-class PollModelTester extends \PHPUnit\Framework\TestCase {
-    private $core;
+class PollModelTester extends \tests\BaseUnitTest {
     private $my_polls;
 
     public function setUp(): void {
-        $this->core = new Core();
         $this->my_polls = [
             0 => new PollModel(
-                $this->core,                                       // core
+                $this->createMockCore([],[],[
+                    "getResponses" => [0 => "Yes", 1 => "No", 2 => "Maybe"],
+                    "getAnswers" => [0 => 0],
+                    "getUserResponses" => ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]]
+                ]),                                       // core
                 0,                                                 // id
                 "Poll #1",                                         // name
                 "Is this the first poll?",                         // question
                 "single-response-single-correct",                  // question_type
-                [0 => "Yes", 1 => "No", 2 => "Maybe"],             // responses
-                [0 => 0],                                          // asnwers
                 "closed",                                          // status
-                ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]], // user_responses
                 "2021-01-11",                                      // release_date
                 null,                                              // image path
                 "never"                                            // student histogram release setting
             ),
             1 => new PollModel(
-                $this->core,
+                $this->createMockCore([],[],[
+                    "getResponses" => [0 => "Absolutely", 1 => "No", 2 => "Perhaps"],
+                    "getAnswers" => [0 => 1, 1 => 2],
+                    "getUserResponses" => ["bitdiddle" => [0 => 2], "aphacker" => [0 => 0]]
+                ]),
                 1,
                 "Poll #2",
                 "Is this the first poll?",
                 "single-response-multiple-correct",
-                [0 => "Absolutely", 1 => "No", 2 => "Perhaps"],
-                [0 => 1, 1 => 2],
                 "open",
-                ["bitdiddle" => [0 => 2], "aphacker" => [0 => 0]],
                 "9999-12-31",
                 null,
                 "always"
             ),
             2 => new PollModel(
-                $this->core,
+                $this->createMockCore([],[],[
+                    "getResponses" => [0 => "Red", 1 => "Blue", 2 => "Yellow", 3 => "Green"],
+                    "getAnswers" => [0 => 0, 1 => 1, 2 => 2, 3 => 3],
+                    "getUserResponses" => ["bitdiddle" => [0 => 0, 1 => 2, 2 => 3], "aphacker" => [0 => 1, 1 => 3]]
+                ]),
                 2,
                 "Poll #3",
                 "What is your favorite color?",
                 "multiple-response-survey",
-                [0 => "Red", 1 => "Blue", 2 => "Yellow", 3 => "Green"],
-                [0 => 0, 1 => 1, 2 => 2, 3 => 3],
                 "ended",
-                ["bitdiddle" => [0 => 0, 1 => 2, 2 => 3], "aphacker" => [0 => 1, 1 => 3]],
                 date("Y-m-d"),
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png",
                 "when_ended"
@@ -86,7 +87,6 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
 
     public function testResponses(): void {
         $this->assertEquals($this->my_polls[0]->getResponses(), [0 => 0, 1 => 1, 2 => 2]);
-        $this->assertEquals($this->my_polls[0]->getResponsesWithKeys(), [0 => "Yes", 1 => "No", 2 => "Maybe"]);
         $this->assertEquals($this->my_polls[0]->getResponseString(0), "Yes");
         $this->assertEquals($this->my_polls[0]->getResponseString(1), "No");
         $this->assertEquals($this->my_polls[0]->getResponseString(2), "Maybe");
@@ -100,7 +100,6 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->my_polls[0]->getAllResponsesString([0 => 2]), "Maybe");
 
         $this->assertEquals($this->my_polls[1]->getResponses(), [0 => 0, 1 => 1, 2 => 2]);
-        $this->assertEquals($this->my_polls[1]->getResponsesWithKeys(), [0 => "Absolutely", 1 => "No", 2 => "Perhaps"]);
         $this->assertEquals($this->my_polls[1]->getResponseString(0), "Absolutely");
         $this->assertEquals($this->my_polls[1]->getResponseString(1), "No");
         $this->assertEquals($this->my_polls[1]->getResponseString(2), "Perhaps");
@@ -114,7 +113,6 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->my_polls[1]->getAllResponsesString([0 => 2]), "Perhaps");
 
         $this->assertEquals($this->my_polls[2]->getResponses(), [0 => 0, 1 => 1, 2 => 2, 3 => 3]);
-        $this->assertEquals($this->my_polls[2]->getResponsesWithKeys(), [0 => "Red", 1 => "Blue", 2 => "Yellow", 3 => "Green"]);
         $this->assertEquals($this->my_polls[2]->getResponseString(0), "Red");
         $this->assertEquals($this->my_polls[2]->getResponseString(1), "Blue");
         $this->assertEquals($this->my_polls[2]->getResponseString(2), "Yellow");

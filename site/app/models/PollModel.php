@@ -12,8 +12,6 @@ use app\libraries\Core;
  * @method string getName()
  * @method string getQuestion()
  * @method string getQuestionType()
- * @method array getAnswers()
- * @method array getUserResponses()
  * @method string|null getImagePath()
  */
 class PollModel extends AbstractModel {
@@ -77,12 +75,15 @@ class PollModel extends AbstractModel {
         return $this->status == "ended";
     }
 
-    public function getUserResponse($user_id) {
+    public function getUserResponses() {
         // Only fetch the responses if they are needed, and cache the result
         if (!isset($this->user_responses)) {
             $this->user_responses = $this->core->getQueries()->getUserResponses($this->id);
         }
+        return $this->user_responses;
+    }
 
+    public function getUserResponse($user_id) {
         if (!isset($this->user_responses[$user_id][0])) {
             return null;
         }
