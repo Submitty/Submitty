@@ -12,6 +12,7 @@
 require_once __DIR__ . "/../site/vendor/autoload.php";
 
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\TokenManager;
 
 if ($argc != 2) {
@@ -24,6 +25,11 @@ $user_id = $argv[1];
 $core = new Core();
 
 $core->loadMasterConfig();
+
+$users_json = FileUtils::readJsonFile(FileUtils::joinPaths($core->getConfig()->getConfigPath(), 'submitty_users.json'));
+$gset = posix_setgid($users_json['php_gid']);
+$uset = posix_setuid($users_json['php_uid']);
+
 $core->initializeTokenManager();
 $core->loadMasterDatabase();
 

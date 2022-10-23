@@ -140,7 +140,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
 fi
-# create routes cache directory
+# create doctrine cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
