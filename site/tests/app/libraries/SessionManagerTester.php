@@ -52,9 +52,9 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
         $core->setQueries($queries);
         $manager = new SessionManager($core);
         $session_id = $manager->newSession('test');
-        $this->assertRegExp('/[a-f0-9]{32}/', $session_id);
+        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $session_id);
         $this->assertEquals($session_id, $manager->newSession('test'));
-        $this->assertRegExp('/[a-f0-9]{32}/', $manager->getCsrfToken());
+        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $manager->getCsrfToken());
     }
 
     public function testRemoveCurrentSessionNoSession() {

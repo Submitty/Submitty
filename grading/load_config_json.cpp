@@ -212,8 +212,7 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   }
   json_set_default(whole_config, "required_capabilities", "default");
 
-  json_set_default(whole_config, "hide_submitted_files", false);
-  json_set_default(whole_config, "hide_version_and_test_details", false);
+  json_set_default(whole_config, "hide_test_details", whole_config.value("hide_version_and_test_details", false));
 
   // By default, we have one drop zone without a part label / sub
   // directory.
