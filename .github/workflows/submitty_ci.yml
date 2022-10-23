@@ -245,7 +245,7 @@ jobs:
           working-directory: sbin/submitty_daemon_jobs
           run : |
             coverage run -m unittest discover tests -t .
-            coverage xml
+            coverage xml -i
 
         - name: Upload submitty_daemon_jobs Coverage
           uses: codecov/codecov-action@v1
