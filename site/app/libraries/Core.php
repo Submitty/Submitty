@@ -176,7 +176,7 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'doctrine');
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new FilesystemAdapter("", 0, $cache_path);
         $config = ORMSetup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
