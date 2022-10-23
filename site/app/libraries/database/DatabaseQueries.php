@@ -5315,22 +5315,6 @@ AND gc_id IN (
     }
 
     /**
-     * Gets user or team submitters by id
-     *
-     * @param  string[] $ids User or team ids
-     * @return Submitter[]
-     */
-    public function getSubmittersById(array $ids) {
-        //Get Submitter for each id in ids
-        return array_map(
-            function ($id) {
-                return $this->getSubmitterById($id);
-            },
-            $ids
-        );
-    }
-
-    /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      *
@@ -7731,68 +7715,61 @@ AND gc_id IN (
         $this->course_db->query("UPDATE polls SET status = 'open' where poll_id = ?", [$poll_id]);
     }
 
-    public function getPolls() {
+    public function getPolls(): array {
         $polls = [];
         $this->course_db->query("SELECT * from polls order by poll_id ASC");
         $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
 
         foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
         }
 
         return $polls;
     }
 
-    public function getTodaysPolls() {
+    public function getTodaysPolls(): array {
         $polls = [];
         $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
 
         foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
         }
 
         return $polls;
     }
 
-    public function getOlderPolls() {
+    public function getOlderPolls(): array {
         $polls = [];
         $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
 
         foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
         }
 
         return $polls;
     }
 
-    public function getFuturePolls() {
+    public function getFuturePolls(): array {
         $polls = [];
         $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
 
         foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
         }
 
         return $polls;
     }
 
-    public function getPoll($poll_id) {
+    public function getPoll($poll_id): ?PollModel {
         $this->course_db->query("SELECT * from polls where poll_id = ?", [$poll_id]);
-        $row = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
+        $row = $this->course_db->row();
         if (count($row) <= 0) {
             return null;
         }
-        $row = $row[0];
-        $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
     }
 
     public function getResponses($poll_id) {

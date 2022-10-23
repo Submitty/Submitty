@@ -37,30 +37,31 @@ class PollModel extends AbstractModel {
     /** @prop-read string */
     protected $release_histogram;
 
-    public function __construct(Core $core, $id, $name, $question, $question_type, array $responses, array $answers, $status, array $user_responses, $release_date, $image_path, $release_histogram) {
+    public function __construct(Core $core, $id, $name, $question, $question_type, $status, $release_date, $image_path, $release_histogram) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
         $this->question = $question;
         $this->question_type = $question_type;
-        $this->responses = $responses;
-        $this->answers = $answers;
         $this->status = $status;
-        $this->user_responses = $user_responses;
         $this->release_date = $release_date;
         $this->image_path = $image_path;
         $this->release_histogram = $release_histogram;
     }
 
     public function getResponses() {
+        // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
+        if (!isset($this->responses)) {
+            $this->responses = $this->core->getQueries()->getResponses($this->getId());
+        }
         return array_keys($this->responses);
     }
 
-    public function getResponsesWithKeys() {
-        return $this->responses;
-    }
-
     public function getAnswers() {
+        // If this is the first time the answers have been queried, make a DB query.  Otherwise use the existing data.
+        if (!isset($this->answers)) {
+            $this->answers = $this->core->getQueries()->getAnswers($this->getId());
+        }
         return $this->answers;
     }
 
@@ -77,9 +78,15 @@ class PollModel extends AbstractModel {
     }
 
     public function getUserResponse($user_id) {
+        // Only fetch the responses if they are needed, and cache the result
+        if (!isset($this->user_responses)) {
+            $this->user_responses = $this->core->getQueries()->getUserResponses($this->id);
+        }
+
         if (!isset($this->user_responses[$user_id][0])) {
             return null;
         }
+
         return $this->user_responses[$user_id];
     }
 
