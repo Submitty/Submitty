@@ -14,6 +14,7 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -175,7 +176,14 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'doctrine');
+        $cache = new FilesystemAdapter("", 0, $cache_path);
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            null,
+            $cache
+        );
 
         if ($debug_stack) {
             $config->setSQLLogger($debug_stack);
