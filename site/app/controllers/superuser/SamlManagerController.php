@@ -63,6 +63,10 @@ class SamlManagerController extends AbstractController {
             $this->core->addErrorMessage("User ID already exists.");
             return new RedirectResponse($return_url);
         }
+        if (empty(trim($_POST['user_numeric_id']))) {
+            $this->core->addErrorMessage("Numeric ID can't be empty.");
+            return new RedirectResponse($return_url);
+        }
         $auth->setValidUsernames([$user_id]);
         if ($auth->isValidUsername($user_id)) {
             $this->core->addErrorMessage("User ID is a valid SAML username and cannot be used for a proxy user.");
