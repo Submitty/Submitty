@@ -47,7 +47,7 @@
         <tr>
             <td data-before-content="Event/Assignment" class="align-left {{ class }}">{{ late_day_info.getEventTitle() }}</td>
             <td data-before-content="Event/Assignment Date" {{ full_class }}>{{ late_day_info.getLateDayEventTime()|date('m/d/Y') }}</td>
-            <td data-before-content="Max Late Days" {{ full_class }}>{{ late_day_info.getAssignmentAllowedLateDays() ?? placeholder }}</td>
+            <td data-before-content="Max Late Days" {{ full_class }}>{{ late_day_info.isLateDayUpdate() ? '' : (late_day_info.getAssignmentAllowedLateDays() ?? placeholder) }}</td>
             <td data-before-content="Days Submitted Late" {{ full_class }}>{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : placeholder }}</td>
             <td data-before-content="Days From Extensions" {{ full_class }}>{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : placeholder }}</td>
             <td data-before-content="Status" {{ full_class }} {{ id }}>{{ late_day_info.isLateDayUpdate() ? placeholder : late_day_info.getStatusMessage() }}</td>

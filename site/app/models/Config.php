@@ -35,6 +35,8 @@ use app\libraries\FileUtils;
  * @method string getAuthentication()
  * @method array getLdapOptions()
  * @method void setLdapOptions(array $options)
+ * @method array getSamlOptions()
+ * @method void setSamlOptions(array $options)
  * @method \DateTimeZone getTimezone()
  * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
@@ -127,6 +129,8 @@ class Config extends AbstractModel {
      * @var array
      **/
     protected $ldap_options = [];
+    /** @prop @var array */
+    protected $saml_options = [];
     /** @prop @var DateTimeZone */
     protected $timezone;
     /** @var string */
@@ -332,6 +336,14 @@ class Config extends AbstractModel {
                 }
             }
         }
+        $this->saml_options = $authentication_json['saml_options'];
+        if ($this->authentication === 'SamlAuthentication') {
+            foreach (['name', 'username_attribute'] as $key) {
+                if (!isset($this->saml_options[$key])) {
+                    throw new ConfigException("Missing config value for saml options: {$key}");
+                }
+            }
+        }
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
         if (!$submitty_json) {
@@ -479,7 +491,15 @@ class Config extends AbstractModel {
             throw new ConfigException("Missing config section 'database_details' in json file");
         }
 
-        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
+        $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
+
+        $this->course_database_params = [
+            'dbname' => $this->course_json['database_details']['dbname'],
+            'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
+            'username' => $database_json['database_course_user'],
+            'password' => $database_json['database_course_password']
+        ];
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',

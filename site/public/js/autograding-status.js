@@ -42,10 +42,12 @@ function updateTable() {
                         new_row.insertCell().innerHTML = course_name[1];
                         new_row.insertCell().innerHTML = key2;
                         const int_box = new_row.insertCell();
+                        // eslint-disable-next-line eqeqeq
                         if (info.interactive != 0) {
                             int_box.innerHTML = info.interactive;
                         }
                         const regrade_box = new_row.insertCell();
+                        // eslint-disable-next-line eqeqeq
                         if (info.regrade != 0) {
                             regrade_box.innerHTML = info.regrade;
                         }
@@ -77,22 +79,25 @@ function updateTable() {
                 new_cell.className = 'right-boarder';
 
                 new_cell = new_row.insertCell();
+                // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.interactive_ongoing != 0) {
                     new_cell.innerHTML = json.queue_counts.interactive_ongoing;
                 }
 
                 new_cell = new_row.insertCell();
+                // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.interactive != 0) {
                     new_cell.innerHTML = json.queue_counts.interactive;
                 }
                 new_cell.className = 'right-boarder';
 
                 new_cell = new_row.insertCell();
+                // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.regrade_ongoing != 0) {
                     new_cell.innerHTML = json.queue_counts.regrade_ongoing;
                 }
                 new_cell = new_row.insertCell();
-
+                // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.regrade != 0) {
                     new_cell.innerHTML = json.queue_counts.regrade;
                 }
@@ -100,6 +105,7 @@ function updateTable() {
                 Object.keys(json.machine_grading_counts).forEach((key, i) => {
                     if (i === Object.keys(json.machine_grading_counts).length - 1) {
                         new_cell = new_row.insertCell();
+                        // eslint-disable-next-line eqeqeq
                         if (json.machine_grading_counts[key] != 0) {
                             new_cell.innerHTML = json.machine_grading_counts[key];
                         }
@@ -107,6 +113,7 @@ function updateTable() {
                     }
                     else {
                         new_cell = new_row.insertCell();
+                        // eslint-disable-next-line eqeqeq
                         if (json.machine_grading_counts[key] != 0) {
                             new_cell.innerHTML = json.machine_grading_counts[key];
                         }
@@ -115,6 +122,7 @@ function updateTable() {
 
                 Object.keys(json.capability_queue_counts).forEach(key => {
                     const new_cell = new_row.insertCell();
+                    // eslint-disable-next-line eqeqeq
                     if (json.capability_queue_counts[key] != 0) {
                         new_cell.innerHTML = json.capability_queue_counts[key];
                     }

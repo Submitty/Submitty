@@ -140,7 +140,10 @@ class RainbowCustomization extends AbstractModel {
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
                 foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
+                    if ($j_index >= count($json_bucket->ids)) {
+                        $c_gradeable['override_max'] = $c_gradeable['max_score'];
+                    }
+                    elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
                     }
