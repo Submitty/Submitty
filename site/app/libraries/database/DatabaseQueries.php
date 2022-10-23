@@ -5315,6 +5315,22 @@ AND gc_id IN (
     }
 
     /**
+     * Gets user or team submitters by id
+     *
+     * @param  string[] $ids User or team ids
+     * @return Submitter[]
+     */
+    public function getSubmittersById(array $ids) {
+        //Get Submitter for each id in ids
+        return array_map(
+            function ($id) {
+                return $this->getSubmitterById($id);
+            },
+            $ids
+        );
+    }
+
+    /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      *
