@@ -949,6 +949,10 @@ class ForumThreadView extends AbstractView {
             $reply_level = 1;
         }
 
+        if ($this->core->getQueries()->isInstructorOrFullAccess($post["author_user_id"])) {
+            $visible_username = $first_name . " " . $last_name;
+        }
+
         if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
