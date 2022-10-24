@@ -2,7 +2,6 @@
 
 namespace tests\app\models;
 
-use app\libraries\Core;
 use app\models\PollModel;
 
 class PollModelTester extends \tests\BaseUnitTest {
@@ -11,7 +10,7 @@ class PollModelTester extends \tests\BaseUnitTest {
     public function setUp(): void {
         $this->my_polls = [
             0 => new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => [0 => "Yes", 1 => "No", 2 => "Maybe"],
                     "getAnswers" => [0 => 0],
                     "getUserResponses" => ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]]
@@ -26,7 +25,7 @@ class PollModelTester extends \tests\BaseUnitTest {
                 "never"                                            // student histogram release setting
             ),
             1 => new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => [0 => "Absolutely", 1 => "No", 2 => "Perhaps"],
                     "getAnswers" => [0 => 1, 1 => 2],
                     "getUserResponses" => ["bitdiddle" => [0 => 2], "aphacker" => [0 => 0]]
@@ -41,7 +40,7 @@ class PollModelTester extends \tests\BaseUnitTest {
                 "always"
             ),
             2 => new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => [0 => "Red", 1 => "Blue", 2 => "Yellow", 3 => "Green"],
                     "getAnswers" => [0 => 0, 1 => 1, 2 => 2, 3 => 3],
                     "getUserResponses" => ["bitdiddle" => [0 => 0, 1 => 2, 2 => 3], "aphacker" => [0 => 1, 1 => 3]]

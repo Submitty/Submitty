@@ -25,7 +25,7 @@ class PollUtilsTester extends \tests\BaseUnitTest {
     public function testExportDataWithNonEmptyPolls() {
         $polls = [
             new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => ["Yes", "No", "Maybe"],
                     "getAnswers" => [0, 2],
                     "getUserResponses" => ["bitdiddle" => 0, "aphacker" => 1]
@@ -40,7 +40,7 @@ class PollUtilsTester extends \tests\BaseUnitTest {
                 "never"
             ),
             new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => ["Yes", "No", "Definitely not"],
                     "getAnswers" => [0],
                     "getUserResponses" => ["bitdiddle" => 2, "aphacker" => 0]
@@ -55,7 +55,7 @@ class PollUtilsTester extends \tests\BaseUnitTest {
                 "always"
             ),
             new PollModel(
-                $this->createMockCore([],[],[
+                $this->createMockCore([], [], [
                     "getResponses" => ["Yes", "No", "Maybe"],
                     "getAnswers" => [1],
                     "getUserResponses" => ["bitdiddle" => 1, "aphacker" => 2]
