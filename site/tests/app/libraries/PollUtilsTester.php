@@ -2,7 +2,6 @@
 
 namespace tests\app\libraries;
 
-use app\libraries\Core;
 use app\libraries\PollUtils;
 use app\models\PollModel;
 
