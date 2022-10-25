@@ -1,6 +1,6 @@
 {% if invalid_users is defined %}
     {% if invalid_users|length == 0 %}
-        <div class="content" style="background-color: var(--actionable-blue);">
+        <div class="content" style="background-color: var(--actionable-blue); color:var(--text-white); ">
             <p>No validation errors!</p>
         </div>
     {% else %}
@@ -21,7 +21,7 @@
     <button class="btn btn-primary" id="new-proxy-mapping-btn">Assign Proxy Mapping</button>
     <form method="POST" action="{{ validate_url }}" style="display: inline;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn btn-warning">Validate Mapped Users</button>
+        <button class="btn btn-primary">Validate Mapped Users</button>
     </form>
     <br><br>
     <h2>Mapped Proxy Users</h2>
@@ -43,14 +43,14 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="activate" value="0">
                         <input type="hidden" name="id" value="{{ row['id'] }}">
-                        <button class="btn btn-warning">Deactivate</button>
+                        <button class="btn btn-default">Deactivate</button>
                     </form>
                 {% else %}
                     <form method="POST" action="{{ change_active_saml_url }}" style="display: inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="activate" value="1">
                         <input type="hidden" name="id" value="{{ row['id'] }}">
-                        <button class="btn btn-warning">Activate</button>
+                        <button class="btn btn-primary" style="padding: 6px 21px">Activate</button>
                     </form>
                 {% endif %}
                 <form method="POST" action="{{ delete_mapping_url }}" style="display: inline;">
