@@ -48,7 +48,7 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 // system_call_check.cpp parses this function to define the categories.
 //
 #include "system_call_categories.cpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 // ===========================================================================
 // ===========================================================================

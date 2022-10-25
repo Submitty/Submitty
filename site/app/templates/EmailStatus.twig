@@ -1,0 +1,74 @@
+{% if not subjects|length == 0 %}
+    {% for subject in subjects %}
+        <div class="status-container">
+            <div class = "button-container">
+                <div>
+                    <div> Email Subject: {{subject[0:-28]}} </div>
+                    <div> Time Created: {{subject[-26:-7]}}</div>
+                    {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
+                        <div> Course: {{courses[subject]}}</div>
+                    {% else %}
+                        <div> Submitty Administrator Email </div>
+                    {% endif %}
+                </div>
+                {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
+                    <button class="btn btn-success text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
+                {% elseif errors[subject]|length != 0 %}
+                    <button class="btn btn-danger  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
+                {% else %}
+                    <button class="btn btn-primary  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
+                {% endif %}
+                        <div class="btn-text">Show Details</div>
+                        ({{errors[subject]|length + pending[subject]|length + successes[subject]|length}})
+                    </button>
+            </div>
+            <div class="expand" id={{"collapse"~loop.index}}>
+                <ul>
+                    {% for row in errors[subject] %}
+                        <li class="status status-error">
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
+                            <div class="status-message">Time Sent: Not Sent</div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                            <div class="status-message">
+                                Error: {{row["error"]}}
+                            </div>
+                        </li>
+                    {% endfor %}
+                    {% for row in pending[subject] %}
+                        <li class="status status-warning">
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
+                            <div class="status-message">Time Sent: Not Sent</div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                        </li>
+                    {% endfor %}
+                    {% for row in successes[subject] %}
+                        <li class="status status-success"> 
+                            <div class="status-message">Recipient: {{row.getUserId()}}</div> 
+                            <div class="status-message">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
+                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <hr class = "divider">
+        </div>
+    {% endfor %}
+{% else %}
+    <div>
+        No Emails Created For This Course
+    </div>
+{% endif %}
+
+<script>
+    function onExpandButtonClick(button){
+        const expandTarget = $(button).data('target');
+        if ($(button).parent().parent().find(expandTarget).is(':visible')) {
+            $(button).parent().parent().find(expandTarget).hide();
+            $(button).find('.btn-text').text("Show Details");
+        }
+        else {
+            $(button).parent().parent().find(expandTarget).show();
+            $(button).find('.btn-text').text("Hide Details");
+        }
+    }
+</script>

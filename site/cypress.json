@@ -1,7 +1,0 @@
-{
-	"baseUrl" : "http://localhost:1511",
-	"testFiles" : [
-    "*/*.spec.js",
-		"*.spec.js"
-	]
-}

@@ -14,15 +14,13 @@
   <br/>
   {% include "misc/MarkdownArea.twig" with {
     "markdown_area_id" : "queue-announcement-message",
-    "markdown_area_query" : "$('#queue-announcement-message')",
     "markdown_area_name" : "queue_announcement_message",
     "markdown_area_value" : viewer.getQueueAnnouncementMessage(),
     "placeholder" : "Enter announcement here...",
     "preview_div_id" : "queue_announcement_message_preview",
     "preview_div_name" : "queue_announcement_message_preview",
-    "onclick" : "previewQueueMarkdown.call(this)",
-    "render_buttons" : true,
-    "min_height" : min_height,
+    "onclick" : "previewQueueMarkdown",
+    "render_header" : true,
   } only %}
 {% endblock %}
 {% block form %}

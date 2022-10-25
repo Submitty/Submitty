@@ -133,7 +133,7 @@ class TestDump(TestCase):
     def tearDown(self):
         sys.stdout = sys.__stdout__
 
-    @patch('migrator.main.subprocess.check_output', side_effect=[
+    @patch('migrator.dumper.check_output', side_effect=[
         MASTER_DB_FRAGMENT,
         COURSE_DB_FRAGMENT
     ])
@@ -162,7 +162,7 @@ class TestDump(TestCase):
                 r"Dumping course environment to .*/data/course_tables.sql... DONE\n"
             )
 
-    @patch('migrator.main.subprocess.check_output', side_effect=[
+    @patch('migrator.dumper.check_output', side_effect=[
         MASTER_DB_FRAGMENT
     ])
     def test_dump_master(self, subprocess):
@@ -186,7 +186,7 @@ class TestDump(TestCase):
                 r"Dumping master environment to .*/data/submitty_db.sql... DONE"
             )
 
-    @patch('migrator.main.subprocess.check_output', side_effect=[
+    @patch('migrator.dumper.check_output', side_effect=[
         COURSE_DB_EXPECTED
     ])
     def test_dump_course(self, subprocess):

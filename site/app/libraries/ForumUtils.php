@@ -3,9 +3,6 @@
 namespace app\libraries;
 
 use app\libraries\Utils;
-use app\libraries\FileUtils;
-use app\models\forum\Thread;
-use app\models\forum\Post;
 
 /**
  * Class ForumUtils
@@ -13,7 +10,6 @@ use app\models\forum\Post;
  * Contains various useful functions for interacting with the forum
  */
 class ForumUtils {
-
     const FORUM_CHAR_POST_LIMIT = 5000;
 
     public static function checkGoodAttachment($isThread, $thread_id, $file_post) {

@@ -32,6 +32,9 @@ class GradedComponent extends AbstractModel {
     /** @prop @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
+    /** @var bool If the component is peer */
+    private $is_peer = false;
+
     /** @var User The grader of this component */
     private $grader = null;
 
@@ -72,24 +75,21 @@ class GradedComponent extends AbstractModel {
      * @param array $details any remaining properties
      * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
-    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details) {
+    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details, User $verifier = null) {
         parent::__construct($core);
 
         if ($ta_graded_gradeable === null) {
             throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
         }
         $this->ta_graded_gradeable = $ta_graded_gradeable;
-
+        $this->is_peer = $component->isPeerComponent();
         $this->setComponent($component);
         $this->setGrader($grader);
-
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
         $this->verifier_id = $details['verifier_id'] ?? '';
-        if ($this->verifier_id !== '') {
-            $this->verifier = $this->core->getQueries()->getUserById($this->verifier_id);
-        }
+        $this->verifier = $verifier;
         $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -118,6 +118,14 @@ class GradedComponent extends AbstractModel {
     public function getComponent() {
         return $this->component;
     }
+    /**
+     * Gets if the component is peer
+     * @return bool
+     */
+    public function isPeer(): bool {
+        return $this->is_peer;
+    }
+
 
     /**
      * Gets the TaGradedGradeable that owns this graded component

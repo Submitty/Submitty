@@ -1,5 +1,3 @@
-{% import _self as self %}
-
 {% if gradeable_id|length %}
     {% set upload_url = upload_url ~ '?g_id=' ~ gradeable_id %}
     {% set rename_url = rename_url ~ '?g_id=' ~ gradeable_id %}
@@ -77,17 +75,17 @@
         }
     </script>
     <ul style="list-style-type: none;">
-        {{ self.display_files(self, all_files, 1, false, inuse_config, display_url) }}
+        {{ _self.display_files(all_files, 1, false, inuse_config, display_url) }}
     </ul>
 </div>
 {% endif %}
 
-{% macro display_files(self, files, indent, seen_root, inuse_config, display_url) %}
+{% macro display_files(files, indent, seen_root, inuse_config, display_url) %}
     {% set margin_left = 15 %}
     {% set neg_margin_left = -15 * indent %}
     {% for name, file in files %}
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
-        {% if file.files != null %}
+        {% if file.files is defined %}
             <li>
                 {% if indent == 1 %}
                     <a class="fas fa-pencil-alt key_to_click" tabindex="0" onclick="openRenamePopup('{{ file.path }}')"></a>
@@ -97,7 +95,7 @@
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a class="key_to_click" tabindex="0" onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <ul id='{{ id }}' style='margin-left: {{ margin_left }}px; list-style-type: none; display: none'>
-                    {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
+                    {{ _self.display_files(file.files, indent + 1, true, inuse_config, display_url) }}
                 </ul>
             </li>
         {% else %}

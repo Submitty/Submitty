@@ -5,18 +5,28 @@
     </div>
     <div>
         <fieldset>
-            <legend>View the gradeable on the course home page and download submitted files?</legend>
+            <legend>View the gradeable on the course home page?</legend>
             <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                     {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
             <input type="radio" id="no_student_view" name="student_view" value="false"
                     {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
             <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
+                    {{ gradeable.isBulkUpload() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
             <div hidden>
                 <input type="radio" id="yes_student_view" name="student_view" value="true"
                     {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
             </div>
         </fieldset>
+    </div>
+
+    <div id="student_download_view">
+        <div>
+            <fieldset><legend>View and download submitted files?</legend>
+            <input type="radio" id="yes_student_download" name="student_download" value="true"
+                    {{ gradeable.canStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
+            <input type="radio" id="no_student_download" name="student_download" value="false"
+                    {{ not gradeable.canStudentDownload() ? 'checked' : '' }}/> <label for="no_student_download">No</label></fieldset>
+        </div>
     </div>
 
     <div id="student_submit_view">
@@ -30,6 +40,31 @@
     </div>
 <br><br>
 
+    <div class="option-title">
+        Should this gradeable be locked from students until they satisfactorily complete a prerequisite assignment?
+    </div>
+    <div>
+        <fieldset>
+            <legend>Previous Gradeable:</legend>
+            <div class="option-input col-md-6" style="padding: 0;">
+                <select name="depends_on" id="gradeable-lock">
+                    <option value="">Select prerequisite gradeable (Off)</option>
+                    {% for template in template_list %}
+                        {% if template.g_id != gradeable.getId() %}
+                            <option value="{{ template.g_id }}" {% if template.g_id == gradeable.getDependsOn() %} selected {% endif %}>{{ template.g_title }} [ {{ template.g_id }} ]</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </fieldset>
+        <fieldset id="gradeable-lock-max-points-field" style="{% if gradeable.getDependsOn() is null %}display: none;{% endif %}">
+            <legend>Autograder Points Required to Unlock:</legend>
+            <input type="number" name="depends_on_points" value="{% if gradeable.getDependsOnPoints() is not null %}{{ gradeable.getDependsOnPoints() }}{% else %}0{% endif %}" id="gradeable-lock-points">
+            <p {% if gradeable.getDependsOn() is null %}hidden{% endif %} id="gradeable-lock-max-points">Out of {{ gradeable_max_points[gradeable.getDependsOn()] }} Maximum Autograding Points</p>
+        </fieldset>
+    </div>
+<br><br>
+
     <div class="option-title">Choose an autograding configuration:</div>
             <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
                 "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
@@ -39,15 +74,19 @@
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
-    {% if not currently_valid_repository %}
-        <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
-    {% endif %}
+
+        <div class="config_search_error" id="autograding_config_error">
+            {% if not currently_valid_repository %}
+                The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
+            {% endif %}
+        </div>
+
 
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
                 <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration">
+                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration" name="autograding_config_path_displayed">
                     <div style="margin-left: -45px; position: absolute; display: inline-block; width: auto; transform: translate(0, 25%);">
                         <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
                         <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
@@ -112,6 +151,8 @@
 </div>
 
 <script>
+    var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
+
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
             // $('#pdf_page').show();
@@ -192,34 +233,37 @@
     }
 
     function onStudentViewChange() {
+        if ($('#radio_ef_student_upload').is(':checked') || $('#radio_ef_bulk_upload').is(':checked')) {
+            if ($('#yes_student_view_after_grades').is(':checked')) {
+                $('#radio_ef_student_upload').prop('checked', false);
+                $('#radio_ef_bulk_upload').prop('checked', true);
+                const gradeableTypeString = $('#gradeable-type-string');
+                gradeableTypeString.html(gradeableTypeString.attr('data-bulk'));
+            } else {
+                $('#radio_ef_bulk_upload').prop('checked', false);
+                $('#radio_ef_student_upload').prop('checked', true);
+                const gradeableTypeString = $('#gradeable-type-string');
+                gradeableTypeString.html(gradeableTypeString.attr('data-hw'));
+            }
+        }
         if($('#yes_student_view').is(':checked')) {
-            //$('#student_submit_download_view').show();
-            disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
+            disableElementChildren('#student_submit_view', false);
+            disableElementChildren('#student_download_view', false);
         }
         else {
-            // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_view', true);
-            let studentSubmit = $('#no_student_submit');
+            disableElementChildren('#student_download_view', true);
+            const studentSubmit = $('#no_student_submit');
+            const studentDownload = $('#no_student_download');
 
             studentSubmit.prop('checked', true);
+            studentDownload.prop('checked', true);
             studentSubmit.change();
+            studentDownload.change();
 
             $('input[name=student_view_after_grades]').prop('checked', false);
+            $('input[name=student_download]').prop('checked', false);
         }
-    }
-
-    function onStudentSubmitChange() {
-        let cont = $('#due_date_options_container');
-
-        let no_due_date = $('#has_due_date_no');
-        if($('#yes_student_submit').is(':checked')) {
-            cont.show();
-        }
-        else {
-            no_due_date.prop('checked', true);
-            cont.hide();
-        }
-        no_due_date.change();
     }
 
     function dropDownBoxOnClick() {
@@ -245,7 +289,7 @@
         let box = $(options).parent().find(".drop-down-box");
         // set the box's value to the text of the option
         $(box).val($(this).text());
-        $(box).trigger("input");
+        $(box).trigger("focusout");
     }
 
     function hideDropDownOptions(){
@@ -268,19 +312,18 @@
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
 
-        // Only show the dates if the setting is enabled
-        onStudentSubmitChange();
-        $('[name=student_submit]').change(onStudentSubmitChange);
-
         // Update the text box when the path config changes
         onConfigPathChange();
-        $('#config_search').on("input", onConfigPathChange);
+        $('#config_search').on("focusout", onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
-            let elem = $('#yes_student_view');
+            const elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
-            let sub = $('#no_student_submit');
+            const download = $('#no_student_download');
+            download.prop('checked', true);
+            download.change();
+            const sub = $('#no_student_submit');
             sub.prop('checked', true);
             sub.change();
         });

@@ -1,6 +1,10 @@
 {# Current team box #}
 <div class="content">
     <h1>Manage Team For: {{ gradeable.getTitle() }}</h1>
+    {% if team %}
+    <h2>Team Name: {% if team_name is not null %}{{ team_name }}{% else %}Not Set{% endif %}
+        <a class="icon" id="team-name-change-icon"><i class="fas fa-pencil-alt"></i></a></h2>
+    {% endif %}
     {# Team lock message #}
     {% if lock %}
         {% if team %}
@@ -59,6 +63,10 @@
             <br />
             </span>
             <br />
+            {% if git_auth_token_required %}
+                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+            {% endif %}
+            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
         {% endif %}
         {# /Repository status #}
 
@@ -142,6 +150,18 @@
         {% endif %}
 
     </div>
+    <script>
+        var textarea = document.querySelector('textarea');
+        textarea.addEventListener('keydown', autosize);
+
+        function autosize(){
+            var el = this;
+            setTimeout(function(){
+                el.style.height = el.scrollHeight + 'px';
+            },0);
+        }
+
+    </script>
 {% endif %}
 {# /Edit/create team box #}
 
@@ -186,15 +206,4 @@
     </div>
 {% endif %}
 
-<script>
-    var textarea = document.querySelector('textarea');
-    textarea.addEventListener('keydown', autosize);
-             
-    function autosize(){
-        var el = this;
-        setTimeout(function(){
-            el.style.height = el.scrollHeight + 'px';
-        },0);
-    }
-
-</script>
+{% include 'submission/EditTeamName.twig' %}

@@ -58,17 +58,19 @@ function setLateDays() {
     const new_date = new Date($('#late-calendar').val());
     const old_date = new Date($('#due-date').data('date'));
     const diff = (new_date.getTime() - old_date.getTime()) / (1000 * 3600 * 24);
-    document.getElementById('late-days').value = diff;
+    if (!Number.isNaN(diff)) {
+        document.getElementById('late-days').value = diff;
+    }
 }
 
-function confirmExtension(option){
+function confirmExtension(option) {
     $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
     updateHomeworkExtension();
     $('input[name="option"]').val(-1);
 }
 
-function extensionPopup(json){
+function extensionPopup(json) {
     $('.popup-form').css('display', 'none');
     const form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];

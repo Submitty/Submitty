@@ -89,7 +89,7 @@ class Component extends AbstractModel {
      * Component constructor.
      * @param Core $core
      * @param Gradeable $gradeable
-     * @param $details
+     * @param array $details
      * @throws \InvalidArgumentException if any of the details were not found or invalid, or the gradeable was null
      * @throws ValidationException If the provided point details are incompatible
      */
@@ -103,7 +103,7 @@ class Component extends AbstractModel {
         $this->setStudentComment($details['student_comment']);
         $this->setPoints($details);
         $this->setText($details['text']);
-        $this->setPeerComponent($details['peer']);
+        $this->setPeerComponent($details['peer_component'] ?? false);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
         $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
@@ -305,9 +305,11 @@ class Component extends AbstractModel {
         // Assert that the point values are valid
         $this->assertPoints($points);
 
+        $precision = $this->gradeable->getPrecision();
+
         // Round after validation because of potential floating point weirdness
         foreach (self::point_properties as $property) {
-            $this->$property = NumberUtils::roundPointValue($points[$property], $this->getGradeable()->getPrecision());
+            $this->$property = NumberUtils::roundPointValue($points[$property], $precision);
         }
         $this->modified = true;
     }
@@ -370,7 +372,7 @@ class Component extends AbstractModel {
 
     /**
      * Imports a mark into the component via array
-     * @param $details
+     * @param array $details
      * @return Mark
      */
     public function importMark($details) {

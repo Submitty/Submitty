@@ -10,6 +10,7 @@ if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://localhost:1511'
     export SUBMISSION_PORT=1511
     export DATABASE_PORT=16442
+    export WEBSOCKET_PORT=8443
 fi
 
 #################################################################
@@ -65,12 +66,12 @@ apt-get install -qqy scrot
 
 apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb \
 p7zip-full patchutils libpq-dev unzip valgrind zip libboost-all-dev gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
+jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
 apt-get install -qqy ninja-build
 
 # NodeJS
-curl -sL https://deb.nodesource.com/setup_12.x | bash -
+(umask 0022 && curl -sL https://deb.nodesource.com/setup_16.x | bash -)
 apt-get install -y nodejs
 
 #CMAKE
@@ -80,11 +81,6 @@ apt-get install -qqy cmake
 # for Lichen (Plagiarism Detection)
 apt-get install -qqy python-clang-6.0
 
-# Install OpenJDK8 Non-Interactively
-echo "installing java8"
-apt-get install -qqy openjdk-8-jdk
-update-java-alternatives --set java-1.8.0-openjdk-amd64
-
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
@@ -93,7 +89,8 @@ apt-get install -qqy emacs
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 apt-key fingerprint 0EBFCD88
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+add-apt-repository "deb [arch=amd64,arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get update
 apt-get install -qqy docker-ce docker-ce-cli
 systemctl status docker | head -n 100
@@ -108,3 +105,17 @@ apt-get -qqy autoremove
 add-apt-repository ppa:git-core/ppa -y
 apt-get install git -y
 # ------------------------------------------------------------------
+
+# Install OpenLDAP for testing on Vagrant
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy php-ldap
+
+    CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+    source "$CUR_DIR/../../../vagrant/setup_ldap.sh"
+fi
+
+# Install SAML IdP docker container for testing
+if [ ${VAGRANT} == 1 ]; then
+    docker pull submitty/docker-test-saml-idp:latest
+fi

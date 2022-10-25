@@ -1,0 +1,28 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-team-name-form{% endblock %}
+{% block title %}Edit Team Name{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Please fill in an appropriate name for your team if you would like.
+    </p>
+    <div class="flex-col" id="team-name-modal">
+        <input id="team-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="edit_user_row">
+            <label for="team-name-change">Team Name:&emsp;</label>
+            <input type="text"
+                   name="team_name"
+                   value="{{ team_name }}"
+                   id="team-name-change"
+                   data-current-name="{{ team_name }}"/>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" action="{{ change_team_name_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

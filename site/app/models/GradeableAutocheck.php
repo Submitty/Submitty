@@ -19,7 +19,6 @@ use app\libraries\Utils;
  * @method boolean getPublic()
  */
 class GradeableAutocheck extends AbstractModel {
-
     /** @prop @var string */
     protected $index;
 
@@ -42,11 +41,11 @@ class GradeableAutocheck extends AbstractModel {
      * GradeableAutocheck constructor.
      *
      * @param Core $core
-     * @param $details
-     * @param $course_path
-     * @param $results_path
-     * @param $results_public_path
-     * @param $idx
+     * @param array $details
+     * @param string $course_path
+     * @param string $results_path
+     * @param string $results_public_path
+     * @param int $idx
      */
     public function __construct(Core $core, $details, $course_path, $results_path, $results_public_path, $idx) {
         parent::__construct($core);

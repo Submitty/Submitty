@@ -9,7 +9,7 @@ import json
 import os
 
 from submitty_utils import dateutils
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete
 from . import grade_item
 
 
@@ -53,13 +53,33 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     testcases = get_testcases(config, semester, course, gradeable_id, notebook_data)
     results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
 
+    db_name = f"submitty_{semester}_{course}"
+
+    # If using a UNIX socket, have to specify a slightly different connection string
+    if os.path.isdir(db_host):
+        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
+    else:
+        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
+
+    engine = create_engine(conn_string)
+    db = engine.connect()
+    metadata = MetaData(bind=db)
+    autograding_metrics = Table('autograding_metrics', metadata, autoload=True)
+    db.execute(
+        delete(autograding_metrics)
+        .where(autograding_metrics.c.user_id == bindparam('u_id'))
+        .where(autograding_metrics.c.team_id == bindparam('t_id'))
+        .where(autograding_metrics.c.g_id == bindparam('g_id'))
+        .where(autograding_metrics.c.g_version == bindparam('g_v')),
+        u_id=user_id,  t_id=team_id, g_id=gradeable_id, g_v=version)
+
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
         raise Exception(
             f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
         )
     for i in range(len(testcases)):
-        print(f"testcase[i]= {json.dumps(results['testcases'][i])}")
+        print(f"testcase[{i}]= {json.dumps(results['testcases'][i])}")
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:
             hidden_ec += results['testcases'][i]['points']
         elif testcases[i]['hidden']:
@@ -68,6 +88,26 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             non_hidden_ec += results['testcases'][i]['points']
         else:
             non_hidden_non_ec += results['testcases'][i]['points']
+
+        if (
+            results["testcases"][i]["elapsed_time"] is not None
+            or results["testcases"][i]["max_rss_size"] is not None
+        ):
+            db.execute(
+                insert(autograding_metrics).values(
+                    user_id=user_id,
+                    team_id=team_id,
+                    g_id=gradeable_id,
+                    g_version=version,
+                    testcase_id=testcases[i]["testcase_id"],
+                    elapsed_time=results["testcases"][i]["elapsed_time"],
+                    max_rss_size=results["testcases"][i]["max_rss_size"],
+                    points=results["testcases"][i]["points"],
+                    passed=results["testcases"][i]["points"] >= testcases[i]["total_points"],
+                    hidden=testcases[i]["hidden"],
+                )
+            )
+
     submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
@@ -80,17 +120,6 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         non_hidden_non_ec += nonhidden_diff
         # hidden_non_ec += hidden_diff
 
-    db_name = f"submitty_{semester}_{course}"
-
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
-    else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
-
-    engine = create_engine(conn_string)
-    db = engine.connect()
-    metadata = MetaData(bind=db)
     data_table = Table('electronic_gradeable_data', metadata, autoload=True)
 
     """
@@ -98,7 +127,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     us to do an update here (as the PHP also deals with the active version for us), but in case
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
-    """
+    """   # noqa: B018
     if is_team is True:
         result = db.execute(select([func.count()]).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
@@ -218,11 +247,12 @@ def get_testcases(config, semester, course, g_id, notebook_data):
             testcase_specs += item_dict['testcases']
 
     testcases = []
-    print(json.dumps(testcase_specs, indent=4))
     for testcase in testcase_specs:
         testcases.append({
                 'hidden': testcase.get('hidden', False),
-                'extra_credit': testcase.get('extra_credit', False)
+                'extra_credit': testcase.get('extra_credit', False),
+                'testcase_id': testcase.get('testcase_id', None),
+                'total_points': testcase.get('points', 0)
             })
     return testcases
 
@@ -250,7 +280,16 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             result_json = json.load(result_file)
             if 'testcases' in result_json and result_json['testcases'] is not None:
                 for testcase in result_json['testcases']:
-                    result_details['testcases'].append({'points': testcase['points_awarded']})
+                    metrics_exist = 'metrics' in testcase and testcase['metrics'] is not None
+
+                    testcase_data = {'points': testcase['points_awarded']}
+                    testcase_data["elapsed_time"] = (
+                        testcase["metrics"]["elapsed_time"] if metrics_exist else None
+                    )
+                    testcase_data["max_rss_size"] = (
+                        testcase["metrics"]["max_rss_size"] if metrics_exist else None
+                    )
+                    result_details['testcases'].append(testcase_data)
             if 'automatic_grading_total' in result_json:
                 result_details['automatic_grading_total'] = result_json['automatic_grading_total']
             if 'nonhidden_automatic_grading_total' in result_json:

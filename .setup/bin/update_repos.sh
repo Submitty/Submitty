@@ -17,9 +17,6 @@ fi
 MY_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SUBMITTY_REPOSITORY=${MY_PATH}/../..
 
-# FIXME: should read this from a config file
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
-
 ########################################################################
 
 # These variables specify the minimum version necessary for
@@ -74,6 +71,7 @@ function clone_or_update_repo {
                 echo -e "    ERROR: Submitty/${repo_name} repository history does not contain version ${min_repo_version}"
                 echo -e "        Run 'git fetch' to get the tags from github."
                 echo -e "        Also check to be sure your current branch is up-to-date."
+                echo -e "        If you have this repository cloned locally, you may have to update it manually."
                 popd > /dev/null
                 exit 1
             fi
@@ -94,6 +92,7 @@ function clone_or_update_repo {
 ########################################################################
 
 clone_or_update_repo  AnalysisTools  ${AnalysisTools_Version}
+clone_or_update_repo  AnalysisToolsTS  ${AnalysisToolsTS_Version}
 clone_or_update_repo  Lichen  ${Lichen_Version}
 clone_or_update_repo  RainbowGrades  ${RainbowGrades_Version}
 clone_or_update_repo  Tutorial  ${Tutorial_Version}

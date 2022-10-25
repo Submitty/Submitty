@@ -423,8 +423,9 @@ bool make_gif(std::string window_name, std::string gif_name, float duration_in_s
 
     //add a 1/10th second delay between each image capture.
     if(i != iterations-1){ 
+      int max_rss_memory = 0;
       killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
-        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+        seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
     if(killed){
       return false;
@@ -1047,8 +1048,9 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
     }
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
+      int max_rss_memory = 0;
       killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
-        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+        seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
     if(killed){
       return false;
@@ -1235,6 +1237,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     std::cout << "The action was unsuccessful" << std::endl;
   }
 
+  int max_rss_memory = 0;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
-    seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);   
+    seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);
 }

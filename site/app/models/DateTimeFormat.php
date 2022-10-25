@@ -6,7 +6,6 @@ use app\exceptions\BadArgumentException;
 use app\libraries\Core;
 
 class DateTimeFormat extends AbstractModel {
-
     // Set of legal specifiers
     const SPECIFIERS = ['MDY', 'DMY'];
 

@@ -9,7 +9,7 @@ After clicking continue, the quiz will start and you will have 10 minutes to com
         "first_time_only" : false //true
     },
 
-    "assignment_message" : "#Welcome to a Timed Notebook Gradeable  \n\
+    "assignment_message" : "# Welcome to a Timed Notebook Gradeable  \n\
   \n\
 Here's a short list of instructions:  \n\
 * This is an open-book quiz.  \n\
@@ -34,7 +34,7 @@ Here's a short list of instructions:  \n\
     "notebook" : [
         {
             "type": "markdown",
-            "markdown_string": "###What is `2 + 2`?"
+            "markdown_string": "### What is `2 + 2`?"
         },
         {
             "type": "multiple_choice",
@@ -51,7 +51,7 @@ Here's a short list of instructions:  \n\
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###What is `3 + 3`?"
+            "markdown_string": "### What is `3 + 3`?"
         },
         {
             "type": "multiple_choice",
@@ -68,7 +68,7 @@ Here's a short list of instructions:  \n\
         // ===================================================
         {
             "type": "markdown",
-            "markdown_string": "###Select *all* statements that are true:"
+            "markdown_string": "### Select *all* statements that are true:"
         },
         {
             "type": "multiple_choice",

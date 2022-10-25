@@ -2,6 +2,9 @@
 
 namespace tests\app\controllers\student;
 
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
+use app\models\Team;
 use tests\BaseUnitTest;
 use app\controllers\student\TeamController;
 use app\models\gradeable\Gradeable;
@@ -10,7 +13,6 @@ use app\libraries\Utils;
 use ReflectionObject;
 
 class TeamControllerTester extends BaseUnitTest {
-
     private $core;
 
     private $config = [];
@@ -45,6 +47,42 @@ class TeamControllerTester extends BaseUnitTest {
         $controller = new TeamController($this->core);
         $response = $controller->createNewTeam($this->config['gradeable_id']);
         $this->assertEquals(["status" => "fail", "message" => "Test Gradeable is not a team assignment"], $response);
+    }
+
+    public function testSetTeamName() {
+        $gradeable = $this->createMockGradeable();
+        $this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $details = [
+            'team_id' => 'test',
+            'registration_section' => 0,
+            'rotating_section' => -1,
+            'users' => [
+                [
+                    'state' => 1,
+                    'user_id' => 'test',
+                    'user_firstname' => 'User',
+                    'user_lastname' => 'One',
+                    'user_email' => 'user1@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
+                ]
+            ],
+            'team_name' => null
+        ];
+        $team = new Team($this->core, $details);
+        $submitter = $this->createMockModel(Submitter::class);
+        $submitter->method('getTeam')->willReturn($team);
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $this->core->getQueries()->method('getGradedGradeable')
+            ->with($gradeable, $this->core->getUser()->getId(), $this->core->getUser()->getId())
+            ->willReturn($graded_gradeable);
+        $this->core->getQueries()->expects($this->once())
+            ->method('updateTeamName')
+            ->with('test', 'newname');
+        $controller = new TeamController($this->core);
+        $_POST['team_name'] = 'newname';
+        $controller->setTeamName($this->config['gradeable_id']);
     }
 
     public function testCreateTeamSuccess() {

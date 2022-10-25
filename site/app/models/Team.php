@@ -14,14 +14,14 @@ use app\models\gradeable\Gradeable;
  * @method string[] getInvitedUserIds()
  * @method User[] getMemberUsers()
  * @method User[] getInvitedUsers()
+ * @method string getTeamName()
  */
 class Team extends AbstractModel {
-
     /** @prop @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
-    /** @prop @var integer rotating section (registration or rotating) of team creator */
+    /** @prop @var string registration section (registration or rotating) of team creator */
     protected $registration_section;
-    /** @prop @var integer registration section (registration or rotating) of team creator */
+    /** @prop @var integer rotating section (registration or rotating) of team creator */
     protected $rotating_section;
     /** @prop @var string[] containing user ids of team members */
     protected $member_user_ids;
@@ -37,6 +37,8 @@ class Team extends AbstractModel {
     protected $assignment_settings;
     /** @var string $anon_id */
     protected $anon_id;
+    /** @prop @var string The name of the team */
+    protected $team_name;
 
     /**
      * Team constructor.
@@ -55,7 +57,7 @@ class Team extends AbstractModel {
         $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
-            if (array_key_exists('anon_id', $user_details)) {
+            if (array_key_exists('user_id', $user_details)) {
                 $user = new User($core, $user_details);
             }
             else {
@@ -75,6 +77,7 @@ class Team extends AbstractModel {
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
+        $this->team_name = $details['team_name'];
     }
 
     /**

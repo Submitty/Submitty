@@ -10,7 +10,6 @@ namespace app\libraries;
  * HTML or plain-text)
  */
 class DiffViewer {
-
     /** @var string */
     private $actual_file;
     /** @var string */
@@ -530,10 +529,12 @@ class DiffViewer {
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
 
+        $num_blanks = 0;
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
+                $num_blanks = $this->add[$type][-1];
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
-                for ($k = 0; $k < $this->add[$type][-1]; $k++) {
+                for ($k = 0; $k < $num_blanks; $k++) {
                     $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
                 $html .= "\t</div>\n";
@@ -543,8 +544,13 @@ class DiffViewer {
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
          */
+        $num_chars = 0;
         $max_digits = strlen((string) count($lines));
         for ($i = 0; $i < count($lines); $i++) {
+            if ($i === 1000 - $num_blanks || $num_chars >= 50000) {
+                break;
+            }
+            $num_chars += strlen($lines[$i]);
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
@@ -636,6 +642,17 @@ class DiffViewer {
             if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
                 $start = null;
                 $html .= "\t</div>\n";
+            }
+        }
+        if (count($lines) + $num_blanks > 1000 || $num_chars >= 50000) {
+            $html .= "<p>...</p>";
+            if ($type === self::EXPECTED) {
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p>";
+                $html = $truncate_error . $html . $truncate_error;
+            }
+            elseif ($type === self::ACTUAL) {
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please download it to see the full file.</b></p>";
+                $html = $truncate_error . $html . $truncate_error;
             }
         }
         return $html . "</div></div>\n";

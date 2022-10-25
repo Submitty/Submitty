@@ -8,7 +8,6 @@ use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\libraries\response\WebResponse;
 use app\models\CalendarInfo;
-use app\models\gradeable\GradeableList;
 use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
 use Symfony\Component\Routing\Annotation\Route;

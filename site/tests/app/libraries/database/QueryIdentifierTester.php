@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace tests\app\libraries\database;
 
 use app\libraries\database\QueryIdentifier;
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
-use PHPUnit\Framework\ExpectationFailedException;
 
 class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
     public function dataProvider(): array {
@@ -76,5 +74,20 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
             ORDER BY A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
 SQL;
           $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));
+    }
+
+    public function invalidQueriesDataProvider(): array {
+        return [
+            ['invalid query'],
+            // trailing comma on CTE
+            ["WITH assigned AS (SELECT * FROM foo), SELECT * FROM bar"]
+        ];
+    }
+
+    /**
+     * @dataProvider invalidQueriesDataProvider
+     */
+    public function testInvalidQueriesReturnUnknown(string $query): void {
+          $this->assertEquals(QueryIdentifier::UNKNOWN, QueryIdentifier::identify($query));
     }
 }

@@ -24,6 +24,7 @@ function loadTemplates() {
         {id: 'Mark', href: "/templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "/templates/grading/OverallComment.twig"},
         {id: 'TotalScoreBox', href: "/templates/grading/TotalScoreBox.twig"},
+        {id: 'TotalPeerScoreBox', href: "/templates/grading/TotalPeerScoreBox.twig"},
         {id: 'ConflictMarks', href: "/templates/grading/ConflictMarks.twig"},
         {id: 'RubricTotalBox', href: "/templates/grading/RubricTotalBox.twig"},
     ];
@@ -139,7 +140,8 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'decimal_precision': DECIMAL_PRECISION,
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
-        'display_version': displayVersion
+        'display_version': displayVersion,
+        'student_grader': isStudentGrader()==='1' ? true : false
     });
 }
 
@@ -160,7 +162,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         graded_gradeable.graded_components = {};
     }
 
-    var peer_details = {};
+    let peer_details = {};
 
     // Group together some useful data for rendering:
     gradeable.components.forEach(function(component) {
@@ -210,8 +212,6 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
         graded_component = prepGradedComponent(component, graded_component);
         if (is_student) {
             component.ta_comment = "";
-        } else {
-            component.student_comment = "";
         }
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
@@ -288,7 +288,7 @@ function renderInstructorEditGradeable(gradeable, itempool_available, itempool_o
 function renderEditComponent(component, precision, showMarkList) {
 
     return new Promise(function (resolve, reject) {
-        // TODO: i don't think this is async
+        // TODO: I don't think this is async
         resolve(Twig.twig({ref: "EditComponent"}).render({
             'component': component,
             'precision': precision,
@@ -334,7 +334,8 @@ function renderOverallComment(comment, editable) {
         resolve(Twig.twig({ref: "OverallComment"}).render({
             'overall_comment': comment,
             'editable': editable,
-            'grading_disabled': false
+            'grading_disabled': false,
+            'student_grader': isStudentGrader()==='1' ? true : false
         }));
     });
 }

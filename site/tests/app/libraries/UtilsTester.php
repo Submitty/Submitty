@@ -39,50 +39,6 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(16, strlen(Utils::generateRandomString(8)));
     }
 
-    public function stringStarts() {
-        return [
-            ["test", "test", true],
-            ["test", "tes", true],
-            ["test", "te", true],
-            ["test", "t", true],
-            ["test", "", true],
-            ["test", "st", false]
-        ];
-    }
-
-    /**
-     * @dataProvider stringStarts
-     *
-     * @param $haystack
-     * @param $needle
-     * @param $result
-     */
-    public function testStartsWith($haystack, $needle, $result) {
-        $this->assertEquals(Utils::startsWith($haystack, $needle), $result);
-    }
-
-    public function stringEnds() {
-        return [
-            ["test", "test", true],
-            ["test", "est", true],
-            ["test", "st", true],
-            ["test", "t", true],
-            ["test", "", true],
-            ["test", "te", false]
-        ];
-    }
-
-    /**
-     * @dataProvider stringEnds
-     *
-     * @param $haystack
-     * @param $needle
-     * @param $result
-     */
-    public function testEndsWith($haystack, $needle, $result) {
-        $this->assertEquals(Utils::endsWith($haystack, $needle), $result);
-    }
-
     public function testPrepareHtmlString() {
         $string = "<test\n\ntest>";
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));

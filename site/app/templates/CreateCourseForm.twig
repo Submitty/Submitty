@@ -1,5 +1,5 @@
 <div class="content">
-    <h1>New Course -- Work In Progress</h1>
+    <h1>New Course</h1>
 
     <form id="course-creation-form" action="{{ course_creation_url }}"
           method="post" enctype="multipart/form-data">
@@ -7,9 +7,10 @@
             <div class="option-desc col-md-6">
                 <label for="course_semester">
                     <span class="option-title block">Term</span>
+                    <span class="block">What is the term for the new course?</span>
                     <span class="option-alt">
-                      <span class="block">What is the term for the new course?</span>
-                      <span class="block">Note: Contact the system administrator to if the desired term is not available from the drop down menu.</span>
+                      <span class="block">Contact the system administrator if the desired term is
+                            not available from the drop down menu.</span>
                       <span class="required_type">(Required)</span>
                     </span>
                 </label>
@@ -33,16 +34,21 @@
             <div class="option-desc col-md-6">
                 <label for="course_title">
                     <span class="option-title block">Course Code</span>
-                    <span class="option-alt">
-                      <span class="block">What is the course code for the new course?
-                      {{ course_code_requirements }} </span>
-                      <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
-                      <span class="required_type">(Required)</span>
+                      <span class="block">What is the course code for the new course?<br>
+                            </span>
+                      <span class="option-alt">
+                         <span class="block">Please follow course code conventions established by your school and department.<br>
+                               {{ course_code_requirements }}
+                               Contact the system administrator if you are unsure what course code you should use.</span>
+                         <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
+                         <span class="required_type">(Required)</span>
                     </span>
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea><br>
+                <span class="information-type" style="overflow-wrap: anywhere">My Prior Course Codes:<br>
+                                  {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.</span>
             </div>
         </div>
 
@@ -73,17 +79,23 @@
 
         <div class="option row">
             <div class="option-desc col-md-6">
-                <label for="base_courses">
-                    <span class="option-title block">Prior Course Offering</span>
-                    <span class="option-alt">Select a prior offering of this course from the dropdown menu.</span>
-                    <span class="option-alt block">Note: Instructors and graders with access to the prior course files on GNU/Linux will be able to see the content of the new course as well.</span>
-                    <span class="option-alt block">Contact the system administrator if this course should not share a GNU/Linux group with any prior course.</span>
-                    <span class="required_type">(Required)</span>
+                <label for="group_name">
+                    <span class="option-title block">GNU/Linux Filesystem Group</span>
+                    <span class="block">Select the appropriate GNU/Linux filesystem group for this course from the dropdown menu.<br>
+                          Instructors and graders in this group with ssh access to the server will be able to access files for this new course.</span>
+                    <span class="option-alt">
+                          <span class="block">Contact the system administrator if you do not see an appropriate GNU/Linux group in this list.
+                                Or if you need to modify the members of the GNU/Linux filesystem group.</span>
+                                <span class="required_type">(Required)</span>
+                    </span>
                 </label>
             </div>
 
             <div class="option-input col-md-6">
-                <select name="base_course" id="base_courses" class="auto_save"></select>
+                <select name="group_name" id="group_name" class="auto_save" onchange="onGroupChange()">
+                    <option value="">Please select an option</option>
+                </select><br>
+                <span class="information-type" id="group_users" style="display: none; overflow-wrap: anywhere">Users in this group:</span>
             </div>
         </div>
 
@@ -110,14 +122,40 @@
         let headInstructor = $('#head_instructor').val();
         $.ajax({
             type: "GET",
-            url: buildUrl(['home', 'courses']) + `?as_instructor=true&user_id=${headInstructor}`,
+            url: buildUrl(['home', 'groups']) + `?user_id=${headInstructor}`,
             success: function(data) {
                 let json = JSON.parse(data);
-                let courses = json['data']['unarchived_courses'].concat(json['data']['archived_courses']);
-                $('#base_courses').find('option').remove();
-                $.each(courses, (i, val) => {
-                    $('#base_courses').append(`<option value="${val['semester']}|${val['title']}">${val['semester']}.${val['title']}`)
+                let groups = json['data'];
+                $('#group_name').find('option').remove();
+                $('#group_name').append('<option value="">Please select an option</option>');
+                $.each(groups, (i, val) => {
+                    $('#group_name').append(`<option value="${val['group_name']}">${val['group_name']}`)
                 })
+                onGroupChange();
+            }
+        });
+    }
+
+    function onGroupChange() {
+        let group = $('#group_name').val();
+        $('#group_users').text("Users in this group: ");
+        if (group === "") {
+            $('#group_users').hide();
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: buildUrl(['home', 'group', 'users']) + `?group_name=${group}`,
+            success: function(data) {
+                let json = JSON.parse(data);
+                if (json.status === "success") {
+                    let users = json.data;
+                    $('#group_users').text(`Users in this group: ${users}`);
+                    $('#group_users').show();
+                }
+                else {
+                    alert("Error displaying group members:\n\n" + json.message)
+                }
             }
         });
     }

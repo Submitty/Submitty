@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-use app\exceptions\DatabaseException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 

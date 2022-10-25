@@ -19,6 +19,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
+use PHPUnit\Util\Test;
 use tests\BaseUnitTest;
 use tests\utils\NullOutput;
 
@@ -66,6 +67,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
+        $this->core->setTesting(true);
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
@@ -92,7 +94,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $max_size = 1000000; // 1 MB
 
         if (empty(static::$annotations)) {
-            static::$annotations = $this->getAnnotations();
+            static::$annotations = Test::parseTestMethodAnnotations(get_class($this), $this->getName());
         }
         if (isset(static::$annotations['method']['highestVersion'][0])) {
             $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
@@ -160,11 +162,12 @@ class SubmissionControllerTester extends BaseUnitTest {
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => true,
-            'scanned_exam' => false,
             'student_view' => $student_view,
             'student_view_after_grades' => false,
+            'student_download' => true,
             'student_submit' => true,
             'has_due_date' => true,
+            'has_release_date' => true,
             'peer_grading' => false,
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
@@ -184,6 +187,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'grade_inquiry_start_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
             'grade_inquiry_due_date' => new \DateTime("9995-01-06 01:01:01", $this->core->getConfig()->getTimezone()),
             'allowed_minutes' => null,
+            'depends_on' => null,
+            'depends_on_points' => null,
             'allow_custom_marks' => true
         ];
         $gradeable = new Gradeable($this->core, $details);
@@ -326,7 +331,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                     $content = $value;
                 }
                 $file_path = FileUtils::joinPaths($dir, $filename);
-                if (Utils::endsWith($filename, '.zip') === true) {
+                if (str_ends_with($filename, '.zip') === true) {
                     $file = new ZipArchive();
                     $file->open($file_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
                     $file->addFromString('test1.txt', 'a');
@@ -360,7 +365,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, 'test1.txt'), "a");
         $pattern = '/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/';
-        $this->assertRegExp($pattern, file_get_contents(FileUtils::joinPaths($tmp, ".submit.timestamp")));
+        $this->assertMatchesRegularExpression($pattern, file_get_contents(FileUtils::joinPaths($tmp, ".submit.timestamp")));
         $iter = new \FilesystemIterator($tmp);
         $files = [];
         foreach ($iter as $entry) {
@@ -386,7 +391,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(1, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
             }
         }
     }
@@ -584,9 +589,9 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(2, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
                 $this->assertEquals(2, $json['history'][1]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
             }
         }
         sort($dirs);
@@ -1434,7 +1439,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(1, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
             }
         }
     }
@@ -1643,7 +1648,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(isset($json['history']));
         $this->assertEquals(2, count($json['history']));
         $this->assertEquals(0, $json['history'][1]['version']);
-        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+        $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
     /**
@@ -1672,7 +1677,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(isset($json['history']));
         $this->assertEquals(2, count($json['history']));
         $this->assertEquals(4, $json['history'][1]['version']);
-        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+        $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
     /*

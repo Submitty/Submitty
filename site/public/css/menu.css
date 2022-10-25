@@ -21,10 +21,10 @@
     overflow-y: auto;
     right: 0;
     animation-duration: 0.5s;
-    animation-name: slideFromRight;
+    animation-name: slide-from-right;
 }
 
-@keyframes slideFromRight {
+@keyframes slide-from-right {
     from { right: -100%; }
     to { right: 0; }
 }
@@ -73,7 +73,7 @@
     position: absolute;
     height: 100%;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: rgb(0 0 0 / 55%);
     z-index: 1;
 }
 
@@ -97,9 +97,9 @@
 }
 
 #mobile-menu .notification-badge {
-    background-color: #000000;
+    background-color: var(--danger-red);
     padding: 0 10px;
-    color: var(--text-white);
+    color: var(--always-default-white);
     font-weight: bold;
     border-radius: 4px;
     height: 40px;

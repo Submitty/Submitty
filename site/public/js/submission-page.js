@@ -19,9 +19,12 @@ let width = 0;
 let allowedTime = 0;
 let gradeable_id = '';
 let ticks_till_update = 600000;
+let popUpTimerStarted = false;
+let isTimed = false;
 
-function initializeTimer(gradeableID) {
+function initializeTimer(gradeableID, is_timed) {
     gradeable_id = gradeableID;
+    isTimed = is_timed;
     syncWithServer(true);
 }
 
@@ -51,6 +54,11 @@ function syncWithServer(criticalSync) {
                 curTime = data.current_time;
                 deadline = data.deadline;
                 updateTime();
+                if (!popUpTimerStarted && isTimed && allowedTime > 25) {
+                    // eslint-disable-next-line no-undef
+                    initializePopupTimer();
+                    popUpTimerStarted = true;
+                }
             }
             else {
                 // eslint-disable-next-line no-undef

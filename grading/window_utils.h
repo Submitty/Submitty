@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 float stringToFloat(std::string const &str, int precision);
 

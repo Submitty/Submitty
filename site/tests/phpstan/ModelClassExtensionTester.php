@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace tests\phpstan;
 
 use app\models\Button;
-use PHPStan\Testing\TestCase;
+use PHPStan\Testing\PHPStanTestCase;
 
-class ModelClassExtensionTester extends TestCase {
+class ModelClassExtensionTester extends PHPStanTestCase {
     public function methodDataProvider() {
         return [
             [Button::class, 'getOnclick', true],

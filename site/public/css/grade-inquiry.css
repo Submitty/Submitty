@@ -50,12 +50,15 @@ a.component-tab.btn-selected {
     margin-left: 5px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .grade_inquiry {
     display: none;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_box {
     padding: 20px;
+    background-color: var(--default-white);
 }
 
 .reply-text-form {

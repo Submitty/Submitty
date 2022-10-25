@@ -4,16 +4,17 @@ namespace tests\app\controllers;
 
 use app\authentication\AbstractAuthentication;
 use app\controllers\AuthenticationController;
+use app\entities\VcsAuthToken;
 use app\models\Team;
 use app\models\User;
 use app\models\gradeable\Gradeable;
+use app\repositories\VcsAuthTokenRepository;
 use tests\BaseUnitTest;
 
 /**
  * @runTestsInSeparateProcesses
  */
 class AuthenticationControllerTester extends BaseUnitTest {
-
     public function setUp(): void {
         // set up variables that logger needs
         $_COOKIE['submitty_token'] = 'test';
@@ -21,11 +22,12 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_SERVER['HTTP_USER_AGENT'] = 'test';
     }
 
-    private function getAuthenticationCore($authenticate = false, $queries = []) {
+    private function getAuthenticationCore($authenticate = false, $queries = [], $user = "") {
         $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);
         $auth->method('setPassword')->willReturn(null);
+        $auth->method('getUserId')->willReturn($user);
         $auth->method('authenticate')->willReturn($authenticate);
         $core->method('getAuthentication')->willReturn($auth);
         $core->method('authenticate')->willReturn($authenticate);
@@ -90,6 +92,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['gradeable_id'] = 'test';
         $_POST['id'] = 'test';
         $core = $this->getAuthenticationCore();
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => 'Could not login using that user id or password'], $response);
@@ -101,6 +113,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['gradeable_id'] = 'test';
         $_POST['id'] = 'test';
         $core = $this->getAuthenticationCore(true, ['getUserById' => null]);
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => 'Could not find that user for that course'], $response);
@@ -114,6 +136,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $user = $this->createMockModel(User::class);
         $user->method('accessFullGrading')->willReturn(true);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user]);
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
@@ -135,6 +167,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'not_test';
         $user = $this->createMockModel(User::class);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
@@ -153,6 +195,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $user = $this->createMockModel(User::class);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
@@ -185,6 +237,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
                 'getTeamById' => $team,
             ]
         );
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
@@ -214,6 +276,16 @@ class AuthenticationControllerTester extends BaseUnitTest {
                 'getTeamById' => $team,
             ]
         );
+        $repository = $this->createMock(VcsAuthTokenRepository::class);
+        $repository->expects($this->once())
+            ->method('getAllByUser')
+            ->with($_POST['user_id'])
+            ->willReturn([]);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(VcsAuthToken::class)
+            ->willReturn($repository);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
@@ -252,7 +324,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['no_redirect'] = true;
         $_POST['user_id'] = 'test';
         $_POST['password'] = 'test';
-        $core = $this->getAuthenticationCore(true);
+        $core = $this->getAuthenticationCore(true, [], 'test');
         $controller = new AuthenticationController($core);
         $response = $controller->checkLogin()->json_response->json;
         $this->assertEquals(

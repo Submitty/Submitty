@@ -5,16 +5,13 @@ namespace app\controllers\grading;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\RedirectResponse;
 use app\models\DisplayImage;
-use app\models\User;
 use app\views\grading\ImagesView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
-
     /**
      * @Route("/courses/{_semester}/{_course}/student_photos")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")

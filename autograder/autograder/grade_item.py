@@ -51,7 +51,7 @@ def get_testcases(
         for item in complete_config_obj['item_pool']:
             testcase_specs += item['testcases']
 
-    is_vcs = queue_obj['vcs_checkout']
+    is_vcs = queue_obj.get('vcs_checkout', False)
 
     # Construct the testcase objects
     for t in testcase_specs:
@@ -263,7 +263,7 @@ def archive(
             False
         )
     except Exception:
-        print("\n\nERROR: Grading incomplete -- could not perform archival")
+        print("\n\nERROR: Grading incomplete -- could not archive autograding results")
         config.logger.log_message(
             "ERROR: could not archive autograding results. See stack trace for more info.",
             job_id=queue_obj['job_id'],

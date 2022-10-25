@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # This function is from https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/bash/travis_retry.bash
 ANSI_RED="\033[31;1m"
 ANSI_RESET="\033[0m"

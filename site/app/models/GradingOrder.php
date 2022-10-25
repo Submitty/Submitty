@@ -8,7 +8,6 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\Gradeable;
 
 class GradingOrder extends AbstractModel {
-
     /**
      * @var Gradeable $gradeable
      */
@@ -211,7 +210,7 @@ class GradingOrder extends AbstractModel {
     /**
      * Queries the database to populate $this->not_fully_graded
      *
-     * @param $component_id
+     * @param int $component_id
      */
     private function initUsersNotFullyGraded($component_id) {
         if (is_null($this->not_fully_graded)) {
@@ -297,7 +296,7 @@ class GradingOrder extends AbstractModel {
      * Will only include students that cause $fn to return true
      * @param Submitter $submitter Current grading submitter
      * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
-     * @return Submitter Previous submitter to grade
+     * @return null|Submitter Previous submitter to grade
      */
     public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
 
@@ -337,7 +336,7 @@ class GradingOrder extends AbstractModel {
      * Will only include students that cause $fn to return true
      * @param Submitter $submitter Current grading submitter
      * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
-     * @return Submitter Next submitter to grade
+     * @return null|Submitter Next submitter to grade
      */
     public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
 
@@ -495,20 +494,24 @@ class GradingOrder extends AbstractModel {
             [$this->getSectionKey(), 'team_id', 'user_id']
         );
         $gg_idx = [];
-        $unsorted = [];
+        $items = [];
         foreach ($iter as $gg) {
-            $idx = $this->getSubmitterIndex($gg->getSubmitter());
-            //Should never happen, but better to be safe
-            if ($idx === false) {
-                $unsorted[] = $gg;
-            }
-            else {
-                $gg_idx[$idx] = $gg;
+            $items[$gg->getSubmitter()->getId()] = $gg;
+        }
+        //Iterate through all sections and their submitters to find this one
+        foreach ($this->section_submitters as $name => $section) {
+            for ($i = 0; $i < count($section); $i++) {
+                $testSub = $section[$i]->getId();
+
+                //Found them
+                if (isset($items[$testSub])) {
+                    $gg_idx[] = $items[$testSub];
+                    unset($items[$testSub]);
+                }
             }
         }
-        //Since the array's elements were not added in the same order as the indices, sort to fix it
-        ksort($gg_idx);
-        return array_merge($gg_idx, $unsorted);
+
+        return array_merge($gg_idx, array_values($items));
     }
 
     /**
@@ -577,8 +580,8 @@ class GradingOrder extends AbstractModel {
      * Returns an string describing the ordering based on its sort type and direction, or an empty string
      * if an unknown sort / direction combination is passed in.
      *
-     * @param $sort Sort type
-     * @param $direction Direction of sort (ASC or DESC)
+     * @param string $sort Sort type
+     * @param string $direction Direction of sort (ASC or DESC)
      * @return string
      */
     public static function getGradingOrderMessage($sort, $direction) {

@@ -19,10 +19,6 @@
     padding-left: 10px;
     padding-right: 10px;
     vertical-align: middle;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -khtml-user-select: none;
     user-select: none;
 }
 
@@ -177,7 +173,10 @@ h2.cal-month-title {
     user-select: none;
     background-image: none;
     border-radius: 4px;
-    box-shadow: 0 1px 1px 0 var(--box-shadow-very-transparent), 0 2px 1px -1px var(--box-shadow-very-transparent), 0 1px 3px 0 var(--box-shadow-slightly-transparent);
+    box-shadow:
+        0 1px 1px 0 var(--box-shadow-very-transparent),
+        0 2px 1px -1px var(--box-shadow-very-transparent),
+        0 1px 3px 0 var(--box-shadow-slightly-transparent);
 }
 
 /* each item in the day cell as a button */
@@ -190,28 +189,28 @@ a.cal-gradeable-item:hover {
 /** Pure Text **/
 a.cal-gradeable-status-text {
     color: var(--text-black);
-    padding: 0 0 0 0;
+    padding: 0;
     border: none;
     box-shadow: none;
 }
 
 a.cal-gradeable-status-text:hover {
     color: var(--text-black);
-    padding: 0 0 0 0;
+    padding: 0;
     cursor: default;
     border: none;
 }
 
 a.cal-gradeable-status-text:focus {
     color: var(--text-black);
-    padding: 0 0 0 0;
+    padding: 0;
     border: none;
 }
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
     color: #218ffd;  /* This color is from DS website */
-    padding: 0 0 0 0;
+    padding: 0;
     font-style: italic;
     border: none;
     box-shadow: none;
@@ -219,7 +218,7 @@ a.cal-gradeable-status-ann {
 
 a.cal-gradeable-status-ann:hover {
     color: #218ffd;
-    padding: 0 0 0 0;
+    padding: 0;
     font-style: italic;
     cursor: default;
     border: none;
@@ -227,7 +226,7 @@ a.cal-gradeable-status-ann:hover {
 
 a.cal-gradeable-status-ann:focus {
     color: #218ffd;
-    padding: 0 0 0 0;
+    padding: 0;
     font-style: italic;
     border: none;
 }
@@ -235,7 +234,7 @@ a.cal-gradeable-status-ann:focus {
 /** Link **/
 a.cal-gradeable-status-link {
     color: var(--external-link-blue);
-    padding: 0 0 0 0;
+    padding: 0;
     text-decoration: underline;
     border: none;
     box-shadow: none;
@@ -243,13 +242,13 @@ a.cal-gradeable-status-link {
 
 a.cal-gradeable-status-link:hover {
     color: var(--external-link-hover);
-    padding: 0 0 0 0;
+    padding: 0;
     border: none;
 }
 
 a.cal-gradeable-status-link:focus {
     color: var(--external-link-active);
-    padding: 0 0 0 0;
+    padding: 0;
     border: none;
 }
 

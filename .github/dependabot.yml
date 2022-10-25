@@ -24,17 +24,7 @@ updates:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency]"
   - package-ecosystem: pip
-    directory: "/.setup/pip/system_requirements.txt"
-    schedule:
-      interval: daily
-      time: "10:00"
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-    commit-message:
-      prefix: "[Dependency] "
-  - package-ecosystem: pip
-    directory: "/.setup/pip/vagrant_requirements.txt"
+    directory: "/.setup/pip/"
     schedule:
       interval: daily
       time: "10:00"

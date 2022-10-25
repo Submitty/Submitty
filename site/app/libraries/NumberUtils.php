@@ -8,7 +8,6 @@ namespace app\libraries;
  * Utility functions for interacting with numbers
  */
 class NumberUtils {
-
     /**
      * Gives the closest number to the `value` with respect to `precision`
      * @param float $value The number to round

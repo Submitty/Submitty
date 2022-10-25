@@ -31,9 +31,9 @@
             releaseDate.value = newDateTime;
         }
 
-        function setChild(dirArr,releaseDate,handleData) {
+        function setChild(id,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
-            changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
+            changeFolderNewDateTime(id,releaseDate.value,function (output) {
                 if(output){
                     if(handleData){
                         handleData(true);
@@ -44,7 +44,8 @@
 
         function confirmReleaseDate() {
             var directory = document.getElementById("submit_time");
-            var dirArr = JSON.parse(directory.dataset.indir);
+            //var dirArr = JSON.parse(directory.dataset.indir);
+            var id = directory.dataset.id;
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
@@ -53,7 +54,7 @@
                 window.alert("No blank time allowed");
                 return;
             }
-            setChild(dirArr, releaseDate, function (output) {
+            setChild(id, releaseDate, function (output) {
                 //when done reload
                 if (output) {
                     var selectedDiv = 'date_to_release_' + ID;
@@ -71,6 +72,9 @@
                         {
                             button: [
                                 {
+                                    label: "Beginning of time"
+                                },
+                                {
                                     label: "Now"
                                 },
                                 {
@@ -79,19 +83,21 @@
                                 {
                                     label: "End of time"
                                 }
-
                             ],
                             onClick: (index, fp) => {
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        date = new Date();
+                                        date = new Date("1001-01-01 00:00:00");
                                         break;
                                     case 1:
                                         date = new Date();
-                                        date.setDate(date.getDate() + 1);
                                         break;
                                     case 2:
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
+                                        break;
+                                    case 3:
                                         date = new Date("9998-01-01 00:00:00");
                                         break;
                                 }

@@ -2,7 +2,7 @@
 #define __DISPATCH_H__
 
 #include "TestCase.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace dispatch {
 

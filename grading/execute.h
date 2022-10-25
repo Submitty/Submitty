@@ -4,7 +4,7 @@
 #include <sys/resource.h>
 #include <string>
 #include <vector>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <queue>
 #include <mutex>
 #include <thread>
@@ -49,7 +49,8 @@ bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile);
 
 //returns true on kill order.
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& elapsed, float& next_checkpoint,
-  float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,std::ostream &logfile);
+  float seconds_to_run, int& rss_memory, int& max_rss_memory, int allowed_rss_memory, int& memory_kill,
+  int& time_kill,std::ostream &logfile);
 
 std::string output_of_system_command(const char* cmd);
 

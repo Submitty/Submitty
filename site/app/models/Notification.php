@@ -24,7 +24,7 @@ use app\libraries\DateUtils;
  * @method int      getId()
  * @method string   getComponent()
  * @method bool     isSeen()
- * @method real     getElapsedTime()
+ * @method float     getElapsedTime()
  * @method string   getCreatedAt()
  * @method string   getCurrentUser()
  *
@@ -72,7 +72,6 @@ class Notification extends AbstractModel {
      * Notifications constructor.
      *
      * @param Core  $core
-     * @param array $details
      */
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -130,7 +129,7 @@ class Notification extends AbstractModel {
      * Trim long $message upto 40 character and filter newline
      *
      * @param string $message
-     * @return $trimmed_message
+     * @return string the trimmed message
      */
     public static function textShortner(string $message): string {
         $max_length = 40;

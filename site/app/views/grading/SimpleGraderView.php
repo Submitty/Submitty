@@ -10,7 +10,6 @@ use app\models\User;
 use app\views\AbstractView;
 
 class SimpleGraderView extends AbstractView {
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables

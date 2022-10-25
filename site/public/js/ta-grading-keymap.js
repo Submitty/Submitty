@@ -29,12 +29,26 @@ let settingsData = [
                     "Prev/Next Active Grade Inquiry": "active-inquiry",
                 }, 
                 default: "Prev/Next Student"
+            },
+            {
+                name: "Prev/Next buttons navigate through",
+                storageCode: "general-setting-navigate-assigned-students-only",
+                options: function() {
+                    if ($('#ta-grading-settings-list').attr("data-full_access") !== "true") {
+                        return {};
+                    }
+                    return {
+                        "All students": "false",
+                        "Only students in assigned registration/rotation sections": "true"
+                    };
+                }, 
+                default: "Only students in assigned registration/rotation sections"
             }
         ]
     },
     {
         id: "notebook-setting-list",
-        name: "Notebook",
+        name: "Notebook",   
         values: [
             {
                 name: "Expand files in notebook file submission on page load",
@@ -175,6 +189,10 @@ Twig.twig({
 function loadTAGradingSettingData() {
     for(var i = 0; i < settingsData.length; i++) {
         for(var x = 0; x < settingsData[i].values.length; x++) {
+            if(typeof(settingsData[i].values[x].options) === "function") {
+                settingsData[i].values[x].options = settingsData[i].values[x].options();
+            }
+
             settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
             if(settingsData[i].values[x].currValue === null) {
                 localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
