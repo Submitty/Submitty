@@ -55,7 +55,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getNumResponses() }} </td>
                         <td>
                             <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
@@ -126,7 +126,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getNumResponses() }} </td>
                         <td>
                             <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
@@ -186,7 +186,7 @@
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() }} </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getNumResponses() }} </td>
                         <td>
                             <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}

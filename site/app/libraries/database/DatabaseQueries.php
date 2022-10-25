@@ -7785,13 +7785,49 @@ AND gc_id IN (
         $this->course_db->query("UPDATE polls SET status = 'open' where poll_id = ?", [$poll_id]);
     }
 
-    public function getPolls(): array {
+    /**
+     * Get an array of polls.  Optionally, specify the $preload_all parameter to preload all of the polls with data.
+     *
+     * @param bool $preload_all
+     * @return array
+     */
+    public function getPolls(bool $preload_all = false): array {
         $polls = [];
-        $this->course_db->query("SELECT * from polls order by poll_id ASC");
-        $polls_rows = $this->course_db->rows();
 
-        foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
+        if ($preload_all) {
+            $this->course_db->query("
+SELECT
+    p.*,
+    json_agg(po1) AS responses
+FROM polls p
+LEFT JOIN poll_options po1 ON po1.poll_id = p.poll_id
+GROUP BY p.poll_id
+ORDER BY
+    p.poll_id ASC
+            ");
+            $polls_rows = $this->course_db->rows();
+
+            $num_responses = $this->getNumResponsesAllPolls();
+
+            foreach ($polls_rows as $row) {
+                $answers = [];
+                foreach ($row['responses'] as $r) {
+                    if ($r['correct'] === true) {
+                        $answers[] = $r['poll_id'];
+                    }
+                }
+                $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, $row['responses']);
+            }
+        }
+        else {
+            $this->course_db->query("SELECT * FROM polls ORDER BY poll_id ASC");
+            $polls_rows = $this->course_db->rows();
+
+            $num_responses = $this->getNumResponsesAllPolls();
+
+            foreach ($polls_rows as $row) {
+                $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
+            }
         }
 
         return $polls;
@@ -7802,8 +7838,10 @@ AND gc_id IN (
         $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
+        $num_responses = $this->getNumResponsesAllPolls();
+
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
         }
 
         return $polls;
@@ -7814,8 +7852,10 @@ AND gc_id IN (
         $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
+        $num_responses = $this->getNumResponsesAllPolls();
+
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
         }
 
         return $polls;
@@ -7826,20 +7866,25 @@ AND gc_id IN (
         $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
+        $num_responses = $this->getNumResponsesAllPolls();
+
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
         }
 
         return $polls;
     }
 
     public function getPoll($poll_id): ?PollModel {
-        $this->course_db->query("SELECT * from polls where poll_id = ?", [$poll_id]);
+        $this->course_db->query("SELECT * FROM polls WHERE poll_id = ?", [$poll_id]);
         $row = $this->course_db->row();
         if (count($row) <= 0) {
             return null;
         }
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"]);
+
+        $num_responses = $this->getNumResponses($poll_id);
+
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses);
     }
 
     public function getResponses($poll_id) {
@@ -7863,6 +7908,43 @@ AND gc_id IN (
             array_push($responses[$row["student_id"]], $row["option_id"]);
         }
         return $responses;
+    }
+
+    /**
+     * Return the number of responses for a specified poll
+     */
+    public function getNumResponses(int $poll_id): int {
+        $this->course_db->query("
+SELECT
+    COUNT(DISTINCT pr.student_id) AS num_responses
+FROM polls p
+LEFT JOIN poll_responses pr ON p.poll_id = pr.poll_id
+WHERE p.poll_id = ?
+GROUP BY p.poll_id
+        ", [$poll_id]);
+
+        return $this->course_db->row()['num_responses'];
+    }
+
+    /**
+     * Return the number of responses for all polls
+     */
+    public function getNumResponsesAllPolls(): array {
+        $this->course_db->query("
+SELECT
+    p.poll_id,
+    COUNT(DISTINCT pr.student_id) AS num_responses
+FROM polls p
+LEFT JOIN poll_responses pr ON p.poll_id = pr.poll_id
+GROUP BY p.poll_id
+        ");
+
+        $return_val = [];
+        foreach ($this->course_db->rows() as $row) {
+            $return_val[$row['poll_id']] = $row['num_responses'];
+        }
+
+        return $return_val;
     }
 
     public function submitResponse($poll_id, $responses) {

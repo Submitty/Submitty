@@ -12,6 +12,7 @@ use app\libraries\Core;
  * @method string getName()
  * @method string getQuestion()
  * @method string getQuestionType()
+ * @method int getNumResponses()
  * @method string|null getImagePath()
  */
 class PollModel extends AbstractModel {
@@ -24,6 +25,8 @@ class PollModel extends AbstractModel {
     /** @prop-read string */
     protected $question_type;
     protected $responses;
+    /** @prop-read int */
+    protected $num_responses;
     /** @prop-read array */
     protected $answers;
     /** @prop-read array */
@@ -35,7 +38,21 @@ class PollModel extends AbstractModel {
     /** @prop-read string */
     protected $release_histogram;
 
-    public function __construct(Core $core, $id, $name, $question, $question_type, $status, $release_date, $image_path, $release_histogram) {
+    public function __construct(
+        Core $core,
+        int $id,
+        string $name,
+        string $question,
+        string $question_type,
+        string $status,
+        string $release_date,
+        ?string $image_path,
+        string $release_histogram,
+        int $num_responses,
+        ?array $answers = null,
+        ?array $responses = null,
+        ?array $user_responses = null
+    ) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -45,11 +62,15 @@ class PollModel extends AbstractModel {
         $this->release_date = $release_date;
         $this->image_path = $image_path;
         $this->release_histogram = $release_histogram;
+        $this->num_responses = $num_responses;
+        $this->answers = $answers;
+        $this->responses = $responses;
+        $this->user_responses = $user_responses;
     }
 
     public function getResponses() {
         // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
-        if (!isset($this->responses)) {
+        if ($this->responses === null) {
             $this->responses = $this->core->getQueries()->getResponses($this->getId());
         }
         return array_keys($this->responses);
@@ -57,7 +78,7 @@ class PollModel extends AbstractModel {
 
     public function getAnswers() {
         // If this is the first time the answers have been queried, make a DB query.  Otherwise use the existing data.
-        if (!isset($this->answers)) {
+        if ($this->answers === null) {
             $this->answers = $this->core->getQueries()->getAnswers($this->getId());
         }
         return $this->answers;
@@ -77,7 +98,7 @@ class PollModel extends AbstractModel {
 
     public function getUserResponses() {
         // Only fetch the responses if they are needed, and cache the result
-        if (!isset($this->user_responses)) {
+        if ($this->user_responses === null) {
             $this->user_responses = $this->core->getQueries()->getUserResponses($this->id);
         }
         return $this->user_responses;
