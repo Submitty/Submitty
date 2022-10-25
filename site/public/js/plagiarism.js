@@ -264,9 +264,13 @@ function loadUser2DropdownList(state) {
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'match'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}`;
     requestAjaxData(url, (data) => {
-
         state.user_2_dropdown_list = data;
         state.user_2_selected = data[0];
+
+        // No matches for this user+version pair
+        if (data.length === 0) {
+            state.user_2_selected = [];
+        }
 
         refreshUser2Dropdown(state);
         loadConcatenatedFileForEditor(state, 2);
@@ -286,7 +290,12 @@ function loadConcatenatedFileForEditor(state, editor) {
         // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
     }
-    else {
+    else { // editor 2
+        if (state.user_2_selected.length === 0) {
+            state.editor2.getDoc().setValue('No matches for this submission');
+            state.editor2.refresh();
+            return;
+        }
         // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_2_selected.user_id}&version=${state.user_2_selected.version}&source_gradeable=${state.user_2_selected.source_gradeable}`;
     }
@@ -321,6 +330,12 @@ function colorRefreshAfterConcatLoad(state) {
 
 
 function loadColorInfo(state) {
+    if (state.user_2_selected.length === 0) {
+        state.color_info = [];
+        colorRefreshAfterConcatLoad(state);
+        return;
+    }
+
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {

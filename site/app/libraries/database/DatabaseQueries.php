@@ -1085,17 +1085,18 @@ WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
 
         if (!empty($semester) && !empty($course)) {
             $params = [$user->getGroup(), $user->getRegistrationSection(),
-                            $this->submitty_db->convertBoolean($user->isManualRegistration()), $semester, $course,
+                            $this->submitty_db->convertBoolean($user->isManualRegistration()),
+                            $user->getRegistrationType(), $semester, $course,
                             $user->getId()];
             $this->submitty_db->query(
                 "
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
+UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
 WHERE semester=? AND course=? AND user_id=?",
                 $params
             );
 
-            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
+            $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
+            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -3112,7 +3113,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             SELECT gradeable.g_id, g_title, eg_submission_due_date
             FROM gradeable INNER JOIN electronic_gradeable
                 ON gradeable.g_id = electronic_gradeable.g_id
-            WHERE g_gradeable_type=0 and eg_scanned_exam=FALSE and eg_has_due_date=TRUE
+            WHERE g_gradeable_type=0 and not (eg_student_view=TRUE and eg_student_view_after_grades=TRUE) and eg_has_due_date=TRUE
             ORDER BY g_grade_released_date DESC
         "
         );
@@ -3722,7 +3723,21 @@ ORDER BY gt.{$section_key}",
      * @param  string $gradeable_id
      * @return SimpleGradeOverriddenUser[]
      */
-    public function getUsersWithOverriddenGrades($gradeable_id) {
+    public function getUsersWithOverriddenGrades(string $gradeable_id): array {
+        $return = [];
+        foreach ($this->getRawUsersWIthOverriddenGrades($gradeable_id) as $row) {
+            $return[] = new SimpleGradeOverriddenUser($this->core, $row);
+        }
+        return $return;
+    }
+
+    /**
+     * Return an array of users with overridden Grades
+     *
+     * @param  string $gradeable_id
+     * @return array
+     */
+    public function getRawUsersWithOverriddenGrades(string $gradeable_id): array {
         $this->course_db->query(
             "
         SELECT u.user_id, user_firstname,
@@ -3735,12 +3750,7 @@ ORDER BY gt.{$section_key}",
         ORDER BY user_email ASC;",
             [$gradeable_id]
         );
-
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleGradeOverriddenUser($this->core, $row);
-        }
-        return $return;
+        return $this->course_db->rows();
     }
 
     /**
@@ -4445,8 +4455,18 @@ AND gc_id IN (
         }
     }
 
-    public function getAllAnonIdsByGradeable($g_id) {
+    public function getAllAnonIdsByGradeable(string $g_id): array {
         $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getAllAnonIdsByGradeableWithUserIds(string $g_id): array {
+        $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getAllTeamAnonIdsByGradeable(string $g_id): array {
+        $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
 
@@ -5014,9 +5034,9 @@ AND gc_id IN (
                   eg_thread_ids AS discussion_thread_ids,
                   eg_has_discussion AS discussion_based,
                   eg_use_ta_grading AS ta_grading,
-                  eg_scanned_exam AS scanned_exam,
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
+                  eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
@@ -5684,9 +5704,9 @@ AND gc_id IN (
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                 $gradeable->isTaGrading(),
-                $gradeable->isScannedExam(),
                 $gradeable->isStudentView(),
                 $gradeable->isStudentViewAfterGrades(),
+                $gradeable->canStudentDownload(),
                 $gradeable->isStudentSubmit(),
                 $gradeable->hasDueDate(),
                 $gradeable->getAutogradingConfigPath(),
@@ -5718,9 +5738,9 @@ AND gc_id IN (
                   eg_max_team_size,
                   eg_team_lock_date,
                   eg_use_ta_grading,
-                  eg_scanned_exam,
                   eg_student_view,
                   eg_student_view_after_grades,
+                  eg_student_download,
                   eg_student_submit,
                   eg_has_due_date,
                   eg_config_path,
@@ -5844,9 +5864,9 @@ AND gc_id IN (
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                     $gradeable->isTaGrading(),
-                    $gradeable->isScannedExam(),
                     $gradeable->isStudentView(),
                     $gradeable->isStudentViewAfterGrades(),
+                    $gradeable->canStudentDownload(),
                     $gradeable->isStudentSubmit(),
                     $gradeable->hasDueDate(),
                     $gradeable->hasReleaseDate(),
@@ -5879,9 +5899,9 @@ AND gc_id IN (
                       eg_max_team_size=?,
                       eg_team_lock_date=?,
                       eg_use_ta_grading=?,
-                      eg_scanned_exam=?,
                       eg_student_view=?,
                       eg_student_view_after_grades=?,
+                      eg_student_download=?,
                       eg_student_submit=?,
                       eg_has_due_date=?,
                       eg_has_release_date=?,
@@ -7176,6 +7196,21 @@ AND gc_id IN (
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
+              
+              /* Aggregate Gradeable Component Verifier Data */
+              gcd.array_verifier_user_id,
+              gcd.array_verifier_user_firstname,
+              gcd.array_verifier_user_preferred_firstname,
+              gcd.array_verifier_user_lastname,
+              gcd.array_verifier_user_email,
+              gcd.array_verifier_user_email_secondary,
+              gcd.array_verifier_user_email_secondary_notify,
+              gcd.array_verifier_user_group,
+              gcd.array_verifier_manual_registration,
+              gcd.array_verifier_last_updated,
+              gcd.array_verifier_registration_section,
+              gcd.array_verifier_rotating_section,
+              gcd.array_verifier_registration_type,
 
               /* Aggregate Gradeable Component Data (versions) */
               egd.array_version,
@@ -7251,6 +7286,19 @@ AND gc_id IN (
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  json_agg(uv.user_id) AS array_verifier_user_id,
+                  json_agg(uv.user_firstname) AS array_verifier_user_firstname,
+                  json_agg(uv.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
+                  json_agg(uv.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(uv.user_email) AS array_verifier_user_email,
+                  json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
+                  json_agg(uv.user_email_secondary_notify) AS array_verifier_user_email_secondary_notify,
+                  json_agg(uv.user_group) AS array_verifier_user_group,
+                  json_agg(uv.manual_registration) AS array_verifier_manual_registration,
+                  json_agg(uv.last_updated) AS array_verifier_last_updated,
+                  json_agg(uv.registration_section) AS array_verifier_registration_section,
+                  json_agg(uv.rotating_section) AS array_verifier_rotating_section,
+                  json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
                   ug.g_id
                 FROM gradeable_component_data in_gcd
@@ -7284,6 +7332,10 @@ AND gc_id IN (
                         FROM gradeable_anon
                       ) AS ga ON u.user_id=ga.user_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
+                  LEFT JOIN (
+                    SELECT u.*
+                    FROM users u
+                  ) AS uv ON uv.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id, ug.g_id
               ) AS gcd ON gcd.gd_id=gd.gd_id AND gcd.g_id=g.g_id
 
@@ -7453,6 +7505,15 @@ AND gc_id IN (
                             return 'grader_' . $elem;
                         },
                         $user_properties
+                    ),
+                    array_map(
+                        function ($elem) {
+                            return 'verifier_' . $elem;
+                        },
+                        array_diff(
+                            $user_properties,
+                            ['anon_id', 'grading_registration_sections']
+                        )
                     )
                 ) as $property
             ) {
@@ -7478,13 +7539,26 @@ AND gc_id IN (
                     // Create the grader user
                     $grader = new User($this->core, $user_array);
 
+                    // Transpose the verifier if it exists
+                    $verifier = null;
+                    $verifier_array = [];
+                    if (isset($db_row_split['verifier_user_id'][$i]) && $db_row_split['verifier_user_id'][$i] !== null) {
+                        foreach ($user_properties as $property) {
+                            if (isset($db_row_split['verifier_' . $property][$i])) {
+                                $verifier_array[$property] = $db_row_split['verifier_' . $property][$i];
+                            }
+                        }
+                        $verifier = new User($this->core, $verifier_array);
+                    }
+
                     // Create the component
                     $graded_component = new GradedComponent(
                         $this->core,
                         $ta_graded_gradeable,
                         $gradeable->getComponent($db_row_split['comp_id'][$i]),
                         $grader,
-                        $comp_array
+                        $comp_array,
+                        $verifier
                     );
 
                     $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
