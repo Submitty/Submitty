@@ -105,6 +105,9 @@ class PollModel extends AbstractModel {
     }
 
     public function getUserResponse($user_id) {
+        if ($this->user_responses === null) {
+            $this->user_responses = $this->core->getQueries()->getUserResponses($this->id);
+        }
         if (!isset($this->user_responses[$user_id][0])) {
             return null;
         }
@@ -113,6 +116,10 @@ class PollModel extends AbstractModel {
     }
 
     public function getResponseString($response_id) {
+        // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
+        if ($this->responses === null) {
+            $this->responses = $this->core->getQueries()->getResponses($this->getId());
+        }
         if (isset($this->responses[$response_id])) {
             return $this->responses[$response_id];
         }
@@ -120,6 +127,10 @@ class PollModel extends AbstractModel {
     }
 
     public function getAllResponsesString($response_id) {
+        // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
+        if ($this->responses === null) {
+            $this->responses = $this->core->getQueries()->getResponses($this->getId());
+        }
         if (count($this->responses) == 1) {
             return $this->responses[$response_id[0]];
         }
