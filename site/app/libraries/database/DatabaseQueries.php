@@ -7811,12 +7811,12 @@ ORDER BY
 
             foreach ($polls_rows as $row) {
                 $answers = [];
-                foreach ($row['responses'] as $r) {
+                foreach (json_decode($row['responses'], true) as $r) {
                     if ($r['correct'] === true) {
                         $answers[] = $r['poll_id'];
                     }
                 }
-                $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, $row['responses']);
+                $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, json_decode($row['responses'], true));
             }
         }
         else {
@@ -7835,13 +7835,29 @@ ORDER BY
 
     public function getTodaysPolls(): array {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
+        $this->course_db->query("
+SELECT
+    p.*,
+    json_agg(po1) AS responses
+FROM polls p
+LEFT JOIN poll_options po1 ON po1.poll_id = p.poll_id
+WHERE p.release_date = ?
+GROUP BY p.poll_id
+ORDER BY
+    p.name ASC
+        ", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
         $num_responses = $this->getNumResponsesAllPolls();
 
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
+            $answers = [];
+            foreach (json_decode($row['responses'], true) as $r) {
+                if ($r['correct'] === true) {
+                    $answers[] = $r['poll_id'];
+                }
+            }
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, json_decode($row['responses'], true));
         }
 
         return $polls;
@@ -7849,13 +7865,29 @@ ORDER BY
 
     public function getOlderPolls(): array {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("
+SELECT
+    p.*,
+    json_agg(po1) AS responses
+FROM polls p
+LEFT JOIN poll_options po1 ON po1.poll_id = p.poll_id
+WHERE p.release_date < ?
+GROUP BY p.poll_id
+ORDER BY
+    p.name ASC
+        ", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
         $num_responses = $this->getNumResponsesAllPolls();
 
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
+            $answers = [];
+            foreach (json_decode($row['responses'], true) as $r) {
+                if ($r['correct'] === true) {
+                    $answers[] = $r['poll_id'];
+                }
+            }
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, json_decode($row['responses'], true));
         }
 
         return $polls;
@@ -7863,13 +7895,29 @@ ORDER BY
 
     public function getFuturePolls(): array {
         $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
+        $this->course_db->query("
+SELECT
+    p.*,
+    json_agg(po1) AS responses
+FROM polls p
+LEFT JOIN poll_options po1 ON po1.poll_id = p.poll_id
+WHERE p.release_date > ?
+GROUP BY p.poll_id
+ORDER BY
+    p.name ASC
+        ", [date("Y-m-d")]);
         $polls_rows = $this->course_db->rows();
 
         $num_responses = $this->getNumResponsesAllPolls();
 
         foreach ($polls_rows as $row) {
-            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']]);
+            $answers = [];
+            foreach (json_decode($row['responses'], true) as $r) {
+                if ($r['correct'] === true) {
+                    $answers[] = $r['poll_id'];
+                }
+            }
+            $polls[] = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $row["status"], $row["release_date"], $row["image_path"], $row["release_histogram"], $num_responses[$row['poll_id']], $answers, json_decode($row['responses'], true));
         }
 
         return $polls;

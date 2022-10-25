@@ -108,43 +108,45 @@ class PollModel extends AbstractModel {
         if ($this->user_responses === null) {
             $this->user_responses = $this->core->getQueries()->getUserResponses($this->id);
         }
-        if (!isset($this->user_responses[$user_id][0])) {
+        if (!isset($this->user_responses[$user_id]) || count($this->user_responses[$user_id]) === 0) {
             return null;
         }
 
         return $this->user_responses[$user_id];
     }
 
-    public function getResponseString($response_id) {
+    public function getResponseString($response_id): string {
         // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
         if ($this->responses === null) {
             $this->responses = $this->core->getQueries()->getResponses($this->getId());
         }
-        if (isset($this->responses[$response_id])) {
-            return $this->responses[$response_id];
+        foreach ($this->responses as $r) {
+            if ($r['option_id'] === $response_id) {
+                return $r['response'];
+            }
         }
         return "No Response";
     }
 
-    public function getAllResponsesString($response_id) {
+    public function getAllResponsesString($response_id): string {
         // If this is the first time the responses have been queried, make a DB query.  Otherwise use the existing data.
         if ($this->responses === null) {
             $this->responses = $this->core->getQueries()->getResponses($this->getId());
         }
-        if (count($this->responses) == 1) {
-            return $this->responses[$response_id[0]];
+        if (count($this->responses) === 1) {
+            return $this->getResponseString($response_id);
         }
         else {
             $ret_string = "";
             $first_answer = true;
-            foreach ($this->responses as $id => $response) {
-                if (in_array($id, $response_id)) {
+            foreach ($this->responses as $response) {
+                if (in_array($response['option_id'], $response_id)) {
                     if (!$first_answer) {
-                        $ret_string .= ", " . $response;
+                        $ret_string .= ", " . $response['response'];
                     }
                     else {
                         $first_answer = false;
-                        $ret_string .= $response;
+                        $ret_string .= $response['response'];
                     }
                 }
             }
