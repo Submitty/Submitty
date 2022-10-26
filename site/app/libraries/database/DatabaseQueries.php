@@ -6575,7 +6575,7 @@ AND gc_id IN (
     }
 
 
-    public function addToQueue(string $queue_code, string $user_id, string $name, string $contact_info,  $time_in = 0) {
+    public function addToQueue(string $queue_code, string $user_id, string $name, string $contact_info, $time_in = 0) {
         $star_type = 'none';
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
