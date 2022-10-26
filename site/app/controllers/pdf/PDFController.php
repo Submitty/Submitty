@@ -83,7 +83,9 @@ class PDFController extends AbstractController {
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
+                $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+            }
         }
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
