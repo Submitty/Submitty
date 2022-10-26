@@ -80,6 +80,10 @@ class PDFController extends AbstractController {
         }
 
         $real_path = $this->getRealPath($anon_path, $id);
+        if (!file_exists($real_path)) {
+            $this->core->getOutput()->renderJsonFail('The PDF file could not be found');
+            return;
+        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
@@ -192,6 +196,9 @@ class PDFController extends AbstractController {
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
             $real_path = $this->getRealPath($file_path, $id);
+            if (!file_exists($real_path)) {
+                return JsonResponse::getErrorResponse('The PDF file could not be found');
+            }
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
