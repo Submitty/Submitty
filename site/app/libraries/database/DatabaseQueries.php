@@ -6560,7 +6560,7 @@ AND gc_id IN (
     }
 
     public function getStarType($user_id, $queue_code) {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
+        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ORDER BY entry_id DESC", [$user_id, $queue_code]);
         return $this->course_db->rows()[0]['star_type'];
     }
 
