@@ -367,6 +367,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install ca-certificates
 
           - name: Install third party dependencies
             run: |
@@ -394,7 +395,7 @@ jobs:
           - name: Set up apache
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+              sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
               sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
               sudo mkdir -p /run/php
               sudo chown www-data:www-data /run/php
@@ -550,6 +551,26 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
               headless: true
+
+          - name: Setup HTTP/2
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              if [ -f .setup/dev-upgrade-h2.sh ]; then
+                sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
+                sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
+                  && echo "Setup OK"
+                  || {
+                    echo "::warning::Setup Failed"
+                    sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
+                  }
+              else
+                echo "Could not find dev-upgrade-h2.sh, skipping"
+              fi
+
+          - name: Test HTTP/2 Connection
+            run: |
+              http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
+              [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
           - uses: actions/upload-artifact@v2
             if: failure()
