@@ -6561,7 +6561,7 @@ AND gc_id IN (
 
     public function getStarType($user_id, $queue_code) {
         $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ORDER BY entry_id DESC", [$user_id, $queue_code]);
-        return $this->course_db->rows()[0]['star_type'];
+        return $this->course_db->rows()['star_type'];
     }
 
     public function getQueueId($queue_code) {
@@ -6582,7 +6582,7 @@ AND gc_id IN (
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
-        if (is_null($last_time_in_queue) || DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
+        if ($last_time_in_queue === null || DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
             $star_type = 'full';
         }
         elseif (DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
@@ -6650,10 +6650,10 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if ($this->getStarType($user_id, $queue_code) == 'full') {
+        if ($this->getStarType($user_id, $queue_code) === 'full') {
             $star_type = 'prev_full';
         }
-        elseif ($this->getStarType($user_id, $queue_code) == 'half') {
+        elseif ($this->getStarType($user_id, $queue_code) === 'half') {
             $star_type = 'prev_half';
         }
 
@@ -6737,10 +6737,10 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if ($this->getStarType($user_id, $queue_code) == 'prev_full') {
+        if ($this->getStarType($user_id, $queue_code) === 'prev_full') {
             $star_type = 'full';
         }
-        elseif ($this->getStarType($user_id, $queue_code) == 'prev_half') {
+        elseif ($this->getStarType($user_id, $queue_code) === 'prev_half') {
             $star_type = 'half';
         }
 
