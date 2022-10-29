@@ -2329,6 +2329,13 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_component_data_no_grader_index; Type: INDEX; Schema: public; Owner: -
 --
 
