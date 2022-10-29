@@ -2,7 +2,9 @@
 
 namespace app\controllers\grading;
 
+use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
@@ -97,7 +99,7 @@ class SimpleGraderController extends AbstractController {
      * @param null|string $view
      * @param string $sort
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
-     * @return MultiResponse
+     * @return ResponseInterface
      */
     public function gradePage($gradeable_id, $view = null, $sort = "section_subsection") {
         try {
@@ -107,6 +109,10 @@ class SimpleGraderController extends AbstractController {
             return MultiResponse::webOnlyResponse(
                 new WebResponse('Error', 'noGradeable')
             );
+        }
+
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']));
         }
 
         //If you can see the page, you can grade the page
@@ -175,6 +181,12 @@ class SimpleGraderController extends AbstractController {
             $graders[$section->getName()] = $section->getGraders();
         }
 
+        $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
+        $anon_ids = [];
+        foreach ($rawAnonIds as $anon) {
+            $anon_ids[$anon['user_id']] = $anon['anon_id'];
+        }
+
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key, "u.user_id"]);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -186,7 +198,8 @@ class SimpleGraderController extends AbstractController {
                 $graders,
                 $section_key,
                 $show_all_sections_button,
-                $sort
+                $sort,
+                $anon_ids
             )
         );
     }
