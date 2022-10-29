@@ -379,14 +379,17 @@ class HomeworkView extends AbstractView {
         if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
-                for ($i = 1; $i <= $num_parts; $i++) {
-                    foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
-                        $old_files[] = [
-                            'name' => str_replace('\'', '\\\'', $file['name']),
-                            'size' => number_format($file['size'] / 1024, 2),
-                            'part' => $i,
-                            'path' => $file['path']
-                        ];
+                // If students do not have permission to download files then hide the old files
+                if ($this->core->getUser()->accessGrading() || $gradeable->canStudentDownload()) {
+                    for ($i = 1; $i <= $num_parts; $i++) {
+                        foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
+                            $old_files[] = [
+                                'name' => str_replace('\'', '\\\'', $file['name']),
+                                'size' => number_format($file['size'] / 1024, 2),
+                                'part' => $i,
+                                'path' => $file['path']
+                            ];
+                        }
                     }
                 }
             }
@@ -951,7 +954,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             'display_version' => $display_version,
             'check_refresh_submission_url' => $check_refresh_submission_url,
@@ -1042,8 +1045,8 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
-            'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
+            'student_download' => $gradeable->canStudentDownload(),
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             // TODO: change this to submitter ID when the MiscController uses new model

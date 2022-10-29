@@ -18,6 +18,7 @@ use app\models\notebook\Notebook;
  * @method int getMaxSubmissionSize()
  * @method int getMaxSubmissions()
  * @method string getAssignmentMessage()
+ * @method bool getHideTestDetails()
  * @method string getRequiredCapabilities()
  * @method float getMaxPossibleGradingTime()
  * @method string[] getPartNames()
@@ -45,9 +46,7 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var string A message to show the user above the file upload box */
     protected $gradeable_message;
     /** @prop @var bool Indicates if list of test should be shown at the bottom of the page */
-    protected $hide_version_and_test_details;
-    /** @prop @var bool Indicates if list os submitted files should be shown on page */
-    protected $hide_submitted_files;
+    protected $hide_test_details;
     /** @prop @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
     /** @prop @var int The number of seconds allowed for autograding */
@@ -130,8 +129,7 @@ class AutogradingConfig extends AbstractModel {
         }
 
         // These two items default to false if they don't exist in the gradeable config.json
-        $this->hide_version_and_test_details = $details['hide_version_and_test_details'] ?? false;
-        $this->hide_submitted_files = $details['hide_submitted_files'] ?? false;
+        $this->hide_test_details = $details['hide_test_details'] ?? $details['hide_version_and_test_details'] ?? false;
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
