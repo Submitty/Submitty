@@ -4,7 +4,7 @@ const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    collapseItems = new Set(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*\=\s*([^;]*).*$)|^.*$/, "$1").split("||"));
+    collapseItems = new Set(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1').split('||'));
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
@@ -87,7 +87,7 @@ function hideGradeableMessage() {
 }
 
 function updateCollapsedSections() {
-    document.cookie = "collapsed_sections=" + [...collapseItems].join("\n") + ";path=" + $('#details-table').attr('data-details-base-path');
+    document.cookie = `collapsed_sections=${[...collapseItems].join('\n')};path=${$('#details-table').attr('data-details-base-path')}`;
 }
 
 function expandAllSections() {
