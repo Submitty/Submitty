@@ -177,6 +177,12 @@ class SimpleGraderController extends AbstractController {
             $graders[$section->getName()] = $section->getGraders();
         }
 
+        $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
+        $anon_ids = [];
+        foreach ($rawAnonIds as $anon) {
+            $anon_ids[$anon['user_id']] = $anon['anon_id'];
+        }
+
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key, "u.user_id"]);
         return new WebResponse(
             ['grading', 'SimpleGrader'],
@@ -187,7 +193,8 @@ class SimpleGraderController extends AbstractController {
             $graders,
             $section_key,
             $show_all_sections_button,
-            $sort
+            $sort,
+            $anon_ids
         );
     }
 
