@@ -1030,8 +1030,10 @@ class Course(object):
                             if gradeable.is_repository:
                                 if not os.path.exists(checkout_path):
                                     os.makedirs(checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{checkout_path}"')
                                 if not os.path.exists(user_checkout_path):
                                     os.makedirs(user_checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{user_checkout_path}"')
 
                             if gradeable.annotated_pdf is True:
                                 if not os.path.exists(gradeable_annotation_path):
