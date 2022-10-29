@@ -687,7 +687,7 @@ class SubmissionController extends AbstractController {
         $i = 1;
         foreach ($image_files as $image) {
             // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $matches[0] . "." . $image_extension))) {
+            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
                 return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
             }
             if (!@unlink($image)) {
