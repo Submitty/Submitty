@@ -23,7 +23,7 @@ class GradeInquiryController extends AbstractController {
         $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
 
         $user = $this->core->getUser();
-        $submitter = $this->core->getQueries()->getUserById($submitter_id);
+        $submitter = $this->core->getQueries()->getSubmitterById($submitter_id);
 
         if ($submitter === null) {
             return JsonResponse::getFailResponse("Failed to get submitter");
@@ -45,7 +45,7 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
 
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $user->accessGrading() );
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to request regrade')
@@ -82,7 +82,7 @@ class GradeInquiryController extends AbstractController {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
         $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
-        $submitter = $this->core->getQueries()->getUserById($submitter_id);
+        $submitter = $this->core->getQueries()->getSubmitterById($submitter_id);
 
         if ($submitter === null) {
             return JsonResponse::getFailResponse("Failed to get submitter");
@@ -109,7 +109,7 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI(
             "grading.electronic.grade_inquiry",
             ['graded_gradeable' => $graded_gradeable]
-        ) && ($submitter_id === $user->getId() || $user->accessFullGrading());
+        ) && $user->accessFullGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to make grade inquiry post')
@@ -176,7 +176,7 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        $submitter = $this->core->getQueries()->getUserById($submitter_id);
+        $submitter = $this->core->getQueries()->getSubmitterById($submitter_id);
         if ($submitter === null) {
             return "";
         }
@@ -185,7 +185,7 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI(
             "grading.electronic.grade_inquiry",
             ['graded_gradeable' => $graded_gradeable]
-        ) && ($submitter_id === $user->getId() || $user->accessGrading() );
+        ) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return "";
         }
@@ -234,12 +234,12 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse('Submitter has not made a grade inquiry');
         }
 
-        $submitter = $this->core->getQueries()->getUserById($submitter_id);
+        $submitter = $this->core->getQueries()->getSubmitterById($submitter_id);
         if ($submitter === null) {
             return JsonResponse::getFailResponse("Failed to get submitter");
         }
 
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && ($submitter_id === $user->getId() || $user->accessGrading() );
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status');
         }
@@ -268,10 +268,12 @@ class GradeInquiryController extends AbstractController {
             $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
-            return JsonResponse::getSuccessResponse([
+            return JsonResponse::getSuccessResponse(
+                [
                 'type' => 'toggle_status',
                 'new_discussion' => $new_discussion
-            ]);
+                ]
+            );
         }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse($e->getMessage());
@@ -306,11 +308,12 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * Helper function to create notification/email content and aggregate recipients
+     *
      * @param GradedGradeable $graded_gradeable
-     * @param string $gradeable_id
-     * @param string $content
-     * @param string $type
-     * @param int|null $gc_id
+     * @param string          $gradeable_id
+     * @param string          $content
+     * @param string          $type
+     * @param int|null        $gc_id
      */
     private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id) {
         $component = "";

@@ -498,12 +498,12 @@ class User extends AbstractModel {
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_firstname':
             case 'user_legal_lastname':
-                //First and last name must be alpha characters, white-space, or certain punctuation.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+                //First and last name must be alpha characters, latin chars, white-space, or certain punctuation.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
             case 'user_preferred_firstname':
             case 'user_preferred_lastname':
-                //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
+                //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
