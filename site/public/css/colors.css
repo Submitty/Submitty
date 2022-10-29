@@ -217,7 +217,7 @@
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
     --background-blue: #000000;
-    --default-black: #FFFFFF;
+    --default-black: #ffffff;
 }
 
 [data-theme="dark"] {
@@ -227,7 +227,7 @@
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
-    --default-black: #FFFFFF;
+    --default-black: #ffffff;
     --always-default-white: #ffffff;
     --badge-backgroud-red: #ff0000;
     --error-alert-dark-red: #ff7a7a;
