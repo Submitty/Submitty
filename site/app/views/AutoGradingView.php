@@ -383,7 +383,8 @@ class AutoGradingView extends AbstractView {
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
                 'graders' => array_map(function (User $grader) {
-                    return ($grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName());
+                    //Preferred first name, preffered last name initial for full access graders
+                    return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName()[0];
                 }, $container->getVisibleGraders()),
                 'marks' => $component_marks,
             ];
