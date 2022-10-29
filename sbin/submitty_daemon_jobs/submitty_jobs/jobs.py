@@ -52,7 +52,6 @@ class AbstractJob(ABC):
     def run_job(self):
         pass
 
-    @abstractmethod
     def cleanup_job(self):
         pass
 
