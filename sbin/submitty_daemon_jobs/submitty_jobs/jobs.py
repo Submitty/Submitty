@@ -52,8 +52,7 @@ class AbstractJob(ABC):
     def run_job(self):
         pass
 
-    @abstractmethod
-    def cleanup_job(self):
+    def cleanup_job(self):  # noqa: B027
         pass
 
 
