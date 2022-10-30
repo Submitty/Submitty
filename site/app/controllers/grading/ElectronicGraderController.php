@@ -4,6 +4,8 @@ namespace app\controllers\grading;
 
 use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
+use app\libraries\GradeableType;
+use app\libraries\response\RedirectResponse;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
@@ -419,7 +421,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -850,6 +852,10 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']));
+        }
+
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
@@ -935,7 +941,27 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode);
+        $rawOverrides = $this->core->getQueries()->getRawUsersWithOverriddenGrades($gradeable->getId());
+        $overrides = [];
+        foreach ($rawOverrides as $o) {
+            $overrides[] = $o['user_id'];
+        }
+
+        $rawAnonIds = $this->core->getQueries()->getAllAnonIdsByGradeableWithUserIds($gradeable->getId());
+        if ($gradeable->isTeamAssignment()) {
+            $rawAnonIds = array_merge($rawAnonIds, $this->core->getQueries()->getAllTeamAnonIdsByGradeable($gradeable->getId()));
+        }
+        $anon_ids = [];
+        foreach ($rawAnonIds as $anon) {
+            if (key_exists('team_id', $anon)) {
+                $anon_ids[$anon['team_id']] = $anon['anon_id'];
+            }
+            else {
+                $anon_ids[$anon['user_id']] = $anon['anon_id'];
+            }
+        }
+
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -977,7 +1003,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
             return;
         }
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get attachments.');
             return;
@@ -1010,7 +1036,13 @@ class ElectronicGraderController extends AbstractController {
      */
     public function uploadAttachment($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
+
+        //Get the user uploading attachment
         $grader = $this->core->getUser();
+        if (!$grader->accessGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
+            return;
+        }
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1020,7 +1052,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to upload attachments.');
             return;
@@ -1094,7 +1126,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete attachments.');
             return;
@@ -1115,6 +1147,11 @@ class ElectronicGraderController extends AbstractController {
 
         if (empty($_POST['attachment'])) {
             $this->core->getOutput()->renderJsonFail('Missing attachment to delete.');
+            return;
+        }
+
+        if (strpos($_POST['attachment'], "..") !== false) {
+            $this->core->getOutput()->renderJsonFail('Invalid path.');
             return;
         }
 
@@ -1515,7 +1552,7 @@ class ElectronicGraderController extends AbstractController {
 
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
-            $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from);
+            $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from, $gradeable_id);
             if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
@@ -1551,7 +1588,7 @@ class ElectronicGraderController extends AbstractController {
             if ($goToStudent !== null) {
                 $who_id = $goToStudent->getId();
                 if ($blind_grading || $anon_mode) {
-                    $who_id = $goToStudent->getAnonId();
+                    $who_id = $goToStudent->getAnonId($gradeable_id);
                 }
             }
             if (empty($who_id)) {
@@ -1566,7 +1603,7 @@ class ElectronicGraderController extends AbstractController {
         }
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
-        $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
+        $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $gradeable_id);
         if ($blind_grading !== "unblind" || $anon_mode) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
@@ -1827,7 +1864,7 @@ class ElectronicGraderController extends AbstractController {
         $grader = $this->core->getUser();
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -1929,7 +1966,7 @@ class ElectronicGraderController extends AbstractController {
             $response_data['peer_gradeable'] = false;
         }
 
-        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
+        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId($gradeable->getId());
 
         $response_data['itempool_items'] = [];
         $components = $gradeable->getComponents();
@@ -2008,7 +2045,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -2612,7 +2649,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get the graded gradeable
-        $who_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
+        $who_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id);
         if ($graded_gradeable === false) {
             return;
@@ -2788,7 +2825,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -2856,7 +2893,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -2920,7 +2957,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
         // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
         if ($submitter_id === false) {
             return;
         }
@@ -3004,7 +3041,12 @@ class ElectronicGraderController extends AbstractController {
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
 
-        $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getAnonId($submitter_ids);
+        if ($gradeable->isTeamAssignment()) {
+            $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getTeamAnonId($submitter_ids);
+        }
+        else {
+            $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getAnonId($submitter_ids, $gradeable->getId());
+        }
 
         $section_graded_component_count = 0;
         $section_total_component_count  = 0;
@@ -3185,7 +3227,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        if ($gradeable->setPeerFeedback($this->core->getQueries()->getUserFromAnon($grader_id)[$grader_id], $user_id, $feedback)) {
+        if ($gradeable->setPeerFeedback($this->core->getQueries()->getUserFromAnon($grader_id, $gradeable_id)[$grader_id], $user_id, $feedback)) {
             $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         }
         else {

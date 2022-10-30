@@ -82,6 +82,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/update', 'System Update'],
             [self.test_url + '/superuser/email', 'Email All'],
             [self.test_url + '/superuser/email_status', 'Email Status'],
+            [self.test_url + '/superuser/saml', 'SAML Management'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
@@ -215,8 +216,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/polls', 'Submini Polls'],
-            # sample course has no course materials to start, so this link will not appear
-            # [base_url + '/course_materials', 'Course Materials'],
+            [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/student_photos', 'Student Photos'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
@@ -270,8 +270,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/polls', 'Submini Polls'],
-            # sample course has no course materials in start, so this link will not appear
-            # [base_url + '/course_materials', 'Course Materials'],
+            [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],

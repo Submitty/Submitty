@@ -574,7 +574,10 @@ class ForumController extends AbstractController {
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if ($post['thread_id'] !== intval($_POST['thread_id'])) {
+        if (isset($_POST['thread_id']) && $post['thread_id'] !== intval($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
+        }
+        if (isset($_POST['edit_thread_id']) && $post['thread_id'] !== intval($_POST['edit_thread_id'])) {
             return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
         }
         if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {

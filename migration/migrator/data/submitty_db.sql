@@ -58,6 +58,30 @@ $$;
 
 
 --
+-- Name: saml_mapping_check(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.saml_mapping_check() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id) = 2
+            THEN
+                IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id AND user_id = saml_id) > 0
+                THEN
+                    RAISE EXCEPTION 'SAML mapping already exists for this user';
+                end if;
+                IF NEW.user_id = NEW.saml_id
+                THEN
+                    RAISE EXCEPTION 'Cannot create SAML mapping for proxy user';
+                end if;
+            end if;
+            RETURN NEW;
+        END;
+        $$;
+
+
+--
 -- Name: sync_courses_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -74,10 +98,10 @@ BEGIN
     IF (TG_OP = 'INSERT') THEN
         -- FULL data sync on INSERT of a new user record.
         SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-        query_string := 'INSERT INTO users (user_id, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated, user_group, registration_section, manual_registration) ' ||
+        query_string := 'INSERT INTO users (user_id, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
                         'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' || quote_literal(user_row.user_lastname) || ', ' ||
                         '' || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_updated) || ', ' || quote_literal(user_row.instructor_updated) || ', ' ||
-                        '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
+                        '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
         IF query_string IS NULL THEN
             RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
         END IF;
@@ -86,7 +110,7 @@ BEGIN
         -- User update on registration_section
         -- CASE clause ensures user's rotating section is set NULL when
         -- registration is updated to NULL.  (e.g. student has dropped)
-        query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
+        query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', registration_type=' || quote_literal(NEW.registration_type) || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
         IF query_string IS NULL THEN
             RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
         END IF;
@@ -147,7 +171,9 @@ DECLARE
     query_string TEXT;
 BEGIN
     db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
-    query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
+    -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
+    query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
+                    || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
         RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
@@ -308,7 +334,9 @@ CREATE TABLE public.courses_users (
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -384,6 +412,38 @@ CREATE TABLE public.migrations_system (
     commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     status numeric(1,0) DEFAULT 0 NOT NULL
 );
+
+
+--
+-- Name: saml_mapped_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.saml_mapped_users (
+    id integer NOT NULL,
+    saml_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    active boolean DEFAULT true NOT NULL
+);
+
+
+--
+-- Name: saml_mapped_users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.saml_mapped_users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: saml_mapped_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.saml_mapped_users_id_seq OWNED BY public.saml_mapped_users.id;
 
 
 --
@@ -478,6 +538,13 @@ ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.email
 
 
 --
+-- Name: saml_mapped_users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('public.saml_mapped_users_id_seq'::regclass);
+
+
+--
 -- Name: vcs_auth_tokens id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -538,6 +605,22 @@ ALTER TABLE ONLY public.migrations_master
 
 ALTER TABLE ONLY public.migrations_system
     ADD CONSTRAINT migrations_system_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: saml_mapped_users saml_mapped_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT saml_mapped_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: saml_mapped_users saml_mapped_users_saml_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT saml_mapped_users_saml_id_user_id_key UNIQUE (saml_id, user_id);
 
 
 --
@@ -616,6 +699,13 @@ CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.cour
 
 
 --
+-- Name: saml_mapped_users saml_mapping_check_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER saml_mapping_check_trigger AFTER INSERT ON public.saml_mapped_users FOR EACH ROW EXECUTE PROCEDURE public.saml_mapping_check();
+
+
+--
 -- Name: courses_users user_sync_courses_users; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -667,6 +757,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.emails
     ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: saml_mapped_users fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --

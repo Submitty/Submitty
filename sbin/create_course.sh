@@ -35,10 +35,7 @@ echo $DATABASE_COURSE_USER
 ########################################################################################################################
 ########################################################################################################################
 
-CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER}"
-if [ -d "${DATABASE_HOST}" ]; then
-    CONN_EXTRA="${CONN_STRING} -p ${DATABASE_PORT}"
-fi
+CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER} -p ${DATABASE_PORT}"
 
 # Check that Submitty Master DB exists.
 PGPASSWORD="${DATABASE_PASS}" psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
@@ -119,6 +116,12 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
+TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc "SELECT COUNT(*) FROM terms WHERE term_id='${semester}'")
+
+if [[ "$TERM_EXISTS" -eq "0" ]] ; then
+    echo "ERROR: Provided term ${semester} doesn't exist."
+    exit
+fi
 
 # FIXME: add some error checking on the $semester and $course
 #        variables

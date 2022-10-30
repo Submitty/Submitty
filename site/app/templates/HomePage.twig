@@ -19,7 +19,10 @@
                             {{ course['display_semester'] }} &nbsp; &nbsp;
                             {{ course['title'] | upper }} &nbsp; &nbsp;
                             {% if course['display_name'] != "" %}
-                                {{ course['display_name'] }}
+                                {{ course['display_name'] }} &nbsp; &nbsp;
+                            {% endif %}
+                            {% if course['registration_section'] != null %}
+                                (Section {{ course['registration_section'] }})
                             {% endif %}
                             {{ user.accessAdmin() }}
                         </a>

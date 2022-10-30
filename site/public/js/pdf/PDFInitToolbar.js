@@ -137,7 +137,7 @@ function renderPDFToolbar() {
                     $('#save-pdf-btn').addClass('btn-default');
                 }
                 else {
-                    alert(data.message);
+                    alert(response.message);
                 }
             },
             error: function(){
