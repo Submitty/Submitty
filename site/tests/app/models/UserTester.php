@@ -254,11 +254,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             $return[] = ["user_legal_{$key}", '', false];
             $return[] = ["user_legal_{$key}", 'Test', true];
             $return[] = ["user_legal_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_legal_{$key}", 'Báiñø', true];
             $return[] = ["user_legal_{$key}", 'Test!!', false];
             $return[] = ["user_legal_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", true];
             $return[] = ["user_preferred_{$key}", '', true];
             $return[] = ["user_preferred_{$key}", 'Test', true];
             $return[] = ["user_preferred_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_preferred_{$key}", 'Báiñø', true];
             $return[] = ["user_preferred_{$key}", 'Test!!', false];
             $return[] = ["user_preferred_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", false];
         }

@@ -36,3 +36,7 @@ a.popout-item > .fas:hover {
 .action-buttons > a {
     margin: 4px;
 }
+
+.partial-checkbox:checked {
+    background-color: var(--standard-medium-gray) !important;
+}
