@@ -2680,13 +2680,13 @@ function scrollToPage(page_num){
         for (let i = 0; i < files.length; i++) {
             let filename = files[i].innerText.trim();
             let filenameNoPeriod = filename.substring(1);
-            if (filename === targetFile || filenameNoPeriod === targetFile) {
-                viewFileFullPanel(filename, files[i].getAttribute("file-url"));
-                return;
-            } else if (filenameNoPeriod.startsWith("upload_page_")) {
-                let pageNum = parseInt(filename.split("_")[2].split(".")[0]);
-                if (pageNum > maxPage) {
-                    maxPage = pageNum;
+            if (filenameNoPeriod.startsWith("upload_page_") && filenameNoPeriod.includes(".")) {
+                let currPageNum = parseInt(filename.split("_")[2].split(".")[0]);
+                if (page_num === currPageNum) {
+                    viewFileFullPanel(filename, files[i].getAttribute("file-url"));
+                    return;
+                } else if (currPageNum > maxPage) {
+                    maxPage = currPageNum;
                     maxPageName = filename;
                     maxPageLoc = files[i].getAttribute("file-url");
                 }
