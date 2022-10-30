@@ -142,7 +142,7 @@ class TestMyProfile(BaseTestCase):
 
     def upload_profile_photo(self):
         # click on the upload-profile-photo link
-        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/a").click()
+        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-profile-photo-form")))
         # Hit submit without adding any file
         self.driver.find_element(By.XPATH, "//div[@id='edit-profile-photo-form']/form/div/div/div[2]/div[2]/div/input").click()
@@ -150,7 +150,7 @@ class TestMyProfile(BaseTestCase):
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-js-0")))
 
         # again click on the edit-preferred-name link
-        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/a").click()
+        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-profile-photo-form")))
         # Clear the previous name and enter new names
         image_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples", "image_diff_mirror", "submissions", "student1.png"))
@@ -179,4 +179,3 @@ class TestMyProfile(BaseTestCase):
 if __name__ == "__main__":
     import unittest
     unittest.main()
-
