@@ -39,6 +39,9 @@ class PollController extends AbstractController {
                 }
             }
 
+            /** @var \app\repositories\ResponseRepository */
+            $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
+
             return new WebResponse(
                 PollView::class,
                 'showPollsInstructor',
@@ -46,15 +49,19 @@ class PollController extends AbstractController {
                 $repo->findByToday(),
                 $repo->findByOld(),
                 $repo->findByFuture(),
+                $em->numResponsesByPoll(),
                 $dropdown_states,
             );
         }
-        else {
+        else { // Student view
+            /** @var \app\repositories\ResponseRepository */
+            $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
             return new WebResponse(
                 PollView::class,
                 'showPollsStudent',
                 $repo->findByToday(),
                 $repo->findByOld(),
+                $em->findAllResponsesByStudentId($this->core->getUser()->getId())
             );
         }
     }

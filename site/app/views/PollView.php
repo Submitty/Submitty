@@ -26,7 +26,7 @@ class PollView extends AbstractView {
      * @param Poll[] $older_polls
      * @param Poll[] $future_polls
      */
-    public function showPollsInstructor(array $todays_polls, array $older_polls, array $future_polls, array $dropdown_states) {
+    public function showPollsInstructor(array $todays_polls, array $older_polls, array $future_polls, array $response_counts, array $dropdown_states) {
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageInstructor.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
@@ -35,6 +35,7 @@ class PollView extends AbstractView {
             'older_polls' => $older_polls,
             'future_polls' => $future_polls,
             'dropdown_states' => $dropdown_states,
+            'response_counts' => $response_counts,
             'semester' => $this->core->getConfig()->getSemester(),
             'course' => $this->core->getConfig()->getCourse()
           ]);
@@ -44,13 +45,14 @@ class PollView extends AbstractView {
      * @param Poll[] $todays_polls
      * @param Poll[] $older_polls
      */
-    public function showPollsStudent(array $todays_polls, array $older_polls) {
+    public function showPollsStudent(array $todays_polls, array $older_polls, array $all_responses) {
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
+            'all_responses' => $all_responses,
             'user_id' => $this->core->getUser()->getId(),
           ]);
     }

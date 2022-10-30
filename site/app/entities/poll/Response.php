@@ -34,7 +34,7 @@ class Response {
   private $poll;
 
   /**
-   * @ORM\ManyToOne(targetEntity="\app\entities\poll\Option",inversedBy="user_responses")
+   * @ORM\ManyToOne(targetEntity="\app\entities\poll\Option",inversedBy="user_responses",fetch="EAGER")
    * @ORM\JoinColumns({
    * @ORM\JoinColumn(name="option_id", referencedColumnName="option_id"),
    * })

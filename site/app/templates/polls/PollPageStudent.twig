@@ -39,14 +39,14 @@
                     <div class = "radio">
                         {% if option.getId() in responses %}
                             {% if poll.isOpen() %}
-                                <input type=radio aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked/>
+                                <input type=radio aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked/>
                             {% else %}
-                                <input type=radio aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked disabled/>
+                                <input type=radio aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked disabled/>
                             {% endif %}
                         {% elseif poll.isOpen() %}
-                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}"/>
+                            <input type=radio aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}"/>
                         {% else %}
-                            <input type=radio aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" disabled/>
+                            <input type=radio aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" disabled/>
                         {% endif %}
                         {% include "misc/Markdown.twig" with {
                             "content" : option.getResponse(),
@@ -63,14 +63,14 @@
                     <div class = "radio">
                         {% if option.getId() in responses %}
                             {% if poll.isOpen() %}
-                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked/>
+                                <input type="checkbox" aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked/>
                             {% else %}
-                                <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked disabled/>
+                                <input type="checkbox" aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" checked disabled/>
                             {% endif %}
                         {% elseif poll.isOpen() %}
-                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}"/>
+                            <input type="checkbox" aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}"/>
                         {% else %}
-                            <input type="checkbox" aria-label="Option {{ index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" disabled/>
+                            <input type="checkbox" aria-label="Option {{ loop.index + 1 }}" value="{{ option.getId() }}" name="answers[]" id="answer-{{loop.index0}}" disabled/>
                         {% endif %}
                         {% include "misc/Markdown.twig" with {
                             "content" : option.getResponse(),

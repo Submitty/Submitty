@@ -16,6 +16,9 @@ class DatabaseUtils {
             if ($param instanceof \DateTime) {
                 $param = DateUtils::dateTimeToString($param);
             }
+            if (is_array($param)) {
+                $param = implode(',', $param);
+            }
             $sql = preg_replace('/\?/', is_numeric($param) ? $param : "'{$param}'", $sql, 1);
         }
         return $sql;

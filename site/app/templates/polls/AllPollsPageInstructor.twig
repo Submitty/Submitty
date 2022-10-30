@@ -55,7 +55,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td> {{ poll.getUserResponses()|length }} </td>
+                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
@@ -121,7 +121,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td> {{ poll.getUserResponses()|length }} </td>
+                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
@@ -176,7 +176,7 @@
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
-                        <td> {{ poll.getUserResponses()|length }} </td>
+                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>

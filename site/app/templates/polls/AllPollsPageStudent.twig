@@ -25,8 +25,7 @@
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
                         <td align="left">
-                            {% set responses = poll.getResponsesByStudentId(user_id) %}
-                            {% set response_label = responses is empty ? "No Response" : responses | map(r => r.getOption().getResponse()) | join(', ') %}
+                            {% set response_label = poll.getId() not in all_responses|keys  ? "No Response" : all_responses[poll.getId()] | map(r => r.getOption().getResponse()) | join(', ') %}
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
                             } only %}
@@ -36,7 +35,7 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
-                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                    {% if all_responses is empty %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
                                         <button type="submit" class="btn btn-primary"> Edit Answer
@@ -78,8 +77,7 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        {% set responses = poll.getResponsesByStudentId(user_id) %}
-                        {% set response_label = responses is empty ? "No Response" : responses | map(r => r.getOption().getResponse()) | join(', ') %}
+                        {% set response_label = poll.getId() not in all_responses|keys  ? "No Response" : all_responses[poll.getId()] | map(r => r.getOption().getResponse()) | join(', ') %}
                         <td align="left">
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
