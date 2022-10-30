@@ -1797,7 +1797,7 @@ class SubmissionController extends AbstractController {
                 $graded_gradeable->getGradeableId(),
                 'grading',
                 'grade'
-            ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
+            ]) . '?' . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()), 'gradeable_version' => $new_version]);
         }
 
         return new MultiResponse(
