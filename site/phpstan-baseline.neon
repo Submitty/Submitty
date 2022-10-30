@@ -406,11 +406,6 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/libraries/Access.php
-
-		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: app/libraries/Access.php
