@@ -69,13 +69,15 @@ class SimpleGraderControllerTester extends BaseUnitTest {
     public function testSaveInvalidGradeable() {
         $_POST['user_id'] = 'test';
         $_POST['csrf_token'] = 'test';
-        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => true], ['getGradeableConfig' => null]);
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
+        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => true], ['getGradeableConfig' => $gradeable]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
-                'message' => 'Invalid gradeable ID'
+                'message' => 'Invalid user ID'
             ],
             $response->json
         );
@@ -86,7 +88,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['csrf_token'] = 'test';
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
-        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => $gradeable], ['getGradeableConfig' => true]);
+        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => $gradeable], ['getGradeableConfig' => $gradeable]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
         $this->assertEquals(
