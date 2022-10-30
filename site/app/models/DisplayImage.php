@@ -187,6 +187,12 @@ class DisplayImage extends AbstractModel {
             throw new FileWriteException('Error creating the user\'s system images folder.');
         }
 
+        // Enforce limit on number of images
+        $uploaded_dps = FileUtils::getAllFiles($folder_path, [], true);
+        if (count($uploaded_dps) >= 50) {
+            throw new FileWriteException('Quota exhausted', User::PROFILE_IMG_QUOTA_EXHAUSTED);
+        }
+
         // Decrease image size while maintaining form factor
         // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
         $imagick = new \Imagick($tmp_file_path);

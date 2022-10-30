@@ -110,7 +110,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             success = True
             for command in commands:
                 print(f'{host}: performing {command}')
-                (_, stdout, _) = target_connection.exec_command(command, timeout=60)
+                (_, stdout, _) = target_connection.exec_command(command, timeout=600)
                 print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
@@ -140,13 +140,14 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
     local_directory = submitty_repository
     remote_host = '{0}@{1}'.format(user, host)
     foreign_directory = submitty_repository
+    rsync_exclude = os.path.join(submitty_repository, ".setup", "worker_rsync_exclude.txt")
 
     # rsync the file
     print(f"performing rsync to {worker}...")
     # If this becomes too slow, we can exculde directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
-    command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
-              local_directory, remote_host, foreign_directory).split()
+    command = "rsync -a --exclude-from={3} --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
+              local_directory, remote_host, foreign_directory, rsync_exclude).split()
     res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          check=True, universal_newlines=True)
     if res.returncode != 0:

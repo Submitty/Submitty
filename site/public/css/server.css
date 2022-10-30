@@ -628,6 +628,18 @@ td > a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.file-annotation {
+    float: right;
+    word-break: break-word;
+}
+
+.btn-annotation {
+    word-break: break-word;
+    text-align: center;
+    vertical-align: middle;
+    float: right;
+}
+
 .overall-comment-box {
     margin-top: 10px;
 }

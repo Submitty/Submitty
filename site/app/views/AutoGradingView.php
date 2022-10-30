@@ -93,7 +93,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             'gradeable_id' => $gradeable->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
             "num_visible_testcases" => $num_visible_testcases,
             "incomplete_autograding" => $incomplete_autograding,
             "show_hidden_breakdown" => $show_hidden_breakdown,
@@ -108,7 +108,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails()
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
         ]);
     }
 
@@ -293,13 +293,13 @@ class AutoGradingView extends AbstractView {
      * @param string $file_path
      * @return string
      */
-    private function convertToAnonPath($file_path) {
+    private function convertToAnonPath($file_path, $g_id) {
         $file_path_parts = explode("/", $file_path);
         $anon_path = "";
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getAnonId($user_id)[$user_id];
+                $anon_id = $this->core->getQueries()->getAnonId($user_id, $g_id)[$user_id];
                 $anon_path = $anon_path . "/" . $anon_id;
             }
             else {
@@ -392,15 +392,15 @@ class AutoGradingView extends AbstractView {
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
-                $file['anon_path'] = $this->convertToAnonPath($file['path']);
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path'], $gradeable->getId()));
+                $file['anon_path'] = $this->convertToAnonPath($file['path'], $gradeable->getId());
                 $uploaded_pdfs[] = $file;
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
-                $file['anon_path'] = $this->convertToAnonPath($file['path']);
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path'], $gradeable->getId()));
+                $file['anon_path'] = $this->convertToAnonPath($file['path'], $gradeable->getId());
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -410,13 +410,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
 
         $id = $this->core->getUser()->getId();
@@ -620,16 +614,16 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            $anon_id = $this->core->getQueries()->getAnonId($grader_id)[$grader_id];
+            $anon_id = $this->core->getQueries()->getAnonId($grader_id, $gradeable->getId())[$grader_id];
             if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
                 $peer_aliases[$grader_id] = $grader_id;
-                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id, $gradeable->getId())[$grader_id]] = $grader_id;
             }
             else {
                 $peer_aliases[$grader_id] = $alias;
-                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $alias;
+                $peer_aliases[$this->core->getQueries()->getAnonId($grader_id, $gradeable->getId())[$grader_id]] = $alias;
             }
-            $anon_grader_id_mapping[$this->core->getQueries()->getAnonId($grader_id)[$grader_id]] = $grader_id;
+            $anon_grader_id_mapping[$this->core->getQueries()->getAnonId($grader_id, $gradeable->getId())[$grader_id]] = $grader_id;
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $anon_id);
         }
@@ -671,14 +665,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
@@ -710,7 +697,6 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        $peer_graders = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $id);
         $grader_info = [];
 
         foreach ($ta_graded_gradeable->getAttachments() as $user_name => $attachments) {
@@ -719,7 +705,6 @@ class AutoGradingView extends AbstractView {
             }
 
             $grader_info[$user_name] = [];
-            $grader_info[$user_name]["attachments"] = $attachments;
             $grader_info[$user_name]["display_name"] = $user_name;
             $grader_info[$user_name]["comment"] = "";
         }
@@ -733,7 +718,6 @@ class AutoGradingView extends AbstractView {
             if (strlen(trim($comment)) > 0) {
                 if (!isset($grader_info[$user_name])) {
                     $grader_info[$user_name] = [];
-                    $grader_info[$user_name]["attachments"] = [];
                     $grader_info[$user_name]["display_name"] = $user_name;
                 }
                 $grader_info[$user_name]["comment"] = $comment;
