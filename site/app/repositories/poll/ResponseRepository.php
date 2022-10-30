@@ -6,11 +6,10 @@ namespace app\repositories\poll;
 
 use Doctrine\ORM\EntityRepository;
 
-class ResponseRepository extends EntityRepository
-{
+class ResponseRepository extends EntityRepository {
     /**
      * @return \app\entities\poll\Response[]
-    */
+     */
     public function findByPollIdAndStudentId(int $poll_id, string $student_id): array {
         return $this->_em
             ->createQuery(

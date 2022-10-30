@@ -170,7 +170,7 @@ class PollController extends AbstractController {
                 $this->core->addErrorMessage("Error occured in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
-            $option = new Option((int)$option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
+            $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
             if ($option->isCorrect()) {
                 $answers++;
             }
@@ -230,7 +230,7 @@ class PollController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
 
         $returnUrl = $this->core->buildCourseUrl(['polls']);
-        $poll_id = (int)$_POST['poll_id'];
+        $poll_id = (int) $_POST['poll_id'];
         if (empty($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($returnUrl);
@@ -303,13 +303,13 @@ class PollController extends AbstractController {
                 $this->core->addErrorMessage("Error occured in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
-            $id = (int)$option['id'];
+            $id = (int) $option['id'];
             if (!empty($id)) {
                 $keep_ids[] = $id;
                 $found = false;
                 foreach ($poll->getOptions() as $poll_option) {
                     if ($poll_option->getId() === $id) {
-                        $poll_option->setOrderId((int)$option['order']);
+                        $poll_option->setOrderId((int) $option['order']);
                         $poll_option->setResponse($option['response']);
                         $poll_option->setCorrect(isset($option['is_correct']) && $option['is_correct'] === 'on');
                         if ($poll_option->isCorrect()) {
@@ -320,7 +320,7 @@ class PollController extends AbstractController {
                     }
                 }
                 if (!$found) {
-                    $option = new Option((int)$option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
+                    $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
                     if ($option->isCorrect()) {
                         $answers++;
                     }
@@ -434,7 +434,7 @@ class PollController extends AbstractController {
     public function submitResponse(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
-        $poll_id = (int)$_POST['poll_id'];
+        $poll_id = (int) $_POST['poll_id'];
         if (empty($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -538,7 +538,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function hasAnswers() {
-        $option_id  = (int)$_POST['option_id'];
+        $option_id  = (int) $_POST['option_id'];
         if (empty($option_id)) {
             return JsonResponse::getFailResponse('Invalid option id');
         }

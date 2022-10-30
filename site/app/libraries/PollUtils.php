@@ -2,9 +2,6 @@
 
 namespace app\libraries;
 
-use app\libraries\Core;
-use app\libraries\FileUtils;
-
 /**
  * Class FileUtils
  *

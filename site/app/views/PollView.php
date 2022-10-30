@@ -4,7 +4,6 @@ namespace app\views;
 
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
-use app\exceptions\OutputException;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\FileUtils;

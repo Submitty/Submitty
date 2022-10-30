@@ -6,11 +6,10 @@ namespace app\repositories\poll;
 
 use Doctrine\ORM\EntityRepository;
 
-class PollRepository extends EntityRepository
-{
+class PollRepository extends EntityRepository {
     /**
      * @return \app\entities\poll\Poll[]
-    */
+     */
     public function findByToday(): array {
         return $this->_em
             ->createQuery(
@@ -22,7 +21,7 @@ class PollRepository extends EntityRepository
 
     /**
      * @return \app\entities\poll\Poll[]
-    */
+     */
     public function findByOld() {
         return $this->_em
             ->createQuery(
@@ -34,8 +33,8 @@ class PollRepository extends EntityRepository
 
     /**
      * @return \app\entities\poll\Poll[]
-    */
-    public function findByFuture () {
+     */
+    public function findByFuture() {
         return $this->_em
             ->createQuery(
                 'SELECT p FROM app\entities\poll\Poll p WHERE p.release_date > :release_date ORDER BY p.name ASC'
