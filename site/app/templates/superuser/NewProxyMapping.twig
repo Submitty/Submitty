@@ -1,0 +1,19 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}new-proxy-mapping-form{% endblock %}
+{% block title %}New Proxy Mapping{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="mapping-form-saml-id">SAML ID:</label>
+    <input type="text" id="mapping-form-saml-id" placeholder="(Required)" name="saml_id"><br>
+    <label for="mapping-form-user-id">Submitty User ID:</label>
+    <input type="text" id="mapping-form-user-id" placeholder="(Required)" name="submitty_id"><br>
+{% endblock %}
+{% block form %}
+    <form method="POST" action="{{ proxy_mapping_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <button class="btn btn-primary">Submit</button>
+{% endblock %}

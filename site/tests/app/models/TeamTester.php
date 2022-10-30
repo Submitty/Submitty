@@ -7,6 +7,27 @@ use tests\BaseUnitTest;
 
 class TeamTester extends BaseUnitTest {
     private $core;
+    private $member_users = [
+                [
+                    'state' => 1,
+                    'user_id' => 'user1',
+                    'user_firstname' => 'User',
+                    'user_lastname' => 'One',
+                    'user_email' => 'user1@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
+                ],
+                [
+                    'state' => 0,
+                    'user_id' => 'user2',
+                    'user_firstname' => 'User',
+                    'user_lastname' => 'Two',
+                    'user_email' => 'user2@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
+                ]
+    ];
+
     public function setUp(): void {
         $this->core = $this->createMockCore();
     }
@@ -17,28 +38,7 @@ class TeamTester extends BaseUnitTest {
             'team_name' => 'TEST NAME',
             'registration_section' => 'test',
             'rotating_section' => 0,
-            'users' => [
-                [
-                    'state' => 1,
-                    'user_id' => 'user1',
-                    'anon_id' => 'anon1',
-                    'user_firstname' => 'User',
-                    'user_lastname' => 'One',
-                    'user_email' => 'user1@example.com',
-                    'user_email_secondary' => null,
-                    'user_email_secondary_notify' => false
-                ],
-                [
-                    'state' => 0,
-                    'user_id' => 'user2',
-                    'anon_id' => 'anon2',
-                    'user_firstname' => 'User',
-                    'user_lastname' => 'Two',
-                    'user_email' => 'user2@example.com',
-                    'user_email_secondary' => null,
-                    'user_email_secondary_notify' => false
-                ]
-            ]
+            'users' => $this->member_users
         ];
         $team = new Team($this->core, $details);
         $this->assertEquals($details['team_id'], $team->getId());
@@ -58,16 +58,7 @@ class TeamTester extends BaseUnitTest {
             'team_name' => null,
             'registration_section' => 'test',
             'rotating_section' => 0,
-            'users' => [
-                [
-                    'state' => 1,
-                    'user_id' => 'user1'
-                ],
-                [
-                    'state' => 0,
-                    'user_id' => 'user2'
-                ]
-            ]
+            'users' => $this->member_users
         ];
         $team = new Team($this->core, $details);
         $anon_id = "anon_id";

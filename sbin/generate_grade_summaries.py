@@ -29,7 +29,7 @@ def main():
 
     try:
         grade_generation_response = requests.post(
-            '{}/api/{}/{}/reports/summaries'.format(
+            '{}/api/courses/{}/{}/reports/summaries'.format(
                 base_url, semester, course
             ),
             headers={'Authorization': token}

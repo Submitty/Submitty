@@ -52,14 +52,13 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method bool isScannedExam()
- * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentViewAfterGrades()
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
+ * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -184,13 +183,13 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
     protected $ta_grading = true;
-    /** @prop @var bool If the gradeable is a 'scanned exam' */
-    protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
     protected $student_view = false;
     /** @prop @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
-    /** @prop @var bool If students can make submissions */
+    /** @prop @var bool If students can download submission files */
+    protected $student_download = false;
+    /** @prop @var bool If students can make submissions and view other versions */
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
@@ -295,9 +294,9 @@ class Gradeable extends AbstractModel {
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
-            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
+            $this->setStudentDownload($details['student_download']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
             $this->setHasReleaseDate($details['has_release_date']);
@@ -569,6 +568,7 @@ class Gradeable extends AbstractModel {
     }
     public function setPeerGradersList($input) {
         $bad_rows = [];
+        $self_grade_rows = [];
         foreach ($input as $row_num => $vals) {
             if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
@@ -576,13 +576,25 @@ class Gradeable extends AbstractModel {
             if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
+            if ($vals["grader"] === $vals["student"]) {
+                array_push($self_grade_rows, ($vals["grader"]));
+            }
         }
-        if (!empty($bad_rows)) {
-            $msg = "The given user id is not valid: ";
-            array_walk($bad_rows, function ($val) use (&$msg) {
-                $msg .= " {$val}";
-            });
-            $this->core->addErrorMessage($msg);
+        if (!empty($bad_rows) || !empty($self_grade_rows)) {
+            if (!empty($bad_rows)) {
+                $bad_row_msg = "The given user id is not valid: ";
+                array_walk($bad_rows, function ($val) use (&$bad_row_msg) {
+                    $bad_row_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($bad_row_msg);
+            }
+            if (!empty($self_grade_rows)) {
+                $self_grade_msg = "The given users have self gradings: ";
+                array_walk($self_grade_rows, function ($val) use (&$self_grade_msg) {
+                    $self_grade_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($self_grade_msg);
+            }
         }
         else {
             $query_string = "";
@@ -624,7 +636,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
-        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $this->getId());
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
         if ($feedback == 'thanks') {
             return 'Thank you!';
@@ -900,6 +912,23 @@ class Gradeable extends AbstractModel {
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
+    }
+
+    /**
+     * Gets if the submitted files for this gradeable can be downloaded by students
+     * @return bool
+     */
+    public function canStudentDownload() {
+        return $this->student_download;
+    }
+
+    /**
+     * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
+     * grades are released)
+     * @return bool
+     */
+    public function isBulkUpload() {
+        return $this->isStudentView() && $this->isStudentViewAfterGrades();
     }
 
     /**

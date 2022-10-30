@@ -16,9 +16,8 @@ class WebRouterTester extends BaseUnitTest {
             "/authentication/login"
         );
         $response = WebRouter::getWebResponse($request, $core);
-        $this->assertEquals(null, $response->redirect_response);
-        $this->assertEquals("Authentication", $response->web_response->view_class);
-        $this->assertEquals("loginForm", $response->web_response->view_function);
+        $this->assertEquals("Authentication", $response->view_class);
+        $this->assertEquals("loginForm", $response->view_function);
     }
 
     public function testLogout() {
@@ -223,13 +222,6 @@ class WebRouterTester extends BaseUnitTest {
             "message" => "POST request exceeds maximum size of 8M"
         ];
 
-        $response = WebRouter::getApiResponse($request, $core);
-        $this->assertEquals($expected, $response->json_response->json);
-        $response = WebRouter::getWebResponse($web_request, $core);
-        $this->assertEquals($expected, $response->json_response->json);
-
-        $_SERVER["CONTENT_LENGTH"] = 0;
-        $_POST = [];
         $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals($expected, $response->json_response->json);
         $response = WebRouter::getWebResponse($web_request, $core);

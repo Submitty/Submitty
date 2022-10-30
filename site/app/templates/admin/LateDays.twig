@@ -1,6 +1,22 @@
 <div id="message"></div>
 <div class="content">
-    <h1>Late Days Allowed</h1>
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <h1 style="margin:0px;">Late Days Allowed</h1>
+
+        <div id="rebuild-status-panel" style="left:0px;display:none">
+            <span id="rebuild-status-label">Build Status: </span>
+            <div id="rebuild-status"></div>
+        </div>
+
+        <div class="column-wrapper">
+            <a class="btn btn-primary"
+                href="{{ late_days_forensics_url }}"style="float: right">
+                Late Days Forensics
+            </a>
+            </form>
+        </div>
+    </div>
+
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <p>

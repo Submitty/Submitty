@@ -172,12 +172,14 @@ authentication_methods = [
     'PamAuthentication',
     'DatabaseAuthentication',
     'LdapAuthentication',
+    'SamlAuthentication'
 ]
 
 defaults = {
     'database_host': 'localhost',
     'database_port': 5432,
     'database_user': 'submitty_dbuser',
+    'database_course_user': 'submitty_course_dbuser',
     'submission_url': '',
     'supervisor_user': 'submitty',
     'vcs_url': '',
@@ -187,7 +189,6 @@ defaults = {
     'institution_homepage' : '',
     'timezone' : tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
-    'submitty_admin_password': '',
     'email_user': '',
     'email_password': '',
     'email_sender': 'submitty@myuniversity.edu',
@@ -202,6 +203,10 @@ defaults = {
         'url': '',
         'uid': '',
         'bind_dn': ''
+    },
+    'saml_options': {
+        'name': '',
+        'username_attribute': ''
     }
 }
 
@@ -223,7 +228,7 @@ if os.path.isfile(AUTHENTICATION_JSON):
 # no need to authenticate on a worker machine (no website)
 if not args.worker:
     if 'authentication_method' in loaded_defaults:
-        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method'])
+        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method']) + 1
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that
 # is not in an existing config file.)
@@ -258,15 +263,26 @@ else:
     else:
         DATABASE_PORT = defaults['database_port']
 
-    DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the global database user/role?', defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the global database user/role {}? {}'.format(DATABASE_USER, default))
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
+    print()
+
+    DATABASE_COURSE_USER = get_input('What is the course database user/role?', defaults['database_course_user'])
+    print()
+
+    default = ''
+    if 'database_course_password' in defaults and DATABASE_COURSE_USER == defaults['database_course_user']:
+        default = '(Leave blank to use same password)'
+    DATABASE_COURSE_PASSWORD = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_COURSE_USER, default))
+    if DATABASE_COURSE_PASSWORD == '' and DATABASE_COURSE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
+        DATABASE_COURSE_PASSWORD = defaults['database_course_password']
     print()
 
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
@@ -326,15 +342,20 @@ else:
         LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
         LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'])
 
+    default_auth_options = defaults.get('saml_options', dict())
+    SAML_OPTIONS = {
+        'name': default_auth_options.get('name', ''),
+        'username_attribute': default_auth_options.get('username_attribute', '')
+    }
+
+    if AUTHENTICATION_METHOD == 'SamlAuthentication':
+        SAML_OPTIONS['name'] = get_input('Enter name you would like shown to user for authentication?', SAML_OPTIONS['name'])
+        SAML_OPTIONS['username_attribute'] = get_input('Enter SAML username attribute?', SAML_OPTIONS['username_attribute'])
+
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
     SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
-    while True:
-        SUBMITTY_ADMIN_PASSWORD = get_input("What is the submitty admin password", defaults['submitty_admin_password'])
-        if SUBMITTY_ADMIN_USERNAME != '' and SUBMITTY_ADMIN_PASSWORD == '':
-            continue
-        break
 
     while True:
         is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
@@ -411,6 +432,8 @@ else:
     config['database_port'] = DATABASE_PORT
     config['database_user'] = DATABASE_USER
     config['database_password'] = DATABASE_PASS
+    config['database_course_user'] = DATABASE_COURSE_USER
+    config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['timezone'] = TIMEZONE
 
     config['authentication_method'] = AUTHENTICATION_METHOD
@@ -469,8 +492,17 @@ if not args.worker:
             shutil.move(full_file_name, tmp_file)
             rescued.append((full_file_name, tmp_file))
 
+IGNORED_FILES_AND_DIRS = ['saml', 'login.md']
+
 if os.path.isdir(CONFIG_INSTALL_DIR):
-    shutil.rmtree(CONFIG_INSTALL_DIR)
+    for file in os.scandir(CONFIG_INSTALL_DIR):
+        if file.name not in IGNORED_FILES_AND_DIRS:
+            if file.is_file():
+                os.remove(os.path.join(CONFIG_INSTALL_DIR, file.name))
+            else:
+                os.rmdir(os.path.join(CONFIG_INSTALL_DIR, file.name))
+elif os.path.exists(CONFIG_INSTALL_DIR):
+    os.remove(CONFIG_INSTALL_DIR)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
@@ -558,6 +590,8 @@ if not args.worker:
     config['database_port'] = DATABASE_PORT
     config['database_user'] = DATABASE_USER
     config['database_password'] = DATABASE_PASS
+    config['database_course_user'] = DATABASE_COURSE_USER
+    config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
     with open(DATABASE_JSON, 'w') as json_file:
@@ -571,6 +605,7 @@ if not args.worker:
     config = OrderedDict()
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['ldap_options'] = LDAP_OPTIONS
+    config['saml_options'] = SAML_OPTIONS
 
     with open(AUTHENTICATION_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=4)
@@ -655,7 +690,6 @@ if not args.worker:
 if not args.worker:
     config = OrderedDict()
     config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
-    config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
 
     with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
