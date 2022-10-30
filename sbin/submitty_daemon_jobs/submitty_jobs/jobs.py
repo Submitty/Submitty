@@ -81,6 +81,9 @@ class CourseJob(AbstractJob):
         test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
         return test_path.exists()
 
+    def cleanup_job(self):
+        pass
+
 
 # pylint: disable=abstract-method
 class CourseGradeableJob(CourseJob):
@@ -360,6 +363,9 @@ class CreateCourse(AbstractJob):
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
 
+    def cleanup_job(self):
+        pass
+
 
 class UpdateDockerImages(AbstractJob):
     def run_job(self):
@@ -376,3 +382,6 @@ class UpdateDockerImages(AbstractJob):
 
         log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
         logger.write_to_log(log_file_path, log_msg)
+
+    def cleanup_job(self):
+        pass
