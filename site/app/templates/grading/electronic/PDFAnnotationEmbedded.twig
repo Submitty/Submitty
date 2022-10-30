@@ -41,7 +41,6 @@
     }
     {% if student_download is defined and student_download %}
     loadAllAnnotations(annotations, "{{ filename }}");
-    console.log("{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
     download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ pdf_url_base | e('js')}}" , "{{ rerender_annotated_pdf }}");
     {% elseif student_popup is defined and student_popup %}
     loadAllAnnotations(annotations, "{{ filename }}");
