@@ -50,7 +50,7 @@ class SimpleGraderController extends AbstractController {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
         catch (\InvalidArgumentException $e) {
-            return new WebResponse('Error', 'noGradeable');
+            return new WebResponse('Error', 'noGradeable', $gradeable_id);
         }
 
         // Make sure this gradeable is an electronic file gradeable
@@ -66,7 +66,7 @@ class SimpleGraderController extends AbstractController {
 
         //Figure out if we are getting users by rotating or registration section.
         if (is_null($section_type)) {
-            return new WebResponse('Error', 'noGradeable');
+            return new WebResponse('Error', 'genericError', ['Got null section type']);
         }
 
         //Grab the students in section, sectiontype.
