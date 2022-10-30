@@ -6677,10 +6677,11 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if ($this->getStarType($user_id, $queue_code) == 'full') {
+        $current_star_type = $this->getStarType($user_id, $queue_code);
+        if ($current_star_type === 'full') {
             $star_type = 'prev_full';
         }
-        elseif ($this->getStarType($user_id, $queue_code) == 'half') {
+        elseif ($current_star_type === 'half') {
             $star_type = 'prev_half';
         }
 
