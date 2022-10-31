@@ -38,6 +38,27 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.get('#future-table').contains('Poll 4');
         cy.get('#poll_4_responses').invoke('text').then(parseInt).should('be.eq', 0);
+
+        // make a poll 5 that opens tomorrow
+        cy.contains('New Poll').click();
+        cy.get('#poll-name').type('Poll 5');
+        cy.get('#poll-question').type('What is your favorite class?');
+        cy.get('#poll-date').clear({force: true});
+        const today = new Date(Date.now());
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
+        cy.contains('+ Add Response').click();
+        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
+        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
+        cy.get('h1').click();
+
+        // submit and verify on main polls page, poll should be closed
+        cy.get('#poll-form-submit').click();
+        cy.url().should('include', 'sample/polls');
+        cy.contains('Poll 5');
+
+        cy.get('#tomorrow-table').contains('Poll 5');
     });
 
     it('Should verify all existing polls are on the student page', () => {

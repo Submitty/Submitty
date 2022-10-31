@@ -148,13 +148,13 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div id="future-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div id="tomorrow-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'tomorrow_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
             <h2> Tomorrow's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
+                <i class="dropdown-arrow{{dropdown_states['tomorrow'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
             </div>
         </div>
-        <table id="future-table" class="table table-striped" style="width:100%;{{ dropdown_states['future'] ? '' : ' display: none;'}}">
+        <table id="tomorrow-table" class="table table-striped" style="width:100%;{{ dropdown_states['tomorrow'] ? '' : ' display: none;'}}">
             <col style="width: 5%">
             <col style="width: 5%">
             <col style="width: 50%">
