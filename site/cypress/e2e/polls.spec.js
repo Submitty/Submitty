@@ -46,7 +46,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         const today = new Date(Date.now());
         const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setDate(tomorrow.getDate() + 1);
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.contains('+ Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
