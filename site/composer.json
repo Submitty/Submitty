@@ -36,9 +36,9 @@
     "symfony/config": "5.4.11",
     "symfony/http-foundation": "5.4.15",
     "symfony/polyfill-php80": "1.26.0",
-    "symfony/routing": "4.4.44",
+    "symfony/routing": "5.4.15",
     "textalk/websocket": "1.5.8",
-    "twig/twig": "2.15.2"
+    "twig/twig": "3.4.3"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
