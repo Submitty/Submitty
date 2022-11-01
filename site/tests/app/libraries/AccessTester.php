@@ -67,27 +67,15 @@ class AccessTester extends BaseUnitTest {
         $gg3->method("getSubmitter")->willReturn($su3);
         $gg3->method("getGradeable")->willReturn($g3);
 
-        /*
-        NOTE: ALL tests seem to be true
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg1, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($gg2, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($gg3, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($gg1, $user2));
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg2, $user2));
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg3, $user2));
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg1, $user3));
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg2, $user3));
-        self::assertFalse($this->access->isGradeableInStudentPeerAssignment($gg3, $user3));
-        */
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g1, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g2, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g3, $user1));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g1, $user2));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g2, $user2));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g3, $user2));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g1, $user3));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g2, $user3));
-        self::assertTrue($this->access->isGradeableInStudentPeerAssignment($g3, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g1, $gg1, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g2, $gg2, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g3, $gg3, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g1, $gg1, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g2, $gg2, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $gg3, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g1, $gg1, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g2, $gg2, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $gg3, $user3));
     }
 
     public function checkGroupPrivilegeProvider() {
