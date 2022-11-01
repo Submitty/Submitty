@@ -7260,7 +7260,7 @@ AND gc_id IN (
               ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
-              LEFT JOIN (
+              LEFT JOIN LATERAL (
                 SELECT
                   json_agg(in_gcd.gc_id) AS array_comp_id,
                   json_agg(gcd_score) AS array_score,
@@ -7302,7 +7302,7 @@ AND gc_id IN (
                   json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
                   ug.g_id
-                FROM gradeable_component_data in_gcd
+                FROM (SELECT * FROM gradeable_component_data WHERE gd_id=gd.gd_id) in_gcd
 
                   LEFT JOIN (
                     SELECT
@@ -7331,7 +7331,7 @@ AND gc_id IN (
                           user_id,
                           g_id
                         FROM gradeable_anon
-                      ) AS ga ON u.user_id=ga.user_id
+                      ) AS ga ON u.user_id=ga.user_id AND ga.g_id=g.g_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
                   LEFT JOIN (
                     SELECT u.*
