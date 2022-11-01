@@ -118,9 +118,9 @@ class SessionManagerTester extends BaseUnitTest {
             ->method('flush');
         $manager = new SessionManager($core);
         $session_id = $manager->newSession('test', $this->browser_info);
-        $this->assertRegExp('/[a-f0-9]{32}/', $session_id);
+        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $session_id);
         $this->assertEquals($session_id, $manager->newSession('test', $this->browser_info));
-        $this->assertRegExp('/[a-f0-9]{32}/', $manager->getCsrfToken());
+        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $manager->getCsrfToken());
     }
 
     public function testRemoveCurrentSessionNoSession() {
