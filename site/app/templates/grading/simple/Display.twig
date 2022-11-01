@@ -211,7 +211,7 @@
                 {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}" data-section="{{ section_id }}">
                     {% for grade in section.rows %}
-                        {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric) }}
+                        {{ _self.render_row(action, gradeable, section_id, grade, loop.index0, components_numeric, anon_ids) }}
                     {% endfor %}
                 </tbody>
             {% endfor %}
@@ -225,8 +225,8 @@
 </div>
 
 {# Render one student's row in the table #}
-{% macro render_row(action, gradeable, section_id, grade, index, components_numeric) %}
-    <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ grade.getSubmitter().getAnonId(gradeable.getId()) }}" data-row="{{ index }}"
+{% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
+    <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
