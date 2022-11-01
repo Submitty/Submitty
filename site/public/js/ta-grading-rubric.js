@@ -2669,9 +2669,9 @@ function scrollToPage(page_num){
     if (lastLoadedFile.charAt(0) === ".") {
         lastLoadedFile = lastLoadedFile.substring(1);
     }
-    if (lastLoadedFile.startsWith(".upload_page_") || lastLoadedFile.startsWith("upload_page_")) {
-        let targetFile = "upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
-        if (activeView && lastLoadedFile === targetFile) {
+    if (lastLoadedFile.startsWith("upload_page_")) {
+        let lastLoadedFilePageNum = parseInt(lastLoadedFile.split("_")[2].split(".")[0]);
+        if (activeView && page_num === lastLoadedFilePageNum) {
             return;
         }
         let maxPage = -1;
@@ -2679,8 +2679,8 @@ function scrollToPage(page_num){
         let maxPageLoc = null;
         for (let i = 0; i < files.length; i++) {
             let filename = files[i].innerText.trim();
-            let filenameNoPeriod = filename.substring(1);
-            if (filenameNoPeriod.startsWith("upload_page_") && filenameNoPeriod.includes(".")) {
+            let filenameNoPeriod = filename.charAt(0) === "." ? filename.substring(1) : filename;
+            if (filenameNoPeriod.startsWith("upload_page_")) {
                 let currPageNum = parseInt(filename.split("_")[2].split(".")[0]);
                 if (page_num === currPageNum) {
                     viewFileFullPanel(filename, files[i].getAttribute("file-url"));
