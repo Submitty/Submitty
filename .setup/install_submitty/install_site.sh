@@ -247,6 +247,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+    # select2
+    mkdir ${VENDOR_FOLDER}/select2
+    cp -R ${NODE_FOLDER}/select2/dist/* ${VENDOR_FOLDER}/select2
+    # select2-theme-bootstrap5
+    mkdir ${VENDOR_FOLDER}/select2/bootstrap5-theme
+    cp -R ${NODE_FOLDER}/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css ${VENDOR_FOLDER}/select2/bootstrap5-theme
     # shortcut-buttons-flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
     cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
