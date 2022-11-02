@@ -58,7 +58,7 @@ class CourseMaterial {
     protected $priority;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", cascade={"persist"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialAccess>
      */
     protected $accesses;
