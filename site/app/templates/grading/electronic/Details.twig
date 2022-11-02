@@ -70,10 +70,8 @@
             </div>
         </div>
     {% endif %}
-    <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
-        <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
-    </div>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message }}
