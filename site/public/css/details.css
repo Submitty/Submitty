@@ -308,7 +308,7 @@
         cursor: pointer;
         position: relative;
     }
-    
+
     #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
         border-bottom: 1px solid var(--standard-hover-light-gray);
     }
