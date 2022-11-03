@@ -70,16 +70,16 @@
                 "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
                 from the Course Settings Page. </p>
             <p> Manually type the full path to a configuration file, or select from the list below. </p>
-    <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+    <p> The dropdown list has all existing configurations that contain the current text.</p>
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
 
-        <div class="config_search_error" id="autograding_config_error">
-            {% if not currently_valid_repository %}
-                The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
-            {% endif %}
-        </div>
+    <div class="config_search_error" id="autograding_config_error">
+        {% if not currently_valid_repository %}
+            The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
+        {% endif %}
+    </div>
 
     <div class="settings">
         <div>
