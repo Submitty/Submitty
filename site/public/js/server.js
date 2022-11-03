@@ -568,7 +568,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
   function c(a, b) {
     const c = document.createElement("textarea");
     c.name = a;

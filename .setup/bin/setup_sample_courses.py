@@ -66,7 +66,7 @@ NOW = dateutils.get_current_time()
 
 def main():
     """
-    Main program execution. This gets us our commandline arugments, reads in the data files,
+    Main program execution. This gets us our commandline arguments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
@@ -106,7 +106,7 @@ def main():
     # permission errors exist) which ends up with just having a ton of
     # build failures. Better to wait on grading any homeworks until
     # we've done all steps of setting up a course.
-    print("pausing the autograding and jobs hander daemons")
+    print("pausing the autograding and jobs handler daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
@@ -552,8 +552,8 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper funtion that copys a annotation from the source to the destination.
-    The source annotation need to be modifed to reflect:
+    Specifically designed helper function that copies a annotation from the source to the destination.
+    The source annotation need to be modified to reflect:
         the file that the annotations belongs to
         the grader that is responsible for the annotation
 

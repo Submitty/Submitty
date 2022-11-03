@@ -141,7 +141,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    sudo apt install -y spice-vdagent spice-webdavd
    sudo apt install -y davfs2
-       * Answer the question "YES" and grant access to unpriviledged users *
+       * Answer the question "YES" and grant access to unprivileged users *
    sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
 
    NOTE: The command below must be re-run each time the guest machine

@@ -1,6 +1,6 @@
 ^
            ^
-#includ^e <iostream>
+#include^e <iostream>
 #inc^lude <str^ing>
     ^
 int m^ain() {

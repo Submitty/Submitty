@@ -490,7 +490,7 @@ class SubmissionController extends AbstractController {
     /**
      * Function for uploading a split item that already exists to the server.
      * The file already exists in uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
@@ -797,7 +797,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
-     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
@@ -1010,7 +1010,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
@@ -1431,7 +1431,7 @@ class SubmissionController extends AbstractController {
             if ($vcs_base_url == "" && $vcs_path == "") {
                 if ($repo_id == "") {
                     // FIXME: commented out for now to pass Travis.
-                    // SubmissionControllerTests needs to be rewriten for proper VCS uploads.
+                    // SubmissionControllerTests needs to be rewritten for proper VCS uploads.
                     // return $this->uploadResult("repository url input cannot be blank.", false);
                 }
                 $vcs_full_path = $repo_id;

@@ -22,7 +22,7 @@ OLD_MARK_LIST = {};
 OLD_GRADED_COMPONENT_LIST = {};
 
 /**
- * A number ot represent the id of no component
+ * A number to represent the id of no component
  * @type {int}
  */
 NO_COMPONENT_ID = -1;

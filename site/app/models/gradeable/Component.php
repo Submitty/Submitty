@@ -323,7 +323,7 @@ class Component extends AbstractModel {
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
-                throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
+                throw new \InvalidArgumentException('Object in marks array was not a mark');
             }
         }
 
