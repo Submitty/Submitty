@@ -18,7 +18,7 @@ const int DaysInMonth[13] = { 0, 31, 28, 31, 30, 31, 30,
 bool 
 is_leap_year( int year )
 {
-  return year % 4 == 0 && ( year % 100 != 0 || year % 400 == 0 );
+  return year % 4 == 0 && ( years % 100 != 0 || year % 400 == 0 );
 }
 
 
