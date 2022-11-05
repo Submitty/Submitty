@@ -6747,20 +6747,9 @@ WHERE current_state IN
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function getLastUsedQueueName() {
-        $this->course_db->query("SELECT name from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['name'];
-    }
-
-    public function getLastUsedContactInfo() {
-        $this->course_db->query("SELECT contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['contact_info'];
+    public function getLastQueueDetails() {
+        $this->course_db->query("SELECT name, contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        return $this->course_db->row();
     }
 
     public function getCurrentQueueState() {
