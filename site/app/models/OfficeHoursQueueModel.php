@@ -67,11 +67,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         parent::__construct($core);
         $index = 0;
         $this->all_queues = $this->core->getQueries()->getAllQueues();
-        $num_in_queues = $this->core->getQueries()->getNumStudentsInQueues();
         foreach ($this->all_queues as $queue) {
             $this->code_to_index[$queue['code']] = $index;
             if ($queue['open']) {
-                $this->queue_occupancy[$queue['code']] = $num_in_queues[$queue['code']];
+                $this->queue_occupancy[$queue['code']] = $queue['num_students'];
             }
             $index += 1;
         }

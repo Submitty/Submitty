@@ -6706,7 +6706,17 @@ AND gc_id IN (
     }
 
     public function getAllQueues() {
-        $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
+        $this->course_db->query("
+SELECT qs.*, COALESCE (ns.num_students, 0) AS num_students
+FROM queue_settings qs
+LEFT JOIN (
+    SELECT q.queue_code, COUNT(distinct q.user_id) AS num_students
+    FROM queue q
+    WHERE q.current_state IN ('waiting')
+    GROUP BY q.queue_code
+) AS ns ON ns.queue_code = qs.code
+WHERE qs.code = ns.queue_code
+ORDER BY id");
         return $this->course_db->rows();
     }
 
@@ -6773,24 +6783,6 @@ AND gc_id IN (
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
         return $this->course_db->rows()[0]['count'];
-    }
-
-    /**
-     * Return a mapping of [queue_name -> # students in queue]
-     * @return array{string:int}
-     */
-    public function getNumStudentsInQueues(): array {
-        $this->course_db->query("
-SELECT qs.code AS queue_code, COUNT(distinct q.user_id) AS num_students
-FROM queue_settings qs
-LEFT JOIN queue q ON q.queue_code = qs.code AND q.current_state IN ('waiting')
-GROUP BY qs.code
-        ");
-        $results = [];
-        foreach ($this->course_db->rows() as $row) {
-            $results[$row['queue_code']] = $row['num_students'];
-        }
-        return $results;
     }
 
     public function getAllQueuesEver() {
