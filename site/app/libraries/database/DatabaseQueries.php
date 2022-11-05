@@ -6544,8 +6544,8 @@ AND gc_id IN (
         if (is_null($user_id)) {
             $user_id = $this->core->getUser()->getId();
         }
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
+        return $this->course_db->row()['count'] > 0;
     }
 
     public function getLastTimeInQueue($user_id, $queue_code) {
@@ -6727,7 +6727,7 @@ AND gc_id IN (
     }
 
     public function getLastUsedQueueName() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        $this->course_db->query("SELECT name from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
         if (count($this->course_db->rows()) <= 0) {
             return null;
         }
@@ -6735,7 +6735,7 @@ AND gc_id IN (
     }
 
     public function getLastUsedContactInfo() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        $this->course_db->query("SELECT contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
         if (count($this->course_db->rows()) <= 0) {
             return null;
         }
