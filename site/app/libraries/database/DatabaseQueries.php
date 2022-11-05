@@ -6485,8 +6485,8 @@ AND gc_id IN (
 
 
     public function isAnyQueueOpen() {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE open = true");
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
+        return $this->course_db->row()['num_open'] > 0;
     }
 
 
@@ -6775,9 +6775,22 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function getCurrentNumberInQueue($queue_code) {
-        $this->course_db->query("SELECT count(*) from queue where UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$queue_code]);
-        return $this->course_db->rows()[0]['count'];
+    /**
+     * Return a mapping of [queue_name -> # students in queue]
+     * @return array{string:int}
+     */
+    public function getNumStudentsInQueues(): array {
+        $this->course_db->query("
+SELECT qs.code AS queue_code, COUNT(distinct q.user_id) AS num_students
+FROM queue_settings qs
+LEFT JOIN queue q ON q.queue_code = qs.code AND q.current_state IN ('waiting')
+GROUP BY qs.code
+        ");
+        $results = [];
+        foreach ($this->course_db->rows() as $row) {
+            $results[$row['queue_code']] = $row['num_students'];
+        }
+        return $results;
     }
 
     public function getAllQueuesEver() {
