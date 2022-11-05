@@ -27,7 +27,6 @@ class OfficeHoursQueueModel extends AbstractModel {
     private $full_history;
     private $current_queue_state;
     private $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
-    private $currently_in_queue = null;
 
     // Stores all of the queues so we don't have to query data more than once
     private $all_queues = null;
@@ -198,11 +197,10 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function inQueue() {
-        // Only load the data once, regardless of the number of times inQueue() is called
-        if ($this->currently_in_queue === null) {
-            $this->currently_in_queue = $this->core->getQueries()->alreadyInAQueue();
+        if (!isset($this->current_queue_state)) {
+            return false;
         }
-        return $this->currently_in_queue;
+        return $this->current_queue_state['current_state'] === 'waiting' || $this->current_queue_state['current_state'] === 'being_helped';
     }
 
     public function getCurrentQueueCode() {
