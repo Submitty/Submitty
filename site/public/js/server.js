@@ -152,7 +152,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(id, file_name) {
+function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
@@ -172,7 +172,19 @@ function newDeleteCourseMaterialForm(id, file_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    let cm_message = '<b>'+file_name+'</b>';
+    if (str_id !== null) {
+        let files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        let num_of_links = files_or_links.filter(function () {
+            return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
+        }).length;
+        let num_of_files = files_or_links.length - num_of_links;
+        let file_s = (num_of_files > 1) ? 's' : '';
+        let link_s = (num_of_links > 1) ? 's' : '';
+        let num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`
+        cm_message += ` (<em>contains <b>${num_of_files}</b> file${file_s}` + num_links_txt;
+    }
+    $('.delete-course-material-message', form).append(cm_message);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
