@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.alert import Alert
 from selenium.common.exceptions import TimeoutException
 import os
+import unittest
 
 # requests is not explicitly installed system wide in our requirements.txt
 # (.setup/pip/system_requirements.txt), but exists currently installed
@@ -18,6 +19,7 @@ class TestAccess(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=True, user_id='ta', user_password='ta')
 
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_delete_file(self):
         # This test ensures two things:
         # - standard upload and deletion of files on the grading rubric page work
