@@ -17,7 +17,7 @@ describe('Test cases revolving around non bulk uploading', () => {
 });
 
 describe('Test cases revolving around bulk uploading', () => {
-    ['ta', 'instructor'].forEach((user) => {
+    ['instructor'].forEach((user) => {
         before(() => {
             cy.visit('/');
         });
