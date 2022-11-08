@@ -235,6 +235,35 @@ jobs:
             files: autograder/coverage.xml
             flags: autograder
 
+        #submitty_daemon_jobs unit tests
+        - name: Install bulk upload dependencies
+          run: |
+            sudo apt-get install -y poppler-utils
+            sudo apt-get install -y libzbar0
+
+        - name: Run bulk upload unit tests
+          working-directory: sbin/submitty_daemon_jobs
+          run : |
+            coverage run -m unittest discover tests -t .
+            coverage xml -i
+
+        - name: Upload submitty_daemon_jobs Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: sbin/submitty_daemon_jobs/coverage.xml
+            flags: submitty_daemon_jobs
+
+
+    shellcheck:
+      name: ShellCheck
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v2
+        - name: install ShellCheck
+          run: sudo apt-get install -y shellcheck
+        - name: Run ShellCheck
+          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
 
     e2e:
         needs:
@@ -245,6 +274,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
