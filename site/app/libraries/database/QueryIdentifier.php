@@ -31,7 +31,7 @@ class QueryIdentifier {
                         $parenthesis++;
                     }
                     elseif ($tokens[$pos] === ')') {
-                        $paranthesis--;
+                        $parenthesis--;
                         if ($afterColumnList && $parenthesis === 0) {
                             $afterCte = true;
                         }
