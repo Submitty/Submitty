@@ -224,11 +224,27 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getHelperName() {
-        if ($this->current_queue_state['helper_group'] <= 2) {
-            return $this->current_queue_state['helper_firstname'] . ' ' . $this->current_queue_state['helper_lastname'];
+        return $this->getDisplayName($this->current_queue_state['helper_firstname'], $this->current_queue_state['helper_lastname'], $this->current_queue_state['helper_group']);
+    }
+
+    public function getDisplayName($first_name, $last_name, $group) {
+        $user_info = [];
+        $user_info["user_firstname"] = $first_name;
+        $user_info["user_lastname"] = $last_name;
+
+        // set to empty string because it is not used but is required by the User model
+        $user_info["user_id"] = "";
+        $user_info["user_email"] = "";
+        $user_info["user_email_secondary"] = "";
+        $user_info["user_email_secondary_notify"] = "";
+
+        $user = new User($this->core, $user_info);
+
+        if ($group <= 2) {
+            return $user->getDisplayFullName();
         }
         else {
-            return $this->current_queue_state['helper_firstname'] . ' ' . substr($this->current_queue_state['helper_lastname'], 0, 1) . '.';
+            return $user->getDisplayAbbreviatedName();
         }
     }
 

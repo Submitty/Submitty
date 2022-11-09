@@ -54,26 +54,14 @@
               {% if entry['help_started_by'] == viewer.getUserId() %}
                 <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp">
               {% else %}
-                {% if entry['helper_group'] <= 2 %}
-                  <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
-                {% else %}
-                  <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
-                {% endif %}
+                <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/finishHelp" onsubmit="return confirm('{{viewer.getDisplayName(entry['helper_firstname'], entry['helper_lastname'], entry['helper_group'])}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
               {% endif %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['help_started_by'] == viewer.getUserId() %}
-                  {% if entry['helper_group'] <= 2 %}
-                    <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}}">Finish Helping</button>
-                  {% else %}
-                    <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}}">Finish Helping</button>
-                  {% endif %}
+                  <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{viewer.getDisplayName(entry['helper_firstname'], entry['helper_lastname'], entry['helper_group'])}}">Finish Helping</button>
                 {% else %}
-                  {% if entry['helper_group'] <= 2 %}
-                    <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname']}}">Finish Helping</button>
-                  {% else %}
-                    <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.'}}">Finish Helping</button>
-                  {% endif %}
+                  <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{viewer.getDisplayName(entry['helper_firstname'], entry['helper_lastname'], entry['helper_group'])}}">Finish Helping</button>
                 {% endif %}
               </form>
             </td>

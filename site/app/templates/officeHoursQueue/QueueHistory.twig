@@ -56,21 +56,11 @@
             {% else %}
               <td>Not in queue</td>
             {% endif %}
-
-            {% if entry['helper_group'] <= 2 %}
-              <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] }}</td>
-            {% else %}
-              <td class="mobile-hide">{{ entry['helper_firstname'] ~ ' ' ~ entry['helper_lastname'] | first ~ '.' }}</td>
-            {% endif %}
-
+            <td class="mobile-hide">{{ viewer.getDisplayName(entry['helper_firstname'], entry['helper_lastname'], entry['helper_group']) }}</td>
             {% if entry['removal_type'] == 'self' %}
               <td class="mobile-hide"></td>
             {% else %}
-              {% if entry['remover_group'] <= 2 %}
-                <td class="mobile-hide">{{ entry['remover_firstname'] ~ ' ' ~ entry['remover_lastname'] }}</td>
-              {% else %}
-                <td class="mobile-hide">{{ entry['remover_firstname'] ~ ' ' ~ entry['remover_lastname'] | first ~ '.' }}</td>
-              {% endif %}
+              <td class="mobile-hide">{{ viewer.getDisplayName(entry['remover_firstname'], entry['remover_lastname'], entry['remover_group']) }}</td>
             {% endif %}
             {% if viewer.isGrader() %}
               <td>

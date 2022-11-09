@@ -440,6 +440,10 @@ class User extends AbstractModel {
         return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
     }
 
+    public function getDisplayAbbreviatedName() {
+        return $this->getDisplayedFirstName() . ' ' . substr($this->getDisplayedLastName(), 0, 1) . '.';
+    }
+
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }
