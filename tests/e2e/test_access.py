@@ -16,8 +16,40 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestAccess(BaseTestCase):
+
+    file_rel_path = 'submissions/closed_homework/aphacker/1/part1_buggy2.py'
+
     def __init__(self, testname):
         super().__init__(testname, log_in=True, user_id='ta', user_password='ta')
+
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
+    def get_credentials(self):
+        cookies = {k: self.driver.get_cookie(k)['value']
+                   for k in ['submitty_session', 'PHPSESSID', 'submitty_token']}
+        csrf = self.driver.find_element(By.CSS_SELECTOR, 'body').get_attribute('data-csrf-token')
+        return cookies, csrf
+
+    def test_sample_file_exists(self):
+        # this test ensures a specific sample course file we use in the subsequent test,
+        # test_delete_file, is present on the Submitty machine
+
+        self.log_out()
+        self.log_in(user_id='aphacker', user_name='aphacker', user_password='aphacker')
+        cookies, csrf = self.get_credentials()
+        endpoint = f'/courses/{self.semester}/sample/download'
+        r = requests.get(url=self.TEST_URL + endpoint, params={
+            'csrf_token': csrf,
+            'dir': 'submissions',
+            'path': f'/var/local/submitty/courses/{self.semester}/sample/' + self.file_rel_path,
+        }, cookies=cookies)
+
+        # moderately fragile checks, but since we receive status 200 on failure,
+        # this is sort of the best we can do.
+        if ('test/html' in r.headers['Content-Type']) or \
+           (b'You don\'t have access to this page.' in r.content):
+            raise ValueError(f'no access to file {self.file_rel_path}, does it exist?')
+
+        self.log_out()
 
     @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_delete_file(self):
@@ -27,13 +59,11 @@ class TestAccess(BaseTestCase):
         # This is kept as a single test since information from the first test
         # is needed for the second (specifically, the anon_id)
 
-        cookies = {k: self.driver.get_cookie(k)['value']
-                   for k in ['submitty_session', 'PHPSESSID', 'submitty_token']}
-        csrf = self.driver.find_element(By.CSS_SELECTOR, 'body').get_attribute('data-csrf-token')
+        cookies, csrf = self.get_credentials()
 
         # 1. Go to grading details page for "Grading Homework" gradeable
         # obtain valid anon_id of peer gradeable assignment
-        self.get('/courses/f22/sample/gradeable/grading_homework/grading/details')
+        self.get(f'/courses/{self.semester}/sample/gradeable/grading_homework/grading/details')
         # accept responsibilities as grader modal popup
         self.driver.find_element(By.ID, 'agree-button').click()
         # click view all sections
@@ -82,13 +112,12 @@ class TestAccess(BaseTestCase):
         Alert(self.driver).accept()
 
         # attempt delete another file
-        file_rel_path = 'submissions/closed_homework/aphacker/1/part1_buggy2.py'
-        assert os.path.exists('/var/local/submitty/courses/f22/sample/' + file_rel_path)
-        endpoint = '/courses/f22/sample/gradeable/grading_homework/grading/attachments/delete'
+        endpoint = f'/courses/{self.semester}/sample' + \
+                   '/gradeable/grading_homework/grading/attachments/delete'
         r = requests.post(url=self.TEST_URL + endpoint, data={
             'anon_id': anon_id,
             'csrf_token': csrf,
-            'attachment': '../../../../' + file_rel_path,
+            'attachment': '../../../../' + self.file_rel_path,
         }, cookies=cookies)
         # checking for failure in this way isn't entirely robust,
         # however unit tests should be used on the specific access checking functions in Access.php
