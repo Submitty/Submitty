@@ -21,6 +21,8 @@ use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
+const DIR = 2;
+
 class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials")
@@ -127,14 +129,17 @@ class CourseMaterialsController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
 
-        $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-
-        foreach ($all_files as $file) {
-            if (str_starts_with($file->getPath(), $path)) {
-                $this->core->getCourseEntityManager()->remove($file);
+        if ($cm->getType() === DIR) {
+            $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+            foreach ($all_files as $file) {
+                if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
+                    $this->core->getCourseEntityManager()->remove($file);
+                }
             }
         }
-        $this->core->getCourseEntityManager()->flush();
+        else {
+            $this->core->getCourseEntityManager()->remove($cm);
+        }
         $success = false;
         if (is_dir($path)) {
             $success = FileUtils::recursiveRmdir($path);
@@ -150,14 +155,17 @@ class CourseMaterialsController extends AbstractController {
             if (count($empty_folders) > 0) {
                 $path = $empty_folders[0];
                 $success = $success && FileUtils::recursiveRmdir($path);
+                if (!isset($all_files)) {
+                    $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+                }
                 foreach ($all_files as $file) {
                     if (str_starts_with($file->getPath(), $path)) {
                         $this->core->getCourseEntityManager()->remove($file);
                     }
                 }
-                $this->core->getCourseEntityManager()->flush();
             }
         }
+        $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
