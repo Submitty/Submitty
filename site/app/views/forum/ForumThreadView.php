@@ -79,12 +79,12 @@ class ForumThreadView extends AbstractView {
 
         $thread_list = [];
 
-        $allPosts = $this->core->getQueries()->getPosts();
+        $all_posts = $this->core->getQueries()->getPosts();
         $is_instructor_full_access = [];
 
-        foreach ($allPosts as $singlePost) {
-            if (in_array($singlePost["thread_id"], array_keys($threadArray))) {
-                $is_instructor_full_access[$singlePost["author_user_id"]] = $this->core->getQueries()->isInstructorOrFullAccess($singlePost["author_user_id"]);
+        foreach ($all_posts as $single_post) {
+            if (in_array($single_post["thread_id"], array_keys($threadArray))) {
+                $is_instructor_full_access[$single_post["author_user_id"]] = $this->core->getQueries()->isInstructorOrFullAccess($single_post["author_user_id"]);
             }
         }
 
