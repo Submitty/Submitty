@@ -119,7 +119,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
       float numerator = min_char_changes - char_changes;
       float denominator = min_max_diff;
-      std::cout << "numer " << numerator << " denom= " << denominator << std::endl;
+      std::cout << "numerator " << numerator << " denominator= " << denominator << std::endl;
       assert (denominator > 0);
       grade = 1 - numerator/denominator;
       messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed."));
@@ -133,7 +133,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       float denominator = min_max_diff;
       assert (denominator > 0);
       grade = 1 - numerator/denominator;
-      std::cout << "numer " << numerator << " denom= " << denominator << std::endl;
+      std::cout << "numerator " << numerator << " denominator= " << denominator << std::endl;
       messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed."));
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;
