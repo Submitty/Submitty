@@ -6716,7 +6716,6 @@ LEFT JOIN (
     WHERE q.current_state IN ('waiting')
     GROUP BY q.queue_code
 ) AS ns ON ns.queue_code = qs.code
-WHERE qs.code = ns.queue_code
 ORDER BY id");
         return $this->course_db->rows();
     }
