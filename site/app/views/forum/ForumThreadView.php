@@ -79,6 +79,15 @@ class ForumThreadView extends AbstractView {
 
         $thread_list = [];
 
+        $allPosts = $this->core->getQueries()->getPosts();
+        $is_instructor_full_access = [];
+
+        foreach ($allPosts as $singlePost) {
+            if (in_array($singlePost["thread_id"], array_keys($threadArray))) {
+                $is_instructor_full_access[$singlePost["author_user_id"]] = $this->core->getQueries()->isInstructorOrFullAccess($singlePost["author_user_id"]);
+            }
+        }
+
         foreach ($threadArray as $thread_id => $data) {
             $thread_title = $fromIdtoTitle[$thread_id];
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
@@ -91,7 +100,7 @@ class ForumThreadView extends AbstractView {
                 $last_name = trim($user_info["last_name"]);
                 $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
 
-                if ($this->core->getQueries()->isInstructorOrFullAccess($post["p_author"])) {
+                if ($is_instructor_full_access[$post["p_author"]]) {
                     $visible_username = $first_name . " " . $last_name;
                 }
 
