@@ -265,10 +265,10 @@ def get_random_text_from_file(filename):
     line = ""
     with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
-        for num, aline in enumerate(comment):
+        for num, alternate_line in enumerate(comment):
             if random.randrange(num + 2):
                 continue
-            line = aline
+            line = alternate_line
     return line.strip()
 
 
