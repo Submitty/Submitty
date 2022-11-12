@@ -260,7 +260,7 @@ class OfficeHoursQueueModel extends AbstractModel {
             return $user->getDisplayAbbreviatedName();
         }
     }
-    
+
     public function cleanForId($queue_code) {
         // Not ideal, but faster than querying from the DB over and over.  There should be a small number of queues.
         foreach ($this->all_queues as $q) {
