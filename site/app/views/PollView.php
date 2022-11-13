@@ -16,6 +16,7 @@ class PollView extends AbstractView {
 
         $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(['polls']));
         $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->enableMobileViewport();
     }
 
@@ -26,7 +27,6 @@ class PollView extends AbstractView {
      * @param Poll[] $future_polls
      */
     public function showPollsInstructor(array $todays_polls, array $older_polls, array $future_polls, array $response_counts, array $dropdown_states) {
-        $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageInstructor.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
@@ -45,7 +45,6 @@ class PollView extends AbstractView {
      * @param Poll[] $older_polls
      */
     public function showPollsStudent(array $todays_polls, array $older_polls) {
-        $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
@@ -86,7 +85,6 @@ class PollView extends AbstractView {
 
     public function pollForm(?Poll $poll = null) {
         $this->core->getOutput()->addBreadcrumb($poll !== null ? "Edit Poll" : 'New Poll');
-        $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));

@@ -10,7 +10,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown')" class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['today'] ? ' down'}} fa fa-chevron-right"></i>
@@ -73,7 +73,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown')" class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -138,7 +138,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown')" class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -189,122 +189,3 @@
         </table>
     </div>
 </div>
-
-<script>
-
-    function newDeletePollForm(pollid, pollname, base_url) {
-        if (confirm("This will delete poll '" + pollname +"'. Are you sure?")) {
-            let url = base_url + "/deletePoll";
-            let fd = new FormData();
-            fd.append('csrf_token', csrfToken);
-            fd.append('poll_id', pollid);
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: fd,
-                processData: false,
-                cache: false,
-                contentType: false,
-                success: function(data) {
-                    try {
-                        const msg = JSON.parse(data);
-                        if (msg.status !== 'success') {
-                            console.error(err);
-                            window.alert("Something went wrong. Please try again.");
-                        }
-                        else {
-                            window.location.reload();
-                        }
-                    }
-                    catch (err) {
-                        console.error(err);
-                        window.alert("Something went wrong. Please try again.");
-                    }
-                },
-                error: function(err) {
-                    console.error(err);
-                    window.alert("Something went wrong. Please try again.");
-                }
-            });
-        }
-    }
-
-    function updatePollAcceptingAnswers(pollid, base_url) {
-        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
-        let visible_checkbox = "#poll_" + pollid + "_visible";
-        let url = base_url;
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('poll_id', pollid);
-        if ($(accepting_answers_checkbox).is(':checked')) {
-            $(visible_checkbox).prop('checked', true);
-            url += "/setOpen";
-        } else {
-            url += "/setEnded";
-        }
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function updatePollVisible(pollid, base_url) {
-        let visible_checkbox = "#poll_" + pollid + "_visible";
-        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
-        let url = base_url;
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('poll_id', pollid);
-        if (!$(visible_checkbox).is(':checked')) {
-            $(accepting_answers_checkbox).prop('checked',false);
-            url += "/setClosed";
-        } else {
-            url += "/setEnded";
-        }
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function updateDropdownStates(curr_state, cookie_key, base_url) {
-        let url = base_url + "/updateDropdownStates";
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('new_state', !curr_state);
-        fd.append('cookie_key', cookie_key);
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function importPolls() {
-        $("#import-polls-form").submit();
-    }
-
-</script>

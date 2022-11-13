@@ -436,16 +436,6 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/updateDropdownStates", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
-     */
-    public function updateDropdownStates(): JsonResponse {
-        $expire_time = time() + (7 * 24 * 60 * 60); // 7 days from now
-        Utils::setCookie($_POST["cookie_key"], $_POST["new_state"], $expire_time);
-        return JsonResponse::getSuccessResponse($_COOKIE[$_POST["cookie_key"]]);
-    }
-
-    /**
      * @Route("/courses/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
      */
     public function submitResponse(): RedirectResponse {
