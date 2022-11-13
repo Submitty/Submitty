@@ -214,18 +214,4 @@ class Poll
     {
         return $this->responses;
     }
-
-    /**
-     * @return Response[]
-     */
-    public function getResponsesByStudentId(string $user_id): array
-    {
-        $responses = [];
-        foreach ($this->responses as $response) {
-            if ($response->getStudentId() === $user_id) {
-                $responses[] = $response;
-            }
-        }
-        return $responses;
-    }
 }

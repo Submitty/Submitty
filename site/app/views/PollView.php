@@ -44,14 +44,13 @@ class PollView extends AbstractView {
      * @param Poll[] $todays_polls
      * @param Poll[] $older_polls
      */
-    public function showPollsStudent(array $todays_polls, array $older_polls, array $all_responses) {
+    public function showPollsStudent(array $todays_polls, array $older_polls) {
         $this->core->getOutput()->addInternalJs('polls-dropdown.js');
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
-            'all_responses' => $all_responses,
             'user_id' => $this->core->getUser()->getId(),
           ]);
     }

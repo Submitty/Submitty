@@ -26,7 +26,7 @@ class PollController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/polls", methods={"GET"})
      */
     public function showPollsPage(): WebResponse {
-        /** @var \app\repositories\PollRepository */
+        /** @var \app\repositories\poll\PollRepository */
         $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
 
         if ($this->core->getUser()->accessAdmin()) {
@@ -39,29 +39,57 @@ class PollController extends AbstractController {
                 }
             }
 
-            /** @var \app\repositories\ResponseRepository */
+            /** @var \app\repositories\\poll\ResponseRepository */
             $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
+
+            $todays_polls = [];
+            $old_polls = [];
+            $future_polls = [];
+            /** @var $poll Poll */
+            foreach ($repo->findAll() as $poll) {
+                if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
+                    $todays_polls[] = $poll;
+                }
+                elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
+                    $old_polls[] = $poll;
+                }
+                elseif ($poll->getReleaseDate() > $this->core->getDateTimeNow()) {
+                    $future_polls[] = $poll;
+                }
+            }
 
             return new WebResponse(
                 PollView::class,
                 'showPollsInstructor',
                 // release_date = ? order by name
-                $repo->findByToday(),
-                $repo->findByOld(),
-                $repo->findByFuture(),
+                $todays_polls,
+                $old_polls,
+                $future_polls,
                 $em->numResponsesByPoll(),
                 $dropdown_states,
             );
         }
         else { // Student view
-            /** @var \app\repositories\ResponseRepository */
+            /** @var \app\repositories\poll\ResponseRepository */
             $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
+
+            $todays_polls = [];
+            $old_polls = [];
+            /** @var $poll Poll */
+            foreach ($repo->findByStudentID($this->core->getUser()->getId()) as $poll) {
+                if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
+                    $todays_polls[] = $poll;
+                }
+                elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
+                    $old_polls[] = $poll;
+                }
+            }
+
             return new WebResponse(
                 PollView::class,
                 'showPollsStudent',
-                $repo->findByToday(),
-                $repo->findByOld(),
-                $em->findAllResponsesByStudentId($this->core->getUser()->getId())
+                $todays_polls,
+                $old_polls
             );
         }
     }
@@ -584,7 +612,6 @@ class PollController extends AbstractController {
         }
         $num_imported = 0;
         $num_errors = 0;
-        $question_type = null;
         foreach ($polls as $poll) {
             if (
                 !array_key_exists("name", $poll)

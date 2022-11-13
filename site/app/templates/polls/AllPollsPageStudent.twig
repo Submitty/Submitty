@@ -77,7 +77,7 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td align="left"> {{ poll.getName() }} </td>
-                        {% set response_label = poll.getId() not in all_responses|keys  ? "No Response" : all_responses[poll.getId()] | map(r => r.getOption().getResponse()) | join(', ') %}
+                        {% set response_label = poll.getResponses()|length == 0  ? "No Response" : poll.getResponses() | map(r => r.getOption().getResponse()) | join(', ') %}
                         <td align="left">
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
@@ -88,7 +88,7 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
-                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                    {% if poll.getResponses()|length == 0 %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
                                         <button type="submit" class="btn btn-primary"> Edit Answer

@@ -3,6 +3,8 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\poll\Poll;
+use app\entities\poll\Response;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
@@ -391,19 +393,24 @@ class ReportController extends AbstractController {
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {
-        // TODO: rewrite
-        $polls = $this->core->getQueries()->getPolls();
+        $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAllWithAllResponses();
         $polls_data = [];
         foreach ($polls as $poll) {
+            $responses = [];
+            /** @var $response Response */
+            foreach ($poll->getUserResponses() as $response) {
+                if (!array_key_exists($response->getStudentId(), $responses)) {
+                    $responses[$response->getStudentId()] = [];
+                }
+                $responses[$response->getStudentId()][] = $response->getOption()->getId();
+            }
+
             $polls_data[] = [
                 "id" => $poll->getId(),
-                "responses" => $poll->getUserResponses()
+                "responses" => $responses
             ];
         }
         FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses.json"), $polls_data);
-
-        /** @var Poll[] */
-        $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAll();
         FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_questions.json"), PollUtils::getPollExportData($polls));
     }
 
