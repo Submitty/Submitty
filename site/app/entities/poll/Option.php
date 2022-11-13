@@ -12,8 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="poll_options")
  */
-class Option
-{
+class Option {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

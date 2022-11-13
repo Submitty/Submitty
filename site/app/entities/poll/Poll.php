@@ -12,8 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="app\repositories\poll\PollRepository")
  * @ORM\Table(name="polls")
  */
-class Poll
-{
+class Poll {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
