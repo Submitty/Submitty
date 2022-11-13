@@ -512,7 +512,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
+     * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*"})
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
@@ -598,14 +598,14 @@ class PollController extends AbstractController {
             }
             /*  Polls that were exported before this feature was
                 implemented don't have this data. At the time, there
-                only existed questions of type single reponse. */
+                only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']));
-            $em->persist($poll);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']));
+            $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {
                 $option = new Option($order, $response, in_array($id, $poll['correct_responses']));
-                $poll->addOption($option);
+                $poll_entity->addOption($option);
                 $em->persist($option);
                 $order++;
             }
