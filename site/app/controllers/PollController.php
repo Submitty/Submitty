@@ -6,7 +6,6 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
-use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -78,7 +77,7 @@ class PollController extends AbstractController {
             $todays_polls = [];
             $old_polls = [];
             /** @var Poll */
-            foreach ($repo->findByStudentIDWithAllOptions($this->core->getUser()->getId()) as $poll) {
+            foreach ($repo->findAllByStudentIDWithAllOptions($this->core->getUser()->getId()) as $poll) {
                 if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
                     $todays_polls[] = $poll;
                 }
@@ -100,36 +99,25 @@ class PollController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return RedirectResponse|WebResponse
      */
-    public function showPoll($poll_id) {
-        if (!isset($poll_id)) {
+    public function showPoll(string $poll_id) {
+        if (!isset($poll_id) || !is_numeric($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
+
         /** @var Poll|null */
-        $poll = $this->core->getCourseEntityManager()->find(Poll::class, $poll_id);
-        $responses = $this->core->getCourseEntityManager()->getRepository(Response::class)->findBy([
-            'poll' => $poll,
-            'student_id' => $this->core->getUser()->getId()
-        ]);
+        $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        if ($this->core->getUser()->accessAdmin()) {
-            // TODO: add a admin view for viewPoll?
-            /*
-            return new WebResponse(
-                PollView::class,
-                'showPollInstructor',
-                $poll
-            );
-            */
-        }
         return new WebResponse(
             PollView::class,
             'showPollStudent',
-            $poll,
-            $responses
+            $poll
         );
     }
 
@@ -487,13 +475,7 @@ class PollController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
 
-        /** @var Response[] */
-        $responses = $em->getRepository(Response::class)->findBy([
-            'poll' => $poll,
-            'student_id' => $user_id
-        ]);
-
-        foreach ($responses as $response) {
+        foreach ($poll->getResponses() as $response) {
             $em->remove($response);
         }
         if (
