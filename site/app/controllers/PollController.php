@@ -39,14 +39,19 @@ class PollController extends AbstractController {
                 }
             }
 
-            /** @var \app\repositories\\poll\ResponseRepository */
-            $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
+            /** @var \app\entities\poll\Poll[] */
+            $all_polls = [];
+            $num_responses_by_poll = [];
+            foreach ($repo->findAllWithNumResponses() as $row) {
+                $all_polls[] = $row['poll'];
+                $num_responses_by_poll[$row['poll']->getId()] = $row['num_responses'];
+            }
 
             $todays_polls = [];
             $old_polls = [];
             $future_polls = [];
-            /** @var $poll Poll */
-            foreach ($repo->findAll() as $poll) {
+            /** @var Poll $poll */
+            foreach ($all_polls as $poll) {
                 if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
                     $todays_polls[] = $poll;
                 }
@@ -65,18 +70,15 @@ class PollController extends AbstractController {
                 $todays_polls,
                 $old_polls,
                 $future_polls,
-                $em->numResponsesByPoll(),
+                $num_responses_by_poll,
                 $dropdown_states,
             );
         }
         else { // Student view
-            /** @var \app\repositories\poll\ResponseRepository */
-            $em = $this->core->getCourseEntityManager()->getRepository(Response::class);
-
             $todays_polls = [];
             $old_polls = [];
-            /** @var $poll Poll */
-            foreach ($repo->findByStudentID($this->core->getUser()->getId()) as $poll) {
+            /** @var Poll */
+            foreach ($repo->findByStudentIDWithAllOptions($this->core->getUser()->getId()) as $poll) {
                 if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
                     $todays_polls[] = $poll;
                 }
@@ -364,8 +366,8 @@ class PollController extends AbstractController {
                     $this->core->addErrorMessage("Error occured in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
                 }
-                $poll->removeOption($option);
-                $em->remove($option);
+                $poll->removeOption($poll_option);
+                $em->remove($poll_option);
             }
         }
 
@@ -393,7 +395,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function openPoll(): RedirectResponse {
-        $poll_id = (int) $_POST['poll_id'] ?? 0;
+        $poll_id = intval($_POST['poll_id'] ?? 0);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -410,10 +412,9 @@ class PollController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/polls/setEnded", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
      */
     public function endPoll(): RedirectResponse {
-        $poll_id = (int) $_POST['poll_id'] ?? 0;
+        $poll_id = intval($_POST['poll_id'] ?? 0);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -432,7 +433,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function closePoll(): RedirectResponse {
-        $poll_id = (int) $_POST['poll_id'] ?? 0;
+        $poll_id = intval($_POST['poll_id'] ?? 0);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -517,7 +518,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deletePoll(): JsonResponse {
-        $poll_id = (int) $_POST['poll_id'] ?? 0;
+        $poll_id = intval($_POST['poll_id'] ?? 0);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);

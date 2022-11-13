@@ -9,16 +9,17 @@ use Doctrine\ORM\EntityRepository;
 
 class PollRepository extends EntityRepository {
     /**
-     * Find all of the polls available to the specified student
+     * Find all of the polls available to the specified student and hydrate options
      * @return Poll[]
      */
-    public function findByStudentID(string $user_id): array {
+    public function findByStudentIDWithAllOptions(string $user_id): array {
         return $this->_em
             ->createQuery('
-                SELECT p, r FROM app\entities\poll\Poll p
+                SELECT p, r, o FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r WITH r.student_id = :user_id
+                LEFT JOIN p.options o
                 WHERE p.release_date <= :release_date
-                ORDER BY p.release_date DESC, p.name ASC')
+                ORDER BY p.release_date ASC, p.name ASC')
             ->setParameter('release_date', date('Y-m-d'))
             ->setParameter('user_id', $user_id)
             ->getResult();
@@ -32,7 +33,24 @@ class PollRepository extends EntityRepository {
         return $this->_em
             ->createQuery('
                 SELECT p, r FROM app\entities\poll\Poll p
-                LEFT JOIN p.responses r')
+                LEFT JOIN p.responses r
+                ORDER BY p.release_date ASC, p.name ASC')
+            ->getResult();
+    }
+
+
+    /**
+     * Get all the polls and the number of responses to each of them
+     * @return array{poll: Poll, num_responses: int}
+     */
+    public function findAllWithNumResponses(): array {
+        return $this->_em
+            ->createQuery('
+                SELECT p AS poll, COUNT(DISTINCT r.student_id) AS num_responses
+                FROM app\entities\poll\Poll p
+                LEFT JOIN p.responses r
+                GROUP BY p.id
+                ORDER BY p.release_date ASC, p.name ASC')
             ->getResult();
     }
 }

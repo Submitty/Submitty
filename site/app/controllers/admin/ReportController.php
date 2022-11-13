@@ -396,7 +396,7 @@ class ReportController extends AbstractController {
         $polls_data = [];
         foreach ($polls as $poll) {
             $responses = [];
-            /** @var $response Response */
+            /** @var \app\entities\poll\Response */
             foreach ($poll->getUserResponses() as $response) {
                 if (!array_key_exists($response->getStudentId(), $responses)) {
                     $responses[$response->getStudentId()] = [];
