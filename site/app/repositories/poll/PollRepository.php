@@ -18,8 +18,7 @@ class PollRepository extends EntityRepository {
                 SELECT p, r FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r WITH r.student_id = :user_id
                 WHERE p.release_date <= :release_date
-                ORDER BY p.release_date DESC, p.name ASC'
-            )
+                ORDER BY p.release_date DESC, p.name ASC')
             ->setParameter('release_date', date('Y-m-d'))
             ->setParameter('user_id', $user_id)
             ->getResult();
@@ -33,8 +32,7 @@ class PollRepository extends EntityRepository {
         return $this->_em
             ->createQuery('
                 SELECT p, r FROM app\entities\poll\Poll p
-                LEFT JOIN p.responses r'
-            )
+                LEFT JOIN p.responses r')
             ->getResult();
     }
 }

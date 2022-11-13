@@ -4,7 +4,6 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\entities\poll\Poll;
-use app\entities\poll\Response;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;

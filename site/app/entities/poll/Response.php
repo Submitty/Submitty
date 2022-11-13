@@ -43,43 +43,35 @@ class Response
      */
     private $option;
 
-    public function __construct(string $student_id)
-    {
+    public function __construct(string $student_id) {
         $this->setStudentId($student_id);
     }
 
-    public function getId(): int
-    {
+    public function getId(): int {
         return $this->id;
     }
 
-    private function setStudentId(string $student_id): void
-    {
+    private function setStudentId(string $student_id): void {
         $this->student_id = $student_id;
     }
 
-    public function getStudentId(): string
-    {
+    public function getStudentId(): string {
         return $this->student_id;
     }
 
-    public function setPoll(Poll $poll): void
-    {
+    public function setPoll(Poll $poll): void {
         $this->poll = $poll;
     }
 
-    public function getPoll(): Poll
-    {
+    public function getPoll(): Poll {
         return $this->poll;
     }
 
-    public function setOption(Option $option): void
-    {
+    public function setOption(Option $option): void {
         $this->option = $option;
     }
 
-    public function getOption(): Option
-    {
+    public function getOption(): Option {
         return $this->option;
     }
 }

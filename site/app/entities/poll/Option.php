@@ -56,8 +56,7 @@ class Option
      */
     private $user_responses;
 
-    public function __construct(int $order_id, string $response, bool $is_correct)
-    {
+    public function __construct(int $order_id, string $response, bool $is_correct) {
         $this->setOrderId($order_id);
         $this->setResponse($response);
         $this->setCorrect($is_correct);
@@ -65,66 +64,54 @@ class Option
         $this->user_responses = new ArrayCollection();
     }
 
-    public function getId(): int
-    {
+    public function getId(): int {
         return $this->id;
     }
 
-    public function setOrderId(int $order_id): void
-    {
+    public function setOrderId(int $order_id): void {
         $this->order_id = $order_id;
     }
 
-    public function getOrderId(): int
-    {
+    public function getOrderId(): int {
         return $this->order_id;
     }
 
-    public function setResponse(string $response): void
-    {
+    public function setResponse(string $response): void {
         $this->response = $response;
     }
 
-    public function getResponse(): string
-    {
+    public function getResponse(): string {
         return $this->response;
     }
 
-    public function setCorrect(bool $correct): void
-    {
+    public function setCorrect(bool $correct): void {
         $this->correct = $correct;
     }
 
-    public function isCorrect(): bool
-    {
+    public function isCorrect(): bool {
         return $this->correct;
     }
 
-    public function setPoll(Poll $poll): void
-    {
+    public function setPoll(Poll $poll): void {
         $this->poll = $poll;
     }
 
-    public function getPoll(): Poll
-    {
+    public function getPoll(): Poll {
         return $this->poll;
     }
 
-    public function detach(): void
-    {
+    public function detach(): void {
         $this->poll = null;
     }
 
-    public function hasUserResponses(): bool
-    {
+    public function hasUserResponses(): bool {
         return count($this->user_responses) > 0;
     }
 
     /**
      * @return Collection<Response>
      */
-    public function getUserResponses(): Collection
-    {
+    public function getUserResponses(): Collection {
         return $this->user_responses;
     }
 }
