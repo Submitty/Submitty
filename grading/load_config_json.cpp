@@ -1559,8 +1559,8 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
 
     int A = 54059; /* a prime */
     int B = 76963; /* another prime */
-    int FIRST = 37; /* also prime */
-    unsigned int sum = FIRST;
+    int FIRSTH = 37; /* also prime */
+    unsigned int sum = FIRSTH;
     for (int i = 0; i < username.size(); i++) {
       sum = (sum * A) ^ (username[i] * B);
     }

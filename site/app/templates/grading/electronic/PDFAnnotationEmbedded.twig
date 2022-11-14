@@ -67,7 +67,10 @@
                 $("#viewer").css("padding-top", height);
             });
         });
-        offSetter.observe(document.querySelector(".sticky-file-info"));
+
+        if (document.querySelector(".sticky-file-info") !== null) {
+            offSetter.observe(document.querySelector(".sticky-file-info"));
+        }
     }
 
 </script>

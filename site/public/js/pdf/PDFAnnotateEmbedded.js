@@ -115,7 +115,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
             doc.addPage();
         }
         pdf.getPage(num).then((page) => {
-            const viewport = page.getViewport({scale:1});
+            const viewport = page.getViewport({scale:1.5});
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -153,7 +153,9 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                         }
                     }
                     const imgData = canvas.toDataURL('image/png');
-                    doc.addImage(imgData, 'PNG', 15, 15);
+                    const width = doc.internal.pageSize.getWidth();
+                    const height = doc.internal.pageSize.getHeight();
+                    doc.addImage(imgData, 'PNG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
                     //TODO: Get the saving and loading from annotated_pdfs working
                     /*console.log("CHECK2");

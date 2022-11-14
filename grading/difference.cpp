@@ -117,11 +117,11 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed."));
     } else if (char_changes < min_char_changes) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
-      float numerator = min_char_changes - char_changes;
-      float denominator = min_max_diff;
-      std::cout << "numerator= " << numerator << " denominator= " << denominator << std::endl;
-      assert (denominator > 0);
-      grade = 1 - numerator/denominator;
+      float numer = min_char_changes - char_changes;
+      float denom = min_max_diff;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
       messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed."));
     } else if (char_changes < max_char_changes) {
       messages.push_back(std::make_pair(MESSAGE_SUCCESS,"Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range."));
@@ -129,11 +129,11 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       grade = 1.0;
     } else if (char_changes < upper_bar) {
       std::cout << "more than max char changes (partial credit)" << std::endl;
-      float numerator = char_changes - max_char_changes;
-      float denominator = min_max_diff;
-      assert (denominator > 0);
-      grade = 1 - numerator/denominator;
-      std::cout << "numerator= " << numerator << " denominator= " << denominator << std::endl;
+      float numer = char_changes - max_char_changes;
+      float denom = min_max_diff;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
       messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed."));
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;

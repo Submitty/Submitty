@@ -1,3 +1,0 @@
-[codespell]
-ignore-words-list=nd,nwe
-skip=*.png,*.lock,./.git/*,*.jpg,*.pdf,package-lock.json,*.zip,*.svg,blank_QR_numeric_id.tex,*Names.txt,output_10090542_sample.html,notification-sound.js,noise.cpp

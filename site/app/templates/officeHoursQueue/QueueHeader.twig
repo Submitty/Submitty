@@ -32,10 +32,10 @@
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
                             aria-label="Toggle filter for: {{queue['code']|upper}}"
-                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
+                            id="queue_filter_{{queue['id']}}"
                             class="page_loading queue_filter"
                             style="display: none;"
-                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+                            onchange="updateQueueFilter('{{queue['id']}}')"/>
                 </label>
             {% endif %}
         {% endfor %}
@@ -50,10 +50,10 @@
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
                             aria-label="Toggle filter for: {{queue['code']|upper}}"
-                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
+                            id="queue_filter_{{queue['id']}}"
                             class="page_loading queue_filter"
                             style="display: none;"
-                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+                            onchange="updateQueueFilter('{{queue['id']}}')"/>
 
                 </label>
             {% endif %}
