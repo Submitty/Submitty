@@ -5,9 +5,7 @@ namespace tests\app\entities\poll;
 use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
-use app\libraries\Core;
 use DateTime;
-use http\Exception\RuntimeException;
 use ReflectionProperty;
 use tests\BaseUnitTest;
 

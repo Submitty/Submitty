@@ -39,7 +39,7 @@ class PollRepository extends EntityRepository {
             ->setParameter('poll_id', $poll_id)
             ->setParameter('user_id', $user_id)
             ->getResult();
-        if (count($result) === 0 ){
+        if (count($result) === 0) {
             return null;
         }
         return $result[0];
