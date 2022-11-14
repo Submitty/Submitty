@@ -44,6 +44,11 @@ class Poll {
     private $question_type;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $release_histogram;
+
+    /**
      * @ORM\OneToMany(targetEntity="\app\entities\poll\Option",mappedBy="poll")
      * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
      * @ORM\OrderBy({"order_id" = "ASC"})
@@ -58,12 +63,13 @@ class Poll {
      */
     private $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateTime $release_date) {
+    public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $image_path = null) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setReleaseDate($release_date);
-
+        $this->setReleaseHistogram($release_histogram);
+        $this->setImagePath($image_path);
         $this->setClosed();
 
         $this->options = new ArrayCollection();
@@ -99,7 +105,7 @@ class Poll {
     }
 
     public function isOpen(): bool {
-        return $this->status == "open";
+        return $this->status === "open";
     }
 
     public function setClosed(): void {
@@ -107,7 +113,7 @@ class Poll {
     }
 
     public function isClosed(): bool {
-        return $this->status == "closed";
+        return $this->status === "closed";
     }
 
     public function setEnded(): void {
@@ -115,7 +121,7 @@ class Poll {
     }
 
     public function isEnded(): bool {
-        return $this->status == "ended";
+        return $this->status === "ended";
     }
 
     public function getReleaseDate(): \DateTime {
@@ -140,6 +146,17 @@ class Poll {
 
     public function setQuestionType(string $question_type): void {
         $this->question_type = $question_type;
+    }
+
+    public function setReleaseHistogram(string $status): void {
+        if ($status !== "never" && $status !== "always" && $status !== "when_ended") {
+            throw new \RuntimeException("Invalid release histogram status");
+        }
+        $this->release_histogram = $status;
+    }
+
+    public function getReleaseHistogram(): string {
+        return $this->release_histogram;
     }
 
     /**
@@ -178,13 +195,6 @@ class Poll {
      * @return Collection<Response>
      */
     public function getUserResponses(): Collection {
-        return $this->responses;
-    }
-
-    /**
-     * @return Collection<Response>
-     */
-    public function getResponses(): Collection {
         return $this->responses;
     }
 }
