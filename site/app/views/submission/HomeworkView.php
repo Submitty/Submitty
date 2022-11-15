@@ -1177,6 +1177,7 @@ class HomeworkView extends AbstractView {
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
             $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
@@ -1192,13 +1193,15 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+                    $is_limited_access_grader = $this->core->getQueries()->isLimitedAccessGraderPost($post['user_id']);
+                    $is_instructor_or_full_access_grader = $this->core->getQueries()->isInstructorOrFullAccessGraderPost($post['user_id']);
                     $first_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $last_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedLastName();
                     $name = $first_name;
-                    if ($this->core->getQueries()->isLimitedAccessGraderPost($post["user_id"])) {
+                    if ($is_limited_access_grader) {
                         $name = $first_name . " " . substr($last_name, 0, 1) . ".";
                     }
-                    if ($this->core->getQueries()->isInstructorOrFullAccessGraderPost($post["user_id"])) {
+                    if ($is_instructor_or_full_access_grader) {
                         $name = $first_name . ' ' . $last_name;
                     }
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
