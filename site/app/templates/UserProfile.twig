@@ -13,9 +13,9 @@
                 {% endif %}
             </div>
             <span class="edit-user-img">
-                <a class="icon" tabindex="0" href="javascript:showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                <button class="icon" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-upload"></i> Upload profile photo
-                </a>
+                </button>
             </span>
             <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">Your preferred image was flagged as inappropriate.</span>
         </div>
@@ -89,9 +89,9 @@
                                 Change Password:
                             </span>
                             <span>
-                                <a class="icon" tabindex="0" href="javascript:showUpdatePasswordForm()" aria-label="Change password" title="Change password">
+                                <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password">
                                     <i class="fas fa-pencil-alt"></i>
-                                </a>
+                                </button>
                             </span>
                         </div>
                     {% endif %}
