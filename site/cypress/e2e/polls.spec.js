@@ -63,7 +63,6 @@ describe('Test cases revolving around polls functionality', () => {
         // delete the poll
         cy.get('#tomorrow-table-dropdown').click();
         cy.contains('Poll 5').siblings(':nth-child(2)').click();
-        cy.wait(1000);
 
         // verify the poll is no longer there
         cy.get('.content').should('not.contain', 'Poll 5');
