@@ -6560,7 +6560,7 @@ AND gc_id IN (
     }
 
     public function getStarType(string $user_id, string $queue_code) {
-        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ORDER BY entry_id DESC", [$user_id, $queue_code]);
+        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ORDER BY entry_id DESC LIMIT 1", [$user_id, $queue_code]);
         return $this->course_db->rows()[0]['star_type'];
     }
 
@@ -6578,10 +6578,8 @@ AND gc_id IN (
     public function addToQueue(string $queue_code, string $user_id, string $name, string $contact_info, $time_in = 0) {
         $star_type = 'none';
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
-        $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
-        date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
-        $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
-        date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
+        $one_day_ago = date_sub(new \DateTime('tomorrow', $this->core->getConfig()->getTimezone()), date_interval_create_from_date_string('1 days'));
+        $one_week_ago = date_sub(new \DateTime('tomorrow', $this->core->getConfig()->getTimezone()), date_interval_create_from_date_string('5 days'));
         if ($last_time_in_queue === null || DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
             $star_type = 'full';
         }
@@ -6650,10 +6648,11 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if ($this->getStarType($user_id, $queue_code) === 'full') {
+        $prev_type = $this->getStarType($user_id, $queue_code);
+        if ($prev_type === 'full') {
             $star_type = 'prev_full';
         }
-        elseif ($this->getStarType($user_id, $queue_code) === 'half') {
+        elseif ($prev_type === 'half') {
             $star_type = 'prev_half';
         }
 
@@ -6739,10 +6738,11 @@ AND gc_id IN (
         }
 
         $star_type = 'none';
-        if ($this->getStarType($user_id, $queue_code) === 'prev_full') {
+        $prev_type = $this->getStarType($user_id, $queue_code);
+        if ($prev_type === 'prev_full') {
             $star_type = 'full';
         }
-        elseif ($this->getStarType($user_id, $queue_code) === 'prev_half') {
+        elseif ($prev_type === 'prev_half') {
             $star_type = 'half';
         }
 
