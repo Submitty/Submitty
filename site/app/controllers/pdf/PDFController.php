@@ -18,6 +18,10 @@ class PDFController extends AbstractController {
         $real_path = "";
         $file_path_parts = explode("/", $file_path);
         for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($file_path_parts[$index] === "..") {
+                return "INVALID FILE PATH";
+            }
+
             if ($index === 9) {
                 $real_path .= "/" . $id;
             }
