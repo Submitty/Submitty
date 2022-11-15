@@ -818,6 +818,16 @@ SQL;
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
+    public function isLimitedAccessGraderPost($author_id) {
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
+        return intval($this->course_db->rows()[0]['user_group']) == 3;
+    }
+
+    public function isInstructorOrFullAccessGraderPost($author_id) {
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
+        return intval($this->course_db->rows()[0]['user_group']) <= 2;
+    }
+
     public function postHasHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", [$post_id]);
         return 0 !== count($this->course_db->rows());

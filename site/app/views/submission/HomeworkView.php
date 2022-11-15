@@ -1192,7 +1192,15 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $first_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $last_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedLastName();
+                    $name = $first_name;
+                    if ($this->core->getQueries()->isLimitedAccessGraderPost($post["user_id"])) {
+                        $name = $first_name . " " . substr($last_name, 0, 1) . ".";
+                    }
+                    if ($this->core->getQueries()->isInstructorOrFullAccessGraderPost($post["user_id"])) {
+                        $name = $first_name . ' ' . $last_name;
+                    }
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
