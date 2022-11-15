@@ -495,12 +495,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if(students_lines_index == -1){
-                    alert("Cannot Process file, requires exactly one labelled 'student' column");
+                    alert("Cannot process file, requires exactly one labelled 'student' column");
                     return;
                 }
 
                 if(graders_lines_index == -1){
-                    alert("Cannot Process file, requires exactly one labelled 'grader' column");
+                    alert("Cannot process file, requires exactly one labelled 'grader' column");
                     return;
                 }
 
