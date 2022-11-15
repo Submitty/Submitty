@@ -63,6 +63,7 @@ def main():
     args = parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
+    # TODO remove-dotdot ${SUBMITTY_REPOSITORY} and .setup inside it
     setup_path = Path(current_path, '..').resolve()
     git_path = Path(current_path, '..', '..').resolve()
 

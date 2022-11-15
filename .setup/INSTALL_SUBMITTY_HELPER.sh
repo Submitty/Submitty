@@ -25,9 +25,12 @@ set -e
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# TODO remove-dotdot can we get the install dir without relative paths somehow
+#CONF_DIR="${SUBMITTY_INSTALL_DIR}/config"
 CONF_DIR="${THIS_DIR}/../../../config"
 
 VAGRANT=0
+# TODO remove-dotdot ${SUBMITTY_REPOSITORY}/.vagrant
 if [ -d "${THIS_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
@@ -439,7 +442,7 @@ find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type f -exec chmod o+r {} \;
 mkdir -p "${SUBMITTY_INSTALL_DIR}/vendor"
 sudo chown -R root:submitty_course_builders "${SUBMITTY_INSTALL_DIR}/vendor"
 sudo chown -R root:submitty_course_builders "${SUBMITTY_INSTALL_DIR}/vendor"
-rsync -rtz "${SUBMITTY_REPOSITORY}/../vendor/nlohmann/json/include" "${SUBMITTY_INSTALL_DIR}/vendor/"
+rsync -rtz "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json/include" "${SUBMITTY_INSTALL_DIR}/vendor/"
 chown -R  root:root "${SUBMITTY_INSTALL_DIR}/vendor"
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type d -exec chmod 555 {} \;
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
@@ -740,7 +743,7 @@ fi
 #####################################
 # Build & Install Lichen Modules
 
-/bin/bash "${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh"
+/bin/bash "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen/install_lichen.sh"
 
 
 ################################################################################################################

@@ -15,6 +15,7 @@ import subprocess
 current_dir = os.path.dirname(__file__)
 
 # Collect other path information from configuration file
+# TODO remove-dotdot can we get ${SUBMITTY_INSTALL_DIR} somehow?
 config_file = os.path.join(current_dir, '..', '..', 'config', 'submitty.json')
 submitty_admin_file = os.path.join(current_dir, '..', '..', 'config',
                                    'submitty_admin.json')
@@ -65,6 +66,7 @@ if not os.path.exists(submitty_admin_file):
 with open(submitty_admin_file, 'r') as f:
     creds = json.load(f)
 
+# TODO remove-dotdot use ${SUBMITTY_INSTALL_DIR} ?
 response = subprocess.run([os.path.join(current_dir, '..', '..', 'sbin', 'api_token_generate.php'), creds['submitty_admin_username']], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
 
 if response.returncode != 0:

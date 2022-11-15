@@ -19,6 +19,7 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Collect other path information from configuration file
+    # TODO remove-dotdot better way to get these paths?
     config_file = os.path.join(current_dir, '..', '..', '..', '..', 'config', 'submitty.json')
     submitty_users_file = os.path.join(current_dir, '..', '..', '..', '..', 'config',
                                        'submitty_users.json')

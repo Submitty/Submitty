@@ -23,8 +23,10 @@ yaml = YAML(typ='safe')
 
 CURRENT_PATH = Path(__file__).resolve().parent
 SETUP_DATA_PATH = Path(CURRENT_PATH, "..", "data").resolve()
-SUBMITTY_REPOSITORY = Path("/usr/local/submitty/GIT_CHECKOUT/Submitty")
-SUBMITTY_INSTALL_DIR = Path("/usr/local/submitty")
+# TODO remove-dotdot better way to get install dir?
+SUBMITTY_INSTALL_DIR = Path(CURRENT_PATH, '..', '..', '..', '..').resolve()
+SUBMITTY_REPOSITORY = Path(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT', 'Submitty').resolve()
+# overwritten by value in submitty.json
 SUBMITTY_DATA_DIR = Path("/var/local/submitty")
 
 
@@ -108,6 +110,11 @@ def main():
         service = service.split()[0]
         running_services.append(service)
         subprocess.check_call(["systemctl", "stop", service])
+
+    # set data dir from config, overwriting default of /var/local/submitty
+    with Path(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json').open() as submitty_config:
+        submitty_config_json = json.load(submitty_config)
+        SUBMITTY_DATA_DIR = Path(submitty_config_json["submitty_data_dir"])
 
     shutil.rmtree('/var/local/submitty', True)
     Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)

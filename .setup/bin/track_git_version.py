@@ -3,7 +3,9 @@
 import os
 import json
 import subprocess
+import sys
 
+# TODO remove-dotdot better way to get config dir
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 CONFIG_DIR = os.path.join(CURRENT_PATH, "..", "..", "config")
 
