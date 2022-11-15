@@ -3,9 +3,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.alert import Alert
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
 import os
 import unittest
+from urllib.parse import urlparse, parse_qs
 
 # requests is not explicitly installed system wide in our requirements.txt
 # (.setup/pip/system_requirements.txt), but exists currently installed
@@ -65,21 +66,37 @@ class TestAccess(BaseTestCase):
         # obtain valid anon_id of peer gradeable assignment
         self.get(f'/courses/{self.semester}/sample/gradeable/grading_homework/grading/details')
         # accept responsibilities as grader modal popup
-        self.driver.find_element(By.ID, 'agree-button').click()
+        try:
+            # accept all modal popups
+            while True:
+                agree_button = (By.ID, 'agree-button')
+                # wait for modal to appear, if no more, then timeout or not interactable exception occurs
+                WebDriverWait(self.driver, 1).until(EC.presence_of_element_located(agree_button))
+                agree_button_elem = self.driver.find_element(*agree_button)
+                agree_button_elem.click()
+                # wait for modal to disappear
+                WebDriverWait(self.driver, 1).until(EC.staleness_of(agree_button_elem))
+        except (TimeoutException, ElementNotInteractableException):
+            pass
         # click view all sections
-        self.driver.find_element(By.CSS_SELECTOR, 'a.btn:nth-child(1)').click()
+        view_all_selector = 'a.btn[onclick="changeSections()"]'
+        self.driver.find_element(By.CSS_SELECTOR, view_all_selector).click()
         # navigate to a specific students grading page
-        sel = 'tbody.details-content:nth-child(4) > tr:nth-child(1)' + \
-              '> td:nth-child(8) > a:nth-child(1)'
-        self.driver.find_element(By.CSS_SELECTOR, sel).click()
-        # obtain anon_id of student
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'anon-id')))
-        anon_id = self.driver.find_element(By.ID, 'anon-id').get_attribute('data-anon_id')
+        sel = '#details-table > .details-content > tr > td > .btn-primary[href]'
+        buttons = self.driver.find_elements(By.CSS_SELECTOR, sel)
+        assert len(buttons) > 0, "no grade buttons found"
+        buttons[0].click()
+        # obtain anon_id of student,
+        # I don't think there is a robust way to obtain this from the page
+        WebDriverWait(self.driver, self.WAIT_TIME).until(EC.url_contains('who_id'))
+        anon_id = parse_qs(urlparse(self.driver.current_url).query)['who_id']
 
         # upload attachment to the rubric page
         self.driver.find_element(By.CSS_SELECTOR,
                                  '#grading_rubric_btn > button:nth-child(1)').click()
-        upload_input = self.driver.find_element(By.ID, 'attachment-upload')
+        attach_upload = (By.ID, 'attachment-upload')
+        WebDriverWait(self.driver, self.WAIT_TIME).until(EC.presence_of_element_located(attach_upload))
+        upload_input = self.driver.find_element(*attach_upload)
         parts = [CURRENT_PATH, "..", "..", "more_autograding_examples", "image_diff_mirror",
                  "submissions", "student1.png"]
         image_path = os.path.abspath(os.path.join(*parts))
@@ -106,7 +123,7 @@ class TestAccess(BaseTestCase):
         # click delete button once it appears
         del_btn = '#attachments-list-ta > div:nth-child(1) > div:nth-child(1) > a:nth-child(4)'
         presence = EC.presence_of_element_located((By.CSS_SELECTOR, del_btn))
-        WebDriverWait(self.driver, 10).until(presence)
+        WebDriverWait(self.driver, self.WAIT_TIME).until(presence)
         self.driver.find_element(By.CSS_SELECTOR, del_btn).click()
         # confirm that we do want to delete the attachment
         Alert(self.driver).accept()
