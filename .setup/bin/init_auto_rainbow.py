@@ -74,6 +74,8 @@ if response.returncode != 0:
     print(api_token_cmd)
     print("Subprocess stdout:")
     print(response.stdout)
+    print("Subprocess stderr:")
+    print(response.stderr)
     exit(1)
 
 token = response.stdout
