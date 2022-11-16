@@ -733,6 +733,11 @@ find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades" -type d -exec chmod o+
 find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades" -type f -exec chmod o+r {} \;
 
 #####################################
+# Obtains the current git hash and tag and stores them in the appropriate jsons
+python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
+chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
+
+#####################################
 # Obtain API auth token for submitty-admin user
 if [ "${WORKER}" == 0 ]; then
     python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py"
@@ -745,10 +750,6 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-
-# Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
-chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
 
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
