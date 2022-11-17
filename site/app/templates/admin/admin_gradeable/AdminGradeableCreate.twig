@@ -435,6 +435,8 @@
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
+            $("#yes_discussion").prop('checked', false);
+            $("#no_discussion").prop('checked', true);
             $('#regrade_request_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
         }
