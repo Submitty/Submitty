@@ -273,7 +273,7 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (str_starts_with($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                if (str_starts_with(pathinfo($cm->getPath(), PATHINFO_DIRNAME), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -325,7 +325,7 @@ class CourseMaterialsController extends AbstractController {
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         foreach ($course_materials as $course_material) {
             if (
-                str_starts_with($course_material->getPath(), $main_course_material->getPath())
+                str_starts_with(pathinfo($course_material->getPath(), PATHINFO_DIRNAME), $main_course_material->getPath())
                 && $course_material->getPath() != $main_course_material->getPath()
             ) {
                 if ($course_material->isDir()) {
