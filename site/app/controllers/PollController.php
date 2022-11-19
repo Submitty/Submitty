@@ -99,7 +99,7 @@ class PollController extends AbstractController {
      * @return RedirectResponse|WebResponse
      */
     public function showPoll(string $poll_id) {
-        if (!isset($poll_id) || !is_numeric($poll_id)) {
+        if (!is_numeric($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
@@ -156,7 +156,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date);
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram']);
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -464,7 +464,7 @@ class PollController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
 
-        foreach ($poll->getResponses() as $response) {
+        foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
         }
         if (
@@ -499,7 +499,7 @@ class PollController extends AbstractController {
         if ($poll->getImagePath() !== null) {
             unlink($poll->getImagePath());
         }
-        foreach ($poll->getResponses() as $response) {
+        foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
         }
         foreach ($poll->getOptions() as $option) {
@@ -599,7 +599,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']));
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $_POST['release_histogram']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {

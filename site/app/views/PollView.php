@@ -54,9 +54,6 @@ class PollView extends AbstractView {
           ]);
     }
 
-    /**
-     * @param Response[] $responses
-     */
     public function showPollStudent(Poll $poll) {
         $this->core->getOutput()->addBreadcrumb("View Poll");
         $image_path = $poll->getImagePath();
@@ -69,7 +66,7 @@ class PollView extends AbstractView {
 
         $response_option_ids = [];
         /** @var \app\entities\poll\Response $response */
-        foreach ($poll->getResponses() as $response) {
+        foreach ($poll->getUserResponses() as $response) {
             $response_option_ids[] = $response->getOption()->getId();
         }
 

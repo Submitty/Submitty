@@ -16,7 +16,6 @@ class PollUtils {
         $export_data = [];
         foreach ($polls as $poll) {
             $poll_data = [
-                'id' => $poll->getId(),
                 'name' => $poll->getName(),
                 'question' => $poll->getQuestion(),
                 'question_type' => $poll->getQuestionType(),
@@ -25,11 +24,12 @@ class PollUtils {
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
                 'status' => $poll->getStatus(),
                 'image_path' => $poll->getImagePath(),
+                'release_histogram' => $poll->getReleaseHistogram()
             ];
             foreach ($poll->getOptions() as $option) {
-                $poll_data['responses'][$option->getId()] = $option->getResponse();
+                $poll_data['responses'][$option->getOrderId()] = $option->getResponse();
                 if ($option->isCorrect()) {
-                    $poll_data['correct_responses'][] = $option->getId();
+                    $poll_data['correct_responses'][] = $option->getOrderId();
                 }
             }
             $export_data[] = $poll_data;

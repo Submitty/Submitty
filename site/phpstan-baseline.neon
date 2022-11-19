@@ -197,6 +197,11 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
+			message: "#^Call to an undefined method Doctrine\\\\ORM\\\\EntityRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\:\\:findAllWithAllResponses\\(\\)\\.$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
 			message: """
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#
@@ -354,6 +359,26 @@ parameters:
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$poll \\(app\\\\entities\\\\poll\\\\Poll\\) does not accept null\\.$#"
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"
