@@ -155,6 +155,14 @@ class Poll {
         $this->release_histogram = $status;
     }
 
+    /**
+     * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
+     *       isHistogramAvailable() is preferred if at all possible.
+     */
+    public function getReleaseHistogram(): string {
+        return $this->release_histogram;
+    }
+
     public function isHistogramAvailable(): bool {
         return ($this->release_histogram === "always" && !$this->isClosed()) || ($this->release_histogram === "when_ended" && $this->isEnded());
     }

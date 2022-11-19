@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\repositories\poll;
 
-use app\entities\poll\Option;
 use Doctrine\ORM\EntityRepository;
 
 class OptionRepository extends EntityRepository {

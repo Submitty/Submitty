@@ -6,7 +6,6 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
-use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -345,29 +344,28 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             $id = (int) $option['id'];
-            if (!empty($id)) {
-                $keep_ids[] = $id;
-                $found = false;
-                foreach ($poll->getOptions() as $poll_option) {
-                    if ($poll_option->getId() === $id) {
-                        $poll_option->setOrderId((int) $option['order']);
-                        $poll_option->setResponse($option['response']);
-                        $poll_option->setCorrect(isset($option['is_correct']) && $option['is_correct'] === 'on');
-                        if ($poll_option->isCorrect()) {
-                            $answers++;
-                        }
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
-                    if ($option->isCorrect()) {
+            $found = false;
+            foreach ($poll->getOptions() as $poll_option) {
+                if ($poll_option->getId() === $id) {
+                    $poll_option->setOrderId((int) $option['order']);
+                    $poll_option->setResponse($option['response']);
+                    $poll_option->setCorrect(isset($option['is_correct']) && $option['is_correct'] === 'on');
+                    if ($poll_option->isCorrect()) {
                         $answers++;
                     }
-                    $poll->addOption($option);
-                    $em->persist($option);
+                    $found = true;
+                    $keep_ids[] = $id;
+                    break;
                 }
+            }
+            if (!$found) {
+                $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
+                if ($option->isCorrect()) {
+                    $answers++;
+                }
+                $poll->addOption($option);
+                $em->persist($option);
+                $keep_ids[] = $option->getId();
             }
         }
 

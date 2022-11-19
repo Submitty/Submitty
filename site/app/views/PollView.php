@@ -7,7 +7,6 @@ use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\PollUtils;
 
 class PollView extends AbstractView {
     public function __construct(Core $core, Output $output) {
