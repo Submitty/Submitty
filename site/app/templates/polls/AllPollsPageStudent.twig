@@ -31,11 +31,11 @@
                             } only %}
                         </td>
                         <td>
-                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
+                            <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
-                                    {% if all_responses is empty %}
+                                    {% if poll.getUserResponses()|length == 0 %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
                                         <button type="submit" class="btn btn-primary"> Edit Answer
@@ -84,7 +84,7 @@
                             } only %}
                         </td>
                         <td>
-                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
+                            <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}

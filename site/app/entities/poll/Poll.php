@@ -155,8 +155,8 @@ class Poll {
         $this->release_histogram = $status;
     }
 
-    public function getReleaseHistogram(): string {
-        return $this->release_histogram;
+    public function isHistogramAvailable(): bool {
+        return ($this->release_histogram === "always" && !$this->isClosed()) || ($this->release_histogram === "when_ended" && $this->isEnded());
     }
 
     /**
@@ -196,5 +196,16 @@ class Poll {
      */
     public function getUserResponses(): Collection {
         return $this->responses;
+    }
+
+    /**
+     * Return an array of options from the set of responses loaded into this model
+     */
+    public function getSelectedOptionIds(): array {
+        $selected_options = [];
+        foreach ($this->getUserResponses() as $r) {
+            $selected_options[] = $r->getOption()->getId();
+        }
+        return $selected_options;
     }
 }

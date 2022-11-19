@@ -6,6 +6,7 @@ use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use app\libraries\Core;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -95,7 +96,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
+     * @Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return RedirectResponse|WebResponse
      */
     public function showPoll(string $poll_id) {
@@ -107,16 +108,38 @@ class PollController extends AbstractController {
         /** @var \app\repositories\poll\PollRepository */
         $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
 
-        /** @var Poll|null */
-        $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
-        if ($poll === null) {
-            $this->core->addErrorMessage("Invalid Poll ID");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        $response_counts = [];
+
+        if ($this->core->getUser()->accessAdmin()) {
+            /** @var Poll|null */
+            $poll = $repo->findByIDWithOptions(intval($poll_id));
+            if ($poll === null) {
+                $this->core->addErrorMessage("Invalid Poll ID");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
+            /** @var \app\repositories\poll\OptionRepository */
+            $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
+            $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
         }
+        else {
+            /** @var Poll|null */
+            $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
+            if ($poll === null) {
+                $this->core->addErrorMessage("Invalid Poll ID");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
+            if ($poll->isHistogramAvailable()) {
+                /** @var \app\repositories\poll\OptionRepository */
+                $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
+                $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
+            }
+        }
+
         return new WebResponse(
             PollView::class,
-            'showPollStudent',
-            $poll
+            'showPoll',
+            $poll,
+            $response_counts
         );
     }
 
@@ -261,7 +284,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($returnUrl);
         }
 
-        $fields = ['name', 'question', 'question_type', 'release_date'];
+        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
                 $this->core->addErrorMessage("Poll must fill out all fields");
@@ -284,6 +307,7 @@ class PollController extends AbstractController {
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
         $poll->setReleaseDate($date);
+        $poll->setReleaseHistogram($_POST['release_histogram']);
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];

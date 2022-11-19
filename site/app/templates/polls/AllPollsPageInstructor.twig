@@ -57,9 +57,13 @@
                         </td>
                         <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
+                            {% if poll.isHistogramAvailable() %}
+                                <i class="fas fa-lock-open"></i>
+                            {% else %}
+                                <i class="fas fa-lock"></i>
+                            {% endif %}
+                                &nbsp;View Poll
                             </a>
                         </td>
                     </tr>
@@ -123,9 +127,13 @@
                         </td>
                         <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
+                                {% if poll.isHistogramAvailable() %}
+                                    <i class="fas fa-lock-open"></i>
+                                {% else %}
+                                    <i class="fas fa-lock"></i>
+                                {% endif %}
+                                &nbsp;View Poll
                             </a>
                         </td>
                     </tr>
@@ -178,9 +186,13 @@
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
                         <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewResults/{{ poll.getId() }}">
-                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                <button type="submit" class="btn btn-primary">View Results</button>
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
+                                {% if poll.isHistogramAvailable() %}
+                                    <i class="fas fa-lock-open"></i>
+                                {% else %}
+                                    <i class="fas fa-lock"></i>
+                                {% endif %}
+                                &nbsp;View Poll
                             </a>
                         </td>
                     </tr>

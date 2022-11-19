@@ -3,7 +3,6 @@
 namespace app\views;
 
 use app\entities\poll\Poll;
-use app\entities\poll\Response;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\FileUtils;
@@ -54,15 +53,17 @@ class PollView extends AbstractView {
           ]);
     }
 
-    public function showPollStudent(Poll $poll) {
+    public function showPoll(Poll $poll, array $response_counts) {
         $this->core->getOutput()->addBreadcrumb("View Poll");
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
+        $this->core->getOutput()->enableMobileViewport();
+
         $image_path = $poll->getImagePath();
         $file_data = null;
         if ($image_path !== null) {
             $file_data = base64_encode(file_get_contents($image_path));
             $file_data = 'data: ' . mime_content_type($image_path) . ';charset=utf-8;base64,' . $file_data;
         }
-        $poll_type = PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
 
         $response_option_ids = [];
         /** @var \app\entities\poll\Response $response */
@@ -70,14 +71,14 @@ class PollView extends AbstractView {
             $response_option_ids[] = $response->getOption()->getId();
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("polls/ViewPoll.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
-            'poll_type' => $poll_type,
-            'responses' => $response_option_ids,
-            'file_data' => $file_data
-          ]);
+            'response_counts' => $response_counts,
+            'file_data' => $file_data,
+            'user_admin' => $this->core->getUser()->accessAdmin()
+        ]);
     }
 
     public function pollForm(?Poll $poll = null) {
@@ -86,23 +87,11 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
-        $poll_type = $poll !== null && PollUtils::isSingleResponse($poll->getQuestionType()) ? "single-response" : "multiple-response";
         return $this->core->getOutput()->renderTwigTemplate("polls/PollForm.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
-            'poll_type' => $poll_type
-          ]);
-    }
-
-    public function viewResults(Poll $poll) {
-        $this->core->getOutput()->addBreadcrumb("View Results");
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
-        return $this->core->getOutput()->renderTwigTemplate("polls/ViewPollResults.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll,
           ]);
     }
 }

@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="app\repositories\poll\OptionRepository")
  * @ORM\Table(name="poll_options")
  */
 class Option {

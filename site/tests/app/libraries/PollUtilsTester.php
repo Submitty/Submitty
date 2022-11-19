@@ -30,7 +30,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Poll #1",
                 "Is this the first poll?",
                 "single-response",
-                new Datetime("2020-01-11"),
+                new DateTime("2020-01-11"),
                 "never",
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             ),

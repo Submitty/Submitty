@@ -46,6 +46,23 @@ class PollRepository extends EntityRepository {
     }
 
     /**
+     * Find a single poll specified by ID and hydrate options
+     */
+    public function findByIDWithOptions(int $poll_id): ?Poll {
+        $result = $this->_em
+            ->createQuery('
+                SELECT p, o FROM app\entities\poll\Poll p
+                LEFT JOIN p.options o
+                WHERE p.id = :poll_id')
+            ->setParameter('poll_id', $poll_id)
+            ->getResult();
+        if (count($result) === 0) {
+            return null;
+        }
+        return $result[0];
+    }
+
+    /**
      * Find all polls, with all responses hydrated. This function should only be used if all data is strictly necessary.
      * @return Poll[]
      */
