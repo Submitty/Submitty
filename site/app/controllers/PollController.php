@@ -11,10 +11,14 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
 
+/**
+ * @Enabled("polls")
+ */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
