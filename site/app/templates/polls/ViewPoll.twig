@@ -30,7 +30,15 @@
                     {% set button_type = (poll.getQuestionType() == "single-response" ? "radio": "checkbox") %}
                     {% if not user_admin %}
                         <label class="radio" for="answer-no-response">
-                            <input class="response-btn" type={{button_type}} value="-1" name="answers[]" id="answer-no-response" {{ poll.getUserResponses() is same as(null) ? "checked" : "" }} {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}>
+                            <input class="no-response-radio response-btn"
+                                   type="{{button_type}}"
+                                   value="-1"
+                                   name="answers[]"
+                                   id="answer-no-response"
+                                   {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="clearResponses()"
+                            >
                             No response
                         </label>
                         <br/>
@@ -41,13 +49,16 @@
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
                         <div class="radio">
-                            <input class="response-btn"
+                            <input class="response-radio response-btn"
                                    type={{ button_type }}
                                    aria-label="Option {{ index + 1 }}"
                                    value="{{ option.getId() }}"
                                    name="answers[]"
                                    id="answer-{{index}}"
-                                   {{ not user_admin and option.getId() in user_selections ? "checked" : "" }} {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}/>
+                                   {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="disableNoResponse();"
+                            />
                             {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
@@ -75,6 +86,7 @@
     function toggle_section(section_id) {
         $(`#${section_id}`).toggle('fast');
     }
+
     function get_new_chart_width() {
         const MIN_CHART_WIDTH = 400;
         const DESIRED_CHART_FACTOR = 0.75;
@@ -90,6 +102,17 @@
         $("#poll-info").css("max-width", '');
         return desired_size;
     }
+
+    function disableNoResponse() {
+        $(".no-response-radio").prop("checked", false);
+    }
+
+    function clearResponses() {
+        if ($(".no-response-radio").is(':checked')) {
+            $(".response-radio").prop("checked", false);
+        }
+    }
+
     {% if user_admin or poll.isHistogramAvailable() %}
     window.onload = function () {
         const data = [{

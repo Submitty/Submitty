@@ -55,7 +55,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                             {% if poll.isHistogramAvailable() %}
@@ -77,7 +77,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown')" class="dropdown-bar">
+        <div id="old-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown')" class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -125,7 +125,7 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
@@ -146,7 +146,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown')" class="dropdown-bar">
+        <div id="future-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown')" class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -184,7 +184,7 @@
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
-                        <td> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
