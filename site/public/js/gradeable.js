@@ -212,8 +212,6 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
         graded_component = prepGradedComponent(component, graded_component);
         if (is_student) {
             component.ta_comment = "";
-        } else {
-            component.student_comment = "";
         }
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
