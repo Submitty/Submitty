@@ -29,7 +29,7 @@ class WebRouter {
     /** @var Request  */
     protected $request;
 
-    /** @var AnnotationReader */
+    /** @var PsrCachedReader */
     protected $reader;
 
     /** @var array */
