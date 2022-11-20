@@ -11,6 +11,9 @@ parameters:
     level: 4
     doctrine:
         objectManagerLoader: tests/phpstan/DoctrineExtensionTester.php
+    excludePaths:
+        - app/libraries/routers/Enabled.php
+        - app/libraries/routers/FeatureFlag.php
 
 services:
     - class: tests\phpstan\ModelClassExtension
