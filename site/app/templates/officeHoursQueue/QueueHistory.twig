@@ -56,11 +56,15 @@
             {% else %}
               <td>Not in queue</td>
             {% endif %}
-            <td class="mobile-hide">{{ viewer.getDisplayName(entry['helper_firstname'], entry['helper_lastname'], entry['helper_group']) }}</td>
+            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
+              <td class="mobile-hide">{{ viewer.getHelperName(entry) }}</td>
+            {% else %}
+              <td class="mobile-hide"></td>
+            {% endif %}
             {% if entry['removal_type'] == 'self' %}
               <td class="mobile-hide"></td>
             {% else %}
-              <td class="mobile-hide">{{ viewer.getDisplayName(entry['remover_firstname'], entry['remover_lastname'], entry['remover_group']) }}</td>
+              <td class="mobile-hide">{{ viewer.getRemoverName(entry) }}</td>
             {% endif %}
             {% if viewer.isGrader() %}
               <td>

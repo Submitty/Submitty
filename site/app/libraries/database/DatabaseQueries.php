@@ -6478,14 +6478,14 @@ AND gc_id IN (
         SELECT ROW_NUMBER()
             OVER (order by time_in ASC),
                 queue.*,
-                CASE
-                    WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
-                    ELSE helper.user_preferred_firstname
-                END AS helper_firstname,
-                CASE
-                    WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
-                    ELSE helper.user_preferred_lastname
-                END AS helper_lastname,
+                helper.user_firstname AS helper_firstname,
+                helper.user_preferred_firstname AS helper_preferred_firstname,
+                helper.user_lastname AS helper_lastname,
+                helper.user_preferred_lastname AS helper_preferred_lastname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group
             FROM queue
             LEFT JOIN users helper on helper.user_id = queue.help_started_by
@@ -6501,23 +6501,23 @@ AND gc_id IN (
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
                 queue.*,
-                CASE
-                    WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
-                    ELSE helper.user_preferred_firstname
-                END AS helper_firstname,
-                CASE
-                    WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
-                    ELSE helper.user_preferred_lastname
-                END AS helper_lastname,
+                helper.user_firstname AS helper_firstname,
+                helper.user_preferred_firstname AS helper_preferred_firstname,
+                helper.user_lastname AS helper_lastname,
+                helper.user_preferred_lastname AS helper_preferred_lastname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
-                CASE
-                    WHEN remover.user_preferred_firstname IS NULL THEN remover.user_firstname
-                    ELSE remover.user_preferred_firstname
-                END AS remover_firstname,
-                CASE
-                    WHEN remover.user_preferred_lastname IS NULL THEN remover.user_lastname
-                    ELSE remover.user_preferred_lastname
-                END AS remover_lastname,
+                remover.user_firstname AS remover_firstname,
+                remover.user_preferred_firstname AS remover_preferred_firstname,
+                remover.user_lastname AS remover_lastname,
+                remover.user_preferred_lastname AS remover_preferred_lastname,
+                remover.user_id AS remover_id,
+                remover.user_email AS remover_email,
+                remover.user_email_secondary AS remover_email_secondary,
+                remover.user_email_secondary_notify AS remover_email_secondary_notify,
                 remover.user_group AS remover_group
             FROM    queue
             LEFT JOIN users helper ON helper.user_id = queue.help_started_by
@@ -6801,14 +6801,14 @@ WHERE current_state IN
         $query = "
         SELECT
             queue.*,
-            CASE
-                WHEN helper.user_preferred_firstname IS NULL THEN helper.user_firstname
-                ELSE helper.user_preferred_firstname
-            END AS helper_firstname,
-            CASE
-                WHEN helper.user_preferred_lastname IS NULL THEN helper.user_lastname
-                ELSE helper.user_preferred_lastname
-            END AS helper_lastname,
+            helper.user_firstname AS helper_firstname,
+            helper.user_preferred_firstname AS helper_preferred_firstname,
+            helper.user_lastname AS helper_lastname,
+            helper.user_preferred_lastname AS helper_preferred_lastname,
+            helper.user_id AS helper_id,
+            helper.user_email AS helper_email,
+            helper.user_email_secondary AS helper_email_secondary,
+            helper.user_email_secondary_notify AS helper_email_secondary_notify,
             helper.user_group AS helper_group
         FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
         WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
