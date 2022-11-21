@@ -2,6 +2,9 @@
 
 namespace app\libraries;
 
+use DateInterval;
+use DateTime;
+
 /**
  * Class SessionManager
  *
@@ -35,12 +38,24 @@ class SessionManager {
      * @return bool|string
      */
     public function getSession(string $session_id) {
-        $this->core->getQueries()->removeExpiredSessions();
+        // Clear expired sessions occasionally.  This should eventually be changed to a cron job which runs
+        // hourly or daily.  Expired sessions don't hurt anything, but may fill up the DB unnecessarily so
+        // we want to clear them eventually.  Doing this randomly ensures that the sessions table is cleaned
+        // periodically while reducing the load on the server substantially.
+        if (rand(0, 1000) === 0) {
+            $this->core->getQueries()->removeExpiredSessions();
+        }
+
         $this->session = $this->core->getQueries()->getSession($session_id);
         if (empty($this->session)) {
             return false;
         }
-        $this->core->getQueries()->updateSessionExpiration($session_id);
+
+        // Only refresh the session once per week.  This reduces the load on the server without annoying people
+        // by logging them out all the time.
+        if (new DateTime($this->session['session_expires']) < (new DateTime())->add(new DateInterval('P1W'))) {
+            $this->core->getQueries()->updateSessionExpiration($session_id);
+        }
 
         return $this->session['user_id'];
     }

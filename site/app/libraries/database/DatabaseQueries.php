@@ -2985,7 +2985,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @return array
      */
     public function getSession($session_id) {
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=?", [$session_id]);
+        // We only ever want to get sessions which aren't expired.  Don't rely upon other PHP code checking for this...
+        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=? AND session_expires > current_timestamp", [$session_id]);
         return $this->submitty_db->row();
     }
 
@@ -2999,7 +3000,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
             "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '336 hours')",
+                                   VALUES(?,?,?,current_timestamp + interval '14 days')",
             [$session_id, $user_id, $csrf_token]
         );
     }
@@ -3011,7 +3012,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function updateSessionExpiration($session_id) {
         $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours')
+            "UPDATE sessions SET session_expires=(current_timestamp + interval '14 days')
                                    WHERE session_id=?",
             [$session_id]
         );
