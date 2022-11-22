@@ -3723,7 +3723,21 @@ ORDER BY gt.{$section_key}",
      * @param  string $gradeable_id
      * @return SimpleGradeOverriddenUser[]
      */
-    public function getUsersWithOverriddenGrades($gradeable_id) {
+    public function getUsersWithOverriddenGrades(string $gradeable_id): array {
+        $return = [];
+        foreach ($this->getRawUsersWIthOverriddenGrades($gradeable_id) as $row) {
+            $return[] = new SimpleGradeOverriddenUser($this->core, $row);
+        }
+        return $return;
+    }
+
+    /**
+     * Return an array of users with overridden Grades
+     *
+     * @param  string $gradeable_id
+     * @return array
+     */
+    public function getRawUsersWithOverriddenGrades(string $gradeable_id): array {
         $this->course_db->query(
             "
         SELECT u.user_id, user_firstname,
@@ -3736,12 +3750,7 @@ ORDER BY gt.{$section_key}",
         ORDER BY user_email ASC;",
             [$gradeable_id]
         );
-
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleGradeOverriddenUser($this->core, $row);
-        }
-        return $return;
+        return $this->course_db->rows();
     }
 
     /**
@@ -4446,8 +4455,18 @@ AND gc_id IN (
         }
     }
 
-    public function getAllAnonIdsByGradeable($g_id) {
+    public function getAllAnonIdsByGradeable(string $g_id): array {
         $this->course_db->query("SELECT anon_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getAllAnonIdsByGradeableWithUserIds(string $g_id): array {
+        $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE g_id=?", [$g_id]);
+        return $this->course_db->rows();
+    }
+
+    public function getAllTeamAnonIdsByGradeable(string $g_id): array {
+        $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE g_id=?", [$g_id]);
         return $this->course_db->rows();
     }
 
@@ -6466,8 +6485,8 @@ AND gc_id IN (
 
 
     public function isAnyQueueOpen() {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE open = true");
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
+        return $this->course_db->row()['num_open'] > 0;
     }
 
 
@@ -6525,8 +6544,8 @@ AND gc_id IN (
         if (is_null($user_id)) {
             $user_id = $this->core->getUser()->getId();
         }
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
+        return $this->course_db->row()['count'] > 0;
     }
 
     public function getLastTimeInQueue($user_id, $queue_code) {
@@ -6634,11 +6653,12 @@ AND gc_id IN (
     }
 
     public function setQueuePauseState($new_state) {
-        $time_paused_start = $this->core->getQueries()->getCurrentQueueState()['time_paused_start'];
+        $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
+        $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
         if ($new_state != $current_state) {
             // The pause state is actually changing
-            $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
+            $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
             if ($new_state) {
                 // The student is pausing
@@ -6687,7 +6707,16 @@ AND gc_id IN (
     }
 
     public function getAllQueues() {
-        $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
+        $this->course_db->query("
+SELECT qs.*, COALESCE (ns.num_students, 0) AS num_students
+FROM queue_settings qs
+LEFT JOIN (
+    SELECT q.queue_code, COUNT(distinct q.user_id) AS num_students
+    FROM queue q
+    WHERE q.current_state IN ('waiting')
+    GROUP BY q.queue_code
+) AS ns ON ns.queue_code = qs.code
+ORDER BY id");
         return $this->course_db->rows();
     }
 
@@ -6698,8 +6727,18 @@ AND gc_id IN (
 
     public function getQueueNumberAheadOfYou($queue_code = null) {
         if ($queue_code) {
-            $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
-            $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting') AND time_in <= ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$time_in, $queue_code]);
+            $this->course_db->query("
+SELECT count(*)
+FROM queue
+WHERE current_state IN
+    ('waiting')
+    AND time_in <= (
+        SELECT time_in
+        FROM queue
+        WHERE user_id = ? AND current_state IN ('waiting','being_helped')
+    )
+    AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
+                ", [$this->core->getUser()->getId(), $queue_code]);
         }
         else {
             $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting')");
@@ -6707,20 +6746,9 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function getLastUsedQueueName() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['name'];
-    }
-
-    public function getLastUsedContactInfo() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['contact_info'];
+    public function getLastQueueDetails() {
+        $this->course_db->query("SELECT name, contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        return $this->course_db->row();
     }
 
     public function getCurrentQueueState() {
@@ -6753,11 +6781,6 @@ AND gc_id IN (
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
-        return $this->course_db->rows()[0]['count'];
-    }
-
-    public function getCurrentNumberInQueue($queue_code) {
-        $this->course_db->query("SELECT count(*) from queue where UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$queue_code]);
         return $this->course_db->rows()[0]['count'];
     }
 
@@ -7133,6 +7156,21 @@ AND gc_id IN (
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
+              
+              /* Aggregate Gradeable Component Verifier Data */
+              gcd.array_verifier_user_id,
+              gcd.array_verifier_user_firstname,
+              gcd.array_verifier_user_preferred_firstname,
+              gcd.array_verifier_user_lastname,
+              gcd.array_verifier_user_email,
+              gcd.array_verifier_user_email_secondary,
+              gcd.array_verifier_user_email_secondary_notify,
+              gcd.array_verifier_user_group,
+              gcd.array_verifier_manual_registration,
+              gcd.array_verifier_last_updated,
+              gcd.array_verifier_registration_section,
+              gcd.array_verifier_rotating_section,
+              gcd.array_verifier_registration_type,
 
               /* Aggregate Gradeable Component Data (versions) */
               egd.array_version,
@@ -7181,7 +7219,7 @@ AND gc_id IN (
               ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
-              LEFT JOIN (
+              LEFT JOIN LATERAL (
                 SELECT
                   json_agg(in_gcd.gc_id) AS array_comp_id,
                   json_agg(gcd_score) AS array_score,
@@ -7208,9 +7246,22 @@ AND gc_id IN (
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  json_agg(uv.user_id) AS array_verifier_user_id,
+                  json_agg(uv.user_firstname) AS array_verifier_user_firstname,
+                  json_agg(uv.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
+                  json_agg(uv.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(uv.user_email) AS array_verifier_user_email,
+                  json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
+                  json_agg(uv.user_email_secondary_notify) AS array_verifier_user_email_secondary_notify,
+                  json_agg(uv.user_group) AS array_verifier_user_group,
+                  json_agg(uv.manual_registration) AS array_verifier_manual_registration,
+                  json_agg(uv.last_updated) AS array_verifier_last_updated,
+                  json_agg(uv.registration_section) AS array_verifier_registration_section,
+                  json_agg(uv.rotating_section) AS array_verifier_rotating_section,
+                  json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
                   ug.g_id
-                FROM gradeable_component_data in_gcd
+                FROM (SELECT * FROM gradeable_component_data WHERE gd_id=gd.gd_id) in_gcd
 
                   LEFT JOIN (
                     SELECT
@@ -7239,8 +7290,12 @@ AND gc_id IN (
                           user_id,
                           g_id
                         FROM gradeable_anon
-                      ) AS ga ON u.user_id=ga.user_id
+                      ) AS ga ON u.user_id=ga.user_id AND ga.g_id=g.g_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
+                  LEFT JOIN (
+                    SELECT u.*
+                    FROM users u
+                  ) AS uv ON uv.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id, ug.g_id
               ) AS gcd ON gcd.gd_id=gd.gd_id AND gcd.g_id=g.g_id
 
@@ -7410,6 +7465,15 @@ AND gc_id IN (
                             return 'grader_' . $elem;
                         },
                         $user_properties
+                    ),
+                    array_map(
+                        function ($elem) {
+                            return 'verifier_' . $elem;
+                        },
+                        array_diff(
+                            $user_properties,
+                            ['anon_id', 'grading_registration_sections']
+                        )
                     )
                 ) as $property
             ) {
@@ -7435,13 +7499,26 @@ AND gc_id IN (
                     // Create the grader user
                     $grader = new User($this->core, $user_array);
 
+                    // Transpose the verifier if it exists
+                    $verifier = null;
+                    $verifier_array = [];
+                    if (isset($db_row_split['verifier_user_id'][$i]) && $db_row_split['verifier_user_id'][$i] !== null) {
+                        foreach ($user_properties as $property) {
+                            if (isset($db_row_split['verifier_' . $property][$i])) {
+                                $verifier_array[$property] = $db_row_split['verifier_' . $property][$i];
+                            }
+                        }
+                        $verifier = new User($this->core, $verifier_array);
+                    }
+
                     // Create the component
                     $graded_component = new GradedComponent(
                         $this->core,
                         $ta_graded_gradeable,
                         $gradeable->getComponent($db_row_split['comp_id'][$i]),
                         $grader,
-                        $comp_array
+                        $comp_array,
+                        $verifier
                     );
 
                     $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);

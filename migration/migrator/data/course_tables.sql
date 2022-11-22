@@ -739,9 +739,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
+    eg_student_download boolean DEFAULT false NOT NULL,
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
-    eg_student_download boolean DEFAULT true NOT NULL,
     eg_student_submit boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
@@ -2326,6 +2326,13 @@ CREATE INDEX forum_posts_history_edit_timestamp_index ON public.forum_posts_hist
 --
 
 CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USING btree (post_id);
+
+
+--
+-- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USING btree (gd_id);
 
 
 --
