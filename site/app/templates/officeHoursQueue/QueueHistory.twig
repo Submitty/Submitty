@@ -20,6 +20,10 @@
         <th scope="col">Time Entered</th>
         <th scope="col">Time In Queue</th>
         <th scope="col">Time Helped</th>
+        {% if viewer.isGrader() %}
+          <th scope="col">Times Helped Today</th>
+          <th scope="col">Times Helped this week</th>
+        {% endif %}
         <th scope="col" class="mobile-hide">Helped Started By</th>
         <th scope="col" class="mobile-hide">Removed By</th>
         {% if viewer.isGrader() %}
@@ -55,6 +59,11 @@
               <td>Queue Emptied</td>
             {% else %}
               <td>Not in queue</td>
+            {% endif %}
+
+            {% if viewer.isGrader() %}
+              <td>{{ entry['helped_today'] }}</td>
+              <td>{{ entry['times_helped'] }}</td>
             {% endif %}
 
             <td class="mobile-hide">{{ entry['help_started_by'] }}</td>

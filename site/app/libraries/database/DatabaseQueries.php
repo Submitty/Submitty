@@ -6474,12 +6474,13 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where current_state IN ('waiting','being_helped') order by ROW_NUMBER");
+        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id, queue_code) as h1 ON user_id = h1.uid AND queue_code = h1.qc where current_state IN ('waiting','being_helped') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue q LEFT JOIN (SELECT user_id as uid, COUNT(user_id) AS times_helped FROM queue WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id) as h ON q.user_id = h.uid LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id, queue_code) as h1 ON q.user_id = h1.uid AND q.queue_code = h1.qc WHERE time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$current_date, $current_date, $current_date]);
         return $this->course_db->rows();
     }
 

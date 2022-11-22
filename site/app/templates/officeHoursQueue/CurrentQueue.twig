@@ -7,6 +7,7 @@
         <th scope="col">Status</th>
         <th scope="col">Time</th>
         <th scope="col">Total Time Paused</th>
+        <th scope="col">Times Helped Today</th>
         <th scope="col">Queue</th>
         <th scope="col">Remove</th>
       </tr>
@@ -78,6 +79,8 @@
           {% else %}
             <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_paused_start']) }}"></td>
           {% endif %}
+
+          <td>{{ entry['helped_today'] }}</td>
 
           <td>{{ entry['queue_code'] }}</td>
           <td>
