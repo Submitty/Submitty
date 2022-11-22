@@ -336,8 +336,8 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
-    CONSTRAINT check_registration_type CHECK (registration_type::TEXT = ANY (ARRAY['graded'::character varying::text, 'audit'::character varying::text, 'withdrawn'::character varying::text, 'staff'::character varying::text]))
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
 
@@ -794,3 +794,4 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
+
