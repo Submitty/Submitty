@@ -46,18 +46,17 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         const today = new Date(Date.now());
         const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setDate(tomorrow.getDate() + 1); // set date to one day forward
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.contains('+ Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
         cy.get('h1').click();
 
-        // submit and verify on main polls page, poll should be closed
+        // submit and verify on main polls page, poll should be in tomorrow table
         cy.get('#poll-form-submit').click();
         cy.url().should('include', 'sample/polls');
         cy.contains('Poll 5');
-
         cy.get('#tomorrow-table').contains('Poll 5');
 
         // delete the poll
