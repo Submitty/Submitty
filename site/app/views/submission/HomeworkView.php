@@ -1186,6 +1186,20 @@ class HomeworkView extends AbstractView {
                     $gc_title = $component->getTitle();
                 }
 
+                $instructor_full_access = [];
+                $limited_access_grader = [];
+                
+                $grade_inquiry_posts_for_id = $grade_inquiry_posts[$grade_inquiry->getId()];
+                $author_user_ids = array_map(function ($post) {
+                    return $post["user_id"];
+                }, $grade_inquiry_posts_for_id);
+                $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+                foreach ($author_user_groups as $author) {
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] == 3;
+                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= 2;
+                }
+
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
@@ -1193,8 +1207,8 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $is_limited_access_grader = $this->core->getQueries()->isLimitedAccessGraderPost($post['user_id']);
-                    $is_instructor_or_full_access_grader = $this->core->getQueries()->isInstructorOrFullAccessGraderPost($post['user_id']);
+                    $is_limited_access_grader = $limited_access_grader[$post['user_id']];
+                    $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
                     $first_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $last_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedLastName();
                     $name = $first_name;
