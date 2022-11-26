@@ -74,7 +74,6 @@ class ForumThreadView extends AbstractView {
                 $fromIdtoTitle[$thread["thread_id"]] = $thread["thread_title"];
             }
             $threadArray[$thread["thread_id"]][] = $thread;
-            
         }
         $count = 1;
 
@@ -84,7 +83,9 @@ class ForumThreadView extends AbstractView {
         $is_instructor_full_access = [];
 
         $posts_in_threads = $this->core->getQueries()->getPostsInThreads(array_keys($threadArray));
-        $author_user_ids = array_map(function ($post) {return $post["author_user_id"];}, $posts_in_threads);
+        $author_user_ids = array_map(function ($post) {
+            return $post["author_user_id"];
+        }, $posts_in_threads);
         $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
 
         foreach ($author_user_groups as $author) {

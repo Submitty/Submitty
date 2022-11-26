@@ -831,7 +831,6 @@ SQL;
 
     public function getAuthorUserGroups($author_ids) {
         $placeholders = $this->createParamaterList(count($author_ids));
-        // $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
     }
