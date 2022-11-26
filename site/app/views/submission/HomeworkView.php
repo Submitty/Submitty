@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -1196,8 +1197,8 @@ class HomeworkView extends AbstractView {
                 $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
 
                 foreach ($author_user_groups as $author) {
-                    $limited_access_grader[$author["user_id"]] = $author["user_group"] == 3;
-                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= 2;
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] == User::GROUP_LIMITED_ACCESS_GRADER;
+                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
                 }
 
                 // format posts
