@@ -6503,8 +6503,8 @@ AND gc_id IN (
 
 
     public function isAnyQueueOpen() {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE open = true");
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
+        return $this->course_db->row()['num_open'] > 0;
     }
 
 
@@ -6562,8 +6562,8 @@ AND gc_id IN (
         if (is_null($user_id)) {
             $user_id = $this->core->getUser()->getId();
         }
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
+        return $this->course_db->row()['count'] > 0;
     }
 
     public function getLastTimeInQueue($user_id, $queue_code) {
@@ -6671,11 +6671,12 @@ AND gc_id IN (
     }
 
     public function setQueuePauseState($new_state) {
-        $time_paused_start = $this->core->getQueries()->getCurrentQueueState()['time_paused_start'];
+        $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
+        $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
         if ($new_state != $current_state) {
             // The pause state is actually changing
-            $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
+            $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
             if ($new_state) {
                 // The student is pausing
@@ -6724,7 +6725,16 @@ AND gc_id IN (
     }
 
     public function getAllQueues() {
-        $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
+        $this->course_db->query("
+SELECT qs.*, COALESCE (ns.num_students, 0) AS num_students
+FROM queue_settings qs
+LEFT JOIN (
+    SELECT q.queue_code, COUNT(distinct q.user_id) AS num_students
+    FROM queue q
+    WHERE q.current_state IN ('waiting')
+    GROUP BY q.queue_code
+) AS ns ON ns.queue_code = qs.code
+ORDER BY id");
         return $this->course_db->rows();
     }
 
@@ -6735,8 +6745,18 @@ AND gc_id IN (
 
     public function getQueueNumberAheadOfYou($queue_code = null) {
         if ($queue_code) {
-            $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
-            $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting') AND time_in <= ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$time_in, $queue_code]);
+            $this->course_db->query("
+SELECT count(*)
+FROM queue
+WHERE current_state IN
+    ('waiting')
+    AND time_in <= (
+        SELECT time_in
+        FROM queue
+        WHERE user_id = ? AND current_state IN ('waiting','being_helped')
+    )
+    AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
+                ", [$this->core->getUser()->getId(), $queue_code]);
         }
         else {
             $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting')");
@@ -6744,20 +6764,9 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function getLastUsedQueueName() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['name'];
-    }
-
-    public function getLastUsedContactInfo() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['contact_info'];
+    public function getLastQueueDetails() {
+        $this->course_db->query("SELECT name, contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        return $this->course_db->row();
     }
 
     public function getCurrentQueueState() {
@@ -6790,11 +6799,6 @@ AND gc_id IN (
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
-        return $this->course_db->rows()[0]['count'];
-    }
-
-    public function getCurrentNumberInQueue($queue_code) {
-        $this->course_db->query("SELECT count(*) from queue where UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$queue_code]);
         return $this->course_db->rows()[0]['count'];
     }
 
@@ -7233,7 +7237,7 @@ AND gc_id IN (
               ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
-              LEFT JOIN (
+              LEFT JOIN LATERAL (
                 SELECT
                   json_agg(in_gcd.gc_id) AS array_comp_id,
                   json_agg(gcd_score) AS array_score,
@@ -7275,7 +7279,7 @@ AND gc_id IN (
                   json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
                   ug.g_id
-                FROM gradeable_component_data in_gcd
+                FROM (SELECT * FROM gradeable_component_data WHERE gd_id=gd.gd_id) in_gcd
 
                   LEFT JOIN (
                     SELECT
@@ -7304,7 +7308,7 @@ AND gc_id IN (
                           user_id,
                           g_id
                         FROM gradeable_anon
-                      ) AS ga ON u.user_id=ga.user_id
+                      ) AS ga ON u.user_id=ga.user_id AND ga.g_id=g.g_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
                   LEFT JOIN (
                     SELECT u.*
