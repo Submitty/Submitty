@@ -74,6 +74,7 @@ class ForumThreadView extends AbstractView {
                 $fromIdtoTitle[$thread["thread_id"]] = $thread["thread_title"];
             }
             $threadArray[$thread["thread_id"]][] = $thread;
+            
         }
         $count = 1;
 
@@ -82,13 +83,35 @@ class ForumThreadView extends AbstractView {
         $all_posts = $this->core->getQueries()->getPosts();
         $is_instructor_full_access = [];
 
-        foreach ($all_posts as $single_post) {
-            if (in_array($single_post["thread_id"], array_keys($threadArray))) {
-                $is_instructor_full_access[$single_post["author_user_id"]] = $this->core->getQueries()->isInstructorOrFullAccess($single_post["author_user_id"]);
-            }
+        // foreach(array_keys($threadArray) as $key) {
+        //     echo $key;
+        // }
+
+        $posts_in_threads = $this->core->getQueries()->getPostsInThreads(array_keys($threadArray));
+        $author_ids = [];
+        foreach ($posts_in_threads as $post) {
+            $author_ids[$post["author_user_id"]] = $post["thread_id"];
+            // echo $post["thread_id"];
+        }
+        // foreach (array_keys($author_ids) as $id) {
+        //     echo $id;
+        // }
+        $user_groups = $this->core->getQueries()->getAuthorUserGroups(array_keys($author_ids));
+
+        foreach ($user_groups as $user) {
+            // echo $user["user_id"];
+            $is_instructor_full_access[$user["user_id"]] = $user["user_group"] <= 2;
         }
 
+        // foreach ($all_posts as $single_post) {
+        //     if (in_array($single_post["thread_id"], array_keys($threadArray))) {
+        //         $is_instructor_full_access[$single_post["author_user_id"]] = $this->core->getQueries()->isInstructorOrFullAccess($single_post["author_user_id"]);
+        //     }
+        //     // echo $single_post["thread_id"];
+        // }
+
         foreach ($threadArray as $thread_id => $data) {
+            // echo $thread_id;
             $thread_title = $fromIdtoTitle[$thread_id];
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
 
