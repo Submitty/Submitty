@@ -1188,7 +1188,7 @@ class HomeworkView extends AbstractView {
 
                 $instructor_full_access = [];
                 $limited_access_grader = [];
-                
+
                 $grade_inquiry_posts_for_id = $grade_inquiry_posts[$grade_inquiry->getId()];
                 $author_user_ids = array_map(function ($post) {
                     return $post["user_id"];
