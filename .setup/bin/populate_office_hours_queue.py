@@ -40,12 +40,103 @@ def main():
     user_table = res.fetchall()
     res.close()
 
+    # Find all ids of students and graders
     all_student_ids = [x['user_id'] for x in user_table if x['user_group'] == 4]
     all_grader_ids = [x['user_id'] for x in user_table if x['user_group'] < 4]
 
-    print(all_student_ids)
-    print(all_grader_ids)
-    print(all_queues)
+    # create a lookup table from user id to name
+    name_lookup = dict()
+    for x in user_table:
+        student_name = ""
+
+        if x["user_preferred_firstname"] != None:
+            student_name += x["user_preferred_firstname"]
+        else:
+            student_name += x["user_firstname"]
+        
+        student_name += " "
+
+        if x["user_preferred_lastname"] != None:
+            student_name += x["user_preferred_lastname"]
+        else:
+            student_name += x["user_lastname"]
+        
+        name_lookup[x["user_id"]] = student_name
+
+    # Hardcoding options that we could use
+    queue_current_states = ["done", "being_helped", "waiting"]
+    queue_removal_types = ["helped", "self", "emptied", "self_helped", "removed"]
+
+    for _ in range(100):
+        queue_entry = dict()
+        queue_entry["current_state"] = random.choice(queue_current_states)
+        
+        if queue_entry["current_state"] == "done":
+            queue_entry["removal_type"] = random.choice(queue_removal_types)
+        else:
+            queue_entry["removal_type"] = None
+        
+        queue_entry["queue_code"] = random.choice(all_queues)
+        queue_entry["user_id"] = random.choice(all_student_ids)
+        queue_entry["name"] = queue_entry["user_id"]
+
+        # FUTURE ME PLEASE GENERATE RANDOM TIME
+        queue_entry["time_in"] = datetime.datetime.now()
+
+        if queue_entry["current_state"] == "done":
+            queue_entry["time_out"] = datetime.datetime.now()
+        else:
+            queue_entry["time_out"] = None
+
+        queue_entry["added_by"] = queue_entry["user_id"]
+
+        if queue_entry["current_state"] == "waiting" or queue_entry["removal_type"] == "self":
+            queue_entry["help_started_by"] = None
+        else:
+            queue_entry["help_started_by"] = random.choice(all_grader_ids)
+        
+        if queue_entry["removal_type"] == None:
+            queue_entry["removed_by"] = None
+        elif queue_entry["removal_type"] == "helped":
+            # usually the grader who started will finish helping
+            if random.random() < 0.9:
+                queue_entry["removed_by"] = queue_entry["help_started_by"]
+            else:
+                queue_entry["removed_by"] = random.choice(all_grader_ids)
+        elif queue_entry["removal_type"] == "self" or queue_entry["removal_type"] == "self_helped":
+            queue_entry["removed_by"] = queue_entry["user_id"]
+        else:
+            queue_entry["removed_by"] = random.choice(all_grader_ids)
+        
+        queue_entry["contact_info"] = queue_entry["user_id"] + "@sample.com"
+
+        # FIX THE TIME LATER
+        queue_entry["last_time_in_queue"] = datetime.datetime.now()
+
+        if queue_entry["help_started_by"] != None:
+            queue_entry["time_help_start"] = datetime.datetime.now()
+        else:
+            queue_entry["time_help_start"] = None
+        
+        # people usually won't be pausing
+        if random.random() < 0.9:
+            queue_entry["paused"] = False
+        else:
+            queue_entry["paused"] = True
+        
+        if queue_entry["paused"]:
+            queue_entry["time_paused"] = random.randint(0, 120)
+        else:
+            queue_entry["time_paused"] = 0
+        
+        if queue_entry["paused"]:
+            queue_entry["time_paused_start"] = datetime.datetime.now()
+        else:
+            queue_entry["time_paused_start"] = None
+
+    # print("All student ids:", all_student_ids)
+    # print("All grader ids:", all_grader_ids)
+    # print("All queue codes:", all_queues)
 
 
 
