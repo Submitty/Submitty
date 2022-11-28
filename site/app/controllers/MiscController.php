@@ -134,10 +134,10 @@ class MiscController extends AbstractController {
         }
         else {
             // Check access through Access library
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                return false;
-            }
+            // if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+            //     $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+            //     return false;
+            // }
 
             if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
                 if ($cm === null) {
