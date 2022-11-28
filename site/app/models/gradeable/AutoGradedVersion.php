@@ -145,10 +145,7 @@ class AutoGradedVersion extends AbstractModel {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
-
-            // $user_assignment_settings_file = array_key_first($user_assignment_settings);
-            // $user_assignment_settings_details = $user_assignment_settings['.user_assignment_settings.json'];
-            // $this->meta_files[$dir]['.user_assignment_settings.json'] = $user_assignment_settings_details;
+            
             // If there is only one part (no separation of upload files),
             //  be sure to set the "Part 1" files to the "all" files
             if ($config->getNumParts() === 1 && !$config->isNotebookGradeable()) {

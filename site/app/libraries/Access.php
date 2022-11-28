@@ -784,7 +784,7 @@ class Access {
         $subpart_values = explode("/", $relative_path);
 
         //Missing necessary directory path
-        if (count($subpart_values) <= count($subpart_types)) {
+        if (count($subpart_values) < count($subpart_types)) {
             return false;
         }
         $end_path = implode("/", array_slice($subpart_values, count($subpart_types)));
