@@ -130,6 +130,13 @@ fi
 # create routes cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
+# clear old access control cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
+fi
+# create access control cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
+
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
 fi
