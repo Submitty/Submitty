@@ -5,6 +5,7 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\models\User;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -79,7 +80,6 @@ class ForumThreadView extends AbstractView {
 
         $thread_list = [];
 
-        $all_posts = $this->core->getQueries()->getPosts();
         $is_instructor_full_access = [];
 
         $posts_in_threads = $this->core->getQueries()->getPostsInThreads(array_keys($threadArray));
@@ -89,7 +89,7 @@ class ForumThreadView extends AbstractView {
         $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
 
         foreach ($author_user_groups as $author) {
-            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= 2;
+            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
         }
 
         foreach ($threadArray as $thread_id => $data) {
@@ -447,6 +447,18 @@ class ForumThreadView extends AbstractView {
         $totalAttachments = 0;
         $GLOBALS['totalAttachments'] = 0;
 
+        $author_user_groups_map = [];
+
+        $author_user_ids = array_map(function ($post) {
+            return $post["author_user_id"];
+        }, $posts);
+
+        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+        foreach ($author_user_groups as $author) {
+            $author_user_groups_map[$author["user_id"]] = $author["user_group"];
+        }
+
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -486,6 +498,8 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
+                        $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
+
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
 
                         break;
@@ -504,6 +518,8 @@ class ForumThreadView extends AbstractView {
                 }
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
+
+                $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
 
@@ -726,6 +742,16 @@ class ForumThreadView extends AbstractView {
 
         $thread_content = [];
 
+        $is_instructor_full_access = [];
+        $author_user_ids = array_map(function ($thread) {
+            return $thread["created_by"];
+        }, $threads);
+        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+        foreach ($author_user_groups as $author) {
+            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+        }
+
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
@@ -860,7 +886,7 @@ class ForumThreadView extends AbstractView {
                 $last_name = trim($user_info["last_name"]);
                 $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
 
-                if ($this->core->getQueries()->isInstructorOrFullAccess($first_post["author_user_id"])) {
+                if ($is_instructor_full_access[$first_post["author_user_id"]]) {
                     $visible_username = $first_name . " " . $last_name;
                 }
 
@@ -971,7 +997,7 @@ class ForumThreadView extends AbstractView {
             $reply_level = 1;
         }
 
-        if ($this->core->getQueries()->isInstructorOrFullAccess($post["author_user_id"])) {
+        if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
             $visible_username = $first_name . " " . $last_name;
         }
 
