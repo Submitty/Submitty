@@ -123,12 +123,6 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
-# TODO: remove this. see #8404
-# clear old annotations cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
-fi
-
 # clear old routes cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
@@ -142,6 +136,13 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
 fi
 # create doctrine cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
+
+# clear old access control cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
+fi
+# create access control cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
