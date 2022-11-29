@@ -1427,7 +1427,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *  ]
      */
     public function getLateDayCache(): array {
-        $query = "SELECT * FROM 
+        $query = "SELECT * FROM
                     late_day_cache AS ldc
                     LEFT JOIN gradeable g ON g.g_id=ldc.g_id
                   ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
@@ -1535,9 +1535,9 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT (cache_row).* 
-                    FROM 
+        $query = "INSERT INTO late_day_cache
+                    (SELECT (cache_row).*
+                    FROM
                         (SELECT
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
@@ -1555,7 +1555,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
+        $query = "INSERT INTO late_day_cache
                     SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
 
         $this->course_db->query($query, $params);
@@ -6474,13 +6474,31 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id, queue_code) as h1 ON user_id = h1.uid AND queue_code = h1.qc where current_state IN ('waiting','being_helped') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $this->course_db->query(
+          "SELECT ROW_NUMBER() OVER(order by time_in ASC),*
+          FROM queue
+          LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+            FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+            GROUP BY user_id, queue_code) as h1 ON user_id = h1.uid AND queue_code = h1.qc
+          WHERE current_state IN ('waiting','being_helped')
+          order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue q LEFT JOIN (SELECT user_id as uid, COUNT(user_id) AS times_helped FROM queue WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id) as h ON q.user_id = h.uid LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped') GROUP BY user_id, queue_code) as h1 ON q.user_id = h1.uid AND q.queue_code = h1.qc WHERE time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$current_date, $current_date, $current_date]);
+        $this->course_db->query(
+          "SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),*
+          FROM queue q
+          LEFT JOIN (SELECT user_id as uid, COUNT(user_id) AS times_helped
+            FROM queue
+            WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
+            GROUP BY user_id) as h ON q.user_id = h.uid
+          LEFT JOIN (SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+            FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+            GROUP BY user_id, queue_code) as h1 ON q.user_id = h1.uid AND q.queue_code = h1.qc
+          WHERE time_in > ? AND current_state IN ('done')
+          order by ROW_NUMBER", [$current_date, $current_date, $current_date]);
         return $this->course_db->rows();
     }
 
@@ -7157,7 +7175,7 @@ WHERE current_state IN
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
-              
+
               /* Aggregate Gradeable Component Verifier Data */
               gcd.array_verifier_user_id,
               gcd.array_verifier_user_firstname,
