@@ -236,22 +236,17 @@ class TestAutogradingShipper(unittest.TestCase):
 }
 """)
 
+        # Initialize git homework directory
+        os.system("cd {TEST_DATA_DIR}/homework; git init; git add -A; git commit -m \"testing\"")
         # Start test
-        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'))
+        results = shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'))
 
         # Confirm standard out
-        expected = "SHIPPER CHECKOUT VCS REPO  /home/peteca/Documents/work/CS Lab Admin/Submitty/autograder/tests/data/shipper_config.json\n"
+        expected = "SHIPPER CHECKOUT VCS REPO  /home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data/shipper_config.json\n"
         self.assertEqual(expected, self.capsys.readouterr().out)
 
         # Confirm VCS checkout logging message
-        with open(os.path.join(homework_paths["results"], "logs/vcs_checkout.txt")) as open_file:
-            expected_vcs_checkout = """VCS CHECKOUT
-vcs_base_url git@gitlab.cs.wallawalla.edu:test_student/student141.git
-vcs_subdirectory /hw01
-vcs_path git@gitlab.cs.wallawalla.edu:test_student/student141.git
-/usr/bin/git clone git@gitlab.cs.wallawalla.edu:test_student/student141.git /home/peteca/documents/test_suite/unitTests/autograder/test_environment/autograding/courses/test_term/test_course/checkout/hw01/test_student/11/tmp --depth 1 -b master
-
-====================================
-
-"""
-            self.assertEqual(expected_vcs_checkout, open_file.read())
+        with open(os.path.join(homework_paths["results"], "logs/vcs_checkout.txt")) as actual_vcs_checkout:
+            print("Our path " ,os.path.join(SCRIPT_DIR, "messages/vcs_checkout.txt"))
+            with open(os.path.join(SCRIPT_DIR, "messages/vcs_checkout.txt")) as expected_vcs_checkout:    
+                self.assertEqual(expected_vcs_checkout.read(), actual_vcs_checkout.read())

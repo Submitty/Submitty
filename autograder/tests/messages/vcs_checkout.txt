@@ -1,0 +1,8 @@
+VCS CHECKOUT
+vcs_base_url git@gitlab.cs.wallawalla.edu:{$user_id}/student141.git
+vcs_subdirectory /homework_01
+vcs_path file:////homework_01
+/usr/bin/git clone file:////homework_01 /home/peteca/Documents/test_suite/unitTests/autograder/test_environment/autograding/courses/test_term/test_course/checkout/homework_01/test_student/11 --depth 1 -b master
+
+====================================
+
