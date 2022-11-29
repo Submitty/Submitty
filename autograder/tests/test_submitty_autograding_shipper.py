@@ -228,14 +228,13 @@ class TestAutogradingShipper(unittest.TestCase):
         with open(course_form_config_file, 'w') as open_file:
             open_file.write("""
 {
-    "gradeable_id": "homework_01",
+    "gradeable_id": "shipper_config.json",
     "config_path": "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data",
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
     "subdirectory": "/homework_01"
 }
 """)
-        print(CONFIG)
         # Initialize git homework directory
         os.system("cd {TEST_DATA_DIR}/homework_01; git init; git add -A; git commit -m \"testing\"")
         # Start test
