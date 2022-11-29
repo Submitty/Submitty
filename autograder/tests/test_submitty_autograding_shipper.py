@@ -201,7 +201,7 @@ class TestAutogradingShipper(unittest.TestCase):
         "display_rainbow_grades_summary": false,
         "display_custom_message": false,
         "course_email": "Please contact your TA or instructor to submit a grade inquiry.",
-        "vcs_base_url": "git@gitlab.cs.wallawalla.edu:{$user_id}/student141.git",
+        "vcs_base_url": "{TEST_DATA_DIR}/homework_01",
         "vcs_type": "git",
         "private_repository": "",
         "forum_enabled": false,
@@ -228,7 +228,7 @@ class TestAutogradingShipper(unittest.TestCase):
         with open(course_form_config_file, 'w') as open_file:
             open_file.write("""
 {
-    "gradeable_id": "shipper_config.json",
+    "gradeable_id": "homework_01",
     "config_path": "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data",
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
