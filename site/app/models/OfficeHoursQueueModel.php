@@ -244,7 +244,7 @@ class OfficeHoursQueueModel extends AbstractModel {
      * @param array|null $query_row
      * @return string
      */
-    public function getHelperName($query_row = null) {
+    public function getHelperName($query_row = null): string {
 
         if ($query_row == null) {
             $query_row = $this->current_queue_state;
@@ -278,7 +278,7 @@ class OfficeHoursQueueModel extends AbstractModel {
      * @param array|null $query_row
      * @return string
      */
-    public function getRemoverName($query_row = null) {
+    public function getRemoverName($query_row = null): string {
 
         if ($query_row == null) {
             $query_row = $this->current_queue_state;

@@ -440,7 +440,7 @@ class User extends AbstractModel {
         return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
     }
 
-    public function getDisplayAbbreviatedName() {
+    public function getDisplayAbbreviatedName(): string {
         return $this->getDisplayedFirstName() . ' ' . substr($this->getDisplayedLastName(), 0, 1) . '.';
     }
 
