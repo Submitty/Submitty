@@ -229,7 +229,7 @@ class TestAutogradingShipper(unittest.TestCase):
             open_file.write("""
 {
     "gradeable_id": "homework_01",
-    "config_path": "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data"
+    "config_path": "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data",
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
     "subdirectory": "/homework_01"
