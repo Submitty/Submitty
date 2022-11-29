@@ -235,7 +235,7 @@ class TestAutogradingShipper(unittest.TestCase):
     "subdirectory": "/homework_01"
 }
 """)
-
+        print(CONFIG)
         # Initialize git homework directory
         os.system("cd {TEST_DATA_DIR}/homework_01; git init; git add -A; git commit -m \"testing\"")
         # Start test
