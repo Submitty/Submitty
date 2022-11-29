@@ -237,7 +237,7 @@ class TestAutogradingShipper(unittest.TestCase):
 """)
 
         # Initialize git homework directory
-        os.system("cd {TEST_DATA_DIR}/homework; git init; git add -A; git commit -m \"testing\"")
+        os.system("cd {TEST_DATA_DIR}/homework_01; git init; git add -A; git commit -m \"testing\"")
         # Start test
         results = shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'))
 
