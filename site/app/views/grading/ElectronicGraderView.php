@@ -942,7 +942,7 @@ HTML;
         elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
             if ($gradeable->isTeamAssignment()) {
                 $error_message = [
-                    "color" => "var(--standard-creamsicle-orange)",
+                    "color" => "var(--standard-red-orange)",
                     "message" => "Late Submission (At least 1 team member has no on-time submission)"
                 ];
             }
