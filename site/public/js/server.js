@@ -171,8 +171,7 @@ function newDeleteCourseMaterialForm(id, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).text(file_name);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
