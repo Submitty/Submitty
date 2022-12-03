@@ -11,7 +11,8 @@ This script takes 2 optional arguments:
 import database_queries
 import datetime
 import sys
-from sqlalchemy import MetaData, text
+from sqlalchemy import text
+
 
 def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     """Collect the emails to be deleted and information about errors and unsent email."""
@@ -36,7 +37,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     if unsent_count > 0:
         print(f"WARNING: {unsent_count} UNSENT emails in database without errors.")
 
-    last_week = str(datetime.datetime.now()- datetime.timedelta(days=days_to_preserve))
+    last_week = str(datetime.datetime.now() - datetime.timedelta(days=days_to_preserve))
 
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""

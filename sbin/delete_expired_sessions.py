@@ -7,6 +7,7 @@ Deletes all expired sessions from the sessions table in the main Submitty databa
 import database_queries
 import datetime
 
+
 def delete_expired_sessions(db):
     """Collect the emails to be deleted and information about errors and unsent email."""
 

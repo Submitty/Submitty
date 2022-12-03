@@ -7,7 +7,7 @@ This script creates a database connection to be used in other misc scripts
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, text
+from sqlalchemy import create_engine, MetaData
 import sys
 
 
