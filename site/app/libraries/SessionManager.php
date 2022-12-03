@@ -38,22 +38,14 @@ class SessionManager {
      * @return bool|string
      */
     public function getSession(string $session_id) {
-        // Clear expired sessions occasionally.  This should eventually be changed to a cron job which runs
-        // hourly or daily.  Expired sessions don't hurt anything, but may fill up the DB unnecessarily so
-        // we want to clear them eventually.  Doing this randomly ensures that the sessions table is cleaned
-        // periodically while reducing the load on the server substantially.
-        if (rand(0, 1000) === 0) {
-            $this->core->getQueries()->removeExpiredSessions();
-        }
-
         $this->session = $this->core->getQueries()->getSession($session_id);
         if (empty($this->session)) {
             return false;
         }
 
-        // Only refresh the session once per week.  This reduces the load on the server without annoying people
-        // by logging them out all the time.
-        if (new DateTime($this->session['session_expires']) < (new DateTime())->add(new DateInterval('P1W'))) {
+        // Only refresh the session if less than 4 weeks are remaining.  This reduces the load on the server
+        // without annoying people by logging them out all the time.
+        if (new DateTime($this->session['session_expires']) < (new DateTime())->add(new DateInterval('P4W'))) {
             $this->core->getQueries()->updateSessionExpiration($session_id);
         }
 

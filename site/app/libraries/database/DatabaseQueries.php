@@ -3006,24 +3006,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * Updates a given session by setting it's expiration date to be 2 weeks into the future
+     * Updates a given session by setting its expiration date to be 6 weeks into the future
      *
      * @param string $session_id
      */
     public function updateSessionExpiration($session_id) {
         $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '14 days')
+            "UPDATE sessions SET session_expires=(current_timestamp + interval '6 weeks')
                                    WHERE session_id=?",
             [$session_id]
         );
-    }
-
-    /**
-     * Remove sessions which have their expiration date before the
-     * current timestamp
-     */
-    public function removeExpiredSessions() {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 
     /**
