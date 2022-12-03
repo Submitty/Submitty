@@ -625,7 +625,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $_POST['release_histogram']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {

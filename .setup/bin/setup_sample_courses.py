@@ -1415,7 +1415,6 @@ class Course(object):
                               release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
-                                  option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
                                   response=poll["responses"][i],
