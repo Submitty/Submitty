@@ -12,7 +12,7 @@ class PollView extends AbstractView {
     public function __construct(Core $core, Output $output) {
         parent::__construct($core, $output);
 
-        $this->core->getOutput()->addBreadcrumb("Polls", $this->core->buildCourseUrl(['polls']));
+        $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(['polls']));
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls.js');
         $this->core->getOutput()->enableMobileViewport();
