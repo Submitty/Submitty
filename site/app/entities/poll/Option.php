@@ -17,7 +17,6 @@ class Option {
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(name="option_id",type="integer")
-     * @ORM\SequenceGenerator(sequenceName="poll_options_option_id_seq1")
      * @var int
      */
     private $id;
