@@ -3000,7 +3000,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
             "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '14 days')",
+                                   VALUES(?,?,?,current_timestamp + interval '6 weeks')",
             [$session_id, $user_id, $csrf_token]
         );
     }
