@@ -583,8 +583,18 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
+        $performance_warning = false;
+        if ($this->core->getConfig()->isDebug()){
+            $submitty_queries = $this->core->getSubmittyQueries();
+            $course_queries = $this->core->getCourseQueries();
+            // Show a warning banner if we have a large number of queries or duplicate queries
+            if (count($submitty_queries) + count($course_queries) > 20 || $this->core->hasDuplicateQueries()) {
+                $performance_warning = true;
+            }
+        }
+
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
     }
 
     private function routeEquals(string $a, string $b) {

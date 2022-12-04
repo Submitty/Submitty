@@ -14,6 +14,7 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -263,6 +264,29 @@ class Core {
             $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
         }
         return $queries;
+    }
+
+    public function hasDuplicateQueries(): bool {
+        if (!$this->config->isDebug()) {
+            throw new Exception('hasDuplicateQueries() only allowed in debug mode');
+        }
+        if (($this->course_db && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db && $this->submitty_db->hasDuplicateQueries())) {
+            return true;
+        }
+
+        $queries = [];
+        if ($this->course_debug_stack) {
+            foreach ($this->course_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+        if ($this->submitty_debug_stack) {
+            foreach ($this->submitty_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+
+        return count($queries) !== count(array_unique($queries));
     }
 
     /**

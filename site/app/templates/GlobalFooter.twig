@@ -43,6 +43,13 @@
         {% endif %}
     {% endif %}
     {% if is_debug %}
+        {% if performance_warning %}
+            <script>
+                $(document).ready(function() {
+                    $('#performance-warning-system-message').show();
+                });
+            </script>
+        {% endif %}
         <div id='page-info'>
             Runtime: {{ runtime }}<br /><br />
             <h2>Site Details</h2>
