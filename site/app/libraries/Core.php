@@ -266,10 +266,11 @@ class Core {
         return $queries;
     }
 
-    public function hasDuplicateQueries(): bool {
-        if (!$this->config->isDebug()) {
-            throw new Exception('hasDuplicateQueries() only allowed in debug mode');
+    public function hasDBPerformanceWarning(): bool {
+        if (count($this->getSubmittyQueries()) + count($this->getCourseQueries()) > 20) {
+            return true;
         }
+
         if (($this->course_db && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db && $this->submitty_db->hasDuplicateQueries())) {
             return true;
         }
