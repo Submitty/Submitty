@@ -14,7 +14,6 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
