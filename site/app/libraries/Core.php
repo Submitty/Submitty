@@ -270,17 +270,17 @@ class Core {
             return true;
         }
 
-        if (($this->course_db && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db && $this->submitty_db->hasDuplicateQueries())) {
+        if (($this->course_db !== null && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db !== null && $this->submitty_db->hasDuplicateQueries())) {
             return true;
         }
 
         $queries = [];
-        if ($this->course_debug_stack) {
+        if ($this->course_debug_stack !== null) {
             foreach ($this->course_debug_stack->queries as $query) {
                 $queries[] = $query['sql'];
             }
         }
-        if ($this->submitty_debug_stack) {
+        if ($this->submitty_debug_stack !== null) {
             foreach ($this->submitty_debug_stack->queries as $query) {
                 $queries[] = $query['sql'];
             }
