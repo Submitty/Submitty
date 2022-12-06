@@ -24,6 +24,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredLastName()  Get the preferred last name of the loaded user
  * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
  *                                        otherwise return the legal last name field for the user.
+ * @method string getPreferredNameOrder() Get the preferred name order of the loaded user
+ * @method void setPreferredNameOrder(int $order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -73,6 +75,12 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Preferred name orders
+     */
+    const FIRST_LAST = 0;
+    const LAST_FIRST = 1;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -98,6 +106,8 @@ class User extends AbstractModel {
     protected $preferred_last_name = "";
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
+    /** @prop @var int The preferred name order of the user */
+    protected $preferred_name_order = FIRST_LAST;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -437,7 +447,12 @@ class User extends AbstractModel {
     }
 
     public function getDisplayFullName() {
-        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+        $first_name = $this->getDisplayedFirstName();
+        $last_name = $this->getDisplayedLastName();
+        if ($this->preferred_name_order == FIRST_LAST) {
+            return $first_name . ' ' . $last_name;
+        }
+        return $last_name . ' ' . $first_name;
     }
 
     public function setRegistrationSection($section) {
