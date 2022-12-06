@@ -107,7 +107,7 @@ class User extends AbstractModel {
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
     /** @prop @var int The preferred name order of the user */
-    protected $preferred_name_order = FIRST_LAST;
+    protected $preferred_name_order = self::FIRST_LAST;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -446,10 +446,10 @@ class User extends AbstractModel {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
-    public function getDisplayFullName() {
+    public function getDisplayFullName(): string {
         $first_name = $this->getDisplayedFirstName();
         $last_name = $this->getDisplayedLastName();
-        if ($this->preferred_name_order == FIRST_LAST) {
+        if ($this->preferred_name_order == self::FIRST_LAST) {
             return $first_name . ' ' . $last_name;
         }
         return $last_name . ' ' . $first_name;
@@ -519,6 +519,10 @@ class User extends AbstractModel {
             case 'user_preferred_lastname':
                 //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
+            case `user_preferred_name_order`:
+                //Preferred name order code must be between 1 and 2.
+                $order = intval($data);
+                return 1 <= $order && $order <= 2;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
