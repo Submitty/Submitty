@@ -449,10 +449,14 @@ class User extends AbstractModel {
     public function getDisplayFullName(): string {
         $first_name = $this->getDisplayedFirstName();
         $last_name = $this->getDisplayedLastName();
-        if ($this->preferred_name_order == self::FIRST_LAST) {
-            return $first_name . ' ' . $last_name;
+        switch ($this->preferred_name_order) {
+            case self::FIRST_LAST:
+                return $first_name . ' ' . $last_name;
+            case self::LAST_FIRST:
+                return $last_name . ' ' . $first_name;
+            default:
+                return $first_name . ' ' . $last_name;
         }
-        return $last_name . ' ' . $first_name;
     }
 
     public function setRegistrationSection($section) {

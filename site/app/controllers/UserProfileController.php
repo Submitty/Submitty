@@ -134,6 +134,28 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/change_preferred_name_order", methods={"POST"})
+     * @return JsonResponse
+     * @throws \ImagickException
+     */
+    public function changePreferredNameOrder() {
+        $user = $this->core->getUser();
+        if (empty($_POST['name_order'])) {
+            return JsonResponse::getErrorResponse('Preferred name order cannot be empty.');
+        }
+        $name_order = trim($_POST['name_order']);
+        if ($user->validateUserData('user_preferred_name_order', $name_order) === true) {
+            $user->setPreferredNameOrder(intval($name_order));
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => "Preferred name order updated successfully!",
+                'name_order' => $name_order,
+            ]);
+        }
+        return JsonResponse::getErrorResponse("Preferred name order code must be between 1 and 2.");
+    }
+
+    /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
