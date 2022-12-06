@@ -119,7 +119,7 @@ class Utils {
 
     /**
      * Given a filename, determine if it is an image.
-     * TODO: Make this a stronger check than just on the appended file extension to the naem
+     * TODO: Make this a stronger check than just on the appended file extension to the name
      *
      * @param string $filename
      *

@@ -97,7 +97,7 @@ def main():
     if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         raise SystemExit("This script can only be run against the vagrant installation")
 
-    # Remove the MOTD
+    # Remove the MOT.D
     remove_file("/etc/motd")
 
     # Scrub out the network interfaces that were created for Vagrant
