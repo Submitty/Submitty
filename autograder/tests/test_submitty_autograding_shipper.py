@@ -201,7 +201,7 @@ class TestAutogradingShipper(unittest.TestCase):
         "display_rainbow_grades_summary": false,
         "display_custom_message": false,
         "course_email": "Please contact your TA or instructor to submit a grade inquiry.",
-        "vcs_base_url": "{TEST_DATA_DIR}/homework_01",
+        "vcs_base_url": "git@gitlab.cs.wallawalla.edu:{$user_id}/student141.git",
         "vcs_type": "git",
         "private_repository": "",
         "forum_enabled": false,
@@ -236,7 +236,7 @@ class TestAutogradingShipper(unittest.TestCase):
 }
 """)
         # Initialize git homework directory
-        os.system("cd {TEST_DATA_DIR}/homework_01; git init; git add -A; git commit -m \"testing\"")
+        os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(TEST_DATA_DIR))
         # Start test
         results = shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'))
 
