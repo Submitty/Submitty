@@ -1,31 +1,35 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
+
 //https://github.com/Submitty/Submitty/pull/5071
-window.addEventListener("resize", function(){
-  loadInBreadcrumbLinks();
-  adjustBreadcrumbLinks();
+window.addEventListener("resize", function () {
+    loadInBreadcrumbLinks();
+    adjustBreadcrumbLinks();
 });
 
 var mobileHomeLink = null;
 var desktopHomeLink = null;
-document.addEventListener("DOMContentLoaded", function() {
-  loadInBreadcrumbLinks();
-  adjustBreadcrumbLinks();
+document.addEventListener("DOMContentLoaded", function () {
+    loadInBreadcrumbLinks();
+    adjustBreadcrumbLinks();
+    //displaySuccessMessage("Sucess");
+    checkTimezoneMatch();
+    //console.log(data)
 });
 
-function loadInBreadcrumbLinks(){
-  mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
-  desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
+function loadInBreadcrumbLinks() {
+    mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
+    desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
 }
 
-function adjustBreadcrumbLinks(){
-  if($(document).width() > 528){
-    $("#home-button").attr('href', "");
-    $("#desktop_home_link").attr('href', desktopHomeLink);
-  }else{
-    $("#home-button").attr('href', mobileHomeLink);
-    $("#desktop_home_link").attr('href', "");
-  }
+function adjustBreadcrumbLinks() {
+    if ($(document).width() > 528) {
+        $("#home-button").attr('href', "");
+        $("#desktop_home_link").attr('href', desktopHomeLink);
+    } else {
+        $("#home-button").attr('href', mobileHomeLink);
+        $("#desktop_home_link").attr('href', "");
+    }
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
 
@@ -50,36 +54,36 @@ function buildCourseUrl(parts = []) {
     return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
+function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id) {
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
     var list_white_spaces = {};
-    $('#'+helper_id).empty();
-    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
-        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
-        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
-        $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
+    $('#' + helper_id).empty();
+    if ($("#show_char_" + index + "_" + autocheck_cnt).text() == "Visualize whitespace characters") {
+        $("#show_char_" + index + "_" + autocheck_cnt).removeClass('btn-default');
+        $("#show_char_" + index + "_" + autocheck_cnt).addClass('btn-primary');
+        $("#show_char_" + index + "_" + autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
         var option = 'unicode'
     }
-    else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
-        $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
+    else if ($("#show_char_" + index + "_" + autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+        $("#show_char_" + index + "_" + autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
         var option = 'escape'
     }
     else {
-        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
-        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
-        $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
+        $("#show_char_" + index + "_" + autocheck_cnt).removeClass('btn-primary');
+        $("#show_char_" + index + "_" + autocheck_cnt).addClass('btn-default');
+        $("#show_char_" + index + "_" + autocheck_cnt).html("Visualize whitespace characters");
         var option = 'original'
     }
     //Insert actual and expected one at a time
     var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
         `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
-    let assertSuccess = function(data) {
+    let assertSuccess = function (data) {
         if (data.status === 'fail') {
             alert("Error loading diff: " + data.message);
             return false;
@@ -94,7 +98,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     $.getJSON({
         url: url,
         success: function (response) {
-            if(!assertSuccess(response)) {
+            if (!assertSuccess(response)) {
                 return;
             }
             for (property in response.data.whitespaces) {
@@ -107,7 +111,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             $.getJSON({
                 url: url,
                 success: function (response) {
-                    if(!assertSuccess(response)) {
+                    if (!assertSuccess(response)) {
                         return;
                     }
                     for (property in response.data.whitespaces) {
@@ -135,17 +139,17 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
     $('[id="delete-gradeable-message"]', form).html('');
-    $('[id="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="delete-gradeable-message"]', form).append('<b>' + gradeable_name + '</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("delete-gradeable-form");
 }
 
-function displayCloseSubmissionsWarning(form_action,gradeable_name) {
+function displayCloseSubmissionsWarning(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#close-submissions-form");
     $('[id="close-submissions-message"]', form).html('');
-    $('[id="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="close-submissions-message"]', form).append('<b>' + gradeable_name + '</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
@@ -155,24 +159,24 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
 function newDeleteCourseMaterialForm(id, file_name) {
     let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
-    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+    document.cookie = 'jumpToScrollPostion=' + current_y_offset;
 
-    $('[id^=div_viewer_]').each(function() {
+    $('[id^=div_viewer_]').each(function () {
         var number = this.id.replace('div_viewer_', '').trim();
 
         var elem = $('#div_viewer_' + number);
         if (elem.hasClass('open')) {
-            document.cookie = "cm_" +number+ "=1;";
+            document.cookie = "cm_" + number + "=1;";
         }
         else {
-            document.cookie = "cm_" +number+ "=0;";
+            document.cookie = "cm_" + number + "=0;";
         }
     });
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).append('<b>' + file_name + '</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -195,7 +199,7 @@ function newUploadCourseMaterialsForm() {
     var fileList = document.getElementsByClassName("file-viewer-data");
 
     var files = [];
-    for(var i=0;i<fileList.length;i++){
+    for (var i = 0; i < fileList.length; i++) {
         var file = fileList[i];
         files.push(file.getAttribute('data-file_url'));
         readPrevious(file.getAttribute('data-file_url'), 1);
@@ -205,7 +209,7 @@ function newUploadCourseMaterialsForm() {
     var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
-    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+    $('[name="existing-file-list"]', form).append('<b>' + JSON.stringify(files) + '</b>');
 
     form.css("display", "block");
     captureTabInModal("upload-course-materials-form");
@@ -219,7 +223,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     let dir = $(tag).data('priority');
     let folder_sections = $(tag).data('sections');
     let partial_sections = $(tag).data('partial-sections');
-    let release_time =  $(tag).data('release-time');
+    let release_time = $(tag).data('release-time');
     let is_hidden = $(tag).data('hidden-state');
     const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
@@ -240,15 +244,15 @@ function newEditCourseMaterialsFolderForm(tag) {
     }
 
     $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
-    let showSections = function() {
-        $("#all-sections-showing-no-folder", form).prop('checked',false);
-        $("#all-sections-showing-yes-folder", form).prop('checked',true);
+    let showSections = function () {
+        $("#all-sections-showing-no-folder", form).prop('checked', false);
+        $("#all-sections-showing-yes-folder", form).prop('checked', true);
         $("#show-some-section-selection-folder-edit", form).show();
     }
     let sectionsVisible = false;
     if (folder_sections.length !== 0) {
-        for(let index = 0; index < folder_sections.length; ++index) {
-            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+        for (let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked', true);
             $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
             if ($(this).attr('class') === '') {
                 $(this).removeAttr('class');
@@ -257,13 +261,13 @@ function newEditCourseMaterialsFolderForm(tag) {
         showSections();
         sectionsVisible = true;
     }
-    else{
+    else {
         $("#show-some-section-selection-folder-edit", form).hide();
-        $("#all-sections-showing-yes-folder", form).prop('checked',false);
-        $("#all-sections-showing-no-folder", form).prop('checked',true);
+        $("#all-sections-showing-yes-folder", form).prop('checked', false);
+        $("#all-sections-showing-no-folder", form).prop('checked', true);
     }
     if (partial_sections.length !== 0) {
-        for(let index = 0; index < partial_sections.length; ++index) {
+        for (let index = 0; index < partial_sections.length; ++index) {
             $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
             $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
         }
@@ -295,12 +299,12 @@ function newEditCourseMaterialsForm(tag) {
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students === 1){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
+    if (this_hide_from_students === 1) {
+        $("#hide-materials-checkbox-edit", form).prop('checked', true).trigger('change');
     }
 
-    else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
+    else {
+        $("#hide-materials-checkbox-edit", form).prop('checked', false).trigger('change');
     }
 
     $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
@@ -308,18 +312,18 @@ function newEditCourseMaterialsForm(tag) {
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
-    if(this_file_section.length !== 0){
-        for(let index = 0; index < this_file_section.length; ++index){
-            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+    if (this_file_section.length !== 0) {
+        for (let index = 0; index < this_file_section.length; ++index) {
+            $("#section-edit-" + this_file_section[index], form).prop('checked', true);
         }
-        $("#all-sections-showing-no", form).prop('checked',false);
-        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#all-sections-showing-no", form).prop('checked', false);
+        $("#all-sections-showing-yes", form).prop('checked', true);
         $("#show-some-section-selection-edit", form).show();
     }
-    else{
+    else {
         $("#show-some-section-selection-edit", form).hide();
-        $("#all-sections-showing-yes", form).prop('checked',false);
-        $("#all-sections-showing-no", form).prop('checked',true);
+        $("#all-sections-showing-yes", form).prop('checked', false);
+        $("#all-sections-showing-no", form).prop('checked', true);
     }
     if (is_link === 1) {
         const title_label = $("#edit-url-title-label", form);
@@ -343,8 +347,8 @@ function newEditCourseMaterialsForm(tag) {
 }
 
 var lastActiveElement = null;
-function captureTabInModal(formName, resetFocus=true){
-    if(resetFocus){
+function captureTabInModal(formName, resetFocus = true) {
+    if (resetFocus) {
         lastActiveElement = document.activeElement;
     }
 
@@ -357,8 +361,8 @@ function captureTabInModal(formName, resetFocus=true){
     var lastInput = inputs.last();
 
     /*set focus on first element*/
-    if(resetFocus){
-      firstInput.focus();
+    if (resetFocus) {
+        firstInput.focus();
     }
 
     /*redirect last tab to first element*/
@@ -374,21 +378,21 @@ function captureTabInModal(formName, resetFocus=true){
     });
 
     //Watch for the modal to be hidden
-    let observer = new MutationObserver(function(){
-        if(form[0].style.display === 'none'){
+    let observer = new MutationObserver(function () {
+        if (form[0].style.display === 'none') {
             releaseTabFromModal(formName);
         }
     });
     observer.observe(form[0], { attributes: true, childList: true });
 }
 
-function releaseTabFromModal(formName){
+function releaseTabFromModal(formName) {
     var form = $("#".concat(formName));
     form.off('keydown');
     lastActiveElement.focus();
 }
 
-function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
+function setFolderRelease(changeActionVariable, releaseDates, id, cm_id) {
 
     $('.popup-form').css('display', 'none');
 
@@ -398,12 +402,12 @@ function setFolderRelease(changeActionVariable,releaseDates,id,cm_id){
     captureTabInModal("set-folder-release-form");
 
     form.find('.form-body').scrollTop(0);
-    $('[id="release_title"]',form).attr('data-path',changeActionVariable);
+    $('[id="release_title"]', form).attr('data-path', changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
-    $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
+    $('[name="release_date"]', form).attr('data-fp', changeActionVariable);
 
-    $('[name="submit"]',form).attr('data-iden',id);
-    $('[name="submit"]',form).attr('data-id',cm_id);
+    $('[name="submit"]', form).attr('data-iden', id);
+    $('[name="submit"]', form).attr('data-id', cm_id);
 
 }
 
@@ -411,7 +415,7 @@ function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
 
-    $('#download-form input:checkbox').each(function() {
+    $('#download-form input:checkbox').each(function () {
         if ($(this).is(':checked')) {
             var thisVal = $(this).val();
 
@@ -463,10 +467,10 @@ function copyToClipboard(code) {
     temp_element.select();
     document.execCommand('copy');
     temp_element.remove();
-    setTimeout(function() {
+    setTimeout(function () {
         $('#copybuttonid').prop('value', 'Copied');
     }, 0);
-    setTimeout(function() {
+    setTimeout(function () {
         $('#copybuttonid').prop('value', 'Copy Emails to Clipboard');
     }, 1000);
 }
@@ -476,30 +480,30 @@ function downloadCSV(code) {
     var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
-    $('#download-form input:checkbox').each(function() {
+    $('#download-form input:checkbox').each(function () {
         if ($(this).is(':checked')) {
             var thisVal = $(this).val();
 
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                    if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
             }
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                    if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
             }
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                    if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -507,18 +511,18 @@ function downloadCSV(code) {
             else {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
-                        if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
-                        if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"' + download_info[i].reg_section + '"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -568,46 +572,46 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
-  function c(a, b) {
-    const c = document.createElement("textarea");
-    c.name = a;
-    c.value = b;
-    d.appendChild(c)
-  }
-  const e = ((a) => {
-      for (var b = "", a = a.firstChild; a;) {
-        switch (a.nodeType) {
-          case Node.ELEMENT_NODE:
-            b += a.outerHTML;
-            break;
-          case Node.TEXT_NODE:
-            b += a.nodeValue;
-            break;
-          case Node.CDATA_SECTION_NODE:
-            b += "<![CDATA[" + a.nodeValue + "]]\>";
-            break;
-          case Node.COMMENT_NODE:
-            b += "<\!--" + a.nodeValue + "--\>";
-            break;
-          case Node.DOCUMENT_TYPE_NODE:
-            b += "<!DOCTYPE " + a.name + ">\n"
+    //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+    function c(a, b) {
+        const c = document.createElement("textarea");
+        c.name = a;
+        c.value = b;
+        d.appendChild(c)
+    }
+    const e = ((a) => {
+        for (var b = "", a = a.firstChild; a;) {
+            switch (a.nodeType) {
+                case Node.ELEMENT_NODE:
+                    b += a.outerHTML;
+                    break;
+                case Node.TEXT_NODE:
+                    b += a.nodeValue;
+                    break;
+                case Node.CDATA_SECTION_NODE:
+                    b += "<![CDATA[" + a.nodeValue + "]]\>";
+                    break;
+                case Node.COMMENT_NODE:
+                    b += "<\!--" + a.nodeValue + "--\>";
+                    break;
+                case Node.DOCUMENT_TYPE_NODE:
+                    b += "<!DOCTYPE " + a.name + ">\n"
+            }
+            a = a.nextSibling
         }
-        a = a.nextSibling
-      }
-      return b
-  })(document);
-  const d = document.createElement("form");
-  d.method = "POST";
-  d.action = "https://validator.w3.org/nu/";
-  d.enctype = "multipart/form-data";
-  d.target = "_blank";
-  d.acceptCharset = "utf-8";
-  c("showsource", "yes");
-  c("content", e);
-  document.body.appendChild(d);
-  d.submit();
-  d.outerHTML = "";
+        return b
+    })(document);
+    const d = document.createElement("form");
+    d.method = "POST";
+    d.action = "https://validator.w3.org/nu/";
+    d.enctype = "multipart/form-data";
+    d.target = "_blank";
+    d.acceptCharset = "utf-8";
+    c("showsource", "yes");
+    c("content", e);
+    document.body.appendChild(d);
+    d.submit();
+    d.outerHTML = "";
 }
 
 /**
@@ -616,22 +620,22 @@ function validateHtml() {
  * @param elem
  */
 function removeMessagePopup(elem) {
-    $('#' + elem).fadeOut('slow', function() {
+    $('#' + elem).fadeOut('slow', function () {
         $('#' + elem).remove();
     });
 }
 
-function gradeableChange(url, sel){
+function gradeableChange(url, sel) {
     url = url + sel.value;
     window.location.href = url;
 }
-function versionChange(url, sel){
+function versionChange(url, sel) {
     url = url + sel.value;
     window.location.href = url;
 }
 
-function checkVersionChange(days_late, late_days_allowed){
-    if(days_late > late_days_allowed){
+function checkVersionChange(days_late, late_days_allowed) {
+    if (days_late > late_days_allowed) {
         var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
         message += "You are not supposed to change your active version after this time unless you have permission from the instructor. Are you sure you want to continue?";
         return confirm(message);
@@ -655,18 +659,18 @@ function toggleDiv(id) {
 
 
 function checkRefreshPage(url) {
-    setTimeout(function() {
+    setTimeout(function () {
         check_server(url)
     }, 1000);
 }
 
 function check_server(url) {
     $.get(url,
-        function(data) {
+        function (data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             }
-        else {
+            else {
                 checkRefreshPage(url);
             }
         }
@@ -686,7 +690,7 @@ function downloadCourseMaterial(id) {
 }
 
 function downloadTestCaseResult(testcase, name, version, gradeable, user) {
-    window.location = buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult']) + `?version=${version}&test_case=${testcase+1}&file_name=${name}&user_id=${user}`;
+    window.location = buildCourseUrl(['gradeable', gradeable, 'downloadTestCaseResult']) + `?version=${version}&test_case=${testcase + 1}&file_name=${name}&user_id=${user}`;
 }
 
 function downloadStudentAnnotations(url, path, dir) {
@@ -735,7 +739,7 @@ function checkColorActivated() {
 }
 $(checkColorActivated);
 
-function changeColor(div, hexColor){
+function changeColor(div, hexColor) {
     div.style.color = hexColor;
 }
 
@@ -815,13 +819,13 @@ function openUrl(url) {
     return false;
 }
 
-function changeName(element, user, visible_username, anon){
+function changeName(element, user, visible_username, anon) {
     var new_element = element.getElementsByTagName("strong")[0];
     anon = (anon == 'true');
     icon = element.getElementsByClassName("fas fa-eye")[0];
-    if(icon == undefined){
+    if (icon == undefined) {
         icon = element.getElementsByClassName("fas fa-eye-slash")[0];
-        if(anon) {
+        if (anon) {
             new_element.style.color = "black";
             new_element.style.fontStyle = "normal";
         }
@@ -830,7 +834,7 @@ function changeName(element, user, visible_username, anon){
         icon.title = "Show full user information";
     }
     else {
-        if(anon) {
+        if (anon) {
             new_element.style.color = "grey";
             new_element.style.fontStyle = "italic";
         }
@@ -840,11 +844,11 @@ function changeName(element, user, visible_username, anon){
     }
 }
 
-function openFrame(url, id, filename, ta_grading_interpret=false) {
+function openFrame(url, id, filename, ta_grading_interpret = false) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
         var iframeId = "file_viewer_" + id + "_iframe";
-        if(ta_grading_interpret) {
+        if (ta_grading_interpret) {
             let display_file_url = buildCourseUrl(['display_file']);
             let directory = "";
             if (url.includes("submissions")) {
@@ -868,7 +872,7 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
         }
         // handle pdf
-        if(filename.substring(filename.length - 3) === "pdf") {
+        if (filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
         }
         else {
@@ -890,21 +894,21 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
     return false;
 }
 
-function resizeFrame(id, max_height = 500, force_height=-1) {
+function resizeFrame(id, max_height = 500, force_height = -1) {
     let img = undefined;
     let visible = $("iframe#" + id).is(":visible");
     img = $("iframe#" + id).contents().find("img");
-    if($("iframe#" + id).contents().find("html").length !== 0) {
+    if ($("iframe#" + id).contents().find("html").length !== 0) {
         $("iframe#" + id).contents().find("html").css("height", "inherit");
         img = $("iframe#" + id).contents().find("img");
-        if(img.length !== 0) {
+        if (img.length !== 0) {
             img.removeAttr("width");
             img.removeAttr("height");
             img.css("width", "");
             img.css("height", "");
             img.css("max-width", "100%");
         }
-        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0, -2));
     } else { //Handling issue with FireFox and jQuery not being able to access iframe contents for PDF reader
         var height = max_height;
     }
@@ -917,8 +921,8 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         $("iframe#" + id).height(height + 18);
     }
     //Workarounds for FireFox changing height/width of img sometime after this code runs
-    if(img.length !== 0) {
-        const observer = new ResizeObserver(function(mutationsList, observer) {
+    if (img.length !== 0) {
+        const observer = new ResizeObserver(function (mutationsList, observer) {
             img.removeAttr("width");
             img.removeAttr("height");
             img.css("width", "");
@@ -927,12 +931,12 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
         })
         observer.observe(img[0]);
     }
-    if(!visible) {
-        const observer = new IntersectionObserver(function(entries, observer) {
-            if($("iframe#" + id).is(":visible")) {
+    if (!visible) {
+        const observer = new IntersectionObserver(function (entries, observer) {
+            if ($("iframe#" + id).is(":visible")) {
                 $("iframe#" + id).removeAttr("height");
                 let iframeFunc = $("iframe#" + id)[0].contentWindow.iFrameInit;
-                if(typeof(iframeFunc) === "function") {
+                if (typeof (iframeFunc) === "function") {
                     iframeFunc();
                 }
                 observer.disconnect();
@@ -943,20 +947,20 @@ function resizeFrame(id, max_height = 500, force_height=-1) {
     }
 }
 
-function batchImportJSON(url, csrf_token){
+function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: "POST",
         data: {
             csrf_token: csrf_token
         }
     })
-    .done(function(response) {
-        window.alert(response);
-        location.reload(true);
-    })
-    .fail(function() {
-        window.alert("[AJAX ERROR] Refresh page");
-    });
+        .done(function (response) {
+            window.alert(response);
+            location.reload(true);
+        })
+        .fail(function () {
+            window.alert("[AJAX ERROR] Refresh page");
+        });
 }
 
 function submitAJAX(url, data, callbackSuccess, callbackFailure) {
@@ -964,36 +968,36 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
         type: "POST",
         data: data
     })
-    .done(function(response) {
-        try{
-            response = JSON.parse(response);
-            if (response['status'] === 'success') {
-                callbackSuccess(response);
-            }
-            else {
-                console.log(response['message']);
-                callbackFailure();
-                if (response['status'] === 'error') {
-                    window.alert("[SAVE ERROR] Refresh Page");
+        .done(function (response) {
+            try {
+                response = JSON.parse(response);
+                if (response['status'] === 'success') {
+                    callbackSuccess(response);
+                }
+                else {
+                    console.log(response['message']);
+                    callbackFailure();
+                    if (response['status'] === 'error') {
+                        window.alert("[SAVE ERROR] Refresh Page");
+                    }
                 }
             }
-        }
-        catch (e) {
-            console.log(response);
-            callbackFailure();
+            catch (e) {
+                console.log(response);
+                callbackFailure();
+                window.alert("[SAVE ERROR] Refresh Page");
+            }
+        })
+        .fail(function () {
             window.alert("[SAVE ERROR] Refresh Page");
-        }
-    })
-    .fail(function() {
-        window.alert("[SAVE ERROR] Refresh Page");
-    });
+        });
 }
 
-$(function() {
+$(function () {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
             var minus = 60;
-            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+            $("html, body").animate({ scrollTop: ($(window.location.hash).offset().top - minus) }, 800);
         }
     }
 
@@ -1004,8 +1008,8 @@ $(function() {
     }
 });
 
-function getFileExtension(filename){
-    return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
+function getFileExtension(filename) {
+    return (filename.substring(filename.lastIndexOf(".") + 1)).toLowerCase();
 }
 
 function openPopUp(css, title, count, testcase_num, side) {
@@ -1020,7 +1024,7 @@ function openPopUp(css, title, count, testcase_num, side) {
 
 let messages = 0;
 
-function displayErrorMessage(message){
+function displayErrorMessage(message) {
     displayMessage(message, 'error');
 }
 
@@ -1065,11 +1069,11 @@ function displayMessage(message, type) {
  */
 function enableTabsInTextArea(jQuerySelector) {
     var t = $(jQuerySelector);
-    t.on('input', function() {
+    t.on('input', function () {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(event) {
+    t.keydown(function (event) {
         if (event.which == 27) {  //ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
@@ -1084,7 +1088,7 @@ function enableTabsInTextArea(jQuerySelector) {
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
             this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
-            this.selectionStart = this.selectionEnd = beforeCurse+1;
+            this.selectionStart = this.selectionEnd = beforeCurse + 1;
             return false;
         }
         // No need to test for SHIFT+TAB as it is not being redefined.
@@ -1101,14 +1105,14 @@ function updateGradeOverride(data) {
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             try {
                 var json = JSON.parse(data);
-            } catch(err){
+            } catch (err) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if(json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -1118,7 +1122,7 @@ function updateGradeOverride(data) {
             $('#comment').val(this.defaultValue);
             displaySuccessMessage(`Updated overridden Grades for ${json['data']['gradeable_id']}`);
         },
-        error: function() {
+        error: function () {
             window.alert("Something went wrong. Please try again.");
         }
     })
@@ -1129,20 +1133,20 @@ function loadOverriddenGrades(g_id) {
     var url = buildCourseUrl(['grade_override', g_id]);
     $.ajax({
         url: url,
-        success: function(data) {
+        success: function (data) {
             try {
                 var json = JSON.parse(data);
-            } catch(err){
+            } catch (err) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            if(json['status'] === 'fail'){
+            if (json['status'] === 'fail') {
                 displayErrorMessage(json['message']);
                 return;
             }
             refreshOnResponseOverriddenGrades(json);
         },
-        error: function() {
+        error: function () {
             window.alert("Something went wrong. Please try again.");
         }
     });
@@ -1153,19 +1157,19 @@ function refreshOnResponseOverriddenGrades(json) {
     $('#grade-override-table tr:gt(0)').remove();
     let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
     $('#title').text(title);
-    if(json['data']['users'].length === 0){
-      $("#load-overridden-grades").addClass('d-none');
-      $("#empty-table").removeClass('d-none');
-      $('#empty-table').text('There are no overridden grades for this homework');
+    if (json['data']['users'].length === 0) {
+        $("#load-overridden-grades").addClass('d-none');
+        $("#empty-table").removeClass('d-none');
+        $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
-        json['data']['users'].forEach(function(elem){
+        json['data']['users'].forEach(function (elem) {
             let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
-      $("#load-overridden-grades").removeClass('d-none');
-      $("#empty-table").addClass('d-none');
+        $("#load-overridden-grades").removeClass('d-none');
+        $("#empty-table").addClass('d-none');
     }
 }
 
@@ -1180,16 +1184,16 @@ function deleteOverriddenGrades(user_id, g_id) {
                 csrf_token: csrfToken,
                 user_id: user_id
             },
-            success: function(data) {
+            success: function (data) {
                 var json = JSON.parse(data);
-                if(json['status'] === 'fail'){
+                if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
                 refreshOnResponseOverriddenGrades(json);
             },
-            error: function() {
+            error: function () {
                 window.alert("Something went wrong. Please try again.");
             }
         })
@@ -1197,7 +1201,7 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
+function toggleRegradeRequests() {
     var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {
         element.style.display = 'none';
@@ -1211,30 +1215,30 @@ function toggleRegradeRequests(){
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
 function escapeSpecialChars(text) {
-  var map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
 
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
 function escapeHTML(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function setChildNewDateTime(path, changeDate,handleData) {
+function setChildNewDateTime(path, changeDate, handleData) {
     //change the date and time of the subfiles in the folder with the time chosen for the whole
     //folder (passed in)
     var success;
     success = false;
-    success  = changeFolderNewDateTime(path,changeDate,function (output) {
-        if(output){
-            success =true;
-            if(handleData){
+    success = changeFolderNewDateTime(path, changeDate, function (output) {
+        if (output) {
+            success = true;
+            if (handleData) {
                 handleData(success);
             }
         }
@@ -1250,7 +1254,7 @@ function setAllRelease(newdatatime) {
     $.ajax({
         type: "POST",
         url: url,
-        data: {'csrf_token': csrfToken, 'newdatatime': newdatatime},
+        data: { 'csrf_token': csrfToken, 'newdatatime': newdatatime },
         success: function (res) {
             const jsondata = JSON.parse(res);
             if (jsondata.status !== 'success') {
@@ -1261,28 +1265,28 @@ function setAllRelease(newdatatime) {
     })
 }
 
-function changeFolderNewDateTime(id, newdatatime,handleData) {
+function changeFolderNewDateTime(id, newdatatime, handleData) {
     // send to server to handle folder date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?newdatatime=' + newdatatime;
     var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'id':id, 'csrf_token': csrfToken},
-        success: function(data) {
+        data: { 'id': id, 'csrf_token': csrfToken },
+        success: function (data) {
             var jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {
                 alert("ERROR: Invalid date.");
                 return false;
             }
 
-            tbr=true;
-            if(handleData){
+            tbr = true;
+            if (handleData) {
                 handleData(data);
             }
             return true;
         },
-        error: function(e) {
+        error: function (e) {
             alert("Encounter saving the NewDateTime.");
             return false;
         }
@@ -1292,7 +1296,7 @@ function changeFolderNewDateTime(id, newdatatime,handleData) {
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport
 // i.e. returns false iff there is some part of the element outside the viewport
-$.fn.isInViewport = function() {                                        // jQuery method: use as $(selector).isInViewPort()
+$.fn.isInViewport = function () {                                        // jQuery method: use as $(selector).isInViewPort()
     var elementTop = $(this).offset().top;                              // get top offset of element
     var elementBottom = elementTop + $(this).outerHeight();             // add height to top to get bottom
 
@@ -1307,49 +1311,49 @@ function checkSidebarCollapse() {
         document.cookie = "collapse_sidebar=true;path=/";
         $("aside").toggleClass("collapsed", true);
     }
-    else{
+    else {
         document.cookie = "collapse_sidebar=false;path=/";
         $("aside").toggleClass("collapsed", false);
     }
 }
 
-function updateTheme(){
-  let choice = $("#theme_change_select option:selected").val();
-  if(choice === "system_black"){
-    localStorage.removeItem("theme");
-    localStorage.setItem("black_mode", "black");
-  }else if(choice === "light"){
-    localStorage.setItem("theme", "light");
-  }else if(choice === "dark"){
-    localStorage.setItem("theme", "dark");
-    localStorage.setItem("black_mode", "dark");
-  }else if(choice === "dark_black"){
-    localStorage.setItem("theme", "dark");
-    localStorage.setItem("black_mode", "black");
-  }else{ //choice === "system"
-    localStorage.removeItem("black_mode");
-    localStorage.removeItem("theme");
-  }
-  detectColorScheme();
-}
-$(document).ready(function() {
-  if(localStorage.getItem("theme")){
-      if(localStorage.getItem("theme") === "dark"){
-        if(localStorage.getItem("black_mode") === "black"){
-          $("#theme_change_select").val("dark_black");
-        }else{
-          $("#theme_change_select").val("dark");
-        }
-      }else{
-        $("#theme_change_select").val("light");
-      }
-  }else{
-    if(localStorage.getItem("black_mode") === "black"){
-      $("#theme_change_select").val("system_black");
-    }else{
-      $("#theme_change_select").val("system");
+function updateTheme() {
+    let choice = $("#theme_change_select option:selected").val();
+    if (choice === "system_black") {
+        localStorage.removeItem("theme");
+        localStorage.setItem("black_mode", "black");
+    } else if (choice === "light") {
+        localStorage.setItem("theme", "light");
+    } else if (choice === "dark") {
+        localStorage.setItem("theme", "dark");
+        localStorage.setItem("black_mode", "dark");
+    } else if (choice === "dark_black") {
+        localStorage.setItem("theme", "dark");
+        localStorage.setItem("black_mode", "black");
+    } else { //choice === "system"
+        localStorage.removeItem("black_mode");
+        localStorage.removeItem("theme");
     }
-  }
+    detectColorScheme();
+}
+$(document).ready(function () {
+    if (localStorage.getItem("theme")) {
+        if (localStorage.getItem("theme") === "dark") {
+            if (localStorage.getItem("black_mode") === "black") {
+                $("#theme_change_select").val("dark_black");
+            } else {
+                $("#theme_change_select").val("dark");
+            }
+        } else {
+            $("#theme_change_select").val("light");
+        }
+    } else {
+        if (localStorage.getItem("black_mode") === "black") {
+            $("#theme_change_select").val("system_black");
+        } else {
+            $("#theme_change_select").val("system");
+        }
+    }
 });
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -1361,12 +1365,12 @@ function toggleSidebar() {
     sidebar.toggleClass("collapsed", !shown);
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
-            if($("aside").hasClass("collapsed")) {
+            if ($("aside").hasClass("collapsed")) {
                 if ($(this).attr("title") === "Collapse Sidebar") {
                     return "Expand Sidebar";
                 }
@@ -1381,18 +1385,18 @@ $(document).ready(function() {
     window.addEventListener("resize", checkSidebarCollapse);
 });
 
-function checkBulkProgress(gradeable_id){
+function checkBulkProgress(gradeable_id) {
     var url = buildCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
         data: null,
         type: "GET",
-        success: function(data) {
+        success: function (data) {
             data = JSON.parse(data)['data'];
             var result = {};
             updateBulkProgress(data['job_data'], data['count']);
         },
-        error: function(e) {
+        error: function (e) {
             console.log("Failed to check job queue");
         }
     })
@@ -1401,7 +1405,7 @@ function checkBulkProgress(gradeable_id){
 //      Solution to autoexpand the height of a textarea
 function auto_grow(element) {
     element.style.height = "5px";
-    element.style.height = (element.scrollHeight + 5)+"px";
+    element.style.height = (element.scrollHeight + 5) + "px";
 }
 
 /**
@@ -1409,46 +1413,46 @@ function auto_grow(element) {
  */
 function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
-    $('textarea.noscroll').each(function() {
+    $('textarea.noscroll').each(function () {
         auto_grow(this);
     });
 }
 
-$(document).ready(function() {
-  enableKeyToClick();
+$(document).ready(function () {
+    enableKeyToClick();
 });
 
-function keyToClickKeydown(event){
-  if (event.code === "Enter") {
-    event.preventDefault();
-    event.stopPropagation();
-    $(event.target).click();
-  }
+function keyToClickKeydown(event) {
+    if (event.code === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+    }
 }
 
-function keyToClickKeyup(event){
-  if (event.code === "Space") {
-    event.preventDefault();
-    event.stopPropagation();
-    $(event.target).click();
-  }
+function keyToClickKeyup(event) {
+    if (event.code === "Space") {
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+    }
 }
 
-function enableKeyToClick(){
-  const key_to_click = document.getElementsByClassName("key_to_click");
-  for (var i = 0; i < key_to_click.length; i++) {
-    //In case this function is run multiple times, we need to remove the old event listeners
-    key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
-    key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
+function enableKeyToClick() {
+    const key_to_click = document.getElementsByClassName("key_to_click");
+    for (var i = 0; i < key_to_click.length; i++) {
+        //In case this function is run multiple times, we need to remove the old event listeners
+        key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
+        key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
 
-    key_to_click[i].addEventListener('keyup', keyToClickKeyup);
-    key_to_click[i].addEventListener('keydown', keyToClickKeydown);
-  }
+        key_to_click[i].addEventListener('keyup', keyToClickKeyup);
+        key_to_click[i].addEventListener('keydown', keyToClickKeydown);
+    }
 }
 
-function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
+function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
     $('#save_status').html('Saving Feedback...');
-    var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
+    var url = buildCourseUrl(['gradeable', g_id, 'feedback', 'set']);
     let formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('grader_id', grader_id);
@@ -1461,14 +1465,14 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             if (data.status === 'success') {
                 $('#save_status').html('All Changes Saved');
             } else {
                 $('#save_status').html('Error Saving Changes');
             }
         },
-        error: function() {
+        error: function () {
             window.alert("Something went wrong. Please try again.");
             $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
         }
@@ -1479,31 +1483,31 @@ function popOutSubmittedFile(html_file, url_file) {
     var directory = "";
     let display_file_url = buildCourseUrl(['display_file']);
     if (url_file.includes("submissions")) {
-      directory = "submissions";
-      url_file = url_file;
+        directory = "submissions";
+        url_file = url_file;
     }
     else if (url_file.includes("results_public")) {
-      directory = "results_public";
+        directory = "results_public";
     }
     else if (url_file.includes("results")) {
-      directory = "results";
+        directory = "results";
     }
     else if (url_file.includes("checkout")) {
-      directory = "checkout";
+        directory = "checkout";
     }
     else if (url_file.includes("split_pdf")) {
-      directory = "split_pdf";
+        directory = "split_pdf";
     }
     else if (url_file.includes("attachments")) {
-      directory = "attachments";
+        directory = "attachments";
     }
-    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    file_path = display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
     if ($("#submission_browser").length > 0) {
         file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
     }
-    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    window.open(file_path, "_blank", "toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
-  }
+}
 
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
@@ -1545,7 +1549,7 @@ function flagUserImage(user_id, flag) {
             image_container.removeChild(image_container.firstElementChild);
             image_container.prepend(working_message);
 
-            const response = await fetch(url, {method: 'POST', body: form_data});
+            const response = await fetch(url, { method: 'POST', body: form_data });
             const result = await response.json();
 
             if (result.status === 'success') {
@@ -1619,12 +1623,12 @@ function previewMarkdown(mode) {
     }
 
     //basic sanity checking
-    if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
-    if (!(typeof data === 'object'))   throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
-    if (!markdown_area.length)         throw new Error(`Could not obtain markdown_area.`);
-    if (!markdown_header.length)       throw new Error(`Could not obtain markdown_header.`);
-    if (!markdown_textarea.length)     throw new Error(`Could not obtain markdown_textarea`);
-    if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
+    if (!(typeof mode === 'string')) throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (!(typeof data === 'object')) throw new TypeError(`Expected type 'object' for 'data'. Got '${typeof data}'`);
+    if (!markdown_area.length) throw new Error(`Could not obtain markdown_area.`);
+    if (!markdown_header.length) throw new Error(`Could not obtain markdown_header.`);
+    if (!markdown_textarea.length) throw new Error(`Could not obtain markdown_textarea`);
+    if (!markdown_preview.length) throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
     if (mode === 'preview') {
@@ -1641,12 +1645,12 @@ function previewMarkdown(mode) {
                 ...data,
                 csrf_token: csrfToken
             },
-            success: function(markdown_data){
+            success: function (markdown_data) {
                 markdown_preview_load_spinner.hide();
                 markdown_preview.html(markdown_data);
                 markdown_header.attr('data-mode', 'preview');
             },
-            error: function() {
+            error: function () {
                 displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             }
         });
@@ -1677,11 +1681,11 @@ function renderMarkdown(markdownContainer, url, content) {
             content: content,
             csrf_token: csrfToken
         },
-        success: function(data){
+        success: function (data) {
             markdownContainer.empty();
             markdownContainer.append(data);
         },
-        error: function() {
+        error: function () {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         }
     });
@@ -1696,7 +1700,7 @@ function renderMarkdown(markdownContainer, url, content) {
  *                      * `'bold'`
  *                      * `'italic'`
  */
-function addMarkdownCode(type){
+function addMarkdownCode(type) {
     const markdown_area = $(this).closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
     //don't allow markdown insertion if we are in preview mode

@@ -10,6 +10,8 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\DateUtils;
+
 
 /**
  * Class HomePageController
@@ -101,7 +103,10 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     public function showHomepage() {
+        $user = $this->core->getUser();
         $courses = $this->getCourses()->json_response->json;
+        
+    
 
         return new MultiResponse(
             null,
@@ -109,6 +114,7 @@ class HomePageController extends AbstractController {
                 ['HomePage'],
                 'showHomePage',
                 $this->core->getUser(),
+                $this->core->getCsrfToken(),
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["archived_courses"]
             )
@@ -116,10 +122,45 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @Route("/home/get_user_time_zone", methods={"GET"})
+     * @return JsonResponse
+     *
+     * Handle ajax request to update the currently logged in user's time zone data.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
+     */
+    public function getUserTimeZone() {
+         $user = $this->core->getUser();
+         $time_zone = $this->core->getQueries()->getSubmittyUserTimeZone($user);
+        
+        
+            // Updating went smoothly, so return success
+            if ($time_zone != null) {
+                $offset = DateUtils::getUTCOffset($time_zone);
+                $user_time_zone_with_offset = "(UTC" . $offset . ") " . $time_zone;
+                return JsonResponse::getSuccessResponse([
+                    'utc_offset' => $offset,
+                    'user_time_zone_with_offset' => $user_time_zone_with_offset
+                ]);
+            }
+        
+
+        // Some failure occurred
+        return JsonResponse::getFailResponse('Error encountered getting user time zone.');
+    }
+
+
+
+
+
+
+    /**
      * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
     public function createCourse() {
+        
+        
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
@@ -253,6 +294,7 @@ class HomePageController extends AbstractController {
      * @Route("/home/courses/new", methods={"GET"})
      */
     public function createCoursePage() {
+        
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
@@ -318,6 +360,7 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewTerm() {
+        
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
@@ -353,6 +396,7 @@ class HomePageController extends AbstractController {
      * @return MultiResponse|WebResponse
      */
     public function systemUpdatePage() {
+       
         $user = $this->core->getUser();
         if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
             return new MultiResponse(
