@@ -18,7 +18,7 @@
 }
 
 .pdfViewer .page {
-    /* describe all css properties independantly so js can read it easily across all platforms */
+    /* describe all css properties independently so js can read it easily across all platforms */
     margin-top: 5px !important;
     margin-right: auto !important;
     margin-bottom: 5px !important;
