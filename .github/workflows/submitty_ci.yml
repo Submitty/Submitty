@@ -407,6 +407,8 @@ jobs:
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+                | sponge /usr/local/submitty/config/submitty_users.json
 
           - name: Setup ldap
             run: |
