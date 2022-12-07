@@ -664,13 +664,6 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 
 
 --
--- Name: sessions_session_expires_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX sessions_session_expires_idx ON public.sessions USING btree (session_expires);
-
-
---
 -- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
 --
 
