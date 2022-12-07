@@ -794,7 +794,7 @@ class ElectronicGraderController extends AbstractController {
                         $sections[$key]['team'] = $team_users[$key];
                     }
                     if (isset($graded_components[$key])) {
-                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                        // Clamp to total components if unsubmitted assignment is graded for whatever reason
                         $sections[$key]['graded_components'] = $graded_components[$key];
                         $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                     }
@@ -1808,7 +1808,7 @@ class ElectronicGraderController extends AbstractController {
                 $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
                 $daysLate = $prevVersionInstance->getDaysLate();
 
-                // If this version is a good submission then it the rollback Submision
+                // If this version is a good submission then it the rollback Submission
                 if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
                     $rollbackSubmission = $previousVersion;
                     break;

@@ -31,7 +31,7 @@ class SessionManager {
     }
 
     /**
-     * Given a session id, grab the assiociated row from the database returning false if
+     * Given a session id, grab the associated row from the database returning false if
      * no such row exists or returning true if the row does exist. If the row exists, additionally
      * update when it'll expire by 24 hours
      *

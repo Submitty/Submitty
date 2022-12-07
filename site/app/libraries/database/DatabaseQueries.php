@@ -553,7 +553,7 @@ SQL;
     /**
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
-     * @param  int[]    $categories_ids     Filter threads having atleast provided categories
+     * @param  int[]    $categories_ids     Filter threads having at least provided categories
      * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
      * @param  bool     $unread_threads     Filter threads to show only unread threads
      * @param  bool     $show_deleted       Consider deleted threads
@@ -1487,7 +1487,7 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Get the late day infomration for a specific user (graded gradeable information)
+     * Get the late day information for a specific user (graded gradeable information)
      * @param string $user_id
      * @param string $g_id
      * @return null|array $return = [
@@ -1512,14 +1512,14 @@ WHERE semester=? AND course=? AND user_id=?",
 
         $row = $this->course_db->row();
 
-        // If cache doesnt exist, generate it and query again
+        // If cache doesn't exist, generate it and query again
         if (empty($row)) {
             $this->generateLateDayCacheForUser($user_id);
             $this->course_db->query($query, $params);
             $row = $this->course_db->row();
         }
 
-        // If cache still doesnt exist, the gradeable is not associated with
+        // If cache still doesn't exist, the gradeable is not associated with
         // LateDays OR there has been a computation error
         if (empty($row)) {
             return null;
@@ -2080,7 +2080,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $include = '';
         $params = [$g_id, $count];
 
-        // Check if we want to exlcude grade overridden gradeables
+        // Check if we want to exclude grade overridden gradeables
         if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
                         WHERE u.user_id = grade_override.user_id
@@ -3268,7 +3268,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Return Team object for team whith given Team ID
+     * Return Team object for team with given Team ID
      *
      * @param  string $team_id
      * @return \app\models\Team|null
@@ -5325,7 +5325,7 @@ AND gc_id IN (
 
     /**
      * Gets a single GradedGradeable associated with the provided gradeable and
-     *  user/team.  Note: The user's team for this gradeable will be retrived if provided
+     *  user/team.  Note: The user's team for this gradeable will be retrieved if provided
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  string|null                     $user      The id of the user to get data for
@@ -5342,7 +5342,7 @@ AND gc_id IN (
 
     /**
      * Gets a single GradedGradeable associated with the provided gradeable and
-     *  submitter.  Note: The user's team for this gradeable will be retrived if provided
+     *  submitter.  Note: The user's team for this gradeable will be retrieved if provided
      *
      * @param  Gradeable $gradeable
      * @param  Submitter                  $submitter The submitter to get data for
@@ -6264,7 +6264,7 @@ AND gc_id IN (
     }
 
     /**
-     * Gets if the provied submitter has a submission for a particular gradeable
+     * Gets if the provided submitter has a submission for a particular gradeable
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  Submitter                       $submitter
@@ -6299,7 +6299,7 @@ AND gc_id IN (
     }
 
     /**
-     * Gets if the provied submitter has a submission for a particular gradeable
+     * Gets if the provided submitter has a submission for a particular gradeable
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  String                     $userid
@@ -6604,7 +6604,7 @@ AND gc_id IN (
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
         $status_code = null;
-        if ($remove_type !== 'self') {//user removeing themselves
+        if ($remove_type !== 'self') {//user removing themselves
             $status_code = 'being_helped';//dont allow removing yourself if you are being helped
         }
 

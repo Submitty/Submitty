@@ -3,7 +3,7 @@
 """Given openCV image array, search for handwritten digits and attempt to read them."""
 
 # Submitty_ocr.py uses the open neural network exchange (ONNX) runtime module to perform
-# Optical charactor recognition on images containing handwritten digits.
+# Optical character recognition on images containing handwritten digits.
 # A model pretrained on the MNIST database is used and is provided by Microsoft's
 # Cogntive toolkit (CNTK) under the MIT license and can be found here :
 # https://gallery.azure.ai/Model/MNIST-Handwritten-Digit-Recognition
@@ -148,7 +148,7 @@ def preprocess(img):
             new_img = cv2.resize(new_img, (28, 28), fx=sf, fy=sf,
                                  interpolation=cv2.INTER_AREA)
 
-            # force a border increase incase the resizing caused a digit to hit the edge
+            # force a border increase in case the resizing caused a digit to hit the edge
             border_size = 2
             new_img = cv2.copyMakeBorder(new_img, border_size, border_size,
                                          border_size, border_size,
