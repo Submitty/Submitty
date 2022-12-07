@@ -18,14 +18,13 @@ class DateUtils {
 
     public static function setTimezone(\DateTimeZone $timezone): void {
         static::$timezone = $timezone;
-       
     }
-    
-    public static function getTimezone():  \DateTimeZone {
-        
+
+    public static function getTimezone(): \DateTimeZone {
+
         return static::$timezone;
     }
-    
+
     /**
      * Returns the current time
      *
@@ -164,9 +163,6 @@ class DateUtils {
             'minute' => $time->format('i'),
             'second' => $time->format('s')
         ];
-    }
-    public static function getUserTimezone(User $user){
-    return $this->core->getQueries()->getSubmittyUserTimeZone($user);
     }
 
     /**

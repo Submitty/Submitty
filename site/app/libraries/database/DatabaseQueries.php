@@ -136,7 +136,7 @@ class DatabaseQueries {
         $this->submitty_db->query("update users set time_zone = ? where user_id = ?", [$time_zone, $user->getId()]);
         return $this->submitty_db->getRowCount();
     }
-     public function getSubmittyUserTimeZone(User $user) {
+    public function getSubmittyUserTimeZone(User $user) {
         $this->submitty_db->query("SELECT time_zone FROM users WHERE user_id = ?", [$user->getId()]);
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['time_zone'] : null;
     }

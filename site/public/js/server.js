@@ -12,9 +12,6 @@ var desktopHomeLink = null;
 document.addEventListener("DOMContentLoaded", function () {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
-    //displaySuccessMessage("Sucess");
-    checkTimezoneMatch();
-    //console.log(data)
 });
 
 function loadInBreadcrumbLinks() {

@@ -1,12 +1,10 @@
 <?php
 
 namespace app\views;
+
 //check if needed
 //use app\libraries\Access;
-use app\libraries\Access;
-use app\libraries\DateUtils;
 use app\models\User;
-
 
 class HomePageView extends AbstractView {
     /**
@@ -58,17 +56,13 @@ class HomePageView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
 
-        
+
 
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "statuses" => $statuses,
             "csrf_token" => $csrf_token,
-        ]
-    
-    );
-
-    
+        ]);
     }
 
     public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
