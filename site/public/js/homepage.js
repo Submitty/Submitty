@@ -39,7 +39,7 @@ window.addEventListener('load', function () {
                 if (users_utc !==current_offset) {
                 
                 // eslint-disable-next-line no-undef
-                displayWarningMessage('The set time-zone on your profile does not match system time-zone. Please update to prevent any issues!');
+                displayWarningMessage('Set time-zone on your profile does not match system time-zone. Please update to prevent any issues!');
                 
                  }
             }
