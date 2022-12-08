@@ -10,7 +10,7 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    sql = "ALTER TABLE ONLY users ADD COLUMN IF NOT EXISTS user_preferred_name_order SMALLINT NOT NULL DEFAULT 1;"
+    sql = "ALTER TABLE ONLY users ADD COLUMN IF NOT EXISTS user_preferred_name_order SMALLINT NOT NULL DEFAULT 0;"
     database.execute(sql)
 
 

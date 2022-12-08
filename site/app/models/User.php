@@ -194,6 +194,8 @@ class User extends AbstractModel {
             $this->setPreferredLastName($details['user_preferred_lastname']);
         }
 
+        $this->setPreferredNameOrder($details['user_preferred_name_order']);
+
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'];
         $this->email_both = $details['user_email_secondary_notify'];
