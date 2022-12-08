@@ -54,8 +54,8 @@
                             Name Order:
                         </span>
                         <select id="name_order_select" class="form-control" aria-label="Edit user preferred name order">
-                            <option <?php if({{ user_name_order }} == 1) {echo("selected");}?>> {{ user_last }}, {{ user_first }} </option>
-                            <option <?php if({{ user_name_order }} == 2) {echo("selected");}?>> {{ user_first }}, {{ user_last }} </option>
+                            <option value="1"> {{ user_last }}, {{ user_first }} </option>
+                            <option value="2"> {{ user_first }}, {{ user_last }} </option>
                         </select>
                         {# <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name"> #}
                             {# <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }} #}

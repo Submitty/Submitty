@@ -306,6 +306,7 @@ $(document).ready(() => {
 
     $('#name_order_select').change(function() {
         const name_order = ($(this).children('option:selected').index() + 1).toString();
+        $(this).addClass("selected")
 
         $.getJSON({
             type: 'POST',
