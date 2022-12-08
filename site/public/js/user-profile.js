@@ -304,6 +304,41 @@ $(document).ready(() => {
         });
     });
 
+    $('#name_order_select').change(function() {
+        const name_order = ($(this).children('option:selected').index() + 1).toString();
+
+        $.getJSON({
+            type: 'POST',
+            // eslint-disable-next-line no-undef
+            url: buildUrl(['user_profile', 'change_preferred_name_order']),
+            data: {
+                // eslint-disable-next-line no-undef
+                csrf_token: csrfToken,
+                name_order,
+            },
+            success: function (response) {
+                // Update page elements if the data was successfully saved server-side
+                if (response.status === 'success') {
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage('Name order updated succesfully!');
+
+                }
+                else {
+                    console.log(response);
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage('Name order is not updated!');
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server!');
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
+
+
     $('#user-image-button').bind('change', function() {
         if ((this.files[0].size/1048576)>5.0) {
             alert("Selected file's size exceeds 5 MB");
