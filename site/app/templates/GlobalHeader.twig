@@ -245,10 +245,7 @@
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
-        <div class="system-message warning" id="performance-warning-system-message" hidden>
-            Developer Warning: Excessive or duplicate database queries observed.
-            Click "Show Page Details" at the bottom of the page for more info.
-        </div>
+        <div class="system-message warning" id="performance-warning-system-message" hidden></div>
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
             {% for message in messages %}

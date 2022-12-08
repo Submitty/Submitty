@@ -46,7 +46,8 @@
         {% if performance_warning %}
             <script>
                 $(document).ready(function() {
-                    $('#performance-warning-system-message').show();
+                    $('#performance-warning-system-message').text('Developer Warning: Excessive or duplicate database queries observed: ' +
+                        '{{ submitty_queries|length + course_queries|length }} queries executed. Click "Show Page Details" at the bottom of the page for more info.').show();
                 });
             </script>
         {% endif %}
