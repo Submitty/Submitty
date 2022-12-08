@@ -306,7 +306,6 @@ $(document).ready(() => {
 
     $('#name_order_select').change(function() {
         const name_order = ($(this).children('option:selected').index() + 1).toString();
-        $(this).addClass("selected")
 
         $.getJSON({
             type: 'POST',
@@ -322,12 +321,14 @@ $(document).ready(() => {
                 if (response.status === 'success') {
                     // eslint-disable-next-line no-undef
                     displaySuccessMessage('Name order updated succesfully!');
+                    $(this).setAttribute("selected","")
                 }
                 else {
                     console.log(response);
                     // eslint-disable-next-line no-undef
                     displayErrorMessage('Name order is not updated!');
                 }
+                
             },
             error: function (response) {
                 console.error('Failed to parse response from server!');
