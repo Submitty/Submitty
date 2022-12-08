@@ -140,7 +140,7 @@ class UserProfileController extends AbstractController {
      */
     public function changePreferredNameOrder() {
         $user = $this->core->getUser();
-        if (empty($_POST['name_order'])) {
+        if (empty($_POST['name_order']) && $_POST['name_order'] !== '0') {
             return JsonResponse::getErrorResponse('Preferred name order cannot be empty.');
         }
         $name_order = trim($_POST['name_order']);
@@ -152,7 +152,7 @@ class UserProfileController extends AbstractController {
                 'name_order' => $name_order,
             ]);
         }
-        return JsonResponse::getErrorResponse("Preferred name order code must be between 1 and 2.");
+        return JsonResponse::getErrorResponse("Preferred name order code must be between 0 and 1.");
     }
 
     /**

@@ -526,9 +526,9 @@ class User extends AbstractModel {
                 //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_preferred_name_order':
-                //Preferred name order code must be between 1 and 2.
+                //Preferred name order code must be between 0 and 1.
                 $order = intval($data);
-                return 1 <= $order && $order <= 2;
+                return 0 <= $order && $order <= 1;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
