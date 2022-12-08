@@ -321,7 +321,6 @@ $(document).ready(() => {
                 if (response.status === 'success') {
                     // eslint-disable-next-line no-undef
                     displaySuccessMessage('Name order updated succesfully!');
-
                 }
                 else {
                     console.log(response);

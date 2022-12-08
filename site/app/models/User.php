@@ -24,7 +24,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredLastName()  Get the preferred last name of the loaded user
  * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
  *                                        otherwise return the legal last name field for the user.
- * @method string getPreferredNameOrder() Get the preferred name order of the loaded user
+ * @method int getPreferredNameOrder() Get the preferred name order of the loaded user
  * @method void setPreferredNameOrder(int $order)
  * @method string getEmail()
  * @method void setEmail(string $email)
