@@ -582,7 +582,7 @@ class FileUtils {
             $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
 
             //manually check against set size limit
-            //incase the max POST size is greater than max file size
+            //in case the max POST size is greater than max file size
             if ($size > $max_size) {
                 $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }

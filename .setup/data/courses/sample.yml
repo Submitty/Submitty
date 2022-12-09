@@ -1290,7 +1290,7 @@ gradeables:
   gradeable_config: upload_only
   g_bucket: homework
 
-# For no autograding, still need components, but also ned eg_use_ta_grading flag
+# For no autograding, still need components, but also need eg_use_ta_grading flag
 - g_id: grades_released_homework_onlyauto
   components:
   - gc_lower_clamp: 0
