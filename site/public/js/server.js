@@ -1,6 +1,5 @@
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
-
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function () {
     loadInBreadcrumbLinks();
@@ -172,8 +171,7 @@ function newDeleteCourseMaterialForm(id, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>' + file_name + '</b>');
+    $('.delete-course-material-message', form).text(file_name);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -569,7 +567,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-    //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+    //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
     function c(a, b) {
         const c = document.createElement("textarea");
         c.name = a;
