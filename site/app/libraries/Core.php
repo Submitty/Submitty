@@ -302,7 +302,7 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            if (preg_match("#^".$regex."$#", $_SERVER['REQUEST_URI']) === 1) {
+            if (preg_match("#^" . $regex . "$#", $_SERVER['REQUEST_URI']) === 1) {
                 return; // this route matches an ignore rule
             }
         }
@@ -349,7 +349,7 @@ class Core {
      */
     public function __destruct() {
         // If this is in debug mode and performance warnings were generated, log them before closing the DB connection
-        if ($this->config->isDebug() && $this->hasDBPerformanceWarning()) {
+        if ($this->config !== null && $this->config->isDebug() && $this->hasDBPerformanceWarning()) {
             $this->logPerformanceWarning();
         }
 
