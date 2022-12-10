@@ -26,10 +26,10 @@ $(document).ready(() => {
             if (response.status === 'success') {
                 const users_utc = response.data.utc_offset;
                 const current_offset = getCurrentUTCOffset();
-
                 // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
-                if (users_utc !==current_offset) {
+                if (users_utc !== current_offset && users_utc !== "NOT SET") {
                 // eslint-disable-next-line no-undef
+                
                 displayWarningMessage('Set time-zone on your profile does not match system time-zone. Please update to prevent any issues!');
                  }
             }
