@@ -105,15 +105,12 @@ class HomePageController extends AbstractController {
         $user = $this->core->getUser();
         $courses = $this->getCourses()->json_response->json;
 
-
-
         return new MultiResponse(
             null,
             new WebResponse(
                 ['HomePage'],
                 'showHomePage',
                 $this->core->getUser(),
-                $this->core->getCsrfToken(),
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["archived_courses"]
             )
@@ -131,9 +128,8 @@ class HomePageController extends AbstractController {
     public function getUserTimeZone() {
          $user = $this->core->getUser();
          $time_zone = $this->core->getQueries()->getSubmittyUserTimeZone($user);
-
-
-            // Updating went smoothly, so return success
+        
+          // Updating went smoothly, so return success
         if ($time_zone != null) {
             $offset = DateUtils::getUTCOffset($time_zone);
             $user_time_zone_with_offset = "(UTC" . $offset . ") " . $time_zone;
@@ -142,17 +138,9 @@ class HomePageController extends AbstractController {
                 'user_time_zone_with_offset' => $user_time_zone_with_offset
             ]);
         }
-
-
         // Some failure occurred
         return JsonResponse::getFailResponse('Error encountered getting user time zone.');
     }
-
-
-
-
-
-
     /**
      * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})

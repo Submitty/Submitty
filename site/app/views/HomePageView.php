@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-//check if needed
-//use app\libraries\Access;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -15,7 +13,6 @@ class HomePageView extends AbstractView {
      */
     public function showHomePage(
         User $user,
-        string $csrf_token,
         array $unarchived_courses,
         array $archived_courses
     ) {
@@ -55,13 +52,9 @@ class HomePageView extends AbstractView {
         $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
-
-
-
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "statuses" => $statuses,
-            "csrf_token" => $csrf_token,
         ]);
     }
 

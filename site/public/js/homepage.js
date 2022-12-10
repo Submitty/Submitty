@@ -1,4 +1,3 @@
-
 /**
  * Get the UTC offset of the user's local time zone
  *
@@ -15,37 +14,27 @@ function getCurrentUTCOffset() {
 
 // once the homepage loads, does a timezone check against the user's local timezone and
 //if the user set a timezone,  warning will pop up if there is a timezone mismatch
-window.addEventListener('load', function () {
+$(document).ready(() => {
     console.log("home page loaded");
 
     $.getJSON({
         type: 'GET',
         // eslint-disable-next-line no-undef
         url: buildUrl(['home', 'get_user_time_zone']),
-        data: {
-            // eslint-disable-next-line no-undef
-            csrf_token: csrfToken,
-            
-
-        },
         success: function (response) {
             // Update page elements if the data was successfully saved server-side
             if (response.status === 'success') {
                 const users_utc = response.data.utc_offset;
                 const current_offset = getCurrentUTCOffset();
-            
+
                 // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
-                
                 if (users_utc !==current_offset) {
-                
                 // eslint-disable-next-line no-undef
                 displayWarningMessage('Set time-zone on your profile does not match system time-zone. Please update to prevent any issues!');
-                
                  }
             }
             else {
                 console.log(response);
-            
             }
         },
         error: function (response) {
@@ -54,5 +43,4 @@ window.addEventListener('load', function () {
            
         },
     });
-   
 });
