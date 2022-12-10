@@ -146,8 +146,6 @@ class HomePageController extends AbstractController {
      * @Route("/api/courses", methods={"POST"})
      */
     public function createCourse() {
-
-
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
@@ -155,7 +153,6 @@ class HomePageController extends AbstractController {
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
-
         if (
             !isset($_POST['course_semester'])
             || !isset($_POST['course_title'])
