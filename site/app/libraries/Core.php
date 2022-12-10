@@ -289,6 +289,29 @@ class Core {
         return count($queries) !== count(array_unique($queries));
     }
 
+    protected function logPerformanceWarning(): void {
+        if (!$this->config->isDebug()) {
+            return;  // We never want to log these warnings on production
+        }
+
+        $ignore_list_path = FileUtils::joinPaths($this->config->getSubmittyInstallPath(), 'site', '.performance_warning_ignore.json');
+        $ignore_list = json_decode(file_get_contents($ignore_list_path));
+
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            return;
+        }
+
+        foreach ($ignore_list as $regex) {
+            if (preg_match("#^".$regex."$#", $_SERVER['REQUEST_URI']) === 1) {
+                return; // this route matches an ignore rule
+            }
+        }
+
+        // didn't match any of the ignore rules...print a warning
+        $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
+        Logger::debug("Excessive or duplicate queries observed:  $num_queries queries executed.");
+    }
+
     /**
      * Loads the shell of the grading queue
      *
@@ -325,6 +348,11 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
+        // If this is in debug mode and performance warnings were generated, log them before closing the DB connection
+        if ($this->config->isDebug() && $this->hasDBPerformanceWarning()) {
+            $this->logPerformanceWarning();
+        }
+
         if ($this->course_db !== null) {
             $this->course_db->disconnect();
         }
