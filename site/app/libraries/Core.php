@@ -302,14 +302,17 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            if (preg_match("#^" . $regex . "$#", $_SERVER['REQUEST_URI']) === 1) {
+            $regex = str_replace("<semester>", $this->getConfig()->getSemester(), $regex);
+            $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
+            if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
                 return; // this route matches an ignore rule
             }
         }
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\n\nMethod: ${_SERVER['REQUEST_METHOD']}\n");
+        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
     }
 
     /**

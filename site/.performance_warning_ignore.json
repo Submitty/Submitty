@@ -1,3 +1,21 @@
 [
-  "/courses/[f|s][0-9][0-9]/sample"
+  "/courses/<semester>/<course>",
+  "/courses/<semester>/<course>/autograding_config",
+  "/courses/<semester>/<course>/gradeable/<gradeable>",
+  "/courses/<semester>/<course>/gradeable/<gradeable>/[0-9]+",
+  "/courses/<semester>/<course>/gradeable/<gradeable>/grading",
+  "/courses/<semester>/<course>/gradeable/<gradeable>/grading/status",
+  "/courses/<semester>/<course>/gradeable/<gradeable>/update",
+  "/courses/<semester>/<course>/forum",
+  "/courses/<semester>/<course>/forum/threads/new",
+  "/courses/<semester>/<course>/forum/threads/[0-9]+",
+  "/courses/<semester>/<course>/forum/threads/merge",
+  "/courses/<semester>/<course>/forum/posts/new",
+  "/courses/<semester>/<course>/forum/posts/modify",
+  "/courses/<semester>/<course>/forum/stats",
+  "/courses/<semester>/<course>/sections",
+  "/courses/<semester>/<course>/plagiarism/configuration/new",
+  "/courses/<semester>/<course>/late_table",
+  "/courses/<semester>/<course>/polls",
+  "/courses/<semester>/<course>/sql_toolbox"
 ]
