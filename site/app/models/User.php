@@ -152,6 +152,9 @@ class User extends AbstractModel {
     /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
 
+    /** @var array A cache of [gradeable id] => [anon id] */
+    private $anon_id_by_gradeable = [];
+
     /**
      * User constructor.
      *
@@ -462,7 +465,13 @@ class User extends AbstractModel {
         if ($g_id === "") {
             return "";
         }
-        $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+        if (array_key_exists($g_id, $this->anon_id_by_gradeable)) {
+            $anon_id = $this->anon_id_by_gradeable[$g_id];
+        }
+        else {
+            $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+            $this->anon_id_by_gradeable[$g_id] = $anon_id;
+        }
         $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
         if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
