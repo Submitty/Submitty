@@ -470,9 +470,9 @@ class User extends AbstractModel {
         }
         else {
             $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+            $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
             $this->anon_id_by_gradeable[$g_id] = $anon_id;
         }
-        $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
         if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);

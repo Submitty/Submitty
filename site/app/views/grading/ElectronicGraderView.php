@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\RegradeRequest;
 use app\models\SimpleStat;
 use app\models\Team;
@@ -35,6 +36,8 @@ class ElectronicGraderView extends AbstractView {
      * @param int $submissions_in_queue
      * @return string
      */
+
+    private $user_id_to_User_cache = [];
 
     public function statusPage(
         Gradeable $gradeable,
@@ -1261,7 +1264,10 @@ HTML;
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                $user_or_team = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                if (!array_key_exists($user_id[0], $this->user_id_to_User_cache)) {
+                    $this->user_id_to_User_cache[$user_id[0]] = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                }
+                $user_or_team = $this->user_id_to_User_cache[$user_id[0]];
                 $anon_id = $user_or_team->getAnonId($g_id);
                 $anon_path = $anon_path . "/" . $anon_id;
             }
