@@ -201,7 +201,7 @@ class DockerView extends AbstractView {
 
                 $is_match = preg_match("/APIError was raised./", $buffer, $matches);
                 if ($is_match) {
-                    $error_logs[] = "APIError has occured, please update the machines.";
+                    $error_logs[] = "APIError has occurred, please update the machines.";
                 }
                 if (preg_last_error() != PREG_NO_ERROR) {
                     $error_logs[] = "Error while parsing the logs";

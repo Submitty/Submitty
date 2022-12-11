@@ -481,7 +481,7 @@ class GlobalController extends AbstractController {
                 break;
             case 11:
                 //November (Thanksgiving)
-                //last week of Novemeber
+                //last week of November
                 $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
                 if ($tgt_date === $now->format('Y-W-n')) {
                     $duck_img = 'moorthy_duck/11-november.svg';

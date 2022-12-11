@@ -40,3 +40,7 @@ a.popout-item > .fas:hover {
 .partial-checkbox:checked {
     background-color: var(--standard-medium-gray) !important;
 }
+
+.delete-course-material-message {
+    font-weight: bold;
+}

@@ -510,10 +510,10 @@ class Core {
     }
 
     /**
-     * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
+     * Authenticates the user against whatever method was chosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
-     * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
+     * from this method. Returns True/False whether or not the authentication attempt succeeded/failed.
      *
      * @param bool $persistent_cookie should we store this for some amount of time (true) or till browser closure (false)
      * @return bool
