@@ -111,7 +111,7 @@ class OfficeHoursQueueModel extends AbstractModel {
             $this->last_queue_details = $this->core->getQueries()->getLastQueueDetails();
         }
         if (!array_key_exists('name', $this->last_queue_details)) {
-            return $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
+            return $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName();
         }
         return $this->last_queue_details['name'];
     }

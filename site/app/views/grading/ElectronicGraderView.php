@@ -346,8 +346,8 @@ HTML;
 HTML;
 
         foreach ($users as $user => $details) {
-            $first_name = htmlspecialchars($details["first_name"]);
-            $last_name = htmlspecialchars($details["last_name"]);
+            $given_name = htmlspecialchars($details["given_name"]);
+            $family_name = htmlspecialchars($details["family_name"]);
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
             $filepath = htmlspecialchars($details["file"]);
@@ -355,7 +355,7 @@ HTML;
             $return .= <<<HTML
 			<tbody>
 				<tr>
-					<td>{$last_name}, {$first_name}</td>
+					<td>{$family_name}, {$given_name}</td>
                     <td>{$upload_timestamp}</td>
                     <td>{$submit_timestamp}</td>
                     <td>{$filepath}</td>
@@ -512,8 +512,8 @@ HTML;
                 }
                 else {
                     $columns[] = ["width" => "13%", "title" => "User ID",          "function" => "user_id", "sort_type" => "id"];
-                    $columns[] = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
-                    $columns[] = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
+                    $columns[] = ["width" => "15%", "title" => "First Name",       "function" => "user_given", "sort_type" => "first"];
+                    $columns[] = ["width" => "15%", "title" => "Last Name",        "function" => "user_family", "sort_type" => "last"];
                 }
             }
             // NOTE/REDESIGN FIXME: Same note as above.
