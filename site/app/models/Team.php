@@ -35,8 +35,8 @@ class Team extends AbstractModel {
     protected $member_list;
     /** @var array $assignment_settings */
     protected $assignment_settings;
-    /** @var ?string $anon_id */
-    protected $anon_id = null;
+    /** @var string $anon_id */
+    protected $anon_id;
     /** @prop @var string The name of the team */
     protected $team_name;
 
@@ -86,13 +86,7 @@ class Team extends AbstractModel {
      * @return string
      */
     public function getAnonId() {
-        if ($this->anon_id !== null) {
-            // used the cached anon_id if we have it
-            return $this->anon_id;
-        }
-
-        $temp = $this->core->getQueries()->getTeamAnonId($this->getId());
-        if (empty($temp) || $temp[$this->getId()] === null) {
+        if (empty($this->core->getQueries()->getTeamAnonId($this->getId())) || $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()] === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIds();
             $alpha_length = strlen($alpha) - 1;
@@ -109,11 +103,7 @@ class Team extends AbstractModel {
             $this->anon_id = $random;
             $this->core->getQueries()->updateTeamAnonId($this->getId(), $random);
         }
-        else {
-            $this->anon_id = $temp[$this->getId()];
-        }
-
-        return $this->anon_id;
+        return $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()];
     }
 
     /**
