@@ -471,8 +471,11 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $em->getRepository(Poll::class);
         /** @var Poll|null */
-        $poll = $em->getRepository(Poll::class)->findByStudentID($this->core->getUser()->getId(), $poll_id);
+        $poll = $repo->findByStudentID($this->core->getUser()->getId(), $poll_id);
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
@@ -483,8 +486,13 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         if (!array_key_exists("answers", $_POST) && PollUtils::isSingleResponse($poll->getQuestionType())) {
-            // Answer must be given for single-response ("no response" counts as a reponse)
+            // Answer must be given for single-response ("no response" counts as a response)
             $this->core->addErrorMessage("No answer given");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        if (str_contains($poll->getQuestionType(), 'single') && count($_POST['answers']) > 1) {
+            $this->core->addErrorMessage('Single response polls can only have one response');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 

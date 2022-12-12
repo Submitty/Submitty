@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityRepository;
 
 class PollRepository extends EntityRepository {
     /**
-     * Find all of the polls available to the specified student and hydrate options
+     * Find all of the polls available to the specified student, and the  and hydrate all options
      * @return Poll[]
      */
     public function findAllByStudentIDWithAllOptions(string $user_id): array {
@@ -26,7 +26,7 @@ class PollRepository extends EntityRepository {
     }
 
     /**
-     * Find single poll and hydrate responses and options
+     * Find single poll and hydrate all options and the specific responses for the specified student
      */
     public function findByStudentID(string $user_id, int $poll_id): ?Poll {
         $result = $this->_em
