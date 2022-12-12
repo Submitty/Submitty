@@ -1453,7 +1453,8 @@ HTML;
                 foreach ($team->getMemberUsers() as $user) {
                     $student_anon_ids[] = $user->getAnonId($gradeable->getId());
                 }
-            } else {
+            }
+            else {
                 $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
             }
         }
