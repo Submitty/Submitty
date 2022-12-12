@@ -25,7 +25,7 @@
 
 import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
-//These functions can be called like "cy.login(...)" and will yeild a result
+//These functions can be called like "cy.login(...)" and will yield a result
 
 /**
 * Log into Submitty, assumes no one is logged in already and at login page

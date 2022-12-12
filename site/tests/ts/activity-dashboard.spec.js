@@ -136,7 +136,7 @@ test('comparator', () => {
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 4, 'desc')).toEqual(true);
     expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 4, 'desc')).toEqual(false);
 
-    // testing nineth column
+    // testing ninth column
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 8, 'desc')).toEqual(false);
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 8, 'asc')).toEqual(true);
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 8, 'desc')).toEqual(false);

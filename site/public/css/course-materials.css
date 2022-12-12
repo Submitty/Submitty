@@ -44,3 +44,7 @@ a.popout-item > .fas:hover {
 #existing-names > li {
     margin-left: 15px;
 }
+
+.delete-course-material-message {
+    font-weight: bold;
+}

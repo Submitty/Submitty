@@ -29,7 +29,7 @@
 
         // *************** TEST CASES *****************
         {
-            "title" : "Regular char by char comparision",
+            "title" : "Regular char by char comparison",
             "details" : "./byChar.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
@@ -86,7 +86,7 @@
             ]
         },
         {
-            "title" : "Regular char by char comparision NO PARTIAL CREDIT",
+            "title" : "Regular char by char comparison NO PARTIAL CREDIT",
             "details" : "./byChar.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "partial_credit" : false,

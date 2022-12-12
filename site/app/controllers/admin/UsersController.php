@@ -745,7 +745,7 @@ class UsersController extends AbstractController {
                 curl_close($ch);
             }
             else {
-                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly receive spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
         }
@@ -870,7 +870,7 @@ class UsersController extends AbstractController {
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
         $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
-        $bad_columns = []; //Tracks columns in which errors occured
+        $bad_columns = []; //Tracks columns in which errors occurred
 
         /* Used for validation of grading assignment for graders to registration sections. Graders cannot
           be assigned to grade the (created-by-default) null registration section. */
