@@ -1332,6 +1332,10 @@ HTML;
         if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $student_grader = true;
         }
+        $instructor = false;
+        if ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR) {
+            $instructor = true;
+        }
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
@@ -1345,6 +1349,7 @@ HTML;
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $submitter_id,
             "student_grader" => $student_grader,
+            "instructor" => $instructor,
             "anon_submitter_id" => $anon_submitter_id,
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
