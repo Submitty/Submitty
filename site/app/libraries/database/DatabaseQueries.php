@@ -5014,6 +5014,7 @@ AND gc_id IN (
               g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
+              gamo.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
@@ -5052,6 +5053,14 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+              LEFT JOIN (
+                SELECT
+                  g_id AS gamo_g_id,
+                  json_agg(user_id) AS gamo_users,
+                  json_agg(allowed_minutes) AS gamo_minutes
+                FROM gradeable_allowed_minutes_override
+                GROUP BY gamo_g_id
+              ) AS gamo ON g.g_id=gamo.gamo_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gc_g_id,
@@ -5107,7 +5116,18 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
-            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
+            $overrides = [];
+            $users = json_decode($row['gamo_users']);
+            $minutes = json_decode($row['gamo_minutes']);
+            if ($users !== null) {
+                for ($i = 0; $i < count($users); $i++) {
+                    $overrides[] = [
+                        'user_id' => $users[$i],
+                        'allowed_minutes' => $minutes[$i]
+                    ];
+                }
+            }
+            $gradeable->setAllowedMinutesOverrides($overrides);
 
             // Construct the components
             $component_properties = [
