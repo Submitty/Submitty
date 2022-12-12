@@ -235,6 +235,24 @@ jobs:
             files: autograder/coverage.xml
             flags: autograder
 
+        #submitty_daemon_jobs unit tests
+        - name: Install bulk upload dependencies
+          run: |
+            sudo apt-get install -y poppler-utils
+            sudo apt-get install -y libzbar0
+
+        - name: Run bulk upload unit tests
+          working-directory: sbin/submitty_daemon_jobs
+          run : |
+            coverage run -m unittest discover tests -t .
+            coverage xml -i
+
+        - name: Upload submitty_daemon_jobs Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: sbin/submitty_daemon_jobs/coverage.xml
+            flags: submitty_daemon_jobs
+
 
     shellcheck:
       name: ShellCheck
@@ -525,7 +543,7 @@ jobs:
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-          - name: Run cypress e2e login tests with databse auth
+          - name: Run cypress e2e login tests with database auth
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost

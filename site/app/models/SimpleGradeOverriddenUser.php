@@ -22,7 +22,7 @@ class SimpleGradeOverriddenUser extends AbstractModel {
     protected $preferred_last_name;
     /** @prop @var  string The name to be displayed by the system (either preferred last name or legal last name) */
     protected $displayed_last_name;
-    /** @prop @var  integer The overrided marks */
+    /** @prop @var  integer The overridden marks */
     protected $marks;
     /** @prop @var  string The comment to be displayed */
     protected $comment;

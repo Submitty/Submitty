@@ -401,7 +401,7 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
 
-    // UPDATE CUMMULATIVE POINTS
+    // UPDATE CUMULATIVE POINTS
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {
       nonhidden_automated_points_awarded += testcase_pts;

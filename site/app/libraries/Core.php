@@ -14,6 +14,7 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -175,7 +176,14 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
+        $cache = new PhpFilesAdapter("", 0, $cache_path);
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            null,
+            $cache
+        );
 
         if ($debug_stack) {
             $config->setSQLLogger($debug_stack);
@@ -455,10 +463,10 @@ class Core {
     }
 
     /**
-     * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
+     * Authenticates the user against whatever method was chosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
-     * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
+     * from this method. Returns True/False whether or not the authentication attempt succeeded/failed.
      *
      * @param bool $persistent_cookie should we store this for some amount of time (true) or till browser closure (false)
      * @return bool

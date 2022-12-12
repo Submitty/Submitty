@@ -36,7 +36,7 @@ $request = Request::createFromGlobals();
 $core = new Core();
 
 /**
- * Register custom expection and error handlers that will get run anytime our application
+ * Register custom exception and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
  * page instead of the actual exception/stack trace during execution, both logging the error
  * and preventing the user from knowing exactly how our system is failing.

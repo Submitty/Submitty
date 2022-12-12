@@ -580,7 +580,7 @@ class AdminGradeableController extends AbstractController {
             $dir_queue = array_values($dir_queue);
 
             if (!file_exists($dir) || !is_dir($dir)) {
-                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occurred when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return [];
             }
 
@@ -588,7 +588,7 @@ class AdminGradeableController extends AbstractController {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
             }
             catch (\Exception $e) {
-                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occurred when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return [];
             }
 
@@ -1298,7 +1298,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     public static function enqueueGenerateRepos($semester, $course, $g_id) {
-        // FIXME:  should use a variable intead of hardcoded top level path
+        // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
