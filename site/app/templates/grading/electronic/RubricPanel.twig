@@ -59,7 +59,7 @@
                         <h4>No Submission</h4>
                     {% endif %}
                 </div>
-                {% for student_anon_id in student_anon_ids %}
+                {% for student_anon_id in student_anon_ids and gradeable.hasPeerComponent() %}
                     {% if gradeable.getPeerFeedback(grader_id, student_anon_id) != 'No response' %}
                         <div class="box component peer-border">
                             Peer Feedback: {{gradeable.getPeerFeedback(grader_id, student_anon_id)}}
