@@ -70,13 +70,7 @@ response = subprocess.run(api_token_cmd, stdout=subprocess.PIPE, stderr=subproce
 
 if response.returncode != 0:
     print("Failure to get token for submitty admin account")
-    print("Subprocess arguments:")
-    print(api_token_cmd)
-    print("Subprocess stdout:")
-    print(response.stdout)
-    print("Subprocess stderr:")
-    print(response.stderr)
-    exit(1)
+    exit(0)
 
 token = response.stdout
 
