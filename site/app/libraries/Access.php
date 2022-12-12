@@ -68,7 +68,7 @@ class Access {
      * Checks that students are allowed to view and download submission files for the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE;
 
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
@@ -260,7 +260,7 @@ class Access {
         ];
         $this->directories["submissions"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
-            "subparts" => ["gradeable", "submitter", "version"],
+            "subparts" => ["gradeable", "submitter"],
             "permissions" => [
                 "path.read" => "path.read.submissions",
                 "path.write" => "path.write.submissions",
@@ -784,7 +784,7 @@ class Access {
         $subpart_values = explode("/", $relative_path);
 
         //Missing necessary directory path
-        if (count($subpart_values) < count($subpart_types)) {
+        if (count($subpart_values) <= count($subpart_types)) {
             return false;
         }
         $end_path = implode("/", array_slice($subpart_values, count($subpart_types)));
