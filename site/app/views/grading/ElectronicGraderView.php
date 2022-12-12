@@ -10,7 +10,6 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
-use app\models\gradeable\LateDays;
 use app\models\gradeable\RegradeRequest;
 use app\models\SimpleStat;
 use app\models\Team;
