@@ -14,6 +14,8 @@ use DateTime;
  * they logged in.
  */
 class SessionManager {
+    const SESSION_EXPIRATION = "2 weeks";
+
     /**
      * @var Core
      */
@@ -43,10 +45,10 @@ class SessionManager {
             return false;
         }
 
-        // Only refresh the session if less than 4 weeks are remaining.  This reduces the load on the server
-        // without annoying people by logging them out all the time.
-        if (new DateTime($this->session['session_expires']) < (new DateTime())->add(new DateInterval('P4W'))) {
-            $this->core->getQueries()->updateSessionExpiration($session_id);
+        // Only refresh the session once per day
+        $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
+        if (new DateTime($this->session['session_expires']) < $day_before_expiration) {
+            $this->updateSession($session_id);
         }
 
         return $this->session['user_id'];
@@ -54,8 +56,6 @@ class SessionManager {
 
     /**
      * Create a new session for the user
-     *
-     * @return string
      */
     public function newSession(string $user_id): string {
         if (!isset($this->session['session_id'])) {
@@ -69,6 +69,13 @@ class SessionManager {
             );
         }
         return $this->session['session_id'];
+    }
+
+    /**
+     * Update the expiration date for this session
+     */
+    public function updateSession(string $session_id) {
+        $this->core->getQueries()->updateSessionExpiration($session_id);
     }
 
     /**

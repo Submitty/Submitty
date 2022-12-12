@@ -763,21 +763,24 @@ class Core {
                 $session_id = $token->claims()->get('session_id');
                 $expire_time = $token->claims()->get('expire_time');
                 $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
-                // make sure that the session exists and it's for the user they're claiming
-                // to be
+                // make sure that the session exists and it's for the user they're claiming to be
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
                 }
                 else {
-                    if ($expire_time > 0) {
+                    // If more than a day has passed since we last updated the cookie, update it with the new timestamp
+                    $expire_time_datetime = (new \DateTime())->setTimestamp($expire_time);
+                    $expiration_interval = \DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION);
+                    if ($expire_time_datetime->sub($expiration_interval)->add(\DateInterval::createFromDateString('1 day')) < new \DateTime()) {
+                        $new_token = TokenManager::generateSessionToken(
+                            $session_id,
+                            $token->claims()->get('sub')
+                        );
                         Utils::setCookie(
                             $cookie_key,
-                            TokenManager::generateSessionToken(
-                                $session_id,
-                                $token->claims()->get('sub')
-                            )->toString(),
-                            $expire_time
+                            $new_token->toString(),
+                            $new_token->claims()->get('expire_time')
                         );
                     }
                 }

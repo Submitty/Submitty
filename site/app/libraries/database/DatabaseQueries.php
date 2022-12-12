@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -3000,21 +3001,21 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
             "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '6 weeks')",
-            [$session_id, $user_id, $csrf_token]
+                                   VALUES(?, ?, ?, current_timestamp + ?::interval)",
+            [$session_id, $user_id, $csrf_token, SessionManager::SESSION_EXPIRATION]
         );
     }
 
     /**
-     * Updates a given session by setting its expiration date to be 6 weeks into the future
+     * Updates a given session by setting its expiration date to be 2 weeks into the future
      *
      * @param string $session_id
      */
     public function updateSessionExpiration($session_id) {
         $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '6 weeks')
+            "UPDATE sessions SET session_expires=(current_timestamp + ?::interval)
                                    WHERE session_id=?",
-            [$session_id]
+            [SessionManager::SESSION_EXPIRATION, $session_id]
         );
     }
 
