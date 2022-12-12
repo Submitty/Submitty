@@ -929,6 +929,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $graded_gradeables = [];
+        $user_ids = [];
         if ($gradeable->isTeamAssignment()) {
             $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable);
             // Collect user ids so we know who isn't on a team
