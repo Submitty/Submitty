@@ -929,7 +929,10 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $graded_gradeables = [];
-        $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
+        if ($gradeable->isTeamAssignment()) {
+            $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable);
+            // Collect user ids so we know who isn't on a team
+        }
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
