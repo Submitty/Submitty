@@ -15,7 +15,7 @@ class TestAccessibility(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    # This should contain a url for every type of page on the webiste
+    # This should contain a url for every type of page on the website
     # please replace the semester and course with '/courses/{}/{}'
     # So '/courses/s20/sample/users' becomes '/courses/{}/{}/users'
     urls = [

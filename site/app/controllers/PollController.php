@@ -111,7 +111,7 @@ class PollController extends AbstractController {
         $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'release_histogram'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occurred in adding poll");
                 return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildCourseUrl(['polls']))
                 );
@@ -154,13 +154,13 @@ class PollController extends AbstractController {
                 // get the id number from the $_POST key
                 $id = preg_replace("/[^\d]/", "", $post_key);
                 if (!isset($_POST["response_" . $id]) || !isset($_POST["order_" . $id])) {
-                    $this->core->addErrorMessage("Error with responses occured in adding poll: invalid response fields submitted");
+                    $this->core->addErrorMessage("Error with responses occurred in adding poll: invalid response fields submitted");
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildCourseUrl(['polls']))
                     );
                 }
                 if ($_POST["response_" . $id] === "") {
-                    $this->core->addErrorMessage("Error occured in adding poll: responses must not be left blank");
+                    $this->core->addErrorMessage("Error occurred in adding poll: responses must not be left blank");
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildCourseUrl(['polls']))
                     );
@@ -173,7 +173,7 @@ class PollController extends AbstractController {
             }
         }
         if (count($responses) !== count($orders) || $response_count !== count($responses) || count($answers) > count($responses)) {
-            $this->core->addErrorMessage("Error with responses occured in editing poll");
+            $this->core->addErrorMessage("Error with responses occurred in editing poll");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -307,7 +307,7 @@ class PollController extends AbstractController {
             );
         }
         if (!array_key_exists("answers", $_POST) && PollUtils::isSingleResponse($poll->getQuestionType())) {
-            // Answer must be given for single-response ("no response" counts as a reponse)
+            // Answer must be given for single-response ("no response" counts as a response)
             $this->core->addErrorMessage("No answer given");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -394,7 +394,7 @@ class PollController extends AbstractController {
         $fields = ['response_count', 'name', 'question', 'question_type', 'release_date', 'removed_responses', 'release_histogram'];
         foreach ($fields as $field) {
             if (!isset($_POST[$field])) {
-                $this->core->addErrorMessage("Error occured in editing poll");
+                $this->core->addErrorMessage("Error occurred in editing poll");
                 return new RedirectResponse($returnUrl);
             }
         }
@@ -452,11 +452,11 @@ class PollController extends AbstractController {
                 // get the id number from the $_POST key
                 $id = preg_replace("/[^\d]/", "", $post_key);
                 if (!isset($_POST["response_" . $id]) || !isset($_POST["order_" . $id])) {
-                    $this->core->addErrorMessage("Error with responses occured in editing poll: invalid response fields submitted");
+                    $this->core->addErrorMessage("Error with responses occurred in editing poll: invalid response fields submitted");
                     return new RedirectResponse($returnUrl);
                 }
                 if ($_POST["response_" . $id] === "") {
-                    $this->core->addErrorMessage("Error occured in editing poll: responses must not be left blank");
+                    $this->core->addErrorMessage("Error occurred in editing poll: responses must not be left blank");
                     return new RedirectResponse($returnUrl);
                 }
                 $responses[$_POST["option_id_" . $id]] = $_POST["response_" . $id];
@@ -474,7 +474,7 @@ class PollController extends AbstractController {
             foreach ($removed_resp as $removed_response_id) {
                 if (isset($prev_responses[$removed_response_id])) {
                     if ($prev_responses[$removed_response_id] > 0) {
-                        $this->core->addErrorMessage("Error occured in editing poll: attempt to delete response option that has already been submitted as an answer");
+                        $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                         return new RedirectResponse($returnUrl);
                     }
                     $original_responses_removed++;
@@ -488,7 +488,7 @@ class PollController extends AbstractController {
             || count($prev_responses) < $original_responses_removed
             || count($prev_responses) - $original_responses_removed > count($responses)
         ) {
-            $this->core->addErrorMessage("Error with responses occured in editing poll");
+            $this->core->addErrorMessage("Error with responses occurred in editing poll");
             return new RedirectResponse($returnUrl);
         }
         if (count($answers) == 0) {
@@ -585,7 +585,7 @@ class PollController extends AbstractController {
             $question = $poll["question"];
             /*  Polls that were exported before this feature was
                 implemented don't have this data. At the time, there
-                only existed questions of type single reponse. */
+                only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
             if (!in_array($question_type, PollUtils::getPollTypes())) {
                 $num_errors = $num_errors + 1;

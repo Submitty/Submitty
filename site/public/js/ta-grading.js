@@ -722,7 +722,7 @@ function resetSinglePanelLayout() {
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
-  // remove the left bottom sectin and its drag bar
+  // remove the left bottom section and its drag bar
   $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
 
   const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop;
@@ -990,7 +990,7 @@ function updatePanelLayoutModes () {
     const panel_type = taLayoutDet.currentTwoPanels[panel];
     //get panel corresponding with the layout position
     const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
-    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    //get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
     const dom_panel = document.getElementById(`${panel_type}`);
     if (dom_panel) {
       $(layout_panel).append(dom_panel);
@@ -1670,7 +1670,7 @@ function uploadAttachment() {
         dataType: "json",
         success: function(data) {
           if (!("status" in data) || data["status"] !== "success") {
-            alert("An error has occured trying to upload the attachment: " + data["message"]);
+            alert("An error has occurred trying to upload the attachment: " + data["message"]);
           } else {
             let renderedData = Twig.twig({
               ref: "Attachments"
@@ -1698,7 +1698,7 @@ function uploadAttachment() {
           fileInput.prop("disabled", false);
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          alert("An error has occured trying to upload the attachment: " + errorThrown);
+          alert("An error has occurred trying to upload the attachment: " + errorThrown);
           fileInput[0].value = "";
           fileInput.prop("disabled", false);
         }
@@ -1725,7 +1725,7 @@ function deleteAttachment(target, file_name) {
       dataType: "json",
       success: function(data) {
         if (!("status" in data) || data["status"] !== "success") {
-          alert("An error has occured trying to delete the attachment: " + data["message"]);
+          alert("An error has occurred trying to delete the attachment: " + data["message"]);
         } else {
           $(target).parent().parent().remove();
           let userAttachmentList = $("#attachments-list").children().first();
@@ -1739,7 +1739,7 @@ function deleteAttachment(target, file_name) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
-        alert("An error has occured trying to upload the attachment: " + errorThrown);
+        alert("An error has occurred trying to upload the attachment: " + errorThrown);
       }
     });
   }

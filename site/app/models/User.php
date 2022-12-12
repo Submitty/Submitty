@@ -226,7 +226,7 @@ class User extends AbstractModel {
     /**
      * Gets the message the user sets when seeking a team or a parter
      * @param string $g_id the gradeable where the user is seeking for a team
-     * @return string, message if it exists or N/A if it doesnt
+     * @return string, message if it exists or N/A if it doesn't
      */
     public function getSeekMessage($g_id): string {
         $ret = $this->core->getQueries()->getSeekMessageByUserId($g_id, $this->id);
@@ -471,8 +471,8 @@ class User extends AbstractModel {
             do {
                 $random = "";
                 for ($i = 0; $i < 15; $i++) {
-                    // this throws an exception if there's no avaiable source for generating
-                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // this throws an exception if there's no available source for generating
+                    // random exists, but that shouldn't happen on our targeted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];

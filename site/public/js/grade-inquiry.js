@@ -161,7 +161,7 @@ function initGradingInquirySocketClient() {
                 gradeInquiryDiscussionHandler(msg.submitter_id);
                 break;
             default:
-                console.log('Undefined message recieved.');
+                console.log('Undefined message received.');
         }
     };
     const page = `${window.location.pathname.split('gradeable/')[1].split('/')[0]}_${$('#submitter_id').val()}`;

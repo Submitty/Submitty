@@ -161,7 +161,7 @@ class UserProfileController extends AbstractController {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
-                // image_data and mime_type will be set but be sure that code doesnt break check for null exception
+                // image_data and mime_type will be set but be sure that code doesn't break check for null exception
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Profile photo updated successfully!',
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
