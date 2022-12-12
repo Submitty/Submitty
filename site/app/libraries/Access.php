@@ -546,7 +546,7 @@ class Access {
                 return false;
             }
             elseif (!file_exists($path)) {
-                //checks for the existense of path which is asked for
+                //checks for the existence of path which is asked for
                 return false;
             }
 
