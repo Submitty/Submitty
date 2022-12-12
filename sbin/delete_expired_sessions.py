@@ -9,7 +9,7 @@ import datetime
 
 
 def delete_expired_sessions(db):
-    """Collect the emails to be deleted and information about errors and unsent email."""
+    """Delete the sessions which have expired."""
 
     return db.execute("""
         WITH deleted AS (
