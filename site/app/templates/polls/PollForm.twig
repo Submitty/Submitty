@@ -106,9 +106,9 @@
             Release response histogram to students:
         </label>
         <select id="student-histogram-release-setting" name="release_histogram">
-            <option value="never">Never</option>
-            <option value="when_ended">After Poll Ended</option>
-            <option value="always">Always</option>
+            <option value="never" {{ poll is null or poll.getReleaseHistogram() == 'never'? "selected" : "" }}>Never</option>
+            <option value="when_ended" {{ poll is not null and poll.getReleaseHistogram() == 'when_ended'? "selected" : "" }}>After Poll Ended</option>
+            <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always'? "selected" : "" }}>Always</option>
         </select>
 
         <hr>
