@@ -151,7 +151,7 @@ def main(args):
 
                     # save cover image
                     page.save('{}.jpg'.format(cover_filename[:-4]),
-                          "JPEG", quality=20, optimize=True)
+                              "JPEG", quality=20, optimize=True)
 
                 # add pages to current split_pdf
                 page_count += 1
