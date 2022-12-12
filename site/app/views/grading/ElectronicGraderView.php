@@ -1447,14 +1447,15 @@ HTML;
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
-        if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
-            foreach ($team->getMemberUsers() as $user) {
-                $student_anon_ids[] = $user->getAnonId($gradeable->getId());
+        if ($gradeable->hasPeerComponent()) {
+            if ($gradeable->isTeamAssignment()) {
+                $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
+                foreach ($team->getMemberUsers() as $user) {
+                    $student_anon_ids[] = $user->getAnonId($gradeable->getId());
+                }
+            } else {
+                $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
             }
-        }
-        else {
-            $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         }
         // Disable grading if the requested version isn't the active one
         $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
