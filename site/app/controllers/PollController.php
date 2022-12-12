@@ -472,7 +472,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         /** @var Poll|null */
-        $poll = $em->find(Poll::class, $poll_id);
+        $poll = $em->getRepository(Poll::class)->findByStudentID($this->core->getUser()->getId(), $poll_id);
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
