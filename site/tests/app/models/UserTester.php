@@ -28,7 +28,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -68,6 +69,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'manual_registration' => false,
             'grading_registration_sections' => [1,2],
             'registration_type' => 'audit',
+            'user_preferred_name_order' => 0
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -97,7 +99,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1,2]
+            'grading_registration_sections' => [1,2],
+            'user_preferred_name_order' => 0
         ];
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
@@ -124,7 +127,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1,2]
+            'grading_registration_sections' => [1,2],
+            'user_preferred_name_order' => 0
         ];
         $user = new User($this->core, $details);
         $actual = $user->toArray();
@@ -194,7 +198,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
-            'time_zone' => 'NOT_SET/NOT_SET'
+            'time_zone' => 'NOT_SET/NOT_SET',
+            'user_preferred_name_order' => 0
         ]);
         $this->assertEquals('NOT SET', $user->getNiceFormatTimeZone());
     }
@@ -207,7 +212,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
-            'time_zone' => 'NOT_SET/NOT_SET'
+            'time_zone' => 'NOT_SET/NOT_SET',
+            'user_preferred_name_order' => 0
         ]);
         $this->assertEquals('NOT SET', $user->getUTCOffset());
     }

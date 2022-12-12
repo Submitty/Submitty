@@ -717,7 +717,8 @@ class GradeableListTester extends BaseUnitTest {
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
-            'user_group' => $access_admin ? 1 : ($access_grading ? 2 : 4)
+            'user_group' => $access_admin ? 1 : ($access_grading ? 2 : 4),
+            'user_preferred_name_order' => 0
         ]);
         $core->setUser($user);
         $core->setConfig(new Config($core));

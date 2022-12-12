@@ -25,7 +25,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => 'Person',
             'user_email' => null,
             'user_email_secondary' => '',
-            'user_email_secondary_notify' => false
+            'user_email_secondary_notify' => false,
+            'user_preferred_name_order' => 0
         ]);
         $this->core->setUser($user);
         $this->core->setConfig($config);
