@@ -397,6 +397,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install moreutils
 
           - name: Install third party dependencies
             run: |
