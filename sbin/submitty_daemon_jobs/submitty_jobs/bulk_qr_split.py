@@ -120,7 +120,8 @@ def main(args):
                     cover_writer.write(out)
 
                 # save cover image
-                page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=20, optimize=True)
+                page.save('{}.jpg'.format(cover_filename[:-4]),
+                    "JPEG", quality=20, optimize=True)
 
                 id_index += 1
                 page_count = 1
@@ -149,7 +150,8 @@ def main(args):
                         cover_writer.write(out)
 
                     # save cover image
-                    page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=20, optimize=True)
+                    page.save('{}.jpg'.format(cover_filename[:-4]),
+                        "JPEG", quality=20, optimize=True)
 
                 # add pages to current split_pdf
                 page_count += 1
