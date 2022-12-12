@@ -32,7 +32,7 @@ class UserProfileView extends AbstractView {
             $autofill_preferred_name[1] = $user->getPreferredLastName();
         }
 
-        $user_name_order = $user->getPreferredNameOrder(); 
+        $user_name_order = $user->getPreferredNameOrder();
 
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
