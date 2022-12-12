@@ -130,6 +130,13 @@ fi
 # create routes cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
+# clear old doctrine cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
+fi
+# create doctrine cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
+
 # clear old access control cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
