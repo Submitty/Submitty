@@ -126,7 +126,6 @@ class AutoGradedVersion extends AbstractModel {
             $this->files[$dir][0] = [];
 
             $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
-            $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
 
             // Now load all files in the directory, flattening the results
             $submitted_files = FileUtils::getAllFiles($path, [], true);
@@ -139,10 +138,13 @@ class AutoGradedVersion extends AbstractModel {
                 }
             }
 
-            $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
-            foreach ($user_assignment_settings as $file => $details) {
-                if (basename($file) === 'user_assignment_settings.json') {
-                    $this->files[$dir][0][$file] = $details;
+            if ($dir === 'submissions') {
+                $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
+                $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
+                foreach ($user_assignment_settings as $file => $details) {
+                    if (basename($file) === 'user_assignment_settings.json') {
+                        $this->files[$dir][0][$file] = $details;
+                    }
                 }
             }
 
