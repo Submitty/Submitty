@@ -327,7 +327,6 @@ $(document).ready(() => {
                     // eslint-disable-next-line no-undef
                     displayErrorMessage('Name order is not updated!');
                 }
-                
             },
             error: function (response) {
                 console.error('Failed to parse response from server!');
