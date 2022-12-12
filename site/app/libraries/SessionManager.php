@@ -46,12 +46,20 @@ class SessionManager {
         }
 
         // Only refresh the session once per day
-        $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
-        if (new DateTime($this->session['session_expires']) < $day_before_expiration) {
-            $this->updateSession($session_id);
+        if ($this->shouldSessionBeUpdated()) {
+            $this->core->getQueries()->updateSessionExpiration($session_id);
         }
 
         return $this->session['user_id'];
+    }
+
+    /**
+     * Sessions should only be updated once per day to reduce load on the server.
+     * Check whether a day has passed since we last updated this session
+     */
+    public function shouldSessionBeUpdated(): bool {
+        $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
+        return new DateTime($this->session['session_expires']) < $day_before_expiration;
     }
 
     /**
@@ -69,13 +77,6 @@ class SessionManager {
             );
         }
         return $this->session['session_id'];
-    }
-
-    /**
-     * Update the expiration date for this session
-     */
-    public function updateSession(string $session_id) {
-        $this->core->getQueries()->updateSessionExpiration($session_id);
     }
 
     /**
