@@ -7,9 +7,8 @@ const waitAndReloadUntil = (condition, timeout, wait = 100) => {
         return condition().then((result) => {
             if (result || timeout <= 0) {
                 return result;
-            } else {
-                return waitAndReloadUntil(condition, timeout - wait, wait);
             }
+            return waitAndReloadUntil(condition, timeout - wait, wait);
         });
     });
 };
@@ -36,10 +35,10 @@ describe('Docker UI Test', () => {
         // Allow the system to update the info and reload
         waitAndReloadUntil(() => {
             return cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
-                    .invoke('text')
-                    .then((text) => {
-                        return text !== 'Error';
-                    });
+                .invoke('text')
+                .then((text) => {
+                    return text !== 'Error';
+                });
         }, 10000);
 
         // Updated time should not be "Unknown"
@@ -113,10 +112,10 @@ describe('Docker UI Test', () => {
         // Allow the system to update the info and reload
         waitAndReloadUntil(() => {
             return cy.get('#capabilities-list')
-                    .invoke('text')
-                    .then((text) => {
-                        return !text.includes('cpp');
-                    });
+                .invoke('text')
+                .then((text) => {
+                    return !text.includes('cpp');
+                });
         }, 10000);
 
         // Check the empty tag list
