@@ -36,17 +36,19 @@ class UserProfileView extends AbstractView {
 
         $last_name_split_by_space = explode(" ", $autofill_preferred_name[1]);
         $last_name_split_by_hyphen = explode("-", $autofill_preferred_name[1]);
-        
         $is_last_name_space_long = count($last_name_split_by_space) >= 2;
         $is_last_name_hyphen_long = count($last_name_split_by_hyphen) >= 2;
 
+        $parse_initial = function(str $c): str {
+            return $c[0];
+        };
         $user_last_name_initial = "";
         if ($user_initial_option == 0) {
             $user_last_name_initial = $autofill_preferred_name[1][0];
         } elseif ($user_initial_option == 1 && $is_last_name_space_long) {
-            $user_last_name_initial = implode(" ", array_map(fn($c): str => $c[0], $last_name_split_by_space));
+            $user_last_name_initial = implode(" ", array_map($parse_initial, $last_name_split_by_space));
         } elseif ($user_initial_option == 2 && $is_last_name_hyphen_long) {
-            $user_last_name_initial = implode("-", array_map(fn($c): str => $c[0], $last_name_split_by_hyphen));
+            $user_last_name_initial = implode("-", array_map($parse_initial, $last_name_split_by_hyphen));
         }
 
         $this->output->addInternalJs('user-profile.js');
