@@ -129,6 +129,7 @@ def main():
 
         queue_entry["added_by"] = queue_entry["user_id"]
 
+        # find helper if the student is currently helped
         if queue_entry["current_state"] == "waiting" or queue_entry["removal_type"] == "self":
             queue_entry["help_started_by"] = None
         else:
@@ -145,8 +146,10 @@ def main():
         elif queue_entry["removal_type"] == "self" or queue_entry["removal_type"] == "self_helped":
             queue_entry["removed_by"] = queue_entry["user_id"]
         else:
+            # student is being emptied/removed out of the queue
             queue_entry["removed_by"] = random.choice(all_grader_ids)
-        
+
+        # contact information
         if queues_lookup[queue_entry["queue_code"]]["contact_information"]:
             queue_entry["contact_info"] = queue_entry["user_id"] + "@sample.com"
         else:
