@@ -1,5 +1,19 @@
 const docker_ui_path = '/admin/docker';
 
+const waitAndReloadUntil = (condition, timeout, wait = 100) => {
+    cy.wait(wait);
+    cy.reload();
+    cy.then(() => {
+        return condition().then((result) => {
+            if (result || timeout <= 0) {
+                return result;
+            } else {
+                return waitAndReloadUntil(condition, timeout - wait, wait);
+            }
+        });
+    });
+};
+
 describe('Docker UI Test', () => {
     beforeEach(() => {
         cy.visit('/');
@@ -20,18 +34,23 @@ describe('Docker UI Test', () => {
                 ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
-        cy.wait(10000);
-        cy.reload();
+        waitAndReloadUntil(() => {
+            return cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
+                    .invoke('text')
+                    .then((text) => {
+                        return text !== 'Error';
+                    });
+        }, 10000);
 
         // Updated time should not be "Unknown"
         cy.get(':nth-child(1) > p')
-            .should('not.have.text', 'Unknown');
+            .should('not.contain.text', 'Unknown');
         // Updated OS info should not be empty
         cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
             .should('not.be.empty');
         // Updated docker version should not be "Error"
         cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
-            .should('not.have.text', 'Error');
+            .should('not.contain.text', 'Error');
     });
 
     it('Should filter images with tags', () => {
@@ -91,12 +110,18 @@ describe('Docker UI Test', () => {
             .should('have.text', 'submitty/autograding-default:latest' +
                   ' found on DockerHub and queued to be added!');
 
-        cy.wait(10000);
-        cy.reload();
+        // Allow the system to update the info and reload
+        waitAndReloadUntil(() => {
+            return cy.get('#capabilities-list')
+                    .invoke('text')
+                    .then((text) => {
+                        return !text.includes('cpp');
+                    });
+        }, 10000);
 
         // Check the empty tag list
         cy.get('#capabilities-list')
-            .should('not.have.text', 'cpp');
+            .should('not.contain.text', 'cpp');
 
         // Try to add it again, should fail
         cy.get('#add-field')
