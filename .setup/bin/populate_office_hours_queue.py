@@ -70,21 +70,27 @@ def main():
         
         name_lookup[x["user_id"]] = user_name
 
-    # To make it easier to code, we will empty everyone from the queue
-    # something to do with updating queue_entries_table
-    update_dict = dict()
-    update_dict["current_state"] = "done"
-    update_dict["removal_type"] = "emptied"
-    update_dict["time_out"] = datetime.now()
-    update_dict["removed_by"] = random.choice(all_grader_ids)
+    # To make it easier to code, we will empty the queues
+    # For those who are being helped, they will finish getting helped
+    # Otherwise, they will get either emptied or removed
+    res = conn.execute(select(queue_entries_table).where(queue_entries_table.c.current_state != "done"))
+    tmp = res.fetchall()
+    res.close()
+    for row in tmp:
+        update_dict = dict()
+        update_dict["current_state"] = "done"
+        update_dict["time_out"] = datetime.now()
+        if row["current_state"] == "waiting":
+            update_dict["removal_type"] = random.choice(["emptied", "removed"])
+            update_dict["removed_by"] = random.choice(all_grader_ids)
+        else:
+            update_dict["removal_type"] = "helped"
+            update_dict["removed_by"] = row["help_started_by"]
 
-    update_query = update(queue_entries_table)
-    update_query = update_query.values(update_dict)
-    update_query = update_query.where(queue_entries_table.c.current_state != "done")
-
-    # TODO: maybe "finish help" if student is in queue instead of straight out
-    # emptying the queue
-    conn.execute(update_query)
+        update_query = update(queue_entries_table)
+        update_query = update_query.values(update_dict)
+        update_query = update_query.where((queue_entries_table.c.user_id == row["user_id"]) & (queue_entries_table.c.time_in == row["time_in"]))
+        conn.execute(update_query)
 
     # Hardcoding options that we could use
     queue_current_states = ["done", "being_helped", "waiting"]
