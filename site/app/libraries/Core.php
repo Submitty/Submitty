@@ -297,7 +297,7 @@ class Core {
         return count($queries) !== count(array_unique($queries));
     }
 
-    protected function logPerformanceWarning(): void {
+    private function logPerformanceWarning(): void {
         if (!$this->config->isDebug()) {
             return;  // We never want to log these warnings on production
         }
