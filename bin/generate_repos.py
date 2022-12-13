@@ -78,7 +78,7 @@ def create_new_repo(folder, which_branch):
     # note: --initial-branch option requires git 2.28.0 or greater
     subprocess.run(['git', 'init', '--bare', '--shared', f'--initial-branch={which_branch}'])
 
-    # unfortuantely, when an empty repo with no branches is cloned,
+    # unfortunately, when an empty repo with no branches is cloned,
     # the active branch and HEAD does NOT default to the specified branch
 
     # so let's manually specify the initial branch
