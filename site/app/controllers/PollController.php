@@ -80,7 +80,9 @@ class PollController extends AbstractController {
         }
         if ($poll->isClosed() && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Poll is currently closed");
-            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
         }
         return MultiResponse::webOnlyResponse(
             new WebResponse(
