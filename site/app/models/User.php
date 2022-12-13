@@ -79,8 +79,9 @@ class User extends AbstractModel {
      * Preferred last name initial
      */
     const LAST_INITIAL = 0;
-    const MULTIPLE_LAST_INITIALs = 1;
+    const MULTIPLE_LAST_INITIALS = 1;
     const LAST_INITIAL_PUNCT = 2;
+    const NO_LAST = 3;
 
 
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
@@ -522,7 +523,7 @@ class User extends AbstractModel {
             case 'user_preferred_lastname_initial':
                 //Preferred lastname initial order code must be between 0 and 2.
                 $order = intval($data);
-                return 0 <= $order && $order <= 2
+                return 0 <= $order && $order <= 3;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
