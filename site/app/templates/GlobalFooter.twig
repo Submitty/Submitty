@@ -48,10 +48,10 @@
                 $(document).ready(() => {
                     $('#performance-warning-system-message-text').text('Developer Warning: Excessive or duplicate database queries observed: ' +
                         '{{ submitty_queries|length + course_queries|length }} queries executed. Click "Show Page Details" at the bottom of the page for more info.');
-                    $('#performance-warning-system-message').show();
+                    $('#performance-warning-system-message').css('display', 'flex');
                 });
                 $('#close-performance-warning-system-message').click(() => {
-                    $('#performance-warning-system-message').hide();
+                    $('#performance-warning-system-message').css('display', 'none');
                 });
             </script>
         {% endif %}
