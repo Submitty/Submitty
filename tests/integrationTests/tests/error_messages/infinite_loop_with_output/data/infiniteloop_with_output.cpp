@@ -2,7 +2,7 @@
  *         Program Terminated
  *         (RED) ERROR! Student file too large for grader
  * Child exited with signal 25 or 31
- * Note: Termined beause it hit the max file size set by instructor
+ * Note: Terminated because it hit the max file size set by instructor
  * Message located in execute.cpp
  */
 

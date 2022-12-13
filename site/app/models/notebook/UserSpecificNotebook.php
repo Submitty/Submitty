@@ -76,7 +76,7 @@ class UserSpecificNotebook extends Notebook {
 
         foreach ($raw_notebook as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
-                //see if theres a target item pool and replace this with the actual notebook
+                //see if there's a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
                 $points = $notebook_cell["points"] ?? 0;
 

@@ -4,7 +4,7 @@ $(document).ready(() => {
     // Attach the collapsible panel on details-table
     attachCollapsiblePanel('#details-table .details-info-header', 951, 'panel-head-active');
 
-    // Creating and adding style for the psuedo selector in the details-table
+    // Creating and adding style for the pseudo selector in the details-table
     const style = document.createElement('style');
     let content = '';
     // loop over the head row of `details-table`
