@@ -2378,10 +2378,24 @@ CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USI
 
 
 --
+-- Name: grading_registration_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_index ON public.grading_registration USING btree (user_id);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
+
+
+--
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
 
 
 --
