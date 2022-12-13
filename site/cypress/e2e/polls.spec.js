@@ -277,7 +277,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio').eq(2).contains('Answer 3');
         cy.get('.radio > input').eq(2).should('be.checked');
         cy.get('.radio').eq(3).contains('Answer 2');
-        cy.get('.radio > input').eq(3).should('be.checked');
+        cy.get('.radio > input').eq(3).should('not.be.checked');
 
         // log into instructor and delete the poll
         cy.logout();
