@@ -134,6 +134,28 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/change_preferred_last_name_initial", methods={"POST"})
+     * @return JsonResponse
+     * @throws \ImagickException
+     */
+    public function changePreferredLastNameInitial() {
+        $user = $this->core->getUser();
+        if (empty($_POST['last_name_initial']) && $_POST['last_name_initial'] !== '0') {
+            return JsonResponse::getErrorResponse('Preferred name order cannot be empty.');
+        }
+        $last_name_initial = trim($_POST['last_name_initial']);
+        if ($user->validateUserData('user_preferred_name_order', $last_name_initial) === true) {
+            $user->setPreferredLastNameInitial(intval($last_name_initial));
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => "Preferred last name initial representation order updated successfully!",
+                'last_name_initial' => $last_name_initial,
+            ]);
+        }
+        return JsonResponse::getErrorResponse("Preferred last name intial order code must be between 0 and 2.");
+    }
+    
+    /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException

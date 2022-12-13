@@ -24,6 +24,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredLastName()  Get the preferred last name of the loaded user
  * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
  *                                        otherwise return the legal last name field for the user.
+ * @method int getPreferredLastNameInitial() Get the preferred last name initial of the laoded user
+ * @method void setPreferredLastNameInitial(int $order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -73,6 +75,14 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Preferred last name initial
+     */
+    const LAST_INITIAL = 0;
+    const MULTIPLE_LAST_INITIALs = 1;
+    const LAST_INITIAL_PUNCT = 2;
+
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -98,6 +108,8 @@ class User extends AbstractModel {
     protected $preferred_last_name = "";
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
+    /** @prop @var int The preferred last name initial */
+    protected $preferred_last_name_initial = self::LAST_INITIAL;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -183,6 +195,9 @@ class User extends AbstractModel {
         if (isset($details['user_preferred_lastname'])) {
             $this->setPreferredLastName($details['user_preferred_lastname']);
         }
+        
+        $this ->setPreferredLastNameInitial($details['user_preferred_lastname_initial']);
+
 
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'];
@@ -504,6 +519,10 @@ class User extends AbstractModel {
             case 'user_preferred_lastname':
                 //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
+            case 'user_preferred_lastname_initial':
+                //Preferred lastname initial order code must be between 0 and 2.
+                $order = intval($data);
+                return 0 <= $order && $order <= 2
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
