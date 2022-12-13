@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-from sqlalchemy import create_engine, Table, MetaData, select, update, insert, func
+from sqlalchemy import create_engine, Table, MetaData, select, update, insert
 import random
 import os
-import datetime
+from datetime import datetime, timedelta
 
 DB_HOST = "localhost"
 DB_PORT = 5432
@@ -12,15 +12,15 @@ DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
 def main():
-
     # get today's date to determine date and time
-    today = datetime.datetime.today()
+    today = datetime.today()
     year = str(today.year)
     if today.month < 7:
         term_id = "s" + year[-2:]
     else:
         term_id = "f" + year[-2:]
-    
+
+    # set up the database connection
     database = "submitty_" + term_id + "_sample"
     engine = create_engine("postgresql:///{}?host={}&port={}&user={}&password={}"
                            .format(database, DB_HOST, DB_PORT, DB_USER, DB_PASS))
@@ -30,11 +30,12 @@ def main():
     queue_entries_table = Table("queue", metadata, autoload=True)
     users_table = Table("users", metadata, autoload=True)
 
-    # Find all queues in class
+    # Find all queues in course
     res = conn.execute(select(queues_table))
     queues_lookup = {x["code"]: x for x in res}
     res.close()
 
+    # finds all open queues
     all_queues = [x for x in queues_lookup if queues_lookup[x]["open"]]
 
     # if there are no open queues, don't populate anything
@@ -47,7 +48,7 @@ def main():
     res.close()
 
     # Find all ids of students and graders
-    all_student_ids = [x['user_id'] for x in all_users if x['user_group'] == 4]
+    all_student_ids = [x['user_id'] for x in all_users if x['user_group'] == 4 and x['registration_section'] != None]
     all_grader_ids = [x['user_id'] for x in all_users if x['user_group'] < 4]
 
     # create a lookup table from user id to name
@@ -74,7 +75,7 @@ def main():
     update_dict = dict()
     update_dict["current_state"] = "done"
     update_dict["removal_type"] = "emptied"
-    update_dict["time_out"] = datetime.datetime.now()
+    update_dict["time_out"] = datetime.now()
     update_dict["removed_by"] = random.choice(all_grader_ids)
 
     update_query = update(queue_entries_table)
@@ -91,32 +92,38 @@ def main():
 
     queue_data = []
     # start generating queue data
-    for _ in range(10):
+    for _ in range(30):
         # since we are removing students from our list, we have to break
         # from the loop when we have no more options left
         if len(all_student_ids) == 0:
             break
 
         queue_entry = dict()
-        queue_entry["current_state"] = random.choice(queue_current_states)
-        
+
+        # pick current state from "done", "being_helped", and "waiting" with ratio 3, 1, and 1
+        queue_entry["current_state"] = random.choices(queue_current_states, [3, 1, 1])[0]
+
         if queue_entry["current_state"] == "done":
             queue_entry["removal_type"] = random.choice(queue_removal_types)
         else:
             queue_entry["removal_type"] = None
-        
+
+        # choose a random queue and a random student to join it
         queue_entry["queue_code"] = random.choice(all_queues)
         queue_entry["user_id"] = random.choice(all_student_ids)
+
         # Once again to make it easier to code, each student can only join once
         all_student_ids.remove(queue_entry["user_id"])
         queue_entry["name"] = name_lookup[queue_entry["user_id"]]
 
+        # get a random join queue time
         time_in = random.randint(300, 600)
-        queue_entry["time_in"] = datetime.datetime.now() - datetime.timedelta(seconds = time_in)
+        queue_entry["time_in"] = datetime.now() - timedelta(seconds = time_in)
 
+        # get a random exit queue time
         time_out = random.randint(0, 300)
         if queue_entry["current_state"] == "done":
-            queue_entry["time_out"] = datetime.datetime.now() - datetime.timedelta(seconds = time_out)
+            queue_entry["time_out"] = datetime.now() - timedelta(seconds = time_out)
         else:
             queue_entry["time_out"] = None
 
@@ -145,37 +152,34 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        # FIX: GET ACCURATE TIME
         res = conn.execute("SELECT max(time_in) FROM queue WHERE user_id = '{}' AND UPPER(TRIM(queue_code)) = UPPER(TRIM('{}')) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)".format(queue_entry["user_id"], queue_entry["queue_code"]))
         queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
         res.close()
 
         if queue_entry["help_started_by"] != None:
             time_start = random.randint(time_out, time_in)
-            queue_entry["time_help_start"] = datetime.datetime.now() - datetime.timedelta(seconds = time_start)
+            queue_entry["time_help_start"] = datetime.now() - timedelta(seconds = time_start)
         else:
             queue_entry["time_help_start"] = None
         
-        # FIX: REWRITE THIS WHOLE PART TO ACCURATELY REFLECT OH QUEUE BEHAVIORS
         # people usually won't be pausing
-        # if random.random() < 0.9:
-        #     queue_entry["paused"] = False
-        # else:
-        #     queue_entry["paused"] = True
-        queue_entry["paused"] = False
-
-        queue_entry["time_paused"] = 0
-
-        queue_entry["time_paused_start"] = None
+        if random.random() < 0.8:
+            queue_entry["paused"] = False
+            queue_entry["time_paused"] = 0
+            queue_entry["time_paused_start"] = None
+        # this user is pausing or has paused
+        else:
+            # currently pausing
+            queue_entry["paused"] = random.choice([True, False])
+            queue_entry["time_paused"] = random.choice([0, random.randint(0, time_in)])
+            if queue_entry["paused"]:
+                queue_entry["time_paused_start"] = datetime.now() - timedelta(seconds = random.randint(0, queue_entry["time_paused"]))
+            else:
+                queue_entry["time_paused_start"] = None
 
         queue_data.append(queue_entry)
-    
+
     conn.execute(insert(queue_entries_table).values(queue_data))
-
-    # print("All student ids:", all_student_ids)
-    # print("All grader ids:", all_grader_ids)
-    # print("All queue codes:", all_queues)
-
 
 
 if __name__ == "__main__":
