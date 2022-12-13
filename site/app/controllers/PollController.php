@@ -491,7 +491,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        if (str_contains($poll->getQuestionType(), 'single') && count($_POST['answers']) > 1) {
+        if (PollUtils::isSingleResponse($poll->getQuestionType()) && count($_POST['answers']) > 1) {
             $this->core->addErrorMessage('Single response polls can only have one response');
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }

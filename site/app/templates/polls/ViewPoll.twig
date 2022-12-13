@@ -27,7 +27,7 @@
                             Possible responses:
                         </h2>
                     </legend>
-                    {% set button_type = "single" in poll.getQuestionType() ? "radio": "checkbox" %}
+                    {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
                         <label class="radio" for="answer-no-response">
                             <input class="no-response-radio response-btn"

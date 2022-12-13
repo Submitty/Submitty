@@ -6,6 +6,7 @@ use app\entities\poll\Poll;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\FileUtils;
+use app\libraries\PollUtils;
 use app\libraries\Utils;
 
 class PollView extends AbstractView {
@@ -76,7 +77,8 @@ class PollView extends AbstractView {
             'poll' => $poll,
             'response_counts' => $response_counts,
             'file_data' => $file_data,
-            'user_admin' => $this->core->getUser()->accessAdmin()
+            'user_admin' => $this->core->getUser()->accessAdmin(),
+            'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType())
         ]);
     }
 
