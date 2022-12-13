@@ -14,6 +14,7 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -175,7 +176,14 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
+        $cache = new PhpFilesAdapter("", 0, $cache_path);
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            null,
+            $cache
+        );
 
         if ($debug_stack) {
             $config->setSQLLogger($debug_stack);
@@ -761,23 +769,23 @@ class Core {
                     $_COOKIE[$cookie_key]
                 );
                 $session_id = $token->claims()->get('session_id');
-                $expire_time = $token->claims()->get('expire_time');
                 $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
-                // make sure that the session exists and it's for the user they're claiming
-                // to be
+                // make sure that the session exists and it's for the user they're claiming to be
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
                 }
                 else {
-                    if ($expire_time > 0) {
+                    // If more than a day has passed since we last updated the cookie, update it with the new timestamp
+                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                        $new_token = TokenManager::generateSessionToken(
+                            $session_id,
+                            $token->claims()->get('sub')
+                        );
                         Utils::setCookie(
                             $cookie_key,
-                            TokenManager::generateSessionToken(
-                                $session_id,
-                                $token->claims()->get('sub')
-                            )->toString(),
-                            $expire_time
+                            $new_token->toString(),
+                            $new_token->claims()->get('expire_time')
                         );
                     }
                 }

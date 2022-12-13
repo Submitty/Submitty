@@ -2329,6 +2329,13 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
 -- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2343,6 +2350,13 @@ CREATE INDEX gradeable_component_data_no_grader_index ON public.gradeable_compon
 
 
 --
+-- Name: gradeable_component_mark_data_gcm_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_component_mark_data USING btree (gcm_id);
+
+
+--
 -- Name: gradeable_team_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2354,6 +2368,13 @@ CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree
 --
 
 CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+
+
+--
+-- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USING btree (user_id);
 
 
 --
