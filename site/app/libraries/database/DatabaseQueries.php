@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -2985,7 +2986,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @return array
      */
     public function getSession($session_id) {
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=?", [$session_id]);
+        // We only ever want to get sessions which aren't expired.  Don't rely upon other PHP code checking for this...
+        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=? AND session_expires > current_timestamp", [$session_id]);
         return $this->submitty_db->row();
     }
 
@@ -2999,30 +3001,22 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
             "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '336 hours')",
-            [$session_id, $user_id, $csrf_token]
+                                   VALUES(?, ?, ?, current_timestamp + ?::interval)",
+            [$session_id, $user_id, $csrf_token, SessionManager::SESSION_EXPIRATION]
         );
     }
 
     /**
-     * Updates a given session by setting it's expiration date to be 2 weeks into the future
+     * Updates a given session by setting its expiration date to be 2 weeks into the future
      *
      * @param string $session_id
      */
     public function updateSessionExpiration($session_id) {
         $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours')
+            "UPDATE sessions SET session_expires=(current_timestamp + ?::interval)
                                    WHERE session_id=?",
-            [$session_id]
+            [SessionManager::SESSION_EXPIRATION, $session_id]
         );
-    }
-
-    /**
-     * Remove sessions which have their expiration date before the
-     * current timestamp
-     */
-    public function removeExpiredSessions() {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 
     /**
@@ -5014,6 +5008,7 @@ AND gc_id IN (
               g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
+              gamo.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
@@ -5052,6 +5047,14 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+              LEFT JOIN (
+                SELECT
+                  g_id AS gamo_g_id,
+                  json_agg(user_id) AS gamo_users,
+                  json_agg(allowed_minutes) AS gamo_minutes
+                FROM gradeable_allowed_minutes_override
+                GROUP BY gamo_g_id
+              ) AS gamo ON g.g_id=gamo.gamo_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gc_g_id,
@@ -5107,7 +5110,18 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
-            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
+            $overrides = [];
+            $users = json_decode($row['gamo_users']);
+            $minutes = json_decode($row['gamo_minutes']);
+            if ($users !== null) {
+                for ($i = 0; $i < count($users); $i++) {
+                    $overrides[] = [
+                        'user_id' => $users[$i],
+                        'allowed_minutes' => $minutes[$i]
+                    ];
+                }
+            }
+            $gradeable->setAllowedMinutesOverrides($overrides);
 
             // Construct the components
             $component_properties = [
@@ -6340,20 +6354,14 @@ AND gc_id IN (
             SELECT ids.id, (CASE WHEN m IS NULL THEN 0 ELSE m END) AS max
             FROM (VALUES $id_placeholders) ids(id)
             LEFT JOIN (
-              (SELECT user_id AS id, active_version as m
+              SELECT COALESCE(user_id, team_id) AS id, active_version as m
               FROM electronic_gradeable_version
-              WHERE g_id = ? AND user_id IS NOT NULL)
-
-              UNION
-
-              (SELECT team_id AS id, active_version as m
-              FROM electronic_gradeable_version
-              WHERE g_id = ? AND team_id IS NOT NULL)
+              WHERE g_id = ? AND (user_id IS NOT NULL OR team_id IS NOT NULL)
             ) AS versions
             ON versions.id = ids.id
         ";
 
-        $params = array_merge($submitter_ids, [$gradeable->getId(), $gradeable->getId()]);
+        $params = array_merge($submitter_ids, [$gradeable->getId()]);
 
         $this->course_db->query($query, $params);
         $versions = [];
