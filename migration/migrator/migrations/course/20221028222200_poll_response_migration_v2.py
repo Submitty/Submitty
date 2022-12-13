@@ -15,10 +15,12 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("""
+    ALTER TABLE poll_responses DROP CONSTRAINT IF EXISTS poll_responses_id_seq;
     ALTER TABLE poll_responses ADD COLUMN IF NOT EXISTS id serial NOT NULL;
     ALTER TABLE poll_responses DROP CONSTRAINT IF EXISTS poll_responses_pkey;
     ALTER TABLE poll_responses ADD PRIMARY KEY (id);
     ALTER TABLE poll_options RENAME COLUMN option_id TO option_id_old;
+    ALTER TABLE poll_options DROP CONSTRAINT IF EXISTS poll_options_option_id_seq;
     ALTER TABLE poll_options ADD COLUMN option_id serial NOT NULL;
     ALTER TABLE poll_options DROP CONSTRAINT IF EXISTS poll_options_pkey;
     ALTER TABLE poll_options ADD PRIMARY KEY (option_id);
