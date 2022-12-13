@@ -501,10 +501,7 @@ class PollController extends AbstractController {
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
         }
-        if (
-            (PollUtils::isSingleResponse($poll->getQuestionType()) && $_POST['answers'][0] !== '-1')
-            || (!PollUtils::isSingleResponse($poll->getQuestionType()) && array_key_exists("answers", $_POST))
-        ) {
+        if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
