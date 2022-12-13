@@ -336,10 +336,10 @@ def generate_random_users(total, real_users):
     :return:
     :rtype: list[User]
     """
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'familyNames.txt')) as family_file, \
             open(os.path.join(SETUP_DATA_PATH, 'random', 'maleGivenNames.txt')) as male_file, \
             open(os.path.join(SETUP_DATA_PATH, 'random', 'womenGivenNames.txt')) as woman_file:
-        last_names = last_file.read().strip().split()
+        family_names = family_file.read().strip().split()
         male_names = male_file.read().strip().split()
         women_names = woman_file.read().strip().split()
 
@@ -352,8 +352,8 @@ def generate_random_users(total, real_users):
                 given_name = random.choice(male_names)
             else:
                 given_name = random.choice(women_names)
-            last_name = random.choice(last_names)
-            user_id = last_name.replace("'", "")[:5] + given_name[0]
+            family_name = random.choice(family_names)
+            user_id = family_name.replace("'", "")[:5] + given_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
