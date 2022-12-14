@@ -9,9 +9,23 @@ use app\libraries\SessionManager;
 use app\entities\Session;
 use app\repositories\SessionRepository;
 use tests\BaseUnitTest;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 
 class SessionManagerTester extends BaseUnitTest {
     private $browser_info = ['browser' => 'Browser', 'version' => '1.0', 'platform' => 'OS'];
+    private $criteria;
+
+    protected function __construct() {
+        $core = $this->createMockCore(['use_mock_time' => true]);
+        $expression_builder = Criteria::expr();
+        $this->criteria = new Criteria(
+            $expression_builder->andX(
+                $expression_builder->eq("session_id", 'id'),
+                $expression_builder->gt("session_expires", $core->getDateTimeNow())
+            )
+        );
+    }
 
     private function getRepoOnce($core, $repo) {
         $core->getSubmittyEntityManager()
@@ -26,9 +40,13 @@ class SessionManagerTester extends BaseUnitTest {
         $repo = $this->createMock(SessionRepository::class);
         $this->getRepoOnce($core, $repo);
         $session = $this->createMock(Session::class);
+        $array_collection = $this->createMock(ArrayCollection::class);
         $repo->expects($this->once())
-            ->method('findOneBy')
-            ->with(['session_id' => 'id'])
+            ->method('matching')
+            ->with($this->criteria)
+            ->willReturn($array_collection);
+        $array_collection->expects($this->once())
+            ->method('first')
             ->willReturn(null);
         $session->expects($this->never())->method('updateSessionExpiration');
         $manager = new SessionManager($core);
@@ -56,9 +74,13 @@ class SessionManagerTester extends BaseUnitTest {
                 $this->browser_info
             ])
             ->getMock();
+        $array_collection = $this->createMock(ArrayCollection::class);
         $repo->expects($this->once())
-            ->method('findOneBy')
-            ->with(['session_id' => 'id'])
+             ->method('matching')
+             ->with($this->criteria)
+             ->willReturn($array_collection);
+        $array_collection->expects($this->once())
+            ->method('first')
             ->willReturn($session);
         $session->expects($this->once())
             ->method('updateSessionExpiration')

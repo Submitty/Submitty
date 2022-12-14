@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use app\libraries\SessionManager;
 
 /**
  * Class Session
@@ -35,7 +36,6 @@ class Session {
     /**
      * @ORM\Column(type="datetimetz")
      * @var \DateTime
-     * @phpstan-ignore-next-line
      */
     private $session_expires;
 
@@ -67,8 +67,8 @@ class Session {
         $this->session_id = $session_id;
         $this->user_id = $user_id;
         $this->csrf_token = $csrf_token;
-        $this->session_expires = $session_expires;
         $this->session_created = $session_created;
+        $this->session_expires = $session_expires;
         $this->browser_name = $user_agent['browser'];
         $this->browser_version = $user_agent['version'];
         $this->platform = $user_agent['platform'];
@@ -90,6 +90,10 @@ class Session {
         return $this->session_created;
     }
 
+    public function getSessionExpires(): \DateTime {
+        return $this->session_expires;
+    }
+
     public function getBrowserName(): string {
         return $this->browser_name;
     }
@@ -107,6 +111,6 @@ class Session {
     }
 
     public function updateSessionExpiration(\DateTime $current_dt) {
-        $this->session_expires = $current_dt->add(\DateInterval::createFromDateString('2 weeks'));
+        $this->session_expires = $current_dt->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION));
     }
 }

@@ -50,11 +50,12 @@ class SessionManager {
         /** @var SessionRepository $repo */
         $repo =  $em->getRepository(Session::class);
         $expressionBuilder = Criteria::expr();
-        $this->session = $repo->matching(new Criteria($expressionBuilder->andX(
-                                $expressionBuilder->eq("session_id", $session_id),
-                                $expressionBuilder->gt("session_expires", $this->core->getDateTimeNow())
-                            ))
-                        )->first();
+        $this->session = $repo->matching(new Criteria(
+            $expressionBuilder->andX(
+                $expressionBuilder->eq("session_id", $session_id),
+                $expressionBuilder->gt("session_expires", $this->core->getDateTimeNow())
+            )
+        ))->first();
         if (empty($this->session)) {
             return false;
         }

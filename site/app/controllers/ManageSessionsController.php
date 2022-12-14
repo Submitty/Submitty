@@ -7,6 +7,7 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\entities\Session;
 use app\repositories\SessionRepository;
+use app\views\ManageSessionsView;
 
 /**
  * Class ManageSessionsController
@@ -24,7 +25,7 @@ class ManageSessionsController extends AbstractController {
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
         $user_sessions = $repo->getAllByUser($this->core->getUser()->getId());
         return new WebResponse(
-            'ManageSessions',
+            ManageSessionsView::class,
             'showSessionsPage',
             $user_sessions
         );
@@ -69,6 +70,7 @@ class ManageSessionsController extends AbstractController {
         /** @var SessionRepository $repo */
         $repo = $this->core->getSubmittyEntityManager()->getRepository(Session::class);
         $repo->removeUserSessionsExcept($this->core->getUser()->getId(), $this->core->getCurrentSessionId());
+        $this->core->addSuccessMessage("All sessions other than the current one terminated successfully.");
         return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
     }
 
