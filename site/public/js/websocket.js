@@ -2,7 +2,7 @@
  * Wrapper around the builtin WebSocket class. This provides us
  * with two major benefits:
  *  1. The websocket will attempt to reconnect if the connection closes
- *  2. It willl automatically perform JSON.parse/JSON.stringify on
+ *  2. It will automatically perform JSON.parse/JSON.stringify on
  *      incoming/outgoing messages.
  *
  * Example usage would be:

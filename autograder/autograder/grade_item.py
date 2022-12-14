@@ -96,9 +96,9 @@ def killall(config, which_untrusted, log_file):
     log_file.flush()
 
 
-def run_compilation(testcases, config, which_untrusted, seperator, log_file):
+def run_compilation(testcases, config, which_untrusted, separator, log_file):
     # COMPILE THE SUBMITTED CODE
-    print(f"{seperator}COMPILATION STARTS", file=log_file)
+    print(f"{separator}COMPILATION STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
         if tc.type != 'Execution' and not os.path.exists(tc.secure_environment.directory):
@@ -110,9 +110,9 @@ def run_compilation(testcases, config, which_untrusted, seperator, log_file):
     log_file.flush()
 
 
-def generate_input(testcases, config, which_untrusted, seperator, log_file):
+def generate_input(testcases, config, which_untrusted, separator, log_file):
     # GENERATE INPUT
-    print(f"{seperator}INPUT GENERATION STARTS", file=log_file)
+    print(f"{separator}INPUT GENERATION STARTS", file=log_file)
     for tc in testcases:
         if tc.has_input_generator_commands:
             tc.generate_random_inputs()
@@ -122,9 +122,9 @@ def generate_input(testcases, config, which_untrusted, seperator, log_file):
     log_file.flush()
 
 
-def run_execution(testcases, config, which_untrusted, seperator, log_file):
+def run_execution(testcases, config, which_untrusted, separator, log_file):
     # RUN EXECUTION TESTCASES
-    print(f"{seperator}RUNNER STARTS", file=log_file)
+    print(f"{separator}RUNNER STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
         if tc.type == 'Execution' and not os.path.exists(tc.secure_environment.directory):
@@ -135,9 +135,9 @@ def run_execution(testcases, config, which_untrusted, seperator, log_file):
     log_file.flush()
 
 
-def generate_output(testcases, config, which_untrusted, seperator, log_file):
+def generate_output(testcases, config, which_untrusted, separator, log_file):
     # RANDOM OUTPUT GENERATION
-    print(f"{seperator}OUTPUT GENERATION STARTS", file=log_file)
+    print(f"{separator}OUTPUT GENERATION STARTS", file=log_file)
     for tc in testcases:
         if tc.has_solution_commands:
             tc.generate_random_outputs()
@@ -151,7 +151,7 @@ def run_validation(
     testcases,
     config,
     which_untrusted,
-    seperator,
+    separator,
     queue_obj,
     tmp_work,
     is_vcs,
@@ -163,7 +163,7 @@ def run_validation(
     generate_all_output
 ):
     # VALIDATE STUDENT OUTPUT
-    print(f"{seperator}VALIDATION STARTS", file=log_file)
+    print(f"{separator}VALIDATION STARTS", file=log_file)
     log_file.flush()
 
     # Create a jailed sandbox to run validation inside of.
@@ -240,11 +240,11 @@ def archive(
     item_name,
     complete_config_obj,
     gradeable_config_obj,
-    seperator,
+    separator,
     log_file
 ):
     # ARCHIVE STUDENT RESULTS
-    print(f"{seperator}ARCHIVING STARTS", file=log_file)
+    print(f"{separator}ARCHIVING STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
         # Removes test input files, makes details directory for the testcase.
@@ -313,7 +313,7 @@ def grade_from_zip(
     tmp_results = os.path.join(working_directory, "TMP_RESULTS")
 
     # Used to separate sections of printed messages
-    seperator = "====================================\n"
+    separator = "====================================\n"
 
     # Open the JSON and timestamp files needed to grade. Initialize needed variables.
     with open(os.path.join(tmp_submission, "queue_file.json"), 'r') as infile:
@@ -353,7 +353,7 @@ def grade_from_zip(
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
             os.chdir(tmp_work)
 
-            generate_output(testcases, config, which_untrusted, seperator, overall_log)
+            generate_output(testcases, config, which_untrusted, separator, overall_log)
 
             archive(
                 testcases,
@@ -364,7 +364,7 @@ def grade_from_zip(
                 item_name,
                 complete_config_obj,
                 gradeable_config_obj,
-                seperator,
+                separator,
                 overall_log
             )
     else:
@@ -412,15 +412,15 @@ def grade_from_zip(
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
             os.chdir(tmp_work)
 
-            run_compilation(testcases, config, which_untrusted, seperator, overall_log)
-            generate_input(testcases, config, which_untrusted, seperator, overall_log)
-            run_execution(testcases, config, which_untrusted, seperator, overall_log)
-            generate_output(testcases, config, which_untrusted, seperator, overall_log)
+            run_compilation(testcases, config, which_untrusted, separator, overall_log)
+            generate_input(testcases, config, which_untrusted, separator, overall_log)
+            run_execution(testcases, config, which_untrusted, separator, overall_log)
+            generate_output(testcases, config, which_untrusted, separator, overall_log)
             run_validation(
                 testcases,
                 config,
                 which_untrusted,
-                seperator,
+                separator,
                 queue_obj,
                 tmp_work,
                 is_vcs,
@@ -440,7 +440,7 @@ def grade_from_zip(
                 item_name,
                 complete_config_obj,
                 gradeable_config_obj,
-                seperator,
+                separator,
                 overall_log
             )
 

@@ -26,7 +26,6 @@ class SessionManagerTester extends BaseUnitTest {
         $repo = $this->createMock(SessionRepository::class);
         $this->getRepoOnce($core, $repo);
         $session = $this->createMock(Session::class);
-        $repo->expects($this->once())->method('removeExpiredSessions');
         $repo->expects($this->once())
             ->method('findOneBy')
             ->with(['session_id' => 'id'])
@@ -57,8 +56,6 @@ class SessionManagerTester extends BaseUnitTest {
                 $this->browser_info
             ])
             ->getMock();
-        $repo->expects($this->once())
-            ->method('removeExpiredSessions');
         $repo->expects($this->once())
             ->method('findOneBy')
             ->with(['session_id' => 'id'])

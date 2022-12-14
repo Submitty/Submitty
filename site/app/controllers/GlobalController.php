@@ -476,7 +476,7 @@ class GlobalController extends AbstractController {
                 break;
             case 11:
                 //November (Thanksgiving)
-                //last week of Novemeber
+                //last week of November
                 $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
                 if ($tgt_date === $now->format('Y-W-n')) {
                     $duck_img = 'moorthy_duck/11-november.svg';
@@ -578,8 +578,10 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
+
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
     }
 
     private function routeEquals(string $a, string $b) {

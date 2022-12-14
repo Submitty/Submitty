@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -553,7 +554,7 @@ SQL;
     /**
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
-     * @param  int[]    $categories_ids     Filter threads having atleast provided categories
+     * @param  int[]    $categories_ids     Filter threads having at least provided categories
      * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
      * @param  bool     $unread_threads     Filter threads to show only unread threads
      * @param  bool     $show_deleted       Consider deleted threads
@@ -1487,7 +1488,7 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Get the late day infomration for a specific user (graded gradeable information)
+     * Get the late day information for a specific user (graded gradeable information)
      * @param string $user_id
      * @param string $g_id
      * @return null|array $return = [
@@ -1512,14 +1513,14 @@ WHERE semester=? AND course=? AND user_id=?",
 
         $row = $this->course_db->row();
 
-        // If cache doesnt exist, generate it and query again
+        // If cache doesn't exist, generate it and query again
         if (empty($row)) {
             $this->generateLateDayCacheForUser($user_id);
             $this->course_db->query($query, $params);
             $row = $this->course_db->row();
         }
 
-        // If cache still doesnt exist, the gradeable is not associated with
+        // If cache still doesn't exist, the gradeable is not associated with
         // LateDays OR there has been a computation error
         if (empty($row)) {
             return null;
@@ -2080,7 +2081,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $include = '';
         $params = [$g_id, $count];
 
-        // Check if we want to exlcude grade overridden gradeables
+        // Check if we want to exclude grade overridden gradeables
         if (!$is_team && $override == 'include') {
             $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
                         WHERE u.user_id = grade_override.user_id
@@ -3239,7 +3240,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Return Team object for team whith given Team ID
+     * Return Team object for team with given Team ID
      *
      * @param  string $team_id
      * @return \app\models\Team|null
@@ -4978,6 +4979,7 @@ AND gc_id IN (
               g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
+              gamo.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
@@ -5016,6 +5018,14 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+              LEFT JOIN (
+                SELECT
+                  g_id AS gamo_g_id,
+                  json_agg(user_id) AS gamo_users,
+                  json_agg(allowed_minutes) AS gamo_minutes
+                FROM gradeable_allowed_minutes_override
+                GROUP BY gamo_g_id
+              ) AS gamo ON g.g_id=gamo.gamo_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gc_g_id,
@@ -5071,7 +5081,18 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
-            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
+            $overrides = [];
+            $users = json_decode($row['gamo_users']);
+            $minutes = json_decode($row['gamo_minutes']);
+            if ($users !== null) {
+                for ($i = 0; $i < count($users); $i++) {
+                    $overrides[] = [
+                        'user_id' => $users[$i],
+                        'allowed_minutes' => $minutes[$i]
+                    ];
+                }
+            }
+            $gradeable->setAllowedMinutesOverrides($overrides);
 
             // Construct the components
             $component_properties = [
@@ -5296,7 +5317,7 @@ AND gc_id IN (
 
     /**
      * Gets a single GradedGradeable associated with the provided gradeable and
-     *  user/team.  Note: The user's team for this gradeable will be retrived if provided
+     *  user/team.  Note: The user's team for this gradeable will be retrieved if provided
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  string|null                     $user      The id of the user to get data for
@@ -5313,7 +5334,7 @@ AND gc_id IN (
 
     /**
      * Gets a single GradedGradeable associated with the provided gradeable and
-     *  submitter.  Note: The user's team for this gradeable will be retrived if provided
+     *  submitter.  Note: The user's team for this gradeable will be retrieved if provided
      *
      * @param  Gradeable $gradeable
      * @param  Submitter                  $submitter The submitter to get data for
@@ -6235,7 +6256,7 @@ AND gc_id IN (
     }
 
     /**
-     * Gets if the provied submitter has a submission for a particular gradeable
+     * Gets if the provided submitter has a submission for a particular gradeable
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  Submitter                       $submitter
@@ -6270,7 +6291,7 @@ AND gc_id IN (
     }
 
     /**
-     * Gets if the provied submitter has a submission for a particular gradeable
+     * Gets if the provided submitter has a submission for a particular gradeable
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  String                     $userid
@@ -6304,20 +6325,14 @@ AND gc_id IN (
             SELECT ids.id, (CASE WHEN m IS NULL THEN 0 ELSE m END) AS max
             FROM (VALUES $id_placeholders) ids(id)
             LEFT JOIN (
-              (SELECT user_id AS id, active_version as m
+              SELECT COALESCE(user_id, team_id) AS id, active_version as m
               FROM electronic_gradeable_version
-              WHERE g_id = ? AND user_id IS NOT NULL)
-
-              UNION
-
-              (SELECT team_id AS id, active_version as m
-              FROM electronic_gradeable_version
-              WHERE g_id = ? AND team_id IS NOT NULL)
+              WHERE g_id = ? AND (user_id IS NOT NULL OR team_id IS NOT NULL)
             ) AS versions
             ON versions.id = ids.id
         ";
 
-        $params = array_merge($submitter_ids, [$gradeable->getId(), $gradeable->getId()]);
+        $params = array_merge($submitter_ids, [$gradeable->getId()]);
 
         $this->course_db->query($query, $params);
         $versions = [];
@@ -6449,8 +6464,8 @@ AND gc_id IN (
 
 
     public function isAnyQueueOpen() {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE open = true");
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) AS num_open FROM queue_settings WHERE open = true");
+        return $this->course_db->row()['num_open'] > 0;
     }
 
 
@@ -6508,8 +6523,8 @@ AND gc_id IN (
         if (is_null($user_id)) {
             $user_id = $this->core->getUser()->getId();
         }
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$user_id]);
+        return $this->course_db->row()['count'] > 0;
     }
 
     public function getLastTimeInQueue($user_id, $queue_code) {
@@ -6575,7 +6590,7 @@ AND gc_id IN (
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
         $status_code = null;
-        if ($remove_type !== 'self') {//user removeing themselves
+        if ($remove_type !== 'self') {//user removing themselves
             $status_code = 'being_helped';//dont allow removing yourself if you are being helped
         }
 
@@ -6617,11 +6632,12 @@ AND gc_id IN (
     }
 
     public function setQueuePauseState($new_state) {
-        $time_paused_start = $this->core->getQueries()->getCurrentQueueState()['time_paused_start'];
+        $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
+        $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
         if ($new_state != $current_state) {
             // The pause state is actually changing
-            $time_paused = $this->core->getQueries()->getCurrentQueueState()['time_paused'];
+            $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
             if ($new_state) {
                 // The student is pausing
@@ -6670,7 +6686,16 @@ AND gc_id IN (
     }
 
     public function getAllQueues() {
-        $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
+        $this->course_db->query("
+SELECT qs.*, COALESCE (ns.num_students, 0) AS num_students
+FROM queue_settings qs
+LEFT JOIN (
+    SELECT q.queue_code, COUNT(distinct q.user_id) AS num_students
+    FROM queue q
+    WHERE q.current_state IN ('waiting')
+    GROUP BY q.queue_code
+) AS ns ON ns.queue_code = qs.code
+ORDER BY id");
         return $this->course_db->rows();
     }
 
@@ -6681,8 +6706,18 @@ AND gc_id IN (
 
     public function getQueueNumberAheadOfYou($queue_code = null) {
         if ($queue_code) {
-            $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
-            $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting') AND time_in <= ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$time_in, $queue_code]);
+            $this->course_db->query("
+SELECT count(*)
+FROM queue
+WHERE current_state IN
+    ('waiting')
+    AND time_in <= (
+        SELECT time_in
+        FROM queue
+        WHERE user_id = ? AND current_state IN ('waiting','being_helped')
+    )
+    AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
+                ", [$this->core->getUser()->getId(), $queue_code]);
         }
         else {
             $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting')");
@@ -6690,20 +6725,9 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function getLastUsedQueueName() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['name'];
-    }
-
-    public function getLastUsedContactInfo() {
-        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
-        if (count($this->course_db->rows()) <= 0) {
-            return null;
-        }
-        return $this->course_db->rows()[0]['contact_info'];
+    public function getLastQueueDetails() {
+        $this->course_db->query("SELECT name, contact_info from queue where user_id = ? order by time_in desc limit 1", [$this->core->getUser()->getId()]);
+        return $this->course_db->row();
     }
 
     public function getCurrentQueueState() {
@@ -6736,11 +6760,6 @@ AND gc_id IN (
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
-        return $this->course_db->rows()[0]['count'];
-    }
-
-    public function getCurrentNumberInQueue($queue_code) {
-        $this->course_db->query("SELECT count(*) from queue where UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$queue_code]);
         return $this->course_db->rows()[0]['count'];
     }
 

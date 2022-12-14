@@ -880,6 +880,14 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 #############################################################################
+# Delete expired sessions
+
+# Deletes all expired sessions from the main Submitty database
+if [ "${WORKER}" == 0 ]; then
+    "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
+fi
+
+#############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
 # existing gradeables, do so.
 
