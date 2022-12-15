@@ -7,6 +7,22 @@ use Doctrine\ORM\EntityRepository;
 
 class SessionRepository extends EntityRepository {
     /**
+     * @param string $session_id
+     * @return Session|null
+     */
+    public function getActiveSessionById(string $session_id): ?Session {
+        $qb = $this->_em->createQueryBuilder();
+        $qb = $qb->select('s')
+            ->from('app\entities\Session', 's')
+            ->where('s.session_id = :session_id')
+            ->setParameter('session_id', $session_id)
+            ->andWhere('s.session_expires > CURRENT_TIMESTAMP()');
+        $result = $qb->getQuery()->execute();
+        return empty($result) ? null : $result[0];
+    }
+
+    /**
+     * @param string $user_id
      * @return Session[]
      */
     public function getAllByUser(string $user_id): array {

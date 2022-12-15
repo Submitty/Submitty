@@ -4,7 +4,6 @@ namespace app\libraries;
 
 use app\entities\Session;
 use app\repositories\SessionRepository;
-use Doctrine\Common\Collections\Criteria;
 use DateInterval;
 use DateTime;
 
@@ -49,13 +48,7 @@ class SessionManager {
         $em = $this->core->getSubmittyEntityManager();
         /** @var SessionRepository $repo */
         $repo =  $em->getRepository(Session::class);
-        $expressionBuilder = Criteria::expr();
-        $this->session = $repo->matching(new Criteria(
-            $expressionBuilder->andX(
-                $expressionBuilder->eq("session_id", $session_id),
-                $expressionBuilder->gt("session_expires", $this->core->getDateTimeNow())
-            )
-        ))->first();
+        $this->session = $repo->getActiveSessionById($session_id);
         if (empty($this->session)) {
             return false;
         }
