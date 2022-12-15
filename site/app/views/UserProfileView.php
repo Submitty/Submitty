@@ -39,7 +39,7 @@ class UserProfileView extends AbstractView {
         $is_last_name_space_long = count($last_name_split_by_space) >= 2;
         $is_last_name_hyphen_long = count($last_name_split_by_hyphen) >= 2;
 
-        $parse_initial = function (str $c): str {
+        $parse_initial = function (string $c): string {
             return $c[0];
         };
         $user_last_name_initial = "";
