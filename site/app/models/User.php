@@ -452,10 +452,9 @@ class User extends AbstractModel {
         $first_name = $this->getDisplayedFirstName();
         $last_name = $this->getDisplayedLastName();
         switch ($this->preferred_name_order) {
-            case self::FIRST_LAST:
-                return $first_name . ' ' . $last_name;
             case self::LAST_FIRST:
                 return $last_name . ' ' . $first_name;
+            case self::FIRST_LAST:
             default:
                 return $first_name . ' ' . $last_name;
         }
