@@ -39,15 +39,17 @@ class UserProfileView extends AbstractView {
         $is_last_name_space_long = count($last_name_split_by_space) >= 2;
         $is_last_name_hyphen_long = count($last_name_split_by_hyphen) >= 2;
 
-        $parse_initial = function(str $c): str {
+        $parse_initial = function (str $c): str {
             return $c[0];
         };
         $user_last_name_initial = "";
         if ($user_initial_option == 0) {
             $user_last_name_initial = $autofill_preferred_name[1][0];
-        } elseif ($user_initial_option == 1 && $is_last_name_space_long) {
+        }
+        elseif ($user_initial_option == 1 && $is_last_name_space_long) {
             $user_last_name_initial = implode(" ", array_map($parse_initial, $last_name_split_by_space));
-        } elseif ($user_initial_option == 2 && $is_last_name_hyphen_long) {
+        }
+        elseif ($user_initial_option == 2 && $is_last_name_hyphen_long) {
             $user_last_name_initial = implode("-", array_map($parse_initial, $last_name_split_by_hyphen));
         }
 

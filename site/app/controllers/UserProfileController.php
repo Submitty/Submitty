@@ -154,7 +154,7 @@ class UserProfileController extends AbstractController {
         }
         return JsonResponse::getErrorResponse("Preferred last name intial order code must be between 0 and 2.");
     }
-    
+
     /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse

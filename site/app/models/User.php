@@ -196,9 +196,8 @@ class User extends AbstractModel {
         if (isset($details['user_preferred_lastname'])) {
             $this->setPreferredLastName($details['user_preferred_lastname']);
         }
-        
-        $this ->setPreferredLastNameInitial($details['user_preferred_lastname_initial']);
 
+        $this ->setPreferredLastNameInitial($details['user_preferred_lastname_initial']);
 
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'];
