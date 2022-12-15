@@ -128,7 +128,6 @@ class HomePageController extends AbstractController {
     public function getUserTimeZone() {
          $user = $this->core->getUser();
          $time_zone = $this->core->getQueries()->getSubmittyUserTimeZone($user);
-        
           // Updating went smoothly, so return success
         if ($time_zone != null) {
             $offset = DateUtils::getUTCOffset($time_zone);
