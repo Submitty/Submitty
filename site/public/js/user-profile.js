@@ -280,7 +280,7 @@ $(document).ready(() => {
                     $('#user_utc_offset').text(response.data.utc_offset);
                     $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
                     // eslint-disable-next-line no-undef
-                    displaySuccessMessage('Time-zone updated succesfully!');
+                    displaySuccessMessage('Time-zone updated successfully!');
 
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
