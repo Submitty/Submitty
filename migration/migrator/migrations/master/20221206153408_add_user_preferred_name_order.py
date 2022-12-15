@@ -23,5 +23,4 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    sql = "ALTER TABLE ONLY users DROP COLUMN IF EXISTS user_preferred_name_order RESTRICT;"
-    database.execute(sql)
+    pass
