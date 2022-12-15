@@ -197,6 +197,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
         const singular = ['Material', 'file', 'name', 'one'];
         form.html((i, html) => {
             singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
                 html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
             });
             return html;
@@ -205,7 +206,9 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     var clash_list = $('#existing-names');
     clash_list.html("");
     clashing_names.forEach((elem) => {
-        clash_list.append(`<li>${elem}</li>`);
+        clash_list.append($('<li>', {
+            text: elem
+        }));
     });
     captureTabInModal("overwrite-course-material-form");
     if (is_edit_form) {
