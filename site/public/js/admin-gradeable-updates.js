@@ -385,7 +385,7 @@ function ajaxCheckBuildStatus() {
             }
             else if (response['data'] == false) {
                 $('#rebuild-status').html('Gradeable build failed');
-                $('#autograding_config_error').text('The current path is not valid, selecting Rebuild Gradeable without changing it will fail.');
+                $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {

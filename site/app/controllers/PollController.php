@@ -62,7 +62,7 @@ class PollController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/polls/viewPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
-     * @return MultiResponse
+     * @return MultiResponse|RedirectResponse
      */
     public function viewPoll($poll_id) {
         if (!isset($poll_id)) {
@@ -77,6 +77,10 @@ class PollController extends AbstractController {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
+        }
+        if ($poll->isClosed() && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Poll is currently closed");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         return MultiResponse::webOnlyResponse(
             new WebResponse(
