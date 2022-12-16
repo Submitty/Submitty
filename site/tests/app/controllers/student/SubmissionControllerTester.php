@@ -76,7 +76,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
-            'user_group' => 4
+            'user_group' => 4,
+            'user_preferred_name_order' => 0
         ]));
 
         $config = new Config($this->core);

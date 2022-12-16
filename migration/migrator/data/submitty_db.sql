@@ -483,6 +483,7 @@ CREATE TABLE public.users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
+    user_preferred_name_order smallint DEFAULT 0 NOT NULL,
     user_access_level integer DEFAULT 3 NOT NULL,
     user_email character varying NOT NULL,
     user_updated boolean DEFAULT false NOT NULL,

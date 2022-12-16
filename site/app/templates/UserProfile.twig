@@ -49,6 +49,15 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="name-order-row">
+                        <span class="label">
+                            Name Order:
+                        </span>
+                        <select id="name_order_select" class="form-control" aria-label="Edit user preferred name order">
+                            <option value="0" {% if user_name_order == 0 %} selected="selected" {% endif %}> {{ user_last }}, {{ user_first }} </option>
+                            <option value="1" {% if user_name_order == 1 %} selected="selected" {% endif %}> {{ user_first }}, {{ user_last }} </option>
+                        </select>
+                    </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
                             Primary Email:

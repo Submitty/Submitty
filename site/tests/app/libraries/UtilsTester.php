@@ -297,7 +297,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -316,7 +317,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $core = new Core();
@@ -347,7 +349,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -366,7 +369,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -385,7 +389,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -404,7 +409,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $core = new Core();
@@ -435,7 +441,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -454,7 +461,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $core = new Core();
@@ -489,7 +497,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -508,7 +517,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -527,7 +537,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $details[] = [
@@ -546,7 +557,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'user_preferred_name_order' => 0
         ];
 
         $core = new Core();

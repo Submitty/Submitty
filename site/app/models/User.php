@@ -24,6 +24,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredLastName()  Get the preferred last name of the loaded user
  * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
  *                                        otherwise return the legal last name field for the user.
+ * @method int getPreferredNameOrder() Get the preferred name order of the loaded user
+ * @method void setPreferredNameOrder(int $order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -73,6 +75,12 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Preferred name orders
+     */
+    const FIRST_LAST = 0;
+    const LAST_FIRST = 1;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -98,6 +106,8 @@ class User extends AbstractModel {
     protected $preferred_last_name = "";
     /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
+    /** @prop @var int The preferred name order of the user */
+    protected $preferred_name_order = self::FIRST_LAST;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -186,6 +196,8 @@ class User extends AbstractModel {
         if (isset($details['user_preferred_lastname'])) {
             $this->setPreferredLastName($details['user_preferred_lastname']);
         }
+
+        $this->setPreferredNameOrder($details['user_preferred_name_order']);
 
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'];
@@ -439,8 +451,16 @@ class User extends AbstractModel {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
-    public function getDisplayFullName() {
-        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+    public function getDisplayFullName(): string {
+        $first_name = $this->getDisplayedFirstName();
+        $last_name = $this->getDisplayedLastName();
+        switch ($this->preferred_name_order) {
+            case self::LAST_FIRST:
+                return $last_name . ' ' . $first_name;
+            case self::FIRST_LAST:
+            default:
+                return $first_name . ' ' . $last_name;
+        }
     }
 
     public function setRegistrationSection($section) {
@@ -513,6 +533,10 @@ class User extends AbstractModel {
             case 'user_preferred_lastname':
                 //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
+            case 'user_preferred_name_order':
+                //Preferred name order code must be between 0 and 1.
+                $order = intval($data);
+                return 0 <= $order && $order <= 1;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
