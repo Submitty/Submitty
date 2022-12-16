@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\libraries\database;
 
 use app\libraries\DateUtils;
-use app\libraries\Utils;
 
 class DatabaseUtils {
     public static function formatQuery(string $sql, ?array $params): string {
@@ -18,7 +17,7 @@ class DatabaseUtils {
                 $param = DateUtils::dateTimeToString($param);
             }
             if (gettype($param) === "array") {
-                $param = Utils::arrayToCommaSepString($param);
+                $param = json_encode($param);
             }
             elseif (!is_numeric($param)) {
                 $param = "'{$param}'";

@@ -314,20 +314,4 @@ class Utils {
     public static function escapeDoubleQuotes(string $str): ?string {
         return preg_replace('["]', '\"', $str);
     }
-
-    /**
-     * Separate an array containing strings and/or numbers using commas, with strings enclosed in single quotes
-     *
-     * @param array $arr
-     * @return string Comma-separated string
-     */
-    public static function arrayToCommaSepString(array $arr): string {
-        $result = "";
-        $sep = "";
-        foreach ($arr as $elem) {
-            $result .= is_numeric($elem) ? "{$sep}{$elem}" : "{$sep}'{$elem}'";
-            $sep = ", ";
-        }
-        return $result;
-    }
 }
