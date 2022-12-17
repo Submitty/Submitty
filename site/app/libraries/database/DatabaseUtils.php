@@ -16,8 +16,9 @@ class DatabaseUtils {
             if ($param instanceof \DateTime) {
                 $param = DateUtils::dateTimeToString($param);
             }
-            if (gettype($param) === "array") {
-                $param = json_encode($param);
+            if (is_array($param)) {
+                $str_param = json_encode($param);
+                $param = substr($str_param, 1, strlen($str_param) - 2);
             }
             elseif (!is_numeric($param)) {
                 $param = "'{$param}'";
