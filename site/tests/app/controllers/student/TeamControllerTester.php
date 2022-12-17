@@ -64,7 +64,8 @@ class TeamControllerTester extends BaseUnitTest {
                     'user_lastname' => 'One',
                     'user_email' => 'user1@example.com',
                     'user_email_secondary' => null,
-                    'user_email_secondary_notify' => false
+                    'user_email_secondary_notify' => false,
+                    'user_preferred_lastname_initial' => 0
                 ]
             ],
             'team_name' => null

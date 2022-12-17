@@ -32,6 +32,27 @@ class UserProfileView extends AbstractView {
             $autofill_preferred_name[1] = $user->getPreferredLastName();
         }
 
+        $user_initial_option = $user->getPreferredLastNameInitial();
+
+        $last_name_split_by_space = explode(" ", $autofill_preferred_name[1]);
+        $last_name_split_by_hyphen = explode("-", $autofill_preferred_name[1]);
+        $is_last_name_space_long = count($last_name_split_by_space) >= 2;
+        $is_last_name_hyphen_long = count($last_name_split_by_hyphen) >= 2;
+
+        $parse_initial = function (string $c): string {
+            return $c[0];
+        };
+        $user_last_name_initial = "";
+        if ($user_initial_option == 0) {
+            $user_last_name_initial = $autofill_preferred_name[1][0];
+        }
+        elseif ($user_initial_option == 1 && $is_last_name_space_long) {
+            $user_last_name_initial = implode(" ", array_map($parse_initial, $last_name_split_by_space));
+        }
+        elseif ($user_initial_option == 2 && $is_last_name_hyphen_long) {
+            $user_last_name_initial = implode("-", array_map($parse_initial, $last_name_split_by_hyphen));
+        }
+
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -48,6 +69,10 @@ class UserProfileView extends AbstractView {
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
             "user_last" => $autofill_preferred_name[1],
+            "user_lastname_initial" => $user_last_name_initial,
+            "user_initial_option" => $user_initial_option,
+            "is_last_name_space_long" => $is_last_name_space_long,
+            "is_last_name_hyphen_long" => $is_last_name_hyphen_long,
             "change_name_text" => $change_name_text,
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,

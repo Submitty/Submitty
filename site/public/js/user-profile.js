@@ -304,6 +304,39 @@ $(document).ready(() => {
         });
     });
 
+    $('#last_name_initial_select').change(function() {
+        const last_name_initial = $(this).children('option:selected').index().toString();
+
+        $.getJSON({
+            type: 'POST',
+            // eslint-disable-next-line no-undef
+            url: buildUrl(['user_profile', 'change_preferred_lastname_initial']),
+            data: {
+                // eslint-disable-next-line no-undef
+                csrf_token: csrfToken,
+                last_name_initial,
+            },
+            success: function (response) {
+                // Update page elements if the data was successfully saved server-side
+                if (response.status === 'success') {
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage('Last name abbreviation updated succesfully!');
+                }
+                else {
+                    console.log(response);
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage('Last name abbreviation was not updated!');
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server!');
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
+
     $('#user-image-button').bind('change', function() {
         if ((this.files[0].size/1048576)>5.0) {
             alert("Selected file's size exceeds 5 MB");

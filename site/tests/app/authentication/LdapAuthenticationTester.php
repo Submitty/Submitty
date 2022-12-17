@@ -50,7 +50,8 @@ class LdapAuthenticationTester extends TestCase {
             'user_lastname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
-            'user_email_secondary_notify' => false
+            'user_email_secondary_notify' => false,
+            'user_preferred_lastname_initial' => 0
         ]);
         $queries->expects($this->once())->method('getSubmittyUser')->with('instructor')->willReturn($user);
         $core->setQueries($queries);
@@ -83,7 +84,8 @@ class LdapAuthenticationTester extends TestCase {
             'user_lastname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
-            'user_email_secondary_notify' => false
+            'user_email_secondary_notify' => false,
+            'user_preferred_lastname_initial' => 0
         ]);
         $queries->expects($this->once())->method('getSubmittyUser')->with('instructor')->willReturn($user);
         $core->setQueries($queries);

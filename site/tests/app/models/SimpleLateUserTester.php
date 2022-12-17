@@ -29,7 +29,8 @@ class SimpleLateUserTester extends \PHPUnit\Framework\TestCase {
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
-            'time_zone' => 'America/New_York'
+            'time_zone' => 'America/New_York',
+            'user_preferred_lastname_initial' => 0
         ]);
         $this->core->setUser($user);
         $this->core->setConfig($config);

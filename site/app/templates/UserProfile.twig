@@ -49,6 +49,17 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="lastname-initial-row">
+                        <span class="label">
+                            Last Name Abbreviation:
+                        </span>
+                        <select id="last_name_initial_select" class="form-control" aria-label="Edit user preferred last name initial">
+                            <option value="0" {% if user_initial_option == 0 %} selected="selected" {% endif %}>{{ user_first }} {{ user_last_name_initial }}</option>
+                            {% if is_last_name_space_long %}<option value="1" {% if user_initial_option == 1 %} selected="selected" {% endif %}>{{ user_first }} {{ user_last_name_initial }}</option>{% endif %}
+                            {% if is_last_name_hyphen_long %}<option value="2" {% if user_initial_option == 2 %} selected="selected" {% endif %}>{{ user_first }} {{ user_last_name_initial }}</option>{% endif %}
+                            <option value="3" {% if user_initial_option == 3 %} selected="selected" {% endif %}>{{ user_first }}</option>
+                        </select>
+                    </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
                             Primary Email:
