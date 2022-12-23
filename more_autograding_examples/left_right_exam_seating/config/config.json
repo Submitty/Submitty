@@ -1,7 +1,7 @@
 {
     "hide_test_details" : true,
 
-    "assignment_message" : "To better accomodate students for the tests and final exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",
+    "assignment_message" : "To better accommodate students for the tests and final exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",
     "autograding": {
         "submission_to_validation" : [ "left_right.txt" ],
         "work_to_details" : [ "left_right.txt" ]
