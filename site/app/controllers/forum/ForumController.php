@@ -171,8 +171,9 @@ class ForumController extends AbstractController {
      */
     public function addNewCategory($category = []) {
         $result = [];
-        if (!empty($_POST["newCategory"])) {
+        if (!empty($_POST["newCategory"]) and !empty($_POST["visibleDate"])) {
             $category = trim($_POST["newCategory"]);
+            $visibleDate = trim($_POST["visibleDate"]);
             if ($this->isValidCategories(-1, [$category])) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
@@ -181,7 +182,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"], $visibleDate);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }

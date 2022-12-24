@@ -117,9 +117,12 @@
           <legend id="cat_label">Categories:</legend>
           <div id=id='categories-pick-list'>
             {% for category in categories %}
+                {# if diff ==4 then visible_Date is true #}
+                {% if category.diff == 4 or core.getUser().getGroup() <= 2 %}
                 <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                     <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
                 </div>
+                {% endif %}
             {% endfor %}
           </div>
         </fieldset>

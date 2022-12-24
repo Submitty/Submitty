@@ -4291,9 +4291,9 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category, $rank) {
+    public function addNewCategory($category, $rank, $visibleDate) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc, rank) VALUES (?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank]);
+        $this->course_db->query("INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank, $visibleDate]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }
@@ -4330,7 +4330,7 @@ AND gc_id IN (
     }
 
     public function getCategories() {
-        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST, category_id");
+        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
         return $this->course_db->rows();
     }
 

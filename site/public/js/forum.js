@@ -1418,6 +1418,7 @@ function showHistory(post_id) {
 // eslint-disable-next-line no-unused-vars
 function addNewCategory(csrf_token) {
     const newCategory = $('#new_category_text').val();
+    const visibleDate = $('#category_visible_date').val();
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
@@ -1425,6 +1426,7 @@ function addNewCategory(csrf_token) {
         type: 'POST',
         data: {
             newCategory: newCategory,
+            visibleDate: visibleDate,
             rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token,
         },
