@@ -171,7 +171,7 @@ class ForumController extends AbstractController {
      */
     public function addNewCategory($category = []) {
         $result = [];
-        if (!empty($_POST["newCategory"]) and !empty($_POST["visibleDate"])) {
+        if (!empty($_POST["newCategory"]) && !empty($_POST["visibleDate"])) {
             $category = trim($_POST["newCategory"]);
             $visibleDate = trim($_POST["visibleDate"]);
             if ($this->isValidCategories(-1, [$category])) {
