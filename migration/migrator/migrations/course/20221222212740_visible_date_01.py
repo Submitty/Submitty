@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE categories_list ADD COLUMN visible_date date")
+    database.execute("ALTER TABLE categories_list ADD COLUMN IF NOT EXISTS visible_date date")
     
 
 
@@ -31,5 +31,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE categories_list DROP COLUMN visible_date ")
     pass
