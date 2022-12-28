@@ -173,7 +173,13 @@ class ForumController extends AbstractController {
         $result = [];
         if (!empty($_POST["newCategory"]) && !empty($_POST["visibleDate"])) {
             $category = trim($_POST["newCategory"]);
-            $visibleDate = trim($_POST["visibleDate"]);
+            $visibleDate;
+            if ($this->core->getUser()->accessAdmin()) {
+                $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+            }
+            else {
+                $visibleDate = null;
+            }
             if ($this->isValidCategories(-1, [$category])) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
