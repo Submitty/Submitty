@@ -38,7 +38,7 @@
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "5.4.15",
     "textalk/websocket": "1.6.3",
-    "twig/twig": "3.4.3"
+    "twig/twig": "3.5.0"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
