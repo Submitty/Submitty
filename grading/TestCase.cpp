@@ -201,32 +201,34 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 
   std::string filename;
   if (expected_string != "") {
-    //use actual_file name to get the name of the expected string output file
-    //ex: actual_file = math_1.txt, expected = AUTO_GENERATED_math_1.txt
-    expected_file = "AUTO_GENERATED_" + actual_file.substr(actual_file.find_last_of('/') + 1);
-    filename = "test_output/" + expected_file;
-    std::ofstream expected_file_stream(filename);
-    expected_file_stream << expected_string;
-    expected_file_stream.close();
+    if (expected_string.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Expected string too large for grader (" +
+                                        std::to_string(expected_string.size()) + " vs. " +
+                                        std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")"));
+      return false;
+    }
+
+    expected_file_contents = expected_string;
   } 
   else if (expected_file != "") {
     filename = getOutputContainingFolderPath(tc, expected_file) + expected_file;
+
+    if (filename == "") {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
+      return false;
+    }
+    if (!getFileContents(filename,expected_file_contents)) {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open expected file: '" + filename));
+      return false;
+    }
+    if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Expected file '" + filename + "' too large for grader (" +
+                                        std::to_string(expected_file_contents.size()) + " vs. " +
+                                        std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")"));
+      return false;
+    }
   }
-  
-  if (filename == "") {
-    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
-    return false;
-  }
-  if (!getFileContents(filename,expected_file_contents)) {
-    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open expected file: '" + filename));
-    return false;
-  }
-  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
-    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Expected file '" + filename + "' too large for grader (" +
-                                      std::to_string(expected_file_contents.size()) + " vs. " +
-                                      std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")"));
-    return false;
-  }
+
   return true;
 }
 
