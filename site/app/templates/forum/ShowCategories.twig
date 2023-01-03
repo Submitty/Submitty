@@ -35,11 +35,12 @@
                     class="category-sortable category-item-box" 
                     style="color: {{ category.color }};"
                     data-category_desc="{{ category.category_desc }}"
+                    data-category_date="{{ category.visible_date }}"
                     data-category_id="{{ category.category_id }}"
                 >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
-                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }}</span>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }} {{ category.visible_date }}</span>
                             <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit category-button edit-category-desc-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
