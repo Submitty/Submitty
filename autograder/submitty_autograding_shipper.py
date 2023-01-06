@@ -1011,7 +1011,7 @@ def checkout_vcs_repo(config, my_file):
                 file=f)
 
     gradeable_config_json_file = os.path.join(
-        course_path,
+        course_dir,
         'config',
         'complete_config',
         f'complete_config_{obj["gradeable"]}.json'
