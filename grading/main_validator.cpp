@@ -196,7 +196,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           if (expected_file != "") {
             std::string expected_out_dir = getPathForOutputFile(my_testcase, expected_file, id);
             std::cout << "expected_out_dir: " << expected_out_dir << std::endl;
-            expected_path << expected_out_dir << expected;
+            expected_path << expected_out_dir << expected_file;
             std::cout << "expected_path: " << expected_path.str() << std::endl;
           }
           if (show_expected) {
