@@ -515,6 +515,10 @@
             }
           }
         }
+      },
+      "keep_git_directory": {
+        "type": "boolean",
+        "description": "Specifies whether the .git directory should be copied into the temporary workspace for a custom validation script"
       }
   },
   "definitions" : {

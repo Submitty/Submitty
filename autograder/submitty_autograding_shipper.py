@@ -1010,20 +1010,23 @@ def checkout_vcs_repo(config, my_file):
                 "credentials.\n",
                 file=f)
 
-    form_json_file = os.path.join(course_dir, 'config', 'form', f'form_{obj["gradeable"]}.json')
-    with open(form_json_file, 'r') as fj:
-        form_json = json.load(fj)
-    gradeable_json_file = os.path.join(form_json["config_path"], "config.json")
-    with open(gradeable_json_file, 'r') as gj:
-        gradeable_json = json.load(gj)
+    gradeable_config_json_file = os.path.join(
+        course_path,
+        'config',
+        'complete_config',
+        f'complete_config_{obj["gradeable"]}.json'
+    )
 
     try:
+        with open(gradeable_config_json_file, 'r') as gcj:
+            gradeable_config_json = json.load(gcj)
+
         # We explicitly compare equality with True because otherwise,
         # Python might implicitly coerce a “truthy” value
         # (such as any non-empty string, including the string "False")
         # to True in an if statement
-        keep_git_directory = gradeable_json["keep_git_directory"] is True
-    except KeyError:
+        keep_git_directory = gradeable_config_json["keep_git_directory"] is True
+    except (FileNotFoundError, KeyError):
         keep_git_directory = False
     if not keep_git_directory:
         # remove the .git directory (storing full history and metafiles)
