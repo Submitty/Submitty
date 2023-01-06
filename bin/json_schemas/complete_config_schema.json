@@ -518,7 +518,7 @@
       },
       "keep_git_directory": {
         "type": "boolean",
-        "description": "Specifies whether the .git directory should be copied into the temporary workspace for a custom validation script"
+        "description": "Specifies whether the .git directory should be kept on clone into the student's checkout submission. Defaults to false."
       }
   },
   "definitions" : {
