@@ -141,7 +141,7 @@ class Notebook extends AbstractModel {
         }
         else {
             // Else something unexpected happened
-            throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
+            throw new \InvalidArgumentException("An error occurred parsing notebook data.\n" .
                 "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }
     }
@@ -273,7 +273,7 @@ class Notebook extends AbstractModel {
         // Read file contents into string
         $file_contents = file_get_contents($complete_file_path);
 
-        // If file_contents is False an error has occured
+        // If file_contents is False an error has occurred
         if ($file_contents === false) {
             throw new IOException("An error occurred retrieving submission contents.");
         }
