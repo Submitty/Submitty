@@ -157,17 +157,18 @@ class TestAutogradingShipper(unittest.TestCase):
     """
     Unit testing individual functions using mocks.
     """
-
+    
     @pytest.fixture(autouse=True)
     def _pass_fixtures(self, capsys):
         self.capsys = capsys
 
     def test_checkout_vcs_repo(self):
+        test_data_path = TEST_DATA_SRC_DIR
         """ Check if they system can checkout a VCS repository under different configs """
         homework_paths = {}
 
         # build test assignment folders
-        with open(os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'), 'r') as infile:
+        with open(os.path.join(test_data_path, 'shipper_config.json'), 'r') as infile:
             obj = json.load(infile)
 
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
@@ -223,25 +224,27 @@ class TestAutogradingShipper(unittest.TestCase):
     }
 }
 """)
-
+      
         course_form_config_file = os.path.join(course_dir, "config", "form", "form_homework_01.json")
         with open(course_form_config_file, 'w') as open_file:
             open_file.write("""
 {
     "gradeable_id": "homework_01",
-    "config_path": "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data",
+    "config_path": {},
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
     "subdirectory": "/homework_01"
 }
-""")
+""").format(test_data_path)
+# "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data"
         # Initialize git homework directory
-        os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(TEST_DATA_DIR))
+        os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(test_data_path))
         # Start test
-        results = shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_SRC_DIR, 'shipper_config.json'))
+        results = shipper.checkout_vcs_repo(CONFIG, os.path.join(test_data_path, 'shipper_config.json'))
 
         # Confirm standard out
-        expected = "SHIPPER CHECKOUT VCS REPO  /home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data/shipper_config.json\n"
+        #/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data/shipper_config.json
+        expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(test_data_path + "/shipper_config.json")
         self.assertEqual(expected, self.capsys.readouterr().out)
 
         # Confirm VCS checkout logging message
