@@ -19,7 +19,7 @@ class PollModelTester extends \PHPUnit\Framework\TestCase {
                 "Is this the first poll?",                         // question
                 "single-response-single-correct",                  // question_type
                 [0 => "Yes", 1 => "No", 2 => "Maybe"],             // responses
-                [0 => 0],                                          // asnwers
+                [0 => 0],                                          // answers
                 "closed",                                          // status
                 ["bitdiddle" => [0 => 1], "aphacker" => [0 => 1]], // user_responses
                 "2021-01-11",                                      // release_date

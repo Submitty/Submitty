@@ -172,7 +172,7 @@ bool isWindowedAction(const nlohmann::json action);
 * thus far. It then passes the current action to be taken through tests to see which function to route to.
 *This function requires all parameters to for execute.cpp's delayAndMemCheck function. 
 *
-* NOTE TO DEVLOPERS: If you want to add a new action, also modify the preprocessing script for config.json to 
+* NOTE TO DEVELOPERS: If you want to add a new action, also modify the preprocessing script for config.json to 
 * include your new action as valid.
 */
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 

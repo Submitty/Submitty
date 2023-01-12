@@ -11,7 +11,7 @@
   4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | f
   5 | -1 | kessll | Can anyone share few good links for `python` beginner? | 2018-05-23 10:55:22.192817-04 | f | f |  | f | 0 | f
   5 | 12 | renneh | Try this for quick overview\n[url=https://developers.google.com/edu/python/introduction]https://developers.google.com/edu/python/introduction[/url]\n | 2018-05-23 11:01:11.483217-04 | f | f |  | f | 0 | f
-  5 | 12 | rueckm | Offical documentation is better for methods specific search.\n[url=https://docs.python.org/3/contents.html]https://docs.python.org/3/contents.html[/url]\n | 2018-05-23 11:07:24.611849-04 | f | f |  | f | 0 | f
+  5 | 12 | rueckm | Official documentation is better for methods specific search.\n[url=https://docs.python.org/3/contents.html]https://docs.python.org/3/contents.html[/url]\n | 2018-05-23 11:07:24.611849-04 | f | f |  | f | 0 | f
   5 | 12 | vonruf | I tried [url=https://www.w3schools.com/python/]https://www.w3schools.com/python/[/url] | 2018-05-23 11:14:41.912376-04 | f | f |  | f | 0 | f
   6 | -1 | bitdiddle | Can someone share multithreading example snippets in C++ | 2018-05-23 11:45:24.049959-04 | f | f |  | f | 0 | f
   6 | 16 | baliss | Sample code snippet\n[code]\n#include <iostream>\n#include <thread>\nvoid foo(std::string msg)\n{\n    std::cout<<msg<<std::endl;\n}\nint main() {\n   std::thread t1(foo, "Test 1");\n   std::thread t2(foo, "Test 2");\n   t1.join();\n   t2.join();\n   return 0;\n}\n[/code]\n | 2018-05-23 11:46:14.864177-04 | f | f |  | f | 0 | f

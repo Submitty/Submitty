@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class DockerInterfaceController
  *
- * Works with Docker to provide a user inteface
+ * Works with Docker to provide a user interface
  *
  */
 class DockerInterfaceController extends AbstractController {
