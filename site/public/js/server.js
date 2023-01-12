@@ -171,8 +171,7 @@ function newDeleteCourseMaterialForm(id, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).text(file_name);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -321,11 +320,9 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
+    const title_label = $("#edit-url-title-label", form);
+    const url_label = $("#edit-url-url-label", form);
     if (is_link === 1) {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
@@ -334,6 +331,14 @@ function newEditCourseMaterialsForm(tag) {
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
+    }
+    else {
+        if (title_label.css('display') !== 'none') {
+            title_label.css('display', 'none');
+        }
+        if (url_label.css('display') !== 'none') {
+            url_label.css('display', 'none');
+        }
     }
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
@@ -568,7 +573,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
   function c(a, b) {
     const c = document.createElement("textarea");
     c.name = a;

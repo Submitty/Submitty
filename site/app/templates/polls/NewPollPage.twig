@@ -69,7 +69,7 @@
             <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
-            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
+            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single response - single correct".<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
@@ -148,7 +148,7 @@
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
                         <input aria-label="Is correct" class="correct-box" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                        <textarea aria-label="Response text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
@@ -175,7 +175,7 @@
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
             <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
-            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
+            <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single response - single correct".<br/></span>
             <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
             <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
             <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
@@ -395,7 +395,7 @@
                     }
                 },
                 error: function(e) {
-                    alert("Error occured when requesting via ajax. Please refresh the page and try again.");
+                    alert("Error occurred when requesting via ajax. Please refresh the page and try again.");
                 }
             });
         });
