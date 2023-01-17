@@ -1,23 +1,33 @@
 const docker_ui_path = '/admin/docker';
 
-const waitAndReloadUntil = (condition, timeout, wait = 100) => {
-    cy.wait(wait);
-    cy.reload();
-    cy.then(() => {
-        return condition().then((result) => {
-            if (result || timeout <= 0) {
-                return result;
-            }
-            return waitAndReloadUntil(condition, timeout - wait, wait);
-        });
-    });
-};
+/**
+ * This test is designed for a single run --
+ * It will not work if the system is already updated.
+ *
+ * To revert the states:
+ *  - pushd /usr/local/submitty/config
+ *  - rm /var/local/submitty/logs/docker/*.txt
+ *  - jq '{default: .default}' autograding_containers.json | sponge autograding_containers.json
+ *  - chown submitty_php:submitty_daemonphp autograding_containers.json
+ *  - popd
+ */
 
 describe('Docker UI Test', () => {
     beforeEach(() => {
         cy.visit('/');
         cy.login();
         cy.visit(docker_ui_path);
+    });
+
+    it('Should be the first update', () => {
+        // No info update should be made before this test...
+        // Check if the update time is "Unknown"
+        cy.get(':nth-child(1) > p')
+            .should('contain.text', 'Unknown');
+        // Check if the OS info is empty
+        cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
+            .invoke('text')
+            .should('match', /[\n ]*/);
     });
 
     it('Should update the machine information', () => {
@@ -33,7 +43,7 @@ describe('Docker UI Test', () => {
                 ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
-        waitAndReloadUntil(() => {
+        cy.waitAndReloadUntil(() => {
             return cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(4)')
                 .invoke('text')
                 .then((text) => {
@@ -110,7 +120,7 @@ describe('Docker UI Test', () => {
                   ' found on DockerHub and queued to be added!');
 
         // Allow the system to update the info and reload
-        waitAndReloadUntil(() => {
+        cy.waitAndReloadUntil(() => {
             return cy.get('#capabilities-list')
                 .invoke('text')
                 .then((text) => {
