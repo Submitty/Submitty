@@ -189,7 +189,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
-  std::cout << "opening expected file..." << std::endl;
+  std::cout << "Retrieving expected information..." << std::endl;
   std::string expected_file = j.value("expected_file", "");
   std::string expected_string = j.value("expected_string", "");
   std::string actual_file = j.value("actual_file", "");
