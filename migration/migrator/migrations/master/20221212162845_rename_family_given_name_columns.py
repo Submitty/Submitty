@@ -11,10 +11,11 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     # Rename columns
-    database.execute("ALTER TABLE users RENAME COLUMN user_firstname TO user_givenname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_preferred_firstname TO user_preferred_givenname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_lastname TO user_familyname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_preferred_lastname TO user_preferred_familyname;")
+    sql = """ALTER TABLE users RENAME COLUMN user_firstname TO user_givenname;
+             ALTER TABLE users RENAME COLUMN user_preferred_firstname TO user_preferred_givenname;
+             ALTER TABLE users RENAME COLUMN user_lastname TO user_familyname;
+             ALTER TABLE users RENAME COLUMN user_preferred_lastname TO user_preferred_familyname;"""
+    database.execute(sql)
     
     # Modify sync_users trigger
     sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
@@ -109,10 +110,11 @@ def down(config, database):
     :type database: migrator.db.Database
     """
     # Rename columns
-    database.execute("ALTER TABLE users RENAME COLUMN user_givenname TO user_firstname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_preferred_givenname TO user_preferred_firstname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_familyname TO user_lastname;")
-    database.execute("ALTER TABLE users RENAME COLUMN user_preferred_familyname TO user_preferred_lastname;")
+    sql = """ALTER TABLE users RENAME COLUMN user_givenname TO user_firstname;
+             ALTER TABLE users RENAME COLUMN user_preferred_givenname TO user_preferred_firstname;
+             ALTER TABLE users RENAME COLUMN user_familyname TO user_lastname;
+             ALTER TABLE users RENAME COLUMN user_preferred_familyname TO user_preferred_lastname;"""
+    database.execute(sql)
 
     # Modify sync_users trigger
     sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
