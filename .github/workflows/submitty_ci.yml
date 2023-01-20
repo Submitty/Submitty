@@ -397,6 +397,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install moreutils
 
           - name: Install third party dependencies
             run: |
@@ -407,6 +408,10 @@ jobs:
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+                | sudo sponge /usr/local/submitty/config/submitty_users.json
+              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
           - name: Setup ldap
             run: |

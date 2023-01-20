@@ -119,3 +119,22 @@ Cypress.Commands.overwrite('visit', (originalFn, options) => {
 Cypress.Commands.add('checkLogoutInAfterEach', () => {
     cy.wrap(true).as('checkLogout');
 });
+
+/**
+ * Wait and reload until
+ * @param {} condition
+ * @param {int} timeout
+ * @param {int} wait
+ */
+Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait=100) => {
+    cy.wait(wait);
+    cy.reload();
+    cy.then(() => {
+        return condition().then((result) => {
+            if (result || timeout <= 0) {
+                return result;
+            }
+            return cy.waitAndReloadUntil(condition, timeout - wait, wait);
+        });
+    });
+});
