@@ -487,7 +487,7 @@ function socketAnnounceThreadHandler(thread_id) {
                     }
                 }
             }
-            // no bookmarked announcements -> insert already-bookmarked new announcment at the beginning
+            // no bookmarked announcements -> insert already-bookmarked new announcement at the beginning
             else {
                 $(thread_to_announce).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
             }
@@ -516,7 +516,7 @@ function socketAnnounceThreadHandler(thread_id) {
                     }
                 }
             }
-            // if all announcements are bookmarked -> insert new annoucement after the last one
+            // if all announcements are bookmarked -> insert new announcement after the last one
             else {
                 // eslint-disable-next-line no-var, no-redeclare
                 var thread_to_insert_after = announced_pinned_threads.last();
@@ -705,7 +705,7 @@ function initSocketClient() {
                 socketNewOrEditThreadHandler(msg.new_thread_id, false);
                 break;
             default:
-                console.log('Undefined message recieved.');
+                console.log('Undefined message received.');
         }
         thread_post_handler();
         loadThreadHandler();
