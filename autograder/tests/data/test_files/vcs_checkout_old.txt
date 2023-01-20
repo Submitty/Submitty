@@ -1,0 +1,7 @@
+VCS CHECKOUT
+vcs_base_url /home/peteca/Documents/work/test_suite/unit_tests/autograder/data
+vcs_subdirectory homework_01
+vcs_path file:////home/peteca/Documents/work/test_suite/unit_tests/autograder/data/homework_01
+/usr/bin/git clone file:////home/peteca/Documents/work/test_suite/unit_tests/autograder/data/homework_01 /home/peteca/Documents/work/test_suite/unit_tests/autograder/test_environment/autograding/courses/test_term/test_course/checkout/homework_01/test_student/11 --depth 1 -b master
+
+====================================

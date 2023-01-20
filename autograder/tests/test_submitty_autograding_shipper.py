@@ -5,6 +5,7 @@ import unittest
 import contextlib
 import copy
 import pytest
+import difflib
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -16,7 +17,7 @@ TEST_DATA_SRC_DIR = os.path.join(SCRIPT_DIR, 'data')
 # Where to dump intermediate test files
 # The GIT_CHECKOUT folder is guaranteed to be within the Submitty install dir.
 WORKING_DIR = os.path.abspath(
-    os.path.join('..', '..', '..', 'test_suite', 'unitTests', 'autograder')
+    os.path.join('..', '..', '..', 'test_suite', 'unit_tests', 'autograder')
 )
 # Path to place our temporary data files
 TEST_DATA_DIR = os.path.join(WORKING_DIR, 'data')
@@ -68,7 +69,7 @@ class TestAutogradingShipper(unittest.TestCase):
         os.makedirs(WORKING_DIR, exist_ok=True)
 
         # Copy test data into the dir
-        shutil.rmtree(TEST_DATA_DIR)
+        shutil.rmtree(TEST_DATA_DIR,  ignore_errors=True)
         shutil.copytree(TEST_DATA_SRC_DIR, TEST_DATA_DIR)#, dirs_exist_ok=True)
 
         # All testing will take place within the TEST_ENVIRONMENT directory
@@ -163,7 +164,8 @@ class TestAutogradingShipper(unittest.TestCase):
         self.capsys = capsys
 
     def test_checkout_vcs_repo(self):
-        test_data_path = TEST_DATA_SRC_DIR
+        test_data_path = TEST_DATA_DIR
+      #  test_data_source_path = TEST_DATA_SRC_DIR
         """ Check if they system can checkout a VCS repository under different configs """
         homework_paths = {}
 
@@ -186,69 +188,73 @@ class TestAutogradingShipper(unittest.TestCase):
             os.makedirs(os.path.join(course_dir, folder))
 
         course_config_file = os.path.join(course_dir, "config", "config.json")
-        with open(course_config_file, 'w') as open_file:
-            open_file.write("""
-{
-    "database_details": {
-        "dbname": "submitty_fall22_cptr141"
-    },
-    "course_details": {
-        "course_name": "Fundamentals of Programming I",
-        "course_home_url": "https://class.wallawalla.edu/d2l/home/343700",
-        "default_hw_late_days": 99,
-        "default_student_late_days": 99,
-        "zero_rubric_grades": false,
-        "upload_message": "By submitting, you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.",
-        "display_rainbow_grades_summary": false,
-        "display_custom_message": false,
-        "course_email": "Please contact your TA or instructor to submit a grade inquiry.",
-        "vcs_base_url": "git@gitlab.cs.wallawalla.edu:{$user_id}/student141.git",
-        "vcs_type": "git",
-        "private_repository": "",
-        "forum_enabled": false,
-        "forum_create_thread_message": "",
-        "regrade_enabled": false,
-        "regrade_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
-        "seating_only_for_instructor": false,
-        "room_seating_gradeable_id": "",
-        "auto_rainbow_grades": false,
-        "queue_enabled": false,
-        "queue_message": "",
-        "queue_announcement_message": "",
-        "polls_enabled": false,
-        "polls_pts_for_correct": 1,
-        "polls_pts_for_incorrect": 0,
-        "seek_message_enabled": false,
-        "seek_message_instructions": "Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.",
-        "git_autograding_branch": "main"
-    }
-}
-""")
-      
+        #open config file and copy to test directory
+        with open(os.path.join(test_data_path, "test_files", 'config.json')) as config_file:
+            
+            with open(course_config_file, 'w') as new_config_file:
+                open_file.write(config_file.read().replace("VCS_BASE_URL", test_data_path))
+        
+        # write course form config
         course_form_config_file = os.path.join(course_dir, "config", "form", "form_homework_01.json")
         with open(course_form_config_file, 'w') as open_file:
-            open_file.write("""
+            file_contents = """
 {
     "gradeable_id": "homework_01",
-    "config_path": {},
+    "config_path": "CONFIG_PATH",
     "date_due": "2022-10-06 23:59:59-0700",
     "upload_type": "repository",
-    "subdirectory": "/homework_01"
+    "subdirectory": "homework_01"
 }
-""").format(test_data_path)
-# "/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data"
+"""
+            open_file.write(file_contents.replace("CONFIG_PATH", test_data_path))
+
         # Initialize git homework directory
         os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(test_data_path))
         # Start test
         results = shipper.checkout_vcs_repo(CONFIG, os.path.join(test_data_path, 'shipper_config.json'))
 
+        #get the path of the folder to clone the repository to, to then checkout later
+        checkout_path = os.path.join(course_dir, "checkout", partial_path)
+
+        expected_vcs_checkout = """VCS CHECKOUT
+vcs_base_url {TEST_DATA_PATH}
+vcs_subdirectory homework_01
+vcs_path file:///{HOMEWORK_PATH}
+/usr/bin/git clone file:///{HOMEWORK_PATH} {CHECKOUT_PATH} --depth 1 -b master""".format(TEST_DATA_PATH = test_data_path, HOMEWORK_PATH = test_data_path + "/homework_01", CHECKOUT_PATH = checkout_path)
+
         # Confirm standard out
-        #/home/peteca/Documents/work/CS_LAB_ADMIN/Submitty/autograder/tests/data/shipper_config.json
         expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(test_data_path + "/shipper_config.json")
         self.assertEqual(expected, self.capsys.readouterr().out)
 
-        # Confirm VCS checkout logging message
+        # Check if the repository has failed to clone
+        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_clone_repository.txt"), "Failed to clone repository")
+
+        # Check if the repository has a correct branch
+        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
+
+        # Check if the repository url is not valid
+        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_construct_valid_repository_url.txt"), "Failed to create a valid repository url")
+     
+        # Confirm VCS checkout logging messages
         with open(os.path.join(homework_paths["results"], "logs/vcs_checkout.txt")) as actual_vcs_checkout:
-            print("Our path " ,os.path.join(SCRIPT_DIR, "messages/vcs_checkout.txt"))
-            with open(os.path.join(SCRIPT_DIR, "messages/vcs_checkout.txt")) as expected_vcs_checkout:    
-                self.assertEqual(expected_vcs_checkout.read(), actual_vcs_checkout.read())
+           
+           # Check if the paths related to the vcs  are correct
+            self.assertTrue(expected_vcs_checkout in actual_vcs_checkout.read(), "Incorrect File Locations") 
+
+            #return to top of file
+            actual_vcs_checkout.seek(0)
+            #confirm the folder cloned and is found at the correct path
+            expected_folder_contains = """{CHECKOUT_PATH}:
+total 1""".format(CHECKOUT_PATH = checkout_path)
+            self.assertTrue(expected_folder_contains in actual_vcs_checkout.read(), "Folder not cloned/incorrect location")
+
+            actual_vcs_checkout.seek(0)
+            #confirm the subfolder is cloned and is found at the correct path
+            expected_subfolder = """{CHECKOUT_PATH}/subfolder:
+total 1""".format(CHECKOUT_PATH = checkout_path)
+            self.assertTrue(expected_subfolder in actual_vcs_checkout.read(), "Subfolder not cloned/incorrect location")
+
+            #Confirm the size of the file "block" (make sure there aren't any extra/unwanted files)
+            actual_vcs_checkout.seek(0)
+            expected_size = "23K	{CHECKOUT_PATH}".format(CHECKOUT_PATH = checkout_path)
+            self.assertTrue(expected_size in actual_vcs_checkout.read(), "File size is incorrect")
