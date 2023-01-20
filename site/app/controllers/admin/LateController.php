@@ -360,7 +360,7 @@ class LateController extends AbstractController {
             if ($type === "extension" && !$this->validateHomework($fields[1])) {
                 $data = null;
                 return [
-                    "successs" => false,
+                    "success" => false,
                     "error" => "Could not resolve gradeable ID '{$fields[1]}' on row {$row_number}",
                 ];
             }

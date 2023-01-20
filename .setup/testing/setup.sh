@@ -79,5 +79,6 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_websocket_server
+systemctl start submitty_daemon_jobs_handler
 
 echo 'Finished setup.'
