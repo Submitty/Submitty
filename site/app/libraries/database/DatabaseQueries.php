@@ -3144,6 +3144,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$team_id, $g_id, $registration_section, $rotating_section, $team_name];
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section, team_name) VALUES(?,?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", [$team_id, $user_id]);
+        $this->core->getQueries()->getTeamById($team_id)->getAnonId();
         return $team_id;
     }
 
@@ -7069,6 +7070,7 @@ WHERE current_state IN
         else {
             $submitter_data_inject = '
               u.user_id,
+              u.user_numeric_id,
               u.g_anon,
               u.user_firstname,
               u.user_preferred_firstname,
