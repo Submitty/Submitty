@@ -84,6 +84,8 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
+  config.vm.boot_timeout = 600
+
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
     # If this IP address changes, it must be changed in install_system.sh and
