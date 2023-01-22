@@ -368,6 +368,7 @@ class ReportController extends AbstractController {
 
         $user_data = [];
         $user_data['user_id'] = $user->getId();
+        $user_data['user_numeric_id'] = $user->getNumericId();
         $user_data['legal_first_name'] = $user->getLegalFirstName();
         $user_data['preferred_first_name'] = $user->getPreferredFirstName();
         $user_data['legal_last_name'] = $user->getLegalLastName();
