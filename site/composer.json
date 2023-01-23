@@ -36,7 +36,7 @@
     "symfony/config": "5.4.11",
     "symfony/http-foundation": "5.4.17",
     "symfony/polyfill-php80": "1.27.0",
-    "symfony/routing": "5.4.15",
+    "symfony/routing": "5.4.17",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.5.0"
   },
