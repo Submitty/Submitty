@@ -49,7 +49,7 @@ class TokenManager {
         string $user_id,
         $persistent = true
     ): Token {
-        $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
+        $expire_time = $persistent ? (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION))->getTimestamp() : 0;
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
