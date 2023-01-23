@@ -408,7 +408,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function openPoll(): RedirectResponse {
-        $poll_id = intval($_POST['poll_id'] ?? 0);
+        $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -427,7 +427,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function endPoll(): RedirectResponse {
-        $poll_id = intval($_POST['poll_id'] ?? 0);
+        $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -446,7 +446,7 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function closePoll(): RedirectResponse {
-        $poll_id = intval($_POST['poll_id'] ?? 0);
+        $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
         /** @var Poll|null */
         $poll = $em->find(Poll::class, $poll_id);
@@ -520,22 +520,30 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deletePoll(): JsonResponse {
-        $poll_id = intval($_POST['poll_id'] ?? 0);
+        $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
+
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $em->getRepository(Poll::class);
+
         /** @var Poll|null */
-        $poll = $em->find(Poll::class, $poll_id);
+        $poll = $repo->findByIDWithOptions($poll_id);
         if ($poll === null) {
             return JsonResponse::getFailResponse('Invalid Poll ID');
         }
+
         if ($poll->getImagePath() !== null) {
             unlink($poll->getImagePath());
         }
+
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
         }
+
         foreach ($poll->getOptions() as $option) {
             $em->remove($option);
         }
+
         $em->remove($poll);
         $em->flush();
 
