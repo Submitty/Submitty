@@ -334,8 +334,8 @@ CREATE TABLE public.courses_users (
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
-    manual_registration boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
+    manual_registration boolean DEFAULT false,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
@@ -493,7 +493,6 @@ CREATE TABLE public.users (
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
-    display_name_type character varying DEFAULT 'GIVEN F'::character varying NOT NULL,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 
