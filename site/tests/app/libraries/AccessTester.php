@@ -171,4 +171,30 @@ class AccessTester extends BaseUnitTest {
         self::assertFalse($this->access->isGradedGradeableBySubmitter($gg2, $su3));
         self::assertTrue($this->access->isGradedGradeableBySubmitter($gg2, $st1));
     }
+
+    public function testCanUserPathWrite() {
+        $user1 = $this->createMockModel(User::class);
+        $user1->method("getId")->willReturn("user1");
+
+        self::assertFalse($this->access->canUser($user1, "path.write", [
+            "path" => "",
+            "dir" => "course_materials",
+        ]));
+
+        // This is kind of an abuse of the way we actually run the tests.
+        // We don't properly enable mocking for filesystem access, however, based on where tests are run,
+        // composer.json is in the current directory, so the existence check passes...
+        //
+        // Unfortunately, this is likely why most of the filesystem functionality in Access was/is untested.
+        // The "proper" solution would be to abstract out filesystem accesses, so that we can mock properly.
+        self::assertTrue($this->access->canUser($user1, "path.write", [
+            "path" => "composer.json",
+            "dir" => "course_materials",
+        ]));
+
+        self::assertFalse($this->access->canUser($user1, "path.write", [
+            "path" => "../site/composer.json",
+            "dir" => "course_materials",
+        ]));
+    }
 }

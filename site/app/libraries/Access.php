@@ -772,6 +772,11 @@ class Access {
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
+        // This also omits empty paths ("") due to PHP weak typing,
+        // But I think that is also a case we don't mind excluding.
+        if (!$path) {
+            return false;
+        }
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't read it
@@ -895,8 +900,11 @@ class Access {
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
         $parts = [];
         foreach ($orig_parts as $part) {
-            if ($part !== ".." && $part !== ".") {
+            if ($part !== ".") {
                 $parts[] = $part;
+            }
+            if ($part === "..") {
+                return false;
             }
         }
         $path = implode(DIRECTORY_SEPARATOR, $parts);
