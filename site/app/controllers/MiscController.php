@@ -101,7 +101,7 @@ class MiscController extends AbstractController {
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
             $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
-            if (!$res_path) {
+            if ($res_path === false) {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
@@ -234,7 +234,7 @@ class MiscController extends AbstractController {
         $cm = null;
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
             $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
-            if (!$res_path) {
+            if ($res_path === false) {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }

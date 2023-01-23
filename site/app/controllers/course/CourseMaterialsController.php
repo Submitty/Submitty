@@ -118,7 +118,7 @@ class CourseMaterialsController extends AbstractController {
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
-        if (!$path) {
+        if ($path === false) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));

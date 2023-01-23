@@ -4,6 +4,7 @@ namespace tests\app\libraries;
 
 use app\libraries\Access;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\Team;
@@ -178,23 +179,20 @@ class AccessTester extends BaseUnitTest {
 
         self::assertFalse($this->access->canUser($user1, "path.write", [
             "path" => "",
-            "dir" => "course_materials",
+            "dir" => "course_materials"
         ]));
 
-        // This is kind of an abuse of the way we actually run the tests.
-        // We don't properly enable mocking for filesystem access, however, based on where tests are run,
-        // composer.json is in the current directory, so the existence check passes...
-        //
-        // Unfortunately, this is likely why most of the filesystem functionality in Access was/is untested.
-        // The "proper" solution would be to abstract out filesystem accesses, so that we can mock properly.
+        FileUtils::createDir(".access_tester");
+        self::assertTrue(FileUtils::writeFile(".access_tester/test.txt", "data"));
         self::assertTrue($this->access->canUser($user1, "path.write", [
-            "path" => "composer.json",
-            "dir" => "course_materials",
+            "path" => ".access_tester/test.txt",
+            "dir" => "course_materials"
         ]));
 
         self::assertFalse($this->access->canUser($user1, "path.write", [
-            "path" => "../site/composer.json",
-            "dir" => "course_materials",
+            "path" => ".access_tester/../.access_tester/test.txt",
+            "dir" => "course_materials"
         ]));
+        FileUtils::recursiveRmdir(".access_tester");
     }
 }

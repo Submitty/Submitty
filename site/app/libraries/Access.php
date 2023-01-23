@@ -772,9 +772,7 @@ class Access {
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
-        // This also omits empty paths ("") due to PHP weak typing,
-        // But I think that is also a case we don't mind excluding.
-        if (!$path) {
+        if ($path === false) {
             return false;
         }
         $relative_path = substr($path, strlen($info["base"]) + 1);
@@ -885,7 +883,7 @@ class Access {
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path
-     * @return bool|string Absolute path of the file in that directory
+     * @return bool|string Absolute path of the file in that directory or false if unsafe
      */
     public function resolveDirPath(string $dir, string $path) {
         if ($this->directories === null) {
@@ -900,11 +898,11 @@ class Access {
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
         $parts = [];
         foreach ($orig_parts as $part) {
-            if ($part !== ".") {
-                $parts[] = $part;
-            }
             if ($part === "..") {
                 return false;
+            }
+            if ($part !== ".") {
+                $parts[] = $part;
             }
         }
         $path = implode(DIRECTORY_SEPARATOR, $parts);
