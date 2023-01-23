@@ -650,6 +650,10 @@ progress::-webkit-progress-value {
     font-size: 16pt;
 }
 
+.grading_label:nth-child(even){
+    background-color: #B0B0B0;
+}
+
 .banner {
     border: solid 6px var(--important-post);
     position: relative;
