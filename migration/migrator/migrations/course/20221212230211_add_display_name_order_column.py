@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name_order character varying(255) NOT NULL DEFAULT 'GIVEN F';")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name_order character varying(255) NOT NULL DEFAULT 'GIVEN_F';")
     pass
 
 
