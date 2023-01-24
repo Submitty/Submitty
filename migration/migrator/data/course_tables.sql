@@ -25,6 +25,42 @@ CREATE TYPE public.notifications_component AS ENUM (
 );
 
 
+--
+-- Name: add_course_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.add_course_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            temp_row RECORD;
+            random_str TEXT;
+            num_rows INT;
+        BEGIN
+            FOR temp_row IN SELECT g_id FROM gradeable LOOP
+                LOOP
+                    random_str = random_string(15);
+                    PERFORM 1 FROM gradeable_anon
+                    WHERE g_id=temp_row.g_id AND anon_id=random_str;
+                    GET DIAGNOSTICS num_rows = ROW_COUNT;
+                    IF num_rows = 0 THEN
+                        EXIT;
+                    END IF;
+                END LOOP;
+                INSERT INTO gradeable_anon (
+                    SELECT NEW.user_id, temp_row.g_id, random_str
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM gradeable_anon
+                        WHERE user_id=NEW.user_id AND g_id=temp_row.g_id
+                    )
+                );
+            END LOOP;
+            RETURN NULL;
+        END;
+    $$;
+
+
 SET default_tablespace = '';
 
 
@@ -536,6 +572,29 @@ CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
 
 
 --
+-- Name: random_string(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.random_string(length integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+            result text := '';
+            i integer := 0;
+        BEGIN
+            IF length < 0 THEN
+                raise exception 'Given length cannot be less than 0';
+            END IF;
+            FOR i IN 1..length LOOP
+                result := result || chars[1+random()*(array_length(chars, 1)-1)];
+            END LOOP;
+            RETURN result;
+        END;
+    $$;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -680,7 +739,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_scanned_exam boolean DEFAULT false NOT NULL,
+    eg_student_download boolean DEFAULT false NOT NULL,
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
@@ -2270,10 +2329,31 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
+-- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_component_data_no_grader_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX gradeable_component_data_no_grader_index ON public.gradeable_component_data USING btree (gc_id, gd_id);
+
+
+--
+-- Name: gradeable_component_mark_data_gcm_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_component_mark_data USING btree (gcm_id);
 
 
 --
@@ -2291,6 +2371,20 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree
 
 
 --
+-- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USING btree (user_id);
+
+
+--
+-- Name: grading_registration_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_index ON public.grading_registration USING btree (user_id);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2298,10 +2392,24 @@ CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g
 
 
 --
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric_id);
+
+
+--
+-- Name: users add_course_user; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
 
 
 --

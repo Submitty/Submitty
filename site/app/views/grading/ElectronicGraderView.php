@@ -36,6 +36,8 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
 
+    private $user_id_to_User_cache = [];
+
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -440,7 +442,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids) {
         $peer = false;
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             $peer = true;
@@ -826,7 +828,9 @@ HTML;
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
             "message" => $message,
-            "message_warning" => $message_warning
+            "message_warning" => $message_warning,
+            "overrides" => $overrides,
+            "anon_ids" => $anon_ids
         ]);
     }
 
@@ -951,12 +955,12 @@ HTML;
                 ];
             }
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
             $pattern1 = "upload.pdf";
-            $pattern2 = "/upload_page_\d+/";
-            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern2 = "/\.upload_page_\d+/";
+            $pattern3 = "/\.upload_version_\d+_page\d+/";
             $pattern4 = ".submit.timestamp";
-            $pattern5 = "bulk_upload_data.json";
+            $pattern5 = ".bulk_upload_data.json";
 
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
@@ -1259,7 +1263,10 @@ HTML;
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                $user_or_team = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                if (!array_key_exists($user_id[0], $this->user_id_to_User_cache)) {
+                    $this->user_id_to_User_cache[$user_id[0]] = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                }
+                $user_or_team = $this->user_id_to_User_cache[$user_id[0]];
                 $anon_id = $user_or_team->getAnonId($g_id);
                 $anon_path = $anon_path . "/" . $anon_id;
             }
@@ -1297,6 +1304,7 @@ HTML;
                         array_pop($path);
                         $working_dir = &$files[$start_dir_name];
                         foreach ($path as $dir) {
+                            /** @var array $working_dir */
                             if (!isset($working_dir[$dir])) {
                                 $working_dir[$dir] = [];
                             }

@@ -13,7 +13,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
- * @method void getNumericId()
+ * @method string getNumericId()
  * @method void setNumericId(string $id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
@@ -152,6 +152,9 @@ class User extends AbstractModel {
     /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
 
+    /** @var array A cache of [gradeable id] => [anon id] */
+    private $anon_id_by_gradeable = [];
+
     /**
      * User constructor.
      *
@@ -226,7 +229,7 @@ class User extends AbstractModel {
     /**
      * Gets the message the user sets when seeking a team or a parter
      * @param string $g_id the gradeable where the user is seeking for a team
-     * @return string, message if it exists or N/A if it doesnt
+     * @return string, message if it exists or N/A if it doesn't
      */
     public function getSeekMessage($g_id): string {
         $ret = $this->core->getQueries()->getSeekMessageByUserId($g_id, $this->id);
@@ -462,8 +465,14 @@ class User extends AbstractModel {
         if ($g_id === "") {
             return "";
         }
-        $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
-        $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
+        if (array_key_exists($g_id, $this->anon_id_by_gradeable)) {
+            $anon_id = $this->anon_id_by_gradeable[$g_id];
+        }
+        else {
+            $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+            $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
+            $this->anon_id_by_gradeable[$g_id] = $anon_id;
+        }
         if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);
@@ -471,8 +480,8 @@ class User extends AbstractModel {
             do {
                 $random = "";
                 for ($i = 0; $i < 15; $i++) {
-                    // this throws an exception if there's no avaiable source for generating
-                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // this throws an exception if there's no available source for generating
+                    // random exists, but that shouldn't happen on our targeted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
@@ -498,12 +507,12 @@ class User extends AbstractModel {
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_firstname':
             case 'user_legal_lastname':
-                //First and last name must be alpha characters, white-space, or certain punctuation.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+                //First and last name must be alpha characters, latin chars, white-space, or certain punctuation.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
             case 'user_preferred_firstname':
             case 'user_preferred_lastname':
-                //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
+                //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...

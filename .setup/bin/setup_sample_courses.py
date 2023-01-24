@@ -66,7 +66,7 @@ NOW = dateutils.get_current_time()
 
 def main():
     """
-    Main program execution. This gets us our commandline arugments, reads in the data files,
+    Main program execution. This gets us our commandline arguments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
@@ -106,7 +106,7 @@ def main():
     # permission errors exist) which ends up with just having a ton of
     # build failures. Better to wait on grading any homeworks until
     # we've done all steps of setting up a course.
-    print("pausing the autograding and jobs hander daemons")
+    print("pausing the autograding and jobs handler daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
@@ -265,10 +265,10 @@ def get_random_text_from_file(filename):
     line = ""
     with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
-        for num, aline in enumerate(comment):
+        for num, alternate_line in enumerate(comment):
             if random.randrange(num + 2):
                 continue
-            line = aline
+            line = alternate_line
     return line.strip()
 
 
@@ -552,8 +552,8 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper funtion that copys a annotation from the source to the destination.
-    The source annotation need to be modifed to reflect:
+    Specifically designed helper function that copies a annotation from the source to the destination.
+    The source annotation need to be modified to reflect:
         the file that the annotations belongs to
         the grader that is responsible for the annotation
 
@@ -1817,6 +1817,7 @@ class Gradeable(object):
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
+            self.student_download = True
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
@@ -1828,6 +1829,8 @@ class Gradeable(object):
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_student_view' in gradeable:
                 self.student_view = gradeable['eg_student_view'] is True
+            if 'eg_student_download' in gradeable:
+                self.student_download = gradeable['eg_student_download'] is True
             if 'eg_student_submit' in gradeable:
                 self.student_submit = gradeable['eg_student_submit'] is True
             if 'eg_late_days' in gradeable:
@@ -1942,6 +1945,7 @@ class Gradeable(object):
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
+                         eg_student_download=self.student_download,
                          eg_student_submit=self.student_submit,
                          eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,

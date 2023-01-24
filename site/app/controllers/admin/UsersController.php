@@ -357,6 +357,9 @@ class UsersController extends AbstractController {
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
+                if ($authentication instanceof SamlAuthentication) {
+                    $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
+                }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
@@ -742,7 +745,7 @@ class UsersController extends AbstractController {
                 curl_close($ch);
             }
             else {
-                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly receive spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
         }
@@ -815,6 +818,9 @@ class UsersController extends AbstractController {
                         //User must first exist in Submitty before being enrolled to a course.
                         if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
+                            if ($this->core->getAuthentication() instanceof SamlAuthentication) {
+                                $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
+                            }
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                         break;
@@ -864,7 +870,7 @@ class UsersController extends AbstractController {
         $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
         $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
-        $bad_columns = []; //Tracks columns in which errors occured
+        $bad_columns = []; //Tracks columns in which errors occurred
 
         /* Used for validation of grading assignment for graders to registration sections. Graders cannot
           be assigned to grade the (created-by-default) null registration section. */
