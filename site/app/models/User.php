@@ -13,7 +13,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
- * @method void getNumericId()
+ * @method string getNumericId()
  * @method void setNumericId(string $id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user

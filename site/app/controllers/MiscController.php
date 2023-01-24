@@ -100,7 +100,12 @@ class MiscController extends AbstractController {
         $cm = null;
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
             if ($dir === 'course_materials') {
                 $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
@@ -228,7 +233,12 @@ class MiscController extends AbstractController {
         // security check
         $cm = null;
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
         }
         elseif ($course_material_id !== null) {
             $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
