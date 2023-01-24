@@ -383,12 +383,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->method('findOneBy')
             ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
-        $repository
-            ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$course_material]);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(2))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);

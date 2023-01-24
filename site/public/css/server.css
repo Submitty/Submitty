@@ -1,5 +1,5 @@
-@import "reset.css";
-@import "google/inconsolata.css";
+@import url("reset.css");
+@import url("google/inconsolata.css");
 
 /* stylelint-disable no-descending-specificity */
 
@@ -1675,7 +1675,7 @@ end of styles used in the admin gradeable page
 }
 
 #skip-nav {
-    /* 90px is the heigth of the navbar and this makes sure the
+    /* 90px is the height of the navbar and this makes sure the
     skip-nav shows up below the navbar instead of on top of it */
     margin: 90px 10px 10px;
 }

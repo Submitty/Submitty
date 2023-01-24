@@ -1,6 +1,6 @@
 /* OUTPUT: ERROR: ABORT SIGNAL
  *         Program Terminated
- *         (RED) WARNING: This file should be empty (Refering to STDERR)
+ *         (RED) WARNING: This file should be empty (Referring to STDERR)
  *         Student Standard ERROR (STDERR)
  *         *** Error in `./a.out': free(): invalid next size (fast): 0x0000000000efa
  * Child exited with status 6

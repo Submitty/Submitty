@@ -115,7 +115,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
             doc.addPage();
         }
         pdf.getPage(num).then((page) => {
-            const viewport = page.getViewport({scale:1});
+            const viewport = page.getViewport({scale:1.5});
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -153,7 +153,9 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                         }
                     }
                     const imgData = canvas.toDataURL('image/png');
-                    doc.addImage(imgData, 'PNG', 15, 15);
+                    const width = doc.internal.pageSize.getWidth();
+                    const height = doc.internal.pageSize.getHeight();
+                    doc.addImage(imgData, 'PNG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
                     //TODO: Get the saving and loading from annotated_pdfs working
                     /*console.log("CHECK2");
@@ -309,7 +311,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
 
 // TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 // the code below will remove the annotation info from local storage when a new window pops up
-// unload event should not be avioded as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
+// unload event should not be avoided as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
 /**
 $(window).on('unload', () => {
     for (let i = 0; i < localStorage.length; i++) {

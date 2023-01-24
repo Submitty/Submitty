@@ -254,7 +254,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Creates a file with teh given contents to be used to upload for a specified part.
+     * Creates a file with the given contents to be used to upload for a specified part.
      *
      * @param string $filename
      * @param string $content

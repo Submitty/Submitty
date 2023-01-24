@@ -7,7 +7,7 @@
 
 #include <nlohmann/json.hpp>
 
-/* DESCRIPTION: Contains the differences in a block for a student's ouput
+/* DESCRIPTION: Contains the differences in a block for a student's output
  * and the expected output */
 class Change {
 public:
