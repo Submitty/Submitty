@@ -189,7 +189,7 @@ class TestAutogradingShipper(unittest.TestCase):
 
         course_config_file = os.path.join(course_dir, "config", "config.json")
         #open config file and copy to test directory
-        with open(os.path.join(test_data_path, "test_files", 'config.json')) as config_file:
+        with open(os.path.join(test_data_path, "config_files", 'config.json')) as config_file:
             
             with open(course_config_file, 'w') as new_config_file:
                 open_file.write(config_file.read().replace("VCS_BASE_URL", test_data_path))
@@ -197,16 +197,8 @@ class TestAutogradingShipper(unittest.TestCase):
         # write course form config
         course_form_config_file = os.path.join(course_dir, "config", "form", "form_homework_01.json")
         with open(course_form_config_file, 'w') as open_file:
-            file_contents = """
-{
-    "gradeable_id": "homework_01",
-    "config_path": "CONFIG_PATH",
-    "date_due": "2022-10-06 23:59:59-0700",
-    "upload_type": "repository",
-    "subdirectory": "homework_01"
-}
-"""
-            open_file.write(file_contents.replace("CONFIG_PATH", test_data_path))
+            with open(os.path.join(test_data_path, "config_files", 'homework_form.json')) as form_file:
+                open_file.write(form_file.read().replace("CONFIG_PATH", test_data_path))
 
         # Initialize git homework directory
         os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(test_data_path))
@@ -216,45 +208,51 @@ class TestAutogradingShipper(unittest.TestCase):
         #get the path of the folder to clone the repository to, to then checkout later
         checkout_path = os.path.join(course_dir, "checkout", partial_path)
 
-        expected_vcs_checkout = """VCS CHECKOUT
-vcs_base_url {TEST_DATA_PATH}
-vcs_subdirectory homework_01
-vcs_path file:///{HOMEWORK_PATH}
-/usr/bin/git clone file:///{HOMEWORK_PATH} {CHECKOUT_PATH} --depth 1 -b master""".format(TEST_DATA_PATH = test_data_path, HOMEWORK_PATH = test_data_path + "/homework_01", CHECKOUT_PATH = checkout_path)
-
+      
         # Confirm standard out
         expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(test_data_path + "/shipper_config.json")
         self.assertEqual(expected, self.capsys.readouterr().out)
 
         # Check if the repository has failed to clone
-        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_clone_repository.txt"), "Failed to clone repository")
-
-        # Check if the repository has a correct branch
-        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
-
-        # Check if the repository url is not valid
-        self.assertFalse(os.path.isfile(checkout_path+"/failed_to_construct_valid_repository_url.txt"), "Failed to create a valid repository url")
+      
+            
+        self.assertFalse(file for file in os.listdir(checkout_path) if file.startswith("failed"))
      
         # Confirm VCS checkout logging messages
         with open(os.path.join(homework_paths["results"], "logs/vcs_checkout.txt")) as actual_vcs_checkout:
            
            # Check if the paths related to the vcs  are correct
-            self.assertTrue(expected_vcs_checkout in actual_vcs_checkout.read(), "Incorrect File Locations") 
+            with open(os.path.join(test_data_path, "config_files", 'homework_form.json')) as expected_vcs_checkout:
+                self.assertTrue(expected_vcs_checkout.replace("TEST_DATA_PATH", test_data_path, "HOMEWORK_PATH", test_data_path + "/homework_01", "CHECKOUT_PATH", checkout_path) in actual_vcs_checkout.read(), "Incorrect File Locations") 
 
             #return to top of file
             actual_vcs_checkout.seek(0)
             #confirm the folder cloned and is found at the correct path
-            expected_folder_contains = """{CHECKOUT_PATH}:
-total 1""".format(CHECKOUT_PATH = checkout_path)
+            expected_folder_contains = "{CHECKOUT_PATH}:\ntotal 1".format(CHECKOUT_PATH = checkout_path)
             self.assertTrue(expected_folder_contains in actual_vcs_checkout.read(), "Folder not cloned/incorrect location")
 
             actual_vcs_checkout.seek(0)
             #confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = """{CHECKOUT_PATH}/subfolder:
-total 1""".format(CHECKOUT_PATH = checkout_path)
+            expected_subfolder = "{CHECKOUT_PATH}/subfolder:\ntotal 1".format(CHECKOUT_PATH = checkout_path)
             self.assertTrue(expected_subfolder in actual_vcs_checkout.read(), "Subfolder not cloned/incorrect location")
 
             #Confirm the size of the file "block" (make sure there aren't any extra/unwanted files)
             actual_vcs_checkout.seek(0)
             expected_size = "23K	{CHECKOUT_PATH}".format(CHECKOUT_PATH = checkout_path)
             self.assertTrue(expected_size in actual_vcs_checkout.read(), "File size is incorrect")
+
+
+
+
+
+
+
+        # # Check if the repository has failed to clone
+        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_clone_repository.txt"), "Failed to clone repository")
+
+        # # Check if the repository has a correct branch
+        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
+
+        # # Check if the repository url is not valid
+        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_construct_valid_repository_url.txt"), "Failed to create a valid repository url")
+     
