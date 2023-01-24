@@ -1304,6 +1304,7 @@ HTML;
                         array_pop($path);
                         $working_dir = &$files[$start_dir_name];
                         foreach ($path as $dir) {
+                            /** @var array $working_dir */
                             if (!isset($working_dir[$dir])) {
                                 $working_dir[$dir] = [];
                             }
