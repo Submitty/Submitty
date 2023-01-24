@@ -238,6 +238,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
+    #codemirror6
+    mkdir ${VENDOR_FOLDER}/codemirror
+    mkdir ${VENDOR_FOLDER}/codemirror/state
+    mkdir ${VENDOR_FOLDER}/codemirror/view
+    mkdir ${VENDOR_FOLDER}/codemirror/commands
+
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
