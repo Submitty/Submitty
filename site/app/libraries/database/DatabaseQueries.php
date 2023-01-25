@@ -7070,6 +7070,7 @@ WHERE current_state IN
         else {
             $submitter_data_inject = '
               u.user_id,
+              u.user_numeric_id,
               u.g_anon,
               u.user_firstname,
               u.user_preferred_firstname,
