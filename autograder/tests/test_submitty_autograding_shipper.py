@@ -201,58 +201,60 @@ class TestAutogradingShipper(unittest.TestCase):
                 open_file.write(form_file.read().replace("CONFIG_PATH", test_data_path))
 
         # Initialize git homework directory
-        os.system("cd {}/homework_01;  git init; git add -A; git commit -m \"testing\"".format(test_data_path))
+        os.system("cd {}/homework_01; git init; git add -A; git commit -m \"testing\"".format(test_data_path))
         # Start test
         results = shipper.checkout_vcs_repo(CONFIG, os.path.join(test_data_path, 'shipper_config.json'))
 
         #get the path of the folder to clone the repository to, to then checkout later
         checkout_path = os.path.join(course_dir, "checkout", partial_path)
-
       
         # Confirm standard out
         expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(test_data_path + "/shipper_config.json")
         self.assertEqual(expected, self.capsys.readouterr().out)
 
         # Check if the repository has failed to clone
-      
-            
-        self.assertFalse(file for file in os.listdir(checkout_path) if file.startswith("failed"))
+        failed_files = [file for file in os.listdir(checkout_path) if file.startswith("failed")]
+        self.assertTrue(len(failed_files) == 0)
      
         # Confirm VCS checkout logging messages
         with open(os.path.join(homework_paths["results"], "logs/vcs_checkout.txt")) as actual_vcs_checkout:
-           
+           check_against = actual_vcs_checkout.read()
            # Check if the paths related to the vcs  are correct
             with open(os.path.join(test_data_path, "config_files", 'homework_form.json')) as expected_vcs_checkout:
-                self.assertTrue(expected_vcs_checkout.replace("TEST_DATA_PATH", test_data_path, "HOMEWORK_PATH", test_data_path + "/homework_01", "CHECKOUT_PATH", checkout_path) in actual_vcs_checkout.read(), "Incorrect File Locations") 
+                self.assertTrue(expected_vcs_checkout.replace("TEST_DATA_PATH", test_data_path, "HOMEWORK_PATH", test_data_path + "/homework_01", "CHECKOUT_PATH", checkout_path) in check_against, "Incorrect File Locations") 
 
-            #return to top of file
-            actual_vcs_checkout.seek(0)
             #confirm the folder cloned and is found at the correct path
             expected_folder_contains = "{CHECKOUT_PATH}:\ntotal 1".format(CHECKOUT_PATH = checkout_path)
-            self.assertTrue(expected_folder_contains in actual_vcs_checkout.read(), "Folder not cloned/incorrect location")
+            self.assertTrue(expected_folder_contains in check_against, "Folder not cloned/incorrect location")
 
-            actual_vcs_checkout.seek(0)
             #confirm the subfolder is cloned and is found at the correct path
             expected_subfolder = "{CHECKOUT_PATH}/subfolder:\ntotal 1".format(CHECKOUT_PATH = checkout_path)
-            self.assertTrue(expected_subfolder in actual_vcs_checkout.read(), "Subfolder not cloned/incorrect location")
+            self.assertTrue(expected_subfolder in check_against, "Subfolder not cloned/incorrect location")
 
             #Confirm the size of the file "block" (make sure there aren't any extra/unwanted files)
-            actual_vcs_checkout.seek(0)
             expected_size = "23K	{CHECKOUT_PATH}".format(CHECKOUT_PATH = checkout_path)
-            self.assertTrue(expected_size in actual_vcs_checkout.read(), "File size is incorrect")
+            self.assertTrue(expected_size in check_against, "File size is incorrect")
 
-
-
-
-
-
-
-        # # Check if the repository has failed to clone
-        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_clone_repository.txt"), "Failed to clone repository")
-
-        # # Check if the repository has a correct branch
-        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
-
+      # Check if the repository has failed to clone (in this case, the directory is not a repository)
+      def test_failed_to_clone_no_repo(self):
+        os.system('rm {}/homework_01/.git'.format(TEST_DATA_DIR))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+        self.assertTrue(os.path.isfile(checkout_path+"/failed_to_clone_repository.txt"), "Failed to clone repository")
+      
+      # Check if the repository has a current version on the master branch
+      # TODO : make this test work without having the repository fail to clone. 
+      # Investigate whether configuring a different path works, or if you have to not commit, etc. 
+      def test_correct_version(self):
+        os.system('cd {}/homework_01; git init'.format(TEST_DATA_DIR))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+        self.assertTrue(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
+        
+      def test_invalid_url(self):
         # # Check if the repository url is not valid
-        # self.assertFalse(os.path.isfile(checkout_path+"/failed_to_construct_valid_repository_url.txt"), "Failed to create a valid repository url")
+        with open(os.path.join(TEST_DATA_DIR, 'shipper_config.json'), 'w') as config_file:
+          valid_config = open_file.read()
+          open_file.write(valid_config.replace("test_student", ""))
+          shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+          open_file.write(valid_config)
+        self.assertTrue(os.path.isfile(checkout_path+"/failed_to_construct_valid_repository_url.txt"), "Failed to create a valid repository url")
      
