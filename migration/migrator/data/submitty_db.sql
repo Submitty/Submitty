@@ -320,7 +320,8 @@ CREATE TABLE public.courses (
 CREATE TABLE public.courses_registration_sections (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
-    registration_section_id character varying(255) NOT NULL
+    registration_section_id character varying(255) NOT NULL,
+    course_id character varying(255) DEFAULT ''::character varying
 );
 
 
