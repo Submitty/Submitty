@@ -254,6 +254,7 @@ BEGIN
         IF query_string IS NULL THEN
             RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section() when doing UPDATE';
         END IF;
+        PERFORM dblink_exec(db_conn, query_string);
     END IF;
 
     -- All done.
