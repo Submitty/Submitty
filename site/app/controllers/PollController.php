@@ -68,7 +68,6 @@ class PollController extends AbstractController {
             return new WebResponse(
                 PollView::class,
                 'showPollsInstructor',
-                // release_date = ? order by name
                 $todays_polls,
                 $old_polls,
                 $future_polls,

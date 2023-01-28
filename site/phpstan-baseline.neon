@@ -197,11 +197,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Call to an undefined method Doctrine\\\\ORM\\\\EntityRepository\\<app\\\\entities\\\\poll\\\\Poll\\>\\:\\:findAllWithAllResponses\\(\\)\\.$#"
-			count: 1
-			path: app/controllers/admin/ReportController.php
-
-		-
 			message: """
 				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return WebResponse directly$#

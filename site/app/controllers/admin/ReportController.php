@@ -391,7 +391,9 @@ class ReportController extends AbstractController {
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {
-        $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAllWithAllResponses();
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
+        $polls = $repo->findAllWithAllResponses();
         $polls_data = [];
         foreach ($polls as $poll) {
             $responses = [];
