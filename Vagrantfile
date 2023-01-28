@@ -77,6 +77,18 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
+  config.vm.boot_timeout=600
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+    v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+    v.customize ["modifyvm", :id, "--audio", "none"]
+    v.customize ["modifyvm", :id, "--usb", "off"]
+    v.customize ["modifyvm", :id, "--uart1", "off"]
+    v.customize ["modifyvm", :id, "--uart2", "off"]
+    v.customize ["modifyvm", :id, "--uart3", "off"]
+    v.customize ["modifyvm", :id, "--uart4", "off"]
+  end
+  # config.ssh.private_key_path = 'id_rsa'
   mount_options = []
 
   # Specify the various machines that we might develop on. After defining a name, we
