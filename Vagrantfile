@@ -88,7 +88,6 @@ Vagrant.configure(2) do |config|
     v.customize ["modifyvm", :id, "--uart3", "off"]
     v.customize ["modifyvm", :id, "--uart4", "off"]
   end
-  # config.ssh.private_key_path = 'id_rsa'
   mount_options = []
 
   # Specify the various machines that we might develop on. After defining a name, we
