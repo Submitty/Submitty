@@ -14,12 +14,12 @@
 #
 #   anon_id: string representing an alternate anonymous id for the user that can be used when anonymity is required
 #
-#   user_firstname: string for the user's first name
+#   user_givenname: string for the user's given name
 #
-#   user_preferred_firstname: [optional] name to display for user instead of their legal first name
+#   user_preferred_givenname: [optional] name to display for user instead of their legal given name
 #         If this is omitted, then it will go into the database as NULL
 #
-#   user_lastname: string to display as the user's last name
+#   user_familyname: string to display as the user's family name
 #
 #   user_email: [optional] string for the user's email.
 #         If this is omitted, then it will go into the database as <user_id>@example.com
@@ -66,4 +66,4 @@
 #   sudo: [optional] boolean on whether to give user sudo access. Defaults to False.
 #
 # If you need help coming up with a name for some fake user: http://random-name-generator.info/ and then just make the
-# user_id be first five letters of last name + first letter of first name.
+# user_id be first five letters of family name + first letter of given name.
