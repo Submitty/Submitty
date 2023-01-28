@@ -90,6 +90,9 @@ Vagrant.configure(2) do |config|
   end
   mount_options = []
 
+  # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
+  config.vm.boot_timeout = 600
+
   # Specify the various machines that we might develop on. After defining a name, we
   # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use
   # that one) as well as making sure all non-primary ones have "autostart: false" set
