@@ -80,8 +80,8 @@ class SamlManagerController extends AbstractController {
 
         $error_msg = "";
         $error_msg .= User::validateUserData('user_id', $user_id) ? "" : "Error in User ID\n";
-        $error_msg .= User::validateUserData('user_legal_firstname', trim($_POST['user_first_name'])) ? "" : "Error in first name\n";
-        $error_msg .= User::validateUserData('user_legal_lastname', trim($_POST['user_last_name'])) ? "" : "Error in last name\n";
+        $error_msg .= User::validateUserData('user_legal_givenname', trim($_POST['user_given_name'])) ? "" : "Error in first name\n";
+        $error_msg .= User::validateUserData('user_legal_familyname', trim($_POST['user_family_name'])) ? "" : "Error in last name\n";
         $error_msg .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email\n";
 
         if (!is_numeric(trim($_POST['user_numeric_id']))) {
@@ -100,8 +100,8 @@ class SamlManagerController extends AbstractController {
 
         $user = new User($this->core);
         $user->setId($user_id);
-        $user->setLegalFirstName(trim($_POST['user_first_name']));
-        $user->setLegalLastName(trim($_POST['user_last_name']));
+        $user->setLegalGivenName(trim($_POST['user_given_name']));
+        $user->setLegalFamilyName(trim($_POST['user_family_name']));
         $user->setEmail(trim($_POST['user_email']));
         $user->setNumericId(trim($_POST['user_numeric_id']));
 

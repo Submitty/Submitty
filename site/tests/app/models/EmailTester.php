@@ -20,9 +20,9 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $config->setCourse('csci1100');
         $user = new User($this->core, [
             'user_id' => 'test',
-            'user_firstname' => 'Tester',
-            'user_preferred_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Tester',
+            'user_preferred_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
