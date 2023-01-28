@@ -122,6 +122,6 @@ Toshi Piazza
 Matt Raneri  
 Chris Reed  
 Zachary Wimer  
-Fu Chai
-Asher Gottlieb
+Fu Chai  
+Asher Gottlieb  
 For their bug reports of specific security vulnerabilities :)  
