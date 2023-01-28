@@ -30,10 +30,10 @@
                             Team:<br/>
 
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
-                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                                &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}
-                            {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                            {{ submitter.getUser().getDisplayedGivenName() }} {{ submitter.getUser().getDisplayedFamilyName() }} ({{ submitter.getId() }})
                             <br/>
                         {% endif %}
 
@@ -48,7 +48,7 @@
                         <div class="tab-bar-wrapper">
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
                                 <a class="nav-bar key_to_click" id="page_{{loop.index}}_nav" onclick="onChangeNavTab({{loop.index}});"> 
-                                    {{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})
+                                    {{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})
                                 </a>
                             {% endfor %}
                         </div>

@@ -111,7 +111,7 @@ class OfficeHoursQueueModel extends AbstractModel {
             $this->last_queue_details = $this->core->getQueries()->getLastQueueDetails();
         }
         if (!array_key_exists('name', $this->last_queue_details)) {
-            return $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
+            return $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName();
         }
         return $this->last_queue_details['name'];
     }
@@ -234,6 +234,75 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getCurrentTimePausedStart(): ?string {
         return $this->current_queue_state['time_paused_start'];
+    }
+
+    /**
+     * function to return the name of the person who is currently helping the
+     * student of a particular query row, if null is passed in, it will return
+     * the name of the person who is currently helping the student in
+     * $this->current_queue_state
+     * @param array|null $query_row
+     * @return string
+     */
+    public function getHelperName($query_row = null): string {
+
+        if ($query_row == null) {
+            $query_row = $this->current_queue_state;
+        }
+
+        $user_info = [];
+        $user_info["user_firstname"] = $query_row["helper_firstname"];
+        $user_info["user_preferred_firstname"] = $query_row["helper_preferred_firstname"];
+        $user_info["user_lastname"] = $query_row["helper_lastname"];
+        $user_info["user_preferred_lastname"] = $query_row["helper_preferred_lastname"];
+        $user_info["user_id"] = $query_row["helper_id"];
+        $user_info["user_email"] = $query_row["helper_email"];
+        $user_info["user_email_secondary"] = $query_row["helper_email_secondary"];
+        $user_info["user_email_secondary_notify"] = $query_row["helper_email_secondary_notify"];
+        $user_info["user_group"] = $query_row["helper_group"];
+
+        $user = new User($this->core, $user_info);
+
+        if ($user->accessFullGrading()) {
+            return $user->getDisplayFullName();
+        }
+        else {
+            return $user->getDisplayAbbreviatedName();
+        }
+    }
+
+    /**
+     * function to return the name of the person who is removed the student of a
+     * particular query row, if null is passed in, it will return the name of
+     * the person who removed the student in $this->current_queue_state
+     * @param array|null $query_row
+     * @return string
+     */
+    public function getRemoverName($query_row = null): string {
+
+        if ($query_row == null) {
+            $query_row = $this->current_queue_state;
+        }
+
+        $user_info = [];
+        $user_info["user_firstname"] = $query_row["remover_firstname"];
+        $user_info["user_preferred_firstname"] = $query_row["remover_preferred_firstname"];
+        $user_info["user_lastname"] = $query_row["remover_lastname"];
+        $user_info["user_preferred_lastname"] = $query_row["remover_preferred_lastname"];
+        $user_info["user_id"] = $query_row["remover_id"];
+        $user_info["user_email"] = $query_row["remover_email"];
+        $user_info["user_email_secondary"] = $query_row["remover_email_secondary"];
+        $user_info["user_email_secondary_notify"] = $query_row["remover_email_secondary_notify"];
+        $user_info["user_group"] = $query_row["remover_group"];
+
+        $user = new User($this->core, $user_info);
+
+        if ($user->accessFullGrading()) {
+            return $user->getDisplayFullName();
+        }
+        else {
+            return $user->getDisplayAbbreviatedName();
+        }
     }
 
     public function cleanForId($queue_code) {

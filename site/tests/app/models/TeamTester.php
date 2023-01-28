@@ -11,8 +11,8 @@ class TeamTester extends BaseUnitTest {
                 [
                     'state' => 1,
                     'user_id' => 'user1',
-                    'user_firstname' => 'User',
-                    'user_lastname' => 'One',
+                    'user_givenname' => 'User',
+                    'user_familyname' => 'One',
                     'user_email' => 'user1@example.com',
                     'user_email_secondary' => null,
                     'user_email_secondary_notify' => false
@@ -20,8 +20,8 @@ class TeamTester extends BaseUnitTest {
                 [
                     'state' => 0,
                     'user_id' => 'user2',
-                    'user_firstname' => 'User',
-                    'user_lastname' => 'Two',
+                    'user_givenname' => 'User',
+                    'user_familyname' => 'Two',
                     'user_email' => 'user2@example.com',
                     'user_email_secondary' => null,
                     'user_email_secondary_notify' => false
