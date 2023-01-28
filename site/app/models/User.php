@@ -444,7 +444,7 @@ class User extends AbstractModel {
     }
 
     public function getDisplayAbbreviatedName(): string {
-        return $this->getDisplayedFirstName() . ' ' . substr($this->getDisplayedLastName(), 0, 1) . '.';
+        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
     }
 
     public function setRegistrationSection($section) {
