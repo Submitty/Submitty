@@ -269,8 +269,6 @@ class PollController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function submitEdits(): RedirectResponse {
-        $em = $this->core->getCourseEntityManager();
-
         $returnUrl = $this->core->buildCourseUrl(['polls']);
         $poll_id = (int) $_POST['poll_id'];
         if (empty($poll_id)) {
@@ -278,8 +276,13 @@ class PollController extends AbstractController {
             return new RedirectResponse($returnUrl);
         }
 
+        $em = $this->core->getCourseEntityManager();
+
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $em->getRepository(Poll::class);
+
         /** @var Poll|null */
-        $poll = $em->find(Poll::class, $poll_id);
+        $poll = $repo->findByIDWithOptions($poll_id);
 
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -540,7 +543,7 @@ class PollController extends AbstractController {
         }
 
         foreach ($poll->getOptions() as $option) {
-            $em->remove($option);
+            $poll->removeOption($option);
         }
 
         $em->remove($poll);
