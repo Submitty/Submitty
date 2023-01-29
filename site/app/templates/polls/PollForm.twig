@@ -365,14 +365,14 @@
 
     $(document).ready(function() {
         setEventHandlers();
-        $("#new-poll-form").on("change click", submitErrorChecks);
-        $("#edit-poll-form").on("change click", submitErrorChecks);
-        $("#new-poll-form").submit(function() {
+        $("#poll-form-submit").on("change click", submitErrorChecks);
+        $("#poll-form-submit").on("change click", submitErrorChecks);
+        $("#poll-form-submit").submit(function() {
             $("#poll-form-submit").prop("disabled", true);
             return true;
         });
         let submit_form = false;
-        $("#edit-poll-form").submit(function(event) {
+        $("#poll-form-submit").click(function(event) {
             if (!submit_form) {
                 if ((poll_type != "single-response"
                         && ($('#poll-type-single-response-single-correct').is(':checked')
