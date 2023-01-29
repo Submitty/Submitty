@@ -25,6 +25,10 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
+Akshat Batra, 2022, Google Summer of Code 2022  
+Madhur Jain, 2022, Google Summer of Code 2022  
+Poorna Gunathilaka, 2022, Google Summer of Code 2022  
+Matthew Bonnecaze 2022  
 Ben Kelly 2019-2022  
 Dan Janikowski 2022  
 Joe Krystowski, 2021-2022  
@@ -118,6 +122,6 @@ Toshi Piazza
 Matt Raneri  
 Chris Reed  
 Zachary Wimer  
-Fu Chai
-Asher Gottlieb
+Fu Chai  
+Asher Gottlieb  
 For their bug reports of specific security vulnerabilities :)  
