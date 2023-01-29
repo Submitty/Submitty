@@ -361,11 +361,6 @@ parameters:
 			path: app/entities/poll/Option.php
 
 		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$poll \\(app\\\\entities\\\\poll\\\\Poll\\) does not accept null\\.$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php

@@ -49,7 +49,7 @@ class Poll {
     private $release_histogram;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\poll\Option",mappedBy="poll")
+     * @ORM\OneToMany(targetEntity="\app\entities\poll\Option",mappedBy="poll",orphanRemoval=true)
      * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
      * @ORM\OrderBy({"order_id" = "ASC"})
      * @var Collection<Option>
@@ -190,7 +190,6 @@ class Poll {
 
     public function removeOption(Option $option): void {
         $this->options->removeElement($option);
-        $option->detach();
     }
 
     public function addResponse(Response $response, int $option_id) {

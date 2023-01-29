@@ -99,10 +99,6 @@ class Option {
         return $this->poll;
     }
 
-    public function detach(): void {
-        $this->poll = null;
-    }
-
     public function hasUserResponses(): bool {
         return count($this->user_responses) > 0;
     }
