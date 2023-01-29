@@ -1,0 +1,34 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-pronouns-form{% endblock %}
+{% block title %}Edit Pronouns Names{% endblock %}
+{% block body %}
+    <p class="std-margin">{{ change_name_text }}</p>
+    <p class="std-margin">
+        Your instructor and the system administrators reserve the right to remove
+        a preferred name if it contains inappropriate or offensive language,
+        or is being used for misrepresentation.
+    </p>
+    <div class="flex-col" id="user_settings_modal">
+        <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>My Preferred Pronouns</h2>
+        <div class="edit_user_row">
+            <label for="user-pronouns-change">Preferred Pronouns&emsp;</label>
+            <select type="text"
+                   name="user_pronouns_change"
+                   id="user-pronouns-change">
+                <option value="he/him">He/Him</option>
+                <option value="she/her">She/Her</option>
+                <option value="they/them">They/Them</option>
+            </select>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserPronouns()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

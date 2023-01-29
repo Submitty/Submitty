@@ -49,6 +49,14 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="pronouns-row">
+                        <span class="label">
+                            Pronouns:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
+                        </button>
+                    </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
                             Primary Email:
@@ -143,6 +151,7 @@
 {% include 'EditNameForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
+{% include 'EditPronounsForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}
