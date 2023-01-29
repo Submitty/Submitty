@@ -56,17 +56,17 @@ def main():
     for x in all_users:
         user_name = ""
 
-        if x["user_preferred_firstname"] != None:
-            user_name += x["user_preferred_firstname"]
+        if x["user_preferred_givenname"] != None:
+            user_name += x["user_preferred_givenname"]
         else:
-            user_name += x["user_firstname"]
+            user_name += x["user_givenname"]
         
         user_name += " "
 
-        if x["user_preferred_lastname"] != None:
-            user_name += x["user_preferred_lastname"]
+        if x["user_preferred_familyname"] != None:
+            user_name += x["user_preferred_familyname"]
         else:
-            user_name += x["user_lastname"]
+            user_name += x["user_familyname"]
         
         name_lookup[x["user_id"]] = user_name
 
