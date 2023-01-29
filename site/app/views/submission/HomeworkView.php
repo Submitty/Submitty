@@ -1192,7 +1192,7 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
@@ -1275,7 +1275,7 @@ class HomeworkView extends AbstractView {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
 
         $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
         $content = $post['content'];
         $post_id = $post['id'];

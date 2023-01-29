@@ -331,8 +331,8 @@ class ReportController extends AbstractController {
         $row = [];
 
         $row['User ID'] = $user->getId();
-        $row['First Name'] = $user->getDisplayedFirstName();
-        $row['Last Name'] = $user->getDisplayedLastName();
+        $row['Given Name'] = $user->getDisplayedGivenName();
+        $row['Family Name'] = $user->getDisplayedFamilyName();
         $row['Registration Section'] = $user->getRegistrationSection();
 
         foreach ($ggs as $gg) {
@@ -369,10 +369,10 @@ class ReportController extends AbstractController {
         $user_data = [];
         $user_data['user_id'] = $user->getId();
         $user_data['user_numeric_id'] = $user->getNumericId();
-        $user_data['legal_first_name'] = $user->getLegalFirstName();
-        $user_data['preferred_first_name'] = $user->getPreferredFirstName();
-        $user_data['legal_last_name'] = $user->getLegalLastName();
-        $user_data['preferred_last_name'] = $user->getPreferredLastName();
+        $user_data['legal_given_name'] = $user->getLegalGivenName();
+        $user_data['preferred_given_name'] = $user->getPreferredGivenName();
+        $user_data['legal_family_name'] = $user->getLegalFamilyName();
+        $user_data['preferred_family_name'] = $user->getPreferredFamilyName();
         $user_data['registration_section'] = $user->getRegistrationSection();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();

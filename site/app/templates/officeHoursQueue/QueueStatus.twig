@@ -202,7 +202,7 @@
   </div>
 {% else %}
   <div id="queue_status">
-    <p>You are currently being helped</p>
+    <p>You are currently being helped by {{viewer.getHelperName()}}</p>
     <form
       method="post"
       id="finish_help"
