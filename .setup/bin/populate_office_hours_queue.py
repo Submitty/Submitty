@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, Table, MetaData, select, update, insert
 import random
 import os
 from datetime import datetime, timedelta
+from submitty_utils import dateutils
 
 DB_HOST = "localhost"
 DB_PORT = 5432
@@ -12,13 +13,8 @@ DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
 def main():
-    # get today's date to determine date and time
-    today = datetime.today()
-    year = str(today.year)
-    if today.month < 7:
-        term_id = "s" + year[-2:]
-    else:
-        term_id = "f" + year[-2:]
+    # get current semester
+    term_id = dateutils.get_current_semester()
 
     # set up the database connection
     database = "submitty_" + term_id + "_sample"
