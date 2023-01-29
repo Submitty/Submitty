@@ -159,7 +159,7 @@ class DatabaseQueries {
     }
 
     /**
-     * Gets a list of first and last names from the database given an array of IDs.
+     * Gets a list of given and family names from the database given an array of IDs.
      *
      * @param array $user_id_list
      * @return array|null
@@ -178,9 +178,9 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_firstname,''), user_firstname) as user_firstname, COALESCE(NULLIF(user_preferred_lastname,''), user_lastname) as user_lastname
+        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) as user_givenname, COALESCE(NULLIF(user_preferred_familyname,''), user_familyname) as user_familyname
         FROM users
-        ORDER BY registration_section, user_lastname, user_firstname, user_id),
+        ORDER BY registration_section, user_familyname, user_givenname, user_id),
         B AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM gradeable_access where user_id is not NULL
@@ -206,7 +206,7 @@ class DatabaseQueries {
         FROM queue
         ORDER BY user_id, time_in desc)
         SELECT
-        A.registration_section, A.user_id, A.user_firstname, user_lastname,
+        A.registration_section, A.user_id, A.user_givenname, user_familyname,
         B.timestamp as gradeable_access,
         C.submission_time as gradeable_submission,
         D.timestamp as forum_view,
@@ -221,7 +221,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
+        ORDER BY length(A.registration_section), A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
         ");
         return $this->course_db->rows();
     }
@@ -430,13 +430,13 @@ SQL;
      */
     public function insertSubmittyUser(User $user) {
         $array = [$user->getId(), $user->getPassword(), $user->getNumericId(),
-                       $user->getLegalFirstName(), $user->getPreferredFirstName(),
-                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
+                       $user->getLegalGivenName(), $user->getPreferredGivenName(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
 
         $this->submitty_db->query(
-            "INSERT INTO users (user_id, user_password, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $array
         );
@@ -1054,8 +1054,8 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $course
      */
     public function updateUser(User $user, $semester = null, $course = null) {
-        $params = [$user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
-                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(), $user->getSecondaryEmail(),
+        $params = [$user->getNumericId(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
                        $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
@@ -1076,8 +1076,8 @@ VALUES (?,?,?,?,?,?)",
             "
 UPDATE users
 SET
-  user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
-  user_lastname=?, user_preferred_lastname=?,
+  user_numeric_id=?, user_givenname=?, user_preferred_givenname=?,
+  user_familyname=?, user_preferred_familyname=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
@@ -2512,8 +2512,8 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getGradersByUserType() {
         $this->course_db->query(
             "SELECT
-                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
-                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                COALESCE(NULLIF(user_preferred_givenname, ''), user_givenname) AS user_givenname,
+                COALESCE(NULLIF(user_preferred_familyname, ''), user_familyname) AS user_familyname,
                 user_id,
                 user_group
             FROM
@@ -2526,7 +2526,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $users = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $users[$row['user_group']][] = [$row['user_id'], $row['user_firstname'], $row['user_lastname']];
+            $users[$row['user_group']][] = [$row['user_id'], $row['user_givenname'], $row['user_familyname']];
         }
         return $users;
     }
@@ -3667,8 +3667,8 @@ ORDER BY gt.{$section_key}",
     public function getUsersWithLateDays() {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname, user_preferred_firstname,
-          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp
+        SELECT u.user_id, user_givenname, user_preferred_givenname,
+          user_familyname, user_preferred_familyname, allowed_late_days, since_timestamp
         FROM users AS u
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id
@@ -3693,8 +3693,8 @@ ORDER BY gt.{$section_key}",
     public function getUsersWithExtensions($gradeable_id) {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, late_day_exceptions
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, late_day_exceptions
         FROM users as u
         FULL OUTER JOIN late_day_exceptions as l
           ON u.user_id=l.user_id
@@ -3735,8 +3735,8 @@ ORDER BY gt.{$section_key}",
     public function getRawUsersWithOverriddenGrades(string $gradeable_id): array {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, marks, comment
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, marks, comment
         FROM users as u
         FULL OUTER JOIN grade_override as g
           ON u.user_id=g.user_id
@@ -3758,8 +3758,8 @@ ORDER BY gt.{$section_key}",
     public function getAUserWithOverriddenGrades($gradeable_id, $user_id) {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, marks, comment
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, marks, comment
         FROM users as u
         FULL OUTER JOIN grade_override as g
           ON u.user_id=g.user_id
@@ -3777,9 +3777,9 @@ ORDER BY gt.{$section_key}",
 SELECT
     u.user_id,
     g.g_id,
-    u.user_firstname,
-    u.user_preferred_firstname,
-    u.user_lastname,
+    u.user_givenname,
+    u.user_preferred_givenname,
+    u.user_familyname,
     g.marks,
     g.comment
 FROM users as u
@@ -4279,11 +4279,11 @@ AND gc_id IN (
     }
 
     public function getDisplayUserInfoFromUserId($user_id) {
-        $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email FROM users WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
         $ar = [];
-        $ar["first_name"] = (empty($name_rows["user_preferred_firstname"])) ? $name_rows["user_firstname"]      : $name_rows["user_preferred_firstname"];
-        $ar["last_name"]  = (empty($name_rows["user_preferred_lastname"]))  ? " " . $name_rows["user_lastname"] : " " . $name_rows["user_preferred_lastname"];
+        $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
+        $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
         return $ar;
     }
@@ -4357,15 +4357,15 @@ AND gc_id IN (
         $param_list[] = $thread_id;
         $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
         if ($option == 'alpha') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp, posts.id;", [$thread_id]);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_familyname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_familyname, posts.timestamp, posts.id;", [$thread_id]);
         }
         elseif ($option == 'alpha_by_registration') {
-            $order = self::generateOrderByClause(["registration_section", "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_lastname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
+            $order = self::generateOrderByClause(["registration_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
         }
         elseif ($option == 'alpha_by_rotating') {
-            $order = self::generateOrderByClause(["rotating_section", "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_lastname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
+            $order = self::generateOrderByClause(["rotating_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
         }
         elseif ($option == 'reverse-time') {
             $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC, id ASC", array_reverse($param_list));
@@ -6483,12 +6483,58 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where current_state IN ('waiting','being_helped') order by ROW_NUMBER");
+        $query = "
+        SELECT ROW_NUMBER()
+            OVER (order by time_in ASC),
+                queue.*,
+                helper.user_givenname AS helper_givenname,
+                helper.user_preferred_givenname AS helper_preferred_givenname,
+                helper.user_familyname AS helper_familyname,
+                helper.user_preferred_familyname AS helper_preferred_familyname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                helper.user_group AS helper_group
+            FROM queue
+            LEFT JOIN users helper on helper.user_id = queue.help_started_by
+            WHERE current_state IN ('waiting','being_helped')
+            ORDER BY ROW_NUMBER
+        ";
+        $this->course_db->query($query);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $query = "
+        SELECT Row_number()
+            OVER (ORDER BY time_out DESC, time_in DESC),
+                queue.*,
+                helper.user_givenname AS helper_givenname,
+                helper.user_preferred_givenname AS helper_preferred_givenname,
+                helper.user_familyname AS helper_familyname,
+                helper.user_preferred_familyname AS helper_preferred_familyname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                helper.user_group AS helper_group,
+                remover.user_givenname AS remover_givenname,
+                remover.user_preferred_givenname AS remover_preferred_givenname,
+                remover.user_familyname AS remover_familyname,
+                remover.user_preferred_familyname AS remover_preferred_familyname,
+                remover.user_id AS remover_id,
+                remover.user_email AS remover_email,
+                remover.user_email_secondary AS remover_email_secondary,
+                remover.user_email_secondary_notify AS remover_email_secondary_notify,
+                remover.user_group AS remover_group
+            FROM    queue
+            LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+            LEFT JOIN users remover ON remover.user_id = queue.removed_by
+            WHERE   time_in > ? AND current_state IN ( 'done' )
+            ORDER BY row_number
+        ";
+        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
@@ -6761,7 +6807,22 @@ WHERE current_state IN
     }
 
     public function getCurrentQueueState() {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$this->core->getUser()->getId()]);
+        $query = "
+        SELECT
+            queue.*,
+            helper.user_givenname AS helper_givenname,
+            helper.user_preferred_givenname AS helper_preferred_givenname,
+            helper.user_familyname AS helper_familyname,
+            helper.user_preferred_familyname AS helper_preferred_familyname,
+            helper.user_id AS helper_id,
+            helper.user_email AS helper_email,
+            helper.user_email_secondary AS helper_email_secondary,
+            helper.user_email_secondary_notify AS helper_email_secondary_notify,
+            helper.user_group AS helper_group
+        FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+        WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
+        ";
+        $this->course_db->query($query, [$this->core->getUser()->getId()]);
         if ($this->course_db->rows()) {
             return $this->course_db->rows()[0];
         }
@@ -6806,13 +6867,13 @@ WHERE current_state IN
               FROM (SELECT
                 user_id AS id,
                 CASE
-                  WHEN user_preferred_firstname IS NULL THEN user_firstname
-                  ELSE user_preferred_firstname
-                END AS first_name,
+                  WHEN user_preferred_givenname IS NULL THEN user_givenname
+                  ELSE user_preferred_givenname
+                END AS given_name,
                 CASE
-                  WHEN user_preferred_lastname IS NULL THEN user_lastname
-                  ELSE user_preferred_lastname
-                END AS lastname
+                  WHEN user_preferred_familyname IS NULL THEN user_familyname
+                  ELSE user_preferred_familyname
+                END AS familyname
               FROM users
               WHERE user_group = 4) AS user_data
               LEFT JOIN (SELECT
@@ -7070,11 +7131,12 @@ WHERE current_state IN
         else {
             $submitter_data_inject = '
               u.user_id,
+              u.user_numeric_id,
               u.g_anon,
-              u.user_firstname,
-              u.user_preferred_firstname,
-              u.user_lastname,
-              u.user_preferred_lastname,
+              u.user_givenname,
+              u.user_preferred_givenname,
+              u.user_familyname,
+              u.user_preferred_familyname,
               u.user_email,
               u.user_email_secondary,
               u.user_email_secondary_notify,
@@ -7152,9 +7214,9 @@ WHERE current_state IN
               /* Aggregate Gradeable Component Grader Data */
               gcd.array_grader_user_id,
               gcd.array_grader_anon_id,
-              gcd.array_grader_user_firstname,
-              gcd.array_grader_user_preferred_firstname,
-              gcd.array_grader_user_lastname,
+              gcd.array_grader_user_givenname,
+              gcd.array_grader_user_preferred_givenname,
+              gcd.array_grader_user_familyname,
               gcd.array_grader_user_email,
               gcd.array_grader_user_email_secondary,
               gcd.array_grader_user_email_secondary_notify,
@@ -7168,9 +7230,9 @@ WHERE current_state IN
               
               /* Aggregate Gradeable Component Verifier Data */
               gcd.array_verifier_user_id,
-              gcd.array_verifier_user_firstname,
-              gcd.array_verifier_user_preferred_firstname,
-              gcd.array_verifier_user_lastname,
+              gcd.array_verifier_user_givenname,
+              gcd.array_verifier_user_preferred_givenname,
+              gcd.array_verifier_user_familyname,
               gcd.array_verifier_user_email,
               gcd.array_verifier_user_email_secondary,
               gcd.array_verifier_user_email_secondary_notify,
@@ -7242,9 +7304,9 @@ WHERE current_state IN
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.g_anon) AS array_grader_anon_id,
-                  json_agg(ug.user_firstname) AS array_grader_user_firstname,
-                  json_agg(ug.user_preferred_firstname) AS array_grader_user_preferred_firstname,
-                  json_agg(ug.user_lastname) AS array_grader_user_lastname,
+                  json_agg(ug.user_givenname) AS array_grader_user_givenname,
+                  json_agg(ug.user_preferred_givenname) AS array_grader_user_preferred_givenname,
+                  json_agg(ug.user_familyname) AS array_grader_user_familyname,
                   json_agg(ug.user_email) AS array_grader_user_email,
                   json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
                   json_agg(ug.user_email_secondary_notify) AS array_grader_user_email_secondary_notify,
@@ -7256,9 +7318,9 @@ WHERE current_state IN
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
                   json_agg(uv.user_id) AS array_verifier_user_id,
-                  json_agg(uv.user_firstname) AS array_verifier_user_firstname,
-                  json_agg(uv.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
-                  json_agg(uv.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(uv.user_givenname) AS array_verifier_user_givenname,
+                  json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
+                  json_agg(uv.user_familyname) AS array_verifier_user_familyname,
                   json_agg(uv.user_email) AS array_verifier_user_email,
                   json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
                   json_agg(uv.user_email_secondary_notify) AS array_verifier_user_email_secondary_notify,
@@ -7430,9 +7492,9 @@ WHERE current_state IN
             $user_properties = [
                 'user_id',
                 'anon_id',
-                'user_firstname',
-                'user_preferred_firstname',
-                'user_lastname',
+                'user_givenname',
+                'user_preferred_givenname',
+                'user_familyname',
                 'user_email',
                 'user_email_secondary',
                 'user_email_secondary_notify',
@@ -8162,9 +8224,9 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-              COALESCE (NULLIF(user_preferred_firstname, ''), user_firstname),
+              COALESCE (NULLIF(user_preferred_givenname, ''), user_givenname),
               ' ',
-              COALESCE (NULLIF(user_preferred_lastname, ''), user_lastname)
+              COALESCE (NULLIF(user_preferred_familyname, ''), user_familyname)
           ) as name
 FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,

@@ -167,10 +167,10 @@ def main():
                               user_id=user.id,
                               user_numeric_id = user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
@@ -180,10 +180,10 @@ def main():
                               user_id=user.id,
                               user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
@@ -336,10 +336,10 @@ def generate_random_users(total, real_users):
     :return:
     :rtype: list[User]
     """
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleFirstNames.txt')) as male_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenFirstNames.txt')) as woman_file:
-        last_names = last_file.read().strip().split()
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'familyNames.txt')) as family_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleGivenNames.txt')) as male_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenGivenNames.txt')) as woman_file:
+        family_names = family_file.read().strip().split()
         male_names = male_file.read().strip().split()
         women_names = woman_file.read().strip().split()
 
@@ -349,11 +349,11 @@ def generate_random_users(total, real_users):
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
-                first_name = random.choice(male_names)
+                given_name = random.choice(male_names)
             else:
-                first_name = random.choice(women_names)
-            last_name = random.choice(last_names)
-            user_id = last_name.replace("'", "")[:5] + first_name[0]
+                given_name = random.choice(women_names)
+            family_name = random.choice(family_names)
+            user_id = family_name.replace("'", "")[:5] + given_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
@@ -367,8 +367,8 @@ def generate_random_users(total, real_users):
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "user_firstname": first_name,
-                             "user_lastname": last_name,
+                             "user_givenname": given_name,
+                             "user_familyname": family_name,
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -587,12 +587,12 @@ class User(object):
         id
         numeric_id
         password
-        firstname
-        lastname
+        givenname
+        familyname
         email
         group
-        preferred_firstname
-        preferred_lastname
+        preferred_givenname
+        preferred_familyname
         access_level
         registration_section
         rotating_section
@@ -603,12 +603,12 @@ class User(object):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
         self.password = self.id
-        self.firstname = user['user_firstname']
-        self.lastname = user['user_lastname']
+        self.givenname = user['user_givenname']
+        self.familyname = user['user_familyname']
         self.email = self.id + "@example.com"
         self.group = 4
-        self.preferred_firstname = None
-        self.preferred_lastname = None
+        self.preferred_givenname = None
+        self.preferred_familyname = None
         self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
@@ -618,10 +618,10 @@ class User(object):
         self.manual = False
         self.sudo = False
 
-        if 'user_preferred_firstname' in user:
-            self.preferred_firstname = user['user_preferred_firstname']
-        if 'user_preferred_lastname' in user:
-            self.preferred_lastname = user['user_preferred_lastname']
+        if 'user_preferred_givenname' in user:
+            self.preferred_givenname = user['user_preferred_givenname']
+        if 'user_preferred_familyname' in user:
+            self.preferred_familyname = user['user_preferred_familyname']
         if 'user_email' in user:
             self.email = user['user_email']
         if 'user_group' in user:
@@ -825,8 +825,8 @@ class Course(object):
         reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
-                                                       user.get_detail(self.code, "lastname"),
+            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "givenname"),
+                                                       user.get_detail(self.code, "familyname"),
                                                        user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
