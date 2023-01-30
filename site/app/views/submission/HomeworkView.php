@@ -455,9 +455,7 @@ class HomeworkView extends AbstractView {
         }
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
-        // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
-            'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
@@ -468,10 +466,10 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
-            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
             'github_user_id' => $github_user_id,
             'github_repo_id' => $github_repo_id,
+            'is_bulk_upload' => $gradeable->isBulkUpload(),
             'has_due_date' => $gradeable->hasDueDate(),
             'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
@@ -489,7 +487,6 @@ class HomeworkView extends AbstractView {
             'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
-            'team_assignment' => $gradeable->isTeamAssignment(),
             'student_id' => $student_id,
             'numberUtils' => new class () {
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
@@ -498,7 +495,6 @@ class HomeworkView extends AbstractView {
             },
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'inputs' => $input_data,
             'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
             'image_data' => $image_data ?? null,
