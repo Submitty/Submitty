@@ -1,9 +1,9 @@
 courses: []
 registration_section: 1
 user_email: pearsr@example.com
-user_firstname: Randy
+user_givenname: Randy
 user_group: 4
 user_id: pearsr
 anon_id: 5tewqJGTHb54kER
-user_lastname: Pears
+user_familyname: Pears
 user_numeric_id: 227309274
