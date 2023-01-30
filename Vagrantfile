@@ -82,6 +82,11 @@ Vagrant.configure(2) do |config|
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
   config.vm.boot_timeout = 600
 
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+    v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+  end 
+
   # Specify the various machines that we might develop on. After defining a name, we
   # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use
   # that one) as well as making sure all non-primary ones have "autostart: false" set
@@ -97,8 +102,8 @@ Vagrant.configure(2) do |config|
   end
 
   # Our primary development target, RPI uses it as of Fall 2021
-  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
+  config.vm.define 'ubuntu-22.04', primary: true do |ubuntu|
+    ubuntu.vm.box = "bento/ubuntu-22.04#{box_extra}"
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
