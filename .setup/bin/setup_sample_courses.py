@@ -1415,7 +1415,6 @@ class Course(object):
                               release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
-                                  option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
                                   response=poll["responses"][i],
@@ -1431,7 +1430,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
                     "student_id": user.id,
-                    "option_id": response_id
+                    "option_id": response_id+1
                 })
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
@@ -1439,7 +1438,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
+                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
                 })
 
         # add responses to DB
