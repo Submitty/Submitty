@@ -148,10 +148,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-question').type('# Question goes here...?');
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type('1970-01-01', {force: true});
+        cy.get('h1').click(); // get rid of the date picker
         cy.get('#image-file').attachFile('sea_animals.png');
-        cy.contains('+ Add Response').click();
-        cy.contains('+ Add Response').click();
-        cy.contains('+ Add Response').click();
+        cy.contains('Add Response').click();
+        cy.contains('Add Response').click();
+        cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
         cy.get('#response_1_wrapper').children(':nth-child(4)').type('Answer 2');
@@ -211,7 +212,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('include', 'sample/polls/viewPoll');
         cy.get('.radio').eq(0).contains('No response');
         cy.get('.radio > input').eq(0).should('not.be.disabled');
         cy.get('.radio > input').eq(0).should('be.checked');
@@ -258,8 +258,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.correct-box').eq(1).should('not.be.checked');
         cy.get('.poll_response').should('contain', 'Answer 3');
         cy.get('.correct-box').eq(2).should('be.checked');
-        cy.get('#response_0_wrapper').children(':nth-child(4)').clear();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 0');
+        cy.get('textarea').contains('Answer 1').clear().type('Answer 0');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(5)').click();
         cy.get('#responses').children(':nth-child(2)').children(':nth-child(4)').contains('Answer 3');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(4)').contains('Answer 2');

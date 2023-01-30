@@ -68,6 +68,6 @@ class ForumUtils {
         if ($anonymous) {
             return "Anonymous";
         }
-        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+        return $real_name['given_name'] . substr($real_name['family_name'], 0, 2) . '.';
     }
 }

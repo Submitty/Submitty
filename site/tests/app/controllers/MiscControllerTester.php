@@ -25,8 +25,8 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
     public function userDataProvider() {
         $user_details = [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false

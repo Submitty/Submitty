@@ -518,7 +518,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -528,7 +528,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -536,7 +536,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -544,7 +544,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -553,17 +553,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -1206,7 +1206,7 @@ function refreshOnResponseOverriddenGrades(json) {
     else {
         json['data']['users'].forEach(function(elem){
             let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
       $("#load-overridden-grades").removeClass('d-none');
@@ -1600,7 +1600,7 @@ function flagUserImage(user_id, flag) {
                 let new_content;
                 if (data.image_data && data.image_mime_type) {
                     new_content = document.createElement('img');
-                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('alt', data.given_family_username);
                     new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
                 }
                 else {
