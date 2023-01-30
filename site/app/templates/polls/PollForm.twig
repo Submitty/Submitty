@@ -365,38 +365,25 @@
 
     $(document).ready(function() {
         setEventHandlers();
-        $("#poll-form-submit").on("change click", submitErrorChecks);
-        $("#poll-form-submit").on("change click", submitErrorChecks);
-        $("#poll-form-submit").submit(function() {
-            $("#poll-form-submit").prop("disabled", true);
-            return true;
-        });
+        $("#new-poll-form").on("change click", submitErrorChecks);
+
         let submit_form = false;
-        $("#poll-form-submit").click(function(event) {
-            if (!submit_form) {
-                if ((poll_type != "single-response"
-                        && ($('#poll-type-single-response-single-correct').is(':checked')
-                            || $('#poll-type-single-response-multiple-correct').is(':checked')
-                            || $('#poll-type-single-response-survey').is(':checked')))
-                    || (poll_type != "multiple-response"
-                        && ($('#poll-type-multiple-response-exact').is(':checked')
-                            || $('#poll-type-multiple-response-flexible').is(':checked')
-                            || $('#poll-type-multiple-response-survey').is(':checked')))) {
-                    // don't submit yet
-                    event.preventDefault();
-                    // send warning
-                    if (confirm("Changing the poll question type may lead to data of students' answers being " +
-                        "lost if students have already begun submitting responses to this poll. " +
-                        "Are you sure you want to change the type of this poll?")) {
-                        submit_form = true;
-                        $("#edit-poll-form").submit();
-                    }
-                } else {
-                    $("#poll-form-submit").prop("disabled", true);
+        $("#new-poll-form").submit(function(event) {
+            if (!submit_form && {{ poll is not null ? "true" : "false" }} && !$(`#poll-type-${ poll_type }`).is(':checked')) {
+                // don't submit yet
+                event.preventDefault();
+                // send warning
+                if (confirm("Changing the poll question type may lead to data of students' answers being " +
+                    "lost if students have already begun submitting responses to this poll. " +
+                    "Are you sure you want to change the type of this poll?")) {
+                    submit_form = true;
+                    $("#new-poll-form").submit();
                 }
-            } else {
-                $("#poll-form-submit").prop("disabled", true);
+                else {
+                    return; // Don't disable the button if the instructor clicked cancel
+                }
             }
+            $("#poll-form-submit").prop("disabled", true);
         });
     });
 
