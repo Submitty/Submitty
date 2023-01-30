@@ -78,16 +78,6 @@ end
 
 Vagrant.configure(2) do |config|
   config.vm.boot_timeout=600
-  config.vm.provider :virtualbox do |v|
-    v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
-    v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
-    v.customize ["modifyvm", :id, "--audio", "none"]
-    v.customize ["modifyvm", :id, "--usb", "off"]
-    v.customize ["modifyvm", :id, "--uart1", "off"]
-    v.customize ["modifyvm", :id, "--uart2", "off"]
-    v.customize ["modifyvm", :id, "--uart3", "off"]
-    v.customize ["modifyvm", :id, "--uart4", "off"]
-  end
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
@@ -119,6 +109,14 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
+    vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+    vb.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+    vb.customize ["modifyvm", :id, "--audio", "none"]
+    vb.customize ["modifyvm", :id, "--usb", "off"]
+    vb.customize ["modifyvm", :id, "--uart1", "off"]
+    vb.customize ["modifyvm", :id, "--uart2", "off"]
+    vb.customize ["modifyvm", :id, "--uart3", "off"]
+    vb.customize ["modifyvm", :id, "--uart4", "off"]
     vb.memory = 2048
     vb.cpus = 2
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
@@ -137,7 +135,6 @@ Vagrant.configure(2) do |config|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
     mount_folders(override, ["dmode=775", "fmode=664"])
-
     if ARGV.include?('ssh')
       override.ssh.timeout = 20
     end
