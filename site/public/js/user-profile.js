@@ -64,6 +64,20 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
+function updateUserPronouns () {
+    const pronouns = $("#user-pronouns-change");
+    if (pronouns.data('current-pronouns') == pronouns.val()) {
+        // eslint-disable-next-line no-undef
+        displayErrorMessage('No changes detected to update pronouns!');
+    }
+    else {
+        const data = new FormData();
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns.val());
+        
+    }
+}
+
 // eslint-disable-next-line no-unused-vars
 function updateUserPreferredNames () {
     const first_name_field = $('#user-firstname-change');
