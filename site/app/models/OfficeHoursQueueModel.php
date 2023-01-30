@@ -251,10 +251,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         }
 
         $user_info = [];
-        $user_info["user_firstname"] = $query_row["helper_firstname"];
-        $user_info["user_preferred_firstname"] = $query_row["helper_preferred_firstname"];
-        $user_info["user_lastname"] = $query_row["helper_lastname"];
-        $user_info["user_preferred_lastname"] = $query_row["helper_preferred_lastname"];
+        $user_info["user_givenname"] = $query_row["helper_givenname"];
+        $user_info["user_preferred_givenname"] = $query_row["helper_preferred_givenname"];
+        $user_info["user_familyname"] = $query_row["helper_familyname"];
+        $user_info["user_preferred_familyname"] = $query_row["helper_preferred_familyname"];
         $user_info["user_id"] = $query_row["helper_id"];
         $user_info["user_email"] = $query_row["helper_email"];
         $user_info["user_email_secondary"] = $query_row["helper_email_secondary"];
@@ -285,10 +285,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         }
 
         $user_info = [];
-        $user_info["user_firstname"] = $query_row["remover_firstname"];
-        $user_info["user_preferred_firstname"] = $query_row["remover_preferred_firstname"];
-        $user_info["user_lastname"] = $query_row["remover_lastname"];
-        $user_info["user_preferred_lastname"] = $query_row["remover_preferred_lastname"];
+        $user_info["user_givenname"] = $query_row["remover_givenname"];
+        $user_info["user_preferred_givenname"] = $query_row["remover_preferred_givenname"];
+        $user_info["user_familyname"] = $query_row["remover_familyname"];
+        $user_info["user_preferred_familyname"] = $query_row["remover_preferred_familyname"];
         $user_info["user_id"] = $query_row["remover_id"];
         $user_info["user_email"] = $query_row["remover_email"];
         $user_info["user_email_secondary"] = $query_row["remover_email_secondary"];
