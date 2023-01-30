@@ -23,8 +23,8 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $config->setCourse('sample');
         $user = new User($this->core, [
             'user_id' => 'test_user',
-            'user_firstname' => 'Tester',
-            'user_lastname' => 'Test',
+            'user_givenname' => 'Tester',
+            'user_familyname' => 'Test',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -55,7 +55,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testCreateNotification(): void {
-        // Now get the basic notifcation details and create the notification object
+        // Now get the basic notification details and create the notification object
         $normalNotifyDetails = $this->notify_details['normal'];
         $normalNotification = Notification::createNotification($this->core, $normalNotifyDetails);
 
@@ -136,7 +136,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         // set the metadata with some data other than url
         $simpleNotification->setNotifyMetadata(json_encode(["extra" => "some_extra_metadata"]));
         $viewOnlyNotification->setNotifyMetadata(json_encode(["extra" => "some_extra_metadata"]));
-        // As notification doesnt have 'url' metadata key, getUrl should return course-url
+        // As notification doesn't have 'url' metadata key, getUrl should return course-url
         $this->assertEquals($this->core->buildCourseUrl(), Notification::getUrl($this->core, $simpleNotification->getNotifyMetadata()));
         $this->assertEquals($this->core->buildCourseUrl(), Notification::getUrl($this->core, $viewOnlyNotification->getNotifyMetadata()));
 
@@ -153,7 +153,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $simpleNotification = Notification::createNotification($this->core, $this->notify_details['normal']);
         $viewOnlyNotification = Notification::createViewOnlyNotification($this->core, $this->notify_details['view_only']);
 
-        // As notification doesnt have 'thread_id' metadata key, getThreadIdIfExists() should return -1
+        // As notification doesn't have 'thread_id' metadata key, getThreadIdIfExists() should return -1
         $this->assertEquals(-1, Notification::getThreadIdIfExists($simpleNotification->getNotifyMetadata()));
         $this->assertEquals(-1, Notification::getThreadIdIfExists($viewOnlyNotification->getNotifyMetadata()));
 

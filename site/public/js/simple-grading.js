@@ -365,10 +365,10 @@ function checkpointRollTo(g_id, diff) {
     setCheckpointHistory(g_id, history);
 
     // update cells for each snapshot
-    update_queue.forEach(function(snaphot) {
+    update_queue.forEach(function(snapshot) {
         // get elems from studentID
-        var elems = $("tr[data-user='" + snaphot[0] + "'] .cell-grade");
-        updateCheckpointCells(elems, snaphot[1], true);
+        var elems = $("tr[data-user='" + snapshot[0] + "'] .cell-grade");
+        updateCheckpointCells(elems, snapshot[1], true);
     });
 }
 

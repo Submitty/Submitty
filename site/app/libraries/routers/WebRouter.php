@@ -6,6 +6,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
+use Doctrine\Common\Annotations\PsrCachedReader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
@@ -28,7 +29,7 @@ class WebRouter {
     /** @var Request  */
     protected $request;
 
-    /** @var AnnotationReader */
+    /** @var PsrCachedReader */
     protected $reader;
 
     /** @var array */
@@ -47,8 +48,15 @@ class WebRouter {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
         $cache = new FilesystemAdapter("", 0, $cache_path);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $this->reader = new AnnotationReader();
+        $access_control_cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'access_control');
+        $ac_cache = new FilesystemAdapter("", 0, $access_control_cache_path);
+
+        $this->reader = new PsrCachedReader(
+            new AnnotationReader(),
+            $ac_cache,
+            $this->core->getConfig()->isDebug()
+        );
+
         // This will fetch the cache for routes. If it doesn't find it then it will
         // compile them, set the cache, and set compiledRoutes to that.
         $compiledRoutes = $cache->get('routes', function (ItemInterface $item) {

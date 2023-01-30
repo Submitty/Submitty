@@ -113,7 +113,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   bool show_message    = ShowHelper(tcg.value("show_message", "never"),test_case_success);
   bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
   bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
-  bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
+  bool show_expected   = ShowHelper(tcg.value("show_expected", "never"),test_case_success);
+  bool use_expected_string = tcg.value("use_expected_string", false);
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
@@ -147,7 +148,10 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
       fileStatus(actual_file, studentFileExists,studentFileEmpty);
-      std::string expected;
+      std::string expected_file;
+      std::string expected_string;
+      // Determine whether the expected_file/expected_string is used
+      bool expected = false;
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
@@ -157,33 +161,59 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             autocheck_j["results_public"] = true;
           }
         }
-        expected = tcg.value("expected_file", "");
-        if (expected != "") {
-          std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
-          fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
+        expected_file = tcg.value("expected_file", "");
+        expected_string = tcg.value("expected_string", "");
+        assert(!(expected_file != "" && expected_string != ""));
+        
+        if (expected_file != "") {
+          std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected_file) + expected_file;
+          fileStatus(expectedWithFolder, expectedFileExists, expectedFileEmpty);
+          std::cout << "expectedFileExists: " << expectedFileExists << std::endl;
           if (!expectedFileExists) {
-            BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+            BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected_file + "' does not exist";
             std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
           }
           else {
-            // PREPARE THE JSON DIFF FILE
-            std::stringstream diff_path;
-            diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str());
-            result.printJSON(diff_stream);
-            std::stringstream expected_path;
-            std::string id = hw_id;
-            std::string expected_out_dir = getPathForOutputFile(my_testcase, expected, id);
-            expected_path << expected_out_dir << expected;
-            if (show_expected) {
-             autocheck_j["expected_file"] = expected_path.str();
+            expected = true;
+          }
+        } 
+        else if (expected_string != "") {
+          expected = true;
+          autocheck_j["expected_string"] = expected_string;
+        }
+
+        std::cout << "expected: " << expected << std::endl;
+        std::cout << "expected_file: " << expected_file << std::endl;
+        std::cout << "expected_string: " << expected_string << std::endl;
+        std::cout << "actual_file: " << actual_file << std::endl;
+
+        if (expected) {
+          // PREPARE THE JSON DIFF FILE
+          std::stringstream diff_path;
+          diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
+          std::ofstream diff_stream(diff_path.str().c_str());
+          result.printJSON(diff_stream);
+          std::stringstream expected_path;
+          std::string id = hw_id;
+          if (expected_file != "") {
+            std::string expected_out_dir = getPathForOutputFile(my_testcase, expected_file, id);
+            std::cout << "expected_out_dir: " << expected_out_dir << std::endl;
+            expected_path << expected_out_dir << expected_file;
+            std::cout << "expected_path: " << expected_path.str() << std::endl;
+          }
+          if (show_expected) {
+            if (use_expected_string) {
+              autocheck_j["use_expected_string"] = true;
             }
-            if (show_image_diff){
-              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + tcg.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");
+            else {
+              autocheck_j["expected_file"] = expected_path.str();
             }
-            if (show_actual) {
-             autocheck_j["difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_diff.json";
-            }
+           }
+          if (show_image_diff){
+            autocheck_j["image_difference_file"] = my_testcase.getPrefix() + tcg.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");
+          }
+          if (show_actual) {
+           autocheck_j["difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_diff.json";
           }
         }
       }
@@ -375,7 +405,7 @@ void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
 
-    // UPDATE CUMMULATIVE POINTS
+    // UPDATE CUMULATIVE POINTS
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {
       nonhidden_automated_points_awarded += testcase_pts;

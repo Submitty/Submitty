@@ -100,7 +100,12 @@ class MiscController extends AbstractController {
         $cm = null;
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
             if ($dir === 'course_materials') {
                 $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findOneBy(['path' => $path]);
@@ -228,7 +233,12 @@ class MiscController extends AbstractController {
         // security check
         $cm = null;
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
-            $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))), $gradeable_id);
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
         }
         elseif ($course_material_id !== null) {
             $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -259,17 +269,6 @@ class MiscController extends AbstractController {
 
         if ($dir === "course_materials") {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
-        }
-
-        if ($dir == 'submissions') {
-            //cannot download scanned images for bulk uploads
-            if (
-                strpos(basename($path), "upload_page_") !== false
-                && FileUtils::getContentType($path) !== "application/pdf"
-            ) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                return false;
-            }
         }
 
         $filename = pathinfo($path, PATHINFO_BASENAME);
@@ -427,17 +426,7 @@ class MiscController extends AbstractController {
                     $file_path = $file->getRealPath();
                     $relative_path = substr($file_path, strlen($path) + 1);
                     if ($this->core->getAccess()->canI("path.read", ["dir" => $folder_name, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
-                        // For scanned exams, the directories get polluted with the images of the split apart
-                        // pages, so we selectively only grab the PDFs there. For all other types,
-                        // we can grab all files regardless of type.
-                        if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($file_path) === 'application/pdf') {
-                                $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
-                            }
-                        }
-                        else {
-                            $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
-                        }
+                        $zip_stream->addFileFromPath(FileUtils::joinPaths($folder_name, $relative_path), $file_path);
                     }
                 }
             }

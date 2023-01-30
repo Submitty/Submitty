@@ -253,7 +253,9 @@ class PlagiarismController extends AbstractController {
         $ranking = preg_split('/\R/', $content);
         $ranking_array = [];
         foreach ($ranking as $row) {
-            $ranking_array[] = preg_split('/\s+/', $row);
+            if (strlen(trim($row)) !== 0) { // filter out whitespace-only rows
+                $ranking_array[] = preg_split('/\s+/', $row);
+            }
         }
         return $ranking_array;
     }
@@ -645,7 +647,7 @@ class PlagiarismController extends AbstractController {
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[2],
@@ -1587,6 +1589,11 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
 
+        // If there were no matches for this version, show nothing in the right dropdown
+        if (count($ranking) === 0) {
+            return JsonResponse::getSuccessResponse([]);
+        }
+
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
 
         $user_ids_and_names = [];
@@ -1607,7 +1614,7 @@ class PlagiarismController extends AbstractController {
         foreach ($ranking as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[3],

@@ -31,7 +31,7 @@ class LeaderboardView extends AbstractView {
             "user_id" => $user_id,
             "user_index" => $user_index,
             "description" => $description,
-            "user_name" => $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName(),
+            "user_name" => $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName(),
             "studentIsAnonymous" => $user_is_anonymous,
             "grader_value" => User::GROUP_LIMITED_ACCESS_GRADER
         ]);

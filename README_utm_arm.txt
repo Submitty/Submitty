@@ -141,7 +141,7 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    sudo apt install -y spice-vdagent spice-webdavd
    sudo apt install -y davfs2
-       * Answer the question "YES" and grant access to unpriviledged users *
+       * Answer the question "YES" and grant access to unprivileged users *
    sudo mkdir -p /usr/local/submitty/GIT_CHECKOUT
 
    NOTE: The command below must be re-run each time the guest machine
@@ -163,17 +163,35 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    sudo umount /usr/local/submitty/GIT_CHECKOUT
 
 
-9. TEMPORARY HACK STEP
+8b. NOTE: If step 8 fails to mount the shared directory to the host
+    computer with an error "failure to reach server", try this instead
+    (from https://docs.getutm.app/guest-support/linux/)
 
-   open .setup/pip/system_requirements.txt
-   comment out the opencv and onnx version installations (compilation from scratch fails)
-
-    #opencv-python==3.4.10.37
-    #onnxruntime==1.8.1
-    #onnx==1.9.0
+    On the guest:
+   
+      sudo mount -t 9p -o trans=virtio share /usr/local/submitty/GIT_CHECKOUT/ -oversion=9p2000.L
 
 
-10. Do Submitty system setup and installation:
+    Then to prevent ownership and permissions errors with git, type these commands on the guest:
+
+      cd /usr/local/submitty/GIT_CHECKOUT
+      git config --global --add safe.directory '*'
+
+
+    Confirm that you can see files in /usr/local/submitty/GIT_CHECKOUT/Submitty and
+    /usr/local/submitty/GIT_CHECKOUT/Tutorial etc.
+
+    Confirm that you can use git to get the release version, etc.
+
+      cd /usr/local/submitty/GIT_CHECKOUT/Tutorial
+      git status
+
+    Also check the other repositories and make sure there are not
+    errors about ownership/permissions/etc.
+
+
+
+9.  Do Submitty system setup and installation:
 
     On the guest machine:
 
@@ -187,13 +205,8 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
     sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh
 
 
-11. After installation, to fix opencv & onnx:
-
-    sudo pip install opencv-python
-    sudo pip install onnxruntime
-    sudo apt install libgl1-mesa-glx
 
 
-12. When finished, access the Submitty website from a browser on your host machine:
+10. When finished, access the Submitty website from a browser on your host machine:
 
     http://localhost:1511/
