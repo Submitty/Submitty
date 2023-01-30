@@ -26,5 +26,8 @@
   "/courses/<semester>/<course>/course_materials/upload",
   "/courses/<semester>/<course>/course_materials/delete",
   "/courses/<semester>/<course>/course_materials/modify_timestamp",
-  "/courses/<semester>/<course>/course_materials/edit"
+  "/courses/<semester>/<course>/course_materials/edit",
+  "/courses/<semester>/<course>/polls/newPoll",
+  "/courses/<semester>/<course>/polls/editPoll/submitEdits",
+  "/courses/<semester>/<course>/polls/deletePoll"
 ]
