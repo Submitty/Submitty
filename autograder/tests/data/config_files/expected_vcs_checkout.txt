@@ -1,10 +1,10 @@
 VCS CHECKOUT
-vcs_base_url {TEST_DATA_PATH}
+vcs_base_url TEST_DATA_PATH
 vcs_subdirectory homework_01
-vcs_path file:///{HOMEWORK_PATH}
-/usr/bin/git clone file:///{HOMEWORK_PATH} {CHECKOUT_PATH} --depth 1 -b master
+vcs_path file:///HOMEWORK_PATH
+/usr/bin/git clone file:///HOMEWORK_PATH CHECKOUT_PATH --depth 1 -b master
 
 ====================================
 
-{CHECKOUT_PATH}:
+CHECKOUT_PATH:
 total 1
