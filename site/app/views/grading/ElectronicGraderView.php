@@ -36,6 +36,8 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
 
+    private $user_id_to_User_cache = [];
+
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -346,8 +348,8 @@ HTML;
 HTML;
 
         foreach ($users as $user => $details) {
-            $first_name = htmlspecialchars($details["first_name"]);
-            $last_name = htmlspecialchars($details["last_name"]);
+            $given_name = htmlspecialchars($details["given_name"]);
+            $family_name = htmlspecialchars($details["family_name"]);
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
             $filepath = htmlspecialchars($details["file"]);
@@ -355,7 +357,7 @@ HTML;
             $return .= <<<HTML
 			<tbody>
 				<tr>
-					<td>{$last_name}, {$first_name}</td>
+					<td>{$family_name}, {$given_name}</td>
                     <td>{$upload_timestamp}</td>
                     <td>{$submit_timestamp}</td>
                     <td>{$filepath}</td>
@@ -514,8 +516,8 @@ HTML;
                 }
                 else {
                     $columns[] = ["width" => "13%", "title" => "User ID",          "function" => "user_id", "sort_type" => "id"];
-                    $columns[] = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
-                    $columns[] = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
+                    $columns[] = ["width" => "15%", "title" => "First Name",       "function" => "user_given", "sort_type" => "first"];
+                    $columns[] = ["width" => "15%", "title" => "Last Name",        "function" => "user_family", "sort_type" => "last"];
                 }
             }
             // NOTE/REDESIGN FIXME: Same note as above.
@@ -1266,7 +1268,10 @@ HTML;
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                $user_or_team = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                if (!array_key_exists($user_id[0], $this->user_id_to_User_cache)) {
+                    $this->user_id_to_User_cache[$user_id[0]] = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]];
+                }
+                $user_or_team = $this->user_id_to_User_cache[$user_id[0]];
                 $anon_id = $user_or_team->getAnonId($g_id);
                 $anon_path = $anon_path . "/" . $anon_id;
             }
@@ -1304,6 +1309,7 @@ HTML;
                         array_pop($path);
                         $working_dir = &$files[$start_dir_name];
                         foreach ($path as $dir) {
+                            /** @var array $working_dir */
                             if (!isset($working_dir[$dir])) {
                                 $working_dir[$dir] = [];
                             }

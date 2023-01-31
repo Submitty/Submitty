@@ -55,8 +55,8 @@ class UsersController extends AbstractController {
                     break;
             }
             array_push($download_info, [
-                'first_name' => $student->getDisplayedFirstName(),
-                'last_name' => $student->getDisplayedLastName(),
+                'given_name' => $student->getDisplayedGivenName(),
+                'family_name' => $student->getDisplayedFamilyName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -122,8 +122,8 @@ class UsersController extends AbstractController {
                     break;
             }
             array_push($download_info, [
-                'first_name' => $grader->getDisplayedFirstName(),
-                'last_name' => $grader->getDisplayedLastName(),
+                'given_name' => $grader->getDisplayedGivenName(),
+                'family_name' => $grader->getDisplayedFamilyName(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -187,10 +187,10 @@ class UsersController extends AbstractController {
             'user_id' => $user->getId(),
             'already_in_course' => true,
             'user_numeric_id' => $user->getNumericId(),
-            'user_firstname' => $user->getLegalFirstName(),
-            'user_lastname' => $user->getLegalLastName(),
-            'user_preferred_firstname' => $user->getPreferredFirstName(),
-            'user_preferred_lastname' => $user->getPreferredLastName(),
+            'user_givenname' => $user->getLegalGivenName(),
+            'user_familyname' => $user->getLegalFamilyName(),
+            'user_preferred_givenname' => $user->getPreferredGivenName(),
+            'user_preferred_familyname' => $user->getPreferredFamilyName(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
@@ -220,10 +220,10 @@ class UsersController extends AbstractController {
             $user_information[$user_id] = [
                 'already_in_course' => $already_in_course,
                 'user_numeric_id' => $user->getNumericId(),
-                'user_firstname' => $user->getLegalFirstName(),
-                'user_lastname' => $user->getLegalLastName(),
-                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
-                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_givenname' => $user->getLegalGivenName(),
+                'user_familyname' => $user->getLegalFamilyName(),
+                'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
+                'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
@@ -264,19 +264,19 @@ class UsersController extends AbstractController {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
-        //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_firstname']) . "\"<br>";
-        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
+        //Given and Family name must be alpha characters, white-space, or certain punctuation.
+        $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
+        $error_message .= User::validateUserData('user_legal_familyname', trim($_POST['user_familyname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_familyname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Check secondary email address for appropriate format.
         $error_message .= User::validateUserData('user_email_secondary', trim($_POST['user_email_secondary'])) ? "" : "Error in secondary email: \"" . strip_tags($_POST['user_email_secondary']) . "\"<br>";
-        //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";
+        //Preferred given name must be alpha characters, white-space, or certain punctuation.
+        if (!empty($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_givenname', trim($_POST['user_preferred_givenname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_givenname']) . "\"<br>";
         }
-        if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_lastname']) . "\"<br>";
+        if (!empty($_POST['user_preferred_familyname']) && trim($_POST['user_preferred_familyname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_familyname', trim($_POST['user_preferred_familyname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_familyname']) . "\"<br>";
         }
 
         //Database password cannot be blank, no check on format
@@ -302,14 +302,14 @@ class UsersController extends AbstractController {
 
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
-        $user->setLegalFirstName(trim($_POST['user_firstname']));
-        if (isset($_POST['user_preferred_firstname'])) {
-            $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
+        $user->setLegalGivenName(trim($_POST['user_givenname']));
+        if (isset($_POST['user_preferred_givenname'])) {
+            $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
-        $user->setLegalLastName(trim($_POST['user_lastname']));
-        if (isset($_POST['user_preferred_lastname'])) {
-            $user->setPreferredLastName(trim($_POST['user_preferred_lastname']));
+        $user->setLegalFamilyName(trim($_POST['user_familyname']));
+        if (isset($_POST['user_preferred_familyname'])) {
+            $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
 
         $user->setEmail(trim($_POST['user_email']));
@@ -745,7 +745,7 @@ class UsersController extends AbstractController {
                 curl_close($ch);
             }
             else {
-                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly receive spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
         }
@@ -864,13 +864,13 @@ class UsersController extends AbstractController {
         $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         // Validation and error checking.
-        $pref_firstname_idx = $use_database ? 6 : 5;
-        $pref_lastname_idx = $pref_firstname_idx + 1;
-        $registration_type_idx = $pref_firstname_idx + 2;
-        $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
+        $pref_givenname_idx = $use_database ? 6 : 5;
+        $pref_familyname_idx = $pref_givenname_idx + 1;
+        $registration_type_idx = $pref_givenname_idx + 2;
+        $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_givenname_idx + 2;
         $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
-        $bad_columns = []; //Tracks columns in which errors occured
+        $bad_columns = []; //Tracks columns in which errors occurred
 
         /* Used for validation of grading assignment for graders to registration sections. Graders cannot
           be assigned to grade the (created-by-default) null registration section. */
@@ -885,14 +885,14 @@ class UsersController extends AbstractController {
             'column_count' => 'Only 5 to 10 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_id_saml' => 'UserId must be a valid SAML username',
-            'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
-            'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
+            'user_legal_givenname' => 'Legal first name must be alpha characters, white-space, or certain punctuation.',
+            'user_legal_familyname' => 'Legal last name must be alpha characters, white-space, or certain punctuation.',
             'user_email' => 'Email address should be valid with appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.',
             'registration_section' =>  'Registration must contain only these characters - A-Z,a-z,_,-',
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
-            'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
-            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
+            'user_preferred_givenname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
+            'user_preferred_familyname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
             'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' .
                 'enclosed in double quotes (e.g. "1,3,STAFF").',
             'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
@@ -937,18 +937,18 @@ class UsersController extends AbstractController {
                     }
                 }
             }
-            // First Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_firstname', $vals[1])) {
-                $bad_row_details[$row_num + 1][] = 'first name';
-                if (!in_array('user_legal_firstname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_firstname';
+            // Given Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_givenname', $vals[1])) {
+                $bad_row_details[$row_num + 1][] = 'given name';
+                if (!in_array('user_legal_givenname', $bad_columns)) {
+                    $bad_columns[] = 'user_legal_givenname';
                 }
             }
-            // Last Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_lastname', $vals[2])) {
-                $bad_row_details[$row_num + 1][] = 'last Name';
-                if (!in_array('user_legal_lastname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_lastname';
+            // Family Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_familyname', $vals[2])) {
+                $bad_row_details[$row_num + 1][] = 'family name';
+                if (!in_array('user_legal_familyname', $bad_columns)) {
+                    $bad_columns[] = 'user_legal_familyname';
                 }
             }
             // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
@@ -991,18 +991,18 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_password';
                 }
             }
-            /* Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            /* Preferred given and family name must be alpha characters, white-space, or certain punctuation.
                Automatically validate if not set (this field is optional) */
-            if (!(empty($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred first name';
-                if (!in_array('user_preferred_firstname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_firstname';
+            if (!(empty($vals[$pref_givenname_idx]) || User::validateUserData('user_preferred_givenname', $vals[$pref_givenname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred given name';
+                if (!in_array('user_preferred_givenname', $bad_columns)) {
+                    $bad_columns[] = 'user_preferred_givenname';
                 }
             }
-            if (!(empty($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred last name';
-                if (!in_array('user_preferred_lastname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_lastname';
+            if (!(empty($vals[$pref_familyname_idx]) || User::validateUserData('user_preferred_familyname', $vals[$pref_familyname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred family name';
+                if (!in_array('user_preferred_familyname', $bad_columns)) {
+                    $bad_columns[] = 'user_preferred_familyname';
                 }
             }
             /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
@@ -1133,8 +1133,8 @@ class UsersController extends AbstractController {
             else {
                 $user = new User($this->core);
                 $user->setId($row[0]);
-                $user->setLegalFirstName($row[1]);
-                $user->setLegalLastName($row[2]);
+                $user->setLegalGivenName($row[1]);
+                $user->setLegalFamilyName($row[2]);
                 $user->setEmail($row[3]);
                 // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
@@ -1143,11 +1143,11 @@ class UsersController extends AbstractController {
                     $user->setRegistrationSection($row[$registration_section_idx]);
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
-                if (!empty($row[$pref_firstname_idx])) {
-                    $user->setPreferredFirstName($row[$pref_firstname_idx]);
+                if (!empty($row[$pref_givenname_idx])) {
+                    $user->setPreferredGivenName($row[$pref_givenname_idx]);
                 }
-                if (!empty($row[$pref_lastname_idx])) {
-                    $user->setPreferredLastName($row[$pref_lastname_idx]);
+                if (!empty($row[$pref_familyname_idx])) {
+                    $user->setPreferredFamilyName($row[$pref_familyname_idx]);
                 }
                 if ($use_database) {
                     $user->setPassword($row[5]);

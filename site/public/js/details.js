@@ -28,7 +28,7 @@ $(document).ready(() => {
         }
     });
 
-    // Creating and adding style for the psuedo selector in the details-table
+    // Creating and adding style for the pseudo selector in the details-table
     const style = document.createElement('style');
     let content = '';
     // loop over the head row of `details-table`

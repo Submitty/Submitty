@@ -187,7 +187,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
                 enableKeyToClick();
             },
             error: function(e) {
-                // Check if error was occured by candelling a test case
+                // Check if error was occurred by candelling a test case
                 if (loading_test_cases_xml_http_requests.has(orig_div_name) && loading_test_cases_xml_http_requests.get(orig_div_name).readyState === 0) {
                     loading_test_cases_xml_http_requests.delete(orig_div_name);
                     CollapseTestCaseOutput(orig_div_name, index, num_test_cases, loadingTools, check_all_test_cases_states);

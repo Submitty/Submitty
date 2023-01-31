@@ -546,7 +546,7 @@ class Access {
                 return false;
             }
             elseif (!file_exists($path)) {
-                //checks for the existense of path which is asked for
+                //checks for the existence of path which is asked for
                 return false;
             }
 
@@ -772,6 +772,9 @@ class Access {
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
+        if ($path === false) {
+            return false;
+        }
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't read it
@@ -880,7 +883,7 @@ class Access {
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path
-     * @return bool|string Absolute path of the file in that directory
+     * @return bool|string Absolute path of the file in that directory or false if unsafe
      */
     public function resolveDirPath(string $dir, string $path) {
         if ($this->directories === null) {
@@ -895,7 +898,10 @@ class Access {
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
         $parts = [];
         foreach ($orig_parts as $part) {
-            if ($part !== ".." && $part !== ".") {
+            if ($part === "..") {
+                return false;
+            }
+            if ($part !== ".") {
                 $parts[] = $part;
             }
         }

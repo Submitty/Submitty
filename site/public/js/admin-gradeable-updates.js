@@ -385,7 +385,7 @@ function ajaxCheckBuildStatus() {
             }
             else if (response['data'] == false) {
                 $('#rebuild-status').html('Gradeable build failed');
-                $('#autograding_config_error').text('The current path is not valid, selecting Rebuild Gradeable without changing it will fail.');
+                $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {
@@ -467,7 +467,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
             } else {
                 msg = 'Uncaught Error.\n' + jqXHR.responseText;
             }
-            alert("error occured"+msg);
+            alert("error occurred"+msg);
         }
     });
 }
@@ -495,12 +495,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if(students_lines_index == -1){
-                    alert("Cannot Proccess file, requires exactly one labelled 'student' column");
+                    alert("Cannot process file, requires exactly one labelled 'student' column");
                     return;
                 }
 
                 if(graders_lines_index == -1){
-                    alert("Cannot Proccess file, requires exactly one labelled 'grader' column");
+                    alert("Cannot process file, requires exactly one labelled 'grader' column");
                     return;
                 }
 
