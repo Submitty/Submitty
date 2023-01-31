@@ -24,12 +24,12 @@ class UserProfileView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $autofill_preferred_name = [$user->getLegalFirstName(), $user->getLegalLastName()];
-        if ($user->getPreferredFirstName() != "") {
-            $autofill_preferred_name[0] = $user->getPreferredFirstName();
+        $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
+        if ($user->getPreferredGivenName() != "") {
+            $autofill_preferred_name[0] = $user->getPreferredGivenName();
         }
-        if ($user->getPreferredLastName() != "") {
-            $autofill_preferred_name[1] = $user->getPreferredLastName();
+        if ($user->getPreferredFamilyName() != "") {
+            $autofill_preferred_name[1] = $user->getPreferredFamilyName();
         }
 
         $this->output->addInternalJs('user-profile.js');
@@ -42,10 +42,12 @@ class UserProfileView extends AbstractView {
             ?  $user->getTimeZone()
             : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
 
+        $this->core->getOutput()->addInternalModuleJs('user-profile.js');
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
-            "user_first" => $autofill_preferred_name[0],
-            "user_last" => $autofill_preferred_name[1],
+            "user_given" => $autofill_preferred_name[0],
+            "user_family" => $autofill_preferred_name[1],
             "change_name_text" => $change_name_text,
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,

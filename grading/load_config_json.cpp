@@ -212,8 +212,7 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   }
   json_set_default(whole_config, "required_capabilities", "default");
 
-  json_set_default(whole_config, "hide_submitted_files", false);
-  json_set_default(whole_config, "hide_version_and_test_details", false);
+  json_set_default(whole_config, "hide_test_details", whole_config.value("hide_version_and_test_details", false));
 
   // By default, we have one drop zone without a part label / sub
   // directory.
@@ -1093,6 +1092,17 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
+        assert(grader.find("expected_string") == grader.end() && "You cannot specify both expected_file and expected_string");
+      }
+      if (grader.find("expected_string") != grader.end()) {
+        itr2 = grader.find("show_expected");
+        if (itr2 == grader.end()) {
+          grader["show_expected"] = "always";
+        } else {
+          assert (validShowValue(*itr2));
+        }
+        grader["use_expected_string"] = true;
+        assert(grader.find("expected_file") == grader.end() && "You cannot specify both expected_file and expected_string");
       }
     }
   }

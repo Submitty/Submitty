@@ -1,5 +1,5 @@
 /* global buildUrl, displayErrorMessage, displaySuccessMessage */
-// Change this variable to change the frequency of the update request, measured in miliseconds
+// Change this variable to change the frequency of the update request, measured in milliseconds
 const refresh_freq = 5000;
 // Change this variable to change the max number of entries in the table before the oldest entries are replaced
 const max_log = 60;

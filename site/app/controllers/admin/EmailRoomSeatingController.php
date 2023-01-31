@@ -76,7 +76,7 @@ Please email your instructor with any questions or concerns.';
             $seating_assignment_emails[] = new Email($this->core, $email_data);
         }
         $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
-        $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
+        $this->core->addSuccessMessage("Seating assignments have been successfully emailed!");
         return new RedirectResponse($this->core->buildCourseUrl());
     }
 
