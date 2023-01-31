@@ -77,6 +77,10 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
+config.vm.provider :virtualbox do |v|
+  v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+  v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+end
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
