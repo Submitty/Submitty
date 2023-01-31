@@ -11,7 +11,7 @@ import argparse
 # 1) The path to the top level of the old assignment's directory tree. This folder's subdirectories should mirror 
 #    a /var/local/submitty/courses/<semester>/<course>/submissions/<assignment_name> folder. 
 # OUTPUT:
-# 1) A csv of the form: username, LastName, FirstName, email, RegistrationSection
+# 1) A csv of the form: username, FamilyName, GivenName, email, RegistrationSection
 def main():
     parser = argparse.ArgumentParser(description='Given a directory mirroring a submission directory (see arguments),\
      this script will generate a csv userlist for upload to submitty.')
@@ -42,7 +42,7 @@ def main():
         with open(os.path.join(os.getcwd(), csv_name), "w") as out_file:
             writer = csv.writer(out_file)
             for student in student_list:
-                #TODO: Do something clever with the name/last name/email/section.
+                #TODO: Do something clever with the name/family name/email/section.
                 writer.writerow((student, "a", "b", "c@email.com", "null"))
     finally:
         f.close()
