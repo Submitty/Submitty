@@ -52,11 +52,10 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
-# Bento does not yet make available ARM64 compatible boxes, so we need to use an alternative box that's built from bento's sources
-ubuntu_2004_box = if Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1'))
-  'jeffnoxon/ubuntu-20.04-arm64'
+box_extra = if Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1'))
+  '-arm64'
 else
-  'bento/ubuntu-20.04'
+  ''
 end
 
 def mount_folders(config, mount_options)
@@ -80,13 +79,16 @@ end
 Vagrant.configure(2) do |config|
   mount_options = []
 
+  # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
+  config.vm.boot_timeout = 600
+
   # Specify the various machines that we might develop on. After defining a name, we
   # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    ubuntu.vm.box = ubuntu_2004_box
+    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
@@ -96,10 +98,11 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.box = ubuntu_2004_box
+    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end

@@ -36,20 +36,19 @@
 
             <div class="action-btn-cont">
                 {% if show_all_sections_button %}
-                <a class="btn btn-default"
-                   href="" onclick="changeSections()">
+                <button class="btn btn-default" onclick="changeSections()">
                     {{ view_all ? "View Your Sections" : "View All" }}
-                </a>
+                </button>
                 {% endif %}
                 <a class="btn btn-default"
                    href="" onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </a>
                 {% if toggle_anon_button %}
-                <a class="btn btn-default" id="toggle-anon-button"
-                   href="" onclick="changeAnon()">
+                <button class="btn btn-default" id="toggle-anon-button"
+                    onclick="changeAnon()">
                     {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
-                </a>
+                </button>
                 {% endif %}
             </div>
         </div>
@@ -174,7 +173,7 @@
                 <tbody class="details-content panel-content-active">
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -219,7 +218,7 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
     <tr
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
@@ -239,9 +238,9 @@
             {% elseif column.function == "graded_questions" %}
                 {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
-                {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
-                {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
                 {{ _self.render_column_grading_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
@@ -258,16 +257,16 @@
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ _self.render_column_total(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "user_first" %}
-                {{ _self.render_column_user_first(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "user_given" %}
+                {{ _self.render_column_user_given(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
-                {{ _self.render_column_user_id(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_user_id(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "user_id_anon" %}
-                {{ _self.render_column_user_id_anon(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_user_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_members_anon" %}
-                {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "user_last" %}
-                {{ _self.render_column_user_last(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
+            {% elseif column.function == "user_family" %}
+                {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
             {% endif %}
@@ -306,8 +305,8 @@
                 <td></td>
             {% elseif column.function == "team_members" %}
                 <td>
-                    {{ user.getDisplayedFirstName() }}
-                    {{ user.getDisplayedLastName() }}
+                    {{ user.getDisplayedGivenName() }}
+                    {{ user.getDisplayedFamilyName() }}
                 </td>
             {% elseif column.function == "team_members_anon" %}
                 <td></td>
@@ -315,13 +314,13 @@
                 <td></td>
             {% elseif column.function == "total_peer" %}
                 <td></td>
-            {% elseif column.function == "user_first" %}
+            {% elseif column.function == "user_given" %}
                 <td></td>
             {% elseif column.function == "user_id" %}
                 <td></td>
             {% elseif column.function == "user_id_anon" %}
                 <td></td>
-            {% elseif column.function == "user_last" %}
+            {% elseif column.function == "user_family" %}
                 <td></td>
             {% elseif column.function == "viewed_grade" %}
                 <td></td>
@@ -420,9 +419,9 @@
 {% endmacro %}
 
 {# Grading Button #}
-{% macro render_column_grading(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
     {% set badge_count = 0 %}
-    {% if  graded_gradeable.hasOverriddenGrades() %}
+    {% if  graded_gradeable.getSubmitter().getId() in overrides %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
@@ -461,7 +460,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -471,8 +470,8 @@
 {% endmacro %}
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
-{% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column) %}
-    {% if  graded_gradeable.hasOverriddenGrades() %}
+{% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
+    {% if  graded_gradeable.getSubmitter().getId() in overrides %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
@@ -511,7 +510,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -563,13 +562,13 @@
 {% macro render_column_team_members(context, section, graded_gradeable, index, info, column) %}
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
-            {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
-            {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
+            {{ graded_gradeable.getSubmitter().getUser().getDisplayedGivenName() }}
+            {{ graded_gradeable.getSubmitter().getUser().getDisplayedFamilyName() }}
         {% else %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getDisplayedFirstName() }}
-                {{ member.getDisplayedLastName() -}}
+                {{- member.getDisplayedGivenName() }}
+                {{ member.getDisplayedFamilyName() -}}
             {%- endfor -%}
         {% endif %}
     <div style="font-style: italic; display: inline; color: var(--standard-medium-dark-gray);">
@@ -577,8 +576,8 @@
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getDisplayedFirstName() }}
-                {{ member.getDisplayedLastName() -}}
+                {{- member.getDisplayedGivenName() }}
+                {{ member.getDisplayedFamilyName() -}}
                 {%- if member.hasMultipleTeamInvites(graded_gradeable.getGradeableId()) -%}
                     <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color: var(--standard-medium-dark-gray);"></i>)</div>
                 {%- endif -%}
@@ -624,18 +623,18 @@
 {% endmacro %}
 
 {# Anonymous ID #}
-{% macro render_column_user_id_anon(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getAnonId() }}</td>
+{% macro render_column_user_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) %}
+    <td>{{ anon_ids[graded_gradeable.getSubmitter().getId()] }}</td>
 {% endmacro %}
 
-{% macro render_column_team_members_anon(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_team_members_anon(context, section, graded_gradeable, index, info, column, anon_ids) %}
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
-            {{ graded_gradeable.getSubmitter().getUser().getAnonId() }}
+            {{ anon_ids[graded_gradeable.getSubmitter().getId()] }}
         {% else %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
+                {{- anon_ids[member.getId()] -}}
             {%- endfor -%}
         {% endif %}
     <div style="font-style: italic; display: inline; color: grey;">
@@ -643,21 +642,21 @@
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
+                {{- anon_ids[member.getId()] -}}
             {%- endfor -%}
         {% endif %}
     </div>
     </td>
 {% endmacro %}
 
-{# First Name #}
-{% macro render_column_user_first(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}</td>
+{# Given Name #}
+{% macro render_column_user_given(context, section, graded_gradeable, index, info, column) %}
+    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedGivenName() }}</td>
 {% endmacro %}
 
-{# Last Name #}
-{% macro render_column_user_last(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}</td>
+{# Family Name #}
+{% macro render_column_user_family(context, section, graded_gradeable, index, info, column) %}
+    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedFamilyName() }}</td>
 {% endmacro %}
 
 {# Viewed Grade #}

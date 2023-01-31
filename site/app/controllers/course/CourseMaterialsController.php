@@ -21,6 +21,8 @@ use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
+const DIR = 2;
+
 class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials")
@@ -104,6 +106,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -114,22 +117,34 @@ class CourseMaterialsController extends AbstractController {
         }
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($cm->getPath())));
-
+        $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
+        if ($path === false) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
+        // check to prevent the deletion of course_materials folder
+        if ($path === FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials")) {
+            $this->core->addErrorMessage(basename($path) . " can't be removed.");
+            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
+        }
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
 
-        $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-
-        foreach ($all_files as $file) {
-            if (str_starts_with($file->getPath(), $path)) {
-                $this->core->getCourseEntityManager()->remove($file);
+        if ($cm->getType() === DIR) {
+            $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+            foreach ($all_files as $file) {
+                if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
+                    $this->core->getCourseEntityManager()->remove($file);
+                }
             }
         }
-        $this->core->getCourseEntityManager()->flush();
+        else {
+            $this->core->getCourseEntityManager()->remove($cm);
+        }
         $success = false;
         if (is_dir($path)) {
             $success = FileUtils::recursiveRmdir($path);
@@ -137,7 +152,25 @@ class CourseMaterialsController extends AbstractController {
         else {
             $success = unlink($path);
         }
-
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+        // delete the topmost parent folder that's empty (contains no files)
+        if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
+            $empty_folders = [];
+            FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
+            if (count($empty_folders) > 0) {
+                $path = $empty_folders[0];
+                $success = $success && FileUtils::recursiveRmdir($path);
+                if (!isset($all_files)) {
+                    $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+                }
+                foreach ($all_files as $file) {
+                    if (str_starts_with($file->getPath(), $path)) {
+                        $this->core->getCourseEntityManager()->remove($file);
+                    }
+                }
+            }
+        }
+        $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
@@ -223,6 +256,7 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
+     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
     public function setReleaseAll(): JsonResponse {
@@ -244,7 +278,7 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (str_starts_with($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                if (str_starts_with(pathinfo($cm->getPath(), PATHINFO_DIRNAME), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -296,14 +330,14 @@ class CourseMaterialsController extends AbstractController {
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         foreach ($course_materials as $course_material) {
             if (
-                str_starts_with($course_material->getPath(), $main_course_material->getPath())
+                str_starts_with(pathinfo($course_material->getPath(), PATHINFO_DIRNAME), $main_course_material->getPath())
                 && $course_material->getPath() != $main_course_material->getPath()
             ) {
                 if ($course_material->isDir()) {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $_POST['requested_path'] = $course_material->getPath();
+                    $_POST['id'] = $course_material->getId();
                     $this->ajaxEditCourseMaterialsFiles(false);
                 }
             }
@@ -349,13 +383,22 @@ class CourseMaterialsController extends AbstractController {
         //handle sections here
 
         if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
-            if ($_POST['sections'] === "") {
+            if (!isset($_POST['sections'])) {
                 $sections = null;
+            }
+            elseif ($_POST['sections'] === "") {
+                $sections = [];
             }
             else {
                 $sections = explode(",", $_POST['sections']);
             }
-            if ($sections != null) {
+            if (!isset($_POST['partial_sections'])) {
+                $partial_sections = [];
+            }
+            else {
+                $partial_sections = explode(",", $_POST['partial_sections']);
+            }
+            if ($sections !== null) {
                 $keep_ids = [];
 
                 foreach ($sections as $section) {
@@ -374,7 +417,7 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 foreach ($course_material->getSections() as $section) {
-                    if (!in_array($section->getSectionId(), $keep_ids)) {
+                    if (!in_array($section->getSectionId(), $keep_ids) && !in_array($section->getSectionId(), $partial_sections)) {
                         $course_material->removeSection($section);
                     }
                 }
@@ -599,8 +642,19 @@ class CourseMaterialsController extends AbstractController {
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
+                            $double_dot = ["../","..\\","/..","\\.."];
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $entries[] = $zip->getNameIndex($i);
+                                //check to ensure that entry name doesn't have ..
+                                $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
+                                    if (strpos($entries[count($entries) - 1], $dot) !== false) {
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                                if (count($dot_check) !== 0) {
+                                    return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
+                                }
                             }
                             $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                                 $name = strtolower($entry);

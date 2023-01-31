@@ -1,0 +1,24 @@
+{
+  "name": "Submitty",
+  "short_name": "Submitty",
+  "start_url": "index.php",
+  "display": "standalone",
+  "description": "An open source Course Management System",
+  "lang": "en",
+  "dir": "auto",
+  "theme_color": "#006398",
+  "background_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "img/pwa_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+    "src": "img/moorthy_duck.ico",
+    "sizes": "72x72 96x96 128x128 256x256"
+    }
+  ]
+}
+

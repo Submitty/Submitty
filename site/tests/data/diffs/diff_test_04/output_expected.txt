@@ -5,7 +5,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;3</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;4</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;5</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;&nbsp;6</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;&nbsp;6</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;7</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;8</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;&nbsp;9</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -22,7 +22,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;20</span><span class='line_code'><span class='line_code_inner'>     &quot;puppet&quot;, Dalek Supreme (Supreme Dalek), inc Progenitor, Dalek prime</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;21</span><span class='line_code'><span class='line_code_inner'>     minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein's</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;22</span><span class='line_code'><span class='line_code_inner'>     monster robot, Gantok, Grey Lady robot, Gubbage Cone, Hartman, Yvonne,</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;23</span><span class='line_code'><span class='line_code_inner'>     Hawthorne, Ice Warriors (inc benevolent appearences), Judoon,</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;23</span><span class='line_code'><span class='line_code_inner'>     Hawthorne, Ice Warriors (inc benevolent appearances), Judoon,</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;24</span><span class='line_code'><span class='line_code_inner'>     Kovarian, Madame, Lytton, Commander Gustav, Master (the), Mavic Chen,</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;25</span><span class='line_code'><span class='line_code_inner'>     Meddling Monk (the), Moroks, (the), Mortimus, Movellans, Nyder,</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;26</span><span class='line_code'><span class='line_code_inner'>     Ogrons, Ood, the (Oodkind), inc benevolent appearances, Rassilon,</span></span></div>
@@ -55,7 +55,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;53</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;54</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;55</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;56</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;56</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;57</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;58</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;59</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -68,7 +68,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;66</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;67</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;68</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;69</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;69</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;70</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;71</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;72</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -107,7 +107,7 @@
 	<div class='bad'><span class='line_number'>105</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>106</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>107</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>108</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>108</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>109</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>110</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>111</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -137,7 +137,7 @@
 	<div class='bad'><span class='line_number'>135</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>136</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>137</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>138</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>138</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>139</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>140</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>141</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -150,7 +150,7 @@
 	<div class='bad'><span class='line_number'>148</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>149</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>150</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>151</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>151</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>152</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>153</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>154</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
@@ -163,7 +163,7 @@
 	<div class='bad'><span class='line_number'>161</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
 	<div class='bad'><span class='line_number'>162</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
 	<div class='bad'><span class='line_number'>163</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
-	<div class='bad'><span class='line_number'>164</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>164</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearances)</span></span></div>
 	<div class='bad'><span class='line_number'>165</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
 	<div class='bad'><span class='line_number'>166</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
 	<div class='bad'><span class='line_number'>167</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>

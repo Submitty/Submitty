@@ -124,7 +124,7 @@ class SubmissionController extends AbstractController {
 
         // Attempt to put the version number to be in bounds of the gradeable
         $version = intval($gradeable_version ?? 0);
-        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0) || (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit())) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
 
@@ -492,7 +492,7 @@ class SubmissionController extends AbstractController {
     /**
      * Function for uploading a split item that already exists to the server.
      * The file already exists in uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
@@ -666,7 +666,7 @@ class SubmissionController extends AbstractController {
                 $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
 
                 if (!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0) {
-                    $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    $file_base_name = ".upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
                 }
 
                 $move_here = FileUtils::joinPaths($version_path, $file_base_name);
@@ -689,7 +689,7 @@ class SubmissionController extends AbstractController {
         $i = 1;
         foreach ($image_files as $image) {
             // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
+            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
                 return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
             }
             if (!@unlink($image)) {
@@ -755,7 +755,7 @@ class SubmissionController extends AbstractController {
             "filepath" => $uploaded_file
         ];
 
-        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
+        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
@@ -799,7 +799,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
-     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
@@ -989,7 +989,7 @@ class SubmissionController extends AbstractController {
                     "semester" => $this->core->getConfig()->getSemester(),
                     "team" => $team_id,
                     "user" => $user_id,
-                    "vcs_checkout" => false,
+                    "vcs_checkout" => $gradeable->isVcs(),
                     "version" => $active_version,
                     "who" => $who_id
                 ];
@@ -1012,7 +1012,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
-     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
@@ -1433,7 +1433,7 @@ class SubmissionController extends AbstractController {
             if ($vcs_base_url == "" && $vcs_path == "") {
                 if ($repo_id == "") {
                     // FIXME: commented out for now to pass Travis.
-                    // SubmissionControllerTests needs to be rewriten for proper VCS uploads.
+                    // SubmissionControllerTests needs to be rewritten for proper VCS uploads.
                     // return $this->uploadResult("repository url input cannot be blank.", false);
                 }
                 $vcs_full_path = $repo_id;
@@ -1859,7 +1859,7 @@ class SubmissionController extends AbstractController {
                 $graded_gradeable->getGradeableId(),
                 'grading',
                 'grade'
-            ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
+            ]) . '?' . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()), 'gradeable_version' => $new_version]);
         }
 
         return new MultiResponse(
@@ -1933,6 +1933,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -1946,17 +1947,20 @@ class SubmissionController extends AbstractController {
             }
             $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+            $json_path = FileUtils::joinPaths($user_path, $num_files, ".bulk_upload_data.json");
             if (!file_exists($json_path)) {
-                continue;
+                $json_path = FileUtils::joinPaths($user_path, $num_files, "bulk_upload_data.json");
+                if (!file_exists($json_path)) {
+                    continue;
+                }
             }
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
             if ($user === null) {
                 continue;
             }
             $file_contents = FileUtils::readJsonFile($json_path);
-            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]["given_name"] = $user->getDisplayedGivenName();
+            $users[$user_id_arr[$i]]["family_name"] = $user->getDisplayedFamilyName();
             $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];

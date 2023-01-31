@@ -14,20 +14,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
 -- Name: notifications_component; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -39,9 +25,44 @@ CREATE TYPE public.notifications_component AS ENUM (
 );
 
 
+--
+-- Name: add_course_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.add_course_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            temp_row RECORD;
+            random_str TEXT;
+            num_rows INT;
+        BEGIN
+            FOR temp_row IN SELECT g_id FROM gradeable LOOP
+                LOOP
+                    random_str = random_string(15);
+                    PERFORM 1 FROM gradeable_anon
+                    WHERE g_id=temp_row.g_id AND anon_id=random_str;
+                    GET DIAGNOSTICS num_rows = ROW_COUNT;
+                    IF num_rows = 0 THEN
+                        EXIT;
+                    END IF;
+                END LOOP;
+                INSERT INTO gradeable_anon (
+                    SELECT NEW.user_id, temp_row.g_id, random_str
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM gradeable_anon
+                        WHERE user_id=NEW.user_id AND g_id=temp_row.g_id
+                    )
+                );
+            END LOOP;
+            RETURN NULL;
+        END;
+    $$;
+
+
 SET default_tablespace = '';
 
-SET default_with_oids = false;
 
 --
 -- Name: late_day_cache; Type: TABLE; Schema: public; Owner: -
@@ -92,7 +113,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
         END LOOP;
         
         -- Get the number of late days charged up to this point
-        late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
+        late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
@@ -551,6 +572,29 @@ CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
 
 
 --
+-- Name: random_string(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.random_string(length integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+            result text := '';
+            i integer := 0;
+        BEGIN
+            IF length < 0 THEN
+                raise exception 'Given length cannot be less than 0';
+            END IF;
+            FOR i IN 1..length LOOP
+                result := result || chars[1+random()*(array_length(chars, 1)-1)];
+            END LOOP;
+            RETURN result;
+        END;
+    $$;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -695,7 +739,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_scanned_exam boolean DEFAULT false NOT NULL,
+    eg_student_download boolean DEFAULT false NOT NULL,
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
@@ -851,6 +895,17 @@ CREATE TABLE public.gradeable_allowed_minutes_override (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     allowed_minutes integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255) NOT NULL
 );
 
 
@@ -1262,12 +1317,32 @@ CREATE TABLE public.peer_feedback (
 --
 
 CREATE TABLE public.poll_options (
-    option_id integer NOT NULL,
     order_id integer NOT NULL,
     poll_id integer,
     response text NOT NULL,
-    correct boolean NOT NULL
+    correct boolean NOT NULL,
+    option_id integer NOT NULL
 );
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_options_option_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_options_option_id_seq OWNED BY public.poll_options.option_id;
 
 
 --
@@ -1277,8 +1352,29 @@ CREATE TABLE public.poll_options (
 CREATE TABLE public.poll_responses (
     poll_id integer NOT NULL,
     student_id text NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_responses_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_responses_id_seq OWNED BY public.poll_responses.id;
 
 
 --
@@ -1651,12 +1747,11 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
-    anon_id character varying,
     user_numeric_id character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
+    user_givenname character varying NOT NULL,
+    user_preferred_givenname character varying,
+    user_familyname character varying NOT NULL,
+    user_preferred_familyname character varying,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
@@ -1671,7 +1766,7 @@ CREATE TABLE public.users (
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
-    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY ((ARRAY['graded'::character varying, 'audit'::character varying, 'withdrawn'::character varying, 'staff'::character varying])::text[]))),
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1762,6 +1857,20 @@ ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
+
+
+--
+-- Name: poll_options option_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options ALTER COLUMN option_id SET DEFAULT nextval('public.poll_options_option_id_seq'::regclass);
+
+
+--
+-- Name: poll_responses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses ALTER COLUMN id SET DEFAULT nextval('public.poll_responses_id_seq'::regclass);
 
 
 --
@@ -1906,6 +2015,14 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gradeable_anon gradeable_anon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_pkey PRIMARY KEY (g_id, anon_id);
 
 
 --
@@ -2125,6 +2242,22 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_pkey PRIMARY KEY (option_id);
+
+
+--
+-- Name: poll_responses poll_responses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses
+    ADD CONSTRAINT poll_responses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: polls polls_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2267,10 +2400,31 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
+-- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_component_data_no_grader_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX gradeable_component_data_no_grader_index ON public.gradeable_component_data USING btree (gc_id, gd_id);
+
+
+--
+-- Name: gradeable_component_mark_data_gcm_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_component_mark_data USING btree (gcm_id);
 
 
 --
@@ -2288,6 +2442,20 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree
 
 
 --
+-- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USING btree (user_id);
+
+
+--
+-- Name: grading_registration_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_index ON public.grading_registration USING btree (user_id);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2295,10 +2463,24 @@ CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g
 
 
 --
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric_id);
+
+
+--
+-- Name: users add_course_user; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
 
 
 --
@@ -2526,6 +2708,22 @@ ALTER TABLE ONLY public.gradeable_access
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

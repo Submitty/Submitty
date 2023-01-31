@@ -1,8 +1,6 @@
 public/js/admin-gradeable-updates.js
 public/js/drag-and-drop.js
-public/js/forum.js
 public/js/gradeable.js
-public/js/latedays.js
 public/js/notebook_builder/notebook-builder-utils.js
 public/js/notebook_builder/builders/abstract-builder.js
 public/js/notebook_builder/builders/itempool-builder.js
@@ -17,13 +15,10 @@ public/js/notebook_builder/widgets/selector-widget.js
 public/js/notebook_builder/widgets/short-answer-widget.js
 public/js/notebook_builder/widgets/widget.js
 public/js/pdf/PDFInitToolbar.js
-public/js/rainbow-customization.js
 public/js/server.js
 public/js/simple-grading.js
-public/js/system-update.js
 public/js/ta-grading-keymap.js
 public/js/ta-grading-rubric-conflict.js
 public/js/ta-grading-rubric.js
 public/js/ta-grading.js
-public/js/user-profile.js
 public/js/userform.js

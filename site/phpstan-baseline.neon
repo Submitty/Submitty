@@ -27,14 +27,6 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/AuthenticationController.php
-
-		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 2
 			path: app/controllers/AuthenticationController.php
@@ -135,22 +127,6 @@ parameters:
 			"""
 			count: 5
 			path: app/controllers/OfficeHoursQueueController.php
-
-		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 25
-			path: app/controllers/PollController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 5
-			path: app/controllers/PollController.php
 
 		-
 			message: """
@@ -291,35 +267,6 @@ parameters:
 				should not be used, just return JsonResponse directly$#
 			"""
 			count: 11
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 4
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 4
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: """
-				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return JsonResponse directly$#
-			"""
-			count: 11
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
@@ -409,12 +356,22 @@ parameters:
 			path: app/entities/email/EmailEntity.php
 
 		-
-			message: "#^Left side of && is always true\\.$#"
+			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
 			count: 1
-			path: app/libraries/Access.php
+			path: app/entities/poll/Option.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
+			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Response.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
 			count: 1
 			path: app/libraries/Access.php
 
@@ -422,14 +379,6 @@ parameters:
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: app/libraries/Access.php
-
-		-
-			message: """
-				#^Casting class Lcobucci\\\\JWT\\\\Token to string is deprecated\\.\\:
-				This method has been removed from the interface in v4\\.0$#
-			"""
-			count: 3
-			path: app/libraries/Core.php
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"
@@ -804,11 +753,6 @@ parameters:
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Offset string on array\\{\\} in isset\\(\\) does not exist\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 

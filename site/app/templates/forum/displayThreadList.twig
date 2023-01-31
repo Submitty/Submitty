@@ -1,5 +1,5 @@
 {% for thread in thread_content %}
-    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" id="thread_box_link_{{ thread.thread_id }}">
+    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" data-thread_title="{{ thread.title }}" id="thread_box_link_{{ thread.thread_id }}">
         <div class="{{ thread.class }}">
             <div class="flex-row">
                 <span class="thread-left-cont">
@@ -104,4 +104,5 @@
             {% endif %}
         </div>
     </a>
+
 {% endfor %}

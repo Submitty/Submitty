@@ -708,6 +708,7 @@ fi
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    dbcourse_user_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_course_password | tr -d '"'`
 
     # create the submitty_dbuser role in postgres (if it does not yet exist)
     # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
@@ -792,13 +793,18 @@ if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     systemctl enable nullsmtpd
 fi
 
-# Setup preferred_name_logging
-echo -e "Setup preferred name logging."
 
-# Copy preferred_name_logging.php to sbin
-rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
-chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
-chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+
+
+## Setup preferred_name_logging
+#echo -e "Setup preferred name logging."
+
+## Copy preferred_name_logging.php to sbin
+#rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_#DIR}/sbin
+#chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+#chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+
+
 
 # Backup and adjust/overwrite Postgresql's configuration
 if [ ${WORKER} == 0 ]; then

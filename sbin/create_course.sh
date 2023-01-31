@@ -35,10 +35,7 @@ echo $DATABASE_COURSE_USER
 ########################################################################################################################
 ########################################################################################################################
 
-CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER}"
-if [ -d "${DATABASE_HOST}" ]; then
-    CONN_EXTRA="${CONN_STRING} -p ${DATABASE_PORT}"
-fi
+CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER} -p ${DATABASE_PORT}"
 
 # Check that Submitty Master DB exists.
 PGPASSWORD="${DATABASE_PASS}" psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
@@ -119,6 +116,12 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
+TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc "SELECT COUNT(*) FROM terms WHERE term_id='${semester}'")
+
+if [[ "$TERM_EXISTS" -eq "0" ]] ; then
+    echo "ERROR: Provided term ${semester} doesn't exist."
+    exit
+fi
 
 # FIXME: add some error checking on the $semester and $course
 #        variables
@@ -292,18 +295,12 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
-python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
-if [[ "$?" -ne "0" ]] ; then
-    echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
-    exit
-fi
-
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to grant table privileges to course database user"
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to grant sequence privileges to course database user"
     exit
@@ -318,6 +315,14 @@ if [[ "$?" -ne "0" ]] ; then
     echo "       To fix, try running 'create_term.sh'."
     exit
 fi
+
+python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
+if [[ $? -ne "0" ]] ; then
+    PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE semester='${semester}' AND course='${course}';"
+    echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
+    exit
+fi
+
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################
