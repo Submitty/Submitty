@@ -45,7 +45,7 @@ class NotebookBuilderController extends AbstractController {
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
 
         if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and term.");
             return new RedirectResponse($failure_url);
         }
 
@@ -239,7 +239,7 @@ class NotebookBuilderController extends AbstractController {
         }
 
         if (!$gradeable->isUsingUploadedConfig()) {
-            return 'Unable to make configuration changes outside of the current course and semester config_upload folder.';
+            return 'Unable to make configuration changes outside of the current course and term config_upload folder.';
         }
 
         return $gradeable;

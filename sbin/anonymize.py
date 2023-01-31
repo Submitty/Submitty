@@ -60,8 +60,8 @@ def main():
     num_rows = 0
     for course_row in courses_rows:
         temp_num_rows = num_rows
-        print(f"Course: {course_row['course']}\nSemester: {course_row['semester']}")
-        DB_NAME = f"submitty_{course_row['semester']}_{course_row['course']}"
+        print(f"Course: {course_row['course']}\nSemester: {course_row['term']}")
+        DB_NAME = f"submitty_{course_row['term']}_{course_row['course']}"
         course_conn_str = db_utils.generate_connect_string(
             DATABASE_HOST,
             DATABASE_PORT,

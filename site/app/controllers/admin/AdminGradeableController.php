@@ -87,7 +87,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with pulled data from the gradeable to be edited
-    private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
+    private function editPage(Gradeable $gradeable, $term, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Serialize the components for numeric/checkpoint rubrics
@@ -243,7 +243,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
-            'semester' => $semester,
+            'term' => $term,
             'course' => $course,
             'date_format' => 'Y-m-d H:i:s',
             'syllabus_buckets' => self::syllabus_buckets,
@@ -1281,15 +1281,15 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function enqueueBuildFile($g_id) {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $term . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
             "job" => "BuildConfig",
-            "semester" => $semester,
+            "term" => $term,
             "course" => $course,
             "gradeable" => $g_id
         ];
@@ -1303,13 +1303,13 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos($semester, $course, $g_id) {
+    public static function enqueueGenerateRepos($term, $course, $g_id) {
         // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $term . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
             "job" => "RunGenerateRepos",
-            "semester" => $semester,
+            "term" => $term,
             "course" => $course,
             "gradeable" => $g_id
         ];

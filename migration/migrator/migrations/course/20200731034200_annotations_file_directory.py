@@ -14,8 +14,8 @@ def get_file_path(directory, file_name):
     return os.path.abspath(os.path.join(directory, f'{file_name}.pdf'))
 
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     annotations_dir = Path(course_dir, 'annotations')
     submissions_dir = Path(course_dir, 'submissions')
     php_user = config.submitty_users['php_user']
@@ -51,8 +51,8 @@ def up(config, database, semester, course):
                         new_file.chmod(0o640)
 
 
-def down(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def down(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     annotations_dir = Path(course_dir, 'annotations')
     php_user = config.submitty_users['php_user']
 

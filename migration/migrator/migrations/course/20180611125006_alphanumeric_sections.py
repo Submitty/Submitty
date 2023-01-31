@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     # drop foreign key constraints as the foreign keys also store type of columns in their definitions
     database.execute("ALTER TABLE ONLY grading_registration DROP CONSTRAINT grading_registration_sections_registration_id_fkey")
     database.execute("ALTER TABLE ONLY users DROP CONSTRAINT users_registration_section_fkey")
@@ -18,7 +18,7 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id)")
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     # drop foreign key constraints while we typecast the columns
     database.execute("ALTER TABLE ONLY gradeable_teams DROP CONSTRAINT gradeable_teams_registration_section_fkey")
     database.execute("ALTER TABLE ONLY gradeable_teams DROP CONSTRAINT gradeable_teams_rotating_section_fkey")

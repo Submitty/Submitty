@@ -17,7 +17,7 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
 
-def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
+def insert_into_database(config, term, course, gradeable_id, user_id, team_id, who_id, is_team,
                          version):
     db_user = config.database['database_user']
     db_host = config.database['database_host']
@@ -34,7 +34,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     tmp_submission = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
-        semester,
+        term,
         course,
         'results',
         gradeable_id,
@@ -50,10 +50,10 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         print(f'could not find {submit_notebook_path}')
         notebook_data = []
 
-    testcases = get_testcases(config, semester, course, gradeable_id, notebook_data)
-    results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
+    testcases = get_testcases(config, term, course, gradeable_id, notebook_data)
+    results = get_result_details(data_dir, term, course, gradeable_id, who_id, version)
 
-    db_name = f"submitty_{semester}_{course}"
+    db_name = f"submitty_{term}_{course}"
 
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_host):
@@ -213,12 +213,12 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-def get_testcases(config, semester, course, g_id, notebook_data):
+def get_testcases(config, term, course, g_id, notebook_data):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
     correspondence with the testcases that come from the results.json file.
 
-    :param semester:
+    :param term:
     :param course:
     :param g_id:
     :return:
@@ -227,7 +227,7 @@ def get_testcases(config, semester, course, g_id, notebook_data):
     build_file = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
-        semester,
+        term,
         course,
         "config",
         "build",
@@ -257,14 +257,14 @@ def get_testcases(config, semester, course, g_id, notebook_data):
     return testcases
 
 
-def get_result_details(data_dir, semester, course, g_id, who_id, version):
+def get_result_details(data_dir, term, course, g_id, who_id, version):
     """
     Gets the result details for a particular version of a gradeable for the who (user or team).
     It returns a dictionary that contains a list of the testcases (that should have a 1-to-1
     correspondence with the testcases gotten through get_testcases() method) and the submission
     time for the particular version.
 
-    :param semester:
+    :param term:
     :param course:
     :param g_id:
     :param who_id:
@@ -273,7 +273,7 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
     """
 
     result_details = {'testcases': [], 'submission_time': None}
-    result_dir = os.path.join(data_dir, "courses", semester, course, "results", g_id, who_id,
+    result_dir = os.path.join(data_dir, "courses", term, course, "results", g_id, who_id,
                               str(version))
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:

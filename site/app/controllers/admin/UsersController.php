@@ -246,7 +246,7 @@ class UsersController extends AbstractController {
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -351,7 +351,7 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $semester, $course);
+            $this->core->getQueries()->updateUser($user, $term, $course);
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
@@ -361,7 +361,7 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                $this->core->getQueries()->insertCourseUser($user, $term, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
@@ -378,7 +378,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
+                    AdminGradeableController::enqueueGenerateRepos($term, $course, $g_id);
                 }
             }
         }
@@ -393,13 +393,13 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getSemester();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
                 $this->core->addErrorMessage('You cannot delete yourself.');
             }
-            elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
+            elseif ($this->core->getQueries()->deleteUser($user_id, $term, $course)) {
                 $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
             }
             else {
@@ -421,13 +421,13 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getSemester();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
                 $this->core->addErrorMessage('You cannot demote yourself.');
             }
-            elseif ($this->core->getQueries()->demoteGrader($user_id, $semester, $course)) {
+            elseif ($this->core->getQueries()->demoteGrader($user_id, $term, $course)) {
                 $this->core->addSuccessMessage("{$displayed_fullname} has been demoted to a student.");
             }
             else {
@@ -811,7 +811,7 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$return_url) {
+        $insert_or_update_user_function = function ($action, $user) use (&$term, &$course, &$return_url) {
             try {
                 switch ($action) {
                     case 'insert':
@@ -822,10 +822,10 @@ class UsersController extends AbstractController {
                                 $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
                             }
                         }
-                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        $this->core->getQueries()->insertCourseUser($user, $term, $course);
                         break;
                     case 'update':
-                        $this->core->getQueries()->updateUser($user, $semester, $course);
+                        $this->core->getQueries()->updateUser($user, $term, $course);
                         break;
                     default:
                         throw new ValidationException("Unknown DB operation", [$action, '$insert_or_update_user_function']);
@@ -1104,7 +1104,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 

@@ -23,7 +23,7 @@ class PlagiarismView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "new_plagiarism_config_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']),
             "refreshLichenMainPageLink" => $this->core->buildCourseUrl(['plagiarism', 'check_refresh']),
-            "semester" => $this->core->getConfig()->getSemester(),
+            "term" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse()
         ]);
     }

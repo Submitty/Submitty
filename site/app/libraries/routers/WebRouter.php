@@ -271,11 +271,11 @@ class WebRouter {
             array_key_exists('_semester', $this->parameters)
             && array_key_exists('_course', $this->parameters)
         ) {
-            $semester = $this->parameters['_semester'];
+            $term = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
 
             /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadCourseConfig($semester, $course);
+            $this->core->loadCourseConfig($term, $course);
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadGradingQueue();
 
@@ -316,7 +316,7 @@ class WebRouter {
         }
         elseif (
             $this->core->getConfig()->isCourseLoaded()
-            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
+            && !$this->core->getAccess()->canI("course.view", ["term" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {

@@ -488,7 +488,7 @@ class RainbowCustomization extends AbstractModel {
         // Configure json to go into jobs queue
         $job_json = (object) [];
         $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getSemester();
+        $job_json->term = $this->core->getConfig()->getSemester();
         $job_json->course = $this->core->getConfig()->getCourse();
 
         // Encode

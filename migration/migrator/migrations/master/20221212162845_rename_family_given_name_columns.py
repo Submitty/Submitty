@@ -40,9 +40,9 @@ def up(config, database):
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
             END IF;
             -- Propagate UPDATE to course DBs
-            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+            FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Semester: %, Course: %', course_row.term, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
                 query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_givenname=' || quote_literal(NEW.user_givenname) || ', user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', user_familyname=' || quote_literal(NEW.user_familyname) || ', user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
                 IF query_string IS NULL THEN
@@ -67,7 +67,7 @@ def up(config, database):
         db_conn varchar;
         query_string text;
     BEGIN
-        db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+        db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
         IF (TG_OP = 'INSERT') THEN
             -- FULL data sync on INSERT of a new user record.
@@ -139,9 +139,9 @@ def down(config, database):
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
             END IF;
             -- Propagate UPDATE to course DBs
-            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+            FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Semester: %, Course: %', course_row.term, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
                 query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
                 IF query_string IS NULL THEN
@@ -166,7 +166,7 @@ def down(config, database):
         db_conn varchar;
         query_string text;
     BEGIN
-        db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+        db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
         IF (TG_OP = 'INSERT') THEN
             -- FULL data sync on INSERT of a new user record.

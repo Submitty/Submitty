@@ -62,7 +62,7 @@ function updateTable() {
                     info.forEach(elem => {
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
                         new_row.insertCell().innerHTML = key;
-                        new_row.insertCell().innerHTML = elem.semester;
+                        new_row.insertCell().innerHTML = elem.term;
                         new_row.insertCell().innerHTML = elem.course;
                         new_row.insertCell().innerHTML = elem.gradeable_id;
                         new_row.insertCell().innerHTML = elem.user_id;

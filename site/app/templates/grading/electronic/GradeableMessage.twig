@@ -3,7 +3,7 @@
 {% block title %}Your Responsibility as a Grader{% endblock %}
 {% block body %}
 
-<div hidden data-semester="{{ semester }}" data-course="{{ course }}" data-gradeable="{{ gradeable_id }}" data-userlevel="{{ core.getUser().getGroup() }}" id="gradeable-message-data"></div>
+<div hidden data-term="{{ term }}" data-course="{{ course }}" data-gradeable="{{ gradeable_id }}" data-userlevel="{{ core.getUser().getGroup() }}" id="gradeable-message-data"></div>
 
 <!-- If grader is limited access or full access grader -->
 {% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}

@@ -36,7 +36,7 @@ def parse_args(argv, config_path=None):
     )
     parser.add_argument(
         '--course', dest='choose_course', nargs=2,
-        metavar=('semester', 'course'), default=None
+        metavar=('term', 'course'), default=None
     )
 
     subparsers = parser.add_subparsers(metavar='command', dest='command')

@@ -46,9 +46,9 @@ daemon_directory = os.path.join(data_dir, 'daemon_job_queue')
 courses_path = os.path.join(data_dir, 'courses')
 
 
-def process_course(semester, course):
+def process_course(term, course):
     """Decide if we should run rainbow grades for this specific course."""
-    course_config_path = os.path.join(courses_path, semester,
+    course_config_path = os.path.join(courses_path, term,
                                       course, 'config', 'config.json')
 
     # Retrieve the auto_rainbow_grades bool from the course config.json
@@ -62,12 +62,12 @@ def process_course(semester, course):
         # Setup jobs daemon json
         jobs_json = {
             'job': 'RunAutoRainbowGrades',
-            'semester': semester,
+            'term': term,
             'course': course
         }
 
         # Prepare filename
-        job_filename = 'auto_scheduled_rainbow_' + semester + '_' + course + '.json'
+        job_filename = 'auto_scheduled_rainbow_' + term + '_' + course + '.json'
 
         # Drop job into jobs queue
         with open(os.path.join(daemon_directory, job_filename), 'w') as f:
@@ -100,9 +100,9 @@ def find_all_unarchived_courses():
     result = db.execute(select([courses_table]).where(courses_table.c.status == 1))
 
     for row in result:
-        semester = row.semester
+        term = row.term
         course = row.course
-        process_course(semester, course)
+        process_course(term, course)
 
 
 # Do the work!

@@ -5,11 +5,11 @@ legacy table.
 """
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute('DROP TABLE IF EXISTS sessions')
     pass
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     # not necessary to restore -- has not been used in several years
     pass

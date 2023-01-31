@@ -55,17 +55,17 @@ fi
 # Check that there are exactly 4 command line arguments.
 if [[ "$#" -ne "4" ]] ; then
     echo "ERROR: Usage, wrong number of arguments"
-    echo "   create_course.sh  <semester>  <course>  <instructor username>  <ta group>"
+    echo "   create_course.sh  <term>  <course>  <instructor username>  <ta group>"
     exit
 fi
 
-semester="$1"
+term="$1"
 course="$2"
 instructor="$3"
 ta_www_group="$4"
 
 echo -e "\nCREATE COURSE:"
-echo -e "  semester:     $semester"
+echo -e "  term:     $term"
 echo -e "  course:       $course"
 echo -e "  instructor:   $instructor"
 echo -e "  ta_www_group: $ta_www_group\n"
@@ -116,14 +116,14 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
-TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc "SELECT COUNT(*) FROM terms WHERE term_id='${semester}'")
+TERM_EXISTS=$(PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -AXtc "SELECT COUNT(*) FROM terms WHERE term_id='${term}'")
 
 if [[ "$TERM_EXISTS" -eq "0" ]] ; then
-    echo "ERROR: Provided term ${semester} doesn't exist."
+    echo "ERROR: Provided term ${term} doesn't exist."
     exit
 fi
 
-# FIXME: add some error checking on the $semester and $course
+# FIXME: add some error checking on the $term and $course
 #        variables
 #
 #   (not clear how to do this since these variables could have quite
@@ -132,7 +132,7 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-course_dir="$SUBMITTY_DATA_DIR/courses/$semester/$course"
+course_dir="$SUBMITTY_DATA_DIR/courses/$term/$course"
 
 if [ -d "$course_dir" ]; then
     echo -e "ERROR: specific course directory $course_dir already exists"
@@ -143,7 +143,7 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-DATABASE_NAME="submitty_${semester}_${course}"
+DATABASE_NAME="submitty_${term}_${course}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -154,7 +154,7 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" "$1"
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" "$1"
 
-    sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" "$1"
+    sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$term|g" "$1"
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" "$1"
 
     sed -i -e "s|__CREATE_COURSE__FILLIN__DATABASE_NAME__|$DATABASE_NAME|g" "$1"
@@ -176,10 +176,10 @@ if [ ! -d "$SUBMITTY_DATA_DIR/courses" ]; then
     exit
 fi
 
-if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
-    mkdir                                 "$SUBMITTY_DATA_DIR/courses/$semester"
-    chown "root:$COURSE_BUILDERS_GROUP"   "$SUBMITTY_DATA_DIR/courses/$semester"
-    chmod 751                             "$SUBMITTY_DATA_DIR/courses/$semester"
+if [ ! -d "$SUBMITTY_DATA_DIR/courses/$term" ]; then
+    mkdir                                 "$SUBMITTY_DATA_DIR/courses/$term"
+    chown "root:$COURSE_BUILDERS_GROUP"   "$SUBMITTY_DATA_DIR/courses/$term"
+    chmod 751                             "$SUBMITTY_DATA_DIR/courses/$term"
 fi
 
 ########################################################################################################################
@@ -306,19 +306,19 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (semester, course, group_name, owner_name)
-VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}');"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (term, course, group_name, owner_name)
+VALUES ('${term}', '${course}', '${ta_www_group}', '${instructor}');"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
     echo "HINT:  'insert or update on table \"courses\" violates foreign key constraint...'"
-    echo "       may indicate that term ${semester} does not exist in master DB."
+    echo "       may indicate that term ${term} does not exist in master DB."
     echo "       To fix, try running 'create_term.sh'."
     exit
 fi
 
-python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
+python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${term}" "${course}" migrate --initial
 if [[ $? -ne "0" ]] ; then
-    PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE semester='${semester}' AND course='${course}';"
+    PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE term='${term}' AND course='${course}';"
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit
 fi
@@ -328,8 +328,8 @@ echo -e "\nSUCCESS!\n\n"
 ########################################################################################################################
 ########################################################################################################################
 
-echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
-echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${semester}/${course}"
+echo -e "SUCCESS!  new course   $course $term   CREATED HERE:   $course_dir"
+echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${term}/${course}"
 
 ########################################################################################################################
 ########################################################################################################################

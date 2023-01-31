@@ -52,17 +52,17 @@
         captureTabInModal("delete-plagiarism-result-and-config-form");
     }
 
-    function checkRefreshLichenMainPage(url, semester, course) {
+    function checkRefreshLichenMainPage(url, term, course) {
         // refresh time for lichen main page
         let refresh_time = 1000;
         setInterval(function() {
-            check_lichen_jobs(url, semester, course);
+            check_lichen_jobs(url, term, course);
         }, refresh_time);
     }
 
     let waiting_gradeables = -1;
 
-    function check_lichen_jobs(url, semester, course) {
+    function check_lichen_jobs(url, term, course) {
         $.get(url,
             function(data) {
                 data = JSON.parse(data);

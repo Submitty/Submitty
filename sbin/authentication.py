@@ -43,7 +43,7 @@ def check_password(environ, user, password):
 
     params = list(filter(lambda x: x not in vcs_paths, params))
     if len(params) == 5:
-        semester, course, gradeable, unknown_id = params[1:]
+        term, course, gradeable, unknown_id = params[1:]
     else:
         return None
 
@@ -56,7 +56,7 @@ def check_password(environ, user, password):
 
     try:
         req = requests.post(
-            SUBMISSION_URL + f'/{semester}/{course}/authentication/vcs_login',
+            SUBMISSION_URL + f'/{term}/{course}/authentication/vcs_login',
             data=data
         )
         response = req.json()

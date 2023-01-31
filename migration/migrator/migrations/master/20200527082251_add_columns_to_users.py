@@ -31,9 +31,9 @@ def up(config, database):
         END LOOP;
 
         -- Propagate time zone from master to courses for any users that may have already set their time zone
-        FOR row IN SELECT courses_users.user_id, courses_users.semester, courses_users.course, users.time_zone FROM courses_users, users WHERE users.user_id = courses_users.user_id LOOP
+        FOR row IN SELECT courses_users.user_id, courses_users.term, courses_users.course, users.time_zone FROM courses_users, users WHERE users.user_id = courses_users.user_id LOOP
 
-            db_conn := format('dbname=submitty_%s_%s', row.semester, row.course);
+            db_conn := format('dbname=submitty_%s_%s', row.term, row.course);
             query_string := 'UPDATE users SET time_zone = ' || quote_literal(row.time_zone) || ' WHERE user_id = ' || quote_literal(row.user_id);
             PERFORM dblink_exec(db_conn, query_string);
 
@@ -74,9 +74,9 @@ def up(config, database):
             RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
         END IF;
         -- Propagate UPDATE to course DBs
-        FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-            RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-            db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+        FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+            RAISE NOTICE 'Semester: %, Course: %', course_row.term, course_row.course;
+            db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
             query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
             -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
             IF query_string IS NULL THEN

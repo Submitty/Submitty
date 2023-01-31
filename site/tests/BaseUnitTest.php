@@ -45,15 +45,15 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         /** @var Config&\PHPUnit\Framework\MockObject\MockObject $config */
         $config = $this->createMockModel(Config::class);
-        if (isset($config_values['semester'])) {
-            $config->method('getSemester')->willReturn($config_values['semester']);
+        if (isset($config_values['term'])) {
+            $config->method('getSemester')->willReturn($config_values['term']);
         }
 
         if (isset($config_values['course'])) {
             $config->method('getCourse')->willReturn($config_values['course']);
         }
 
-        if (isset($config_values['semester']) && isset($config_values['course'])) {
+        if (isset($config_values['term']) && isset($config_values['course'])) {
             $config->method('isCourseLoaded')->willReturn(true);
         }
 

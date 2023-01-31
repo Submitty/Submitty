@@ -387,7 +387,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Generates a summary of all polls over a semester if polling is enabled
+     * Generates a summary of all polls over a term if polling is enabled
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {

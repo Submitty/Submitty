@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     # First, re-clamp the dates similar to the "clamp_dates" migration
     database.execute("UPDATE gradeable SET g_ta_view_start_date = LEAST(g_ta_view_start_date, '9999-02-01 00:00:00.000000')")
     database.execute("UPDATE gradeable SET g_grade_start_date = LEAST(g_grade_start_date, '9999-02-01 00:00:00.000000')")
@@ -20,7 +20,7 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE electronic_gradeable ADD CONSTRAINT eg_regrade_request_date_max CHECK(eg_regrade_request_date <= '9999-03-01 00:00:00.000000')")
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     database.execute("ALTER TABLE gradeable DROP CONSTRAINT g_grade_locked_date_max")
 
     database.execute("ALTER TABLE electronic_gradeable DROP CONSTRAINT eg_team_lock_date_max")

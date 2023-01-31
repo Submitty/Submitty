@@ -107,7 +107,7 @@ MIGRATION                                                                   STAT
 
     def test_status_course(self):
         self.setup_test('course')
-        self.args.semester = 'f19'
+        self.args.term = 'f19'
         self.args.course = 'csci1000'
         create_migration(self.database, self.dir, 'course', '01_test.py')
         create_migration(self.database, self.dir, 'course', '02_test.py', 1, False)

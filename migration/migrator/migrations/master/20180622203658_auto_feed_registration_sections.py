@@ -1,11 +1,11 @@
 def up(config, database):
     database.execute("""
 CREATE TABLE public.courses_registration_sections (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     registration_section_id character varying(255) NOT NULL,
-    CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id),
-    CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE);""")
+    CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (term, course, registration_section_id),
+    CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (term, course) REFERENCES courses(term, course) ON UPDATE CASCADE);""")
 
     database.execute("""
 CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
@@ -16,8 +16,8 @@ DECLARE
   db_conn VARCHAR;
   query_string TEXT;
 BEGIN
-  FOR registration_row IN SELECT semester, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
-    db_conn := format('dbname=submitty_%s_%s', registration_row.semester, registration_row.course);
+  FOR registration_row IN SELECT term, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
+    db_conn := format('dbname=submitty_%s_%s', registration_row.term, registration_row.course);
     query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN

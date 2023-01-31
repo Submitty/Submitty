@@ -1,4 +1,4 @@
-SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); term = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(term)')
 
 echo "Setting identity"
 git config --global user.email "instructor"

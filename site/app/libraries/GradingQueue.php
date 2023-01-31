@@ -37,11 +37,11 @@ class GradingQueue {
     const NOT_QUEUED = -1;
     const GRADING = 0;
 
-    public function __construct($semester, $course, $submitty_path) {
+    public function __construct($term, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
         $this->grading_path = FileUtils::joinPaths($submitty_path, 'in_progress_grading');
-        if ($semester != null || $course != null) {
-            $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
+        if ($term != null || $course != null) {
+            $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$term, $course]);
         }
     }
 
@@ -314,7 +314,7 @@ class GradingQueue {
             $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60), 2, "0", STR_PAD_LEFT) . ":"
                 . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT);
             $ongoing_job_info[$machine][] = [
-                "semester" => $file_segments[0],
+                "term" => $file_segments[0],
                 "course" => $file_segments[1],
                 "gradeable_id" => $file_segments[2],
                 "user_id" => $file_segments[3],

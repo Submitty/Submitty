@@ -10,7 +10,7 @@ use tests\BaseUnitTest;
 class CourseTester extends BaseUnitTest {
     public function testCourse() {
         $details = [
-            'semester' => 's18',
+            'term' => 's18',
             'term_name' => 'Spring 2018',
             'course' => 'csci1000',
             'user_group' => 1
@@ -24,7 +24,7 @@ class CourseTester extends BaseUnitTest {
         $this->assertEquals('Spring 2018', $course->getSemesterName());
 
         $array = [
-            'semester' => 's18',
+            'term' => 's18',
             'semester_name' => 'Spring 2018',
             'title' => 'csci1000',
             'display_name' => '',
@@ -45,13 +45,13 @@ class CourseTester extends BaseUnitTest {
             ]
         ];
         FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
-        $details = ['semester' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
+        $details = ['term' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
             $this->assertTrue($course->loadDisplayName());
             $this->assertEquals('Test Course', $course->getDisplayName());
             $array = [
-                'semester' => 's18',
+                'term' => 's18',
                 'semester_name' => 'Spring 2018',
                 'title' => 'csci1000',
                 'display_name' => 'Test Course',
@@ -67,7 +67,7 @@ class CourseTester extends BaseUnitTest {
     }
 
     public function testInvalidPath() {
-        $details = ['semester' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
+        $details = ['term' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
         $course = new Course($this->createMockCore(['tmp_path' => '/invalid/path']), $details);
         $this->assertFalse($course->loadDisplayName());
         $this->assertEquals('', $course->getDisplayName());
@@ -79,7 +79,7 @@ class CourseTester extends BaseUnitTest {
         FileUtils::createDir($config_path, true);
         $config = [];
         FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
-        $details = ['semester' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
+        $details = ['term' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
             $this->assertFalse($course->loadDisplayName());
@@ -96,7 +96,7 @@ class CourseTester extends BaseUnitTest {
         FileUtils::createDir($config_path, true);
         $config = ['course_details' => []];
         FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
-        $details = ['semester' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
+        $details = ['term' => 's18', 'term_name' => 'Spring 2018', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
             $this->assertFalse($course->loadDisplayName());

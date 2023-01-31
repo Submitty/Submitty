@@ -3,12 +3,12 @@ import grp
 from pathlib import Path
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
 
     # Redo permissions from previous migrations (in case of error
     # related to system user name changes)
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    images_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'uploads', 'student_images')
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
+    images_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course, 'uploads', 'student_images')
     lichen_dir = Path(course_dir, 'lichen')
     
     # get course group

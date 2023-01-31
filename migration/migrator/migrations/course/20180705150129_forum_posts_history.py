@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("""CREATE TABLE IF NOT EXISTS forum_posts_history (
         "post_id" int NOT NULL,
         "edit_author" character varying NOT NULL,

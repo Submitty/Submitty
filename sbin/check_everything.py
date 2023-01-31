@@ -117,8 +117,8 @@ def main():
 
 
     # CHECK EACH COURSE
-    for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
-        semester_path=SUBMITTY_DATA_DIR+"/courses/"+semester
+    for term in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
+        semester_path=SUBMITTY_DATA_DIR+"/courses/"+term
         if not os.path.isdir(semester_path):
             continue
         for course in os.listdir(semester_path):

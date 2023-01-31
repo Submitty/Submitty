@@ -534,8 +534,8 @@ function downloadCSV(code) {
 
     // Setup default name for the CSV file
     let course = $('#download_info_json_id').data('course');
-    let semester = $('#download_info_json_id').data('semester');
-    let csv_name = [semester, course, 'users', 'data'].join('_') + '.csv'
+    let term = $('#download_info_json_id').data('term');
+    let csv_name = [term, course, 'users', 'data'].join('_') + '.csv'
 
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);

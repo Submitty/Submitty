@@ -476,17 +476,17 @@ def get_php_db_password(password):
 
 def get_current_semester():
     """
-    Given today's date, generates a three character code that represents the semester to use for
+    Given today's date, generates a three character code that represents the term to use for
     courses such that the first half of the year is considered "Spring" and the last half is
-    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
+    considered "Fall". The "Spring" term  gets an S as the first letter while "Fall" gets an
     F. The next two characters are the last two digits in the current year.
     :return:
     """
     today = datetime.today()
-    semester = "f" + str(today.year)[-2:]
+    term = "f" + str(today.year)[-2:]
     if today.month < 7:
-        semester = "s" + str(today.year)[-2:]
-    return semester
+        term = "s" + str(today.year)[-2:]
+    return term
 
 
 def parse_args():
@@ -723,14 +723,14 @@ class Course(object):
 
     Attributes:
         code
-        semester
+        term
         instructor
         gradeables
         users
         max_random_submissions
     """
     def __init__(self, course):
-        self.semester = get_current_semester()
+        self.term = get_current_semester()
         self.code = course['code']
         self.instructor = course['instructor']
         self.gradeables = []
@@ -767,7 +767,7 @@ class Course(object):
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
         self.gradeables.sort(key=lambda x: x.id)
-        self.course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
+        self.course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.term, self.code)
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, 'utf-8'))
@@ -786,11 +786,11 @@ class Course(object):
         add_to_group(course_group, "submitty_daemon")
         add_to_group(course_group, "submitty_cgi")
         os.system("{}/sbin/create_course.sh {} {} {} {}"
-                  .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
+                  .format(SUBMITTY_INSTALL_DIR, self.term, self.code, self.instructor.id,
                           course_group))
 
         os.environ['PGPASSWORD'] = DB_PASS
-        database = "submitty_" + self.semester + "_" + self.code
+        database = "submitty_" + self.term + "_" + self.code
         print("Database created, now populating ", end="")
 
         submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
@@ -810,7 +810,7 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            submitty_conn.execute(table.insert(), semester=self.semester, course=self.code, registration_section_id=str(section))
+            submitty_conn.execute(table.insert(), term=self.term, course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
@@ -840,7 +840,7 @@ class Course(object):
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
             submitty_conn.execute(submitty_users.insert(),
-                                  semester=self.semester,
+                                  term=self.term,
                                   course=self.code,
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
@@ -1190,7 +1190,7 @@ class Course(object):
             print('Added office hours queue data to sample course.')
 
         if self.code == 'sample':
-            student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
+            student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.term, self.code, 'uploads', 'student_images')
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
             with TemporaryDirectory() as tmpdir:
                 shutil.unpack_archive(zip_path, tmpdir)
@@ -1198,7 +1198,7 @@ class Course(object):
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
             course_materials_source = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'course_materials')
-            course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'course_materials')
+            course_materials_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.term, self.code, 'uploads', 'course_materials')
             course_materials_table = Table("course_materials", self.metadata, autoload=True)
             for dpath, dirs, files in os.walk(course_materials_source):
                 inner_dir=os.path.relpath(dpath, course_materials_source)

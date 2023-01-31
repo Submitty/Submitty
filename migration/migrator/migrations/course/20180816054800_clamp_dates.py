@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("UPDATE gradeable SET g_ta_view_start_date = LEAST(g_ta_view_start_date, '9999-01-01 04:59:59.000000')")
     database.execute("UPDATE gradeable SET g_grade_start_date = LEAST(g_grade_start_date, '9999-01-01 04:59:59.000000')")
     database.execute("UPDATE gradeable SET g_grade_due_date = LEAST(g_grade_due_date, '9999-01-01 04:59:59.000000')")

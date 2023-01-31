@@ -429,7 +429,7 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
 
@@ -441,7 +441,7 @@ class SubmissionController extends AbstractController {
             for ($i = 0; $i < $count; $i++) {
                 $qr_upload_data = [
                     "job"       => "BulkUpload",
-                    "semester"  => $semester,
+                    "term"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
@@ -465,7 +465,7 @@ class SubmissionController extends AbstractController {
             for ($i = 0; $i < $count; $i++) {
                 $job_data = [
                     "job"       => "BulkUpload",
-                    "semester"  => $semester,
+                    "term"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
@@ -768,7 +768,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = ["term" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -984,7 +984,7 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getSemester(),
+                    "term" => $this->core->getConfig()->getSemester(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
@@ -1563,7 +1563,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
+            "term" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),

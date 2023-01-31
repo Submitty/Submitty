@@ -2,7 +2,7 @@
 //These functions are defined in normal JS and can be imported into a spec file
 
 /**
-* Generate a 3 letter semester code e.g s21, f20 based on today's data
+* Generate a 3 letter term code e.g s21, f20 based on today's data
 * This functions the same as the submitty python util's get_current_semester
 *
 * @returns {String}
@@ -10,9 +10,9 @@
 export function getCurrentSemester() {
     const today = new Date();
     const year = today.getFullYear().toString().slice(2,4);	//get last two digits
-    const semester = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
+    const term = ((today.getMonth() + 1) < 7) ? 's' : 'f';	//first half of year 'spring' rest is fall
 
-    return semester + year;
+    return term + year;
 }
 
 /**

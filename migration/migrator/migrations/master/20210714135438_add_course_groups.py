@@ -19,17 +19,17 @@ def up(config, database):
     database.execute("ALTER TABLE courses ADD CONSTRAINT group_validate CHECK (group_name ~ '^[a-zA-Z0-9_-]*$')")
     database.execute("ALTER TABLE courses ADD CONSTRAINT owner_validate CHECK (owner_name ~ '^[a-zA-Z0-9_-]*$')")
     semester_dir = Path(config.submitty['submitty_data_dir'], 'courses')
-    for semester in semester_dir.iterdir():
-        for course in semester.iterdir():
-            query = "UPDATE courses SET group_name=:g, owner_name=:o WHERE semester = :s AND course = :c;"
+    for term in semester_dir.iterdir():
+        for course in term.iterdir():
+            query = "UPDATE courses SET group_name=:g, owner_name=:o WHERE term = :s AND course = :c;"
             try:
                 course_group = course.group()
                 course_owner = course.owner()
             except:
-                print (f"WARNING: Could not obtain course group and/or owner for {semester} {course}")
+                print (f"WARNING: Could not obtain course group and/or owner for {term} {course}")
                 continue
             params = {
-                's': semester.name,
+                's': term.name,
                 'c': course.name,
                 'g': course_group,
                 'o': course_owner

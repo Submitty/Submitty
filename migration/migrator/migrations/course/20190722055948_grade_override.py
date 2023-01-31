@@ -1,7 +1,7 @@
 """Migration for a given Submitty course database."""
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     if not database.has_table('grade_override'):
         database.execute("CREATE TABLE grade_override (user_id character varying(255) NOT NULL,g_id character varying(255) NOT NULL,marks float NOT NULL,comment character varying )")
         
@@ -11,5 +11,5 @@ def up(config, database, semester, course):
     
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

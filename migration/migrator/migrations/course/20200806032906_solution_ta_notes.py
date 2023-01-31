@@ -1,7 +1,7 @@
 """Migration for a given Submitty course database."""
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("""CREATE TABLE IF NOT EXISTS solution_ta_notes (
         g_id character varying(255) NOT NULL,
         component_id int NOT NULL,
@@ -17,5 +17,5 @@ def up(config, database, semester, course):
     database.execute('ALTER TABLE IF EXISTS ONLY solution_ta_notes ADD CONSTRAINT solution_ta_notes_author_fk FOREIGN KEY (author) REFERENCES users(user_id)')
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

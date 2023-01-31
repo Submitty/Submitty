@@ -49,7 +49,7 @@ if [[ $# -ne "4" ]] ; then
     exit 5
 fi
 
-semester=$1
+term=$1
 name=$2
 start=$3
 end=$4
@@ -83,7 +83,7 @@ fi
 # INSERT new term into master DB
 insert_string="
 INSERT INTO terms (term_id, name, start_date, end_date)
-VALUES ('${semester}', '${name}', TO_DATE('${start}', 'MM/DD/YYYY'), TO_DATE('${end}', 'MM/DD/YYYY'))"
+VALUES ('${term}', '${name}', TO_DATE('${start}', 'MM/DD/YYYY'), TO_DATE('${end}', 'MM/DD/YYYY'))"
 
 if [ ${amend} -eq 1 ]; then
     insert_string+="
@@ -98,5 +98,5 @@ if [[ $? -ne "0" ]] ; then
     exit 6
 fi
 
-echo "'${semester}' term has been INSERTed $([ ${amend} -eq 1 ] && echo 'or AMENDed ')into the master DB."
-echo "You may now create courses for the '${semester}' term."
+echo "'${term}' term has been INSERTed $([ ${amend} -eq 1 ] && echo 'or AMENDed ')into the master DB."
+echo "You may now create courses for the '${term}' term."

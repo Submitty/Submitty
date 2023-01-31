@@ -144,7 +144,7 @@ class HomePageController extends AbstractController {
             );
         }
 
-        $semester = $_POST['course_semester'];
+        $term = $_POST['course_semester'];
         $course_title = strtolower($_POST['course_title']);
         $head_instructor = $_POST['head_instructor'];
 
@@ -169,7 +169,7 @@ class HomePageController extends AbstractController {
         }
 
         if ($this->core->getQueries()->courseExists($_POST['course_semester'], $_POST['course_title'])) {
-            $error = "Course with that semester/title already exists.";
+            $error = "Course with that term/title already exists.";
             $this->core->addErrorMessage($error);
             return new MultiResponse(
                 JsonResponse::getFailResponse($error),
@@ -232,14 +232,14 @@ class HomePageController extends AbstractController {
 
         $json = [
             "job" => 'CreateCourse',
-            'semester' => $semester,
+            'term' => $term,
             'course' => $course_title,
             'head_instructor' => $head_instructor,
             'group_name' => $group_name
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $term . '_' . $course_title . '.json', $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new MultiResponse(

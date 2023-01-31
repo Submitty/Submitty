@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     """
     Run up migration.
 
@@ -10,7 +10,7 @@ def up(config, database, semester, course):
     :type config: migrator.config.Config
     """
     
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'uploads')
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course, 'uploads')
     polls_dir = Path(course_dir, 'polls')
     polls_dir.mkdir(mode=0o750, exist_ok=True)
     php_user = config.submitty_users['php_user']
@@ -21,7 +21,7 @@ def up(config, database, semester, course):
 
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     """
     Run down migration (rollback).
 

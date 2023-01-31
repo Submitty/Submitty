@@ -272,13 +272,13 @@ Could not find migration table for f19.csci1100
         self.assertEqual('course', mock_method.call_args[0][1])
         # Test that mutation did not happen
         self.assertEqual(self.args.config.database, dict())
-        self.assertNotIn('semester', self.args)
+        self.assertNotIn('term', self.args)
         self.assertNotIn('course', self.args)
         self.args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        self.args.semester = 'f19'
+        self.args.term = 'f19'
         self.args.course = 'csci1100'
         self.assertEqual(self.args, mock_method.call_args[0][2])
-        self.assertEqual(self.args.semester, 'f19')
+        self.assertEqual(self.args.term, 'f19')
         self.assertEqual(self.args.course, 'csci1100')
         self.assertFalse(database.open)
 
@@ -328,13 +328,13 @@ Could not find migration table for f19.csci1100
         self.assertEqual('course', mock_args[1])
         # Test that mutation did not happen
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f18_csci1100'}
-        expected_args.semester = 'f18'
+        expected_args.term = 'f18'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f18')
+        self.assertEqual(expected_args.term, 'f18')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_1.open)
 
@@ -344,13 +344,13 @@ Could not find migration table for f19.csci1100
         self.assertEqual('course', mock_args[1])
         # Test that mutation did not happen
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_2.open)
 
@@ -360,13 +360,13 @@ Could not find migration table for f19.csci1100
         self.assertEqual('course', mock_args[1])
         # Test that mutation did not happen
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1200'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1200'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1200')
         self.assertFalse(database_3.open)
 
@@ -403,12 +403,12 @@ Could not find migration table for f19.csci1100
         self.assertEqual('course', mock_args[1])
         # Test that mutation did not happen
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_1.open)

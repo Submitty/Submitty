@@ -20,7 +20,7 @@ class TeamControllerTester extends BaseUnitTest {
     public function setUp(): void {
         $config['gradeable_id'] = "test";
 
-        $config['semester'] = "test";
+        $config['term'] = "test";
         $config['course'] = "test";
 
         $config['course_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());

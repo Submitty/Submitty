@@ -36,7 +36,7 @@ class TestMain(unittest.TestCase):
     def test_call_func_course(self):
         args = Namespace()
         args.config = 'd'
-        args.semester = 'e'
+        args.term = 'e'
         args.course = 'f'
 
         def func(*func_args):

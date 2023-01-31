@@ -55,7 +55,7 @@ class EmailEntity {
      * @ORM\Column(type="string")
      * @var string
      */
-    private $semester;
+    private $term;
     /**
      * @ORM\Column(type="string")
      * @var string
@@ -94,7 +94,7 @@ class EmailEntity {
     }
 
     public function getSemester(): ?string {
-        return $this->semester;
+        return $this->term;
     }
 
     public function getCourse(): ?string {

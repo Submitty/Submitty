@@ -15,9 +15,9 @@ use app\libraries\FileUtils;
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-    /** @property string $semester the semester (or term) code in which the course is taking place. */
-    protected $semester;
-    /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
+    /** @property string $term the term (or term) code in which the course is taking place. */
+    protected $term;
+    /** @property string $semester_name the name of the term (or term). aka "Long Semester". */
     protected $semester_name;
     /** @property string $title the proper title of the course. */
     protected $title;
@@ -36,7 +36,7 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->semester = $details['semester'];
+        $this->term = $details['term'];
         $this->semester_name = $details['term_name'];
         $this->title = $details['course'];
         $this->display_name = "";
@@ -48,7 +48,7 @@ class Course extends AbstractModel {
         $course_json_path = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
             "courses",
-            $this->semester,
+            $this->term,
             $this->title,
             "config",
             "config.json"
@@ -73,7 +73,7 @@ class Course extends AbstractModel {
 
     public function getCourseInfo() {
         return [
-            "semester" => $this->semester,
+            "term" => $this->term,
             "title" => $this->title,
             "display_name" => $this->display_name,
             "display_semester" => $this->semester_name,

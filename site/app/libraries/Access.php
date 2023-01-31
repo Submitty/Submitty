@@ -81,7 +81,7 @@ class Access {
     const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" (type int) argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
-    /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
+    /** If the current set of flags requires the "term" (type string) and "course" (type string) arguments */
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */
     const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
@@ -557,10 +557,10 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARGS_SEMESTER_COURSE)) {
-            $semester = $this->requireArg($args, "semester");
+            $term = $this->requireArg($args, "term");
             $course = $this->requireArg($args, "course");
             if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
-                $course_status = $this->core->getQueries()->getCourseStatus($semester, $course);
+                $course_status = $this->core->getQueries()->getCourseStatus($term, $course);
                 // only instructors should be able to access courses with status archived==2
                 if ($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
                     return false;

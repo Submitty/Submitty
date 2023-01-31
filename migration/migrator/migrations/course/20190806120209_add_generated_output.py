@@ -6,9 +6,9 @@ import pwd
 from pathlib import Path
 import shutil
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
 
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     generated_output_dir = Path(course_dir, 'generated_output')
 
     # get course group
@@ -27,5 +27,5 @@ def up(config, database, semester, course):
         os.system("chmod o-rwx {0}".format(str(generated_output_dir)))
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

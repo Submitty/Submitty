@@ -20,7 +20,7 @@ class CalendarInfo extends AbstractModel {
      * contains an array with a structure of
      * 'gradeable_id' => string   (the id of the item, reserved row and useless for now)
      * 'title'        => string   (the title of the item which will be shown on each clickable button)
-     * 'semester'     => string   (the semester of which the item belongs)
+     * 'term'     => string   (the term of which the item belongs)
      * 'course'       => string   (the title of the course of which the item belongs)
      * 'url'          => string   (the url of the clickable button)
      * 'onclick'      => string   (the onclick js function of the clickable button)
@@ -84,7 +84,7 @@ class CalendarInfo extends AbstractModel {
             // Iterate over the Gradeable objects in current section and summarize data
             foreach ($gradeables as $id => $gradeable) {
                 /** @var Gradeable $gradeable */
-                [$semester, $course_title, $gradeable_id] = unserialize($id);
+                [$term, $course_title, $gradeable_id] = unserialize($id);
 
                 // Get the submit button for the gradeable to retrieve the gradeable information
                 /** @var Button|null $submit_btn */
@@ -93,9 +93,9 @@ class CalendarInfo extends AbstractModel {
                 $currGradeable = [
                     'gradeable_id' => $gradeable_id,
                     'title' => $gradeable->getTitle(),
-                    'semester' => $semester,
+                    'term' => $term,
                     'course' => $course_title,
-                    'url' => $info->core->buildUrl(['courses', $semester, $course_title, 'gradeable', $gradeable->getId()]),
+                    'url' => $info->core->buildUrl(['courses', $term, $course_title, 'gradeable', $gradeable->getId()]),
                     'onclick' => '',
                     'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format($date_format) : '',
                     'status' => (string) $section,
@@ -108,7 +108,7 @@ class CalendarInfo extends AbstractModel {
                     'icon' => '',
                 ];
 
-                // Put gradeables in current section by their id which consists of semester, course title and gradeable id
+                // Put gradeables in current section by their id which consists of term, course title and gradeable id
                 $curr_section['gradeables'][$id] = $currGradeable;
 
                 // Put gradeables in by-date maps according to section (close/open)

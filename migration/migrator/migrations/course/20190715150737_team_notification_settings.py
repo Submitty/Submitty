@@ -1,7 +1,7 @@
 """Migration for a given Submitty course database."""
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     # add team to enum notifications_component
     database.execute("ALTER TYPE notifications_component rename to notifications_component_");
     database.execute("CREATE TYPE notifications_component as enum ('forum','student','grading','team')")
@@ -16,5 +16,5 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL")
     database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS team_joined_email BOOLEAN DEFAULT TRUE NOT NULL")
 
-def down(config, conn, semester, course):
+def down(config, conn, term, course):
     pass

@@ -228,7 +228,7 @@ class Logger {
      *
      * where action is either OPENED, CLOSED, EMPTIED, CREATED
      *
-     * @param string $course_semester The current semester
+     * @param string $course_semester The current term
      * @param string $course The course name
      * @param string $queue_name The name of the queue
      * @param string $queue_action The action performed

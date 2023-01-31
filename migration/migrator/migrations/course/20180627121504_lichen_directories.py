@@ -3,8 +3,8 @@ import grp
 from pathlib import Path
 
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     lichen_dir = Path(course_dir, 'lichen')
     lichen_config_dir = Path(lichen_dir, 'config')
     lichen_provided_dir = Path(lichen_dir, 'provided_code')

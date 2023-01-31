@@ -16,8 +16,8 @@ def _replace(install_path, old, new):
 
 
 def up(config):
-    _replace(Path(config.submitty['submitty_install_dir']), '(conn)', '(conn, semester, course)')
+    _replace(Path(config.submitty['submitty_install_dir']), '(conn)', '(conn, term, course)')
 
 
 def down(config):
-    _replace(Path(config.submitty['submitty_install_dir']), '(conn, semester, course)', '(conn)')
+    _replace(Path(config.submitty['submitty_install_dir']), '(conn, term, course)', '(conn)')

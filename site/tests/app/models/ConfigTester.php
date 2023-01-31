@@ -243,7 +243,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $expected = [
             'debug' => false,
-            'semester' => 's17',
+            'term' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',

@@ -29,38 +29,38 @@ DB_USER = DB_JSON['database_user']
 DB_PASS = DB_JSON['database_password']
 
 
-# This script was created to help professors re-upload an old semester's assignments for autograding.
+# This script was created to help professors re-upload an old term's assignments for autograding.
 # To run it, please create a new assignment (hereafter called the CURRENT assignment) via the submitty interface 
 # to which you wish to upload your old assignment. Then, run this script and provide the following arguments:
 # ARGUMENTS
 # 1) The path to the top level of the old assignment's directory tree. This folder's subdirectories should mirror 
-#    a /var/local/submitty/courses/<semester>/<course>/submissions/<assignment_name> folder.
-# 2) The semester of the course to which the old assignments will be uploaded.
+#    a /var/local/submitty/courses/<term>/<course>/submissions/<assignment_name> folder.
+# 2) The term of the course to which the old assignments will be uploaded.
 # 3) The name of the course to which the old assignments will be uploaded.
 # 4) The name of the current assignment to which the old assignments will be uploaded
 # 5) The optional argument --grade, which causes the uploaded assignments to be added to the grading queue.
 
 #NOTE: variables beginning with ARCHIVED_ are populated using the homework assignment being copied.
-#Variables beginning with CURRENT_ are populated using the destination/current semester's directories.
+#Variables beginning with CURRENT_ are populated using the destination/current term's directories.
 def main():
     #In order to successfully re-upload the assignment, we need the directory of the assignment to be inflated,
-    #and the semester, course name, and assignment name that it should be uploaded to.
-    parser = argparse.ArgumentParser(description='This script was created to help professors re-upload an old semester\'s\
+    #and the term, course name, and assignment name that it should be uploaded to.
+    parser = argparse.ArgumentParser(description='This script was created to help professors re-upload an old term\'s\
         assignments for autograding and reevaluation. To run it, please create a new assignment via the submitty interface to\
         which you wish to upload a past assignment\'s submissions. Then, run this script.')
     parser.add_argument('-g', '--grade', action='store_true', help='adds assignments to the grading queue.')
     parser.add_argument('ARCHIVED_directory', help='The path to the top level of the old assignment\'s directory tree. This folder\'s\
-        subdirectories should mirror a /var/local/submitty/courses/<semester>/<course>/submissions/<assignment_name> folder.')
-    parser.add_argument('semester', help='The semester of the course you wish to upload to.')
+        subdirectories should mirror a /var/local/submitty/courses/<term>/<course>/submissions/<assignment_name> folder.')
+    parser.add_argument('term', help='The term of the course you wish to upload to.')
     parser.add_argument('course_name', help='The name of the course you wish to upload to.')
     parser.add_argument('assignment_name', help='The assignment name you wish to upload to.')
     args = parser.parse_args()
 
     print("You are about to attempt to copy\n\tSOURCE: " + args.ARCHIVED_directory + "\n\tDESTINATION: "
-     + SUBMITTY_DATA_DIR + "/" + args.semester+"/courses/"+args.course_name+"/submissions/"+args.assignment_name)
+     + SUBMITTY_DATA_DIR + "/" + args.term+"/courses/"+args.course_name+"/submissions/"+args.assignment_name)
 
     #Check the existence of the submission path (the user should have already created the assignment for us to populate)
-    CURRENT_course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", args.semester, args.course_name)
+    CURRENT_course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", args.term, args.course_name)
     print("Current course path:" + CURRENT_course_path)
     CURRENT_assignment_path = os.path.join(CURRENT_course_path, "submissions", args.assignment_name)
     print("Current assignment path" + CURRENT_assignment_path)
@@ -74,7 +74,7 @@ def main():
         print("SUCCESS: The directory " + CURRENT_assignment_path + " does exist.")    
 
     #Make a connection to the database and grab the necessary tables.
-    database = "submitty_" + args.semester + "_" + args.course_name
+    database = "submitty_" + args.term + "_" + args.course_name
     print("Connecting to database: ", end="")
     engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                            database))
@@ -84,7 +84,7 @@ def main():
     electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
     electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
 
-    course_group = grp.getgrgid(os.stat(os.path.join(SUBMITTY_DATA_DIR,"courses",args.semester,args.course_name)).st_gid)[0]
+    course_group = grp.getgrgid(os.stat(os.path.join(SUBMITTY_DATA_DIR,"courses",args.term,args.course_name)).st_gid)[0]
 
     #For every user folder in our directory, for every submission folder inside of it, copy over that user/submission, add it to 
     #the database, and create a queue file. 
@@ -157,14 +157,14 @@ def main():
 
             if args.grade:
                 # Create a queue file for each submission
-                queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
+                queue_file = "__".join([args.term, args.course_name, args.assignment_name, user_name, submission])
                 print("Creating queue file:", queue_file)
                 queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", queue_file)
                 with open(queue_file, "w") as open_file:
                     # FIXME: This will need to be adjusted for team assignments
                     # and assignments with special required capabilities!
                     queue_time = dateutils.write_submitty_date()
-                    json.dump({"semester": args.semester,
+                    json.dump({"term": args.term,
                                "course": args.course_name,
                                "gradeable": args.assignment_name,
                                "user": user_name,

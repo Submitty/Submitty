@@ -1,7 +1,7 @@
 """Migration for a given Submitty course database."""
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     # add gc_id (gradeable compoenent id) column to regrade_requests table
     #
     # add constraint to make sure gc_id exists in gradeable_component
@@ -43,5 +43,5 @@ def up(config, database, semester, course):
         ALTER TABLE electronic_gradeable ADD CONSTRAINT eg_regrade_allowed_true_check CHECK (eg_regrade_allowed is true or eg_grade_inquiry_per_component_allowed is false);
     """)
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

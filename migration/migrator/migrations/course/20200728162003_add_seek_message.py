@@ -1,10 +1,10 @@
 """Migration for a given Submitty course database."""
 import json
 from pathlib import Path
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute('ALTER TABLE IF EXISTS seeking_team ADD COLUMN IF NOT EXISTS message character varying;')
     
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     config_file = Path(course_dir, 'config', 'config.json')
 
     if config_file.is_file():
@@ -21,5 +21,5 @@ def up(config, database, semester, course):
         f.close()
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

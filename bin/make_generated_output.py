@@ -2,7 +2,7 @@
 
 """
 # USAGE
-# make_generated_output.py   <path to config file for gradeable>   <assignment>   <semester>  <course>
+# make_generated_output.py   <path to config file for gradeable>   <assignment>   <term>  <course>
 """
 
 import argparse
@@ -17,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file_path")
     parser.add_argument("assignment")
-    parser.add_argument("semester")
+    parser.add_argument("term")
     parser.add_argument("course")
     return parser.parse_args()
 
@@ -25,7 +25,7 @@ def main():
     args = parse_args()
     complete_config_json_path = os.path.join(SUBMITTY_DATA_DIR,
                                             'courses',
-                                            args.semester,
+                                            args.term,
                                             args.course,
                                             'config',
                                             'complete_config',
@@ -40,7 +40,7 @@ def main():
     required_capabilities = config_file.get('required_capabilities','default')
     testcases = config_file.get('testcases',[])
     graded_file = {
-        "semester": args.semester,
+        "term": args.term,
         "course": args.course,
         "gradeable": args.assignment,
         "required_capabilities": required_capabilities,
@@ -62,7 +62,7 @@ def main():
                 break
 
         if should_generate_solution and not input_generation_commands:
-            path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.semester, args.course, args.assignment]))
+            path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.term, args.course, args.assignment]))
 
             if os.path.isfile(path_grading_file):
                 os.remove(path_grading_file)

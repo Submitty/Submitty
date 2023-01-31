@@ -16,7 +16,7 @@ class TestAccessibility(BaseTestCase):
         super().__init__(testname, log_in=False)
 
     # This should contain a url for every type of page on the website
-    # please replace the semester and course with '/courses/{}/{}'
+    # please replace the term and course with '/courses/{}/{}'
     # So '/courses/s20/sample/users' becomes '/courses/{}/{}/users'
     urls = [
         '/home',
@@ -76,7 +76,7 @@ class TestAccessibility(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
-        self.urls_formatted = [url.format(self.semester, 'sample') for url in self.urls]
+        self.urls_formatted = [url.format(self.term, 'sample') for url in self.urls]
 
     def validatePages(self):
         self.log_out()

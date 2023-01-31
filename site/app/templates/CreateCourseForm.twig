@@ -17,9 +17,9 @@
             </div>
             <div class="option-input col-md-6">
                 <select name="course_semester" id="course_semester" class="auto_save">
-                    {% for semester in semesters %}
-                        <option value="{{ semester }}">
-                            {{ semester }}
+                    {% for term in semesters %}
+                        <option value="{{ term }}">
+                            {{ term }}
                         </option>
                     {% endfor %}
                 </select>

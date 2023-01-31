@@ -98,7 +98,7 @@ DONE
         self.setup_test(environment)
         args = Namespace()
         args.direction = 'down'
-        args.semester = 'f18'
+        args.term = 'f18'
         args.course = 'csci1100'
         args.config = None
 

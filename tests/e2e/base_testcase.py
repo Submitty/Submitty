@@ -70,8 +70,8 @@ class BaseTestCase(unittest.TestCase):
         if user_password is None and user_id is not None:
             user_password = user_id
         self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
-        self.semester = dateutils.get_current_semester()
-        self.full_semester = BaseTestCase.get_display_semester(self.semester)
+        self.term = dateutils.get_current_semester()
+        self.full_semester = BaseTestCase.get_display_semester(self.term)
         self.logged_in = False
         self.use_log_in = log_in
         self.use_websockets = use_websockets
@@ -105,7 +105,7 @@ class BaseTestCase(unittest.TestCase):
 
     def get(self, url=None, parts=None):
         if url is None:
-            # Can specify parts = [('semester', 's18'), ...]
+            # Can specify parts = [('term', 's18'), ...]
             self.assertIsNotNone(parts)
             url = "/index.php?" + urlencode(parts)
 
@@ -233,7 +233,7 @@ class BaseTestCase(unittest.TestCase):
         address = parsed._replace(netloc=netloc).geturl()
 
         self.ws = create_connection(address, cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
-        new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.semester + '-sample-' + self.socket_page})
+        new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.term + '-sample-' + self.socket_page})
         self.ws.send(new_connection_msg)
 
     def check_socket_message(self, message):

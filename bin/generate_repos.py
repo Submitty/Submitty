@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-This script will generate the repositories for a specified course and semester
+This script will generate the repositories for a specified course and term
 for each student that currently does not have a repository. You can either make
 the repositories at a per course level (for a repo that would carry through
 all gradeables for example) or on a per gradeable level.
 
 usage:
-sudo /usr/local/submitty/bin/generate_repos.py <semester> <course_code> <project_name/gradeable_id>
+sudo /usr/local/submitty/bin/generate_repos.py <term> <course_code> <project_name/gradeable_id>
 
 """
 
@@ -124,7 +124,7 @@ def create_or_update_repo(folder, which_branch):
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
 parser.add_argument("--non-interactive", action='store_true', default=False)
-parser.add_argument("semester", help="semester")
+parser.add_argument("term", help="term")
 parser.add_argument("course", help="course code")
 parser.add_argument("repo_name", help="repository name")
 args = parser.parse_args()
@@ -142,13 +142,13 @@ connection = engine.connect()
 metadata = MetaData(bind=engine)
 
 courses_table = Table('courses', metadata, autoload=True)
-select = courses_table.select().where(courses_table.c.semester == bindparam('semester')).where(courses_table.c.course == bindparam('course'))
-course = connection.execute(select, semester=args.semester, course=args.course).fetchone()
+select = courses_table.select().where(courses_table.c.term == bindparam('term')).where(courses_table.c.course == bindparam('course'))
+course = connection.execute(select, term=args.term, course=args.course).fetchone()
 
 if course is None:
-    raise SystemExit("Semester '{}' and Course '{}' not found".format(args.semester, args.course))
+    raise SystemExit("Semester '{}' and Course '{}' not found".format(args.term, args.course))
 
-vcs_semester = os.path.join(VCS_FOLDER, args.semester)
+vcs_semester = os.path.join(VCS_FOLDER, args.term)
 if not os.path.isdir(vcs_semester):
     os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
     shutil.chown(vcs_semester, group=DAEMONCGI_GROUP)
@@ -172,7 +172,7 @@ is_team = False
 course_conn_string = db_utils.generate_connect_string(
     DATABASE_HOST,
     DATABASE_PORT,
-    f"submitty_{args.semester}_{args.course}",
+    f"submitty_{args.term}_{args.course}",
     DATABASE_USER,
     DATABASE_PASS,
 )
@@ -189,7 +189,7 @@ is_team = False
 if eg is not None:
     is_team = eg.eg_team_assignment
 elif not args.non_interactive:
-    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
+    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.term, args.course, args.repo_name))
     response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
     if not response.lower() == 'y':
         print ("exiting");
@@ -198,7 +198,7 @@ elif not args.non_interactive:
 
 # Load the git branch for autgrading from the course config file
 course_config_file = os.path.join('/var/local/submitty/courses/',
-                                  args.semester, args.course,
+                                  args.term, args.course,
                                   'config', 'config.json')
 with open(course_config_file) as open_file:
     COURSE_JSON = json.load(open_file)
@@ -224,8 +224,8 @@ if is_team:
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
-    users = connection.execute(select, semester=args.semester, course=args.course)
+    select = users_table.select().where(users_table.c.term == bindparam('term')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    users = connection.execute(select, term=args.term, course=args.course)
 
     for user in users:
         create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), course_git_autograding_branch)

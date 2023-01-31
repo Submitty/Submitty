@@ -87,10 +87,10 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        return FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        return FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$term}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
 
@@ -100,10 +100,10 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getProcessingQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$term}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
     /**
@@ -112,9 +112,9 @@ class PlagiarismController extends AbstractController {
      * @return int
      */
     private function getCurrentUserGroup(): int {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $semester, $course));
+        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course));
         if (!$group) {
             throw new FileNotFoundException("Error: Unable to find course directory for current user");
         }
@@ -132,7 +132,7 @@ class PlagiarismController extends AbstractController {
         $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
         $ret = [];
         foreach ($valid_courses as $item) {
-            $ret[] = "{$item['semester']} {$item['course']}";
+            $ret[] = "{$item['term']} {$item['course']}";
         }
         sort($ret);
         return $ret;
@@ -320,7 +320,7 @@ class PlagiarismController extends AbstractController {
      */
     private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         $config = $em->getRepository(PlagiarismConfig::class)
@@ -349,7 +349,7 @@ class PlagiarismController extends AbstractController {
         if ($job === "RunLichen") {
             $lichen_job_data = [
                 "job" => $job,
-                "semester" => $semester,
+                "term" => $term,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id,
@@ -359,7 +359,7 @@ class PlagiarismController extends AbstractController {
         else {
             $lichen_job_data = [
                 "job" => $job,
-                "semester" => $semester,
+                "term" => $term,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id
@@ -384,7 +384,7 @@ class PlagiarismController extends AbstractController {
      */
     private function getJsonForConfig(string $gradeable_id, int $config_id): array {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         /** @var PlagiarismConfig $config */
@@ -403,7 +403,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $json = [
-            "semester" => $semester,
+            "term" => $term,
             "course" => $course,
             "gradeable" => $gradeable_id,
             "config_id" => $config_id,
@@ -466,7 +466,7 @@ class PlagiarismController extends AbstractController {
         });
 
         // TODO: return to this and enable later
-        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $term . "/" . $course . "/lichen/nightly_rerun.json";
         // if (!file_exists($nightly_rerun_info_file)) {
         //     $nightly_rerun_info = [];
         //     foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
@@ -683,7 +683,7 @@ class PlagiarismController extends AbstractController {
      */
     public function savePlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
         // Determine whether this is a new config or an existing config
@@ -843,7 +843,7 @@ class PlagiarismController extends AbstractController {
                     else {
                         $tokens = explode(" ", $sem_course);
                         if (count($tokens) !== 2) {
-                            $this->core->addErrorMessage("Invalid input provided for other semester and course");
+                            $this->core->addErrorMessage("Invalid input provided for other term and course");
                             $this->core->redirect($return_url);
                         }
                         $other_semester = $tokens[0];
@@ -864,7 +864,7 @@ class PlagiarismController extends AbstractController {
                             "other_course" => $other_course,
                             "other_gradeable" => $other_gradeable
                         ];
-                        if ($other_semester === $semester && $other_course === $course && $other_gradeable === $gradeable_id) {
+                        if ($other_semester === $term && $other_course === $course && $other_gradeable === $gradeable_id) {
                             $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
                             return new RedirectResponse($return_url);
                         }
@@ -1279,11 +1279,11 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      */
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
-        // $semester = $this->core->getConfig()->getSemester();
+        // $term = $this->core->getConfig()->getSemester();
         // $course = $this->core->getConfig()->getCourse();
         // $return_url = $this->core->buildCourseUrl(['plagiarism']);
         //
-        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $term . "/" . $course . "/lichen/nightly_rerun.json";
         //
         // $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
         // $nightly_rerun_info[$gradeable_id] = !$nightly_rerun_info[$gradeable_id];
@@ -1305,11 +1305,11 @@ class PlagiarismController extends AbstractController {
         }
 
         $tokens = explode(' ', $_POST['semester_course']);
-        $semester = $tokens[0];
+        $term = $tokens[0];
         $course = $tokens[1];
 
         try {
-            $return = $this->getOtherOtherGradeables($semester, $course, $_POST['this_gradeable']);
+            $return = $this->getOtherOtherGradeables($term, $course, $_POST['this_gradeable']);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
@@ -1435,9 +1435,9 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        if (isset($source_gradeable) && $source_gradeable !== "{$semester}__{$course}__{$gradeable_id}") {
+        if (isset($source_gradeable) && $source_gradeable !== "{$term}__{$course}__{$gradeable_id}") {
             $file_name = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable, $user_id, $version), "submission.concatenated");
         }
         else {
@@ -1494,9 +1494,9 @@ class PlagiarismController extends AbstractController {
         // get the list of tokens for user 2
         $tokens_user_2 = [];
         if (isset($user_id_2)) {
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getSemester();
             $course = $this->core->getConfig()->getCourse();
-            if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$semester}__{$course}__{$gradeable_id}") {
+            if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$term}__{$course}__{$gradeable_id}") {
                 $user_2_tokens_file_path = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable_user_2, $user_id_2, $version_user_2), "tokens.json");
             }
             else {
