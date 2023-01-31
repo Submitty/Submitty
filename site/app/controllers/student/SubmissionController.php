@@ -987,7 +987,7 @@ class SubmissionController extends AbstractController {
                     "semester" => $this->core->getConfig()->getSemester(),
                     "team" => $team_id,
                     "user" => $user_id,
-                    "vcs_checkout" => false,
+                    "vcs_checkout" => $gradeable->isVcs(),
                     "version" => $active_version,
                     "who" => $who_id
                 ];
@@ -1897,8 +1897,8 @@ class SubmissionController extends AbstractController {
                 continue;
             }
             $file_contents = FileUtils::readJsonFile($json_path);
-            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]["given_name"] = $user->getDisplayedGivenName();
+            $users[$user_id_arr[$i]]["family_name"] = $user->getDisplayedFamilyName();
             $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];

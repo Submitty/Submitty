@@ -17,10 +17,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => "test",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -33,11 +33,11 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
-        $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
-        $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
-        $this->assertEquals($details['user_firstname'], $user->getDisplayedFirstName());
-        $this->assertEquals($details['user_preferred_lastname'], $user->getPreferredLastName());
-        $this->assertEquals($details['user_lastname'], $user->getLegalLastName());
+        $this->assertEquals($details['user_givenname'], $user->getLegalGivenName());
+        $this->assertEquals($details['user_preferred_givenname'], $user->getPreferredGivenName());
+        $this->assertEquals($details['user_givenname'], $user->getDisplayedGivenName());
+        $this->assertEquals($details['user_preferred_familyname'], $user->getPreferredFamilyName());
+        $this->assertEquals($details['user_familyname'], $user->getLegalFamilyName());
         $this->assertEquals($details['user_email'], $user->getEmail());
         $this->assertEquals($details['user_group'], $user->getGroup());
         $this->assertEquals($details['registration_section'], $user->getRegistrationSection());
@@ -55,10 +55,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = [
             'user_id' => "test",
             'user_numeric_id' => '123456789',
-            'user_firstname' => "User",
-            'user_preferred_firstname' => "Paul",
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => "Bunyan",
+            'user_givenname' => "User",
+            'user_preferred_givenname' => "Paul",
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => "Bunyan",
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -72,12 +72,12 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
-        $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
-        $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
-        $this->assertEquals($details['user_preferred_firstname'], $user->getDisplayedFirstName());
-        $this->assertEquals($details['user_lastname'], $user->getLegalLastName());
-        $this->assertEquals($details['user_preferred_lastname'], $user->getPreferredLastName());
-        $this->assertEquals($details['user_preferred_lastname'], $user->getDisplayedLastName());
+        $this->assertEquals($details['user_givenname'], $user->getLegalGivenName());
+        $this->assertEquals($details['user_preferred_givenname'], $user->getPreferredGivenName());
+        $this->assertEquals($details['user_preferred_givenname'], $user->getDisplayedGivenName());
+        $this->assertEquals($details['user_familyname'], $user->getLegalFamilyName());
+        $this->assertEquals($details['user_preferred_familyname'], $user->getPreferredFamilyName());
+        $this->assertEquals($details['user_preferred_familyname'], $user->getDisplayedFamilyName());
         $this->assertEquals($details['registration_type'], $user->getRegistrationType());
     }
 
@@ -86,10 +86,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => "test",
             'user_numeric_id' => "123456789",
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -112,10 +112,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => "test",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -132,21 +132,21 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         unset($actual['password']);
         ksort($actual);
         $expected = [
-            'displayed_first_name' => 'User',
-            'displayed_last_name' => 'Tester',
+            'displayed_given_name' => 'User',
+            'displayed_family_name' => 'Tester',
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
-            'legal_first_name' => 'User',
+            'legal_given_name' => 'User',
             'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,
             'id' => 'test',
-            'legal_last_name' => 'Tester',
+            'legal_family_name' => 'Tester',
             'loaded' => true,
             'manual_registration' => false,
-            'preferred_first_name' => "",
-            'preferred_last_name' => "",
+            'preferred_given_name' => "",
+            'preferred_family_name' => "",
             'numeric_id' => '123456789',
             'registration_section' => 1,
             'registration_type' => 'staff',
@@ -189,8 +189,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testGetNiceFormatTimeZoneExplicitlySet() {
         $user = new User($this->core, [
             'user_id' => 'test',
-            'user_firstname' => 'test',
-            'user_lastname' => 'test',
+            'user_givenname' => 'test',
+            'user_familyname' => 'test',
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -202,8 +202,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testGetUTCOffsetExplicitlySet() {
         $user = new User($this->core, [
             'user_id' => 'test',
-            'user_firstname' => 'test',
-            'user_lastname' => 'test',
+            'user_givenname' => 'test',
+            'user_familyname' => 'test',
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -222,7 +222,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             ['user_email', 'pevelm@rpi.edu', true],
             ['user_email', 'student@faculty.university-of-xy.edu', true],
             ['user_email', '_______@example.com', true],
-            ['user_email', 'firstname-lastname@example.com', true],
+            ['user_email', 'givenname-familyname@example.com', true],
             ['user_email', 'invalid', false],
             ['user_email', '@example.com', false],
             ['user_email', 'Abc..123@example.com', false],
@@ -230,7 +230,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             ['user_email_secondary', 'pevelm@rpi.edu', true],
             ['user_email_secondary', 'student@faculty.university-of-xy.edu', true],
             ['user_email_secondary', '_______@example.com', true],
-            ['user_email_secondary', 'firstname-lastname@example.com', true],
+            ['user_email_secondary', 'givenname-familyname@example.com', true],
             ['user_email_secondary', 'invalid', false],
             ['user_email_secondary', '@example.com', false],
             ['user_email_secondary', 'Abc..123@example.com', false],
@@ -250,7 +250,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             ['user_password', 'test', true],
         ];
 
-        foreach (['firstname', 'lastname'] as $key) {
+        foreach (['givenname', 'familyname'] as $key) {
             $return[] = ["user_legal_{$key}", '', false];
             $return[] = ["user_legal_{$key}", 'Test', true];
             $return[] = ["user_legal_{$key}", "Test-Phil Mc'Duffy Sr.", true];
