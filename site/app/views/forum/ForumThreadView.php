@@ -87,9 +87,9 @@ class ForumThreadView extends AbstractView {
             foreach ($data as $post) {
                 $author = $post['author'];
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-                $first_name = trim($user_info["first_name"]);
-                $last_name = trim($user_info["last_name"]);
-                $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
+                $given_name = trim($user_info["given_name"]);
+                $family_name = trim($user_info["family_name"]);
+                $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
 
                 if ($post["anonymous"]) {
                     $visible_username = 'Anonymous';
@@ -839,14 +839,14 @@ class ForumThreadView extends AbstractView {
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
                 $email = trim($user_info['user_email']);
-                $first_name = trim($user_info["first_name"]);
-                $last_name = trim($user_info["last_name"]);
+                $given_name = trim($user_info["given_name"]);
+                $family_name = trim($user_info["family_name"]);
 
                 $author_info = [
                     "user_id" => $first_post['author_user_id'],
-                    "name" => $first_post['anonymous'] ? "Anonymous" : $first_name . " " . substr($last_name, 0, 1) . ".",
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $given_name . " " . substr($family_name, 0, 1) . ".",
                     "email" => $email,
-                    "full_name" => $first_name . " " . $last_name . " (" . $first_post['author_user_id'] . ")",
+                    "full_name" => $given_name . " " . $family_name . " (" . $first_post['author_user_id'] . ")",
                 ];
                 $thread_info = array_merge($thread_info, [
                     "post_id" => $first_post["id"],
@@ -940,9 +940,9 @@ class ForumThreadView extends AbstractView {
 
         $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
         $author_email = trim($user_info['user_email']);
-        $first_name = trim($user_info["first_name"]);
-        $last_name = trim($user_info["last_name"]);
-        $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
+        $given_name = trim($user_info["given_name"]);
+        $family_name = trim($user_info["family_name"]);
+        $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
         if ($display_option != 'tree') {
@@ -988,7 +988,7 @@ class ForumThreadView extends AbstractView {
 
         $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
-            $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
+            $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
@@ -1287,8 +1287,8 @@ class ForumThreadView extends AbstractView {
         $userData = [];
 
         foreach ($users as $user => $details) {
-            $first_name = $details["first_name"];
-            $last_name = $details["last_name"];
+            $given_name = $details["given_name"];
+            $family_name = $details["family_name"];
             $post_count = count($details["posts"]);
             $posts = json_encode($details["posts"]);
             $ids = json_encode($details["id"]);
@@ -1298,8 +1298,8 @@ class ForumThreadView extends AbstractView {
             $num_deleted = ($details["num_deleted_posts"]);
 
             $userData[] = [
-                "last_name" => $last_name,
-                "first_name" => $first_name,
+                "family_name" => $family_name,
+                "given_name" => $given_name,
                 "post_count" => $post_count,
                 "details_total_threads" => $details["total_threads"],
                 "num_deleted" => $num_deleted,

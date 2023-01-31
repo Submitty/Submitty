@@ -83,8 +83,8 @@
                 {% for user in users %}
                     <tr>
                         <td data-before-content="Student ID" class="align-left">{{ user.getId() }}</td>
-                        <td data-before-content="First Name" class="align-left">{{ user.getDisplayedFirstName() }}</td>
-                        <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedLastName() }}</td>
+                        <td data-before-content="First Name" class="align-left">{{ user.getDisplayedGivenName() }}</td>
+                        <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedFamilyName() }}</td>
                         <td data-before-content="Total Allowed Late Days">{{ user.getAllowedLateDays() }}</td>
                         <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
                         <td data-before-content="Delete">

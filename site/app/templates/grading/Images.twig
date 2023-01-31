@@ -26,12 +26,12 @@
                         <td class="{{ student.getId() }}-image-container">
                             {% set image = student.getDisplayImage() %}
                             {% if image is not null %}
-                                {{ base64_image(image.getImageBase64MaxDimension(constant('app\\views\\grading\\ImagesView::IMG_MAX_DIMENSION')), image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
+                                {{ base64_image(image.getImageBase64MaxDimension(constant('app\\views\\grading\\ImagesView::IMG_MAX_DIMENSION')), image.getMimeType(), '%s %s'|format(student.getDisplayedGivenName(), student.getDisplayedFamilyName())) }}
                             {% else %}
                                 <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                             {% endif %}
                             <div class="name">
-                                <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                                <br /><br />{{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}
                                 <br />{{student.getId()}}
                                 {% if has_full_access %}
                                     {% if student.getDisplayImageState() == 'preferred' %}

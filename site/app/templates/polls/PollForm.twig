@@ -1,0 +1,390 @@
+{% set url_path = poll is not null ? "/editPoll/submitEdits" : "/newPoll" %}
+{% set question_type = poll is not null ? poll.getQuestionType() : 'single-response-multiple-correct' %}
+
+<div class="content">
+    <h1>{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
+
+    <form id="new-poll-form" method="post" action="{{ base_url }}{{ url_path }}" enctype="multipart/form-data">
+        {% if poll is not null %}
+            <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+        {% endif %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+
+        <label for="poll-name" class="option-title">
+            Poll Name:
+        </label>
+        <input type="text" name="name" id="poll-name" placeholder="Enter name here..." value="{{ poll is not null ? poll.getName() }}" />
+        <br/> <br/>
+
+        <p class="option-title">Question:</p>
+        {% include "misc/MarkdownArea.twig" with {
+            "markdown_area_id" : "poll-question",
+            "markdown_area_query" : "$('#poll-question')",
+            "markdown_area_name" : "question",
+            "markdown_area_value" : poll is not null ? poll.getQuestion()  : "",
+            "placeholder" : "Enter question here...",
+            "preview_div_id" : "poll_preview",
+            "preview_div_name" : "poll_preview",
+            "onclick" : "previewPollMarkdown.call(this)",
+            "render_buttons" : true,
+            "min_height" : "100px"
+        } only %}
+        <br/><br/>
+
+        <span class="option-title" >
+        Question Type:
+        </span>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()" {{ question_type == 'single-response-single-correct'? "checked" : "" }}></input>
+            <label for="poll-type-single-response-single-correct">single response - single correct</label>
+            <p class="poll-type-description"><i>Students can select only one response, and there is only one full credit answer.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" {{ question_type == 'single-response-multiple-correct'? "checked" : "" }}></input>
+            <label for="poll-type-single-response-multiple-correct">single response - multiple correct</label>
+            <p class="poll-type-description"><i>Students can select only one response, and there are one or more full credit answers.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()" {{ question_type == 'single-response-survey'? "checked" : "" }}></input>
+            <label for="poll-type-single-response-survey">single response - survey</label>
+            <p class="poll-type-description"><i>Students can select only one response, and any selection is worth full credit.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
+            <label for="poll-type-multiple-response-exact">multiple response - exact</label>
+            <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit only if their selection exactly matches the instructor's selection.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" value="multiple-response-flexible" onclick="changePollType()" {{ question_type == 'multiple-response-flexible'? "checked" : "" }}></input>
+            <label for="poll-type-multiple-response-flexible">multiple response - flexible</label>
+            <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit if they select at least one of the instructor's selected responses and do not select any of the instructor's unselected responses.</i></p>
+        </div>
+
+        <div class="poll-type-option">
+            <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
+            <label for="poll-type-multiple-response-survey">multiple response - survey</label>
+            <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
+        </div>
+
+        <br/>
+
+        <label for="image-file" class="option-title">
+            Optional Image:
+        </label>
+        <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+        <br/>
+        {% if poll is not null and poll.getImagePath() != null %}
+            Current Image: {{ poll.getImagePath() }}
+            <br/>
+            <label for="keep-image">
+                Keep Image:
+            </label>
+            <input type="checkbox" id="keep-image" name="keep_image" checked />
+        {% endif %}
+        <br/>
+
+        <label for="poll-date" class="option-title">
+            Expected release date:
+        </label>
+        <input
+            id="poll-date"
+            class="poll-date"
+            name="release_date"
+            autocomplete="off"
+            type="text"
+            size="10"
+            value="{{ poll is not null ? poll.getReleaseDate() | date("Y-m-d") }}"
+        />
+        <br/>
+
+        <label for="student-histogram-release-setting" class="option-title">
+            Release response histogram to students:
+        </label>
+        <select id="student-histogram-release-setting" name="release_histogram">
+            <option value="never" {{ poll is null or poll.getReleaseHistogram() == 'never'? "selected" : "" }}>Never</option>
+            <option value="when_ended" {{ poll is not null and poll.getReleaseHistogram() == 'when_ended'? "selected" : "" }}>After Poll Ended</option>
+            <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always'? "selected" : "" }}>Always</option>
+        </select>
+
+        <hr>
+        <h2> Responses: </h2>
+        <div id="responses">
+            {% if poll is not null %}
+                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
+                {% for option in poll.getOptions() %}
+                    <div class="response-container" id="response_{{option.getId()}}_wrapper">
+                        <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
+                        <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
+                        <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
+                        <textarea aria-label="Reponse text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                                  rows="10" cols="30">{{option.getResponse()}}</textarea>
+                        <div class="move-btn up-btn">
+                            <i class="fa fa-lg fa-chevron-up"></i>
+                        </div>
+                        <div class="move-btn down-btn">
+                            <i class="fa fa-lg fa-chevron-down"></i>
+                        </div>
+                        <div class="move-btn delete-btn">
+                            <i class="fa fa-lg fa-trash delete"></i>
+                        </div>
+                        <br/>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <br/>
+
+        <button type="button" class="btn btn-primary" onclick="addResponse()"><i class="fas fa-plus"></i> Add Response</button>
+        <br/> <br/>
+
+        <hr>
+        <span id="empty-name-error" class="red-message polls-submit-error" {{ poll is not null ? 'hidden' }}>Please make sure poll name is filled in.<br/></span>
+        <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+        <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
+        <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
+        <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
+        <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
+        <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
+        <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
+        <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
+        <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
+        <button type="submit" id="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Edit' }} Poll</button>
+    </form>
+</div>
+
+
+<script>
+    let MAX_SIZE = {{ max_size }};
+    let size_is_valid = true;
+    let poll_type = "{{ poll is not null ? poll.getQuestionType() : 'poll-type-single-response-survey' }}";
+
+    flatpickr('.poll-date', {
+        allowInput: true,
+        dateFormat: "Y-m-d",
+        onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+        }
+    });
+
+    function changePollType() {
+        let count = $(".option_id").length;
+        for (let i = 0; i < count; i++) {
+            if ($("#poll-type-single-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
+                $($(".correct-box")[i]).prop('checked', true);
+                $($(".correct-box")[i]).css({"display":"none"});
+            } else {
+                $($(".correct-box")[i]).css({"display":"inline-block"});
+            }
+        }
+    }
+
+    function checkSize(uploadedFile) {
+        if (uploadedFile.files[0].size > MAX_SIZE) {
+            size_is_valid = false;
+        } else {
+            size_is_valid = true;
+        }
+        submitErrorChecks();
+    };
+
+    function addResponse() {
+        let count = $(".option_id").length;
+        let curr_max_id = -1;
+        for (let i = 0; i < count; i++) {
+            const option_id = $($(".option_id")[i]).val();
+            curr_max_id = Math.max(parseInt(option_id === "" ? i : option_id, 10), curr_max_id);
+        }
+        const first_free_id = curr_max_id + 1;
+        let hidden_style = "";
+        let is_checked = "";
+        if ($("#poll-type-single-response-survey").is(":checked")
+            || $("#poll-type-multiple-response-survey").is(":checked")) {
+            hidden_style = "style='display:none'";
+            is_checked = "checked";
+        }
+        $("#responses").append(`
+            <div class="response-container" id="response_${first_free_id}_wrapper">
+                <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
+                <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
+                <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
+                <textarea aria-label="Response text" class="poll_response" name="option[${first_free_id}][response]" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                rows="10" cols="30"></textarea>
+                <div class="move-btn up-btn">
+                    <i class="fa fa-lg fa-chevron-up"></i>
+                </div>
+                <div class="move-btn down-btn">
+                    <i class="fa fa-lg fa-chevron-down"></i>
+                </div>
+                <div class="move-btn delete-btn">
+                    <i class="fa fa-lg fa-trash"></i>
+                </div>
+                <br/>
+            </div>
+        `);
+        setEventHandlers();
+    }
+
+    function submitErrorChecks() {
+        let empty_responses = false;
+        for (let i = 0; i < $(".poll_response").length; i++) {
+            if ($($(".poll_response")[i]).val() === "") {
+                empty_responses = true;
+            }
+        }
+
+        if ($("#poll-name").val().length === 0) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-name-error").show();
+        } else if ($("#poll-question").val().length === 0) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-question-error").show();
+        } else if (!$('#poll-type-single-response-single-correct').is(':checked')
+            && !$('#poll-type-single-response-multiple-correct').is(':checked')
+            && !$('#poll-type-single-response-survey').is(':checked')
+            && !$('#poll-type-multiple-response-exact').is(':checked')
+            && !$('#poll-type-multiple-response-flexible').is(':checked')
+            && !$('#poll-type-multiple-response-survey').is(':checked')) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#question-type-error").show();
+        } else if (!size_is_valid) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#file-size-error").show();
+        } else if ($("#poll-date").val().length === 0) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-date-error").show();
+        } else if ($(".response-container").length === 0) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#response-count-error").show();
+        } else if ($(".correct-box:checked").length === 0) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#correct-response-count-error").show();
+        } else if ($(".correct-box:checked").length > 1
+            && $('#poll-type-single-response-single-correct').is(':checked')) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#single-response-error").show();
+        } else if (empty_responses) {
+            $("#poll-form-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-response-error").show();
+        } else {
+            $("#poll-form-submit").prop("disabled", false);
+            $(".polls-submit-error").hide();
+        }
+    }
+
+    function setEventHandlers() {
+        $(".up-btn").off("click");
+        $(".up-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
+            if (curr_pos == 0) {
+                return;
+            }
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent());
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos);
+            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1);
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        });
+        $(".down-btn").off("click");
+        $(".down-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
+            if (curr_pos == $(".poll_response").length - 1) {
+                return;
+            }
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos);
+            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1);
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        });
+        $(".delete-btn").off("click");
+        $(".delete-btn").on("click", function() {
+            // first we check if the response option that is about to be deleted
+            // has responses by users, via an ajax request
+            let my_this = $(this);
+            let my_url = "{{base_url}}" + "/hasAnswers";
+            $.ajax({
+                url: my_url,
+                type: "POST",
+                data: {
+                    csrf_token: csrfToken,
+                    poll_id: {{ poll is null ? -1 : poll.getId() }},
+                    option_id: my_this.siblings(".option_id").attr("value")
+                },
+                success: function(data) {
+                    // the result is a boolean -- whether or not this options has responses
+                    let parsed_result = JSON.parse(data);
+                    if (parsed_result.data) {
+                        // we cannot delete. send an error to the instructor
+                        alert("Students and/or other staff users have already submitted this response as their answer. " +
+                            "This response cannot be deleted unless they switch their answers to the poll.");
+                    } else {
+                        // delete the response
+                        let count = $(".poll_response").length;
+                        let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"));
+                        let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1]);
+                        for(let i=curr_pos + 1; i < count; i++) {
+                            $(".order-" + i).attr("value", i - 1);
+                            $(".order-" + i).addClass("order-" + (i - 1));
+                            $(".order-" + i).removeClass("order-" + i);
+                        }
+                        for(let i=wrapper_id + 1; i < count; i++) {
+                            $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1));
+                            $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1));
+                            $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
+                        }
+                        my_this.parent().remove();
+                    }
+                },
+                error: function(e) {
+                    alert("Error occured when requesting via ajax. Please refresh the page and try again.");
+                }
+            });
+        });
+    }
+
+    $(document).ready(function() {
+        setEventHandlers();
+        $("#new-poll-form").on("change click", submitErrorChecks);
+
+        let submit_form = false;
+        $("#new-poll-form").submit(function(event) {
+            if (!submit_form && {{ poll is not null ? "true" : "false" }} && !$(`#poll-type-${ poll_type }`).is(':checked')) {
+                // don't submit yet
+                event.preventDefault();
+                // send warning
+                if (confirm("Changing the poll question type may lead to data of students' answers being " +
+                    "lost if students have already begun submitting responses to this poll. " +
+                    "Are you sure you want to change the type of this poll?")) {
+                    submit_form = true;
+                    $("#new-poll-form").submit();
+                }
+                else {
+                    return; // Don't disable the button if the instructor clicked cancel
+                }
+            }
+            $("#poll-form-submit").prop("disabled", true);
+        });
+    });
+
+</script>
