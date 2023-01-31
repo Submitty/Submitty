@@ -133,22 +133,6 @@ parameters:
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
 			"""
-			count: 25
-			path: app/controllers/PollController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 5
-			path: app/controllers/PollController.php
-
-		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
 			count: 1
 			path: app/controllers/UserProfileController.php
 
@@ -370,6 +354,21 @@ parameters:
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
+			count: 1
+			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"

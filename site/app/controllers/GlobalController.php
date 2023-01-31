@@ -84,7 +84,7 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['authentication', 'logout']),
-            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedGivenName(),
             "id" => "logout",
             "icon" => "fa-power-off"
         ]);

@@ -76,7 +76,7 @@
                     <input type='radio' id="radio-student" name="submission-type">
                     Make Submission for a Student
                 </label>
-                {% if part_names|length == 1 and not is_vcs %}
+                {% if is_bulk_upload %}
                     <label for="radio-bulk">
                         <input type='radio' id="radio-bulk" name="submission-type">
                         Bulk PDF Upload
@@ -356,7 +356,7 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}
-    {% if not is_vcs and not is_notebook %}
+    {% if is_bulk_upload %}
         {% include 'submission/homework/BulkUploadProgressBox.twig' %}
     {% endif %}
 {% endif %}
