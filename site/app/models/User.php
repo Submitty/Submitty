@@ -16,14 +16,14 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getNumericId()
  * @method void setNumericId(string $id)
  * @method string getPassword()
- * @method string getLegalFirstName() Get the first name of the loaded user
- * @method string getPreferredFirstName() Get the preferred first name of the loaded user
- * @method string getDisplayedFirstName() Returns the preferred first name if one exists and is not null or blank,
- *                                        otherwise return the legal first name field for the user.
- * @method string getLegalLastName() Get the last name of the loaded user
- * @method string getPreferredLastName()  Get the preferred last name of the loaded user
- * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
- *                                        otherwise return the legal last name field for the user.
+ * @method string getLegalGivenName() Get the given name of the loaded user
+ * @method string getPreferredGivenName() Get the preferred given name of the loaded user
+ * @method string getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
+ *                                        otherwise return the legal given name field for the user.
+ * @method string getLegalFamilyName() Get the family name of the loaded user
+ * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
+ * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
+ *                                        otherwise return the legal family name field for the user.
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -86,18 +86,18 @@ class User extends AbstractModel {
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @prop @var string The first name of the user */
-    protected $legal_first_name;
-    /** @prop @var string The preferred first name of the user */
-    protected $preferred_first_name = "";
-    /** @prop @var  string The first name to be displayed by the system (either first name or preferred first name) */
-    protected $displayed_first_name;
-    /** @prop @var string The last name of the user */
-    protected $legal_last_name;
-    /** @prop @var string The preferred last name of the user */
-    protected $preferred_last_name = "";
-    /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
-    protected $displayed_last_name;
+    /** @prop @var string The given name of the user */
+    protected $legal_given_name;
+    /** @prop @var string The preferred given name of the user */
+    protected $preferred_given_name = "";
+    /** @prop @var  string The given name to be displayed by the system (either given name or preferred given name) */
+    protected $displayed_given_name;
+    /** @prop @var string The family name of the user */
+    protected $legal_family_name;
+    /** @prop @var string The preferred family name of the user */
+    protected $preferred_family_name = "";
+    /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
+    protected $displayed_family_name;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -129,17 +129,17 @@ class User extends AbstractModel {
 
     /**
      * @prop
-     * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
+     * @var bool This flag is set TRUE when a user edits their own preferred givenname.  When TRUE, preferred givenname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     *           permitted to change (correct?) a user's legal givenname/familyname and email address.
      */
     protected $user_updated = false;
 
     /**
      * @prop
-     * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
+     * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred givenname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     *           permitted to change (correct?) a user's legal givenname/familyname and email address.
      */
     protected $instructor_updated = false;
 
@@ -177,14 +177,14 @@ class User extends AbstractModel {
             $this->setNumericId($details['user_numeric_id']);
         }
 
-        $this->setLegalFirstName($details['user_firstname']);
-        if (isset($details['user_preferred_firstname'])) {
-            $this->setPreferredFirstName($details['user_preferred_firstname']);
+        $this->setLegalGivenName($details['user_givenname']);
+        if (isset($details['user_preferred_givenname'])) {
+            $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
-        $this->setLegalLastName($details['user_lastname']);
-        if (isset($details['user_preferred_lastname'])) {
-            $this->setPreferredLastName($details['user_preferred_lastname']);
+        $this->setLegalFamilyName($details['user_familyname']);
+        if (isset($details['user_preferred_familyname'])) {
+            $this->setPreferredFamilyName($details['user_preferred_familyname']);
         }
 
         $this->email = $details['user_email'];
@@ -395,14 +395,14 @@ class User extends AbstractModel {
         }
     }
 
-    public function setLegalFirstName($name) {
-        $this->legal_first_name = $name;
-        $this->setDisplayedFirstName();
+    public function setLegalGivenName($name) {
+        $this->legal_given_name = $name;
+        $this->setDisplayedGivenName();
     }
 
-    public function setLegalLastName($name) {
-        $this->legal_last_name = $name;
-        $this->setDisplayedLastName();
+    public function setLegalFamilyName($name) {
+        $this->legal_family_name = $name;
+        $this->setDisplayedFamilyName();
     }
 
     public function getNotificationSettings() {
@@ -418,29 +418,33 @@ class User extends AbstractModel {
     }
 
     /**
-     * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
+     * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
-    public function setPreferredFirstName($name) {
-        $this->preferred_first_name = $name;
-        $this->setDisplayedFirstName();
+    public function setPreferredGivenName($name) {
+        $this->preferred_given_name = $name;
+        $this->setDisplayedGivenName();
     }
 
-    public function setPreferredLastName($name) {
-        $this->preferred_last_name = $name;
-        $this->setDisplayedLastName();
+    public function setPreferredFamilyName($name) {
+        $this->preferred_family_name = $name;
+        $this->setDisplayedFamilyName();
     }
 
-    private function setDisplayedFirstName() {
-        $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
+    private function setDisplayedGivenName() {
+        $this->displayed_given_name = (!empty($this->preferred_given_name)) ? $this->preferred_given_name : $this->legal_given_name;
     }
 
-    private function setDisplayedLastName() {
-        $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
+    private function setDisplayedFamilyName() {
+        $this->displayed_family_name = (!empty($this->preferred_family_name)) ? $this->preferred_family_name : $this->legal_family_name;
     }
 
     public function getDisplayFullName() {
-        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+        return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
+    }
+
+    public function getDisplayAbbreviatedName(): string {
+        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
     }
 
     public function setRegistrationSection($section) {
@@ -505,13 +509,13 @@ class User extends AbstractModel {
             case 'user_id':
                  //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
-            case 'user_legal_firstname':
-            case 'user_legal_lastname':
-                //First and last name must be alpha characters, latin chars, white-space, or certain punctuation.
+            case 'user_legal_givenname':
+            case 'user_legal_familyname':
+                //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
-            case 'user_preferred_firstname':
-            case 'user_preferred_lastname':
-                //Preferred first and last name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+            case 'user_preferred_givenname':
+            case 'user_preferred_familyname':
+                //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':

@@ -116,7 +116,7 @@
             <p>
                 The CSV file should be formatted as such:
                 <br />
-                user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
+                user id,given name,family name,grade1,grade2,...,total points earned,text1,text2,...
             </p>
         </div>
     {% endif %}
@@ -238,8 +238,8 @@
             {% endif %}
         </td>
         <td class="cell-all" style="text-align: left">{{ grade.getSubmitter().getId() }}</td>
-        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedFirstName() }}</td>
-        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedLastName() }}</td>
+        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedGivenName() }}</td>
+        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedFamilyName() }}</td>
 
         {% if action == 'lab' %}
             {{ _self.render_lab_cols(gradeable, section_id, grade, index) }}
@@ -316,7 +316,7 @@
                         data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                     {% endif %}
                     data-num="true"
-                    aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
+                    aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                 />
             </td>
         {% endfor %}
@@ -348,7 +348,7 @@
                   onblur="minimizeHeight(this);"
                   onkeyup="adjustHeight(this);"
                   data-id="{{ component.getId() }}"
-                  aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
+                  aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                   rows="1"
                   style="resize: vertical;"
             >{{ component_grade.getComment() | default('') }}</textarea>
