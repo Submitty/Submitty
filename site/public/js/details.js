@@ -4,13 +4,13 @@ const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    let collapsedSections = document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1');
-    if (collapsedSections === "") {
+    const collapsedSections = document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    if (collapsedSections === '') {
         collapseItems = new Set();
-    } else {
+    }
+    else {
         collapseItems = new Set(JSON.parse(decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1'))));
     }
-    
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
