@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Response {
     /**
-     * @ORM\ID
+     * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(name="id",type="integer")
      * @var int
