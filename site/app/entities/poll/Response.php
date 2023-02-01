@@ -7,7 +7,7 @@ namespace app\entities\poll;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="app\repositories\poll\ResponseRepository")
+ * @ORM\Entity
  * @ORM\Table(name="poll_responses")
  */
 class Response {
