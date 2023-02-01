@@ -17,7 +17,7 @@ TEST_DATA_SRC_DIR = os.path.join(SCRIPT_DIR, 'data')
 # Where to dump intermediate test files
 # The GIT_CHECKOUT folder is guaranteed to be within the Submitty install dir.
 WORKING_DIR = os.path.abspath(
-    os.path.join('..', '..', '..', 'test_suite', 'unit_tests', 'autograder')
+    os.path.join('..', '..', '..', 'test_suite', 'unitTests', 'autograder')
 )
 # Path to place our temporary data files
 TEST_DATA_DIR = os.path.join(WORKING_DIR, 'data')
@@ -63,30 +63,7 @@ def get_paths():
     
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     return {"checkout" : checkout_path, "course" : course_dir, "partial" : partial_path, "homework" :homework_paths}
-
-def setup_test_paths():
-    homework_paths = {}
-    paths = get_paths()
-    
-    for folder in ["submissions", "checkout", "results"]:
-        homework_paths[folder] = os.path.join(paths["course"], folder, paths["partial"])
-        os.makedirs(homework_paths[folder])
-
-    for folder in ["config", "config/form"]:
-        os.makedirs(os.path.join(paths["course"], folder))
-
-    course_config_file = os.path.join(paths["course"], "config", "config.json")
-    #open config file and copy to test directory
-    with open(os.path.join(TEST_DATA_DIR, "config_files", 'config.json')) as config_file:
-        with open(course_config_file, 'w') as new_config_file:
-            new_config_file.write(config_file.read().replace("VCS_BASE_URL", TEST_DATA_DIR))
-    
-    # write course form config
-    course_form_config_file = os.path.join(paths["course"], "config", "form", "form_homework_01.json")
-    with open(course_form_config_file, 'w') as open_file:
-        with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json')) as form_file:
-            open_file.write(form_file.read().replace("CONFIG_PATH", TEST_DATA_DIR))
-    
+   
 class TestAutogradingShipper(unittest.TestCase):
     """Unittest TestCase."""
 
@@ -166,38 +143,66 @@ class TestAutogradingShipper(unittest.TestCase):
         # Instantiate the shipper's config object
         CONFIG = config.Config.path_constructor(CONFIG_DIR, 'TEST')
         shipper.instantiate_global_variables(CONFIG)
+        
+        # Create git submission paths
+        homework_paths = {}
+        paths = get_paths()
+        
+        for folder in ["submissions", "checkout", "results"]:
+            homework_paths[folder] = os.path.join(paths["course"], folder, paths["partial"])
+            os.makedirs(homework_paths[folder])
 
-    # def test_can_short_no_testcases(self):
-    #     """ We should be able to short circuit configs with no testcases  """
-    #     autograding_config = {
-    #         "testcases": []
-    #     }
-    #     self.assertTrue(shipper.can_short_circuit(autograding_config))
+        for folder in ["config", "config/form"]:
+            os.makedirs(os.path.join(paths["course"], folder))
 
-    # def test_can_short_circuit_max_submission(self):
-    #     """ We should be able to short circuit if the only testcase is max_submission """
-    #     with open(os.path.join(TEST_DATA_DIR, 'complete_config_upload_only.json')) as infile:
-    #         autograding_config = json.load(infile)
-    #     self.assertTrue(shipper.can_short_circuit(autograding_config))
+        course_config_file = os.path.join(paths["course"], "config", "config.json")
+        # Open config file and copy to test directory
+        with open(os.path.join(TEST_DATA_DIR, "config_files", 'config.json')) as config_file:
+            with open(course_config_file, 'w') as new_config_file:
+                new_config_file.write(config_file.read().replace("VCS_BASE_URL", TEST_DATA_DIR))
+        
+        # Write course form config
+        course_form_config_file = os.path.join(paths["course"], "config", "form", "form_homework_01.json")
+        with open(course_form_config_file, 'w') as open_file:
+            with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json')) as form_file:
+                open_file.write(form_file.read().replace("CONFIG_PATH", TEST_DATA_DIR))
 
-    # def test_cannot_short_circuit_single_non_file_submission_testcase(self):
-    #     """
-    #     If there is only one testcase, but it is non-file submission, we cannot short circuit.
-    #     """
-    #     with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
-    #         tmp_config = json.load(infile)
-    #     # Create a config that is a copy of cpp cats but with only one testcase.
-    #     autograding_config = copy.deepcopy(tmp_config)
-    #     autograding_config['testcases'] = []
-    #     autograding_config['testcases'].append(tmp_config['testcases'][0])
+        # Initialize git homework directory
+        os.system('cd {}/homework_01; git init; git add -A; git commit -m \"testing\"'.format(TEST_DATA_DIR))
 
-    #     self.assertFalse(shipper.can_short_circuit(autograding_config))
+    
 
-    # def test_cannot_short_circuit_many_testcases(self):
-    #     """ We cannot short circuit if there are multiple testcases. """
-    #     with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
-    #         autograding_config = json.load(infile)
-    #     self.assertFalse(shipper.can_short_circuit(autograding_config))
+    def test_can_short_no_testcases(self):
+        """ We should be able to short circuit configs with no testcases  """
+        autograding_config = {
+            "testcases": []
+        }
+        self.assertTrue(shipper.can_short_circuit(autograding_config))
+
+    def test_can_short_circuit_max_submission(self):
+        """ We should be able to short circuit if the only testcase is max_submission """
+        with open(os.path.join(TEST_DATA_DIR, 'complete_config_upload_only.json')) as infile:
+            autograding_config = json.load(infile)
+        self.assertTrue(shipper.can_short_circuit(autograding_config))
+
+    def test_cannot_short_circuit_single_non_file_submission_testcase(self):
+        """
+        If there is only one testcase, but it is non-file submission, we cannot short circuit.
+        """
+        with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
+            tmp_config = json.load(infile)
+        # Create a config that is a copy of cpp cats but with only one testcase.
+        autograding_config = copy.deepcopy(tmp_config)
+        autograding_config['testcases'] = []
+        autograding_config['testcases'].append(tmp_config['testcases'][0])
+
+        self.assertFalse(shipper.can_short_circuit(autograding_config))
+
+    def test_cannot_short_circuit_many_testcases(self):
+        """ We cannot short circuit if there are multiple testcases. """
+        with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
+            autograding_config = json.load(infile)
+        self.assertFalse(shipper.can_short_circuit(autograding_config))
 
   
     """
@@ -209,56 +214,60 @@ class TestAutogradingShipper(unittest.TestCase):
     def _pass_fixtures(self, capsys):
         self.capsys = capsys
     
-    def test_happy_path(self):
-        setup_test_paths()
+   
+    def test_correct_checkout(self):
+        """
+        This function tests the correct output of the checkout_vcs_repo function in the shipper. 
+        To start, the submission directory is setup, and the path variables are retrieved. After this,
+        the shipper is run, and we confirm the standard out. Then the checkout path is scanned to make
+        sure that there is no "failed" test, and if that passes, the expected vcs checkout log is compared 
+        to the actual log. 
+        """
         paths = get_paths()
-        # Initialize git homework directory
-        os.system('cd {}/homework_01; git init; git add -A; git commit -m \"testing\"'.format(TEST_DATA_DIR))
+        
         # Start test
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+
         # Confirm standard out
         expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(TEST_DATA_DIR + "/shipper_config.json")
         self.assertEqual(expected, self.capsys.readouterr().out)
-        # make sure none of the tests have failed before checking valid output
+
+        # Make sure none of the tests have failed before checking valid output
         failed_files = [file for file in os.listdir(paths["checkout"]) if file.startswith("failed")]
         self.assertTrue(len(failed_files) == 0)
      
         # Confirm VCS checkout logging messages
         with open(os.path.join(paths["homework"]["results"], "logs/vcs_checkout.txt"), 'r') as actual_vcs_checkout:
-            correct_output = actual_vcs_checkout.read()
-            # Check if the paths related to the vcs  are correct
+            actual_output = actual_vcs_checkout.read()
+            # Check if the paths related to the vcs are correct
             with open(os.path.join(TEST_DATA_DIR, "config_files", 'expected_vcs_checkout.txt'), 'r') as expected_vcs_checkout:
+                # Check if the expected checkout with local path variables is in the actual output
                 self.assertTrue(expected_vcs_checkout.read().replace("TEST_DATA_PATH", TEST_DATA_DIR).replace("HOMEWORK_PATH", TEST_DATA_DIR + "/homework_01")
-                .replace("CHECKOUT_PATH", paths["checkout"]) in correct_output, "Incorrect File Locations") 
+                .replace("CHECKOUT_PATH", paths["checkout"]) in actual_output, "Incorrect File Locations") 
         
             #confirm the subfolder is cloned and is found at the correct path
             expected_subfolder = "{CHECKOUT_PATH}/subfolder:\ntotal 1".format(CHECKOUT_PATH = paths["checkout"])
-            self.assertTrue(expected_subfolder in correct_output, "Subfolder not cloned/incorrect location")
-
-    def test_invalid_clone(self):
-        paths = get_paths()
-        os.system("rm {}/homework_01/.git".format(TEST_DATA_DIR))
-        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
-        self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_clone_repository.txt"), "Failed to cause a clone repository Failure")
+            self.assertTrue(expected_subfolder in actual_output, "Subfolder not cloned/incorrect location")
    
-    def test_valid_url(self):
+   
+    def test_failed_to_clone(self):
+        """
+        This test is to verify the output when the shipper is forced to fail to clone the repository
+        """
         paths = get_paths()
-        course_form_config_file = os.path.join(paths["course"], "config", "form", "form_homework_01.json")
-        with open(course_form_config_file, 'w') as open_file:
-            with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json')) as form_file:
-                open_file.write(form_file.read().replace("homework_01", ""))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+        self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_clone_repository.txt"), "Failed to cause a clone repository failure")
+
+    def test_invalid_url(self):
+        """
+        This test is to verify the output when the shipper cannot construct a valid repository directory path.
+        To do this, the subdirectory is set to an empty string in the form_homework_01.json config file.
+        """
+        paths = get_paths()
+        
+        with open(os.path.join(paths["course"], "config", "form", "form_homework_01.json"), 'w+') as form_config_file:
+            with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json'), 'r') as base_config_file:
+                # The subdirectory path is changed to and empty string.
+                form_config_file.write(base_config_file.read().replace("homework_01", ""))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_construct_valid_repository_url.txt"), "Failed to induce an invalid repository url")
-
-
-
-## I don't know how to make this test fail without having the failed_to_clone part fail also. 
-
-# According to the submitty_autograding_shipper comments at line 934, "if the repo is empty or the specified branch does not exist, this command will fail"
-# however, the repository needs to have something in it in order to clone it, and it needs to have the correct branch in order to clone also, so both parts
-# of this test will fail before even getting to this point.
-
-        # os.system("rm {} -rf".format(checkout_path+"/"))
-        # os.system('cd {}/homework_01; git init; git add -A; git commit -m \"testing\"; '.format(TEST_DATA_DIR))
-        # shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
-        # self.assertTrue(os.path.isfile(checkout_path+"/failed_to_determine_version_on_specifed_branch.txt"), "Failed to determine branch")
