@@ -89,4 +89,17 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
         $this->assertStringStartsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p>", $diff_result_expected);
         $this->assertStringEndsWith("<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p></div></div>\n", $diff_result_expected);
     }
+
+    /**
+     * @param $diffDir
+     *
+     * @dataProvider diffDir
+     */
+    public function testExpectedStringDiffViewer($diffDir) {
+        $expected_string = file_get_contents("{$diffDir}/input_expected.txt");
+        $diff = new DiffViewer("{$diffDir}/input_actual.txt", "", $expected_string, "{$diffDir}/input_differences.json", "");
+        $this->assertStringEqualsFile($diffDir . "/output_actual.txt", $diff->getDisplayActual());
+        $this->assertStringEqualsFile($diffDir . "/output_expected.txt", $diff->getDisplayExpected());
+        $this->assertTrue($diff->existsDifference());
+    }
 }
