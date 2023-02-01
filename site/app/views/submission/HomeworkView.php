@@ -680,7 +680,7 @@ class HomeworkView extends AbstractView {
                            'matches' => $matches ];
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [

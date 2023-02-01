@@ -1589,7 +1589,7 @@ class Gradeable extends AbstractModel {
                 $submission_path = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
                     'courses',
-                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getterm(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
                     $this->getId()
@@ -2164,7 +2164,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getterm(), $config->getCourse(), $gradeable_id);
         }
     }
 

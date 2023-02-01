@@ -25,7 +25,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/polls", methods={"GET"})
      */
     public function showPollsPage(): WebResponse {
         /** @var \app\repositories\poll\PollRepository */
@@ -98,7 +98,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
+     * @Route("/courses/{_term}/{_course}/polls/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return RedirectResponse|WebResponse
      */
     public function showPoll(string $poll_id) {
@@ -146,7 +146,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/polls/newPoll", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function showNewPollPage(): WebResponse {
@@ -158,7 +158,7 @@ class PollController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/newPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function addNewPoll(): RedirectResponse {
@@ -240,7 +240,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
+     * @Route("/courses/{_term}/{_course}/polls/editPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
@@ -265,7 +265,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function submitEdits(): RedirectResponse {
@@ -406,7 +406,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setOpen", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/setOpen", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function openPoll(): RedirectResponse {
@@ -425,7 +425,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setEnded", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/setEnded", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function endPoll(): RedirectResponse {
@@ -444,7 +444,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setClosed", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/setClosed", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function closePoll(): RedirectResponse {
@@ -463,7 +463,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/submitResponse", methods={"POST"})
      */
     public function submitResponse(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -518,7 +518,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/deletePoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deletePoll(): JsonResponse {
@@ -553,7 +553,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*"})
+     * @Route("/courses/{_term}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*"})
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
@@ -575,7 +575,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/hasAnswers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function hasAnswers() {
@@ -592,13 +592,13 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/polls/export", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function getPollExportData() {
         /** @var Poll[] */
         $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAll();
-        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getSemester() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
+        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getterm() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
         $data = FileUtils::encodeJson(PollUtils::getPollExportData($polls));
         if ($data === false) {
             $this->core->addErrorMessage("Failed to export poll data. Please try again");
@@ -612,7 +612,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/import", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/polls/import", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function importPollsFromJSON(): RedirectResponse {

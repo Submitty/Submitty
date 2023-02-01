@@ -14,7 +14,7 @@ import sys
 import os
 
 
-# make a 6 lowercase letter 'hash' of the input (the course+semester+assignment+user+offset)
+# make a 6 lowercase letter 'hash' of the input (the course+term+assignment+user+offset)
 def random_string(seed):
     random.seed(seed)
     answer= ""
@@ -46,7 +46,7 @@ def anon_log(in_filename,out_filename,offset):
                     if len(things) != 5:
                         # discard unparsable things (only errors)
                         continue
-                    semester = things[0]
+                    term = things[0]
                     course = things[1]
                     assignment = things[2]
                     user = things[3]
@@ -66,7 +66,7 @@ def anon_log(in_filename,out_filename,offset):
                     if len(things) != 6:
                         # discard unparsable things (only errors)
                         continue
-                    semester = things[0]
+                    term = things[0]
                     course = things[1]
                     assignment = things[3]
                     user = things[4]
@@ -76,9 +76,9 @@ def anon_log(in_filename,out_filename,offset):
                     # discard lines with bad format (usually errors)
                     continue
 
-                hash = random_string(semester+course+user+offset)
+                hash = random_string(term+course+user+offset)
 
-                anon_which = semester+"/"+course+"/submissions/"+assignment+"/"+hash+"/"+version
+                anon_which = term+"/"+course+"/submissions/"+assignment+"/"+hash+"/"+version
                 outfile.write('{0}|{1}|{2}|{3}| {4:76}|{5}|{6}\n'
                               .format(timestamp,job_id,batch,untrusted,anon_which,waitgrade,result))
                 

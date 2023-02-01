@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 
-def up(config, conn, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, conn, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
 
 
     # add boolean to course config
@@ -41,5 +41,5 @@ def up(config, conn, semester, course):
     os.system("chmod -R o-rwx  "+str(course_rainbow_grades_dir))
 
 
-def down(config, conn, semester, course):
+def down(config, conn, term, course):
     pass

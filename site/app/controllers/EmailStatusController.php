@@ -16,17 +16,17 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/email_status", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/email_status", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
     public function getEmailStatusPage(): WebResponse {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
 
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
-        $num_page = $repository->getPageNum($semester, $course);
+        $num_page = $repository->getPageNum($term, $course);
 
         return new WebResponse(
             EmailStatusView::class,
@@ -37,18 +37,18 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/email_status_page", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
     public function getEmailStatusesByPage(): WebResponse {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $page = isset($_POST['page']) ? $_POST['page'] : 1;
 
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
-        $result = $repository->getEmailsByPage($page, $semester, $course);
+        $result = $repository->getEmailsByPage($page, $term, $course);
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);

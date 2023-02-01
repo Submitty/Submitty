@@ -5,7 +5,7 @@
           method="post" enctype="multipart/form-data">
         <div class="option row">
             <div class="option-desc col-md-6">
-                <label for="course_semester">
+                <label for="course_term">
                     <span class="option-title block">Term</span>
                     <span class="block">What is the term for the new course?</span>
                     <span class="option-alt">
@@ -16,10 +16,10 @@
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <select name="course_semester" id="course_semester" class="auto_save">
-                    {% for semester in semesters %}
-                        <option value="{{ semester }}">
-                            {{ semester }}
+                <select name="course_term" id="course_term" class="auto_save">
+                    {% for term in terms %}
+                        <option value="{{ term }}">
+                            {{ term }}
                         </option>
                     {% endfor %}
                 </select>

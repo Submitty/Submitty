@@ -104,7 +104,7 @@ DONE
         args.direction = 'up'
         args.initial = False
         args.single = False
-        args.semester = 'f18'
+        args.term = 'f18'
         args.course = 'csci1100'
         args.config = None
 

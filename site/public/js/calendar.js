@@ -111,13 +111,13 @@ function generateCalendarItem(item) {
  * @param month : int the month of the date (1 as January and 12 as December)
  * @param day : int the date of the date (1 - 31)
  * @param curr_view_month : int the current month that the calendar is viewing
- * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
+ * @param view_term : boolean if the calendar is viewing the entire term. If so, the day cell would show both the month and date
  * @returns {string} the HTML string containing the cell
  */
-function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
+function generateDayCell(year, month, day, curr_view_month, view_term=false) {
     const cell_date_str = dateToStr(year, month ,day);
     let content;
-    if (view_semester) {
+    if (view_term) {
         content = `<td class="cal-day-cell cal-cell-expand" id="cell-${cell_date_str}">`;
     }
     else {
@@ -125,7 +125,7 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
     }
     // Title of the day cell
     content += '<div class="cal-cell-title-panel">';
-    if (view_semester) {
+    if (view_term) {
         content += `<span class="cal-curr-month-date cal-day-title">${monthNamesShort[month]} ${day},</span>`;
     }
     else if (month === curr_view_month) {
@@ -162,7 +162,7 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
 /**
  * Generates the title area for the calendar.
  *
- * @param title_area the title of the calendar (month+year/semester/...)
+ * @param title_area the title of the calendar (month+year/term/...)
  * @returns {string} the HTML code for the title area
  */
 function generateCalendarHeader(title_area) {
@@ -260,22 +260,22 @@ function generateCalendarOfMonth(view_year, view_month) {
 }
 
 /**
- * Creates a calendar of the entire semester.
+ * Creates a calendar of the entire term.
  *
- * @param start the start date of the semester in the format of YYYY-mm-dd
- * @param end the end date of the semester in the format of YYYY-mm-dd
- * @param semester_name the name of the semester
+ * @param start the start date of the term in the format of YYYY-mm-dd
+ * @param end the end date of the term in the format of YYYY-mm-dd
+ * @param term_name the name of the term
  * @returns {string} the HTML string containing the cell
  */
-function generateFullCalendar(start, end, semester_name) {
+function generateFullCalendar(start, end, term_name) {
     // Header area: two buttons to move, and month
     let content = generateCalendarHeader(
         `<th colspan="3">    
             </th>
             <th colspan="1">
                 <div class="cal-title">
-                    <h2 class="cal-month-title" >${semester_name.split(' ')[0]}</h2>
-                    <h3 class="cal-year-title" >${semester_name.split(' ')[1]}</h3>
+                    <h2 class="cal-month-title" >${term_name.split(' ')[0]}</h2>
+                    <h3 class="cal-year-title" >${term_name.split(' ')[1]}</h3>
                 </div>
             </th>
             <th colspan="3">          
@@ -332,12 +332,12 @@ function loadCalendar(month_, year_) {
 }
 
 /**
- * Changes the calendar div to the required semester.
+ * Changes the calendar div to the required term.
  *
- * @param start : string the start date of the semester in the format of YYYY-mm-dd
- * @param end the end date of the semester in the format of YYYY-mm-dd
- * @param semester_name the name of the semester
+ * @param start : string the start date of the term in the format of YYYY-mm-dd
+ * @param end the end date of the term in the format of YYYY-mm-dd
+ * @param term_name the name of the term
  */
-function loadFullCalendar(start, end, semester_name) {
-    $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
+function loadFullCalendar(start, end, term_name) {
+    $('#full-calendar').html(generateFullCalendar(start, end, term_name));
 }

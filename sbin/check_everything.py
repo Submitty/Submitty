@@ -117,12 +117,12 @@ def main():
 
 
     # CHECK EACH COURSE
-    for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
-        semester_path=SUBMITTY_DATA_DIR+"/courses/"+semester
-        if not os.path.isdir(semester_path):
+    for term in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
+        term_path=SUBMITTY_DATA_DIR+"/courses/"+term
+        if not os.path.isdir(term_path):
             continue
-        for course in os.listdir(semester_path):
-            course_path=semester_path+"/"+course
+        for course in os.listdir(term_path):
+            course_path=term_path+"/"+course
             if not os.path.isdir(course_path):
                 continue
             c_instructor=pwd.getpwuid(os.stat(course_path).st_uid).pw_name

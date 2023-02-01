@@ -22,7 +22,7 @@ set (MY_DIR ${CMAKE_SOURCE_DIR})
 
 IF (ASSIGNMENT_INSTALLATION)
   # assuming we are in a directory of this structure
-  #   SUBMITTY_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+  #   SUBMITTY_DATA_DIR/courses/which_term/which_course/build/which_assignment
 
   # base directory for course
   set (course_dir ${MY_DIR}/../..)

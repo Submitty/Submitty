@@ -1,7 +1,7 @@
 """Migration for a given Submitty course database."""
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     """
     Run up migration.
 
@@ -9,8 +9,8 @@ def up(config, database, semester, course):
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
+    :param term: term of the course being migrated
+    :type term: str
     :param course: Code of course being migrated
     :type course: str
     """
@@ -139,7 +139,7 @@ def up(config, database, semester, course):
         database.session.execute(query, params)
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     """
     Run down migration (rollback).
 
@@ -147,8 +147,8 @@ def down(config, database, semester, course):
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
+    :param term: term of the course being migrated
+    :type term: str
     :param course: Code of course being migrated
     :type course: str
     """

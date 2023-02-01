@@ -87,10 +87,10 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        return FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        return FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$term}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
 
@@ -100,10 +100,10 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getProcessingQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
+        return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$term}__{$course}__{$gradeable_id}__{$config_id}.json");
     }
 
     /**
@@ -112,9 +112,9 @@ class PlagiarismController extends AbstractController {
      * @return int
      */
     private function getCurrentUserGroup(): int {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
-        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $semester, $course));
+        $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course));
         if (!$group) {
             throw new FileNotFoundException("Error: Unable to find course directory for current user");
         }
@@ -126,13 +126,13 @@ class PlagiarismController extends AbstractController {
      * @return array
      * @throws Exception
      */
-    private function getOtherSemesterCourses(): array {
-        $this_semester = $this->core->getConfig()->getSemester();
+    private function getOthertermCourses(): array {
+        $this_term = $this->core->getConfig()->getterm();
         $this_course = $this->core->getConfig()->getCourse();
-        $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
+        $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_term, $this_course);
         $ret = [];
         foreach ($valid_courses as $item) {
-            $ret[] = "{$item['semester']} {$item['course']}";
+            $ret[] = "{$item['term']} {$item['course']}";
         }
         sort($ret);
         return $ret;
@@ -164,7 +164,7 @@ class PlagiarismController extends AbstractController {
         // actually do the collection of gradeables here
         $gradeables = [];
         foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
-            if ($gradeable !== '.' && $gradeable !== '..' && ($term !== $this->core->getConfig()->getSemester() || $course !== $this->core->getConfig()->getCourse() || $gradeable !== $this_gradeable)) {
+            if ($gradeable !== '.' && $gradeable !== '..' && ($term !== $this->core->getConfig()->getterm() || $course !== $this->core->getConfig()->getCourse() || $gradeable !== $this_gradeable)) {
                 $gradeables[] = $gradeable;
             }
         }
@@ -320,7 +320,7 @@ class PlagiarismController extends AbstractController {
      */
     private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
 
         $config = $em->getRepository(PlagiarismConfig::class)
@@ -349,7 +349,7 @@ class PlagiarismController extends AbstractController {
         if ($job === "RunLichen") {
             $lichen_job_data = [
                 "job" => $job,
-                "semester" => $semester,
+                "term" => $term,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id,
@@ -359,7 +359,7 @@ class PlagiarismController extends AbstractController {
         else {
             $lichen_job_data = [
                 "job" => $job,
-                "semester" => $semester,
+                "term" => $term,
                 "course" => $course,
                 "gradeable" => $gradeable_id,
                 "config_id" => $config_id
@@ -384,7 +384,7 @@ class PlagiarismController extends AbstractController {
      */
     private function getJsonForConfig(string $gradeable_id, int $config_id): array {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
 
         /** @var PlagiarismConfig $config */
@@ -403,7 +403,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $json = [
-            "semester" => $semester,
+            "term" => $term,
             "course" => $course,
             "gradeable" => $gradeable_id,
             "config_id" => $config_id,
@@ -425,7 +425,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism")
+     * @Route("/courses/{_term}/{_course}/plagiarism")
      * @param string $refresh_page
      * @return WebResponse
      */
@@ -466,7 +466,7 @@ class PlagiarismController extends AbstractController {
         });
 
         // TODO: return to this and enable later
-        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $term . "/" . $course . "/lichen/nightly_rerun.json";
         // if (!file_exists($nightly_rerun_info_file)) {
         //     $nightly_rerun_info = [];
         //     foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
@@ -593,7 +593,7 @@ class PlagiarismController extends AbstractController {
      * @param string $gradeable_id
      * @param string $config_id
      * @return ResponseInterface
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult(string $gradeable_id, string $config_id): ResponseInterface {
         $em = $this->core->getCourseEntityManager();
@@ -679,11 +679,11 @@ class PlagiarismController extends AbstractController {
      * @param string $gradeable_id
      * @param string $config_id
      * @return RedirectResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
     public function savePlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
 
         // Determine whether this is a new config or an existing config
@@ -831,11 +831,11 @@ class PlagiarismController extends AbstractController {
             // other gradeables ////////////////////////////////////////////////////
             $other_gradeables = [];
             if ($_POST["other_gradeables_option"] === "has_other_gradeables") {
-                if (isset($_POST["other_semester_course"]) !== isset($_POST["other_gradeable"])) {
+                if (isset($_POST["other_term_course"]) !== isset($_POST["other_gradeable"])) {
                     $this->core->addErrorMessage("Invalid input provided for other gradeables");
                     $this->core->redirect($return_url);
                 }
-                foreach ($_POST["other_semester_course"] ?? [] as $index => $sem_course) {
+                foreach ($_POST["other_term_course"] ?? [] as $index => $sem_course) {
                     if (!isset($_POST["other_gradeable"][$index])) {
                         $this->core->addErrorMessage("Invalid input provided for other term gradeables");
                         $this->core->redirect($return_url);
@@ -843,33 +843,33 @@ class PlagiarismController extends AbstractController {
                     else {
                         $tokens = explode(" ", $sem_course);
                         if (count($tokens) !== 2) {
-                            $this->core->addErrorMessage("Invalid input provided for other semester and course");
+                            $this->core->addErrorMessage("Invalid input provided for other term and course");
                             $this->core->redirect($return_url);
                         }
-                        $other_semester = $tokens[0];
+                        $other_term = $tokens[0];
                         $other_course = $tokens[1];
                         $other_gradeable = $_POST["other_gradeable"][$index];
                         // Error checking
-                        if (str_contains($other_semester, '..') || str_contains($other_course, '..') || str_contains($other_gradeable, '..')) {
+                        if (str_contains($other_term, '..') || str_contains($other_course, '..') || str_contains($other_gradeable, '..')) {
                             $this->core->addErrorMessage("Error: other gradeables string contains invalid component '..'");
                             return new RedirectResponse($return_url);
                         }
-                        $other_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $other_semester, $other_course, "submissions", $other_gradeable);
+                        $other_g_submissions_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $other_term, $other_course, "submissions", $other_gradeable);
                         if (!is_dir($other_g_submissions_path) || count(scandir($other_g_submissions_path)) === 2) {
                             $this->core->addErrorMessage("Error: submssions to other gradeable provided not found");
                             return new RedirectResponse($return_url);
                         }
                         $to_append = [
-                            "other_semester" => $other_semester,
+                            "other_term" => $other_term,
                             "other_course" => $other_course,
                             "other_gradeable" => $other_gradeable
                         ];
-                        if ($other_semester === $semester && $other_course === $course && $other_gradeable === $gradeable_id) {
+                        if ($other_term === $term && $other_course === $course && $other_gradeable === $gradeable_id) {
                             $this->core->addErrorMessage("Error: attempt to compare this gradeable '{$gradeable_id}' to itself as other gradeable");
                             return new RedirectResponse($return_url);
                         }
                         if (in_array($to_append, $other_gradeables)) {
-                            $this->core->addErrorMessage("Error: duplicate other gradeable found: {$other_semester} {$other_course} {$other_gradeable}");
+                            $this->core->addErrorMessage("Error: duplicate other gradeable found: {$other_term} {$other_course} {$other_gradeable}");
                             return new RedirectResponse($return_url);
                         }
                         $other_gradeables[] = $to_append;
@@ -1009,7 +1009,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/plagiarism/configuration/new", methods={"GET"})
      * @return WebResponse
      */
     public function configurePlagiarismForm(): WebResponse {
@@ -1063,7 +1063,7 @@ class PlagiarismController extends AbstractController {
         $config["threshold"] = PlagiarismUtils::DEFAULT_THRESHOLD;
         $config["hash_size"] = PlagiarismUtils::SUPPORTED_LANGUAGES["plaintext"]["hash_size"];
         $config["has_other_gradeables"] = false;
-        $config["other_semester_courses"] = $this->getOtherSemesterCourses();
+        $config["other_term_courses"] = $this->getOthertermCourses();
         $config["other_gradeables"] = [];
         $config["other_gradeable_paths"] = "";
         $config["ignore_submissions"] = [];
@@ -1080,7 +1080,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
+     * @Route("/courses/{_term}/{_course}/plagiarism/configuration/edit")
      * @param string $gradeable_id
      * @param string $config_id
      * @return ResponseInterface
@@ -1116,7 +1116,7 @@ class PlagiarismController extends AbstractController {
         $other_gradeables_array = $plagiarism_config->getOtherGradeables();
         foreach ($other_gradeables_array as &$gradeable) {
             try {
-                $gradeable["other_gradeables"] = $this->getOtherOtherGradeables($gradeable["other_semester"], $gradeable["other_course"], $gradeable_id);
+                $gradeable["other_gradeables"] = $this->getOtherOtherGradeables($gradeable["other_term"], $gradeable["other_course"], $gradeable_id);
             }
             catch (Exception $e) {
                 $this->core->addErrorMessage($e->getMessage());
@@ -1151,7 +1151,7 @@ class PlagiarismController extends AbstractController {
         $config["threshold"] = $plagiarism_config->getThreshold();
         $config["hash_size"] = $plagiarism_config->getHashSize();
         $config["has_other_gradeables"] = count($plagiarism_config->getOtherGradeables()) > 0 || count($plagiarism_config->getOtherGradeablePaths()) > 0;
-        $config["other_semester_courses"] = $this->getOtherSemesterCourses();
+        $config["other_term_courses"] = $this->getOthertermCourses();
         $config["other_gradeables"] = $other_gradeables_array;
         $config["other_gradeable_paths"] = implode(",\n", $plagiarism_config->getOtherGradeablePaths());
         $config["ignore_submissions"] = $ignore[0];
@@ -1168,7 +1168,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
      * @param string $gradeable_id
      * @param string $config_id
      * @return RedirectResponse
@@ -1215,7 +1215,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
      * @param string $gradeable_id
      * @param string $config_id
      * @return RedirectResponse
@@ -1257,7 +1257,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/download_config_file")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/download_config_file")
      * @param string $gradeable_id
      * @param string $config_id
      */
@@ -1274,16 +1274,16 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
      * @param string $gradeable_id
      * @param string $config_id
      */
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
-        // $semester = $this->core->getConfig()->getSemester();
+        // $term = $this->core->getConfig()->getterm();
         // $course = $this->core->getConfig()->getCourse();
         // $return_url = $this->core->buildCourseUrl(['plagiarism']);
         //
-        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
+        // $nightly_rerun_info_file = "/var/local/submitty/courses/" . $term . "/" . $course . "/lichen/nightly_rerun.json";
         //
         // $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
         // $nightly_rerun_info[$gradeable_id] = !$nightly_rerun_info[$gradeable_id];
@@ -1297,19 +1297,19 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/getOtherGradeables", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/plagiarism/configuration/getOtherGradeables", methods={"POST"})
      */
     public function getOtherGradeables(): JsonResponse {
-        if (!isset($_POST['semester_course']) || !isset($_POST['this_gradeable'])) {
+        if (!isset($_POST['term_course']) || !isset($_POST['this_gradeable'])) {
             return JsonResponse::getErrorResponse("Error: Unable to get other gradeables");
         }
 
-        $tokens = explode(' ', $_POST['semester_course']);
-        $semester = $tokens[0];
+        $tokens = explode(' ', $_POST['term_course']);
+        $term = $tokens[0];
         $course = $tokens[1];
 
         try {
-            $return = $this->getOtherOtherGradeables($semester, $course, $_POST['this_gradeable']);
+            $return = $this->getOtherOtherGradeables($term, $course, $_POST['this_gradeable']);
         }
         catch (Exception $e) {
             return JsonResponse::getErrorResponse($e->getMessage());
@@ -1323,7 +1323,7 @@ class PlagiarismController extends AbstractController {
      * @param string $gradeable_id
      * @param string $config_id
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/log")
      */
     public function getRunLog(string $gradeable_id, string $config_id): JsonResponse {
         try {
@@ -1352,7 +1352,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      * @param string $user_id_1
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/versionlist")
      */
     public function ajaxGetVersionList(string $gradeable_id, string $config_id, string $user_id_1): JsonResponse {
         // error checking
@@ -1418,7 +1418,7 @@ class PlagiarismController extends AbstractController {
      * @param string $version
      * @param string|null $source_gradeable
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/concat")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/concat")
      */
     public function ajaxGetSubmissionConcatenated(string $gradeable_id, string $config_id, string $user_id, string $version, string $source_gradeable = null): JsonResponse {
         // error checking
@@ -1435,9 +1435,9 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
-        if (isset($source_gradeable) && $source_gradeable !== "{$semester}__{$course}__{$gradeable_id}") {
+        if (isset($source_gradeable) && $source_gradeable !== "{$term}__{$course}__{$gradeable_id}") {
             $file_name = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable, $user_id, $version), "submission.concatenated");
         }
         else {
@@ -1461,7 +1461,7 @@ class PlagiarismController extends AbstractController {
      * @param string|null $version_user_2
      * @param string|null $source_gradeable_user_2
      * @return JsonResponse
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/colorinfo")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/colorinfo")
      */
     public function ajaxGetColorInfo(string $gradeable_id, string $config_id, string $user_id_1, string $version_user_1, string $user_id_2 = null, string $version_user_2 = null, string $source_gradeable_user_2 = null): JsonResponse {
         // error checking
@@ -1494,9 +1494,9 @@ class PlagiarismController extends AbstractController {
         // get the list of tokens for user 2
         $tokens_user_2 = [];
         if (isset($user_id_2)) {
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getterm();
             $course = $this->core->getConfig()->getCourse();
-            if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$semester}__{$course}__{$gradeable_id}") {
+            if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$term}__{$course}__{$gradeable_id}") {
                 $user_2_tokens_file_path = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable_user_2, $user_id_2, $version_user_2), "tokens.json");
             }
             else {
@@ -1561,7 +1561,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/match")
+     * @Route("/courses/{_term}/{_course}/plagiarism/gradeable/{gradeable_id}/{config_id}/match")
      * @param string $gradeable_id
      * @param string $config_id
      * @param string $user_id_1
@@ -1631,7 +1631,7 @@ class PlagiarismController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
+     * @Route("/courses/{_term}/{_course}/plagiarism/check_refresh")
      * @return JsonResponse
      */
     public function checkRefreshLichenMainPage(): JsonResponse {

@@ -51,12 +51,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_POST['repo_id'] = "";
 
         $this->config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-        $this->config['semester'] = "test";
+        $this->config['term'] = "test";
         $this->config['course'] = "test";
         $this->config['course_path'] = FileUtils::joinPaths(
             $this->config['tmp_path'],
             "courses",
-            $this->config['semester'],
+            $this->config['term'],
             $this->config['course']
         );
 
@@ -81,7 +81,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $config = new Config($this->core);
         $config->setDebug(true);
-        $config->setSemester($this->config['semester']);
+        $config->setterm($this->config['term']);
         $config->setCourse($this->config['course']);
         $config->setCoursePath($this->config['course_path']);
         $config->setSubmittyPath($this->config['tmp_path']);
@@ -376,7 +376,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
-        $touch_file = implode("__", [$this->config['semester'], $this->config['course'], "test", "testUser", "1"]);
+        $touch_file = implode("__", [$this->config['term'], $this->config['course'], "test", "testUser", "1"]);
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         foreach (new \FilesystemIterator($tmp) as $iter) {
@@ -994,7 +994,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(['.submit.VCS_CHECKOUT', '.submit.timestamp', '.user_assignment_access.json'], $files);
-        $touch_file = implode("__", [$this->config['semester'], $this->config['course'], "test", "testUser", "1"]);
+        $touch_file = implode("__", [$this->config['term'], $this->config['course'], "test", "testUser", "1"]);
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }
 

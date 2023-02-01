@@ -25,8 +25,8 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/users", methods={"GET"})
+     * @Route("/api/courses/{_term}/{_course}/users", methods={"GET"})
      * @return MultiResponse
      */
     public function getStudents() {
@@ -84,8 +84,8 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/graders", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/graders", methods={"GET"})
+     * @Route("/api/courses/{_term}/{_course}/graders", methods={"GET"})
      * @return MultiResponse
      */
     public function getGraders() {
@@ -148,7 +148,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/graders/assign_registration_sections", methods={"POST"})
      */
     public function reassignRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['graders']);
@@ -172,14 +172,14 @@ class UsersController extends AbstractController {
             else {
                 $grader->setGradingRegistrationSections([]);
             }
-            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getterm(), $this->core->getConfig()->getCourse());
         }
 
         $this->core->redirect($return_url);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/users/details", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
@@ -205,7 +205,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/user_information", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/user_information", methods={"GET"})
      */
     public function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
@@ -239,14 +239,14 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/users", methods={"POST"})
      */
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -351,7 +351,7 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $semester, $course);
+            $this->core->getQueries()->updateUser($user, $term, $course);
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
@@ -361,12 +361,12 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                $this->core->getQueries()->insertCourseUser($user, $term, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getterm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -378,7 +378,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
+                    AdminGradeableController::enqueueGenerateRepos($term, $course, $g_id);
                 }
             }
         }
@@ -386,20 +386,20 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/delete_user", methods={"POST"})
      * @return RedirectResponse
      */
     public function deleteUser(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getterm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
                 $this->core->addErrorMessage('You cannot delete yourself.');
             }
-            elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
+            elseif ($this->core->getQueries()->deleteUser($user_id, $term, $course)) {
                 $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
             }
             else {
@@ -414,20 +414,20 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/demote_grader", methods={"POST"})
      * @return RedirectResponse
      */
     public function demoteGrader(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $term = $this->core->getConfig()->getterm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
                 $this->core->addErrorMessage('You cannot demote yourself.');
             }
-            elseif ($this->core->getQueries()->demoteGrader($user_id, $semester, $course)) {
+            elseif ($this->core->getQueries()->demoteGrader($user_id, $term, $course)) {
                 $this->core->addSuccessMessage("{$displayed_fullname} has been demoted to a student.");
             }
             else {
@@ -442,7 +442,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/sections", methods={"GET"})
      */
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
@@ -477,7 +477,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/sections/registration", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -535,7 +535,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/sections/rotating", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -802,7 +802,7 @@ class UsersController extends AbstractController {
      * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
-     * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/users/upload", methods={"POST"})
      */
     public function uploadUserList($list_type = "classlist") {
 
@@ -811,7 +811,7 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$return_url) {
+        $insert_or_update_user_function = function ($action, $user) use (&$term, &$course, &$return_url) {
             try {
                 switch ($action) {
                     case 'insert':
@@ -822,10 +822,10 @@ class UsersController extends AbstractController {
                                 $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
                             }
                         }
-                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        $this->core->getQueries()->insertCourseUser($user, $term, $course);
                         break;
                     case 'update':
-                        $this->core->getQueries()->updateUser($user, $semester, $course);
+                        $this->core->getQueries()->updateUser($user, $term, $course);
                         break;
                     default:
                         throw new ValidationException("Unknown DB operation", [$action, '$insert_or_update_user_function']);
@@ -1104,7 +1104,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 
@@ -1218,7 +1218,7 @@ class UsersController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/users/view_grades", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/users/view_grades", methods={"POST"})
      **/
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {

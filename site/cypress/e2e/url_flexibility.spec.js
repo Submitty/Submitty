@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils.js';
+import {getCurrentterm} from '../support/utils.js';
 
 describe('Tests for auto removal of trailing slash in url', () => {
     beforeEach(() => {
@@ -6,7 +6,7 @@ describe('Tests for auto removal of trailing slash in url', () => {
         cy.login();
     });
 
-    const BASE_URL = `/courses/${getCurrentSemester()}/sample`;
+    const BASE_URL = `/courses/${getCurrentterm()}/sample`;
 
     [
         BASE_URL,

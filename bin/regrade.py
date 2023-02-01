@@ -2,7 +2,7 @@
 
 """
 Expected directory structure:
-<BASE_PATH>/courses/<SEMESTER>/<COURSES>/submissions/<HW>/<WHO>/<VERSION#>
+<BASE_PATH>/courses/<term>/<COURSES>/submissions/<HW>/<WHO>/<VERSION#>
 
 This script will find all submissions that match the provided
 pattern and add them to the grading queue.
@@ -104,7 +104,7 @@ def replay(starttime,endtime):
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
             # FIXME : This will need to be adjust for team assignments
             # and assignments with special required capabilities!
-            item = {"semester": what[0],
+            item = {"term": what[0],
                     "course": what[1],
                     "gradeable": what[3],
                     "user": what[4],
@@ -116,7 +116,7 @@ def replay(starttime,endtime):
                     "queue_time": queue_time,
                     "regrade": True,
                     "max_possible_grading_time" : -1 }
-            file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
+            file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
                 json.dump(item, open_file, sort_keys=True, indent=4)
@@ -155,9 +155,9 @@ def main():
             raise SystemExit("You need to point to a directory within {}".format(data_dir))
 
         # Extract directories from provided pattern path (path may be incomplete)
-        pattern_semester="*"
+        pattern_term="*"
         if len(dirs) > len(data_dirs):
-            pattern_semester=dirs[len(data_dirs)]
+            pattern_term=dirs[len(data_dirs)]
         pattern_course="*"
         if len(dirs) > len(data_dirs)+1:
             pattern_course=dirs[len(data_dirs)+1]
@@ -175,7 +175,7 @@ def main():
             pattern_version=dirs[len(data_dirs)+5]
 
         # full pattern may include wildcards!
-        pattern = os.path.join(pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
+        pattern = os.path.join(pattern_term,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
 
         print("pattern: ",pattern)
 
@@ -190,10 +190,10 @@ def main():
                 if args.active_only and not is_active_version(d):
                     continue
                 print("match: ",d)
-                my_semester=my_dirs[len(data_dirs)]
+                my_term=my_dirs[len(data_dirs)]
                 my_course=my_dirs[len(data_dirs)+1]
                 my_gradeable=my_dirs[len(data_dirs)+3]
-                gradeable_config = os.path.join(data_dir,my_semester,my_course,"config/build/"+"build_"+my_gradeable+".json")
+                gradeable_config = os.path.join(data_dir,my_term,my_course,"config/build/"+"build_"+my_gradeable+".json")
                 with open(gradeable_config, 'r') as build_configuration:
                     datastore = json.load(build_configuration)
                     required_capabilities = datastore.get('required_capabilities', 'default')
@@ -203,7 +203,7 @@ def main():
                 queue_time = dateutils.write_submitty_date()
                 my_who=my_dirs[len(data_dirs)+4]
                 my_version=my_dirs[len(data_dirs)+5]
-                my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_who,my_version)
+                my_path=os.path.join(data_dir,my_term,my_course,"submissions",my_gradeable,my_who,my_version)
                 if my_path != d:
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
@@ -221,7 +221,7 @@ def main():
                 # Note: If the initial checkout failed, or if
                 # autograding failed to create a results subdirectory
                 # or create a history file, regrading will also fail.
-                history_file=os.path.join(data_dir, my_semester, my_course,
+                history_file=os.path.join(data_dir, my_term, my_course,
                                           "results", my_gradeable, my_who,
                                           my_version, "history.json")
                 is_vcs_checkout = False
@@ -232,7 +232,7 @@ def main():
                             is_vcs_checkout = True
                             revision = obj[0]['revision']
 
-                obj = {"semester": my_semester,
+                obj = {"term": my_term,
                        "course": my_course,
                        "gradeable": my_gradeable,
                        "user": my_user,
@@ -258,7 +258,7 @@ def main():
             raise SystemExit("Aborting...")
 
     for item in grade_queue:
-        file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
+        file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file, sort_keys=True, indent=4)

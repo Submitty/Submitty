@@ -13,7 +13,7 @@ use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/student_photos")
+     * @Route("/courses/{_term}/{_course}/student_photos")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
@@ -29,7 +29,7 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/student_photos/upload")
+     * @Route("/courses/{_term}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -178,7 +178,7 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/flag_user_image", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function flagUserImage(): JsonResponse {

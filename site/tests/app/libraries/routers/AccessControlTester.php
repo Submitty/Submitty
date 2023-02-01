@@ -9,12 +9,12 @@ use app\libraries\routers\WebRouter;
 use Symfony\Component\HttpFoundation\Request;
 
 class AccessControlTester extends BaseUnitTest {
-    private $semester = 'test_semester';
+    private $term = 'test_term';
 
     private $course = 'test_course';
 
     public function data() {
-        $course_prefix = "/courses/{$this->semester}/{$this->course}";
+        $course_prefix = "/courses/{$this->term}/{$this->course}";
         return [
             [$course_prefix . '/gradeable/open_homework/update', "GET", [], User::GROUP_INSTRUCTOR],
         ];
@@ -65,7 +65,7 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_admin' => true,
-                        'semester' => $this->semester,
+                        'term' => $this->term,
                         'course' => $this->course,
                         'logged_in' => $logged_in
                     ],
@@ -78,7 +78,7 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_full_grading' => true,
-                        'semester' => $this->semester,
+                        'term' => $this->term,
                         'course' => $this->course,
                         'logged_in' => $logged_in
                     ],
@@ -91,7 +91,7 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_grading' => true,
-                        'semester' => $this->semester,
+                        'term' => $this->term,
                         'course' => $this->course,
                         'logged_in' => $logged_in
                     ],
@@ -104,7 +104,7 @@ class AccessControlTester extends BaseUnitTest {
             default:
                 $core = $this->createMockCore(
                     [
-                        'semester' => $this->semester,
+                        'term' => $this->term,
                         'course' => $this->course,
                         'logged_in' => $logged_in
                     ],

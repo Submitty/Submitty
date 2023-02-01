@@ -6,9 +6,9 @@ import pwd
 from pathlib import Path
 import shutil
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
 
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     solution_dir = Path(course_dir, 'instructor_solution')
 
     # get course group
@@ -27,6 +27,6 @@ def up(config, database, semester, course):
         os.system("chmod o-rwx {0}".format(str(solution_dir)))
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     #The existence of an old solution directory isn't harmful.
     pass

@@ -367,16 +367,16 @@ ORDER BY user_id",
     /**
      * @return string[]
      */
-    public function getAllUnarchivedSemester() {
+    public function getAllUnarchivedterm() {
         $this->submitty_db->query(
             "
-SELECT DISTINCT semester
+SELECT DISTINCT term
 FROM courses
 WHERE status = 1"
         );
         $return = [];
         foreach ($this->submitty_db->rows() as $row) {
-            $return[] = $row['semester'];
+            $return[] = $row['term'];
         }
         return $return;
     }
@@ -386,9 +386,9 @@ WHERE status = 1"
      */
     public function getAllUnarchivedCourses(): \Iterator {
         $sql = <<<SQL
-SELECT t.name AS term_name, c.semester, c.course
+SELECT t.name AS term_name, c.term, c.course
 FROM courses AS c
-INNER JOIN terms AS t ON c.semester=t.term_id
+INNER JOIN terms AS t ON c.term=t.term_id
 WHERE c.status = 1
 ORDER BY t.start_date DESC, c.course ASC
 SQL;
@@ -1029,15 +1029,15 @@ SQL;
 
     /**
      * @param User   $user
-     * @param string $semester
+     * @param string $term
      * @param string $course
      */
-    public function insertCourseUser(User $user, $semester, $course) {
-        $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
+    public function insertCourseUser(User $user, $term, $course) {
+        $params = [$term, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
         $this->submitty_db->query(
             "
-INSERT INTO courses_users (semester, course, user_id, user_group, registration_section, manual_registration)
+INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
 VALUES (?,?,?,?,?,?)",
             $params
         );
@@ -1049,10 +1049,10 @@ VALUES (?,?,?,?,?,?)",
 
     /**
      * @param User $user
-     * @param string|null $semester
+     * @param string|null $term
      * @param string|null $course
      */
-    public function updateUser(User $user, $semester = null, $course = null) {
+    public function updateUser(User $user, $term = null, $course = null) {
         $params = [$user->getNumericId(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
                        $this->submitty_db->convertBoolean($user->getEmailBoth()),
@@ -1083,15 +1083,15 @@ WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
             $params
         );
 
-        if (!empty($semester) && !empty($course)) {
+        if (!empty($term) && !empty($course)) {
             $params = [$user->getGroup(), $user->getRegistrationSection(),
                             $this->submitty_db->convertBoolean($user->isManualRegistration()),
-                            $user->getRegistrationType(), $semester, $course,
+                            $user->getRegistrationType(), $term, $course,
                             $user->getId()];
             $this->submitty_db->query(
                 "
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
-WHERE semester=? AND course=? AND user_id=?",
+WHERE term=? AND course=? AND user_id=?",
                 $params
             );
 
@@ -1122,20 +1122,20 @@ WHERE semester=? AND course=? AND user_id=?",
     /**
      * Gets the group that the user is in for a given class (used on homepage)
      *
-     * Classes are distinct for each semester *and* course
+     * Classes are distinct for each term *and* course
      *
-     * @param  string $semester    - class's working semester
+     * @param  string $term    - class's working term
      * @param  string $course_name - class's course name
      * @param  string $user_id     - user id to be searched for
      * @return integer - group number of user in the given class
      */
-    public function getGroupForUserInClass($semester, $course_name, $user_id) {
-        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ? AND semester = ?", [$user_id, $course_name, $semester]);
+    public function getGroupForUserInClass($term, $course_name, $user_id) {
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ? AND term = ?", [$user_id, $course_name, $term]);
         return intval($this->submitty_db->row()['user_group']);
     }
 
     /**
-     * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current semester
+     * Gets an unique array of active users in courses_users, active users are users enrolled in a course in the current term
      * Allows the filtering the group of users returned by this function
      *
      * @param bool $instructor To include instructors or not
@@ -1143,7 +1143,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * @param bool $limitedAccess To include limited access graders or not
      * @param bool $student To include students or not
      * @param bool $faculty to include faculty level users or not
-     * @return array - array of userids active in the specified semester
+     * @return array - array of userids active in the specified term
      */
     public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
         $args = ['-1'];
@@ -1170,7 +1170,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.semester = courses.semester AND courses_users.course = courses.course
+                ON courses_users.term = courses.term AND courses_users.course = courses.course
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
         );
@@ -1190,7 +1190,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->submitty_db->query(
             "WITH A as (SELECT DISTINCT ON(user_id) user_id, user_group FROM courses_users JOIN courses
             on courses.course = courses_users.course
-            and courses.semester = courses_users.semester
+            and courses.term = courses_users.term
             WHERE courses.status = 1
             ORDER BY user_id, courses_users.user_group ASC)
             SELECT A.user_group, COUNT(A.user_group) FROM A GROUP BY A.user_group"
@@ -2654,16 +2654,16 @@ ORDER BY user_id ASC"
     }
 
     public function insertNewRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
-        $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
+        $this->submitty_db->query("INSERT INTO courses_registration_sections (term, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$term, $course, $section]);
         return $this->submitty_db->getrowcount();
     }
 
     public function deleteRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
-        $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", [$semester, $course, $section]);
+        $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE term=? AND course=? AND registration_section_id=?", [$term, $course, $section]);
         return $this->submitty_db->getRowCount();
     }
 
@@ -4094,10 +4094,10 @@ SQL;
         }
 
         $query = <<<SQL
-SELECT t.name AS term_name, u.semester, u.course, u.user_group, u.registration_section
+SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_section
 FROM courses_users u
-INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-INNER JOIN terms t ON u.semester=t.term_id
+INNER JOIN courses c ON u.course=c.course AND u.term=c.term
+INNER JOIN terms t ON u.term=t.term_id
 WHERE u.user_id=? ${extra} AND (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
@@ -4117,16 +4117,16 @@ SQL;
      * @return array
      */
     public function getInstructorLevelAccessCourse(string $user_id): array {
-        $this->submitty_db->query("SELECT semester, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
+        $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
         return $this->submitty_db->rows();
     }
 
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
-        SELECT t.name AS term_name, u.semester, u.course, u.user_group
+        SELECT t.name AS term_name, u.term, u.course, u.user_group
         FROM courses_users u
-        INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-        INNER JOIN terms t ON u.semester=t.term_id
+        INNER JOIN courses c ON u.course=c.course AND u.term=c.term
+        INNER JOIN terms t ON u.term=t.term_id
         WHERE u.user_id=? AND (u.registration_section IS NOT NULL OR u.user_group<>4)
         ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
         ";
@@ -4140,8 +4140,8 @@ SQL;
         return $return;
     }
 
-    public function getCourseStatus($semester, $course) {
-        $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", [$semester, $course]);
+    public function getCourseStatus($term, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$term, $course]);
         return $this->submitty_db->rows()[0]['status'];
     }
 
@@ -4686,7 +4686,7 @@ AND gc_id IN (
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query(
             "
-            INSERT INTO emails(subject, body, created, user_id, email_address, semester, course)
+            INSERT INTO emails(subject, body, created, user_id, email_address, term, course)
             VALUES " . $value_param_string,
             $flattened_params
         );
@@ -4784,16 +4784,16 @@ AND gc_id IN (
      * a student has dropped a course.  SQL query checks for user_group=4 so
      * that only students are considered.  Returns false when course is dropped.
      * Returns true when course is still active, or user is not a student.
-     * If course or semester is null, this method instead checks for if the student
+     * If course or term is null, this method instead checks for if the student
      * is 'active' in any course
      *
      * @param  string $user_id
      * @param  string $course
-     * @param  string $semester
+     * @param  string $term
      * @return bool
      */
-    public function checkStudentActiveInCourse($user_id, $course, $semester): bool {
-        if ($course == null || $semester == null) {
+    public function checkStudentActiveInCourse($user_id, $course, $term): bool {
+        if ($course == null || $term == null) {
             $this->submitty_db->query(
                 "
                 SELECT
@@ -4814,14 +4814,14 @@ AND gc_id IN (
                 ELSE TRUE
                 END
             AS active
-            FROM courses_users WHERE user_id=? AND course=? AND semester=?",
-            [$user_id, $course, $semester]
+            FROM courses_users WHERE user_id=? AND course=? AND term=?",
+            [$user_id, $course, $term]
         );
         $row = $this->submitty_db->row();
         return count($row) > 0 && $row['active'];
     }
 
-    public function checkIsInstructorInCourse($user_id, $course, $semester) {
+    public function checkIsInstructorInCourse($user_id, $course, $term) {
         $this->submitty_db->query(
             "
             SELECT
@@ -4829,8 +4829,8 @@ AND gc_id IN (
                 ELSE FALSE
                 END
             AS is_instructor
-            FROM courses_users WHERE user_id=? AND course=? AND semester=?",
-            [$user_id, $course, $semester]
+            FROM courses_users WHERE user_id=? AND course=? AND term=?",
+            [$user_id, $course, $term]
         );
         return count($this->submitty_db->rows()) >= 1 &&
             $this->submitty_db->row()['is_instructor'];
@@ -7834,7 +7834,7 @@ WHERE current_state IN
     }
 
     /**
-     * Delete user from DBs identified by user_id, semester, and course.
+     * Delete user from DBs identified by user_id, term, and course.
      *
      * Query issues DELETE on master DB's courses_users table.  When potentially
      * successful, trigger function will attempt to delete user from course DB.
@@ -7844,33 +7844,33 @@ WHERE current_state IN
      * deleted.
      *
      * @param string $user_id
-     * @param string $semester
+     * @param string $term
      * @param string $course
      * @return bool false on failure (or 0 rows deleted), true otherwise.
      */
-    public function deleteUser(string $user_id, string $semester, string $course): bool {
-        $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
-        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+    public function deleteUser(string $user_id, string $term, string $course): bool {
+        $query = "DELETE FROM courses_users WHERE user_id=? AND term=? AND course=?";
+        $this->submitty_db->query($query, [$user_id, $term, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
-     * Demote grader to a student, identified by user_id, semester, and course.
+     * Demote grader to a student, identified by user_id, term, and course.
      * Set user group to 4 (student) and the query is successful if the row
      * count (number of affected rows) is positive.
      *
      * @param string $user_id
-     * @param string $semester
+     * @param string $term
      * @param string $course
      * @return bool false on failure, true otherwise
      */
-    public function demoteGrader(string $user_id, string $semester, string $course): bool {
+    public function demoteGrader(string $user_id, string $term, string $course): bool {
         $query = <<<SQL
 UPDATE courses_users
 SET user_group = 4
-WHERE user_id=? AND semester=? AND course=?
+WHERE user_id=? AND term=? AND course=?
 SQL;
-        $this->submitty_db->query($query, [$user_id, $semester, $course]);
+        $this->submitty_db->query($query, [$user_id, $term, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }
 
@@ -7915,25 +7915,25 @@ SQL;
     public function getUserGroups(string $user_id): array {
         $this->submitty_db->query(
             'SELECT DISTINCT c.group_name FROM courses c INNER JOIN courses_users cu on c.course = cu.course AND
-                   c.semester = cu.semester WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
+                   c.term = cu.term WHERE cu.user_id = ? AND user_group = 1 AND c.group_name != \'root\'',
             [$user_id]
         );
         return $this->submitty_db->rows();
     }
 
-    public function courseExists(string $semester, string $course): bool {
+    public function courseExists(string $term, string $course): bool {
         $this->submitty_db->query(
-            'SELECT * FROM courses WHERE semester=? AND course=?',
-            [$semester, $course]
+            'SELECT * FROM courses WHERE term=? AND course=?',
+            [$term, $course]
         );
         return $this->submitty_db->getRowCount() === 1;
     }
 
-    public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
+    public function getOtherCoursesWithSameGroup(string $term, string $course): array {
         $this->submitty_db->query(
-            "SELECT c2.course, c2.semester FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
-                   WHERE c1.semester = ? AND c1.course = ? AND c1.group_name != 'root'",
-            [$semester, $course]
+            "SELECT c2.course, c2.term FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
+                   WHERE c1.term = ? AND c1.course = ? AND c1.group_name != 'root'",
+            [$term, $course]
         );
         return $this->submitty_db->rows();
     }

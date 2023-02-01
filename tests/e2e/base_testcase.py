@@ -70,8 +70,8 @@ class BaseTestCase(unittest.TestCase):
         if user_password is None and user_id is not None:
             user_password = user_id
         self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
-        self.semester = dateutils.get_current_semester()
-        self.full_semester = BaseTestCase.get_display_semester(self.semester)
+        self.term = dateutils.get_current_term()
+        self.full_term = BaseTestCase.get_display_term(self.term)
         self.logged_in = False
         self.use_log_in = log_in
         self.use_websockets = use_websockets
@@ -105,7 +105,7 @@ class BaseTestCase(unittest.TestCase):
 
     def get(self, url=None, parts=None):
         if url is None:
-            # Can specify parts = [('semester', 's18'), ...]
+            # Can specify parts = [('term', 's18'), ...]
             self.assertIsNotNone(parts)
             url = "/index.php?" + urlencode(parts)
 
@@ -157,7 +157,7 @@ class BaseTestCase(unittest.TestCase):
         if course_name is None:
             course_name = course
         course_name = course_name.title()
-        self.driver.find_element(By.ID, dateutils.get_current_semester() + '_' + course).click()
+        self.driver.find_element(By.ID, dateutils.get_current_term() + '_' + course).click()
         # print(self.driver.page_source)
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Gradeables - ' + course_name))
 
@@ -209,9 +209,9 @@ class BaseTestCase(unittest.TestCase):
         input("Hit enter to continue...")
 
     @staticmethod
-    def get_display_semester(current_semester):
-        s = 'Fall' if current_semester[0] == 'f' else 'Summer' if current_semester[0] == 'u' else 'Spring'
-        s += ' 20' + current_semester[1:]
+    def get_display_term(current_term):
+        s = 'Fall' if current_term[0] == 'f' else 'Summer' if current_term[0] == 'u' else 'Spring'
+        s += ' 20' + current_term[1:]
         return s
 
     # https://stackoverflow.com/a/47366981/214063
@@ -233,7 +233,7 @@ class BaseTestCase(unittest.TestCase):
         address = parsed._replace(netloc=netloc).geturl()
 
         self.ws = create_connection(address, cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
-        new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.semester + '-sample-' + self.socket_page})
+        new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.term + '-sample-' + self.socket_page})
         self.ws.send(new_connection_msg)
 
     def check_socket_message(self, message):

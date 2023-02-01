@@ -647,7 +647,7 @@ HTML;
     }
 
     /**
-     * Builds a course URL (starts with /<semester>/<course>)
+     * Builds a course URL (starts with /<term>/<course>)
      * @param string[] $parts
      */
     public function buildCourseUrl(array $parts): string {

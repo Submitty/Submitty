@@ -37,7 +37,7 @@ class ReportController extends AbstractController {
     private $all_overrides = [];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/reports")
+     * @Route("/courses/{_term}/{_course}/reports")
      */
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -57,8 +57,8 @@ class ReportController extends AbstractController {
     /**
      * Generates grade summary files for every user
      *
-     * @Route("/courses/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/reports/summaries")
+     * @Route("/api/courses/{_term}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -138,7 +138,7 @@ class ReportController extends AbstractController {
     /**
      * Generates and offers download of CSV grade report
      *
-     * @Route("/courses/{_semester}/{_course}/reports/csv")
+     * @Route("/courses/{_term}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -387,7 +387,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Generates a summary of all polls over a semester if polling is enabled
+     * Generates a summary of all polls over a term if polling is enabled
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {
@@ -572,7 +572,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
+     * @Route("/courses/{_term}/{_course}/reports/rainbow_grades_customization")
      */
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -618,7 +618,7 @@ class ReportController extends AbstractController {
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                     $this->core->getConfig()->getCourse(),
-                    $this->core->getConfig()->getSemester()
+                    $this->core->getConfig()->getterm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
             ]);
@@ -626,7 +626,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
      */
     public function uploadRainbowConfig() {
         $redirect_url =  $this->core->buildCourseUrl((['reports']));
@@ -675,19 +675,19 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
+     * @Route("/courses/{_term}/{_course}/reports/rainbow_grades_status")
      */
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getterm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
         // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getterm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
@@ -713,7 +713,7 @@ class ReportController extends AbstractController {
 
         // Check the course auto_debug_output.txt to ensure no exceptions were thrown
         $debug_output_path = '/var/local/submitty/courses/' .
-            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getterm() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
@@ -740,7 +740,7 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/courses/{_semester}/{_course}/gradebook")
+     * @Route("/courses/{_term}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function displayGradebook() {

@@ -332,7 +332,7 @@ def grade_from_zip(
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
         ''' Cache the results when there are solution commands be no input generation commands'''
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj["term"],
             queue_obj["course"],
             "generated_output",
             queue_obj["gradeable"]
@@ -373,7 +373,7 @@ def grade_from_zip(
             submission_string = submission_time_file.read().rstrip()
 
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj["term"],
             queue_obj["course"],
             "submissions",
             queue_obj["gradeable"],

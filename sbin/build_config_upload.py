@@ -19,12 +19,12 @@ DATA_DIR = JSON['submitty_data_dir']
 
 # ------------------------------------------------------------------------
 def build_one(data):
-    semester = data["semester"]
+    term = data["term"]
     course = data["course"]
 
     # construct the paths for this course
-    build_script = os.path.join(DATA_DIR, "courses", semester, course, "BUILD_" + course + ".sh")
-    build_output = os.path.join(DATA_DIR, "courses", semester, course, "build_script_output.txt")
+    build_script = os.path.join(DATA_DIR, "courses", term, course, "BUILD_" + course + ".sh")
+    build_output = os.path.join(DATA_DIR, "courses", term, course, "build_script_output.txt")
 
     # construct the command line to build/rebuild/clean/delete the gradeable
     build_args = [build_script]

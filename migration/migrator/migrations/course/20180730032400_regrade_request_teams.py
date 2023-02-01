@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute('ALTER TABLE regrade_requests RENAME COLUMN gradeable_id TO g_id')
     database.execute('ALTER TABLE regrade_requests RENAME COLUMN student_id TO user_id')
 
@@ -11,7 +11,7 @@ def up(config, database, semester, course):
     database.execute('ALTER TABLE regrade_requests ALTER COLUMN user_id DROP NOT NULL')
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     database.execute('ALTER TABLE regrade_requests RENAME COLUMN g_id TO gradeable_id')
     database.execute('ALTER TABLE regrade_requests RENAME COLUMN user_id TO student_id')
 

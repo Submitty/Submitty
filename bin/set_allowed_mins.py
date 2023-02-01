@@ -24,7 +24,7 @@ except Exception as config_fail_error:
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
-SEMESTER = sys.argv[2]
+term = sys.argv[2]
 COURSE = sys.argv[3]
 GRADEABLE = sys.argv[4]
 
@@ -33,7 +33,7 @@ def setup_db():
     """Set up a connection with the course database."""
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         db_config = json.load(open_file)
-    db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
+    db_name = "submitty_{}_{}".format(term, COURSE)
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_config['database_host']):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(

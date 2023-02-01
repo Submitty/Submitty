@@ -14,14 +14,14 @@ class NavigationController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/no_access")
+     * @Route("/courses/{_term}/{_course}/no_access")
      */
     public function noAccess() {
         $this->core->getOutput()->renderOutput('Error', 'noAccessCourse');
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
+     * @Route("/courses/{_term}/{_course}", requirements={"_term": "^(?!api)[^\/]+", "_course": "[^\/]+"})
      */
     public function navigationPage() {
         try {

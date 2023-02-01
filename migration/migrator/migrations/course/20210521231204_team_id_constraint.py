@@ -5,6 +5,6 @@ one grade per individual.
 """
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("ALTER TABLE public.gradeable_data DROP CONSTRAINT IF EXISTS g_id_gd_team_id_unique;");
     database.execute("ALTER TABLE ONLY public.gradeable_data ADD CONSTRAINT g_id_gd_team_id_unique UNIQUE (g_id, gd_team_id);");

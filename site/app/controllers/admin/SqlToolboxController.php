@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SqlToolboxController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/sql_toolbox", methods={"GET"})
      */
     public function showToolbox(): WebResponse {
         return new WebResponse(
@@ -36,7 +36,7 @@ class SqlToolboxController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/sql_toolbox", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/sql_toolbox", methods={"POST"})
      */
     public function runQuery(): JsonResponse {
         $query = trim($_POST['sql']);

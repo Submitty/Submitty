@@ -115,7 +115,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         disableQueue(self)
 
     def goToQueuePage(self):
-        queue_url = f"courses/{self.semester}/sample/office_hours_queue"
+        queue_url = f"courses/{self.term}/sample/office_hours_queue"
         self.get(queue_url)
         self.assertEqual(self.driver.current_url, self.test_url+"/"+queue_url)
 
@@ -307,7 +307,7 @@ class TestOfficeHoursQueue(BaseTestCase):
 
 
 def enableQueue(self):
-    self.get(f"/courses/{self.semester}/sample/config")
+    self.get(f"/courses/{self.term}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
         self.driver.find_element(By.ID, 'queue-enabled').click()
@@ -318,7 +318,7 @@ def enableQueue(self):
 def disableQueue(self):
     self.log_out()
     self.log_in(user_id='instructor')
-    self.get(f"/courses/{self.semester}/sample/config")
+    self.get(f"/courses/{self.term}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
         self.driver.find_element(By.ID, 'queue-enabled').click()

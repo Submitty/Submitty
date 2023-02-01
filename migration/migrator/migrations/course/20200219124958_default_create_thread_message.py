@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
 
     # add new field in course config details
     config_file = Path(course_dir, 'config', 'config.json')
@@ -17,8 +17,8 @@ def up(config, database, semester, course):
             json.dump(j, out_file, indent=4)
 
 
-def down(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def down(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
 
     # remove additional field in course config details
     config_file = Path(course_dir, 'config', 'config.json')

@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LateController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days")
+     * @Route("/courses/{_term}/{_course}/late_days")
      * @return WebResponse
      */
     public function viewLateDays() {
@@ -32,7 +32,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/extensions")
+     * @Route("/courses/{_term}/{_course}/extensions")
      * @return WebResponse
      */
     public function viewExtensions() {
@@ -44,7 +44,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
+     * @Route("/courses/{_term}/{_course}/late_days_forensics")
      * @return WebResponse
      */
     public function viewLateDaysForensics() {
@@ -57,7 +57,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
+     * @Route("/courses/{_term}/{_course}/late_days_forensics/flush")
      * @return RedirectResponse
      */
     public function flushLateDayCache() {
@@ -68,7 +68,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
+     * @Route("/courses/{_term}/{_course}/late_days_forensics/calculate")
      * @return RedirectResponse
      */
     public function calculateLateDayCache() {
@@ -82,7 +82,7 @@ class LateController extends AbstractController {
     /**
      * @param string|null $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
-     * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateLateDays($csv_option = null) {
@@ -138,7 +138,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days/delete", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/late_days/delete", methods={"POST"})
      * @return MultiResponse
      */
     public function deleteLateDays() {
@@ -166,7 +166,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/extensions/update", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/extensions/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateExtension() {

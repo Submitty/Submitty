@@ -4,9 +4,9 @@ import os
 import grp
 from pathlib import Path
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
 
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     uploads_dir = Path(course_dir, 'uploads')
     bulk_uploads_dir = Path(course_dir, 'uploads', 'bulk_pdf')
     split_uploads_dir = Path(course_dir, 'uploads', 'split_pdf')
@@ -43,6 +43,6 @@ def up(config, database, semester, course):
     pass
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
 
     pass

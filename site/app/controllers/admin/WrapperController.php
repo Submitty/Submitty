@@ -26,7 +26,7 @@ class WrapperController extends AbstractController {
     ];
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme")
+     * @Route("/courses/{_term}/{_course}/theme")
      * @return MultiResponse
      */
     public function uploadWrapperPage() {
@@ -40,7 +40,7 @@ class WrapperController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/theme/upload", methods={"POST"})
      * @return MultiResponse
      */
     public function processUploadHTML() {
@@ -82,7 +82,7 @@ class WrapperController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/theme/delete", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/theme/delete", methods={"POST"})
      * @return MultiResponse
      */
     public function deleteUploadedHTML() {

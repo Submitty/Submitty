@@ -176,10 +176,10 @@
                             {% if new_or_edit == "edit" %}
                                 {% for row in config["other_gradeables"] %}
                                     <div id="other-g-option-{{ loop.index0 }}" class="other-gradeable-wrapper">
-                                        <select name='other_semester_course[]' onchange='getGradeables(this)'>
-                                            {% for semester_course in config["other_semester_courses"] %}
-                                                {% set tokens = semester_course|split(' ') %}
-                                                <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["other_semester"] and tokens[1] == row["other_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
+                                        <select name='other_term_course[]' onchange='getGradeables(this)'>
+                                            {% for term_course in config["other_term_courses"] %}
+                                                {% set tokens = term_course|split(' ') %}
+                                                <option value="{{ tokens[0] }} {{ tokens[1] }}" {{ tokens[0] == row["other_term"] and tokens[1] == row["other_course"] ? "selected" : "" }}>{{ tokens[0] }}/{{ tokens[1] }}</option>
                                             {% endfor %}
                                         </select>
                                         <select name='other_gradeable[]'>
@@ -231,7 +231,7 @@
 </div>
 
 <script>
-    const other_semester_course_list = JSON.parse(`{{ config["other_semester_courses"] | json_encode() | raw }}`);
+    const other_term_course_list = JSON.parse(`{{ config["other_term_courses"] | json_encode() | raw }}`);
     const gradeables_with_plag_configs = JSON.parse(`{{ gradeables_with_plag_configs | json_encode() | raw }}`);
 
     // SUBMIT FORM /////////////////////////////////////////////////////////////
@@ -326,7 +326,7 @@
     }
 
     function getGradeables(selectObject) {
-        let semester_course_dropdown = $(selectObject);
+        let term_course_dropdown = $(selectObject);
         let gradeable_dropdown = $(selectObject).siblings().first();
         // clear the dropdown and display a "loading" message
         gradeable_dropdown.empty();
@@ -336,7 +336,7 @@
             type: "POST",
             data: {
                 csrf_token: csrfToken,
-                semester_course: semester_course_dropdown.val(),
+                term_course: term_course_dropdown.val(),
                 this_gradeable: {{ new_or_edit == "edit" ? ("'" ~ config["gradeable_id"] ~ "'")|raw : "$('#gradeable_id').val()" }}
             },
             success: (data) => {
@@ -364,7 +364,7 @@
         let first_free_index = $(".other-gradeable-wrapper").length;
         $('#other-gradeables-content', form).append(`
             <div id='other-g-option-${first_free_index}' class='other-gradeable-wrapper'>
-                <select name='other_semester_course[]' onchange='getGradeables(this)'>
+                <select name='other_term_course[]' onchange='getGradeables(this)'>
                 </select>
                 <select name='other_gradeable[]'>
                 </select>
@@ -374,13 +374,13 @@
             </div>
         `);
         // fill in the left dropdown
-        let semester_course_dropdown = $(`#other-g-option-${first_free_index}`).children().first();
-        $.each(other_semester_course_list, (index, semester_course) => {
-            let tokens_array = semester_course.split(" ");
-            semester_course_dropdown.append(`<option value='${semester_course}'>${tokens_array[0]}/${tokens_array[1]}</option>`);
+        let term_course_dropdown = $(`#other-g-option-${first_free_index}`).children().first();
+        $.each(other_term_course_list, (index, term_course) => {
+            let tokens_array = term_course.split(" ");
+            term_course_dropdown.append(`<option value='${term_course}'>${tokens_array[0]}/${tokens_array[1]}</option>`);
         });
         // fill in the right dropdown
-        getGradeables(semester_course_dropdown[0]);
+        getGradeables(term_course_dropdown[0]);
     }
 
     // HASH SIZE + LANGUAGE ////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("""CREATE TABLE IF NOT EXISTS notification_settings (
                         user_id character varying NOT NULL,
                         merge_threads BOOLEAN DEFAULT FALSE NOT NULL,

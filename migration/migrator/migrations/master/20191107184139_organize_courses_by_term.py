@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS terms (
 
     # Retrieve DISTINCT set of term codes from courses table.
     # These codes need to be INSERTed before creating the FK referencing terms table.
-    term_codes = database.execute("SELECT DISTINCT semester FROM courses ORDER BY semester ASC;")
+    term_codes = database.execute("SELECT DISTINCT term FROM courses ORDER BY term ASC;")
 
     # We need information about each term code to INSERT into the terms table.
     # Init list of information that will be INSERTed into terms table.
@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS terms (
     #   c. suggest that uXX = 06/01/XX to 08/31/XX.
     #   d. Do not suggest anything if code is not 'f', 's', or 'u' + "XX".
     for code in term_codes:
-        # Get raw string from SELECT query result (semester column)
-        code = code['semester']
+        # Get raw string from SELECT query result (term column)
+        code = code['term']
 
         # if term code is style used at RPI (e.g. 'f19' = 'Fall 2019')...
         if re.fullmatch("^[fsu]\d{2}$", code):
@@ -118,13 +118,13 @@ CREATE TABLE IF NOT EXISTS terms (
         database.execute("ROLLBACK;")
         raise SystemExit("Error INSERTing values into terms table.\n" + str(e))
 
-    # Create FK, courses table (semester) references terms table (term_id)
+    # Create FK, courses table (term) references terms table (term_id)
     try:
         database.execute("ALTER TABLE ONLY courses DROP CONSTRAINT IF EXISTS courses_fkey;")
-        database.execute("ALTER TABLE ONLY courses ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;")
+        database.execute("ALTER TABLE ONLY courses ADD CONSTRAINT courses_fkey FOREIGN KEY (term) REFERENCES terms (term_id) ON UPDATE CASCADE;")
     except Exception as e:
         database.execute("ROLLBACK;")
-        raise SystemExit("Error creating FK for courses(semester) references terms(term_id)\n" + str(e))
+        raise SystemExit("Error creating FK for courses(term) references terms(term_id)\n" + str(e))
 
     database.execute("COMMIT;")
 # END function up()

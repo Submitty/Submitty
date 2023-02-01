@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils';
+import {getCurrentterm} from '../support/utils';
 
 describe('Test cases revolving around authentication tokens', () => {
     beforeEach(() => {
@@ -33,7 +33,7 @@ describe('Test cases revolving around authentication tokens', () => {
             // Verify the token works as a password
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/${getCurrentSemester()}/sample/authentication/vcs_login`,
+                url: `${Cypress.config('baseUrl')}/${getCurrentterm()}/sample/authentication/vcs_login`,
                 form: true,
                 body: {
                     user_id: 'instructor',
@@ -50,7 +50,7 @@ describe('Test cases revolving around authentication tokens', () => {
             // Verify normal password authentication still works
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/${getCurrentSemester()}/sample/authentication/vcs_login`,
+                url: `${Cypress.config('baseUrl')}/${getCurrentterm()}/sample/authentication/vcs_login`,
                 form: true,
                 body: {
                     user_id: 'instructor',
@@ -67,7 +67,7 @@ describe('Test cases revolving around authentication tokens', () => {
             // Verify a bad password or token fails
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/${getCurrentSemester()}/sample/authentication/vcs_login`,
+                url: `${Cypress.config('baseUrl')}/${getCurrentterm()}/sample/authentication/vcs_login`,
                 form: true,
                 body: {
                     user_id: 'instructor',

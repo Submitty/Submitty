@@ -89,7 +89,7 @@ def anon_log(in_filename,out_filename):
                     if len(things) != 5:
                         # discard unparsable things (only errors)
                         continue
-                    semester = things[0]
+                    term = things[0]
                     course = things[1]
                     assignment = things[2]
                     user = things[3]
@@ -109,7 +109,7 @@ def anon_log(in_filename,out_filename):
                     if len(things) != 6:
                         # discard unparsable things (only errors)
                         continue
-                    semester = things[0]
+                    term = things[0]
                     course = things[1]
                     assignment = things[3]
                     user = things[4]

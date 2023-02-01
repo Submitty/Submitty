@@ -107,7 +107,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
         $logging_params = [
-            "course_semester" => "test_semester",
+            "course_term" => "test_term",
             "course_name" => "test_course",
             "gradeable_id" => "test_gradeable",
             "grader_id" => "test_grader",
@@ -126,7 +126,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $date = explode("/", $datetime[1]);
         $this->assertTimeEqualsCurrent($date, $time);
         $this->assertEquals(2, strlen($time[2]));
-        $this->assertEquals("test_semester", $line[1]);
+        $this->assertEquals("test_term", $line[1]);
         $this->assertEquals("test_course", $line[2]);
         $this->assertEquals("test_gradeable", $line[3]);
         $this->assertEquals("test_grader", $line[4]);

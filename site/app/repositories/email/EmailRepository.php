@@ -8,19 +8,19 @@ class EmailRepository extends EntityRepository {
     const PAGE_SIZE = 5000;
     const MAX_SUBJECTS_PER_PAGE = 10;
 
-    public function getEmailsByPage(int $page, $semester = null, $course = null): array {
+    public function getEmailsByPage(int $page, $term = null, $course = null): array {
         $this->_em->getConnection()->getConfiguration()->setSQLLogger(null);
-        $subjects = $this->getPageSubjects($page, $semester, $course);
+        $subjects = $this->getPageSubjects($page, $term, $course);
         $result = [];
 
         foreach ($subjects as $subject) {
             $qb = $this->_em->createQueryBuilder();
             $qb ->select('e')
                 ->from('app\entities\email\EmailEntity', 'e');
-            if ($semester && $course) {
-                $qb->where('e.semester = :semester')
+            if ($term && $course) {
+                $qb->where('e.term = :term')
                     ->andWhere('e.course = :course')
-                    ->setParameter('semester', $semester)
+                    ->setParameter('term', $term)
                     ->setParameter('course', $course);
             }
             $qb ->orderBy('e.created', 'DESC')
@@ -34,9 +34,9 @@ class EmailRepository extends EntityRepository {
         return $result;
     }
 
-    public function getPageNum($semester = null, $course = null): int {
-        if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.semester = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
+    public function getPageNum($term = null, $course = null): int {
+        if ($term != null || $course != null) {
+            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $term . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
@@ -58,9 +58,9 @@ class EmailRepository extends EntityRepository {
         return $page;
     }
 
-    private function getPageSubjects($page, $semester = null, $course = null): array {
-        if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.semester = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
+    private function getPageSubjects($page, $term = null, $course = null): array {
+        if ($term != null || $course != null) {
+            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $term . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';

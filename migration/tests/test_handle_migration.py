@@ -39,15 +39,15 @@ class TestHandleMigration(unittest.TestCase):
     def create_course_table(self, database):
         database.execute("""
             CREATE TABLE courses (
-                semester character varying(255) NOT NULL,
+                term character varying(255) NOT NULL,
                 course character varying(255) NOT NULL,
                 status smallint DEFAULT 1 NOT NULL
             );
             """)
 
-    def add_course(self, database, semester, course, status=1):
+    def add_course(self, database, term, course, status=1):
         database.execute(
-            f"INSERT INTO courses VALUES ('{semester}', '{course}', {status})"
+            f"INSERT INTO courses VALUES ('{term}', '{course}', {status})"
         )
 
     def test_no_course_dir(self):
@@ -117,7 +117,7 @@ class TestHandleMigration(unittest.TestCase):
             mock_class.side_effect = [database, OperationalError('test', None, None)]
             main.handle_migration(args)
         self.assertEqual(
-            "Submitty Database Migration Error:  Database does not exist for semester=f19 course=csci1100",
+            "Submitty Database Migration Error:  Database does not exist for term=f19 course=csci1100",
             str(context.exception)
         )
 
@@ -217,13 +217,13 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual('course', mock_method.call_args[0][1])
         # Test that mutation did not happen
         self.assertEqual(args.config.database, dict())
-        self.assertNotIn('semester', args)
+        self.assertNotIn('term', args)
         self.assertNotIn('course', args)
         args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        args.semester = 'f19'
+        args.term = 'f19'
         args.course = 'csci1100'
         self.assertEqual(args, mock_method.call_args[0][2])
-        self.assertEqual(args.semester, 'f19')
+        self.assertEqual(args.term, 'f19')
         self.assertEqual(args.course, 'csci1100')
         self.assertFalse(database.open)
 
@@ -276,13 +276,13 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(database_1, mock_args[0])
         self.assertEqual('course', mock_args[1])
         self.assertEqual(args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f18_csci1100'}
-        expected_args.semester = 'f18'
+        expected_args.term = 'f18'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f18')
+        self.assertEqual(expected_args.term, 'f18')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_1.open)
 
@@ -291,13 +291,13 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(database_2, mock_args[0])
         self.assertEqual('course', mock_args[1])
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_2.open)
 
@@ -306,13 +306,13 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(database_3, mock_args[0])
         self.assertEqual('course', mock_args[1])
         self.assertEqual(args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1200'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1200'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1200')
         self.assertFalse(database_3.open)
 
@@ -353,13 +353,13 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(database_1, mock_args[0])
         self.assertEqual('course', mock_args[1])
         self.assertEqual(expected_args.config.database, dict())
-        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('term', expected_args)
         self.assertNotIn('course', expected_args)
         expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
-        expected_args.semester = 'f19'
+        expected_args.term = 'f19'
         expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.term, 'f19')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_1.open)
 

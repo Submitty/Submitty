@@ -13,7 +13,7 @@ Queue File Example:
 ```json
 {
     "job": "BuildConfig",
-    "semester": "f18",
+    "term": "f18",
     "course": "sample",
     "gradeable": "test"
 }
@@ -24,7 +24,7 @@ Jobs
 
 ### BuildConfig
 Parameters:
-* semester
+* term
 * course
 * gradeable
 
@@ -32,7 +32,7 @@ Builds a gradeable for a course
 
 ### RunLichen
 Parameters:
-* semester
+* term
 * course
 * gradeable
 
@@ -40,7 +40,7 @@ Runs Lichen over a given gradeable for a course
 
 ### DeleteLichenResult
 Parameters:
-* semester
+* term
 * course
 * gradeable
 
@@ -49,7 +49,7 @@ Delete Lichen results for a given gradeable for a course
 ### SendEmail
 Parameters:
 * email_type
-* semester
+* term
 * course
 * thread_title
 * thread_content
@@ -60,7 +60,7 @@ sending it via the smtp python library.
 
 ### BulkQRSplit
 Parameters:
-* semester
+* term
 * course
 * gradeable id
 * version timestamp

@@ -3,8 +3,8 @@ import grp
 from pathlib import Path
 
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     course_materials_dir = Path(course_dir, 'uploads', 'course_materials')
 
     # create the directories

@@ -2,9 +2,9 @@ import os
 import grp
 from pathlib import Path
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    site_wrapper_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, 'site')
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
+    site_wrapper_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course, 'site')
 
     # create the directories
     os.makedirs(str(site_wrapper_dir), exist_ok=True)

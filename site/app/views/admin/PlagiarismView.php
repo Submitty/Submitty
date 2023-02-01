@@ -23,7 +23,7 @@ class PlagiarismView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "new_plagiarism_config_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']),
             "refreshLichenMainPageLink" => $this->core->buildCourseUrl(['plagiarism', 'check_refresh']),
-            "semester" => $this->core->getConfig()->getSemester(),
+            "term" => $this->core->getConfig()->getterm(),
             "course" => $this->core->getConfig()->getCourse()
         ]);
     }
@@ -48,7 +48,7 @@ class PlagiarismView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismResult.twig', [
             "gradeable_id" => $gradeable_id,
-            "term_course_gradeable" => "{$this->core->getConfig()->getSemester()}__{$this->core->getConfig()->getCourse()}__{$gradeable_id}",
+            "term_course_gradeable" => "{$this->core->getConfig()->getterm()}__{$this->core->getConfig()->getCourse()}__{$gradeable_id}",
             "config_id" => $config_id,
             "gradeable_title" => $gradeable_title,
             "rankings" => $rankings,

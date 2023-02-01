@@ -23,7 +23,7 @@ DECLARE
     db_conn varchar;
     query_string text;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
     IF (TG_OP = 'INSERT') THEN
         -- FULL data sync on INSERT of a new user record.
@@ -63,9 +63,9 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-        RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-        db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+    FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+        RAISE NOTICE 'term: %, Course: %', course_row.term, course_row.course;
+        db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
         query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
         -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
         IF query_string IS NULL THEN
@@ -97,9 +97,9 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-        RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-        db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+    FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+        RAISE NOTICE 'term: %, Course: %', course_row.term, course_row.course;
+        db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
         query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ' WHERE user_id=' || quote_literal(NEW.user_id);
         -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
         IF query_string IS NULL THEN
@@ -123,7 +123,7 @@ DECLARE
   db_conn varchar;
   query_string text;
 BEGIN
-  db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+  db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
   IF (TG_OP = 'INSERT') THEN
     -- FULL data sync on INSERT of a new user record.

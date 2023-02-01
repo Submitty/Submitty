@@ -9,8 +9,8 @@ from pathlib import Path
 # migration)
 
 
-def up(config, database, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, database, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     uploads_dir = Path(course_dir, 'uploads')
 
     php_user = config.submitty_users['php_user']

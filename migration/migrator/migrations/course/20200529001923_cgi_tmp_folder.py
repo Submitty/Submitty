@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 
 
-def up(config, database, semester, course):
+def up(config, database, term, course):
     tmp_cgi_dir = Path(config.submitty['submitty_data_dir'], 'tmp', 'cgi')
 
     # create the directories
@@ -19,5 +19,5 @@ def up(config, database, semester, course):
     subprocess.check_output(["chmod", "-R", "g+rwxs", str(tmp_cgi_dir)])
     subprocess.check_output(["chmod", "-R", "o-rwx", str(tmp_cgi_dir)])
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     pass

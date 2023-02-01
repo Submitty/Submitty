@@ -82,7 +82,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/status", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/status", methods={"POST"})
      */
     public function changeThreadStatus($status, $thread_id = null) {
         if (is_null($thread_id)) {
@@ -166,7 +166,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/new", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/categories/new", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function addNewCategory($category = []) {
@@ -202,7 +202,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/categories/delete", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function deleteCategory() {
@@ -229,7 +229,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/categories/edit", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function editCategory() {
@@ -258,7 +258,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/categories/reorder", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function reorderCategories() {
@@ -285,7 +285,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
     public function publishThread() {
@@ -381,7 +381,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/make_announcement", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/make_announcement", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
     public function makeAnnouncement(): JsonResponse {
@@ -420,7 +420,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/search", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/search", methods={"POST"})
      */
     public function search() {
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
@@ -428,7 +428,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/new", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
     public function publishPost() {
@@ -514,7 +514,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/single", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/single", methods={"POST"})
      */
     public function getSinglePost() {
         $post_id = $_POST['post_id'];
@@ -533,7 +533,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/announcements", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
     public function alterAnnouncement(bool $type) {
@@ -544,7 +544,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/bookmark", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/bookmark", methods={"POST"})
      */
     public function bookmarkThread(bool $type) {
         $thread_id = $_POST["thread_id"];
@@ -561,7 +561,7 @@ class ForumController extends AbstractController {
      *
      * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
      *
-     * @Route("/courses/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/modify", methods={"POST"})
      */
     public function alterPost($modify_type) {
         $full_course_name = $this->core->getFullCourseName();
@@ -701,7 +701,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/merge", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function mergeThread() {
@@ -748,7 +748,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/split", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/split", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function splitThread() {
@@ -890,7 +890,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads", methods={"POST"})
      */
     public function getThreads($page_number = null) {
         $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 1;
@@ -919,7 +919,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/single", methods={"POST"})
      */
     public function getSingleThread() {
         $thread_id = $_POST['thread_id'];
@@ -947,7 +947,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/forum", methods={"GET"})
      */
     public function showFullThreads() {
         // preparing the params for threads
@@ -970,8 +970,8 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"GET"})
-     * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
+     * @Route("/courses/{_term}/{_course}/forum/threads", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
         $user = $this->core->getUser()->getId();
@@ -1074,7 +1074,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/forum/threads/new", methods={"GET"})
      */
     public function showCreateThread() {
         if (empty($this->core->getQueries()->getCategories())) {
@@ -1085,7 +1085,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/categories", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/forum/categories", methods={"GET"})
      * @AccessControl(permission="forum.view_modify_category")
      */
     public function showCategories() {
@@ -1093,7 +1093,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/splitinfo",methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/splitinfo",methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function getSplitPostInfo() {
@@ -1112,7 +1112,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/history", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/history", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function getHistory() {
@@ -1156,7 +1156,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/posts/get", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/forum/posts/get", methods={"POST"})
      */
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
@@ -1192,7 +1192,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/forum/stats")
+     * @Route("/courses/{_term}/{_course}/forum/stats")
      */
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();

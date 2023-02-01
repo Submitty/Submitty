@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("""DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notifications_component') THEN

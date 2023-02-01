@@ -27,7 +27,7 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
      * notebook builder know to save a new configuration or edit the existing one.
@@ -45,7 +45,7 @@ class NotebookBuilderController extends AbstractController {
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
 
         if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and term.");
             return new RedirectResponse($failure_url);
         }
 
@@ -121,7 +121,7 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/save", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/notebook_builder/save", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function save(): JsonResponse {
@@ -148,7 +148,7 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/notebook_builder/file", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function file(): JsonResponse {
@@ -239,7 +239,7 @@ class NotebookBuilderController extends AbstractController {
         }
 
         if (!$gradeable->isUsingUploadedConfig()) {
-            return 'Unable to make configuration changes outside of the current course and semester config_upload folder.';
+            return 'Unable to make configuration changes outside of the current course and term config_upload folder.';
         }
 
         return $gradeable;

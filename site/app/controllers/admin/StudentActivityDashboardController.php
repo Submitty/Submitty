@@ -16,7 +16,7 @@ use app\libraries\DateUtils;
 
 class StudentActivityDashboardController extends AbstractController {
   /**
-   * @Route("/courses/{_semester}/{_course}/activity", methods={"GET"})
+   * @Route("/courses/{_term}/{_course}/activity", methods={"GET"})
    * @AccessControl(role="INSTRUCTOR")
    */
     public function getStudents() {
@@ -46,7 +46,7 @@ class StudentActivityDashboardController extends AbstractController {
     }
 
    /**
-    * @Route("/courses/{_semester}/{_course}/activity/download", methods={"GET"})
+    * @Route("/courses/{_term}/{_course}/activity/download", methods={"GET"})
     * @AccessControl(role="INSTRUCTOR")
     */
     public function downloadData() {

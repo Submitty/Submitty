@@ -26,7 +26,7 @@ def main():
     with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
         DATABASE_DETAILS = json.load(open_file)
     # COURSE = input("Course: ")
-    # SEMESTER = input("Semester: ")
+    # term = input("term: ")
     DATABASE_HOST = DATABASE_DETAILS['database_host']
     DATABASE_PORT = DATABASE_DETAILS['database_port']
     DB_USER = DATABASE_DETAILS['database_user']
@@ -60,8 +60,8 @@ def main():
     num_rows = 0
     for course_row in courses_rows:
         temp_num_rows = num_rows
-        print(f"Course: {course_row['course']}\nSemester: {course_row['semester']}")
-        DB_NAME = f"submitty_{course_row['semester']}_{course_row['course']}"
+        print(f"Course: {course_row['course']}\nterm: {course_row['term']}")
+        DB_NAME = f"submitty_{course_row['term']}_{course_row['course']}"
         course_conn_str = db_utils.generate_connect_string(
             DATABASE_HOST,
             DATABASE_PORT,

@@ -61,24 +61,24 @@ class AbstractJob(ABC):
 class CourseJob(AbstractJob):
     """
     Base class for jobs that involve operation for a course.
-    This class validates that the job details includes a semester
+    This class validates that the job details includes a term
     and course and that they are valid directories within Submitty
     """
 
     required_keys = [
-        'semester',
+        'term',
         'course'
     ]
 
     def validate_job_details(self):
-        for key in ['semester', 'course']:
+        for key in ['term', 'course']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
                 return False
             if self.job_details[key] != os.path.basename(self.job_details[key]):
                 return False
-        test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
+        test_path = Path(DATA_DIR, 'courses', self.job_details['term'], self.job_details['course'])
         return test_path.exists()
 
     def cleanup_job(self):
@@ -88,7 +88,7 @@ class CourseJob(AbstractJob):
 # pylint: disable=abstract-method
 class CourseGradeableJob(CourseJob):
     """
-    Base class for jobs that involve a semester/course as well as a gradeable, validating
+    Base class for jobs that involve a term/course as well as a gradeable, validating
     that we have a gradeable within our job details, and that it's not empty nor just a
     dot or two dots.
     """
@@ -109,27 +109,27 @@ class CourseGradeableJob(CourseJob):
 class RunAutoRainbowGrades(CourseJob):
     def run_job(self):
 
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
 
         path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
-        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
+        debug_output = os.path.join(DATA_DIR, 'courses', term, course, 'rainbow_grades', 'auto_debug_output.txt')
 
         try:
             with open(debug_output, "w") as file:
-                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+                subprocess.call(['python3', path, term, course], stdout=file, stderr=file)
         except PermissionError:
             print("error, could not open "+file+" for writing")
 
 
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = os.path.join(DATA_DIR, 'courses', semester, course, 'BUILD_{}.sh'.format(course))
-        build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
+        build_script = os.path.join(DATA_DIR, 'courses', term, course, 'BUILD_{}.sh'.format(course))
+        build_output = os.path.join(DATA_DIR, 'courses', term, course, 'build_script_output.txt')
 
         try:
             with open(build_output, "w") as output_file:
@@ -140,7 +140,7 @@ class BuildConfig(CourseGradeableJob):
 
 class RunGenerateRepos(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
@@ -159,7 +159,7 @@ class RunGenerateRepos(CourseGradeableJob):
                     "sudo",
                     gen_script,
                     "--non-interactive",
-                    semester,
+                    term,
                     course,
                     gradeable
                 ], stdout=output_file, stderr=output_file)
@@ -169,7 +169,7 @@ class RunGenerateRepos(CourseGradeableJob):
 
 class RunLichen(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
         # We cast to an int to prevent malicious json files from containing invalid path components
@@ -178,12 +178,12 @@ class RunLichen(CourseGradeableJob):
 
         # error checking
         # prevent backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable:
+        if '..' in term or '..' in course or '..' in gradeable:
             print('Error: Invalid path component ".." in string')
             return
 
         # paths
-        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+        lichen_dir = os.path.join(DATA_DIR, 'courses', term, course, 'lichen')
         config_path = os.path.join(lichen_dir, gradeable, str(config_id))
         data_path = os.path.join(DATA_DIR, 'courses')
 
@@ -196,16 +196,16 @@ class RunLichen(CourseGradeableJob):
 
 class DeleteLichenResult(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
         config_id = int(self.job_details['config_id'])
 
-        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+        lichen_dir = os.path.join(DATA_DIR, 'courses', term, course, 'lichen')
 
         # error checking
         # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable:
+        if '..' in term or '..' in course or '..' in gradeable:
             print('invalid path component ".." in string')
             return
 
@@ -236,7 +236,7 @@ class BulkUpload(CourseJob):
                 self.add_permissions(os.path.join(root, f), file_perms)
 
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         timestamp = self.job_details['timestamp']
         gradeable_id = self.job_details['g_id']
@@ -275,8 +275,8 @@ class BulkUpload(CourseJob):
         # create paths
         try:
             current_path = os.path.dirname(os.path.realpath(__file__))
-            bulk_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/bulk_pdf", gradeable_id, timestamp)
-            split_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/split_pdf", gradeable_id, timestamp)
+            bulk_path = os.path.join(DATA_DIR, "courses", term, course, "uploads/bulk_pdf", gradeable_id, timestamp)
+            split_path = os.path.join(DATA_DIR, "courses", term, course, "uploads/split_pdf", gradeable_id, timestamp)
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
@@ -338,7 +338,7 @@ class BulkUpload(CourseJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'group_name']:
+        for key in ['term', 'course', 'head_instructor', 'group_name']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
@@ -348,20 +348,20 @@ class CreateCourse(AbstractJob):
         return True
 
     def run_job(self):
-        semester = self.job_details['semester']
+        term = self.job_details['term']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
         base_group = self.job_details['group_name']
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
-            semester, course, head_instructor, base_group
+            term, course, head_instructor, base_group
         ))
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", term, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, term, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
-                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, term, course], stdout=output_file, stderr=output_file)
 
     def cleanup_job(self):
         pass

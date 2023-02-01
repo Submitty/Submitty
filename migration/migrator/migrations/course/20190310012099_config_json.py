@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 
-def up(config, conn, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+def up(config, conn, term, course):
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', term, course)
     old_config_file = Path(course_dir, 'config', 'config.ini')
     new_config_file = Path(course_dir, 'config', 'config.json')
 

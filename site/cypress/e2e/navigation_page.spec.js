@@ -1,4 +1,4 @@
-import {getCurrentSemester} from '../support/utils.js';
+import {getCurrentterm} from '../support/utils.js';
 
 function validate_navigation_page_sections(sections) {
     const section_keys = Object.keys(sections);
@@ -18,7 +18,7 @@ describe('navigation page', () => {
 
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(`/courses/${getCurrentterm()}/sample`);
 
         const sections = {
             future: 5,
@@ -113,7 +113,7 @@ describe('navigation page', () => {
 
     it('should show full access grader content for ta', () => {
         cy.login('ta');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(`/courses/${getCurrentterm()}/sample`);
 
         const sections = {
             beta: 3,
@@ -130,7 +130,7 @@ describe('navigation page', () => {
 
     it('should show student content for student', () => {
         cy.login('student');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(`/courses/${getCurrentterm()}/sample`);
 
         const sections = {
             open: 5,

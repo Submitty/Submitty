@@ -60,10 +60,10 @@ $(document).ready(() => {
 
 function gradeableMessageStorageKey() {
     const dataElement = document.getElementById('gradeable-message-data');
-    const semester = dataElement.dataset.semester;
+    const term = dataElement.dataset.term;
     const course = dataElement.dataset.course;
     const gradeable = dataElement.dataset.gradeable;
-    return `${semester}-${course}-${gradeable}-message`;
+    return `${term}-${course}-${gradeable}-message`;
 }
 
 function gradeableMessageAgree() {

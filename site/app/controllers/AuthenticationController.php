@@ -208,7 +208,7 @@ class AuthenticationController extends AbstractController {
      * status, as well as potentially information about a particular
      * gradeable in that course.
      *
-     * @Route("{_semester}/{_course}/authentication/vcs_login")
+     * @Route("{_term}/{_course}/authentication/vcs_login")
      * @return MultiResponse
      */
     public function vcsLogin() {

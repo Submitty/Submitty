@@ -25,7 +25,7 @@ Usage
 ```
 $ python3 run_migrator.py --help
 usage: run_migrator.py [-h] [-v] -c CONFIG_PATH [-e {master,system,course}]
-                       [--course semester course]
+                       [--course term course]
                        command ...
 
 Migration script for upgrading/downgrading the database
@@ -42,7 +42,7 @@ optional arguments:
   -v, --version         show program's version number and exit
   -c CONFIG_PATH, --config CONFIG_PATH
   -e {master,system,course}, --environment {master,system,course}
-  --course semester course
+  --course term course
  ```
  
 By default, `run_migrator.py` will look for a config directory two directories up 
@@ -66,7 +66,7 @@ file will have an `up` and `down` function which will both have the same paramet
 The parameters are dependent on the environment you're using. System will only have
 a `Config` object (see `migrator.config.Config`), Master will have a `Config` object
 and a `Database` object (see `migrator.db.Database`), and Course will have a `Config`
-object, `Database` object, `semester` string, and `course` string. You are not
+object, `Database` object, `term` string, and `course` string. You are not
 required to have both functions in the file and it's perfectly safe and recommended
 to delete the `up` or `down` function if you're not using it.
 

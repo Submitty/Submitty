@@ -142,7 +142,7 @@ def sample_rainbow_grades_test():
                     make_file.write(os.path.join(
                         "REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__",
                         "courses",
-                        dateutils.get_current_semester(),
+                        dateutils.get_current_term(),
                         "sample",
                         "reports"
                     ) + "\n")

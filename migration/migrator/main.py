@@ -90,18 +90,18 @@ def status(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in sorted(os.listdir(str(course_dir))):
-                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+            for term in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), term)))
                 for course in courses:
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
-                    cond2 = [semester, course] != loop_args.choose_course
+                    cond2 = [term, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    loop_args.semester = semester
+                    loop_args.term = term
                     loop_args.course = course
                     loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
-                        semester,
+                        term,
                         course
                     )
                     try:
@@ -110,7 +110,7 @@ def status(args):
                         if not exists:
                             print(
                                 'Could not find migration table for {}.{}'.format(
-                                    semester,
+                                    term,
                                     course
                                 )
                             )
@@ -120,7 +120,7 @@ def status(args):
                         database.close()
                     except OperationalError:
                         print('Could not get the status for the migrations '
-                              'for {}.{}'.format(semester, course))
+                              'for {}.{}'.format(term, course))
                         continue
 
 
@@ -139,7 +139,7 @@ def print_status(database, environment, args):
             missing_migrations.append(migration.id)
 
     if environment == 'course':
-        name = '{}.{} ({})'.format(args.semester, args.course, environment)
+        name = '{}.{} ({})'.format(args.term, args.course, environment)
     else:
         name = environment
 
@@ -238,28 +238,28 @@ def handle_migration(args):
 
             courses = {}
             for course in database.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course'
             ):
-                if course['semester'] not in courses:
-                    courses[course['semester']] = []
-                courses[course['semester']].append(course['course'])
+                if course['term'] not in courses:
+                    courses[course['term']] = []
+                courses[course['term']].append(course['course'])
             database.close()
 
-            for semester in courses:
-                for course in courses[semester]:
-                    if not Path(course_dir, semester, course).exists():
+            for term in courses:
+                for course in courses[term]:
+                    if not Path(course_dir, term, course).exists():
                         raise SystemExit(
-                            f'Migrator Error:  Could not find directory for {semester} {course}'
+                            f'Migrator Error:  Could not find directory for {term} {course}'
                         )
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
-                    cond2 = [semester, course] != loop_args.choose_course
+                    cond2 = [term, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    loop_args.semester = semester
+                    loop_args.term = term
                     loop_args.course = course
                     loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
-                        semester,
+                        term,
                         course
                     )
                     try:
@@ -275,7 +275,7 @@ def handle_migration(args):
                         raise SystemExit(
                             "Submitty Database Migration Error:  "
                             "Database does not exist for "
-                            "semester={} course={}".format(semester, course)
+                            "term={} course={}".format(term, course)
                         )
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
@@ -304,7 +304,7 @@ def migrate_environment(database, environment, args, all_missing_migrations):
     if environment == 'course':
         print("Running {} migrations for {}.{}...".format(
             args.direction,
-            args.semester,
+            args.term,
             args.course
         ), end="")
     else:
@@ -415,7 +415,7 @@ def call_func(func, database, environment, args):
     if environment in ['course', 'master']:
         parameters.append(database)
     if environment == 'course':
-        parameters.append(args.semester)
+        parameters.append(args.term)
         parameters.append(args.course)
     func(*parameters)
 
@@ -467,6 +467,6 @@ def dump(args):
         out_file = data_dir / 'course_tables.sql'
         print(f'Dumping course environment to {str(out_file)}... ', end='')
         today = datetime.today()
-        semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
-        dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
+        term = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
+        dump_database(f'submitty_{term}_sample', data_dir / 'course_tables.sql')
         print('DONE')

@@ -2,7 +2,7 @@
 
 """
 The expected COURSE_PATH is:
-<BASE_PATH>/courses/<SEMESTER>/<COURSES>
+<BASE_PATH>/courses/<term>/<COURSES>
 
 Expected directory structures:
 <COURSE_PATH>/submissions/<TESTNOTES GRADEABLE>/<WHO>/<VERSION#>

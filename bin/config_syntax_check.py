@@ -2,7 +2,7 @@
 
 """
 # USAGE
-# config_syntax_check.py   <path to config file for gradeable>   <assignment>   <semester>  <course>
+# config_syntax_check.py   <path to config file for gradeable>   <assignment>   <term>  <course>
 """
 
 import argparse
@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file_path")
     parser.add_argument("assignment")
-    parser.add_argument("semester")
+    parser.add_argument("term")
     parser.add_argument("course")
     return parser.parse_args()
 
@@ -35,7 +35,7 @@ def main():
     complete_config_json_path = os.path.join(
         SUBMITTY_DATA_DIR,
         'courses',
-        args.semester,
+        args.term,
         args.course,
         'config',
         'complete_config',

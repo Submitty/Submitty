@@ -97,8 +97,8 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}")
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
@@ -132,7 +132,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getterm()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
         );
         $user_id = $this->core->getUser()->getId();
         $team_id = null;
@@ -205,7 +205,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for showing a message to a user before the gradeable is loaded.
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
      */
     public function loadGradeableMessage($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -240,7 +240,7 @@ class SubmissionController extends AbstractController {
      * If failure, also returns message explaining what happened.
      * If success, also returns highest version of the student gradeable.
      *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
      */
     public function ajaxValidGradeable($gradeable_id) {
 
@@ -338,7 +338,7 @@ class SubmissionController extends AbstractController {
      * Its error checking has overlap with ajaxUploadSubmission.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
      */
     public function ajaxBulkUpload($gradeable_id) {
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
@@ -429,7 +429,7 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        $semester = $this->core->getConfig()->getSemester();
+        $term = $this->core->getConfig()->getterm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
 
@@ -441,7 +441,7 @@ class SubmissionController extends AbstractController {
             for ($i = 0; $i < $count; $i++) {
                 $qr_upload_data = [
                     "job"       => "BulkUpload",
-                    "semester"  => $semester,
+                    "term"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
@@ -465,7 +465,7 @@ class SubmissionController extends AbstractController {
             for ($i = 0; $i < $count; $i++) {
                 $job_data = [
                     "job"       => "BulkUpload",
-                    "semester"  => $semester,
+                    "term"  => $term,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
@@ -494,7 +494,7 @@ class SubmissionController extends AbstractController {
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
      * @return boolean
      */
     public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
@@ -757,7 +757,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
-        $queue_file = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = [$this->core->getConfig()->getterm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -768,7 +768,7 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
-        $queue_data = ["semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = ["term" => $this->core->getConfig()->getterm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -800,7 +800,7 @@ class SubmissionController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
      * @return boolean
      */
     public function ajaxDeleteSplitItem($gradeable_id) {
@@ -856,7 +856,7 @@ class SubmissionController extends AbstractController {
     /**
      * function for counting the number of submissions to be regraded
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/regrade/count", methods={"POST"})
      * @return JsonResponse
      */
     public function ajaxCountRegrade(): JsonResponse {
@@ -886,7 +886,7 @@ class SubmissionController extends AbstractController {
     /**
      * Function for regrading submissions
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/regrade", methods={"POST"})
      * @return array
      */
     public function ajaxRegrade($gradeable_id): array {
@@ -967,7 +967,7 @@ class SubmissionController extends AbstractController {
                     $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
                 }
                 //create file name
-                $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $queue_file_helper = [$this->core->getConfig()->getterm(), $this->core->getConfig()->getCourse(),
                     $gradeable_id, $who_id, $active_version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
@@ -984,7 +984,7 @@ class SubmissionController extends AbstractController {
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
-                    "semester" => $this->core->getConfig()->getSemester(),
+                    "term" => $this->core->getConfig()->getterm(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
@@ -1012,7 +1012,7 @@ class SubmissionController extends AbstractController {
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
@@ -1543,7 +1543,7 @@ class SubmissionController extends AbstractController {
         }
 
 
-        $queue_file_helper = [$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file_helper = [$this->core->getConfig()->getterm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths(
@@ -1563,7 +1563,7 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = [
-            "semester" => $this->core->getConfig()->getSemester(),
+            "term" => $this->core->getConfig()->getterm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1598,7 +1598,7 @@ class SubmissionController extends AbstractController {
         Logger::logAccess(
             $this->core->getUser()->getId(),
             $_COOKIE['submitty_token'],
-            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+            "{$this->core->getConfig()->getterm()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
         );
         if ($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
@@ -1655,7 +1655,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
     public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): MultiResponse {
         $ta = $ta === "true" ?? false;
@@ -1812,7 +1812,7 @@ class SubmissionController extends AbstractController {
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
@@ -1870,7 +1870,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/bulk_stats")
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function showBulkStats($gradeable_id) {
@@ -1908,7 +1908,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
      * @return JsonResponse
      */
     public function getTimeRemainingData($gradeable_id) {

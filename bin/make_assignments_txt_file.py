@@ -30,9 +30,9 @@ def main():
     # grab the gradeables from the command line (if any)
     processed = []
 
-    # extract the semester & course from the forms_path directory
+    # extract the term & course from the forms_path directory
     dirs = args.forms_path.split("/")
-    semester = dirs[len(dirs)-4]
+    term = dirs[len(dirs)-4]
     course = dirs[len(dirs)-3]
 
     with open(args.assignment_path, 'w') as outfile:
@@ -46,7 +46,7 @@ def main():
             if not os.path.isfile(test_form_path):
                 # deletion of the form .json indicates that we should cleanup the build for that gradeable
                 print ("Gradeable form file "+test_form_path+" no longer exists.  Cleanup deleted gradeable!")
-                outfile.write("clean_homework  "                 +semester+"  "+course+"  "+build_dir+"\n")
+                outfile.write("clean_homework  "                 +term+"  "+course+"  "+build_dir+"\n")
 
         #####################################
         # OPEN ALL FILES IN THE FORMS DIRECTORIES
@@ -74,9 +74,9 @@ def main():
                 if len(args.gradeables) == 0 or g_id in args.gradeables:
                     config_path = obj["config_path"]
                     if args.clean:
-                        outfile.write("clean_homework  "                 +semester+"  "+course+"  "+g_id+"\n")
+                        outfile.write("clean_homework  "                 +term+"  "+course+"  "+g_id+"\n")
                     if not args.no_build:
-                        outfile.write("build_homework  "+config_path+"  "+semester+"  "+course+"  "+g_id+"\n")
+                        outfile.write("build_homework  "+config_path+"  "+term+"  "+course+"  "+g_id+"\n")
                     processed.append(g_id)
                 else:
                     # print("SKIPPING " + g_id)

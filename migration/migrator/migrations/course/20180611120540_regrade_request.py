@@ -1,4 +1,4 @@
-def up(config, database, semester, course):
+def up(config, database, term, course):
     database.execute("CREATE TABLE regrade_requests (id serial NOT NULL PRIMARY KEY, gradeable_id VARCHAR(255) NOT NULL, timestamp TIMESTAMP NOT NULL, student_id VARCHAR(255) NOT NULL, status INTEGER DEFAULT 0 NOT NULL)")
     database.execute("CREATE TABLE regrade_discussion (id serial NOT NULL PRIMARY KEY, regrade_id INTEGER NOT NULL, timestamp TIMESTAMP NOT NULL, user_id VARCHAR(255) NOT NULL, content TEXT, deleted BOOLEAN default FALSE NOT NULL)")
 
@@ -9,6 +9,6 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE regrade_discussion ADD CONSTRAINT regrade_discussion_fk1 FOREIGN KEY (user_id) REFERENCES users(user_id)")
 
 
-def down(config, database, semester, course):
+def down(config, database, term, course):
     database.execute("DROP TABLE regrade_discussion")
     database.execute("DROP TABLE regrade_requests")

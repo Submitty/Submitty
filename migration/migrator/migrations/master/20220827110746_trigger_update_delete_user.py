@@ -17,7 +17,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
     query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
                     || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
@@ -54,7 +54,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN

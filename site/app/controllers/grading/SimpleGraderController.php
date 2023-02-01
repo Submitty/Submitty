@@ -25,7 +25,7 @@ class SimpleGraderController extends AbstractController {
      * @param int|string|null $section
      * @param string|null $section_type
      * @param string $sort
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return ResponseInterface
      */
     public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
@@ -98,7 +98,7 @@ class SimpleGraderController extends AbstractController {
      * @param string $gradeable_id
      * @param null|string $view
      * @param string $sort
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return ResponseInterface
      */
     public function gradePage($gradeable_id, $view = null, $sort = "section_subsection") {
@@ -200,7 +200,7 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return ResponseInterface
      */
     public function save($gradeable_id) {
@@ -283,7 +283,7 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
      * @return ResponseInterface
      */
     public function UploadCSV($gradeable_id) {

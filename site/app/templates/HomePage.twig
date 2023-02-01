@@ -4,19 +4,19 @@
             <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
             {% for rank in ranks %}
                 <h2>As {{ rank.title }}</h2>
-                {% set display_semester = '' %}
+                {% set display_term = '' %}
                 {% for course in rank.courses %}
-                    {% if display_semester != course.display_semester %}
-                        {% if display_semester != '' %}
+                    {% if display_term != course.display_term %}
+                        {% if display_term != '' %}
                             </ul>
                         {% endif %}
-                        {% set display_semester = course.display_semester %}
-                        <h3> {{ display_semester }} </h3>
+                        {% set display_term = course.display_term %}
+                        <h3> {{ display_term }} </h3>
                         <ul class="bare-list course-list">
                     {% endif %}
                     <li>
-                        <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
-                            {{ course['display_semester'] }} &nbsp; &nbsp;
+                        <a id="{{ course['term'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['term'], course['title']]) }}">
+                            {{ course['display_term'] }} &nbsp; &nbsp;
                             {{ course['title'] | upper }} &nbsp; &nbsp;
                             {% if course['display_name'] != "" %}
                                 {{ course['display_name'] }} &nbsp; &nbsp;
@@ -28,7 +28,7 @@
                         </a>
                     </li>
                 {% endfor %}
-                {% if display_semester != '' %}
+                {% if display_term != '' %}
                     </ul>
                 {% endif %}
             {% endfor %}

@@ -122,28 +122,28 @@ class Core {
 
     /**
      * Load the config details for the application. This takes in a file from the ../../../config as well as
-     * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
+     * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$term}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *
-     * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
+     * Config model will throw exceptions if we cannot find a given $term or $course on the filesystem.
      *
-     * @param string $semester
+     * @param string $term
      * @param string $course
      * @throws \Exception
      */
-    public function loadCourseConfig($semester, $course) {
+    public function loadCourseConfig($term, $course) {
         if ($this->config === null) {
             throw new \Exception("Master config has not been loaded");
         }
-        if (!empty($semester) && !empty($course)) {
-            $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
+        if (!empty($term) && !empty($course)) {
+            $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $term, $course);
             $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
             if (file_exists($course_json_path) && is_readable($course_json_path)) {
-                $this->config->loadCourseJson($semester, $course, $course_json_path);
+                $this->config->loadCourseJson($term, $course, $course_json_path);
             }
             else {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
-                  $semester . " " . $course . " please contact your system administrator.\n" .
+                  $term . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
                   "sudo service php" . PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "-fpm restart";
                 $this->addErrorMessage($message);
@@ -310,7 +310,7 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            $regex = str_replace("<semester>", $this->getConfig()->getSemester(), $regex);
+            $regex = str_replace("<term>", $this->getConfig()->getterm(), $regex);
             $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
             $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
             if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
@@ -334,7 +334,7 @@ class Core {
         }
 
         $this->grading_queue = new GradingQueue(
-            $this->config->getSemester(),
+            $this->config->getterm(),
             $this->config->getCourse(),
             $this->config->getSubmittyPath()
         );
@@ -636,13 +636,13 @@ class Core {
 
     /**
      * Given some URL parameters (parts), build a URL for the site using those parts.
-     * This function will add the semester and course to the beginning of the new URL.
+     * This function will add the term and course to the beginning of the new URL.
      *
      * @param array  $parts
      * @return string
      */
     public function buildCourseUrl($parts = []) {
-        array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getterm(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
 
@@ -698,24 +698,24 @@ class Core {
         }
     }
 
-    public function getFullSemester() {
-        $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== "") {
-            $arr1 = str_split($semester);
-            $semester = "";
+    public function getFullterm() {
+        $term = $this->getConfig()->getterm();
+        if ($this->getConfig()->getterm() !== "") {
+            $arr1 = str_split($term);
+            $term = "";
             if ($arr1[0] == "f") {
-                $semester .= "Fall ";
+                $term .= "Fall ";
             }
             elseif ($arr1[0] == "s") {
-                $semester .= "Spring ";
+                $term .= "Spring ";
             }
             elseif ($arr1[0] == "u") {
-                $semester .= "Summer ";
+                $term .= "Summer ";
             }
 
-            $semester .= "20" . $arr1[1] . $arr1[2];
+            $term .= "20" . $arr1[1] . $arr1[2];
         }
-        return $semester;
+        return $term;
     }
 
     /**

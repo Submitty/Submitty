@@ -9,7 +9,7 @@ from submitty_utils import dateutils
 
 
 def generatePossibleDatabases():
-	current = dateutils.get_current_semester()
+	current = dateutils.get_current_term()
 	pre = 'submitty_' + current + '_'
 	path = "/var/local/submitty/courses/" + current
 	return [pre + name for name in sorted(os.listdir(path)) if os.path.isdir(path + "/" + name)]

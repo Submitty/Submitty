@@ -9,7 +9,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
     query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
@@ -30,7 +30,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
@@ -68,8 +68,8 @@ DECLARE
   db_conn VARCHAR;
   query_string TEXT;
 BEGIN
-  FOR registration_row IN SELECT semester, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
-    db_conn := format('dbname=submitty_%s_%s', registration_row.semester, registration_row.course);
+  FOR registration_row IN SELECT term, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
+    db_conn := format('dbname=submitty_%s_%s', registration_row.term, registration_row.course);
     query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN

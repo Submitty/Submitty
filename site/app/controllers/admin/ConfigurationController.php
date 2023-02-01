@@ -25,8 +25,8 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"GET"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
+     * @Route("/api/courses/{_term}/{_course}/config", methods={"GET"})
+     * @Route("/courses/{_term}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
     public function viewConfiguration(): MultiResponse {
@@ -63,7 +63,7 @@ class ConfigurationController extends AbstractController {
             $admin_in_course =  $this->core->getQueries()->checkIsInstructorInCourse(
                 $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                 $this->core->getConfig()->getCourse(),
-                $this->core->getConfig()->getSemester()
+                $this->core->getConfig()->getterm()
             );
         }
 
@@ -95,8 +95,8 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
-     * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/api/courses/{_term}/{_course}/config", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
     public function updateConfiguration(): MultiResponse {

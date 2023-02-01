@@ -3,7 +3,7 @@
 Script to trigger the generate grade summaries.
 
 Usage:
-./generate_grade_summaries.py <semester> <course> <base_url> <token>
+./generate_grade_summaries.py <term> <course> <base_url> <token>
 """
 
 import argparse
@@ -16,13 +16,13 @@ def main():
     parser = argparse.ArgumentParser(
         description='Automatically call Generate Grade Summaries API.'
     )
-    parser.add_argument('semester')
+    parser.add_argument('term')
     parser.add_argument('course')
     parser.add_argument('base_url')
     parser.add_argument('token')
     args = parser.parse_args()
 
-    semester = args.semester
+    term = args.term
     course = args.course
     base_url = args.base_url.rstrip('/')
     token = args.token
@@ -30,7 +30,7 @@ def main():
     try:
         grade_generation_response = requests.post(
             '{}/api/courses/{}/{}/reports/summaries'.format(
-                base_url, semester, course
+                base_url, term, course
             ),
             headers={'Authorization': token}
         )
@@ -42,11 +42,11 @@ def main():
         grade_generation_response = grade_generation_response.json()
         if grade_generation_response["status"] == 'success':
             print("Successfully generated grade summaries for {}.{}".format(
-                semester, course
+                term, course
             ))
         else:
             print("ERROR: Failed to generate grade summaries for {}.{}.".format(
-                semester, course
+                term, course
             ), file=stderr)
             print("Reason:{}".format(
                 grade_generation_response["message"]

@@ -432,7 +432,7 @@ const nlohmann::json TestCase::get_test_case_limits() const {
     // compilation (g++, clang++, javac) usually requires multiple
     // threads && produces a large executable
 
-    // Over multiple semesters of Data Structures C++ assignments, the
+    // Over multiple terms of Data Structures C++ assignments, the
     // maximum number of vfork (or fork or clone) system calls needed
     // to compile a student submissions was 28.
     //

@@ -268,14 +268,14 @@ class WebRouter {
      */
     private function loadCourse() {
         if (
-            array_key_exists('_semester', $this->parameters)
+            array_key_exists('_term', $this->parameters)
             && array_key_exists('_course', $this->parameters)
         ) {
-            $semester = $this->parameters['_semester'];
+            $term = $this->parameters['_term'];
             $course = $this->parameters['_course'];
 
             /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadCourseConfig($semester, $course);
+            $this->core->loadCourseConfig($term, $course);
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadGradingQueue();
 
@@ -316,7 +316,7 @@ class WebRouter {
         }
         elseif (
             $this->core->getConfig()->isCourseLoaded()
-            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
+            && !$this->core->getAccess()->canI("course.view", ["term" => $this->core->getConfig()->getterm(), "course" => $this->core->getConfig()->getCourse()])
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
@@ -336,7 +336,7 @@ class WebRouter {
 
         if (!$this->core->getConfig()->isCourseLoaded() && !str_ends_with($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
-                if (isset($this->parameters['_semester']) && isset($this->parameters['_course'])) {
+                if (isset($this->parameters['_term']) && isset($this->parameters['_course'])) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );

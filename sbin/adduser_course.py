@@ -26,7 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Adds a user to courses')
 
     parser.add_argument('user_id', help='user_id of the user to create')
-    parser.add_argument('semester', help='semester of the course')
+    parser.add_argument('term', help='term of the course')
     parser.add_argument('course', help='title of the course')
     parser.add_argument('registration_section', nargs='?', default=None,
                         help='registration section that the user is added into')
@@ -37,7 +37,7 @@ def parse_args():
 def main():
     args = parse_args()
     user_id = args.user_id
-    semester = args.semester
+    term = args.term
     course = args.course
     registration_section = args.registration_section
 
@@ -63,10 +63,10 @@ def main():
     if registration_section and not registration_section.isdigit():
         registration_section = None
     select = courses_table.select().where(and_(
-        courses_table.c.semester == bindparam('semester'),
+        courses_table.c.term == bindparam('term'),
         courses_table.c.course == bindparam('course')
     ))
-    row = connection.execute(select, semester=semester, course=course).fetchone()
+    row = connection.execute(select, term=term, course=course).fetchone()
     # course does not exist, so just skip this argument
     if row is None:
         print("Course does not exist.", file=sys.stderr)
@@ -75,24 +75,24 @@ def main():
     courses_u_table = Table('courses_users', metadata, autoload=True)
     select = courses_u_table.select().where(and_(
         and_(
-            courses_u_table.c.semester == bindparam('semester'),
+            courses_u_table.c.term == bindparam('term'),
             courses_u_table.c.course == bindparam('course')
         ),
         courses_u_table.c.user_id == bindparam('user_id')
     ))
     row = connection.execute(
         select,
-        semester=semester,
+        term=term,
         course=course,
         user_id=user_id
     ).fetchone()
-    # does this user have a row in courses_users for this semester and course?
+    # does this user have a row in courses_users for this term and course?
     if row is None:
         query = courses_u_table.insert()
         connection.execute(
             query,
             user_id=user_id,
-            semester=semester,
+            term=term,
             course=course,
             user_group=1,
             registration_section=registration_section

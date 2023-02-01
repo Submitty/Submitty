@@ -28,20 +28,20 @@ class GradeableUtils {
         $submit_btns = [];
 
         // Load the database and configuration of a course
-        $core->loadCourseConfig($course->getSemester(), $course->getTitle());
+        $core->loadCourseConfig($course->getterm(), $course->getTitle());
         $core->loadCourseDatabase();
 
         // Load all Gradeable objects of the current course
         foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             /** @var Gradeable $gradeable */
-            $gradeables[serialize([$course->getSemester(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
+            $gradeables[serialize([$course->getterm(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
             $visible_gradeables[] = $gradeable;
         }
 
         // Load all GradedGradable objects of the current course
         foreach ($core->getQueries()->getGradedGradeables($visible_gradeables, $core->getUser()->getId()) as $gg) {
             /** @var GradedGradeable $gg */
-            $graded_gradeables[serialize([$course->getSemester(), $course->getTitle(), $gg->getGradeableId()])] = $gg;
+            $graded_gradeables[serialize([$course->getterm(), $course->getTitle(), $gg->getGradeableId()])] = $gg;
         }
 
         // Create submit buttons for all gradeables

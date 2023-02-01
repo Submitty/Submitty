@@ -88,15 +88,15 @@ def down({1}):
 
     def test_create_course(self):
         """Test the create command for the course environment."""
-        parameters = ['config', 'database', 'semester', 'course']
+        parameters = ['config', 'database', 'term', 'course']
         environment = 'course'
         module_text = 'Migration for a given Submitty course database.'
         parameter_text = """:param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
-    :param semester: Semester of the course being migrated
-    :type semester: str
+    :param term: term of the course being migrated
+    :type term: str
     :param course: Code of course being migrated
     :type course: str"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)

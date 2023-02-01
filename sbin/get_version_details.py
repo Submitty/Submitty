@@ -5,8 +5,8 @@ Generate a list of active versions for students. Useful for when the database ge
 values for the active version and then you can just run this function to get the proper
 values to update the database with.
 
-Basic usage of this script is ./get_version_details.py <semester> <course> which will
-get all students and their submissions for that particular semester course. You can
+Basic usage of this script is ./get_version_details.py <term> <course> which will
+get all students and their submissions for that particular term course. You can
 also pass in optional flag to not have any indentation in the JSON produced as well as
 to write the JSON to a file instead of printing it out to stdout.
 
@@ -25,25 +25,25 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 DATA_PATH = os.path.join(JSON['submitty_data_dir'], "courses")
 
 
-def get_all_versions(semester, course):
+def get_all_versions(term, course):
     """
-    Given a semester and course, generate a dictionary of every student, that then
+    Given a term and course, generate a dictionary of every student, that then
     contains every homework for that student and then all versions (with condensed
     details) for the version. Additionally, we mark one of these versions as "active"
     based on the value in their user_assignment_settings.json file.
 
-    :param semester: semester to use for the active versions
-    :type semester: str
+    :param term: term to use for the active versions
+    :type term: str
     :param course: course to examine for the active versions
-    :type semester: str
+    :type term: str
     :return: a dictionary containing all students and their active versions for all
-            assignments for the course and semester
+            assignments for the course and term
     :rtype: dict
     """
     versions = {}
-    submission_path = os.path.join(DATA_PATH, semester, course, "submissions")
-    results_path = os.path.join(DATA_PATH, semester, course, "results")
-    build_path = os.path.join(DATA_PATH, semester, course, "config", "build")
+    submission_path = os.path.join(DATA_PATH, term, course, "submissions")
+    results_path = os.path.join(DATA_PATH, term, course, "results")
+    build_path = os.path.join(DATA_PATH, term, course, "config", "build")
     if not os.path.isdir(submission_path) or not os.path.isdir(results_path):
         raise SystemError("Could not find submission or results directory")
     for homework in os.listdir(submission_path):
@@ -75,7 +75,7 @@ def get_all_versions(semester, course):
             results_student = os.path.join(results_path, homework, student)
             for version in sorted(os.listdir(results_student)):
                 versions[student][homework][version] = get_version_details(
-                    semester,
+                    term,
                     course,
                     homework,
                     student,
@@ -87,7 +87,7 @@ def get_all_versions(semester, course):
 
 
 def get_version_details(
-    semester,
+    term,
     course,
     homework,
     student,
@@ -97,7 +97,7 @@ def get_version_details(
 ):
     results_path = os.path.join(
         DATA_PATH,
-        semester,
+        term,
         course,
         "results",
         homework,
@@ -149,7 +149,7 @@ def main():
         description="Generate a list of students and their version "
                     "details for all assignments"
     )
-    parser.add_argument("semester", type=str, help="What semester to look at?")
+    parser.add_argument("term", type=str, help="What term to look at?")
     parser.add_argument("course", type=str, help="What course to look at?")
     parser.add_argument(
         "-n",
@@ -160,7 +160,7 @@ def main():
     )
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, default=None)
     args = parser.parse_args()
-    versions = get_all_versions(args.semester, args.course)
+    versions = get_all_versions(args.term, args.course)
     indent = None
     if not args.no_indent:
         indent = 4

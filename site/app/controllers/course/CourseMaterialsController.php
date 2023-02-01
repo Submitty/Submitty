@@ -25,7 +25,7 @@ const DIR = 2;
 
 class CourseMaterialsController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials")
+     * @Route("/courses/{_term}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
@@ -39,7 +39,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_material/{path}", requirements={"path"=".+"})
+     * @Route("/courses/{_term}/{_course}/course_material/{path}", requirements={"path"=".+"})
      */
     public function viewCourseMaterial(string $path) {
         $full_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials/" . $path;
@@ -87,7 +87,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/view", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/course_materials/view", methods={"POST"})
      */
     public function markViewed(): JsonResponse {
         $ids = $_POST['ids'];
@@ -105,7 +105,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/delete")
+     * @Route("/courses/{_term}/{_course}/course_materials/delete")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteCourseMaterial($id) {
@@ -182,7 +182,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
+     * @Route("/courses/{_term}/{_course}/course_materials/download_zip")
      */
     public function downloadCourseMaterialZip($course_material_id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -255,7 +255,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
+     * @Route("/courses/{_term}/{_course}/course_materials/release_all")
      * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
@@ -289,7 +289,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
+     * @Route("/courses/{_term}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($newdatatime): JsonResponse {
@@ -345,7 +345,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
@@ -465,7 +465,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/course_materials/upload", methods={"POST"})
+     * @Route("/courses/{_term}/{_course}/course_materials/upload", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {

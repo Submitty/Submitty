@@ -24,7 +24,7 @@ def check_password(environ, user, password):
     :return:         Boolean for whether user was properly authenticated or not
     """
     # The REQUEST_URI will contain stuff after the usual
-    # /<VCS>/<SEMESTER>/<COURSE>/<G_ID>/<USER_ID> that have
+    # /<VCS>/<term>/<COURSE>/<G_ID>/<USER_ID> that have
     # to do with the GIT and whether it's pushing, pulling, cloning, etc.
 
     params = list(filter(lambda x: len(x) > 0, environ['REQUEST_URI'].split("/")))
@@ -43,7 +43,7 @@ def check_password(environ, user, password):
 
     params = list(filter(lambda x: x not in vcs_paths, params))
     if len(params) == 5:
-        semester, course, gradeable, unknown_id = params[1:]
+        term, course, gradeable, unknown_id = params[1:]
     else:
         return None
 
@@ -56,7 +56,7 @@ def check_password(environ, user, password):
 
     try:
         req = requests.post(
-            SUBMISSION_URL + f'/{semester}/{course}/authentication/vcs_login',
+            SUBMISSION_URL + f'/{term}/{course}/authentication/vcs_login',
             data=data
         )
         response = req.json()

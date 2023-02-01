@@ -201,7 +201,7 @@ class TestDateUtils(TestCase):
         )
 
     @patch('submitty_utils.dateutils.datetime')
-    def test_get_semester(self, mock):
+    def test_get_term(self, mock):
         testcases = (
             (datetime(year=2021, month=1, day=1), 's21'),
             (datetime(year=2020, month=6, day=22), 's20'),
@@ -211,4 +211,4 @@ class TestDateUtils(TestCase):
         for testcase in testcases:
             with self.subTest(testcase[1]):
                 mock.today.return_value = testcase[0]
-                self.assertEqual(testcase[1], dateutils.get_current_semester())
+                self.assertEqual(testcase[1], dateutils.get_current_term())

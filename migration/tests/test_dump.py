@@ -92,7 +92,7 @@ SET row_security = off;
 --
 
 CREATE TABLE public.courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     status smallint DEFAULT 1 NOT NULL
 );
@@ -119,7 +119,7 @@ SET row_security = off;
 --
 
 CREATE TABLE public.courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     status smallint DEFAULT 1 NOT NULL
 );

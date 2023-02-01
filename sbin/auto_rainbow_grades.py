@@ -3,7 +3,7 @@
 """
 Automatically generate rainbow grades.
 
-usage: python3 auto_rainbow_grades.py <semester> <course>
+usage: python3 auto_rainbow_grades.py <term> <course>
 
 If the instructor chooses to supply a custom_customization.json instead of using
 the web form this file will always take precedence and overwrite any customization.json
@@ -60,7 +60,7 @@ if data['daemon_user'] != getpass.getuser():
 
 
 # Configure variables
-semester = sys.argv[1]
+term = sys.argv[1]
 course = sys.argv[2]
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
@@ -80,7 +80,7 @@ def log_message(message):
         file.write(timestring + " " + message + "\n")
 
 
-log_message("Start processing " + semester + " " + course)
+log_message("Start processing " + term + " " + course)
 
 
 # Verify user exists
@@ -98,7 +98,7 @@ if user_found is False:
 print('Started build at {}'.format(datetime.datetime.now()), flush=True)
 
 # Generate path information
-rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
+rg_course_path = os.path.join(courses_path, term, course, 'rainbow_grades')
 
 # Verify that customization.json or custom_customization.json exist
 if os.path.exists(rg_course_path + '/customization.json') or \
@@ -131,7 +131,7 @@ if not os.path.exists(rg_course_path + '/Makefile'):
     filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
                                 rainbow_grades_path)
     filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
-    filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
+    filedata = filedata.replace('<term>/<COURSE>', '{}/{}'.format(term, course))
 
     # Write the file out again
     with open(makefile_path, 'w') as file:
@@ -169,7 +169,7 @@ if 'token' not in creds or not creds['token']:
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
-    reports_path = os.path.join(courses_path, semester, course, 'reports', 'all_grades')
+    reports_path = os.path.join(courses_path, term, course, 'reports', 'all_grades')
     file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
 
     if file_count == 0:
@@ -181,7 +181,7 @@ else:
     # Construct cmd string
     cmd = [
         '{}/sbin/generate_grade_summaries.py'.format(install_dir),
-        semester,
+        term,
         course,
         host_name,
         creds['token']
@@ -213,7 +213,7 @@ print('Updating permissions', flush=True)
 cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
 
 summary_html_path = os.path.join(courses_path,
-                                 semester,
+                                 term,
                                  course,
                                  'reports',
                                  'summary_html')
@@ -221,4 +221,4 @@ cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
 
 print('Done', flush=True)
 
-log_message("Finished         " + semester + " " + course)
+log_message("Finished         " + term + " " + course)

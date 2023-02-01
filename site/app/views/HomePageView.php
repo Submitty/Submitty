@@ -56,7 +56,7 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
+    public function showCourseCreationPage($faculty, $head_instructor, $terms, bool $is_superuser, string $csrf_token, array $courses) {
         $this->output->addBreadcrumb("New Course");
         $course_names = [];
         foreach ($courses as $course) {
@@ -69,7 +69,7 @@ class HomePageView extends AbstractView {
             "head_instructor" => $head_instructor,
             "faculty" => $faculty,
             "is_superuser" => $is_superuser,
-            "semesters" => $semesters,
+            "terms" => $terms,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
             "add_term_url" => $this->output->buildUrl(['term', 'new']),

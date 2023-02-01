@@ -207,7 +207,7 @@ class Logger {
      * @param array $params All the params in a key-value array
      */
     public static function logTAGrading(array $params) {
-        $log_message[] = $params['course_semester'];
+        $log_message[] = $params['course_term'];
         $log_message[] = $params['course_name'];
         $log_message[] = $params['gradeable_id'];
         $log_message[] = $params['grader_id'];
@@ -224,17 +224,17 @@ class Logger {
      * 2. Closed
      * 3. Emptied
      * 4. Created
-     * Timestamp | Course Semester | Course Name | Queue Name | Action | User Agent
+     * Timestamp | Course term | Course Name | Queue Name | Action | User Agent
      *
      * where action is either OPENED, CLOSED, EMPTIED, CREATED
      *
-     * @param string $course_semester The current semester
+     * @param string $course_term The current term
      * @param string $course The course name
      * @param string $queue_name The name of the queue
      * @param string $queue_action The action performed
      */
-    public static function logQueueActivity($course_semester, $course, $queue_name, $queue_action) {
-        $log_message[] = $course_semester;
+    public static function logQueueActivity($course_term, $course, $queue_name, $queue_action) {
+        $log_message[] = $course_term;
         $log_message[] = $course;
         $log_message[] = $queue_name;
         $log_message[] = $queue_action;

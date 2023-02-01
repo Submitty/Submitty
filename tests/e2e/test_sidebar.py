@@ -18,7 +18,7 @@ class TestSidebar(BaseTestCase):
         if which_course != '':
             self.click_class(which_course)
 
-        base_url = self.test_url + '/courses/' + self.semester + '/' + which_course
+        base_url = self.test_url + '/courses/' + self.term + '/' + which_course
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
@@ -107,7 +107,7 @@ class TestSidebar(BaseTestCase):
     @unittest.skipUnless(os.environ.get('CI') is None,
                          "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_instructor_blank(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        base_url = self.test_url + '/courses/' + self.term + '/blank'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -139,7 +139,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper('blank', expected, 'instructor', 'Quinn')
 
     def test_click_sidebar_links_instructor_sample(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/sample'
+        base_url = self.test_url + '/courses/' + self.term + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -192,7 +192,7 @@ class TestSidebar(BaseTestCase):
     @unittest.skipUnless(os.environ.get('CI') is None,
                          "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_ta_blank(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        base_url = self.test_url + '/courses/' + self.term + '/blank'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -210,7 +210,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper('blank', expected, 'ta', 'Jill')
 
     def test_click_sidebar_links_ta_sample(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/sample'
+        base_url = self.test_url + '/courses/' + self.term + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -247,7 +247,7 @@ class TestSidebar(BaseTestCase):
     @unittest.skipUnless(os.environ.get('CI') is None,
                          "cannot run in CI, blank course does not exist")
     def test_click_sidebar_links_student_blank(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        base_url = self.test_url + '/courses/' + self.term + '/blank'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -264,7 +264,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper('blank', expected, 'student', 'Joe')
 
     def test_click_sidebar_links_student_sample(self):
-        base_url = self.test_url + '/courses/' + self.semester + '/sample'
+        base_url = self.test_url + '/courses/' + self.term + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
