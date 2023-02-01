@@ -4,8 +4,6 @@ import shutil
 import unittest
 import contextlib
 import copy
-import pytest
-import difflib
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -71,8 +69,8 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        # with contextlib.suppress(FileNotFoundError):
-        #     shutil.rmtree(WORKING_DIR)
+        with contextlib.suppress(FileNotFoundError):
+            shutil.rmtree(WORKING_DIR)
         pass
 
     @classmethod
@@ -248,7 +246,6 @@ class TestAutogradingShipper(unittest.TestCase):
             #confirm the subfolder is cloned and is found at the correct path
             expected_subfolder = "{CHECKOUT_PATH}/subfolder:\ntotal 1".format(CHECKOUT_PATH = paths["checkout"])
             self.assertTrue(expected_subfolder in actual_output, "Subfolder not cloned/incorrect location")
-   
    
     def test_failed_to_clone(self):
         """
