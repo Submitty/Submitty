@@ -1389,11 +1389,11 @@ function showHistory(post_id) {
                     box.addClass('important');
                 }
 
-                const first_name = post['user_info']['first_name'].trim();
-                const last_name = post['user_info']['last_name'].trim();
+                const given_name = post['user_info']['given_name'].trim();
+                const family_name = post['user_info']['family_name'].trim();
                 const author_user_id = post['user'];
-                const visible_username = `${first_name} ${(last_name.length === 0) ? '' : (`${last_name.substr(0 , 1)}.`)}`;
-                let info_name = `${first_name} ${last_name} (${author_user_id})`;
+                const visible_username = `${given_name} ${(family_name.length === 0) ? '' : (`${family_name.substr(0 , 1)}.`)}`;
+                let info_name = `${given_name} ${family_name} (${author_user_id})`;
                 const visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
                 let user_button_code = `<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, ${info_name}, ${visible_user_json}, false)' title='Show full user information'><i class='fas fa-eye' aria-hidden='true'></i></a>&nbsp;`;
