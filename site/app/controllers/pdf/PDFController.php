@@ -15,6 +15,10 @@ class PDFController extends AbstractController {
     }
 
     public function getRealPath(string $file_path, string $id): string {
+        if (str_contains($file_path, "..")) {
+            return "INVALID FILE PATH";
+        }
+
         $real_path = "";
         $file_path_parts = explode("/", $file_path);
         for ($index = 1; $index < count($file_path_parts); $index++) {
