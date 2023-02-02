@@ -77,7 +77,6 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
-  config.vm.boot_timeout=600
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
