@@ -5,7 +5,7 @@ function showUpdatePrefNameForm() {
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
     $('[name="user_name_change"]', form).val('');
-    $('#user-firstname-change').focus();
+    $('#user-givenname-change').focus();
 }
 function showUpdatePronounsForm() {
     $(".popup-form").css('display', 'none');
@@ -80,10 +80,10 @@ function updateUserPronouns () {
 
 // eslint-disable-next-line no-unused-vars
 function updateUserPreferredNames () {
-    const first_name_field = $('#user-firstname-change');
-    const last_name_field = $('#user-lastname-change');
+    const given_name_field = $('#user-givenname-change');
+    const family_name_field = $('#user-familyname-change');
     // If the names are not updated just display an error message and return without making any API call
-    if (first_name_field.data('current-name') === first_name_field.val() && last_name_field.data('current-name') === last_name_field.val()) {
+    if (given_name_field.data('current-name') === given_name_field.val() && family_name_field.data('current-name') === family_name_field.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
@@ -91,8 +91,8 @@ function updateUserPreferredNames () {
         const data = new FormData();
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
-        data.append('first_name', first_name_field.val());
-        data.append('last_name', last_name_field.val());
+        data.append('given_name', given_name_field.val());
+        data.append('family_name', family_name_field.val());
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_preferred_names']);
         $.ajax({
@@ -109,11 +109,11 @@ function updateUserPreferredNames () {
                     displaySuccessMessage(data.message);
                     //update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
-                    $('#firstname-row .icon').html(`${icon} ${data.first_name}`);
-                    $('#lastname-row .icon').html(`${icon} ${data.last_name}`);
+                    $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
+                    $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
                     //update the data attributes
-                    first_name_field.data('current-name', data.first_name);
-                    last_name_field.data('current-name', data.last_name);
+                    given_name_field.data('current-name', data.given_name);
+                    family_name_field.data('current-name', data.family_name);
                 }
                 else {
                     // eslint-disable-next-line no-undef
