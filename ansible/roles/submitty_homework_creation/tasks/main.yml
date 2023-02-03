@@ -1,0 +1,10 @@
+---
+# Submitty Homework Creation (really a build) Ansible script.
+# Assumes that course is already set up.
+
+- name: Run build for specific homework
+  ansible.builtin.command:
+    cmd: ./BUILD_{{ course }}.sh {{ homework }}
+    chdir: /var/local/submitty/courses/{{ semester }}/{{ course }}/
+  become: yes
+  become_user: root

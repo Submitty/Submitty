@@ -1,0 +1,8 @@
+---
+- name: Install Submitty
+  hosts: submitty
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+    - submitty_service
