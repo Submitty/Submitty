@@ -647,7 +647,7 @@ class PlagiarismController extends AbstractController {
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[2],
@@ -1614,7 +1614,7 @@ class PlagiarismController extends AbstractController {
         foreach ($ranking as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[3],

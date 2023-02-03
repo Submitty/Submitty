@@ -8,9 +8,9 @@
 export AnalysisTools_Version=v22.03.00
 export AnalysisToolsTS_Version=v22.08.01
 export Lichen_Version=v22.10.00
-export RainbowGrades_Version=v22.10.00
+export RainbowGrades_Version=v23.02.00
 export Tutorial_Version=v22.06.00
-export SysadminTools_Version=v20.01.00
+export SysadminTools_Version=v23.01.00
 
 # JAVA
 export JUNIT_VERSION=4.12

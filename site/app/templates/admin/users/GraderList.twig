@@ -32,18 +32,18 @@
                             <tr id="user-{{ grader.getId() }}">
                                 <td></td>
                                 <td class="align-left">{{ grader.getId() }}</td>
-                                <td class="align-left">{{ grader.getDisplayedFirstName() }}</td>
-                                <td class="align-left">{{ grader.getDisplayedLastName() }}</td>
+                                <td class="align-left">{{ grader.getDisplayedGivenName() }}</td>
+                                <td class="align-left">{{ grader.getDisplayedFamilyName() }}</td>
                                 <td>{{ groups[grader.getGroup()].name }}</td>
                                 <td>{{ grader.getGradingRegistrationSections()|join(", ") ?: "None" }}</td>
                                 <td>
                                     <a href="javascript:editUserForm('{{ grader.getId() }}');"
-                                       aria-label="edit grader {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}">
+                                       aria-label="edit grader {{grader.getDisplayedGivenName()}} {{grader.getDisplayedFamilyName()}}">
                                         <i class="fas fa-pencil-alt" title="Edit Grader"></i>
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="javascript:demoteGraderForm('{{ grader.getId() }}', '{{ grader.getDisplayedFirstName() }}', '{{ grader.getDisplayedLastName() }}');"
+                                    <a href="javascript:demoteGraderForm('{{ grader.getId() }}', '{{ grader.getDisplayedGivenName() }}', '{{ grader.getDisplayedFamilyName() }}');"
                                         aria-label="">
                                         <i class="fas fa-user-xmark" title="Demote Grader"></i>
                                     </a>
