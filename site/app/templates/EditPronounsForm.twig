@@ -13,13 +13,17 @@
         <h2>My Preferred Pronouns</h2>
         <div class="edit_user_row">
             <label for="user-pronouns-change">Preferred Pronouns&emsp;</label>
-            <select type="text"
+            <input type="text"
                    name="user_pronouns_change"
-                   id="user-pronouns-change">
-                <option value="he/him">He/Him</option>
-                <option value="she/her">She/Her</option>
-                <option value="they/them">They/Them</option>
-            </select>
+                   id="user-pronouns-change"
+                   list="default_pronouns_list"
+                   placeholder="Type or Select">
+                <datalist id="default_pronouns_list">
+                    <option value="He/Him"></option>
+                    <option value="She/Her"></option>
+                    <option value="They/Them"></option>
+                </datalist>
+            </input>
         </div>
     </div>
 {% endblock %}
