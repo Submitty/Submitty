@@ -1,12 +1,11 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-pronouns-form{% endblock %}
-{% block title %}Edit Pronouns Names{% endblock %}
+{% block title %}Edit Pronouns{% endblock %}
 {% block body %}
     <p class="std-margin">{{ change_name_text }}</p>
     <p class="std-margin">
         Your instructor and the system administrators reserve the right to remove
-        a preferred name if it contains inappropriate or offensive language,
-        or is being used for misrepresentation.
+        pronouns if it contains inappropriate or offensive language.
     </p>
     <div class="flex-col" id="user_settings_modal">
         <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
