@@ -441,7 +441,12 @@ def archive_autograding_results(
         if os.path.exists(user_assignment_access_filename):
             with open(user_assignment_access_filename, 'r') as access_file:
                 obj = json.load(access_file)
-                first_access_string = obj[0]["timestamp"]
+                if len(obj) == 0:
+                    # this can happen if the student never clicks on the page and the
+                    # instructor makes a submission for the student
+                    pass
+                else:
+                    first_access_string = obj[0]["timestamp"]
 
     history_file_tmp = os.path.join(tmp_submission, "history.json")
     history_file = os.path.join(tmp_results, "history.json")
