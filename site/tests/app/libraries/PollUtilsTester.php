@@ -95,6 +95,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $expected_data = [
             [
+                "id" => 0,
                 "name" => "Poll #1",
                 "question" => "Is this the first poll?",
                 "question_type" => "single-response",
@@ -106,6 +107,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "release_histogram" => "never"
             ],
             [
+                "id" => 1,
                 "name" => "Poll #2",
                 "question" => "Is this the second poll?",
                 "question_type" => "single-response",
@@ -117,6 +119,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "release_histogram" => "always"
             ],
             [
+                "id" => 2,
                 "name" => "Poll #3",
                 "question" => "Is this the fourth poll?",
                 "question_type" => "multiple-response",
