@@ -70,12 +70,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
    * "English"
    * (do not upgrade to Ubuntu 22.04 -- "Continue without updating")
-
    * "Done" on keyboard layout
    * "Done" on network connections
    * "Done" on configure proxy
    * "Done" on alternate mirror
-   * "Done" on default for storage configuration / storage layout
    * Guided storage configuration / file system:
 
       - Select "Custom storage layout" and then "Done"
@@ -116,8 +114,10 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
 
      under the "Network" tab, add port forwarding:
        select "Emulated VLAN" for "Network Mode"
-       click "New" button to right of "Port Forward"
+       Under the "Network" tab, select "Port Forward"
+       click "New" button to on the bottom right corner &
        add the following Guest Port/Host Port pairings:
+         Add the guest port number to the second text box (where it shows 1234), and host to the 4th
          guest port 22 -> host 1234 (or anything for ssh below)
          guest port 1511 -> host 1511
          guest port 8443 -> host 8443
@@ -133,7 +133,15 @@ On an M1 Mac laptop, we cannot use virtual box, so follow these instructions ins
    ssh -p 1234 <USERNAME>@localhost
 
    Run `sudo su` to connect as the root user
-
+   
+   NOTE: If you are making a new VM after having one in the past, and you receive an error
+   when trying the ssh, you must reset your host key. In order to do that, go to finder, and
+   get to the user folder (Usually Macintosh HD/Users), then go to the user you are on your 
+   computer (Users/<your user>). Then, if the .ssh file does not appear, press CMD + Shift + . 
+   (shows hidden files). Enter the .ssh file, and open known_hosts. In known hosts, delete both 
+   lines starting with [localhost]:1234. Then save the file and try again. If the keys are not 
+   there, try the ssh command as a supervisor (sudo ssh -p 1234 <USERNAME>@localhost), and then 
+   delete the lines if you still receive the error.
 
 8. To share directories between host & guest machines:
 
