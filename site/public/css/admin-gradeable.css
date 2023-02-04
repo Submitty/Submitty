@@ -136,6 +136,10 @@ input[type="checkbox"] {
     padding-left: 20px;
 }
 
+.warning-text {
+    color: red;
+}
+
 .settings-description {
     padding: 2px;
     font-size: 12pt;
