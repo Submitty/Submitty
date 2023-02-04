@@ -138,8 +138,9 @@ Vagrant.configure(2) do |config|
     vb.customize ["modifyvm", :id, "--uart2", "off"]
     vb.customize ["modifyvm", :id, "--uart3", "off"]
     vb.customize ["modifyvm", :id, "--uart4", "off"]
-    
+
     mount_folders(override, ["dmode=775", "fmode=664"])
+
     if ARGV.include?('ssh')
       override.ssh.timeout = 20
     end
