@@ -123,18 +123,36 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
-# TODO: remove this. see #8404
-# clear old annotations cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
-fi
-
 # clear old routes cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
 fi
 # create routes cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
+
+# clear old doctrine cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
+fi
+# create doctrine cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
+
+# clear old access control cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
+fi
+# create access control cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
+
+# clear old doctrine proxy classes
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
+fi
+# create doctrine proxy classes directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -247,6 +265,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+    # select2
+    mkdir ${VENDOR_FOLDER}/select2
+    cp -R ${NODE_FOLDER}/select2/dist/* ${VENDOR_FOLDER}/select2
+    # select2-theme-bootstrap5
+    mkdir ${VENDOR_FOLDER}/select2/bootstrap5-theme
+    cp -R ${NODE_FOLDER}/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css ${VENDOR_FOLDER}/select2/bootstrap5-theme
     # shortcut-buttons-flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
     cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons

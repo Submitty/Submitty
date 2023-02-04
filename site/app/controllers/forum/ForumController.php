@@ -1145,7 +1145,7 @@ class ForumController extends AbstractController {
         // Fetch additional information
         foreach ($output as &$_post) {
             $emptyUser = empty($_post['user']);
-            $_post['user_info'] = $emptyUser ? ['first_name' => 'Anonymous', 'last_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+            $_post['user_info'] = $emptyUser ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
             $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
         }
         return $this->core->getOutput()->renderJsonSuccess($output);
@@ -1204,8 +1204,8 @@ class ForumController extends AbstractController {
             if (!isset($users[$user])) {
                 $users[$user] = [];
                 $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
-                $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
+                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];

@@ -1,0 +1,271 @@
+<?php
+
+namespace tests\app\entities\poll;
+
+use app\entities\poll\Option;
+use app\entities\poll\Poll;
+use app\entities\poll\Response;
+use DateTime;
+use ReflectionProperty;
+use tests\BaseUnitTest;
+
+class PollTester extends BaseUnitTest {
+    /** @var Poll[] */
+    private $my_polls;
+
+    public function setUp(): void {
+        $this->my_polls = [
+            0 => new Poll(
+                "Poll #1",
+                "Is this the first poll?",
+                "single-response-single-correct",
+                new DateTime("2021-01-11"),
+                "never"
+            ),
+            1 => new Poll(
+                "Poll #2",
+                "Is this the first poll?",
+                "single-response-multiple-correct",
+                new DateTime("9999-12-31"),
+                "always"
+            ),
+            2 => new Poll(
+                "Poll #3",
+                "What is your favorite color?",
+                "multiple-response-survey",
+                new DateTime('now'),
+                "when_ended",
+                "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
+            )
+        ];
+
+        $this->my_polls[1]->setOpen();
+        $this->my_polls[2]->setEnded();
+
+        $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");
+        $poll_property->setAccessible(true);
+        $poll_property->setValue($this->my_polls[0], 0);
+        $poll_property->setValue($this->my_polls[1], 1);
+        $poll_property->setValue($this->my_polls[2], 2);
+
+        $option_property = new ReflectionProperty("app\\entities\\poll\\Option", "id");
+        $option_property->setAccessible(true);
+
+        $option0 = new Option(0, "Yes", true);
+        $option1 = new Option(1, "No", false);
+        $option2 = new Option(2, "Maybe", false);
+        $option_property->setValue($option0, 0);
+        $option_property->setValue($option1, 1);
+        $option_property->setValue($option2, 2);
+        $this->my_polls[0]->addOption($option0);
+        $this->my_polls[0]->addOption($option1);
+        $this->my_polls[0]->addOption($option2);
+
+        $option3 = new Option(0, "Absolutely", false);
+        $option4 = new Option(1, "No", true);
+        $option5 = new Option(2, "Perhaps", true);
+        $option_property->setValue($option3, 3);
+        $option_property->setValue($option4, 4);
+        $option_property->setValue($option5, 5);
+        $this->my_polls[1]->addOption($option3);
+        $this->my_polls[1]->addOption($option4);
+        $this->my_polls[1]->addOption($option5);
+
+        $option6 = new Option(0, "Red", true);
+        $option7 = new Option(1, "Blue", true);
+        $option8 = new Option(2, "Yellow", true);
+        $option9 = new Option(3, "Green", true);
+        $option_property->setValue($option6, 6);
+        $option_property->setValue($option7, 7);
+        $option_property->setValue($option8, 8);
+        $option_property->setValue($option9, 9);
+        $this->my_polls[2]->addOption($option6);
+        $this->my_polls[2]->addOption($option7);
+        $this->my_polls[2]->addOption($option8);
+        $this->my_polls[2]->addOption($option9);
+
+        $response_property = new ReflectionProperty("app\\entities\\poll\\Response", "id");
+        $response_property->setAccessible(true);
+
+        $response0 = new Response("bitdiddle");
+        $response1 = new Response("aphacker");
+        $response_property->setValue($response0, 0);
+        $response_property->setValue($response1, 1);
+        $this->my_polls[0]->addResponse($response0, 1);
+        $this->my_polls[0]->addResponse($response1, 1);
+
+        $response2 = new Response("bitdiddle");
+        $response3 = new Response("aphacker");
+        $response_property->setValue($response2, 2);
+        $response_property->setValue($response3, 3);
+        $this->my_polls[1]->addResponse($response2, 3);
+        $this->my_polls[1]->addResponse($response3, 5);
+
+        $response4 = new Response("bitdiddle");
+        $response5 = new Response("bitdiddle");
+        $response6 = new Response("bitdiddle");
+        $response7 = new Response("aphacker");
+        $response8 = new Response("aphacker");
+        $response_property->setValue($response4, 4);
+        $response_property->setValue($response5, 5);
+        $response_property->setValue($response6, 6);
+        $response_property->setValue($response7, 7);
+        $response_property->setValue($response8, 8);
+        $this->my_polls[2]->addResponse($response4, 6);
+        $this->my_polls[2]->addResponse($response5, 8);
+        $this->my_polls[2]->addResponse($response6, 9);
+        $this->my_polls[2]->addResponse($response7, 7);
+        $this->my_polls[2]->addResponse($response8, 9);
+    }
+
+    public function tearDown(): void {
+    }
+
+    public function testId(): void {
+        $this->assertEquals($this->my_polls[0]->getId(), 0);
+        $this->assertEquals($this->my_polls[1]->getId(), 1);
+        $this->assertEquals($this->my_polls[2]->getId(), 2);
+    }
+
+    public function testName(): void {
+        $this->assertEquals($this->my_polls[0]->getName(), "Poll #1");
+        $this->assertEquals($this->my_polls[1]->getName(), "Poll #2");
+        $this->assertEquals($this->my_polls[2]->getName(), "Poll #3");
+    }
+
+    public function testQuestion(): void {
+        $this->assertEquals($this->my_polls[0]->getQuestion(), "Is this the first poll?");
+        $this->assertEquals($this->my_polls[1]->getQuestion(), "Is this the first poll?");
+        $this->assertEquals($this->my_polls[2]->getQuestion(), "What is your favorite color?");
+    }
+
+    public function testQuestionType(): void {
+        $this->assertEquals($this->my_polls[0]->getQuestionType(), "single-response-single-correct");
+        $this->assertEquals($this->my_polls[1]->getQuestionType(), "single-response-multiple-correct");
+        $this->assertEquals($this->my_polls[2]->getQuestionType(), "multiple-response-survey");
+    }
+
+    public function testOptions(): void {
+        $option_text = [];
+        $order_id = [];
+        $correct = [];
+        foreach ($this->my_polls[0]->getOptions() as $o) {
+            $option_text[] = $o->getResponse();
+            $order_id[] = $o->getOrderId();
+            $correct[] = $o->isCorrect();
+        }
+        $this->assertEquals(["Yes", "No", "Maybe"], $option_text);
+        $this->assertEquals([0, 1, 2], $order_id);
+        $this->assertEquals([true, false, false], $correct);
+
+        $option_text = [];
+        $order_id = [];
+        $correct = [];
+        foreach ($this->my_polls[1]->getOptions() as $o) {
+            $option_text[] = $o->getResponse();
+            $order_id[] = $o->getOrderId();
+            $correct[] = $o->isCorrect();
+        }
+        $this->assertEquals(["Absolutely", "No", "Perhaps"], $option_text);
+        $this->assertEquals([0, 1, 2], $order_id);
+        $this->assertEquals([false, true, true], $correct);
+
+        $option_text = [];
+        $order_id = [];
+        $correct = [];
+        foreach ($this->my_polls[2]->getOptions() as $o) {
+            $option_text[] = $o->getResponse();
+            $order_id[] = $o->getOrderId();
+            $correct[] = $o->isCorrect();
+        }
+        $this->assertEquals(["Red", "Blue", "Yellow", "Green"], $option_text);
+        $this->assertEquals([0, 1, 2, 3], $order_id);
+        $this->assertEquals([true, true, true, true], $correct);
+
+        $this->assertEquals("Yes", $this->my_polls[0]->getOptionById(0)->getResponse());
+        $this->expectException(\RuntimeException::class);
+        $this->my_polls[0]->getOptionById(5);
+    }
+
+    public function testUserResponses(): void {
+        $student_id = [];
+        $option_text = [];
+        foreach ($this->my_polls[0]->getUserResponses() as $r) {
+            $student_id[] = $r->getStudentId();
+            $option_text[] = $r->getOption()->getResponse();
+        }
+        $this->assertEquals(["bitdiddle", "aphacker"], $student_id);
+        $this->assertEquals(["No", "No"], $option_text);
+
+        $student_id = [];
+        $option_text = [];
+        foreach ($this->my_polls[1]->getUserResponses() as $r) {
+            $student_id[] = $r->getStudentId();
+            $option_text[] = $r->getOption()->getResponse();
+        }
+        $this->assertEquals(["bitdiddle", "aphacker"], $student_id);
+        $this->assertEquals(["Absolutely", "Perhaps"], $option_text);
+
+        $student_id = [];
+        $option_text = [];
+        foreach ($this->my_polls[2]->getUserResponses() as $r) {
+            $student_id[] = $r->getStudentId();
+            $option_text[] = $r->getOption()->getResponse();
+        }
+        $this->assertEquals(["bitdiddle", "bitdiddle", "bitdiddle", "aphacker", "aphacker"], $student_id);
+        $this->assertEquals(["Red", "Yellow", "Green", "Blue", "Green"], $option_text);
+    }
+
+    public function testReleaseDate(): void {
+        $this->assertEquals($this->my_polls[0]->getReleaseDate()->format("Y-m-d"), "2021-01-11");
+        $this->assertEquals($this->my_polls[1]->getReleaseDate()->format("Y-m-d"), "9999-12-31");
+        $this->assertEquals($this->my_polls[2]->getReleaseDate()->format("Y-m-d"), date("Y-m-d"));
+    }
+
+    public function testStatus(): void {
+        $this->assertFalse($this->my_polls[0]->isOpen());
+        $this->assertTrue($this->my_polls[0]->isClosed());
+        $this->assertFalse($this->my_polls[0]->isEnded());
+
+        $this->assertTrue($this->my_polls[1]->isOpen());
+        $this->assertFalse($this->my_polls[1]->isClosed());
+        $this->assertFalse($this->my_polls[1]->isEnded());
+
+        $this->assertFalse($this->my_polls[2]->isOpen());
+        $this->assertFalse($this->my_polls[2]->isClosed());
+        $this->assertTrue($this->my_polls[2]->isEnded());
+
+        $this->my_polls[2]->setClosed();
+        $this->assertFalse($this->my_polls[2]->isOpen());
+        $this->assertTrue($this->my_polls[2]->isClosed());
+        $this->assertFalse($this->my_polls[2]->isEnded());
+
+        $this->my_polls[2]->setOpen();
+        $this->assertTrue($this->my_polls[2]->isOpen());
+        $this->assertFalse($this->my_polls[2]->isClosed());
+        $this->assertFalse($this->my_polls[2]->isEnded());
+
+        $this->my_polls[2]->setEnded();
+        $this->assertFalse($this->my_polls[2]->isOpen());
+        $this->assertFalse($this->my_polls[2]->isClosed());
+        $this->assertTrue($this->my_polls[2]->isEnded());
+    }
+
+    public function testImagePath(): void {
+        $this->assertEquals($this->my_polls[0]->getImagePath(), null);
+        $this->assertEquals($this->my_polls[1]->getImagePath(), null);
+        $this->assertEquals($this->my_polls[2]->getImagePath(), "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png");
+    }
+
+    public function testHistogramRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getReleaseHistogram(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseHistogram(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseHistogram(), "when_ended");
+
+        $this->my_polls[0]->setReleaseHistogram("always");
+        $this->assertEquals("always", $this->my_polls[0]->getReleaseHistogram());
+
+        $this->expectException(\RuntimeException::class);
+        $this->my_polls[0]->setReleaseHistogram("aaaaaaaaa");
+    }
+}

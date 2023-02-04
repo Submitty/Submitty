@@ -7,7 +7,7 @@
             <div class="user-img-cont">
                 {% set image = user.getDisplayImage() %}
                 {% if image is not null %}
-                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
+                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedGivenName(), user.getDisplayedFamilyName())) }}
                 {% else %}
                     <span class="center-img-tag">N/A</span>
                 {% endif %}
@@ -33,20 +33,20 @@
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="firstname-row">
+                    <div class="flex-row" id="givenname-row">
                         <span class="label">
                             First Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFirstName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="lastname-row">
+                    <div class="flex-row" id="familyname-row">
                         <span class="label">
                             Last Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
                     <div class="flex-row" id="email-row">

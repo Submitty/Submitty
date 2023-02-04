@@ -302,56 +302,30 @@ select[name="component-itempool"] {
     padding-right: 0;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
-#config_search {
-    width: 100%;
-    padding-right: 45px;
-}
-
 .drop-down {
     display: inline-block;
     width: 64%;
 }
 
-.drop-down-options {
-    border: 0.5px black solid;
-    position: relative;
-    width: 100%;
-    max-height: 30vh;
-    overflow-y: scroll;
+/* stylelint-disable selector-class-pattern -- Select2 internal classes */
+#config-drop-down .select2-selection,
+#config-drop-down .select2-selection__rendered,
+#config-drop-down .select2-selection__arrow,
+.select2-container .select2-dropdown,
+.select2-container .select2-dropdown .select2-search .select2-search__field {
+    color: var(--text-black);
+    background-color: var(--default-white);
 }
 
-.drop-down-options::-webkit-scrollbar {
-    width: 0.7vh;
+/* stylelint-disable selector-descendant-combinator-no-non-space -- line too long */
+.select2-container .select2-dropdown .select2-results__options
+.select2-results__option.select2-results__option--selected {
+    background-color: var(--submitty-logo-blue);
 }
+/* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
 
 body::-webkit-scrollbar-track {
     box-shadow: inset 0 0 3px black;
-}
-
-.drop-down-options::-webkit-scrollbar-thumb {
-    background-color: var(--hover-actionable-blue);
-    outline: 1px solid slategrey;
-}
-
-.drop-down-option {
-    padding: 1vh;
-    text-overflow: ellipsis;
-}
-
-.drop-down-option:hover {
-    background-color: var(--hover-active-all-info-blue);
-}
-
-[data-theme="dark"] .drop-down-options {
-    background-color: var(--standard-medium-dark-gray);
-    border: 1px solid var(--standard-focus-cornflower-blue);
-}
-
-/* stylelint-disable-next-line selector-id-pattern */
-#clear_search_button {
-    padding-right: 6px;
-    color: red;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
