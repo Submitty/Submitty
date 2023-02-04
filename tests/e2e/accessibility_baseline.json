@@ -70,7 +70,7 @@
         "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
     "/courses/{}/{}/grade_override": [
-        "Attribute “name” not allowed on element “div” at this point."
+        "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
     "/courses/{}/{}/plagiarism": [
         "Attribute “name” not allowed on element “div” at this point."
