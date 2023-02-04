@@ -69,7 +69,7 @@
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission-type" checked="checked">
+                    <input type='radio' id="radio-normal" name="submission-type">
                     Normal Submission
                 </label>
                 <label for="radio-student">
@@ -78,7 +78,7 @@
                 </label>
                 {% if is_bulk_upload %}
                     <label for="radio-bulk">
-                        <input type='radio' id="radio-bulk" name="submission-type">
+                        <input type='radio' id="radio-bulk" name="submission-type" checked>
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
