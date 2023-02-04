@@ -136,6 +136,20 @@ Vagrant.configure(2) do |config|
     # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
+    # Sometimes Vagrant will error on trying to SSH into the machine when it starts, due to a bug in how
+    # Ubuntu 20.04 and later setup the virtual serial port, where the machine takes minutes to start, plus
+    # occasionally restarting. Modifying the behavior of the uart fields, as well as disabling features like USB and
+    # audio (which we don't need) seems to greatly reduce boot times and make vagrant work consistently. See
+    # https://github.com/hashicorp/vagrant/issues/11777 for more info.
+    vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+    vb.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+    vb.customize ["modifyvm", :id, "--audio", "none"]
+    vb.customize ["modifyvm", :id, "--usb", "off"]
+    vb.customize ["modifyvm", :id, "--uart1", "off"]
+    vb.customize ["modifyvm", :id, "--uart2", "off"]
+    vb.customize ["modifyvm", :id, "--uart3", "off"]
+    vb.customize ["modifyvm", :id, "--uart4", "off"]
+
     mount_folders(override, ["dmode=775", "fmode=664"])
 
     if ARGV.include?('ssh')
