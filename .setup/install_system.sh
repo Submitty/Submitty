@@ -793,13 +793,18 @@ if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     systemctl enable nullsmtpd
 fi
 
-# Setup preferred_name_logging
-echo -e "Setup preferred name logging."
 
-# Copy preferred_name_logging.php to sbin
-rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
-chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
-chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+
+
+## Setup preferred_name_logging
+#echo -e "Setup preferred name logging."
+
+## Copy preferred_name_logging.php to sbin
+#rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_#DIR}/sbin
+#chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+#chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+
+
 
 # Backup and adjust/overwrite Postgresql's configuration
 if [ ${WORKER} == 0 ]; then

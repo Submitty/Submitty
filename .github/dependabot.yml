@@ -1,35 +1,46 @@
 version: 2
 updates:
-  - package-ecosystem: composer
+  - package-ecosystem: "composer"
     directory: "/site"
     schedule:
-      interval: daily
+      interval: "weekly"
+      day: "monday"
       time: "10:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     labels:
       - dependencies
     versioning-strategy: increase
     commit-message:
       prefix: "[Dependency] "
-      prefix-development: "[DevDependency]"
-  - package-ecosystem: npm
+      prefix-development: "[DevDependency] "
+  - package-ecosystem: "npm"
     directory: "/site"
     schedule:
-      interval: daily
-      time: "10:00"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+        day: "monday"
+        time: "10:00"
+    open-pull-requests-limit: 15
     labels:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
-      prefix-development: "[DevDependency]"
+      prefix-development: "[DevDependency] "
   - package-ecosystem: pip
     directory: "/.setup/pip/"
     schedule:
-      interval: daily
-      time: "10:00"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+        day: "monday"
+        time: "10:00"
+    open-pull-requests-limit: 15
     labels:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
+  - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+        interval: "weekly"
+          day: "monday"
+          time: "10:00"
+      open-pull-requests-limit: 15
+
