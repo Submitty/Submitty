@@ -21,7 +21,7 @@ class CourseMaterialAccess {
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="\app\entities\course\CourseMaterial", inversedBy="accesses")
+     * @ORM\ManyToOne(targetEntity="\app\entities\course\CourseMaterial", inversedBy="accesses", nullable=false)
      * @var CourseMaterial
      */
     protected $course_material;

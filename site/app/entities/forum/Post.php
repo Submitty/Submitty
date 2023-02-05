@@ -29,14 +29,14 @@ class Post {
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Thread", inversedBy="posts")
      * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
-     * @var Thread
+     * @var Thread|null
      */
     protected $thread;
 
     /**
      * @ORM\ManyToOne(targetEntity="Post", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
-     * @var Post
+     * @var Post|null
      */
     protected $parent;
 

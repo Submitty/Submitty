@@ -78,7 +78,7 @@ class PollRepository extends EntityRepository {
 
     /**
      * Get all the polls and the number of responses to each of them
-     * @return array{poll: Poll, num_responses: int}
+     * @return array<array{poll: Poll, num_responses: int}>
      */
     public function findAllWithNumResponses(): array {
         return $this->_em

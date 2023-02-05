@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class ThreadAccess {
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Thread", inversedBy="viewers")
-     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id", nullable=false)
      * @ORM\Id
      * @var Thread
      */
@@ -26,7 +26,7 @@ class ThreadAccess {
     protected $user_id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="datetimetz")
      * @var DateTime
      */
     protected $timestamp;

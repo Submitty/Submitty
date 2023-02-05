@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PostHistory {
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Post", inversedBy="history")
-     * @ORM\JoinColumn(name="post_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)
      * @var Post
      */
     protected $post;

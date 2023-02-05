@@ -237,11 +237,6 @@ parameters:
 			path: app/controllers/admin/WrapperController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between array\\<int, app\\\\entities\\\\course\\\\CourseMaterial\\> and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: "#^Elseif condition is always true\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -306,6 +301,11 @@ parameters:
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
+			message: "#^Property app\\\\entities\\\\VcsAuthToken\\:\\:\\$expiration type mapping mismatch\\: property can contain DateTime\\|null but database expects DateTimeInterface\\.$#"
+			count: 1
+			path: app/entities/VcsAuthToken.php
+
+		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
@@ -331,11 +331,6 @@ parameters:
 			path: app/entities/email/EmailEntity.php
 
 		-
-			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$id is unused\\.$#"
-			count: 1
-			path: app/entities/email/EmailEntity.php
-
-		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$semester is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
@@ -354,21 +349,6 @@ parameters:
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Response\\:\\:\\$id is never written, only read\\.$#"
-			count: 1
-			path: app/entities/poll/Response.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"

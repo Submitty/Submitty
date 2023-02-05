@@ -47,7 +47,7 @@ class Thread {
     /**
      * @ORM\ManyToOne(targetEntity="Thread", inversedBy="merged_on_this")
      * @ORM\JoinColumn(name="merged_thread_id", referencedColumnName="id")
-     * @var Thread
+     * @var Thread|null
      */
     protected $merged_thread;
 
@@ -60,7 +60,7 @@ class Thread {
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Post", inversedBy="merged_threads")
      * @ORM\JoinColumn(name="merged_post_id", referencedColumnName="id")
-     * @var Post
+     * @var Post|null
      */
     protected $merged_post;
 

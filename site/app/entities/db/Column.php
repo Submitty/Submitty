@@ -54,9 +54,9 @@ class Column {
   /**
    * @ORM\ManyToOne(targetEntity="\app\entities\db\Table",inversedBy="columns")
    * @ORM\JoinColumns({
-   * @ORM\JoinColumn(name="table_catalog", referencedColumnName="table_catalog"),
-   * @ORM\JoinColumn(name="table_schema", referencedColumnName="table_schema"),
-   * @ORM\JoinColumn(name="table_name", referencedColumnName="table_name")
+   * @ORM\JoinColumn(name="table_catalog", referencedColumnName="table_catalog", nullable=false),
+   * @ORM\JoinColumn(name="table_schema", referencedColumnName="table_schema", nullable=false),
+   * @ORM\JoinColumn(name="table_name", referencedColumnName="table_name", nullable=false)
    * })
    * @var Table
    */
