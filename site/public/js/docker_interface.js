@@ -70,10 +70,10 @@ function addFieldOnChange() {
 
 function removeTicked(id,capability) {
     removal_capability = capability;
-    let checkbox = document.getElementById(id);
+    const checkbox = document.getElementById(id);
     if (checkbox.checked) {
         imageList = (id);
-    } 
+    }
     else {
         imageList = null;
     }
