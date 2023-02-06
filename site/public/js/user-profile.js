@@ -74,7 +74,32 @@ function updateUserPronouns () {
         const data = new FormData();
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
-        
+        const url = buildUrl(['user_profile', 'change_pronouns'])
+        $.ajax({
+            url,
+            type: 'POST', 
+            data, 
+            processData: false, 
+            contentType: false, 
+            success: function(res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const {data} = response;
+                    displaySuccessMessage(data.message);
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    // updat the pronouns
+                    $('#pronouns-row').html(`${icon} ${data.pronouns}`);
+                    // update the data attributes
+                    pronouns.data('current-pronouns', data.pronouns);
+                }
+                else {
+                    displayErrorMessage(response.message);
+                }
+            }, 
+            error: function() {
+                displayErrorMessage('Some went wrong while updating pronouns!');
+            }
+        })
     }
 }
 
