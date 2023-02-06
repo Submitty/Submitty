@@ -154,6 +154,37 @@ class DockerInterfaceController extends AbstractController {
     }
 
     /**
+     * @Route("/admin/remove_image", methods={"POST"})
+     * @return JsonResponse | MultiResponse
+     */
+    public function removeImage() {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
+            );
+        }
+        else {
+        $jsonFilePath = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+        $json = json_decode(file_get_contents($jsonFilePath), true);
+
+        $key = array_search($_POST['image'], $json[$_POST['capability']]);
+        if ($key !== false) {
+            unset($json[$_POST['capability']][$key]);
+        }
+        $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
+        file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+        return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
+    }
+}
+
+
+    /**
      * @Route("/admin/update_docker", methods={"GET"})
      * @return JsonResponse
      */

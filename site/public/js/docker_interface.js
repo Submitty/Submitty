@@ -4,6 +4,9 @@
 * @param {string} id of the section to toggle
 * @param {string} btn_id id of the button calling this function
 */
+
+var imageList;
+var removal_capability;
 function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
@@ -62,6 +65,51 @@ function addFieldOnChange() {
         $('#send-button').attr('disabled',false);
         $('#docker-warning').css('display', 'none');
     }
+}
+
+
+function removeTicked(id,capability) {
+    removal_capability = capability;
+    var checkbox = document.getElementById(id);
+    if (checkbox.checked) {
+      imageList = (id);
+    } else {
+      imageList = null;
+    }
+    if(imageList.length > 0){
+        $('#remove-button').attr('disabled',false);
+    }
+    else{
+        $('#remove-button').attr('disabled',true);
+    }
+}
+
+function removeImage(url){
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            'image': imageList,
+            'capability': removal_capability,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: function(data) {
+            const json = JSON.parse(data);
+            if (json.status === 'success') {
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
+            }
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
+            }
+        },
+        error: function(err) {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
 }
 
 function addImage(url) {
