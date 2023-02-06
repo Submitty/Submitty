@@ -70,13 +70,14 @@ function addFieldOnChange() {
 
 function removeTicked(id,capability) {
     removal_capability = capability;
-    var checkbox = document.getElementById(id);
+    let checkbox = document.getElementById(id);
     if (checkbox.checked) {
         imageList = (id);
-    } else {
+    } 
+    else {
         imageList = null;
     }
-    if (imageList.length > 0){
+    if (imageList.length > 0) {
         $('#remove-button').attr('disabled',false);
     }
     else {
