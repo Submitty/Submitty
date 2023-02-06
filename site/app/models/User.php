@@ -99,9 +99,9 @@ class User extends AbstractModel {
     protected $preferred_family_name = "";
     /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
-    /** @prop @var string The primary email of the user */
-    protected $pronouns;
     /** @prop @var string The pronouns of the user */
+    protected $pronouns = "";
+    /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
     protected $secondary_email;
@@ -424,6 +424,10 @@ class User extends AbstractModel {
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
+    public function setPronouns($name) {
+        $this->pronouns = $name;
+    }
+
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
         $this->setDisplayedGivenName();
@@ -437,7 +441,6 @@ class User extends AbstractModel {
     private function setDisplayedGivenName() {
         $this->displayed_given_name = (!empty($this->preferred_given_name)) ? $this->preferred_given_name : $this->legal_given_name;
     }
-
     private function setDisplayedFamilyName() {
         $this->displayed_family_name = (!empty($this->preferred_family_name)) ? $this->preferred_family_name : $this->legal_family_name;
     }
@@ -516,6 +519,9 @@ class User extends AbstractModel {
             case 'user_legal_familyname':
                 //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
+            case 'user_pronouns':
+                // need to be modified
+                return true;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
                 //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
