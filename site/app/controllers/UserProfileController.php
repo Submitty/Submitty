@@ -101,6 +101,34 @@ class UserProfileController extends AbstractController {
 
 
     /**
+     * @Route("/user_profile/change_pronouns", methods={"POST"})
+     * @return JsonResponse
+     * @throws \ImagickException
+     */
+    public function changePronouns() {
+        $user = $this->core->getUser();
+        if (empty($_POST['user_pronouns_change'])) {
+            $newPronouns = trim($_POST['pronouns']);
+            //validPronouns() checks for valid option
+            if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+                $user->setPronouns($newPronouns);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Pronouns updated successfully",
+                    'pronouns' => $newPronouns
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Pronouns is not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse('Pronouns cannot be empty!');
+        }
+    }
+    
+    /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
