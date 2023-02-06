@@ -443,6 +443,8 @@ HTML;
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids) {
+        $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
+
         $peer = false;
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             $peer = true;
@@ -787,6 +789,7 @@ HTML;
             }
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
@@ -816,6 +819,8 @@ HTML;
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
             "details_base_url" => $details_base_url,
+            "details_base_path" => $details_base_path,
+            "collapsed_sections" => $collapsed_sections,
             "sort" => $sort,
             "direction" => $direction,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
