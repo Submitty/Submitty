@@ -5,8 +5,8 @@
 * @param {string} btn_id id of the button calling this function
 */
 
-var imageList;
-var removal_capability;
+let imageList;
+let removal_capability;
 function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
@@ -72,19 +72,19 @@ function removeTicked(id,capability) {
     removal_capability = capability;
     var checkbox = document.getElementById(id);
     if (checkbox.checked) {
-      imageList = (id);
+        imageList = (id);
     } else {
-      imageList = null;
+        imageList = null;
     }
-    if(imageList.length > 0){
+    if (imageList.length > 0){
         $('#remove-button').attr('disabled',false);
     }
-    else{
+    else {
         $('#remove-button').attr('disabled',true);
     }
 }
 
-function removeImage(url){
+function removeImage(url) {
     $.ajax({
         url: url,
         type: 'POST',

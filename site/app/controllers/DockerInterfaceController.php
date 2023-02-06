@@ -166,22 +166,21 @@ class DockerInterfaceController extends AbstractController {
             );
         }
         else {
-        $jsonFilePath = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
-            "config",
-            "autograding_containers.json"
-        );
-        $json = json_decode(file_get_contents($jsonFilePath), true);
-
-        $key = array_search($_POST['image'], $json[$_POST['capability']]);
-        if ($key !== false) {
-            unset($json[$_POST['capability']][$key]);
+            $jsonFilePath = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyInstallPath(),
+                "config",
+                "autograding_containers.json"
+            );
+            $json = json_decode(file_get_contents($jsonFilePath), true);
+            $key = array_search($_POST['image'], $json[$_POST['capability']]);
+            if ($key !== false) {
+                unset($json[$_POST['capability']][$key]);
+            }
+            $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
+            file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+            return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
         }
-        $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
-        file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-        return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
     }
-}
 
 
     /**
