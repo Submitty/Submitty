@@ -67,7 +67,7 @@ function addFieldOnChange() {
     }
 }
 
-
+// eslint-disable-next-line no-unused-vars
 function removeTicked(id,capability) {
     removal_capability = capability;
     const checkbox = document.getElementById(id);
@@ -85,6 +85,7 @@ function removeTicked(id,capability) {
     }
 }
 
+// eslint-disable-next-line no-unused-vars
 function removeImage(url) {
     $.ajax({
         url: url,
