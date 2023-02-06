@@ -67,7 +67,7 @@ function addFieldOnChange() {
     }
 }
 
-/*eslint no-unused-vars: ["error", { "args": "all" }]*/
+
 function removeTicked(id,capability) {
     removal_capability = capability;
     const checkbox = document.getElementById(id);
@@ -85,7 +85,6 @@ function removeTicked(id,capability) {
     }
 }
 
-/*eslint no-unused-vars: ["error", { "args": "all" }]*/
 function removeImage(url) {
     $.ajax({
         url: url,
