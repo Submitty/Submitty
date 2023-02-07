@@ -21,7 +21,10 @@
 
     <div id="student_download_view">
         <div>
-            <fieldset><legend>View and download submitted files? <span class="warning-text" id="warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span></legend>
+            <fieldset><legend>View and download submitted files? 
+            {% if gradeable.isBulkUpload() %}
+            <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span></legend>
+            {% endif %}
             <input type="radio" id="yes_student_download" name="student_download" value="true"
                     {{ gradeable.canStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
             <input type="radio" id="no_student_download" name="student_download" value="false"
@@ -192,10 +195,10 @@
 
     function onStudentDownloadChange() {
         if($('#no_student_download').is(':checked')) {
-            disableElementChildren('#warning', false);
+            disableElementChildren('#view-files-warning', false);
         }
         else {
-            disableElementChildren('#warning', true);
+            disableElementChildren('#view-files-warning', true);
         }
     }
 
@@ -210,6 +213,7 @@
 
         // Only show the settings if the setting is enabled
         onStudentViewChange();
+        onStudentDownloadChange();
         $('[name="student_view"]').change(onStudentViewChange);
         $('[name="student_download"]').change(onStudentDownloadChange);
 
