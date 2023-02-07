@@ -4,6 +4,7 @@ import shutil
 import unittest
 import contextlib
 import copy
+# import pytest 
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -69,9 +70,9 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(WORKING_DIR)
-        pass
+        # with contextlib.suppress(FileNotFoundError):
+        #     shutil.rmtree(WORKING_DIR)
+        # pass
 
     @classmethod
     def setUpClass(cls):
@@ -208,7 +209,7 @@ class TestAutogradingShipper(unittest.TestCase):
     """
     
 
-    @pytest.fixture(autouse=True)
+    # @pytest.fixture(autouse=True)
     def _pass_fixtures(self, capsys):
         self.capsys = capsys
     
@@ -268,3 +269,9 @@ class TestAutogradingShipper(unittest.TestCase):
                 form_config_file.write(base_config_file.read().replace("homework_01", ""))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_construct_valid_repository_url.txt"), "Failed to induce an invalid repository url")
+
+
+    def test_invalid_version(self):
+        paths = get_paths()
+        os.system('rm {}/homework_01/subfolder -rf; rm {}/homework_01/homework_01.cpp; cd {}/homework_01; git add -A; git commit -m \"empty\"'.format(TEST_DATA_DIR,  TEST_DATA_DIR))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
