@@ -423,17 +423,32 @@ class RainbowCustomization extends AbstractModel {
             // Get sections from the file
             $sectionsFromFile = (array) $this->RCJSON->getSection();
 
-            // If sections from database is larger than sections from file then there must be a new section in
-            // in the database, add new fields into sections from file with defaults
-            $sectionsFromFileCount = count($sectionsFromFile);
+            // gets the number of sections in the database
             $sectionsCount = count($sections);
 
-            if ($sectionsFromFileCount != $sectionsCount) {
-                for ($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++) {
-                    $sectionsFromFile[$i] = (string) $i;
+            // creates a copy of the database sections to compare against the file sections
+            $temp = array();
+            for ($i = 0; $i < $sectionsCount; $i++) {
+                $temp[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
+            }
+
+            // checks whether or not a sections has been added and upodates the file sections
+            $result = array_diff_key($temp, $sectionsFromFile); 
+            if($result) {
+                foreach ($result as $x => $val) {
+                    $sectionsFromFile[$x] = $val;
                 }
             }
 
+            // checks whether or not a sections has been removed and updates the file sections
+            $result = array_diff_key($sectionsFromFile, $temp); 
+            if($result) {
+                foreach ($result as $x => $val) {
+                    unset($sectionsFromFile[$x]);
+                }
+            }
+
+            // Collect sections out of the file
             return (object) $sectionsFromFile;
         }
         else {
