@@ -87,7 +87,7 @@ function updateUserPronouns () {
                     const {data} = response;
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
-                    // updat the pronouns
+                    // update the pronouns
                     $('#pronouns-row').html(`${icon} ${data.pronouns}`);
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
