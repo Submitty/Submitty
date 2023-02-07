@@ -427,7 +427,7 @@ class RainbowCustomization extends AbstractModel {
             $sectionsCount = count($sections);
 
             // creates a copy of the database sections to compare against the file sections
-            $temp = array();
+            $temp = [];
             for ($i = 0; $i < $sectionsCount; $i++) {
                 $temp[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
             }
