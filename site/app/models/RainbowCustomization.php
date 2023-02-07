@@ -432,7 +432,7 @@ class RainbowCustomization extends AbstractModel {
                 $temp[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
             }
 
-            // checks whether or not a sections has been added and upodates the file sections
+            // checks whether or not sections have been added and updates the file sections
             $result = array_diff_key($temp, $sectionsFromFile);
             if ($result) {
                 foreach ($result as $x => $val) {
@@ -440,7 +440,7 @@ class RainbowCustomization extends AbstractModel {
                 }
             }
 
-            // checks whether or not a sections has been removed and updates the file sections
+            // checks whether or not sections have been removed and updates the file sections
             $result = array_diff_key($sectionsFromFile, $temp);
             if ($result) {
                 foreach ($result as $x => $val) {
