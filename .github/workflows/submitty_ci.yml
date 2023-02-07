@@ -27,7 +27,7 @@ jobs:
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -49,7 +49,7 @@ jobs:
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -73,7 +73,7 @@ jobs:
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -100,9 +100,9 @@ jobs:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
               id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
             - name: Install Composer
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -137,9 +137,9 @@ jobs:
               coverage: pcov
           - name: Cache Composer
             id: composer-cache
-            run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
           - name: Install Composer
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
                 path: ${{ steps.composer-cache.outputs.dir }}
                 key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -164,7 +164,7 @@ jobs:
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
-          uses: actions/cache@v2
+          uses: actions/cache@v3
           with:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -186,7 +186,7 @@ jobs:
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
-          uses: actions/cache@v2
+          uses: actions/cache@v3
           with:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -320,7 +320,7 @@ jobs:
               sudo timedatectl set-timezone America/New_York
 
           - name: Cache pip
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ~/.cache/pip
               key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -348,9 +348,9 @@ jobs:
             id: composer-cache
             run: |
               cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-              echo "::set-output name=dir::$(composer config cache-files-dir)"
+              echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
           - name: Install composer Cache
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ${{ steps.composer-cache.outputs.dir }}
               key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
@@ -397,6 +397,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install moreutils
 
           - name: Install third party dependencies
             run: |
@@ -407,6 +408,10 @@ jobs:
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+                | sudo sponge /usr/local/submitty/config/submitty_users.json
+              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
           - name: Setup ldap
             run: |
@@ -479,7 +484,7 @@ jobs:
 
           # TODO: Remove this block after upgrading jsPDF
           - name: Cache Node Modules
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ~/.npm
               key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -543,7 +548,7 @@ jobs:
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-          - name: Run cypress e2e login tests with databse auth
+          - name: Run cypress e2e login tests with database auth
             uses: cypress-io/github-action@v4
             with:
               config: baseUrl=http://localhost

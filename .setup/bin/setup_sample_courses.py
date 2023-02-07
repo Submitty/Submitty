@@ -66,7 +66,7 @@ NOW = dateutils.get_current_time()
 
 def main():
     """
-    Main program execution. This gets us our commandline arugments, reads in the data files,
+    Main program execution. This gets us our commandline arguments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
@@ -106,7 +106,7 @@ def main():
     # permission errors exist) which ends up with just having a ton of
     # build failures. Better to wait on grading any homeworks until
     # we've done all steps of setting up a course.
-    print("pausing the autograding and jobs hander daemons")
+    print("pausing the autograding and jobs handler daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
@@ -167,10 +167,10 @@ def main():
                               user_id=user.id,
                               user_numeric_id = user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
@@ -180,10 +180,10 @@ def main():
                               user_id=user.id,
                               user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
@@ -265,10 +265,10 @@ def get_random_text_from_file(filename):
     line = ""
     with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
-        for num, aline in enumerate(comment):
+        for num, alternate_line in enumerate(comment):
             if random.randrange(num + 2):
                 continue
-            line = aline
+            line = alternate_line
     return line.strip()
 
 
@@ -336,10 +336,10 @@ def generate_random_users(total, real_users):
     :return:
     :rtype: list[User]
     """
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleFirstNames.txt')) as male_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenFirstNames.txt')) as woman_file:
-        last_names = last_file.read().strip().split()
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'familyNames.txt')) as family_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleGivenNames.txt')) as male_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenGivenNames.txt')) as woman_file:
+        family_names = family_file.read().strip().split()
         male_names = male_file.read().strip().split()
         women_names = woman_file.read().strip().split()
 
@@ -349,11 +349,11 @@ def generate_random_users(total, real_users):
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
-                first_name = random.choice(male_names)
+                given_name = random.choice(male_names)
             else:
-                first_name = random.choice(women_names)
-            last_name = random.choice(last_names)
-            user_id = last_name.replace("'", "")[:5] + first_name[0]
+                given_name = random.choice(women_names)
+            family_name = random.choice(family_names)
+            user_id = family_name.replace("'", "")[:5] + given_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
@@ -367,8 +367,8 @@ def generate_random_users(total, real_users):
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "user_firstname": first_name,
-                             "user_lastname": last_name,
+                             "user_givenname": given_name,
+                             "user_familyname": family_name,
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -552,8 +552,8 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper funtion that copys a annotation from the source to the destination.
-    The source annotation need to be modifed to reflect:
+    Specifically designed helper function that copies a annotation from the source to the destination.
+    The source annotation need to be modified to reflect:
         the file that the annotations belongs to
         the grader that is responsible for the annotation
 
@@ -587,12 +587,12 @@ class User(object):
         id
         numeric_id
         password
-        firstname
-        lastname
+        givenname
+        familyname
         email
         group
-        preferred_firstname
-        preferred_lastname
+        preferred_givenname
+        preferred_familyname
         access_level
         registration_section
         rotating_section
@@ -603,12 +603,12 @@ class User(object):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
         self.password = self.id
-        self.firstname = user['user_firstname']
-        self.lastname = user['user_lastname']
+        self.givenname = user['user_givenname']
+        self.familyname = user['user_familyname']
         self.email = self.id + "@example.com"
         self.group = 4
-        self.preferred_firstname = None
-        self.preferred_lastname = None
+        self.preferred_givenname = None
+        self.preferred_familyname = None
         self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
@@ -618,10 +618,10 @@ class User(object):
         self.manual = False
         self.sudo = False
 
-        if 'user_preferred_firstname' in user:
-            self.preferred_firstname = user['user_preferred_firstname']
-        if 'user_preferred_lastname' in user:
-            self.preferred_lastname = user['user_preferred_lastname']
+        if 'user_preferred_givenname' in user:
+            self.preferred_givenname = user['user_preferred_givenname']
+        if 'user_preferred_familyname' in user:
+            self.preferred_familyname = user['user_preferred_familyname']
         if 'user_email' in user:
             self.email = user['user_email']
         if 'user_group' in user:
@@ -825,8 +825,8 @@ class Course(object):
         reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
-                                                       user.get_detail(self.code, "lastname"),
+            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "givenname"),
+                                                       user.get_detail(self.code, "familyname"),
                                                        user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
@@ -1415,7 +1415,6 @@ class Course(object):
                               release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
-                                  option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
                                   response=poll["responses"][i],
@@ -1431,7 +1430,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
                     "student_id": user.id,
-                    "option_id": response_id
+                    "option_id": response_id+1
                 })
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
@@ -1439,7 +1438,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
+                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
                 })
 
         # add responses to DB
@@ -1817,6 +1816,7 @@ class Gradeable(object):
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
+            self.student_view_after_grades = False
             self.student_download = True
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
@@ -1848,6 +1848,9 @@ class Gradeable(object):
             if 'eg_annotated_pdf' in gradeable:
                 self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
                 self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "annotation")
+            if 'eg_bulk_test' in gradeable:
+                self.student_view = gradeable['eg_bulk_test'] is True
+                self.student_view_after_grades = gradeable['eg_bulk_test'] is True
 
             self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
             self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
@@ -1945,6 +1948,7 @@ class Gradeable(object):
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
+                         eg_student_view_after_grades=self.student_view_after_grades,
                          eg_student_download=self.student_download,
                          eg_student_submit=self.student_submit,
                          eg_config_path=self.config_path,

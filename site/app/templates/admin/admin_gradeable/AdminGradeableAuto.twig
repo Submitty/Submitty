@@ -70,41 +70,29 @@
                 "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
                 from the Course Settings Page. </p>
             <p> Manually type the full path to a configuration file, or select from the list below. </p>
-    <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+    <p> The dropdown list has all existing configurations that contain the current text.</p>
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
 
-        <div class="config_search_error" id="autograding_config_error">
-            {% if not currently_valid_repository %}
-                The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
-            {% endif %}
-        </div>
-
+    <div class="config_search_error" id="autograding_config_error">
+        {% if not currently_valid_repository %}
+            The current path is not valid, selecting Rebuild Gradeable without changing it will fail.
+        {% endif %}
+    </div>
 
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
-                <input class="config_search ignore drop-down-box" type="text" id="config_search" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="autograding configuration" name="autograding_config_path_displayed">
-                    <div style="margin-left: -45px; position: absolute; display: inline-block; width: auto; transform: translate(0, 25%);">
-                        <a class="fas fa-times key_to_click" id= "clear_search_button" style="margin: 0%;" onclick="clearButtonPress();" tabindex="0"></a>
-                        <a class="fas fa-chevron-down" style="padding: 0;" id= "drop-down-arrow"></a>
-                    </div>
-                </input>
-                <div class="drop-down-options" style="display: none;" id="config-options">
+                <select name="autograding_config_path" id="autograding_config_selector">
+                    <option>{{ gradeable.getAutogradingConfigPath() }}</option>
                     {% for path in all_config_paths %}
-                        <div class="path_autofill_option drop-down-option" data-name="{{path.0}}" data-value="{{path.1}}">{{path.0}}</div>
+                        <option value={{path.1}}>{{path.0}}</option>
                     {% endfor %}
-                </div>
+                </select>
             </div>
         </div>
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-        <br />
-        
-        {# text box with the path to the current config file, hidden but still used in js #}
-        <input style='width: 83%' id='input-provide-full-path' type="hidden" name='autograding_config_path'
-            value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
 
     <div class="notebook-builder-info">
@@ -168,70 +156,6 @@
         }
     }
 
-    function getConfigData() {
-        var names = [];
-        var paths = [];
-
-        $(".path_autofill_option").each(function() {
-            names.push($(this).attr("data-name"));
-            paths.push($(this).attr("data-value"));
-        });
-
-        return [names,paths];
-    }
-
-    function onConfigPathChange() {
-        data=getConfigData();
-        let full_path_obj = $('#input-provide-full-path');
-        let current_val = $('#config_search').val();
-
-        // Filters the autograding configs displayed based on the values in the box
-        $(".path_autofill_option").each(function() {
-            if ($(this).attr("data-name").toLowerCase().includes(current_val.toLowerCase()) ||
-                    $(this).attr("data-value").toLowerCase().includes(current_val.toLowerCase())) {
-                $(this).show();
-            }
-            else {
-                $(this).hide();
-            }
-        });
-
-        //if a name is entered change to the path
-
-        let index=-1;
-        for (i=0; i<data[0].length; i++) {
-            if (current_val == data[0][i]) {
-                index = i;
-            }
-        }
-        if (index != -1) {
-            current_val = data[1][index];
-        }
-        full_path_obj.val(current_val);
-        full_path_obj.change();
-
-
-        //if path matches display the name
-        for (i=0; i<data[1].length; i++) {
-            if (full_path_obj.val() == data[1][i]) {
-                $('#config_search').val(data[0][i]);
-
-                // Update visibility of notebook builder edit button
-                const edit_button_div = document.querySelector('.notebook-builder-edit-button-div');
-                const visibility = data[0][i].split(':')[0] !== 'UPLOADED' ? 'hidden' : 'visible';
-                edit_button_div.style.visibility = visibility;
-
-                return;
-            }
-        }
-        $('#config_search').val(full_path_obj.val());
-    }
-
-    function clearButtonPress() {
-        $('#config_search').val('');
-        $('.drop-down-box').trigger("input");
-    }
-
     function onStudentViewChange() {
         if ($('#radio_ef_student_upload').is(':checked') || $('#radio_ef_bulk_upload').is(':checked')) {
             if ($('#yes_student_view_after_grades').is(':checked')) {
@@ -266,39 +190,6 @@
         }
     }
 
-    function dropDownBoxOnClick() {
-        let options = $(this).parent().find(".drop-down-options");
-        if (!$(options).is(":visible")) {
-            $(options).hide();
-        }
-    }
-    
-    function dropDownArrowOnClick() {
-        let options = $(this).parent().parent().find(".drop-down-options");
-        if ($(options).is(":visible")) {
-            $(options).hide();
-        }
-        else {
-            $(options).show();
-        }
-    }
-
-    function dropDownOptionOnClick() {
-        let options = $(this).parent();
-        $(options).hide();
-        let box = $(options).parent().find(".drop-down-box");
-        // set the box's value to the text of the option
-        $(box).val($(this).text());
-        $(box).trigger("focusout");
-    }
-
-    function hideDropDownOptions(){
-        let options = $(".drop-down-options");
-        if ($(options).is(":visible")) {
-            $(options).hide();
-        }
-    }
-
     $(document).ready(function() {
 
         // Hide PDF settings if not in use
@@ -312,10 +203,6 @@
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
 
-        // Update the text box when the path config changes
-        onConfigPathChange();
-        $('#config_search').on("focusout", onConfigPathChange);
-
         $('input[name=student_view_after_grades]').change(function() {
             const elem = $('#yes_student_view');
             elem.prop('checked', true);
@@ -328,12 +215,15 @@
             sub.change();
         });
 
-        $('.drop-down').on("click", function(event){
-            event.stopPropagation();
+        // Register select2 for #autograding_config_selector
+        // https://stackoverflow.com/a/30021059
+        $('#autograding_config_selector').select2({
+            tags: true,
+            theme: "bootstrap-5",
+            createTag: (params) => ({
+                id: params.term,
+                text: params.term
+            })
         });
-        $(document).on("click", hideDropDownOptions);
-        $('.drop-down-box').on("click", dropDownBoxOnClick);
-        $('#drop-down-arrow').on("click", dropDownArrowOnClick);
-        $('.drop-down-option').on("click",dropDownOptionOnClick);
     });
 </script>

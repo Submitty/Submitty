@@ -15,7 +15,7 @@ use app\libraries\FileUtils;
  * This class is a PHP representation of a customization.json file as used in RainbowGrades and provides means
  * to update its fields.
  *
- * When adding to data to any property, the appropriate setter must be used as they preform additional validation.
+ * When adding to data to any property, the appropriate setter must be used as they perform additional validation.
  */
 class RainbowCustomizationJSON extends AbstractModel {
     protected $core;
