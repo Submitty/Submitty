@@ -27,23 +27,42 @@
                             Possible responses:
                         </h2>
                     </legend>
-                    {% set button_type = (poll_type == "single-response" ? "radio": "checkbox") %}
+                    {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
                         <label class="radio" for="answer-no-response">
-                            <input class="response-btn" type={{button_type}} value="-1" name="answers[]" id="answer-no-response" {{ poll.getUserResponse(user_id) is same as(null) ? "checked" : "" }} {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}>
+                            <input class="no-response-radio response-btn"
+                                   type="{{button_type}}"
+                                   value="-1"
+                                   name="answers[]"
+                                   id="answer-no-response"
+                                   {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="clearResponses()"
+                            >
                             No response
                         </label>
                         <br/>
                         <br/>
                     {% endif %}
                     {% set index = 0 %}
-                    {% for response in poll.getResponses() %}
+
+                    {% set user_selections = poll.getSelectedOptionIds() %}
+                    {% for option in poll.getOptions() %}
                         <div class="radio">
-                            <input class="response-btn" type={{ button_type }} aria-label="Option {{ index + 1 }}" value="{{ response }}" name="answers[]" id="answer-{{index}}" {{ response in poll.getUserResponse(user_id) ? "checked" : "" }} {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}/>
+                            <input class="response-radio response-btn"
+                                   type={{ button_type }}
+                                   aria-label="Option {{ index + 1 }}"
+                                   value="{{ option.getId() }}"
+                                   name="answers[]"
+                                   id="answer-{{index}}"
+                                   {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="disableNoResponse();"
+                            />
                             {% include "misc/Markdown.twig" with {
-                                    "content" : poll.getResponseString(response),
-                                    "style": "display: inline"
-                                } only %}
+                                "content" : option.getResponse(),
+                                "style": "display: inline"
+                            } only %}
                             <br/>
                             <br/>
                         </div>
@@ -84,39 +103,47 @@
         return desired_size;
     }
 
+    function disableNoResponse() {
+        $(".no-response-radio").prop("checked", false);
+    }
+
+    function clearResponses() {
+        if ($(".no-response-radio").is(':checked')) {
+            $(".response-radio").prop("checked", false);
+        }
+    }
+
     {% if user_admin or poll.isHistogramAvailable() %}
-        window.onload = function () {
-            const data = [{
-                type: "bar",
-                    x: [],
-                    y: []
-                }];
-            {% for answer, number in results %}
-                data[0].x.push("{{ poll.getResponseString(answer)|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-                data[0].y.push({{ number }});
-            {% endfor %}
-            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+    window.onload = function () {
+        const data = [{
+            type: "bar",
+            x: [],
+            y: []
+        }];
+        {% for option in poll.getOptions() %}
+        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+        data[0].y.push({{ response_counts[option.getId()] }});
+        {% endfor %}
+        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+        const width = get_new_chart_width();
+        const layout = {
+            title: title_text.documentElement.textContent,
+            paper_bgcolor: $("body").css("--default-white"),
+            plot_bgcolor: $("body").css("--default-white"),
+            font: {
+                color: $("body").css("--text-black")
+            },
+            width: width
+        }
+        Plotly.newPlot("chartContainer", data, layout);
+        window.addEventListener('resize', function() {
             const width = get_new_chart_width();
-            const layout = {
-                title: title_text.documentElement.textContent,
-                paper_bgcolor: $("body").css("--default-white"),
-                plot_bgcolor: $("body").css("--default-white"),
-                font: {
-                    color: $("body").css("--text-black")
-                },
+            const container = document.getElementById('chartContainer');
+            const update = {
                 width: width
             }
-
-            Plotly.newPlot("chartContainer", data, layout);
-
-            window.addEventListener('resize', function() {
-                const width = get_new_chart_width();
-                const container = document.getElementById('chartContainer');
-                const update = {
-                    width: width
-                }
-                Plotly.relayout(container, update);
-            });
-        }
+            Plotly.relayout(container, update);
+        });
+    }
     {% endif %}
 </script>

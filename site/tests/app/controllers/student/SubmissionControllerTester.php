@@ -71,8 +71,8 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -254,7 +254,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Creates a file with teh given contents to be used to upload for a specified part.
+     * Creates a file with the given contents to be used to upload for a specified part.
      *
      * @param string $filename
      * @param string $content

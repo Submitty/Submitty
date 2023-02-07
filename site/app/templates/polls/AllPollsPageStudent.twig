@@ -23,19 +23,19 @@
             <tbody>
                 {% for poll in todays_polls %}
                     <tr>
-                        <td align="left"> {{ poll.getName() }} </td>
-                        <td align="left">
-                            {% set response_label = poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
+                        <td style="text-align: left"> {{ poll.getName() }} </td>
+                        <td style="text-align: left">
+                            {% set response_label = poll.getUserResponses()|length == 0  ? "No Response" : poll.getUserResponses() | map(r => r.getOption().getResponse()) | join(', ') %}
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
                             } only %}
                         </td>
                         <td>
-                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
+                            <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
-                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                    {% if poll.getUserResponses()|length == 0 %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
                                         <button type="submit" class="btn btn-primary"> Edit Answer
@@ -76,19 +76,19 @@
             <tbody>
                 {% for poll in older_polls %}
                     <tr>
-                        <td align="left"> {{ poll.getName() }} </td>
-                        {% set response_label = poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getAllResponsesString(poll.getUserResponse(user_id)) %}
-                        <td align="left">
+                        <td style="text-align: left"> {{ poll.getName() }} </td>
+                        {% set response_label = poll.getUserResponses()|length == 0  ? "No Response" : poll.getUserResponses() | map(r => r.getOption().getResponse()) | join(', ') %}
+                        <td style="text-align: left">
                             {% include "misc/Markdown.twig" with {
                                 content: response_label
                             } only %}
                         </td>
                         <td>
-                            <a href="{{ base_url }}/viewPoll/{{ poll.getId() }}">
+                            <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                                 {% if poll.isOpen() %}
-                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                    {% if poll.getUserResponses()|length == 0 %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
                                         <button type="submit" class="btn btn-primary"> Edit Answer
