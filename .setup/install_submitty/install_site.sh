@@ -123,12 +123,36 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
-# clear old annotation cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/annotations" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/annotations"
+# clear old routes cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
 fi
-# create annotation cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/annotations
+# create routes cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
+
+# clear old doctrine cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
+fi
+# create doctrine cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
+
+# clear old access control cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
+fi
+# create access control cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
+
+# clear old doctrine proxy classes
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
+fi
+# create doctrine proxy classes directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -241,6 +265,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+    # select2
+    mkdir ${VENDOR_FOLDER}/select2
+    cp -R ${NODE_FOLDER}/select2/dist/* ${VENDOR_FOLDER}/select2
+    # select2-theme-bootstrap5
+    mkdir ${VENDOR_FOLDER}/select2/bootstrap5-theme
+    cp -R ${NODE_FOLDER}/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css ${VENDOR_FOLDER}/select2/bootstrap5-theme
     # shortcut-buttons-flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
     cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
@@ -285,6 +315,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
 fi
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# Permissions for PWA
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
@@ -298,6 +330,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc

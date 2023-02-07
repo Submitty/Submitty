@@ -9,7 +9,7 @@
 /*
    The algorithm for shortest edit script was in derived from
    Eugene W. Myers's paper, "An O(ND) Difference Algorithm and Its Variations",
-   avalible here: http://www.xmailserver.org/diff2.pdf
+   available here: http://www.xmailserver.org/diff2.pdf
 
    It was published in the journal "Algorithmica" in November 1986.
 
@@ -38,7 +38,7 @@
 // the edit distance in distance and pointers to objects a and b
 /*
 @param T* student_output - a pointer to a vector<vector<string> > that is the student output file
-@param T* inst_output - a pointer to a vector<vector<stirng> > that is the expected output file
+@param T* inst_output - a pointer to a vector<vector<string> > that is the expected output file
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file
 */
@@ -65,9 +65,9 @@ template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output
 
   //loop until the correct diff (d) value is reached, or until end is reached
   for ( int d = 0; d <= ( student_output_size + inst_output_size ); d++ ) {
-    // find all the possibile k lines represented by  y = x-k from the max
+    // find all the possible k lines represented by  y = x-k from the max
     // negative diff value to the max positive diff value
-    // represents the possibilities for additions and deletions at diffrent
+    // represents the possibilities for additions and deletions at different
     // points in the file
     for ( int k = -d; k <= d; k += 2 ) {
       //which is the farthest path reached in the previous iteration?
@@ -199,9 +199,9 @@ template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extr
   return meta_diff;
 }
 
-// Takes a metaData object and parses the snake to constuct a vector of
-// Change objects, which each hold the diffrences between a and b, lumped
-// by if they are neighboring. Also fills diff_a and diff_b with the diffrences
+// Takes a metaData object and parses the snake to construct a vector of
+// Change objects, which each hold the differences between a and b, lumped
+// by if they are neighboring. Also fills diff_a and diff_b with the differences
 // All differences are stored by element number
 template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extraStudentOutputOk ) {
        Difference* diff = new Difference();
@@ -293,7 +293,7 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 }
 
 // Takes a Difference object that has it's changes vector filled and parses to
-// find substitution chunks. It then runs a secondary diff to find diffrences
+// find substitution chunks. It then runs a secondary diff to find differences
 // between the elements of each version of the line
 template<class T> Difference* sesSecondary ( Difference* text_diff,
                metaData< T > & meta_diff, bool extraStudentOutputOk  ) {
@@ -338,7 +338,7 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 // Runs all the ses functions
 /*
 @param T* student_output - a pointer to a vector<vector<string> > that is the student output file
-@param T* inst_output - a pointer to a vector<vector<stirng> > that is the expected output file
+@param T* inst_output - a pointer to a vector<vector<string> > that is the expected output file
 @param bool secondary
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file
