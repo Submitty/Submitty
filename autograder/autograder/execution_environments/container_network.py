@@ -19,7 +19,7 @@ class Container():
     can be made up of 1 or more containers.
     """
     def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one,
-                 is_test_environment, log_function, log_meta):
+                 is_test_environment, log_function, log_container):
         self.name = container_info['container_name']
 
         # If there are multiple containers, each gets its own directory under
@@ -45,7 +45,7 @@ class Container():
         # This will be populated later
         self.return_code = None
         self.log_function = log_function
-        self.log_meta = log_meta
+        self.log_container = log_container
         self.container = None
         # A socket for communication with the container.
         self.socket = None
@@ -63,7 +63,6 @@ class Container():
     def create(self, execution_script, arguments, more_than_one):
         """ Create (but don't start) this container. """
         container_create_time = timer()
-        self.log_meta('CREATE BEGIN', self.full_name)
 
         client = docker.from_env(timeout=60)
 
@@ -119,8 +118,8 @@ class Container():
             client.close()
             raise
 
-        self.log_meta(
-            'CREATE END',
+        self.log_container(
+            'CREATED',
             self.full_name,
             self.container.short_id,
             timer() - container_create_time
@@ -129,14 +128,12 @@ class Container():
 
     def start(self, logfile):
         container_start_time = timer()
-        self.log_meta('START BEGIN', self.full_name, self.container.short_id)
 
         self.container.start()
         self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
 
-        self.container_grading_time = timer()
-        self.log_meta(
-            'START END',
+        self.log_container(
+            'STARTED',
             self.full_name,
             self.container.short_id,
             timer() - container_start_time
@@ -150,6 +147,7 @@ class Container():
 
     def cleanup_container(self, logfile):
         """ Remove this container. """
+        cleanup_start = timer()
         if not self.is_server:
             status = self.container.wait()
             self.return_code = status['StatusCode']
@@ -170,10 +168,11 @@ class Container():
             f'{dateutils.get_current_time()} docker container '
             f'{self.container.short_id} destroyed'
         )
-        self.log_meta(
-            'DESTROY',
+        self.log_container(
+            'DESTROYED',
             self.full_name,
-            self.container.short_id, timer() - self.container_grading_time
+            self.container.short_id,
+            timer() - cleanup_start
         )
 
 
@@ -222,7 +221,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                         greater_than_one,
                         self.is_test_environment,
                         self.log_message,
-                        self.log_container_meta
+                        self.log_container
                     )
                 )
         else:
@@ -243,7 +242,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     False,
                     self.is_test_environment,
                     self.log_message,
-                    self.log_container_meta
+                    self.log_container
                 )
             )
         self.containers = containers
@@ -275,7 +274,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     greater_than_one_solution_container,
                     self.is_test_environment,
                     self.log_message,
-                    self.log_container_meta
+                    self.log_container
                 )
             )
         self.solution_containers = solution_containers
@@ -757,7 +756,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             False,
             self.is_test_environment,
             self.log_message,
-            self.log_container_meta
+            self.log_container
         )
         execution_script = os.path.join(container.directory, executable)
         try:

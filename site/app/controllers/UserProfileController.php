@@ -107,21 +107,21 @@ class UserProfileController extends AbstractController {
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_firstname_change']) && empty($_POST['user_lastname_change'])) {
-            $newFirstName = trim($_POST['first_name']);
-            $newLastName = trim($_POST['last_name']);
+        if (empty($_POST['user_givenname_change']) && empty($_POST['user_familyname_change'])) {
+            $newGivenName = trim($_POST['given_name']);
+            $newFamilyName = trim($_POST['family_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
-            if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-                $user->setPreferredFirstName($newFirstName);
-                $user->setPreferredLastName($newLastName);
+            if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
+                $user->setPreferredGivenName($newGivenName);
+                $user->setPreferredFamilyName($newFamilyName);
                 //User updated flag tells auto feed to not clobber some of the user's data.
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
-                    'first_name' => $newFirstName,
-                    'last_name' => $newLastName
+                    'given_name' => $newGivenName,
+                    'family_name' => $newFamilyName
                 ]);
             }
             else {
@@ -161,12 +161,12 @@ class UserProfileController extends AbstractController {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
-                // image_data and mime_type will be set but be sure that code doesnt break check for null exception
+                // image_data and mime_type will be set but be sure that code doesn't break check for null exception
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Profile photo updated successfully!',
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
                     'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
-                    'image_alt_data' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                    'image_alt_data' => $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName(),
                     'image_flagged_state' => $user->getDisplayImageState(),
                 ]);
             }

@@ -171,8 +171,7 @@ function newDeleteCourseMaterialForm(id, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).text(file_name);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -214,25 +213,80 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsFolderForm(id, dir, is_hidden) {
+function newEditCourseMaterialsFolderForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let folder_sections = $(tag).data('sections');
+    let partial_sections = $(tag).data('partial-sections');
+    let release_time =  $(tag).data('release-time');
+    let is_hidden = $(tag).data('hidden-state');
+    const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
-    $('#hide-folder-materials-checkbox-edit', form).prop('checked', false);
-    if (is_hidden === true) {
-        $('#hide-folder-materials-checkbox-edit', form).prop('checked', true);
+
+    let element = document.getElementById("edit-folder-picker");
+    element._flatpickr.setDate(release_time);
+
+    let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
+    if (is_hidden > 0) {
+        hide_materials_box.prop('checked', true).trigger('change');
+        if (is_hidden === partially_hidden) {
+            hide_materials_box.attr('class', 'partial-checkbox');
+            $(hide_materials_box.siblings()[0]).before("<span><br><em>(Currently, some materials inside this folder are hidden.)</em></span>");
+        }
     }
-    $('#hide-folder-materials-checkbox-edit:checked ~ #edit-folder-form-hide-warning').show();
-    $('#hide-folder-materials-checkbox-edit:not(:checked) ~ #edit-folder-form-hide-warning').hide();
+    else {
+        hide_materials_box.prop('checked', false).trigger('change');
+    }
+
+    $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
+    let showSections = function() {
+        $("#all-sections-showing-no-folder", form).prop('checked',false);
+        $("#all-sections-showing-yes-folder", form).prop('checked',true);
+        $("#show-some-section-selection-folder-edit", form).show();
+    }
+    let sectionsVisible = false;
+    if (folder_sections.length !== 0) {
+        for(let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
+            if ($(this).attr('class') === '') {
+                $(this).removeAttr('class');
+            }
+        }
+        showSections();
+        sectionsVisible = true;
+    }
+    else{
+        $("#show-some-section-selection-folder-edit", form).hide();
+        $("#all-sections-showing-yes-folder", form).prop('checked',false);
+        $("#all-sections-showing-no-folder", form).prop('checked',true);
+    }
+    if (partial_sections.length !== 0) {
+        for(let index = 0; index < partial_sections.length; ++index) {
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
+            $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
+        }
+        if (!sectionsVisible) {
+            showSections();
+        }
+    }
+
     $('#material-folder-edit-form', form).attr('data-id', id);
-    $("#show-some-section-selection-edit", form).hide();
-    $("#all-sections-showing-yes", form).prop('checked',false);
-    $("#all-sections-showing-no", form).prop('checked',true);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
+function newEditCourseMaterialsForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let this_file_section = $(tag).data('sections');
+    let this_hide_from_students = $(tag).data('hidden-state');
+    let release_time = $(tag).data('release-time');
+    let is_link = $(tag).data('is-link');
+    let link_title = $(tag).data('link-title');
+    let link_url = $(tag).data('link-url');
 
     let form = $("#edit-course-materials-form");
 
@@ -240,12 +294,12 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students === "1"){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    if(this_hide_from_students === 1){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
     }
 
     else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
     }
 
     $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
@@ -266,11 +320,9 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    if (is_link === "1") {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
+    const title_label = $("#edit-url-title-label", form);
+    const url_label = $("#edit-url-url-label", form);
+    if (is_link === 1) {
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
@@ -279,6 +331,14 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
+    }
+    else {
+        if (title_label.css('display') !== 'none') {
+            title_label.css('display', 'none');
+        }
+        if (url_label.css('display') !== 'none') {
+            url_label.css('display', 'none');
+        }
     }
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
@@ -418,7 +478,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -428,7 +488,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -436,7 +496,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -444,7 +504,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -453,17 +513,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -513,7 +573,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
   function c(a, b) {
     const c = document.createElement("textarea");
     c.name = a;
@@ -619,7 +679,11 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    let download_path = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    if ($("#submission_browser").length > 0) {
+        download_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.location = download_path;
 }
 
 function downloadCourseMaterial(id) {
@@ -647,7 +711,7 @@ function checkColorActivated() {
     pos = 0;
     seq = "&&((%'%'BA\r";
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
-    
+
     function inject() {
         $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
     }
@@ -805,6 +869,9 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
         }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+        }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
             iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
@@ -921,7 +988,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
         }
-    })  
+    })
     .fail(function() {
         window.alert("[SAVE ERROR] Refresh Page");
     });
@@ -1099,7 +1166,7 @@ function refreshOnResponseOverriddenGrades(json) {
     else {
         json['data']['users'].forEach(function(elem){
             let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
       $("#load-overridden-grades").removeClass('d-none');
@@ -1435,7 +1502,11 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("attachments")) {
       directory = "attachments";
     }
-    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    if ($("#submission_browser").length > 0) {
+        file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
 
@@ -1489,7 +1560,7 @@ function flagUserImage(user_id, flag) {
                 let new_content;
                 if (data.image_data && data.image_mime_type) {
                     new_content = document.createElement('img');
-                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('alt', data.given_family_username);
                     new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
                 }
                 else {
@@ -1561,7 +1632,7 @@ function previewMarkdown(mode) {
     if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
     if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
-    if (mode === 'preview') { 
+    if (mode === 'preview') {
         if (markdown_header.attr('data-mode') === 'preview') return;
         accessibility_message.hide();
         markdown_textarea.hide();

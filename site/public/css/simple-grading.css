@@ -9,6 +9,50 @@
     flex-direction: column;
 }
 
+th {
+    background: var(--standard-light-gray);
+}
+
+tr > th:first-child,
+tr > td:first-child {
+    position: sticky;
+    left: 0;
+    border-left: 1px solid var(--standard-medium-gray);
+}
+
+tr > th:nth-child(2),
+tr > td:nth-child(2) {
+    position: sticky;
+    left: 1.25rem;
+}
+
+tr > th:nth-child(3),
+tr > td:nth-child(3) {
+    position: sticky;
+    left: 5.25rem;
+}
+
+tr > th:nth-child(4),
+tr > td:nth-child(4) {
+    position: sticky;
+    left: 10.75rem;
+}
+
+tr > th:nth-child(5),
+tr > td:nth-child(5) {
+    position: sticky;
+    left: 16.75rem;
+    border-right: 1px solid var(--standard-medium-gray);
+}
+
+tr:nth-child(odd) td:nth-child(n+1):nth-child(-n+5) {
+    background: var(--default-white);
+}
+
+tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
+    background: var(--standard-light-gray);
+}
+
 #data-table td:focus,
 #data-table input:focus {
     outline: 3px dashed var(--standard-medium-blue);
@@ -27,6 +71,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .sticky-top label,
 .sticky-top .not-sticky {
     display: none !important;
+}
+
+.scrollable-table {
+    overflow-x: auto;
 }
 
 .simple-full-credit {

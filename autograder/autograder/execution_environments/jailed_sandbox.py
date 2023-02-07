@@ -22,11 +22,11 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
 
     def _handle_error_signal(self, _signum, _frame):
         """
-        Leave a message at logs/autograding and meta_log.txt when it receives an error signal
+        Leave a message at logs/autograding and container_log.txt when it receives an error signal
         from untrusted_execute.
         """
         self.log_message("ERROR: untrusted_execute reported an error")
-        self.log_container_meta("ERROR: untrusted_execute reported an error")
+        self.log_container("ERROR: untrusted_execute reported an error")
 
     def setup_for_archival(self, overall_log):
         """

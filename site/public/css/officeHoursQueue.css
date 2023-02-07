@@ -52,7 +52,7 @@ th {
 
 .fully-transparent {
     background: transparent !important;
-    color: white;
+    color: var(--default-black) !important;
 }
 
 .filter-buttons {

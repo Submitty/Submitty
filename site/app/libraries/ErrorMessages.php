@@ -14,7 +14,7 @@ class ErrorMessages {
      *
      * @param int $code Error code from upload
      *
-     * @return string Message for what went wront with upload
+     * @return string Message for what went wrong with upload
      */
     public static function uploadErrors($code) {
         switch ($code) {
@@ -43,7 +43,7 @@ class ErrorMessages {
       * Given a response code after opening a Zip Archive, check if anything went wrong
       * @param bool | int $res Error code or status for opening archive
       *
-      * @return string Message for what went wront with upload
+      * @return string Message for what went wrong with upload
       */
     public static function getZipErrorMessage($res) {
 
@@ -59,7 +59,7 @@ class ErrorMessages {
             case \ZipArchive::ER_COMPNOTSUPP:
                 return "Compression method not supported.";
             case \ZipArchive::ER_INTERNAL:
-                return "Internel Error.";
+                return "Internal Error.";
             case \ZipArchive::ER_INCONS:
                 return "Zip archive inconsistent.";
             case \ZipArchive::ER_CRC:
