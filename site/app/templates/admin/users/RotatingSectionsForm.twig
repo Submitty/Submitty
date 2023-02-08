@@ -3,13 +3,13 @@
 
         $("[name='rotating_assignment_type']").change(function() {
             var val = $(this).val();
-			if (val != "redo") {
+			if (val !== "redo") {
 				$('#redo-data').hide();
 			}
             else {
 				$('#redo-data').show();
             }
-            if (val != "fewest"){
+            if (val !== "fewest"){
                 $('#fewest-exclude').hide();
             }else{
                 $('#fewest-exclude').show();
