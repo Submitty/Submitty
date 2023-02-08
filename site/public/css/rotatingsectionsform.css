@@ -12,7 +12,8 @@ fieldset > * {
     margin: 0.5em 0;
 }
 
-#redo-data, #fewest-exclude {
+#redo-data,
+#fewest-exclude {
     margin-left: 13px;
     border-left: solid var(--solution-text-background) 1px;
     padding-left: 13px;
