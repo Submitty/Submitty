@@ -44,7 +44,7 @@ def main():
     res.close()
 
     # Find all ids of students and graders
-    all_student_ids = [x['user_id'] for x in all_users if x['user_group'] == 4 and x['registration_section'] != None]
+    all_student_ids = [x['user_id'] for x in all_users if x['user_group'] == 4 and x['registration_section'] is not None]
     all_grader_ids = [x['user_id'] for x in all_users if x['user_group'] < 4]
 
     # create a lookup table from user id to name
@@ -52,14 +52,14 @@ def main():
     for x in all_users:
         user_name = ""
 
-        if x["user_preferred_givenname"] != None:
+        if x["user_preferred_givenname"] is not None:
             user_name += x["user_preferred_givenname"]
         else:
             user_name += x["user_givenname"]
         
         user_name += " "
 
-        if x["user_preferred_familyname"] != None:
+        if x["user_preferred_familyname"] is not None:
             user_name += x["user_preferred_familyname"]
         else:
             user_name += x["user_familyname"]
