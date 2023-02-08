@@ -71,7 +71,7 @@ class PlagiarismUtils {
             if ($a->getStart() > $b->getStart()) {
                 return 1;
             }
-            else if ($a->getStart() < $b->getStart()) {
+            elseif ($a->getStart() < $b->getStart()) {
                 return -1;
             }
             else {

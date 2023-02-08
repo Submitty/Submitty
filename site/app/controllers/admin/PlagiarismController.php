@@ -1039,7 +1039,7 @@ class PlagiarismController extends AbstractController {
             if (new DateTime($a['due_date']) > new DateTime($b['due_date'])) {
                 return 1;
             }
-            else if (new DateTime($a['due_date']) < new DateTime($b['due_date'])) {
+            elseif (new DateTime($a['due_date']) < new DateTime($b['due_date'])) {
                 return -1;
             }
             else {
