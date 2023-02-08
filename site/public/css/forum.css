@@ -31,7 +31,7 @@
 #thread_list {
     padding-right: 0;
     overflow-y: auto;
-    height: 81vh;
+    height: 100%;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -445,7 +445,7 @@
 
 #thread-container {
     position: relative;
-    height: 100%;
+    height: 81vh;
     overflow-y: hidden;
 }
 
