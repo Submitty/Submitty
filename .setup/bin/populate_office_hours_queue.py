@@ -18,8 +18,7 @@ def main():
 
     # set up the database connection
     database = "submitty_" + term_id + "_sample"
-    engine = create_engine("postgresql:///{}?host={}&port={}&user={}&password={}"
-                           .format(database, DB_HOST, DB_PORT, DB_USER, DB_PASS))
+    engine = create_engine(f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
     conn = engine.connect()
     metadata = MetaData(bind=engine)
     queues_table = Table("queue_settings", metadata, autoload=True)
@@ -157,7 +156,7 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        res = conn.execute("SELECT max(time_in) FROM queue WHERE user_id = '{}' AND UPPER(TRIM(queue_code)) = UPPER(TRIM('{}')) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)".format(queue_entry["user_id"], queue_entry["queue_code"]))
+        res = conn.execute(f"SELECT max(time_in) FROM queue WHERE user_id = '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = UPPER(TRIM('{queue_entry['queue_code']}')) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
         queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
         res.close()
 
