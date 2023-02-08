@@ -306,6 +306,11 @@ parameters:
 			path: app/entities/VcsAuthToken.php
 
 		-
+			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
+			count: 1
+			path: app/entities/course/CourseMaterialAccess.php
+
+		-
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$body is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
@@ -349,6 +354,11 @@ parameters:
 			message: "#^Property app\\\\entities\\\\email\\\\EmailEntity\\:\\:\\$user_id is never written, only read\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
+
+		-
+			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\:\\:\\$lichen_run type mapping mismatch\\: database can contain app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\|null but property expects app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismRunAccess.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"

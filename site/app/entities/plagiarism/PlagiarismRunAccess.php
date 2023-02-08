@@ -24,7 +24,7 @@ class PlagiarismRunAccess {
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="app\entities\plagiarism\PlagiarismConfig", inversedBy="access_times", nullable=false)
+     * @ORM\ManyToOne(targetEntity="app\entities\plagiarism\PlagiarismConfig", inversedBy="access_times")
      * @var PlagiarismConfig
      */
     protected $lichen_run;
