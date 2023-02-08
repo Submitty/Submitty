@@ -3428,12 +3428,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     /**
      * Edit the user's message from table seeking_team
-     *
-     * @param string $g_id
-     * @param string $user_id
-     * @param string $message
      */
-    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+    public function updateSeekingTeamMessageById(string $g_id, string $user_id, ?string $message) {
         $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
     }
 
@@ -4938,8 +4934,8 @@ AND gc_id IN (
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
-        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", [$regrade_id]);
     }
 
     public function deleteGradeable($g_id) {
