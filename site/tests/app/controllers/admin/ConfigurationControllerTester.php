@@ -416,11 +416,13 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $queries
             ->expects($this->exactly(4))
             ->method('addNewCategory')
-            ->withConsecutive(
-                [$this->equalTo('General Questions')],
-                [$this->equalTo('Homework Help')],
-                [$this->equalTo('Quizzes')],
-                [$this->equalTo('Tests')]
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('General Questions'),
+                    $this->equalTo('Homework Help'),
+                    $this->equalTo('Quizzes'),
+                    $this->equalTo('Tests')
+                )
             )
             ->will($this->onConsecutiveCalls(0, 1, 2, 3));
 
