@@ -12,7 +12,7 @@ use InvalidArgumentException;
  * as the single argument to the constructor:
  *
  * ```php
- * @ FeatureFlag('foo')
+ * @FeatureFlag("foo")
  * class Foo {}
  * ```
  *

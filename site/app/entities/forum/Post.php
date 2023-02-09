@@ -28,8 +28,8 @@ class Post {
 
     /**
      * @ORM\ManyToOne(targetEntity="\app\entities\forum\Thread", inversedBy="posts")
-     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
-     * @var Thread|null
+     * @ORM\JoinColumn(name="thread_id", referencedColumnName="id", nullable=false)
+     * @var Thread
      */
     protected $thread;
 

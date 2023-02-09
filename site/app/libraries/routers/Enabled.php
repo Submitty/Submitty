@@ -17,7 +17,7 @@ use InvalidArgumentException;
  * Example Usage:
  *
  * ```php
- * @ Enabled("forum")
+ * @Enabled("forum")
  * class ForumController {}
  * ```
  *
