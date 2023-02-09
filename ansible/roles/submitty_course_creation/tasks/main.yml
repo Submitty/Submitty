@@ -74,6 +74,7 @@
     recurse: yes
     mode: g+s
 
+#TODO this wouldnt work unless the account already existed?
 # - name: Add dummy student account for "{{ instructor }}".
 #   user:
 #     name: "{{ instructor }}-stu"
