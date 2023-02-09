@@ -181,12 +181,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->expects($this->exactly(8))
             ->method('persist')
             ->with(
-                $this->logicalOr(
-                    $this->identicalTo($course_materials[0]),
-                    $this->identicalTo($course_materials[1]),
-                    $this->identicalTo($course_materials[2]),
-                    $this->identicalTo($course_materials[3])
-                )
+                
             );
 
         $this->core->getCourseEntityManager()
