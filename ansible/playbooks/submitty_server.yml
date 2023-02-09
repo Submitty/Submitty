@@ -12,6 +12,6 @@
       prompt: "Which submitty repo do you want to use (e.g. git@github.com:Submitty/Submitty.git)"
       default: git@github.com:Submitty/Submitty.git
 
-    - name: sibmitty_repo_version
+    - name: submitty_repo_version
       prompt: "Which branch would you like to do (e.g. main)"
       default: main
