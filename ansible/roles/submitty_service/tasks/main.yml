@@ -4,55 +4,65 @@
     path: /usr/local/submitty/GIT_CHECKOUT
     state: directory
 
-
-# TODO change submitty repo and branch as parameters with default to main submitty 
 - name: Checkout submitty git repo
   ansible.builtin.git:
-    repo: 
+    repo: "{{ submitty_repo }}"
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
-    version: 
+    version: "{{ submitty_repo_version }}" 
     force: yes
     update: yes
 
-# TODO copy over config
 # TODO find the correct path here
+#done? dont remember context
 - name: Set up Apache Submitty configuration
   ansible.builtin.copy:
     src: /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/apache/submitty.conf
     dest: /etc/apache2/sites-available/submitty.conf
     remote_src: yes
 
+- name: Copy over submitty.conf
+  ansible.builtin.copy:
+    src: "{{ lookup('file', 'submitty.conf') }}"
+    dest: /usr/local/submitty/submitty.conf
+
 - name: Run Submitty install script.
-  ansible.builtin.shell: |
-    echo "localhost
-      5432
-      submitty_dbuser
-      #password: 
-      submitty_course_dbuser
-      #password: 
-      America/Los_Angeles
-      "https://{{ submitty_url }}"
-      #git link
-      #organization
-      #host?
-      "{{ submitty_email }}"
-      #host?
-      1
-      admin
-      #password:
-      y
-      "{{ submitty_email }}"
-      #password:
-      "{{ submitty_email }}"
-      #do_not_reply email
-      #mail server
-      25
-      #host?
-      " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
-  args:
+  ansible.builtin.shell: 
+    cmd: bash -p ./.setup/install_system.sh -c /usr/local/submitty/submitty.conf > /usr/local/submitty/install.log 2>&1
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: yes
   become_user: root
+
+#- name: Run Submitty install script.
+#  ansible.builtin.shell: |
+#    echo "localhost
+#      5432
+#      submitty_dbuser
+#      #password: 
+#      submitty_course_dbuser
+#      #password: 
+#      America/Los_Angeles
+#      "https://{{ submitty_url }}"
+#      #git link
+#      #organization
+#      #host?
+#      "{{ submitty_email }}"
+#      #host?
+#      1
+#      admin
+#      #password:
+#      y
+#      "{{ submitty_email }}"
+#      #password:
+#      "{{ submitty_email }}"
+#      #do_not_reply email
+#      #mail server
+#      25
+#      #host?
+#      " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+#  args:
+#    chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
+#  become: yes
+#  become_user: root
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
@@ -97,7 +107,8 @@
     replace: 'ServerName'
 
 - name: Run a2ensite submitty
-  ansible.builtin.command: a2ensite submitty
+  ansible.builtin.command:
+    cmd: a2ensite submitty
 
 # TODO turn off TCP for postgresql
 
