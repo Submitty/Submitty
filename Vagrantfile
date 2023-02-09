@@ -52,10 +52,12 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
-box_extra = if Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1'))
-  '-arm64'
-else
-  ''
+box_name = "bento/ubuntu-20.04"
+
+arm_mac = Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1') || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M2'))
+
+if arm_mac
+  box_name = "perk/ubuntu-20.04-arm64"
 end
 
 def mount_folders(config, mount_options)
@@ -77,6 +79,16 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
+  config.env&.enable # env file plugin
+
+  if ENV.has_key?('HOST_USER')
+    host_user = ENV['HOST_USER']
+  end
+
+  if ENV.has_key?('VAGRANT_BOX')
+    box_name = ENV['VAGRANT_BOX']
+  end
+
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
@@ -88,7 +100,7 @@ Vagrant.configure(2) do |config|
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
+    ubuntu.vm.box = box_name
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
@@ -98,11 +110,11 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
+    ubuntu.vm.box = box_name
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511                     # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443                     # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442                    # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: (arm_mac ? 7001 : 7000)  # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
@@ -158,6 +170,14 @@ Vagrant.configure(2) do |config|
     vmware.vmx["numvcpus"] = "2"
 
     mount_folders(override, [])
+  end
+
+  config.vm.provider "qemu" do |qe, override|
+    qe.memory = "2G"
+    qe.smp = 2
+    qe.ssh_port = 2222
+
+    mount_folders(override, (defined? host_user).nil ? [] : ["username=" + host_user])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
