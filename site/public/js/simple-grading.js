@@ -760,6 +760,11 @@ function setupSimpleGrading(action) {
         // if input cell selected, use this to check if cursor is in the right place
         var input_cell = $("input.cell-grade:focus");
 
+        // Exit if in typing mode
+        if (!input_cell.length) return;
+        if (input_cell[0].dataset.typing === true || input_cell[0].dataset.typing === 'true')
+            return;
+
         // if there is no selection OR there is a selection to the far left with 0 length
         if(event.code === "ArrowLeft") {
             event.preventDefault();

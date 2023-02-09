@@ -58,6 +58,10 @@ tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
     outline: 3px dashed var(--standard-medium-blue);
 }
 
+#data-table input[data-typing="true"]:focus {
+    outline-style: solid;
+}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
     display: none;
