@@ -42,7 +42,7 @@ class GlobalView extends AbstractView {
             "page_title" => $page_title,
             "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
-            "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
+            "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),

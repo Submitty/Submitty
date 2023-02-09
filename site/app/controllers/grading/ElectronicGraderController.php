@@ -806,7 +806,7 @@ class ElectronicGraderController extends AbstractController {
                             foreach ($graders[$key] as $valid_grader) {
                                 /* @var User $valid_grader */
                                 if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
-                                    $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                                    $valid_graders[] = $valid_grader->getDisplayedGivenName();
                                 }
                             }
                             $sections[$key]["valid_graders"] = $valid_graders;
@@ -1347,13 +1347,13 @@ class ElectronicGraderController extends AbstractController {
 
         $all_teams = $gradeable->getTeams();
         $nl = "\n";
-        $csvdata = "First Name,Last Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
+        $csvdata = "Given Name,Family Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
                 foreach ($team->getMemberUsers() as $user) {
                     $csvdata .= implode(',', [
-                        $user->getDisplayedFirstName(),
-                        $user->getDisplayedLastName(),
+                        $user->getDisplayedGivenName(),
+                        $user->getDisplayedFamilyName(),
                         $user->getId(),
                         $team->getId(),
                         $team->getTeamName(),

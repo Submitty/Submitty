@@ -1,8 +1,8 @@
 registration_section: 2
 user_email: joness@example.com
-user_firstname: Sally
+user_givenname: Sally
 user_group: 4
 user_id: joness
 anon_id: mbcR432Ertg67UI
-user_lastname: Jones
+user_familyname: Jones
 user_numeric_id: 177956871
