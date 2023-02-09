@@ -180,14 +180,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(8))
             ->method('persist')
-            ->with(
-                $this->logicalOr(
-                    $this->identicalTo($course_materials[0]),
-                    $this->identicalTo($course_materials[1]),
-                    $this->identicalTo($course_materials[2]),
-                    $this->identicalTo($course_materials[3])
-                )
-            );
+            ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
@@ -261,12 +254,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(
-                $this->logicalOr(
-                    $this->equalTo(['path' => $this->upload_path . "/" . $name]), 
-                    $this->equalTo(['id' => $course_material->getId()])
-                )
-            )
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
         $repository
             ->expects($this->once())
@@ -327,12 +315,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(
-                $this->logicalOr(
-                    $this->equalTo(['path' => $this->upload_path . "/" . $name]),
-                    $this->equalTo(['id' => $course_material->getId()])
-                )
-            )
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -398,12 +381,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->with(
-                $this->logicalOr(
-                    $this->equalTo(['path' => $this->upload_path . "/" . $name]),
-                    $this->equalTo(['id' => $course_material->getId()])
-                )
-            )
+            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
             ->willReturnOnConsecutiveCalls(null, $course_material);
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
@@ -466,13 +444,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(3))
             ->method('findOneBy')
-            ->with(
-                $this->logicalOr(
-                    $this->equalTo(['path' => $this->upload_path . '/foo/foo2/foo.txt']),
-                    $this->equalTo(['path' => $this->upload_path . "/foo/foo2"]),
-                    $this->equalTo(['path' => $this->upload_path . "/foo"])
-                )
-            )
+            ->withConsecutive([['path' => $this->upload_path . '/foo/foo2/foo.txt']], [['path' => $this->upload_path . "/foo/foo2"]], [['path' => $this->upload_path . "/foo"]])
             ->willReturnOnConsecutiveCalls(null, $course_material, $course_material);
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(3))
