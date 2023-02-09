@@ -13,8 +13,8 @@ def up(config, database):
 
     database.execute("""
 ALTER TABLE IF EXISTS users 
-ADD COLUMN IF NOT EXISTS user_pronouns character varying;
-    $$ LANGUAGE plpgsql;""")
+ADD COLUMN IF NOT EXISTS user_pronouns VARCHAR(255) DEFAULT ''::VARCHAR
+    """)
     pass
 
 
