@@ -346,8 +346,8 @@
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
-                  ondblclick="this.dataset.typing = true; minimizeHeight(this);"
-                  onblur="this.dataset.typing = false;"
+                  ondblclick="this.dataset.typing = true;"
+                  onblur="this.dataset.typing = false; minimizeHeight(this);"
                   onkeydown="if (event.code === 'Escape') {if (this.dataset.typing) this.dataset.typing = false; else this.blur();}"
                   onfocus="adjustHeight(this);"
                   onkeyup="adjustHeight(this);"
