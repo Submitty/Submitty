@@ -1,4 +1,4 @@
-"""Migration for the Submitty master database."""
+"""Migration for the Submitty system."""
 
 
 def up(config, database):
@@ -7,10 +7,8 @@ def up(config, database):
 
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
     """
-
+    
     database.execute("""
 ALTER TABLE IF EXISTS users 
 ADD COLUMN IF NOT EXISTS user_pronouns character varying;
@@ -18,13 +16,11 @@ ADD COLUMN IF NOT EXISTS user_pronouns character varying;
     pass
 
 
-def down(config, database):
+def down(config):
     """
     Run down migration (rollback).
 
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
-    :param database: Object for interacting with given database for environment
-    :type database: migrator.db.Database
     """
     pass
