@@ -520,8 +520,8 @@ class User extends AbstractModel {
                 //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
             case 'user_pronouns':
-                // need to be modified
-                return true;
+                // if the length is less than 12
+                return strlen($data) <= 12;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
                 //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
