@@ -345,9 +345,11 @@
             <textarea class="option-small-box cell-grade"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
-                  onclick="this.select()"
+                  onclick="this.dataset.typing || this.select()"
+                  ondblclick="this.dataset.typing = true; minimizeHeight(this);"
+                  onblur="this.dataset.typing = false;"
+                  onkeydown="if (event.code === 'Escape') {if (this.dataset.typing) this.dataset.typing = false; else this.blur();}"
                   onfocus="adjustHeight(this);"
-                  onblur="minimizeHeight(this);"
                   onkeyup="adjustHeight(this);"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
