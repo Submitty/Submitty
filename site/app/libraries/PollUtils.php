@@ -16,6 +16,7 @@ class PollUtils {
         $export_data = [];
         foreach ($polls as $poll) {
             $poll_data = [
+                'id' => $poll->getId(),
                 'name' => $poll->getName(),
                 'question' => $poll->getQuestion(),
                 'question_type' => $poll->getQuestionType(),
