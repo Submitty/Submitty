@@ -427,22 +427,22 @@ class RainbowCustomization extends AbstractModel {
             $sectionsCount = count($sections);
 
             // creates a copy of the database sections to compare against the file sections
-            $temp = [];
+            $database_copy = [];
             for ($i = 0; $i < $sectionsCount; $i++) {
-                $temp[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
+                $database_copy[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
             }
 
             // checks whether or not sections have been added and updates the file sections
-            $result = array_diff_key($temp, $sectionsFromFile);
-            if ($result) {
+            $result = array_diff_key($database_copy, $sectionsFromFile);
+            if (count($result) > 0) {
                 foreach ($result as $x => $val) {
                     $sectionsFromFile[$x] = $val;
                 }
             }
 
             // checks whether or not sections have been removed and updates the file sections
-            $result = array_diff_key($sectionsFromFile, $temp);
-            if ($result) {
+            $result = array_diff_key($sectionsFromFile, $database_copy);
+            if (count($result) > 0) {
                 foreach ($result as $x => $val) {
                     unset($sectionsFromFile[$x]);
                 }
