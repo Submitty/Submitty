@@ -107,8 +107,9 @@ class UserProfileController extends AbstractController {
      */
     public function changePronouns() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_pronouns_change'])) {
+        if (!empty($_POST['pronouns'])) {
             $newPronouns = trim($_POST['pronouns']);
+
             //validPronouns() checks for valid option
             if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
                 $user->setPronouns($newPronouns);
@@ -135,7 +136,7 @@ class UserProfileController extends AbstractController {
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_givenname_change']) && empty($_POST['user_familyname_change'])) {
+        if (!empty($_POST['given_name']) && !empty($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
             $newFamilyName = trim($_POST['family_name']);
 
