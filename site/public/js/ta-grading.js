@@ -87,6 +87,9 @@ $(function () {
   isMobileView = window.innerWidth <= MOBILE_WIDTH;
   initializeTaLayout();
 
+  // Make sidebar scroll just for TA grading
+  $("#wrapper").css("min-height", "0");
+
   window.addEventListener('resize', () => {
     let wasMobileView = isMobileView;
     isMobileView = window.innerWidth <= MOBILE_WIDTH;
