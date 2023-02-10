@@ -163,25 +163,23 @@ class DockerInterfaceController extends AbstractController {
     public function removeImage() {
         $user = $this->core->getUser();
         $user_id = $this->core->getUser()->getId();
-        else {
-            $jsonFilePath = FileUtils::joinPaths(
-                $this->core->getConfig()->getSubmittyInstallPath(),
-                "config",
-                "autograding_containers.json"
-            );
-            $json = json_decode(file_get_contents($jsonFilePath), true);
-            if (array_key_exists($user_id, $json)) {
-                $key = array_search($_POST['image'], $json[$user_id][$_POST['capability']]);
-                if ($key !== false && $key != null) {
-                    unset($json[$user_id][$_POST['capability']][$key]);
-                    $json[$user_id][$_POST['capability']] = array_values($json[$user_id][$_POST['capability']]);
-                file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-                return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
-                }
-                else {
-                    return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
-                    
-                }
+        $jsonFilePath = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+        $json = json_decode(file_get_contents($jsonFilePath), true);
+        if (array_key_exists($user_id, $json)) {
+            $key = array_search($_POST['image'], $json[$user_id][$_POST['capability']]);
+            if ($key !== false && $key != null) {
+                unset($json[$user_id][$_POST['capability']][$key]);
+                $json[$user_id][$_POST['capability']] = array_values($json[$user_id][$_POST['capability']]);
+            file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+            return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
+            }
+            else {
+                return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
+                
             }
         }
     }
