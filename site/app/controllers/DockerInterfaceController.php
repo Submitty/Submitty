@@ -174,12 +174,11 @@ class DockerInterfaceController extends AbstractController {
             if ($key !== false && $key != null) {
                 unset($json[$user_id][$_POST['capability']][$key]);
                 $json[$user_id][$_POST['capability']] = array_values($json[$user_id][$_POST['capability']]);
-            file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-            return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
+                file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+                return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
             }
             else {
-                return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
-                
+                return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");  
             }
         }
     }
