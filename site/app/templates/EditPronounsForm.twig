@@ -2,10 +2,11 @@
 {% block popup_id %}edit-pronouns-form{% endblock %}
 {% block title %}Edit Pronouns{% endblock %}
 {% block body %}
-    <p class="std-margin">{{ change_name_text }}</p>
+    <p class="std-margin">{{ "Pronouns are the part of speech used to refer to someone in the third person. We want to know how to respectfully refer to you!
+    Pronouns will only be visible to members of the teaching staff who have the instructor role." }}</p>
     <p class="std-margin">
         Your instructor and the system administrators reserve the right to remove
-        pronouns if it contains inappropriate or offensive language.
+        pronouns if they contain inappropriate or offensive language.
     </p>
     <div class="flex-col" id="user_settings_modal">
         <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
