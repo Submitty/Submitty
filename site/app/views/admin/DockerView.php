@@ -22,7 +22,7 @@ class DockerView extends AbstractView {
         $images = [];
         foreach ($docker_data['autograding_containers'] as $user_id_recieved => $capability_list) {
             if ($user_id_recieved == $user_id) {
-                foreach ($capability_list as $capability  => $image_list) {
+                foreach ($capability_list as $capability => $image_list) {
                     foreach ($image_list as $image) {
                         $images[] = $image;
                     }
