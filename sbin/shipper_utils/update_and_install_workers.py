@@ -66,7 +66,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         image_to_remove = set.difference(image_set,container_list)
         for imagesRemoved in image_to_remove:
             client.images.remove(imagesRemoved)
-            print(f"Removed image with ID: {imagesRemoved.id} and tag: {imagesRemoved.tags}")
+            print(f"Removed image tag: {imagesRemoved.tags}")
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:
