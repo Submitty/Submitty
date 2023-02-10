@@ -254,8 +254,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->with($this->callback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return true;
+                   case $value == ['id' => $course_material->getId()]:
+                       return true;
+                   default:
+                       return false;
+               }
+           }))
+           ->will($this->returnCallback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return null;
+                   case $value == ['id' => $course_material->getId()]:
+                       return $course_material;
+               }
+           }));
         $repository
             ->expects($this->once())
             ->method('findAll')
@@ -315,8 +331,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->with($this->callback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return true;
+                   case $value == ['id' => $course_material->getId()]:
+                       return true;
+                   default:
+                       return false;
+               }
+           }))
+           ->will($this->returnCallback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return null;
+                   case $value == ['id' => $course_material->getId()]:
+                       return $course_material;
+               }
+           }));
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
             ->method('getRepository')
@@ -381,8 +413,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/" . $name]], [['id' => $course_material->getId()]])
-            ->willReturnOnConsecutiveCalls(null, $course_material);
+            ->with($this->callback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return true;
+                   case $value == ['id' => $course_material->getId()]:
+                       return true;
+                   default:
+                       return false;
+               }
+           }))
+           ->will($this->returnCallback(function ($value) use ($name, $course_material) {
+               switch (true) {
+                   case $value == ['path' => $this->upload_path . "/" . $name]:
+                       return null;
+                   case $value == ['id' => $course_material->getId()]:
+                       return $course_material;
+               }
+           }));
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(2))
             ->method('getRepository')
