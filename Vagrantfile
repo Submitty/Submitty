@@ -91,7 +91,7 @@ Vagrant.configure(2) do |config|
 
   mount_options = []
 
-  # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
+  # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
   # Specify the various machines that we might develop on. After defining a name, we
@@ -177,7 +177,7 @@ Vagrant.configure(2) do |config|
     qe.smp = 2
     qe.ssh_port = 2222
 
-    mount_folders(override, ((defined? host_user).nil? ? [] : ["username=" + host_user]))
+    mount_folders(override, ((defined? host_user).nil? || host_user.nil?) ? [] : ["username=" + host_user])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
