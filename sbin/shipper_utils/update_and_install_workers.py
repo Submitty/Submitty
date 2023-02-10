@@ -42,9 +42,10 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     success = True
     print(f'download/update docker images on {host}')
 
-    for requirement, images in autograding_containers.items():
-        if requirement in worker_requirements:
-            images_to_update.update(set(images))
+    for user in autograding_containers:
+        for requirement, images in autograding_containers[user].items():
+            if requirement in worker_requirements:
+                images_to_update.update(set(images))
 
     images_str = ", ".join(str(e) for e in images_to_update)
     print(f'{host} needs {images_str}')
@@ -57,6 +58,15 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         else:
             print(res.stdout)
         client = docker.from_env()
+        # List all image
+        image_current_list = client.images.list()
+        container_list = images_str.split(', ')
+        container_list = set(container_list)
+        image_set = {image.attrs['RepoTags'][0] for image in image_current_list}
+        image_to_remove = set.difference(image_set,container_list)
+        for imagesRemoved in image_to_remove:
+            client.images.remove(imagesRemoved)
+            print(f"Removed image with ID: {imagesRemoved.id} and tag: {imagesRemoved.tags}")
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:

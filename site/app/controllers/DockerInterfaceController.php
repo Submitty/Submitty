@@ -64,6 +64,7 @@ class DockerInterfaceController extends AbstractController {
      */
     public function addImage() {
         $user = $this->core->getUser();
+        $user_id = $this->core->getUser()->getId();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
@@ -123,13 +124,15 @@ class DockerInterfaceController extends AbstractController {
                 )
             );
 
-
-            if (!array_key_exists($_POST['capability'], $json)) {
-                $json[$_POST['capability']] = [];
+            if (!array_key_exists($user_id, $json)) {
+                $json[$user_id] = [];
+            }
+            if (!array_key_exists($_POST['capability'], $json[$user_id])) {
+                $json[$user_id][$_POST['capability']] = [];
             }
 
-            if (!in_array($_POST['image'], $json[$_POST['capability']])) {
-                $json[$_POST['capability']][] = $_POST['image'];
+            if (!in_array($_POST['image'], $json[$user_id][$_POST['capability']])) {
+                $json[$user_id][$_POST['capability']][] = $_POST['image'];
             }
             else {
                 return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
@@ -159,6 +162,7 @@ class DockerInterfaceController extends AbstractController {
      */
     public function removeImage() {
         $user = $this->core->getUser();
+        $user_id = $this->core->getUser()->getId();
         if (is_null($user) || !$user->accessFaculty()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
@@ -172,13 +176,19 @@ class DockerInterfaceController extends AbstractController {
                 "autograding_containers.json"
             );
             $json = json_decode(file_get_contents($jsonFilePath), true);
-            $key = array_search($_POST['image'], $json[$_POST['capability']]);
-            if ($key !== false) {
-                unset($json[$_POST['capability']][$key]);
+            if (array_key_exists($user_id, $json)) {
+                $key = array_search($_POST['image'], $json[$user_id][$_POST['capability']]);
+                if ($key !== false && $key != null) {
+                    unset($json[$user_id][$_POST['capability']][$key]);
+                    $json[$user_id][$_POST['capability']] = array_values($json[$user_id][$_POST['capability']]);
+                file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+                return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
+                }
+                else {
+                    return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
+                    
+                }
             }
-            $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
-            file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
-            return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
         }
     }
 
