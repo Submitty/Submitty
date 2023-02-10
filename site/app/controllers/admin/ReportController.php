@@ -402,7 +402,7 @@ class ReportController extends AbstractController {
                 if (!array_key_exists($response->getStudentId(), $responses)) {
                     $responses[$response->getStudentId()] = [];
                 }
-                $responses[$response->getStudentId()][] = $response->getOption()->getId();
+                $responses[$response->getStudentId()][] = $response->getOption()->getOrderId();
             }
 
             $polls_data[] = [

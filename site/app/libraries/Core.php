@@ -181,7 +181,7 @@ class Core {
         $config = ORMSetup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
-            null,
+            FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
             $cache
         );
 

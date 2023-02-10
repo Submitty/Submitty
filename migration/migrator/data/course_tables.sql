@@ -2429,6 +2429,13 @@ CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_compon
 
 
 --
+-- Name: gradeable_component_mark_data_gd_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gd_id_idx ON public.gradeable_component_mark_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_team_unique; Type: INDEX; Schema: public; Owner: -
 --
 

@@ -7388,7 +7388,7 @@ WHERE current_state IN
                     GROUP BY gc_id, gd_id, gcd_grader_id
                   ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id AND gcmd.gcd_grader_id=in_gcd.gcd_grader_id
 
-                  /* Join grader data; TODO: do we want/need 'sr' information? */
+                  /* Join grader data; TODO: do we want/need 'sr' information */
                   LEFT JOIN (
                     SELECT u.*, ga.anon_id AS g_anon, ga.g_id, grading_registration_sections
                     FROM users u
