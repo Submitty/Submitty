@@ -758,7 +758,7 @@ function setupSimpleGrading(action) {
     // default key movement
     $(document).on("keydown", function(event) {
         // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("input.cell-grade:focus, textarea.cell-grade:focus");
+        const input_cell = $("input.cell-grade:focus, textarea.cell-grade:focus");
 
         // Exit if in typing mode
         if (!input_cell.length) return;
