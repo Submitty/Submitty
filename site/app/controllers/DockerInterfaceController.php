@@ -158,7 +158,7 @@ class DockerInterfaceController extends AbstractController {
 
     /**
      * @Route("/admin/remove_image", methods={"POST"})
-     * @return JsonResponse | MultiResponse
+     * @return JsonResponse
      */
     public function removeImage() {
         $user = $this->core->getUser();
