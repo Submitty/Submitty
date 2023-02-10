@@ -79,7 +79,9 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
-  config.env&.enable # env file plugin
+  if (defined? config.env)
+    config.env.enable # env file plugin
+  end
 
   if ENV.has_key?('HOST_USER')
     host_user = ENV['HOST_USER']
