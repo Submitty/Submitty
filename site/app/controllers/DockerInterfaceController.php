@@ -178,7 +178,7 @@ class DockerInterfaceController extends AbstractController {
                 return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
             }
             else {
-                return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");  
+                return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
             }
         }
     }
