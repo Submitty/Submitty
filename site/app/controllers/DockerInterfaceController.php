@@ -181,6 +181,9 @@ class DockerInterfaceController extends AbstractController {
                 return JsonResponse::getFailResponse("This image is owned/managed by another instructur.");
             }
         }
+        else {
+            return JsonResponse::getFailResponse("User doesn't exist or doesn't have any docker images.");
+        }
     }
 
 
