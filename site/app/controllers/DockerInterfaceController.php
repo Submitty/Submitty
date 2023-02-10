@@ -163,12 +163,6 @@ class DockerInterfaceController extends AbstractController {
     public function removeImage() {
         $user = $this->core->getUser();
         $user_id = $this->core->getUser()->getId();
-        if (is_null($user) || !$user->accessFaculty()) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
-            );
-        }
         else {
             $jsonFilePath = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
