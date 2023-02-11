@@ -32,11 +32,13 @@
     padding-right: 0;
     overflow-y: auto;
     height: 100%;
+    max-height: 81vh;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #posts_list {
     overflow-y: auto;
+    max-height: 81vh;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
