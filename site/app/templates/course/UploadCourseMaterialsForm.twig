@@ -214,7 +214,11 @@
                 paths[x] = paths[x].slice(69);
             }
             $("#input-provide-full-path").autocomplete({
-                source: paths
+                source: paths,
+                minLength: 0,
+                scroll: true
+            }).focus(function() {
+                $(this).autocomplete("search", "");
             });
         });
     </script>
