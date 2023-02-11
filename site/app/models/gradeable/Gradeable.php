@@ -2360,6 +2360,10 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isLocked(string $user_id): bool {
+        $user = $this->core->getUser();
+        if ($user->accessGrading()) {
+            return false;
+        }
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             if ($dependent_gradeable != null) {
