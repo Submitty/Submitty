@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--utm] [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,6 +59,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 # PROVISION SETUP
 #################
 
+export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
@@ -69,6 +70,9 @@ export WORKER_PAIR=0
 # don't recognize as a flag
 while :; do
     case $1 in
+        --utm)
+            export UTM=1
+            ;;
         --vagrant)
             export VAGRANT=1
             ;;
@@ -90,22 +94,16 @@ while :; do
     shift
 done
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-export UTM_ARM=0
-if [[ "$(uname -m)" = "aarch64" ]] ; then
-    export UTM_ARM=1
-fi
-
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
     export DEBIAN_FRONTEND=noninteractive
 fi
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if { [ ${VAGRANT} == 1 ] || [ ${UTM} == 1 ]; } && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-    if [ ${UTM_ARM} == 0 ]; then
+    if [ ${UTM} == 0 ]; then
 	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
     fi
 
@@ -218,15 +216,9 @@ bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 # STACK SETUP
 #################
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-#if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
-# stack is not available for non-x86_64 systems
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
-    # We only might build analysis tools from source while using vagrant
-    echo "Installing stack (haskell)"
-    curl -sSL https://get.haskellstack.org/ | sh
-    # NOTE: currently only 64-bit (x86_64) Linux binary is available
-fi
+# We only might build analysis tools from source while using vagrant
+echo "Installing stack (haskell)"
+curl -sSL https://get.haskellstack.org/ | sh
 
 #################################################################
 # USERS SETUP
@@ -267,14 +259,14 @@ else
 fi
 
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON ARM64 / UTM_ARM MAC M1
+# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON UTM
 if getent passwd vagrant > /dev/null; then
     # Already exists
     echo 're-running install submitty'
-elif [ ${UTM_ARM} == 1 ]; then
+elif [ ${UTM} == 1 ]; then
     useradd -m vagrant
 fi
-# END ARM64
+# END UTM
 
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
