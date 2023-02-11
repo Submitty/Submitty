@@ -160,7 +160,7 @@ jobs:
       runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -182,7 +182,7 @@ jobs:
       runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -307,7 +307,7 @@ jobs:
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
                 sudo chmod -R a+rwx /tmp/
 
-          - uses: actions/setup-python@v2
+          - uses: actions/setup-python@v4
             with:
               python-version: ${{ env.PYTHON_VERSION }}
           - uses: shivammathur/setup-php@2.7.0
