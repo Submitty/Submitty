@@ -207,6 +207,17 @@
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
     </script>
+    <script>
+        $(function() {
+            var paths = Object.keys($.parseJSON('{{ directory_priorities|json_encode|raw }}'));
+            for (let x = 0; x < paths.length; x++){
+                paths[x] = paths[x].slice(69);
+            }
+            $("#input-provide-full-path").autocomplete({
+                source: paths
+            });
+        });
+    </script>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}

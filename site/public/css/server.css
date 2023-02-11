@@ -597,6 +597,10 @@ td > a.active-sort {
     color: var(--text-black);
 }
 
+.ui-autocomplete {
+    z-index: 2000;
+}
+
 .sub-text {
     margin-left: 20px;
     margin-top: 10px;
