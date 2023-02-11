@@ -52,12 +52,6 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
-box_extra = if Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1'))
-  '-arm64'
-else
-  ''
-end
-
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
@@ -77,6 +71,14 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
+  # Default box
+  config.vm.box = "bento/ubuntu-20.04"
+
+  # Custom box
+  if ENV.has_key?('VAGRANT_BOX')
+    config.vm.box = ENV['VAGRANT_BOX']
+  end
+
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
@@ -88,7 +90,6 @@ Vagrant.configure(2) do |config|
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
@@ -98,7 +99,6 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.box = "bento/ubuntu-20.04#{box_extra}"
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
@@ -147,6 +147,13 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
+    # Default box for parallels on arm64
+    unless ENV.has_key?('VAGRANT_BOX')
+      if (`uname -m`.chomp == 'arm64' || `uname -m`.chomp == 'aarch64')
+        override.vm.box = "bento/ubuntu-20.04-arm64"
+      end
+    end
+
     prl.memory = 2048
     prl.cpus = 2
 
@@ -161,6 +168,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "libvirt" do |libvirt, override|
+      # Default box with libvirt support
+      unless ENV.has_key?('VAGRANT_BOX')
+        override.vm.box = "generic/ubuntu2004"
+      end
+
       libvirt.memory = 2048
       libvirt.cpus = 2
 
