@@ -83,10 +83,6 @@ Vagrant.configure(2) do |config|
     config.env.enable # env file plugin
   end
 
-  if ENV.has_key?('HOST_USER')
-    host_user = ENV['HOST_USER']
-  end
-
   if ENV.has_key?('VAGRANT_BOX')
     box_name = ENV['VAGRANT_BOX']
   end
@@ -179,7 +175,7 @@ Vagrant.configure(2) do |config|
     qe.smp = 2
     qe.ssh_port = 2222
 
-    mount_folders(override, ((defined? host_user).nil? || host_user.nil?) ? [] : ["username=" + host_user])
+    mount_folders(override, [])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
