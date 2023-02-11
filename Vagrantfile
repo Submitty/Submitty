@@ -71,6 +71,11 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
+  # Optional plugin for reading from env file
+  if Vagrant.has_plugin?('vagrant-env')
+    config.env.enable
+  end
+
   # Default box
   config.vm.box = "bento/ubuntu-20.04"
 
