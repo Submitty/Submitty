@@ -149,7 +149,8 @@ Vagrant.configure(2) do |config|
   config.vm.provider "parallels" do |prl, override|
     # Default box for parallels on arm64
     unless ENV.has_key?('VAGRANT_BOX')
-      if (`uname -m`.chomp == 'arm64' || `uname -m`.chomp == 'aarch64')
+      arch = `uname -m`.chomp
+      if (arch == 'arm64' || arch == 'aarch64')
         override.vm.box = "bento/ubuntu-20.04-arm64"
       end
     end
