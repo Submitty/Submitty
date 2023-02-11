@@ -79,7 +79,7 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
-  if (defined? config.env)
+  if Vagrant.has_plugin?('env')
     config.env.enable # env file plugin
   end
 
