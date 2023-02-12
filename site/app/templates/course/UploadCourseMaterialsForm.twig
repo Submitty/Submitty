@@ -14,7 +14,6 @@
                 {{ base_course_material_path }}/optional/subdirectory
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
-            <span class="autofill-folder"></span>
         </label>
         <fieldset>
             <legend class="black-message">
@@ -216,7 +215,7 @@
             }
             $("#input-provide-full-path").autocomplete({
                 source: paths,
-                appendTo: ".autofill-folder",
+                appendTo: "#cm_path",
                 minLength: 0,
                 scroll: true
             }).focus(function() {
