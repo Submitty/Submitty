@@ -43,7 +43,9 @@
     ],
     "/courses/s20/sample/polls": [],
     "/courses/s20/sample/polls/newPoll": [],
-    "/courses/{}/{}/course_materials": [],
+    "/courses/{}/{}/course_materials": [
+        "Attribute “unselectable” not allowed on element “ul” at this point."
+    ],
     "/courses/{}/{}/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
