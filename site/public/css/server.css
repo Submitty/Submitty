@@ -1626,7 +1626,7 @@ end of styles used in the admin gradeable page
     z-index: 2000;
 }
 
-#cm_path {
+#cm-path {
     position: relative;
 }
 
