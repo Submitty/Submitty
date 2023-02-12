@@ -1625,6 +1625,7 @@ end of styles used in the admin gradeable page
     overflow-x: hidden;
     z-index: 2000;
 }
+
 .autofill-folder {
     position: relative;
 }
