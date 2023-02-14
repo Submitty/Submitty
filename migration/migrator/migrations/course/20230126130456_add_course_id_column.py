@@ -18,7 +18,7 @@ def up(config, database, semester, course):
     # add the column
     database.execute("""
 ALTER TABLE IF EXISTS sections_registration
-ADD COLUMN IF NOT EXISTS course_id
+ADD COLUMN IF NOT EXISTS course_section_id
     VARCHAR(255)
     DEFAULT ''::VARCHAR
 """)
