@@ -8,11 +8,11 @@ function showUpdatePrefNameForm() {
     $('#user-givenname-change').focus();
 }
 function showUpdatePronounsForm() {
-    $(".popup-form").css('display', 'none');
-    const form = $("#edit-pronouns-form");
-    form.css("display", "block");
-    form.find(".form-body").scrollTop(0);
-    console.log("check");
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-pronouns-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    console.log('check');
 }
 // eslint-disable-next-line no-unused-vars
 function showUpdatePasswordForm() {
@@ -65,27 +65,27 @@ function getCurrentUTCOffset() {
 }
 
 function updateUserPronouns () {
-    const pronouns = $("#user-pronouns-change");
-    if (pronouns.data('current-pronouns') == pronouns.val()) {
+    const pronouns = $('#user-pronouns-change');
+    if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
     }
     else {
         const data = new FormData();
-        data.append('csrf_token', csrfToken);
-        data.append('pronouns', pronouns.val());
-        const url = buildUrl(['user_profile', 'change_pronouns'])
+        //data.append('csrf_token', csrfToken); //undefined
+        //data.append('pronouns', pronouns.val()); //Currently undefined
+        const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
             url,
-            type: 'POST', 
-            data, 
-            processData: false, 
-            contentType: false, 
+            type: 'POST',
+            data,
+            processData: false,
+            contentType: false,
             success: function(res) {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const {data} = response;
-                    displaySuccessMessage(data.message);
+                    //displaySuccessMessage(data.message); //Currently undefined
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns
                     $('#pronouns-row').html(`${icon} ${data.pronouns}`);
@@ -95,11 +95,11 @@ function updateUserPronouns () {
                 else {
                     displayErrorMessage(response.message);
                 }
-            }, 
+            },
             error: function() {
-                displayErrorMessage('Some went wrong while updating pronouns!');
+                //displayErrorMessage('Some went wrong while updating pronouns!'); //currently undefined
             }
-        })
+        });
     }
 }
 
