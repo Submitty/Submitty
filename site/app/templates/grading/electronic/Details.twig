@@ -70,6 +70,8 @@
             </div>
         </div>
     {% endif %}
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message }}
@@ -112,7 +114,7 @@
     </div>
 
     {# This is a data table #}
-    <table id="details-table" class="table table-striped table-bordered persist-area table-text-left">
+    <table id="details-table" class="table table-striped table-bordered persist-area table-text-left" data-details-base-path="{{ details_base_path }}">
         <caption />
         {# Table header #}
         <thead>
@@ -150,7 +152,7 @@
         {% else %}
             {% for section in sections %}
                 {# Section heading #}
-                <tbody class="details-info-header panel-head-active">
+                <tbody class="details-info-header{% if section.title not in collapsed_sections %} panel-head-active{% endif %}" id="details-content-section-{{section.title}}" data-section-id="{{section.title}}">
                     <tr class="info">
                         {% if core.getUser().accessGrading() %}
                             <td colspan="{{ columns|length }}" style="text-align: center">
@@ -170,7 +172,7 @@
                 </tbody>
                 {# /Section heading #}
                 {# Student list #}
-                <tbody class="details-content panel-content-active">
+                <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
                             {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
@@ -188,10 +190,21 @@
         {# /Sections #}
         {# Empty teams #}
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
-            <tr class="info">
-                <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
-            </tr>
-            <tbody>
+            <tbody class="details-info-header{% if 'empty-teams' not in collapsed_sections %} panel-head-active{% endif %}" id="details-content-section-empty-teams" data-section-id="empty-teams">
+                <tr class="info">
+                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+                    {% if core.getUser().accessGrading() %}
+                        <td colspan="{{ columns|length }}" style="text-align: center">
+                            <i class="collapse-icon fas fa-caret-right"></i>
+                            <i class="expand-icon fas fa-caret-down"></i>
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr class="info">
+                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+                </tr>
+            </tbody>
+            <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                 {% for team in empty_teams %}
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}
@@ -257,16 +270,16 @@
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ _self.render_column_total(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "user_first" %}
-                {{ _self.render_column_user_first(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "user_given" %}
+                {{ _self.render_column_user_given(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
                 {{ _self.render_column_user_id(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "user_id_anon" %}
                 {{ _self.render_column_user_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_members_anon" %}
                 {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
-            {% elseif column.function == "user_last" %}
-                {{ _self.render_column_user_last(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "user_family" %}
+                {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
             {% endif %}
@@ -305,8 +318,8 @@
                 <td></td>
             {% elseif column.function == "team_members" %}
                 <td>
-                    {{ user.getDisplayedFirstName() }}
-                    {{ user.getDisplayedLastName() }}
+                    {{ user.getDisplayedGivenName() }}
+                    {{ user.getDisplayedFamilyName() }}
                 </td>
             {% elseif column.function == "team_members_anon" %}
                 <td></td>
@@ -314,13 +327,13 @@
                 <td></td>
             {% elseif column.function == "total_peer" %}
                 <td></td>
-            {% elseif column.function == "user_first" %}
+            {% elseif column.function == "user_given" %}
                 <td></td>
             {% elseif column.function == "user_id" %}
                 <td></td>
             {% elseif column.function == "user_id_anon" %}
                 <td></td>
-            {% elseif column.function == "user_last" %}
+            {% elseif column.function == "user_family" %}
                 <td></td>
             {% elseif column.function == "viewed_grade" %}
                 <td></td>
@@ -562,13 +575,13 @@
 {% macro render_column_team_members(context, section, graded_gradeable, index, info, column) %}
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
-            {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
-            {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
+            {{ graded_gradeable.getSubmitter().getUser().getDisplayedGivenName() }}
+            {{ graded_gradeable.getSubmitter().getUser().getDisplayedFamilyName() }}
         {% else %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getDisplayedFirstName() }}
-                {{ member.getDisplayedLastName() -}}
+                {{- member.getDisplayedGivenName() }}
+                {{ member.getDisplayedFamilyName() -}}
             {%- endfor -%}
         {% endif %}
     <div style="font-style: italic; display: inline; color: var(--standard-medium-dark-gray);">
@@ -576,8 +589,8 @@
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getDisplayedFirstName() }}
-                {{ member.getDisplayedLastName() -}}
+                {{- member.getDisplayedGivenName() }}
+                {{ member.getDisplayedFamilyName() -}}
                 {%- if member.hasMultipleTeamInvites(graded_gradeable.getGradeableId()) -%}
                     <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color: var(--standard-medium-dark-gray);"></i>)</div>
                 {%- endif -%}
@@ -649,14 +662,14 @@
     </td>
 {% endmacro %}
 
-{# First Name #}
-{% macro render_column_user_first(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}</td>
+{# Given Name #}
+{% macro render_column_user_given(context, section, graded_gradeable, index, info, column) %}
+    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedGivenName() }}</td>
 {% endmacro %}
 
-{# Last Name #}
-{% macro render_column_user_last(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}</td>
+{# Family Name #}
+{% macro render_column_user_family(context, section, graded_gradeable, index, info, column) %}
+    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedFamilyName() }}</td>
 {% endmacro %}
 
 {# Viewed Grade #}
