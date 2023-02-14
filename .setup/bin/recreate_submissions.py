@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 '''
 DOCUMENTATION
-currently uses hard coded values
 '''
 
 '''
@@ -33,11 +32,14 @@ COURSE.electronic_gradeable_version
     WHERE g_id=? AND user_id=?
 '''
 
+import argparse
 import getpass
 import json
 import os
 import shutil
 import sqlalchemy as sql
+import sys
+import typing
 
 from submitty_utils import dateutils as submitty_dateutils
 
@@ -56,19 +58,27 @@ ARG_DB_USER = SUBMITTY_DBCONFIG_JSON['database_user']
 ARG_DB_PASS = SUBMITTY_DBCONFIG_JSON['database_password']
 
 # variables specifying gradeable to submit to
-ARG_SEMESTER = 's23'
-ARG_COURSE = 'blank'
-ARG_GRADEABLE = 'test_resubmit1'
+ARG_SEMESTER = ''
+ARG_COURSE = ''
+ARG_GRADEABLE = ''
 
 # place with files to submit
-ARG_SUBMISSIONS = '/test'
+ARG_SUBMISSIONS = ''
 
+# only use active versions?
+ARG_ACTIVE_ONLY = False
+
+# display extra output
+ARG_VERBOSE = False
+
+# some file names to look for
 UASF_NAME = 'user_assignment_settings.json'
 UAAF_NAME = '.user_assignment_access.json'
 UST_NAME = '.submit.timestamp'
 
 def submit(semester:str, course:str, gradeable:str, user:str, data: str,
-        func_add_submission, func_update_active):
+        func_add_submission: typing.Callable[[str,str,int,str],None],
+        func_update_active: typing.Callable[[str,str,int],None]):
     '''
     Create a new submission as a student
     semester,course,gradeable = specify gradeable to make submission to
@@ -115,64 +125,99 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
     func_add_submission(gradeable,user,highest_version+1,str(current_time))
     func_update_active(gradeable,user,highest_version+1)
     # write a queue file for the autograding daemon
-    queue_data = {
-        'semester': semester,
-        'course': course,
-        'gradeable': gradeable,
-        'required_capabilities': ['default'], # TODO FIXME
-        'is_team': False, # TODO is this bad
-        'max_possible_grading_time': 60, # TODO
-        'queue_time': str(submitty_dateutils.get_current_time()),
-        'regrade': False,
-        'user': user,
-        'vcs_checkout': False,
-        'version': highest_version+1,
-        'who': user
-    }
-    qfn = '__'.join([semester,course,gradeable,user,str(highest_version+1)])
-    with open(os.path.join(ARG_DATA_DIR,'to_be_graded_queue',qfn),'w') as qfo:
-        json.dump(queue_data,qfo,indent=4)
+    #queue_data = {
+    #    'semester': semester,
+    #    'course': course,
+    #    'gradeable': gradeable,
+    #    'required_capabilities': ['default'], # TODO FIXME
+    #    'is_team': False, # TODO is this bad
+    #    'max_possible_grading_time': 60, # TODO
+    #    'queue_time': str(submitty_dateutils.get_current_time()),
+    #    'regrade': False,
+    #    'user': user,
+    #    'vcs_checkout': False,
+    #    'version': highest_version+1,
+    #    'who': user
+    #}
+    #qfn = '__'.join([semester,course,gradeable,user,str(highest_version+1)])
+    #with open(os.path.join(ARG_DATA_DIR,'to_be_graded_queue',qfn),'w') as qfo:
+    #    json.dump(queue_data,qfo,indent=4)
+
+def parseArgs():
+    global ARG_SEMESTER,ARG_COURSE,ARG_GRADEABLE,ARG_SUBMISSIONS
+    global ARG_ACTIVE_ONLY,ARG_VERBOSE
+    parser = argparse.ArgumentParser(
+        prog = 'recreate_submissions.py',
+        description = 'upload student submissions to an existing gradeable'
+    )
+    parser.add_argument('semester',
+        help='the semester containing the gradeable to submit to')
+    parser.add_argument('course',
+        help='the course containing the gradeable to submit to')
+    parser.add_argument('gradeable',
+        help='the gradeable ID to submit to')
+    parser.add_argument('submissions',
+        help='directory containing the file structure of submissions to use')
+    parser.add_argument('--active-only',action='store_true')
+    parser.add_argument('--verbose',action='store_true')
+    print(f'sys.argv = {sys.argv}')
+    args = parser.parse_args(sys.argv[1:])
+    ARG_SEMESTER = args.semester
+    ARG_COURSE = args.course
+    ARG_GRADEABLE = args.gradeable
+    ARG_SUBMISSIONS = args.submissions
+    ARG_ACTIVE_ONLY = args.active_only
+    ARG_VERBOSE = args.verbose
 
 def main():
+    parseArgs()
     dbengine_course = sql.create_engine(
         f'postgresql:///submitty_{ARG_SEMESTER}_{ARG_COURSE}?host={ARG_DB_HOST}'
         f'&port={ARG_DB_PORT}&user={ARG_DB_USER}&password={ARG_DB_PASS}')
     dbconn_course = dbengine_course.connect()
     metadata = sql.MetaData(dbengine_course)
     table_users = sql.Table('users',metadata,autoload=True)
-    table_egdata = sql.Table('electronic_gradeable_data',metadata,autoload=True)
-    table_egver = sql.Table('electronic_gradeable_version',metadata,autoload=True)
+    table_egdata = sql.Table('electronic_gradeable_data',
+        metadata,autoload=True)
+    table_egver = sql.Table('electronic_gradeable_version',
+        metadata,autoload=True)
     ret = dbconn_course.execute(sql.select(table_users))
     user_list = set(row['user_id'] for row in ret.all())
     ret.close()
+    # function for query to electronic_gradeable_data table
     def insert_egdata(g_id: str, user_id: str, g_version: int,
             submission_time: str, autograding_complete = False):
-        print(f'    insert_egdata()')
-        print(f'    g_id                 = {g_id}')
-        print(f'    user_id              = {user_id}')
-        print(f'    g_version            = {g_version}')
-        print(f'    submission_time      = {submission_time}')
-        print(f'    autograding_complete = {autograding_complete}')
+        if ARG_VERBOSE:
+            print(f'    insert_egdata()')
+            print(f'    g_id                 = {g_id}')
+            print(f'    user_id              = {user_id}')
+            print(f'    g_version            = {g_version}')
+            print(f'    submission_time      = {submission_time}')
+            print(f'    autograding_complete = {autograding_complete}')
         query = table_egdata.insert().values(
             g_id=g_id,user_id=user_id,g_version=g_version,
             submission_time=submission_time,
             autograding_complete=autograding_complete
         )
-        print(f'    SQL: {query}')
+        if ARG_VERBOSE:
+            print(f'    SQL: {query}')
         dbconn_course.execute(query)
+    # function for query to electronic_gradeable_version table
     def update_egver(g_id: str, user_id: str, active_version: int):
-        print(f'    update_egver()')
-        print(f'    g_id           = {g_id}')
-        print(f'    user_id        = {user_id}')
-        print(f'    active_version = {active_version}')
+        if ARG_VERBOSE:
+            print(f'    update_egver()')
+            print(f'    g_id           = {g_id}')
+            print(f'    user_id        = {user_id}')
+            print(f'    active_version = {active_version}')
         query = table_egver.select().where(
             (table_egver.c.g_id == g_id) &
             (table_egver.c.user_id == user_id)
         )
         ret = dbconn_course.execute(query)
-        print(f'    SQL: {query}')
         rows = ret.all()
-        print(f'    egver_data = {rows}')
+        if ARG_VERBOSE:
+            print(f'    SQL: {query}')
+            print(f'    egver_data = {rows}')
         if len(rows) == 0: # INSERT
             query = table_egver.insert().values(
                 g_id = g_id,
@@ -186,17 +231,30 @@ def main():
                 (table_egver.columns.g_id == g_id) &
                 (table_egver.columns.user_id == user_id)
             )
-        print(f'    SQL: {query}')
+        if ARG_VERBOSE:
+            print(f'    SQL: {query}')
         dbconn_course.execute(query)
     for user in os.listdir(ARG_SUBMISSIONS):
         if not os.path.isdir(os.path.join(ARG_SUBMISSIONS,user)):
             continue
-        assert user in user_list
+        if user not in user_list:
+            print(f'WARNING: found dir for {user} who is not in the course')
+            continue
         print(f'SUBMITTING FOR USER {user}')
         user_dirlist = os.listdir(os.path.join(ARG_SUBMISSIONS,user))
         versions = [int(f) for f in user_dirlist if os.path.isdir(
             os.path.join(ARG_SUBMISSIONS,user,f))]
+        # determine active version
+        if os.path.isfile(os.path.join(ARG_SUBMISSIONS,user,UASF_NAME)):
+            with open(os.path.join(ARG_SUBMISSIONS,user,UASF_NAME)) as uasfile:
+                uasdata = json.load(uasfile)
+            active_version = uasdata['active_version']
+        else: # use highest
+            active_version = max(versions)
         for version in sorted(versions):
+            # skip inactive versions with active only flag
+            if ARG_ACTIVE_ONLY and version != active_version:
+                continue
             print(f'  SUBMITTING VERSION {version}')
             submit(ARG_SEMESTER,ARG_COURSE,ARG_GRADEABLE,user,
                 os.path.join(ARG_SUBMISSIONS,user,str(version)),
@@ -204,7 +262,7 @@ def main():
     dbconn_course.close()
 
 if __name__ == '__main__':
-    if getpass.getuser() == 'root':
+    if getpass.getuser() != 'submitty_php':
         print('Run this as submitty_php')
         quit()
     main()
