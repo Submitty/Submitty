@@ -160,7 +160,7 @@ jobs:
       runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -182,7 +182,7 @@ jobs:
       runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -307,7 +307,7 @@ jobs:
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
                 sudo chmod -R a+rwx /tmp/
 
-          - uses: actions/setup-python@v2
+          - uses: actions/setup-python@v4
             with:
               python-version: ${{ env.PYTHON_VERSION }}
           - uses: shivammathur/setup-php@2.7.0
@@ -504,7 +504,7 @@ jobs:
               BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
@@ -518,7 +518,7 @@ jobs:
               sudo systemctl stop submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               spec: cypress/e2e/autograding_status_1.spec.js
@@ -532,7 +532,7 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               spec: cypress/e2e/autograding_status_2.spec.js
@@ -549,7 +549,7 @@ jobs:
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with database auth
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               spec: cypress/e2e/login.spec.js
@@ -561,7 +561,7 @@ jobs:
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               spec: cypress/e2e/login.spec.js
@@ -578,7 +578,7 @@ jobs:
             run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with SAML auth
-            uses: cypress-io/github-action@v4
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost,chromeWebSecurity=false
               spec: cypress/e2e/login.spec.js
