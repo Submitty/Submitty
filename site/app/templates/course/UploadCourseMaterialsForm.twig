@@ -149,6 +149,18 @@
                 }
                 e.stopPropagation();
             });
+
+            let paths = Object.keys($.parseJSON('{{ directory_priorities|json_encode|raw }}'));
+            paths.forEach(function(item,index,arr) {
+                arr[index] = item.slice(69);
+            });
+            $("#input-provide-full-path").autocomplete({
+                source: paths,
+                minLength: 0,
+                scroll: true
+            }).focus(function() {
+                $(this).autocomplete("search", "");
+            });
         });
         flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
@@ -198,30 +210,13 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
-    </script>
-    <script>
+
         createArray(1);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
-    </script>
-    <script>
-        $(function() {
-            var paths = Object.keys($.parseJSON('{{ directory_priorities|json_encode|raw }}'));
-            for (let x = 0; x < paths.length; x++){
-                paths[x] = paths[x].slice(69);
-            }
-            $("#input-provide-full-path").autocomplete({
-                source: paths,
-                appendTo: "#cm-path",
-                minLength: 0,
-                scroll: true
-            }).focus(function() {
-                $(this).autocomplete("search", "");
-            });
-        });
     </script>
 {% endblock %}
 {% block buttons %}
