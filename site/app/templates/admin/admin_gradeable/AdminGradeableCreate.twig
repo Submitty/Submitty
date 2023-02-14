@@ -171,8 +171,8 @@
                     </fieldset>
                     <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
-                            <input style="width: 85px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
-                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}" placeholder="(Required)"/>
+                            <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
                     </div>
                 </div>
             {% endif %}
@@ -416,11 +416,9 @@
     function onDiscussionChange() {
         if($('#yes_discussion').is(':checked')) {
             disableElementChildren('.discussion_id_wrapper', false);
-            $("#discussion_thread_id").attr('required', '');
         }
         else {
             disableElementChildren('.discussion_id_wrapper', true);
-            $("#discussion_thread_id").removeAttr('required');
         }
     }
 
@@ -438,7 +436,6 @@
             disableElementChildren('.no_manual_grading', false);
             $('#regrade_request_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
-            document.getElementById("no_discussion").checked = true;
         }
         updateDateDisplay();
     }
@@ -520,7 +517,6 @@
 
         onManualGradingChange();
         $('[name="ta_grading"]').change(onManualGradingChange);
-        $('[name="ta_grading"]').change(onDiscussionChange);
 
         //
         // Template Selector Box Events

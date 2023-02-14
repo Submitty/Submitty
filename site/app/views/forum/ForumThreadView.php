@@ -744,10 +744,16 @@ class ForumThreadView extends AbstractView {
                 }
             }
             if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']) {
-                $class .= " new_thread";
+                $class .= " new_thread");
+
             }
-            if ($thread["deleted"]) {
-                $class .= " deleted";
+            if ($thread["deleted"]) { //changed to try to show deleted thread stuff
+                if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']){
+                    $class .= " new_thread_deleted"
+                }
+                else{
+                    $class .= " deleted";
+                }
             }
 
             if ($this->core->getQueries()->getUserById($thread['created_by'])->accessGrading()) {

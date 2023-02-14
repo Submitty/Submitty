@@ -17,8 +17,8 @@ updates:
     directory: "/site"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "10:00"
+        day: "monday"
+        time: "10:00"
     open-pull-requests-limit: 15
     labels:
       - dependencies
@@ -29,21 +29,18 @@ updates:
     directory: "/.setup/pip/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "10:00"
+        day: "monday"
+        time: "10:00"
     open-pull-requests-limit: 15
     labels:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
   - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
-    labels:
-      - dependencies
-    commit-message:
-      prefix: "[DevDependency] "
+      directory: "/"
+      schedule:
+        interval: "weekly"
+          day: "monday"
+          time: "10:00"
+      open-pull-requests-limit: 15
+

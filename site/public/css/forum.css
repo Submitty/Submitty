@@ -120,7 +120,7 @@
 }
 
 .reply-box {
-    display: none;
+    display: flex; // change none to flex, hopefully students can now see it
     margin-right: 15px;
     margin-bottom: 60px;
 }
@@ -724,6 +724,11 @@
 .new_thread {
     background-color: var(--viewed-content);
     color: var(--text-black);
+}
+
+.new_thread_deleted{
+    background-color: #192734;
+    color : var(--text-black);
 }
 
 .markdown-toggle {
