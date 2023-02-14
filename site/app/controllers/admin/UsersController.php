@@ -270,7 +270,7 @@ class UsersController extends AbstractController {
         }
         //Pronouns must be less than 12 characters.
         if (!empty(trim($_POST['user_pronouns']))) {
-          $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "": "Error in pronouns: \"". strip_tags($_POST['user_pronouns']) . "\"<br>";
+            $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "" : "Error in pronouns: \"" . strip_tags($_POST['user_pronouns']) . "\"<br>";
         }
         //Given and Family name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
@@ -319,7 +319,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_preferred_familyname'])) {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
-        
+
         $user->setPronouns(trim($_POST['user_pronouns']));
 
         $user->setEmail(trim($_POST['user_email']));

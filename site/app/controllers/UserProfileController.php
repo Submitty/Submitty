@@ -128,7 +128,7 @@ class UserProfileController extends AbstractController {
             return JsonResponse::getErrorResponse('Pronouns cannot be empty!');
         }
     }
-    
+
     /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
