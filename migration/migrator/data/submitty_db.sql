@@ -496,6 +496,15 @@ CREATE TABLE public.users (
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_image (
+    image_name character varying NOT NULL,
+    user_id character varying NOT NULL
+);
+
 
 --
 -- Name: vcs_auth_tokens; Type: TABLE; Schema: public; Owner: -

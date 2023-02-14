@@ -8186,4 +8186,15 @@ ORDER BY
         ");
         return $this->rowsToArray($this->submitty_db->rows());
     }
+    
+    public function setDockerImageOwner(string $image, string $user_id): void {
+        $this->submitty_db->query("
+            INSERT INTO docker_image (image_name, user_id) values (?, ?);", [$image,$user_id]);
+    }
+    
+    public function removeDockerImageOwner(string $image ,string $user_id): bool {
+        $this->submitty_db->query("
+            DELETE FROM docker_image WHERE image_name=? AND user_id=?;", [$image ,$user_id]);
+            return $this->submitty_db->getRowCount() > 0;
+    }
 }
