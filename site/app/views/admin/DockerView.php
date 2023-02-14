@@ -20,13 +20,9 @@ class DockerView extends AbstractView {
 
         $user_id = $this->core->getUser()->getId();
         $images = [];
-        foreach ($docker_data['autograding_containers'] as $user_id_recieved => $capability_list) {
-            if ($user_id_recieved == $user_id) {
-                foreach ($capability_list as $capability => $image_list) {
-                    foreach ($image_list as $image) {
-                        $images[] = $image;
-                    }
-                }
+        foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
+            foreach ($image_list as $image) {
+                $images[] = $image;
             }
         }
         $images = array_unique($images);
@@ -50,8 +46,8 @@ class DockerView extends AbstractView {
                 $worker_temp['capabilities'] = $worker['capabilities'];
                 // list of capabilities without containers
                 $worker_temp['images_not_found'] = [];
-                if (array_key_exists($capability, $docker_data['autograding_containers'][$user_id])) {
-                    foreach ($docker_data['autograding_containers'][$user_id][$capability] as $image) {
+                if (array_key_exists($capability, $docker_data['autograding_containers'])) {
+                    foreach ($docker_data['autograding_containers'][$capability] as $image) {
                         $image_to_capability[$image][] = $capability;
                     }
                 }

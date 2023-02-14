@@ -77,7 +77,6 @@
     <table class="table table-striped docker-table mobile-table">
         <thead>
             <tr>
-                <th>Select</th>
                 <th>Image Name</th>
                 <th>Id</th>
                 <th>Size</th>
@@ -85,6 +84,7 @@
                 <th>Created</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
+                <th>Remove</th>
             </tr>
         </thead>
         <tbody>
@@ -103,9 +103,6 @@
                 {% else %}
                     {% set used_name = null %}
                 {% endif %}
-                {% for capability in value %}
-                <td><input type="radio" id="{{ key }}" name="removeid" onchange=removeTicked(id,'{{capability}}')></td>
-                {% endfor %}
                 <td>{{ name }}</th>
                 <td>
                     {% if used_name in image_info|keys %}
@@ -137,11 +134,16 @@
                         <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
                     {% endfor %}
                 </td>
+                {% for capability in value %}
+                <td>
+                <button class="send-button btn btn-primary" id="{{ key }}" onclick=confirmationdialog("{{admin_url}}/remove_image",id,'{{capability}}')>Remove</button>
+                </td>
+                {% endfor %}
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <button class="send-button btn btn-primary" id="remove-button" onclick=removeImage("{{admin_url}}/remove_image")  disabled="disabled">Remove Image</button>
+    
 </div>
 
 {% if no_image_capabilities | length > 0 %}

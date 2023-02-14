@@ -1,4 +1,4 @@
-/* exported collapseSection, addImage, updateImage */
+/* exported collapseSection, confirmationdialog, removeImage, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -67,32 +67,19 @@ function addFieldOnChange() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
-function removeTicked(id,capability) {
-    removal_capability = capability;
-    const checkbox = document.getElementById(id);
-    if (checkbox.checked) {
-        imageList = (id);
-    }
-    else {
-        imageList = null;
-    }
-    if (imageList.length > 0) {
-        $('#remove-button').attr('disabled',false);
-    }
-    else {
-        $('#remove-button').attr('disabled',true);
+function confirmationdialog(url,id,capability) {
+    if(confirm('Are you sure you want to remove ' + id + " image")) {
+        removeImage(url,id,capability)
     }
 }
 
-// eslint-disable-next-line no-unused-vars
-function removeImage(url) {
+function removeImage(url,id,capability) {
     $.ajax({
         url: url,
         type: 'POST',
         data: {
-            'image': imageList,
-            'capability': removal_capability,
+            'image': id,
+            'capability': capability,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
