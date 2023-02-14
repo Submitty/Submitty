@@ -194,7 +194,7 @@
     }
 
     function onStudentDownloadChange() {
-        if($('#no_student_download').is(':checked')) {
+        if(!$('#no_student_download').is(':checked')) {
             disableElementChildren('#view-files-warning', false);
         }
         else {
