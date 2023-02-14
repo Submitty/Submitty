@@ -74,7 +74,7 @@ function updateUserPronouns () {
         const data = new FormData();
         //data.append('csrf_token', csrfToken); //undefined
         //data.append('pronouns', pronouns.val()); //Currently undefined
-        const url = buildUrl(['user_profile', 'change_pronouns']);
+        //const url = buildUrl(['user_profile', 'change_pronouns']); //Currently undefined
         $.ajax({
             url,
             type: 'POST',
@@ -93,12 +93,12 @@ function updateUserPronouns () {
                     pronouns.data('current-pronouns', data.pronouns);
                 }
                 else {
-                    displayErrorMessage(response.message);
+                    //displayErrorMessage(response.message); //currently undefined
                 }
             },
             error: function() {
                 //displayErrorMessage('Some went wrong while updating pronouns!'); //currently undefined
-            }
+            },
         });
     }
 }
