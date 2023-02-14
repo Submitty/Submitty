@@ -43,9 +43,8 @@ def get_paths():
     homework_paths = {}
 
     CONFIG = config.Config.path_constructor(CONFIG_DIR, 'TEST')
-    #  test_data_source_path = TEST_DATA_SRC_DIR
-    """ Check if they system can checkout a VCS repository under different configs """
-       # build test assignment folders
+
+    # Build the homework/checkout path folders
     with open(os.path.join(TEST_DATA_DIR, 'shipper_config.json'), 'r') as infile:
         obj = json.load(infile)
 
@@ -71,7 +70,6 @@ class TestAutogradingShipper(unittest.TestCase):
         # Remove the test environment.
         with contextlib.suppress(FileNotFoundError):
             shutil.rmtree(WORKING_DIR)
-        pass
 
     @classmethod
     def setUpClass(cls):
@@ -166,8 +164,15 @@ class TestAutogradingShipper(unittest.TestCase):
                 open_file.write(form_file.read().replace('CONFIG_PATH', TEST_DATA_DIR))
 
         # Initialize git homework directory
-        os.system('cd {}/homework_01; git init; git add -A; git commit -m \'testing\''.format(TEST_DATA_DIR))
-
+        create_git_repository = """
+        cd {}/homework_01; 
+        git init;
+        git config user.email "test@email.com";
+        git config user.name "Test Shipper";
+        git add -A; 
+        git commit -m "testing"
+        """
+        os.system(create_git_repository.format(TEST_DATA_DIR))
     
     def test_can_short_no_testcases(self):
         """ We should be able to short circuit configs with no testcases  """
