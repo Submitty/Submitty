@@ -636,11 +636,13 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                if($curr_size['count'] === NULL){
-                    $this->core->addErrorMessage("No rotating sections have been added to the system, cannot put newly
-                    registered students into rotating section with fewest members");
+                if ($curr_size === NULL){
+                    $curr_size = 0;
+                    return $expected_size - $curr_size;
+                }else{
+                    return $expected_size - $curr_size['count'];
                 }
-                return $expected_size - $curr_size['count'];
+                
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
