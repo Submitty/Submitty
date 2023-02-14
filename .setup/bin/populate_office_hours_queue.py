@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 
 import argparse
 from sqlalchemy import create_engine, Table, MetaData, select, update, insert
@@ -12,7 +12,7 @@ DB_PORT = 5432
 DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
-def main():
+def main(ramdom_seed = 17):
     # get current semester
     term_id = dateutils.get_current_semester()
 
@@ -76,6 +76,7 @@ def main():
         update_dict["current_state"] = "done"
         update_dict["time_out"] = datetime.now()
         if row["current_state"] == "waiting":
+            ramdom.seed(random_seed)
             update_dict["removal_type"] = random.choice(["emptied", "removed"])
             update_dict["removed_by"] = random.choice(all_grader_ids)
         else:
@@ -102,15 +103,19 @@ def main():
         queue_entry = dict()
 
         # pick current state from "done", "being_helped", and "waiting" with ratio 3, 1, and 1
+        ramdom.seed(random_seed)
         queue_entry["current_state"] = random.choices(queue_current_states, [3, 1, 1])[0]
 
         if queue_entry["current_state"] == "done":
+            ramdom.seed(random_seed)
             queue_entry["removal_type"] = random.choice(queue_removal_types)
         else:
             queue_entry["removal_type"] = None
 
         # choose a random queue and a random student to join it
+        ramdom.seed(random_seed)
         queue_entry["queue_code"] = random.choice(all_queues)
+        ramdom.seed(random_seed)
         queue_entry["user_id"] = random.choice(all_student_ids)
 
         # Once again to make it easier to code, each student can only join once
@@ -118,10 +123,12 @@ def main():
         queue_entry["name"] = name_lookup[queue_entry["user_id"]]
 
         # get a random join queue time
+        ramdom.seed(random_seed)
         time_in = random.randint(300, 600)
         queue_entry["time_in"] = datetime.now() - timedelta(seconds = time_in)
 
         # get a random exit queue time
+        ramdom.seed(random_seed)
         time_out = random.randint(0, 300)
         if queue_entry["current_state"] == "done":
             queue_entry["time_out"] = datetime.now() - timedelta(seconds = time_out)
@@ -134,20 +141,24 @@ def main():
         if queue_entry["current_state"] == "waiting" or queue_entry["removal_type"] == "self":
             queue_entry["help_started_by"] = None
         else:
+            ramdom.seed(random_seed)
             queue_entry["help_started_by"] = random.choice(all_grader_ids)
 
         if queue_entry["removal_type"] == None:
             queue_entry["removed_by"] = None
         elif queue_entry["removal_type"] == "helped":
             # usually the grader who started will finish helping
+            ramdom.seed(random_seed)
             if random.random() < 0.9:
                 queue_entry["removed_by"] = queue_entry["help_started_by"]
             else:
+                ramdom.seed(random_seed)
                 queue_entry["removed_by"] = random.choice(all_grader_ids)
         elif queue_entry["removal_type"] == "self" or queue_entry["removal_type"] == "self_helped":
             queue_entry["removed_by"] = queue_entry["user_id"]
         else:
             # student is being emptied/removed out of the queue
+            ramdom.seed(random_seed)
             queue_entry["removed_by"] = random.choice(all_grader_ids)
 
         # contact information
@@ -161,12 +172,14 @@ def main():
         res.close()
 
         if queue_entry["help_started_by"] != None:
+            ramdom.seed(random_seed)
             time_start = random.randint(time_out, time_in)
             queue_entry["time_help_start"] = datetime.now() - timedelta(seconds = time_start)
         else:
             queue_entry["time_help_start"] = None
         
         # people usually won't be pausing
+        ramdom.seed(random_seed)
         if random.random() < 0.8:
             queue_entry["paused"] = False
             queue_entry["time_paused"] = 0
@@ -174,9 +187,12 @@ def main():
         # this user is pausing or has paused
         else:
             # currently pausing
+            ramdom.seed(random_seed)
             queue_entry["paused"] = random.choice([True, False])
+            ramdom.seed(random_seed)
             queue_entry["time_paused"] = random.choice([0, random.randint(0, time_in)])
             if queue_entry["paused"]:
+                ramdom.seed(random_seed)
                 queue_entry["time_paused_start"] = datetime.now() - timedelta(seconds = random.randint(0, queue_entry["time_paused"]))
             else:
                 queue_entry["time_paused_start"] = None
