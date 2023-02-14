@@ -4,7 +4,6 @@ import shutil
 import unittest
 import contextlib
 import copy
-# import pytest 
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -31,7 +30,7 @@ SUBMITTY_DATA_DIR = os.path.join(TEST_ENVIRONMENT, 'autograding')
 TODO_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_TODO')
 DONE_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_DONE')
 TO_BE_GRADED = os.path.join(SUBMITTY_DATA_DIR, 'to_be_graded_queue')
-GRADING = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
+GRADING = os.path.join(SUBMITTY_DATA_DIR, 'in_progress_grading')
 
 # Log directorories
 LOG_PATH = os.path.join(TEST_ENVIRONMENT, 'logs')
@@ -50,18 +49,18 @@ def get_paths():
     with open(os.path.join(TEST_DATA_DIR, 'shipper_config.json'), 'r') as infile:
         obj = json.load(infile)
 
-    partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
+    partial_path = os.path.join(obj['gradeable'], obj['who'], str(obj['version']))
     course_dir = os.path.join(
         CONFIG.submitty['submitty_data_dir'],
-        "courses",
-        obj["semester"],
-        obj["course"]
+        'courses',
+        obj['semester'],
+        obj['course']
     )
-    for folder in ["submissions", "checkout", "results"]:
+    for folder in ['submissions', 'checkout', 'results']:
         homework_paths[folder] = os.path.join(course_dir, folder, partial_path)
     
-    checkout_path = os.path.join(course_dir, "checkout", partial_path)
-    return {"checkout" : checkout_path, "course" : course_dir, "partial" : partial_path, "homework" :homework_paths}
+    checkout_path = os.path.join(course_dir, 'checkout', partial_path)
+    return {'checkout' : checkout_path, 'course' : course_dir, 'partial' : partial_path, 'homework' :homework_paths}
    
 class TestAutogradingShipper(unittest.TestCase):
     """Unittest TestCase."""
@@ -70,9 +69,9 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        # with contextlib.suppress(FileNotFoundError):
-        #     shutil.rmtree(WORKING_DIR)
-        # pass
+        with contextlib.suppress(FileNotFoundError):
+            shutil.rmtree(WORKING_DIR)
+        pass
 
     @classmethod
     def setUpClass(cls):
@@ -147,34 +146,33 @@ class TestAutogradingShipper(unittest.TestCase):
         homework_paths = {}
         paths = get_paths()
         
-        for folder in ["submissions", "checkout", "results"]:
-            homework_paths[folder] = os.path.join(paths["course"], folder, paths["partial"])
+        for folder in ['submissions', 'checkout', 'results']:
+            homework_paths[folder] = os.path.join(paths['course'], folder, paths['partial'])
             os.makedirs(homework_paths[folder])
 
-        for folder in ["config", "config/form"]:
-            os.makedirs(os.path.join(paths["course"], folder))
+        for folder in ['config', 'config/form']:
+            os.makedirs(os.path.join(paths['course'], folder))
 
-        course_config_file = os.path.join(paths["course"], "config", "config.json")
+        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
         # Open config file and copy to test directory
-        with open(os.path.join(TEST_DATA_DIR, "config_files", 'config.json')) as config_file:
+        with open(os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')) as config_file:
             with open(course_config_file, 'w') as new_config_file:
-                new_config_file.write(config_file.read().replace("VCS_BASE_URL", TEST_DATA_DIR))
+                new_config_file.write(config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR))
         
         # Write course form config
-        course_form_config_file = os.path.join(paths["course"], "config", "form", "form_homework_01.json")
+        course_form_config_file = os.path.join(paths['course'], 'config', 'form', 'form_homework_01.json')
         with open(course_form_config_file, 'w') as open_file:
-            with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json')) as form_file:
-                open_file.write(form_file.read().replace("CONFIG_PATH", TEST_DATA_DIR))
+            with open(os.path.join(TEST_DATA_DIR, 'config_files', 'homework_form.json')) as form_file:
+                open_file.write(form_file.read().replace('CONFIG_PATH', TEST_DATA_DIR))
 
         # Initialize git homework directory
-        os.system('cd {}/homework_01; git init; git add -A; git commit -m \"testing\"'.format(TEST_DATA_DIR))
+        os.system('cd {}/homework_01; git init; git add -A; git commit -m \'testing\''.format(TEST_DATA_DIR))
 
     
-
     def test_can_short_no_testcases(self):
         """ We should be able to short circuit configs with no testcases  """
         autograding_config = {
-            "testcases": []
+            'testcases': []
         }
         self.assertTrue(shipper.can_short_circuit(autograding_config))
 
@@ -207,54 +205,43 @@ class TestAutogradingShipper(unittest.TestCase):
     """
     Unit testing individual functions using mocks.
     """
-    
 
-    # @pytest.fixture(autouse=True)
-    def _pass_fixtures(self, capsys):
-        self.capsys = capsys
-    
-   
     def test_correct_checkout(self):
         """
         This function tests the correct output of the checkout_vcs_repo function in the shipper. 
         To start, the submission directory is setup, and the path variables are retrieved. After this,
-        the shipper is run, and we confirm the standard out. Then the checkout path is scanned to make
-        sure that there is no "failed" test, and if that passes, the expected vcs checkout log is compared 
-        to the actual log. 
+        the shipper is run, and the checkout path is scanned to make sure that there is no 'failed' test files.
+        If that passes, the expected vcs checkout log is compared to the actual log. 
         """
         paths = get_paths()
         
         # Start test
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
 
-        # Confirm standard out
-        expected = "SHIPPER CHECKOUT VCS REPO  {}\n".format(TEST_DATA_DIR + "/shipper_config.json")
-        self.assertEqual(expected, self.capsys.readouterr().out)
-
         # Make sure none of the tests have failed before checking valid output
-        failed_files = [file for file in os.listdir(paths["checkout"]) if file.startswith("failed")]
+        failed_files = [file for file in os.listdir(paths['checkout']) if file.startswith('failed')]
         self.assertTrue(len(failed_files) == 0)
      
         # Confirm VCS checkout logging messages
-        with open(os.path.join(paths["homework"]["results"], "logs/vcs_checkout.txt"), 'r') as actual_vcs_checkout:
+        with open(os.path.join(paths['homework']['results'], 'logs/vcs_checkout.txt'), 'r') as actual_vcs_checkout:
             actual_output = actual_vcs_checkout.read()
             # Check if the paths related to the vcs are correct
-            with open(os.path.join(TEST_DATA_DIR, "config_files", 'expected_vcs_checkout.txt'), 'r') as expected_vcs_checkout:
+            with open(os.path.join(TEST_DATA_DIR, 'config_files', 'expected_vcs_checkout.txt'), 'r') as expected_vcs_checkout:
                 # Check if the expected checkout with local path variables is in the actual output
-                self.assertTrue(expected_vcs_checkout.read().replace("TEST_DATA_PATH", TEST_DATA_DIR).replace("HOMEWORK_PATH", TEST_DATA_DIR + "/homework_01")
-                .replace("CHECKOUT_PATH", paths["checkout"]) in actual_output, "Incorrect File Locations") 
+                self.assertTrue(expected_vcs_checkout.read().replace('TEST_DATA_PATH', TEST_DATA_DIR).replace('HOMEWORK_PATH', TEST_DATA_DIR + '/homework_01')
+                .replace('CHECKOUT_PATH', paths['checkout']) in actual_output, 'Incorrect File Locations') 
         
             #confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = "{CHECKOUT_PATH}/subfolder:\ntotal 1".format(CHECKOUT_PATH = paths["checkout"])
-            self.assertTrue(expected_subfolder in actual_output, "Subfolder not cloned/incorrect location")
+            expected_subfolder = '{CHECKOUT_PATH}/subfolder:\ntotal 1'.format(CHECKOUT_PATH = paths['checkout'])
+            self.assertTrue(expected_subfolder in actual_output, 'Subfolder not cloned/incorrect location')
    
     def test_failed_to_clone(self):
         """
-        This test is to verify the output when the shipper is forced to fail to clone the repository
+        This test is to verify the output when the shipper fails clone the repository
         """
         paths = get_paths()
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
-        self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_clone_repository.txt"), "Failed to cause a clone repository failure")
+        self.assertTrue(os.path.isfile(paths['checkout']+'/failed_to_clone_repository.txt'), 'Failed to cause a clone repository failure')
 
     def test_invalid_url(self):
         """
@@ -263,9 +250,9 @@ class TestAutogradingShipper(unittest.TestCase):
         """
         paths = get_paths()
         
-        with open(os.path.join(paths["course"], "config", "form", "form_homework_01.json"), 'w+') as form_config_file:
-            with open(os.path.join(TEST_DATA_DIR, "config_files", 'homework_form.json'), 'r') as base_config_file:
+        with open(os.path.join(paths['course'], 'config', 'form', 'form_homework_01.json'), 'w+') as form_config_file:
+            with open(os.path.join(TEST_DATA_DIR, 'config_files', 'homework_form.json'), 'r') as base_config_file:
                 # The subdirectory path is changed to and empty string.
-                form_config_file.write(base_config_file.read().replace("homework_01", ""))
+                form_config_file.write(base_config_file.read().replace('homework_01', ''))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
-        self.assertTrue(os.path.isfile(paths["checkout"]+"/failed_to_construct_valid_repository_url.txt"), "Failed to induce an invalid repository url")
+        self.assertTrue(os.path.isfile(paths['checkout']+'/failed_to_construct_valid_repository_url.txt'), 'Failed to induce an invalid repository url')

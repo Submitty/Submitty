@@ -1,11 +1,11 @@
 
 {
     "database_details": {
-        "dbname": "submitty_fall22_cptr141"
+        "dbname": "submitty_git_example_db"
     },
     "course_details": {
-        "course_name": "Fundamentals of Programming I",
-        "course_home_url": "https://class.wallawalla.edu/d2l/home/343700",
+        "course_name": "CS1 Git Problem Example",
+        "course_home_url": "https://courcse.url.com",
         "default_hw_late_days": 99,
         "default_student_late_days": 99,
         "zero_rubric_grades": false,
