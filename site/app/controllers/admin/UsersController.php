@@ -57,6 +57,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $student->getDisplayedGivenName(),
                 'family_name' => $student->getDisplayedFamilyName(),
+                'pronouns' => $student->getPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -124,6 +125,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
+                'pronouns' => $grader->getPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -191,6 +193,7 @@ class UsersController extends AbstractController {
             'user_familyname' => $user->getLegalFamilyName(),
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
+            'user_pronouns' => $user->getPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
@@ -224,6 +227,7 @@ class UsersController extends AbstractController {
                 'user_familyname' => $user->getLegalFamilyName(),
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
+                'user_pronouns' => $user->getPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
@@ -263,6 +267,10 @@ class UsersController extends AbstractController {
             if ($authentication->isInvalidUsername($_POST['user_id'])) {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
+        }
+        //Pronouns must be less than 12 characters.
+        if (!empty(trim($_POST['user_pronouns']))) {
+          $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "": "Error in pronouns: \"". strip_tags($_POST['user_pronouns']) . "\"<br>";
         }
         //Given and Family name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
@@ -311,6 +319,8 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_preferred_familyname'])) {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
+        
+        $user->setPronouns(trim($_POST['user_pronouns']));
 
         $user->setEmail(trim($_POST['user_email']));
 

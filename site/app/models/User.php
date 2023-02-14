@@ -424,8 +424,8 @@ class User extends AbstractModel {
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
-    public function setPronouns($name) {
-        $this->pronouns = $name;
+    public function setPronouns($pronouns) {
+        $this->pronouns = $pronouns;
     }
 
     public function setPreferredGivenName($name) {
