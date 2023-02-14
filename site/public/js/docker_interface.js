@@ -5,8 +5,7 @@
 * @param {string} btn_id id of the button calling this function
 */
 
-let imageList;
-let removal_capability;
+
 function collapseSection(id,btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
@@ -68,8 +67,8 @@ function addFieldOnChange() {
 }
 
 function confirmationdialog(url,id,capability) {
-    if(confirm('Are you sure you want to remove ' + id + " image")) {
-        removeImage(url,id,capability)
+    if (confirm('Are you sure you want to remove ' + ${id} + ' image')) {
+        removeImage(url,id,capability);
     }
 }
 
