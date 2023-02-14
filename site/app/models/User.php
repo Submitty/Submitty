@@ -420,14 +420,14 @@ class User extends AbstractModel {
         $this->notification_settings[$key] = $value;
     }
 
-    /**
-     * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
-     * @param string $name
-     */
     public function setPronouns($pronouns) {
         $this->pronouns = $pronouns;
     }
 
+    /**
+     * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
+     * @param string $name
+     */
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
         $this->setDisplayedGivenName();
