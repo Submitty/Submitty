@@ -11,6 +11,13 @@
 #   WORKER_PAIR=1 vagrant up
 #
 #
+# If you want to override the default image used for the virtual machines, you can set the
+# environment variable VAGRANT_BOX. See https://vagrantup.com/boxes/search for a list of
+# distributed boxes. For example:
+#
+# VAGRANT_BOX=ubuntu/focal64 vagrant up
+#
+#
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
 # variable EXTRA set. The easiest way to do this is doing:
 #
