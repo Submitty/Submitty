@@ -54,10 +54,10 @@ SCRIPT
 
 base_boxes = Hash[]
 
-# Should all be base Ubuntu 20.04 boxes
+# Should all be base Ubuntu boxes that use the same version
 base_boxes.default         = "bento/ubuntu-20.04"
 base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/2004"
+base_boxes[:libvirt]       = "generic/ubuntu2004"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -83,13 +83,7 @@ Vagrant.configure(2) do |config|
     config.env.enable
   end
 
-  # Default box
-  config.vm.box = base_boxes.default
-
-  # Custom box
-  if ENV.has_key?('VAGRANT_BOX')
-    config.vm.box = ENV['VAGRANT_BOX']
-  end
+  config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
 
   mount_options = []
 
