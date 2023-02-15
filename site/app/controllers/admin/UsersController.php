@@ -625,6 +625,16 @@ class UsersController extends AbstractController {
                     registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
+
+            //Gets all the ids of the excluded sections
+            $excluded_registration_sections = $_POST["excluded_registration_sections"] ?? [];
+            $excluded_users = $this->core->getQueries()->getUsersByRegistrationSections($excluded_registration_sections);
+            $excluded_user_ids = array_map(function (User $user) {
+                return $user->getId();
+            }, $excluded_users);
+
+            $unassigned_user_ids = array_values(array_diff($unassigned_user_ids, $excluded_user_ids));
+
             // 'fewest' rotating section setup option can only use random sort
             shuffle($unassigned_user_ids);
             // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
