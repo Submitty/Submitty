@@ -636,12 +636,7 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                if ($curr_size === null) {
-                    return $expected_size;
-                }
-                else {
-                    return $expected_size - $curr_size['count'];
-                }
+                return $curr_size === null ? $expected_size : $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
