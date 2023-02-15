@@ -88,8 +88,8 @@ class TestAutogradingShipper(unittest.TestCase):
 
         # Copy test data into the dir
         shutil.rmtree(TEST_DATA_DIR,  ignore_errors=True)
-        shutil.copytree(TEST_DATA_SRC_DIR, TEST_DATA_DIR)#, dirs_exist_ok=True)
-
+        shutil.copytree(TEST_DATA_SRC_DIR, TEST_DATA_DIR)
+        
         # All testing will take place within the TEST_ENVIRONMENT directory
         os.mkdir(TEST_ENVIRONMENT)
 
