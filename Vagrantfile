@@ -78,7 +78,6 @@ def mount_folders(config, mount_options)
 end
 
 Vagrant.configure(2) do |config|
-  # Optional plugin for reading from env file
   if Vagrant.has_plugin?('vagrant-env')
     config.env.enable
   end
@@ -153,7 +152,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
-    # Default box for parallels on arm64
     unless ENV.has_key?('VAGRANT_BOX')
       arch = `uname -m`.chomp
       if (arch == 'arm64' || arch == 'aarch64')
@@ -175,7 +173,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "libvirt" do |libvirt, override|
-      # Default box with libvirt support
       unless ENV.has_key?('VAGRANT_BOX')
         override.vm.box = base_boxes[:libvirt]
       end
