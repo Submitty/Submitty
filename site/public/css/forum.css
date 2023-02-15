@@ -697,6 +697,10 @@
     background-color: var(--deleted-discussion-post-grey);
 }
 
+.deleted_and_unviewed{
+    background-color: var(--deleted-and-unviewed-thread) !important;
+}
+
 .deleted.active {
     background-color: var(--deleted-discussion-post-grey);
 }
