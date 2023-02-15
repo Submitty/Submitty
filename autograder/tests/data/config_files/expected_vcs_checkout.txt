@@ -7,4 +7,3 @@ vcs_path file:///HOMEWORK_PATH
 ====================================
 
 CHECKOUT_PATH:
-total 1

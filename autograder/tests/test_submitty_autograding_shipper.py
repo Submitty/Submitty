@@ -234,7 +234,7 @@ class TestAutogradingShipper(unittest.TestCase):
             with open(os.path.join(TEST_DATA_DIR, 'config_files', 'expected_vcs_checkout.txt'), 'r') as expected_vcs_checkout:
                 # Check if the expected checkout with local path variables is in the actual output
                 self.assertTrue(expected_vcs_checkout.read().replace('TEST_DATA_PATH', TEST_DATA_DIR).replace('HOMEWORK_PATH', TEST_DATA_DIR + '/homework_01')
-                .replace('CHECKOUT_PATH', paths['checkout']) in actual_output, 'Incorrect File Locations, {}'.format(actual_output)) 
+                .replace('CHECKOUT_PATH', paths['checkout']) in actual_output, 'Incorrect File Locations, {}') 
         
             #confirm the subfolder is cloned and is found at the correct path
             expected_subfolder = '{CHECKOUT_PATH}/subfolder:\ntotal 1'.format(CHECKOUT_PATH = paths['checkout'])
