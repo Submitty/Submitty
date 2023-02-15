@@ -21,7 +21,7 @@ describe('navigation page', () => {
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
         const sections = {
-            future: 4,
+            future: 5,
             beta: 3,
             open: 5,
             closed: 3,

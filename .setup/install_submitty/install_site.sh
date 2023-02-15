@@ -144,6 +144,16 @@ fi
 # create access control cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
 
+# clear old doctrine proxy classes
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
+fi
+# create doctrine proxy classes directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
 fi

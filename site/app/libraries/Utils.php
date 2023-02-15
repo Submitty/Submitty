@@ -196,9 +196,9 @@ class Utils {
 
     /*
      * Given an array of students, returns a json object of formatted student names in the form:
-     * First_Name Last_Name <student_id>
+     * Given_Name Family_Name <student_id>
      * Students in the null section are at the bottom of the list in the form:
-     * (In null section) First_Name Last_Name <student_id>
+     * (In null section) Given_Name Family_Name <student_id>
      * Optional param to show previous submission count
      * students_version is an array of user and their highest submitted version
      */
@@ -209,7 +209,7 @@ class Utils {
         foreach ($students as $student) {
             $student_entry = [
                 'value' => $student->getId(),
-                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
+                'label' => $student->getDisplayedGivenName() . ' ' . $student->getDisplayedFamilyName() . ' <' . $student->getId() . '>'
             ];
 
             if ($append_numeric_id) {
