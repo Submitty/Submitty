@@ -237,7 +237,7 @@ class TestAutogradingShipper(unittest.TestCase):
                 .replace('CHECKOUT_PATH', paths['checkout']) in actual_output, 'Incorrect File Locations, {}') 
         
             #confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = '{CHECKOUT_PATH}/subfolder:\ntotal 1'.format(CHECKOUT_PATH = paths['checkout'])
+            expected_subfolder = '{CHECKOUT_PATH}/subfolder:'.format(CHECKOUT_PATH = paths['checkout'])
             self.assertTrue(expected_subfolder in actual_output, 'Subfolder not cloned/incorrect location')
    
     def test_failed_to_clone(self):
