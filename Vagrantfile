@@ -52,6 +52,13 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
+base_boxes = Hash[]
+
+# Should all be base Ubuntu 20.04 boxes
+base_boxes.default         = "bento/ubuntu-20.04"
+base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
+base_boxes[:libvirt]       = "generic/2004"
+
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
@@ -77,7 +84,7 @@ Vagrant.configure(2) do |config|
   end
 
   # Default box
-  config.vm.box = "bento/ubuntu-20.04"
+  config.vm.box = base_boxes.default
 
   # Custom box
   if ENV.has_key?('VAGRANT_BOX')
@@ -156,7 +163,7 @@ Vagrant.configure(2) do |config|
     unless ENV.has_key?('VAGRANT_BOX')
       arch = `uname -m`.chomp
       if (arch == 'arm64' || arch == 'aarch64')
-        override.vm.box = "bento/ubuntu-20.04-arm64"
+        override.vm.box = base_boxes[:arm_parallels]
       end
     end
 
@@ -176,7 +183,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "libvirt" do |libvirt, override|
       # Default box with libvirt support
       unless ENV.has_key?('VAGRANT_BOX')
-        override.vm.box = "generic/ubuntu2004"
+        override.vm.box = base_boxes[:libvirt]
       end
 
       libvirt.memory = 2048
