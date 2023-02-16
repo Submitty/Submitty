@@ -169,6 +169,7 @@ class TestAutogradingShipper(unittest.TestCase):
         git init;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
+        git config init.defaultBranch "main"
         git add -A; 
         git commit -m "testing"
         """
@@ -257,7 +258,7 @@ class TestAutogradingShipper(unittest.TestCase):
         
         with open(os.path.join(paths['course'], 'config', 'form', 'form_homework_01.json'), 'w+') as form_config_file:
             with open(os.path.join(TEST_DATA_DIR, 'config_files', 'homework_form.json'), 'r') as base_config_file:
-                # The subdirectory path is changed to and empty string.
+                # The subdirectory variable is changed to and empty string.
                 form_config_file.write(base_config_file.read().replace('homework_01', ''))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         self.assertTrue(os.path.isfile(paths['checkout']+'/failed_to_construct_valid_repository_url.txt'), 'Failed to induce an invalid repository url')
