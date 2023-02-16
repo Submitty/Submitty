@@ -10,15 +10,14 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-
-    database.execute("""
-ALTER TABLE IF EXISTS users 
-ADD COLUMN IF NOT EXISTS user_pronouns VARCHAR(255) DEFAULT ''::VARCHAR
-    """)
+    # add pronouns column into user table
+    sql = """ALTER TABLE users ADD COLUMN IF NOT EXISTS user_pronouns 
+      character varying NOT NULL DEFAULT '';"""
+    database.execute(sql)
     pass
 
 
-def down(config, database):
+def down(config):
     """
     Run down migration (rollback).
 

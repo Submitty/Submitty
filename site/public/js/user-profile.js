@@ -72,9 +72,9 @@ function updateUserPronouns () {
     }
     else {
         const data = new FormData();
-        //data.append('csrf_token', csrfToken); //undefined
-        //data.append('pronouns', pronouns.val()); //Currently undefined
-        //const url = buildUrl(['user_profile', 'change_pronouns']); //Currently undefined
+        data.append('csrf_token', csrfToken); //undefined
+        data.append('pronouns', pronouns.val()); //Currently undefined
+        const url = buildUrl(['user_profile', 'change_pronouns']); //Currently undefined
         $.ajax({
             url,
             type: 'POST',
@@ -85,7 +85,7 @@ function updateUserPronouns () {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const {data} = response;
-                    //displaySuccessMessage(data.message); //Currently undefined
+                    displaySuccessMessage(data.message); //Currently undefined
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns
                     $('#pronouns-row').html(`${icon} ${data.pronouns}`);
@@ -93,11 +93,11 @@ function updateUserPronouns () {
                     pronouns.data('current-pronouns', data.pronouns);
                 }
                 else {
-                    //displayErrorMessage(response.message); //currently undefined
+                    displayErrorMessage(response.message); //currently undefined
                 }
             },
             error: function() {
-                //displayErrorMessage('Some went wrong while updating pronouns!'); //currently undefined
+                displayErrorMessage('Some went wrong while updating pronouns!'); //currently undefined
             },
         });
     }
@@ -127,23 +127,24 @@ function updateUserPreferredNames () {
             processData: false,
             contentType: false,
             success: function(res) {
-                const response = JSON.parse(res);
-                if (response.status === 'success') {
-                    const {data} = response;
-                    // eslint-disable-next-line no-undef
-                    displaySuccessMessage(data.message);
-                    //update the preferred names
-                    const icon = '<i class="fas fa-pencil-alt"></i>';
-                    $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
-                    $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
-                    //update the data attributes
-                    given_name_field.data('current-name', data.given_name);
-                    family_name_field.data('current-name', data.family_name);
-                }
-                else {
-                    // eslint-disable-next-line no-undef
-                    displayErrorMessage(response.message);
-                }
+                console.log(res);
+                // const response = JSON.parse(res);
+                // if (response.status === 'success') {
+                //     const {data} = response;
+                //     // eslint-disable-next-line no-undef
+                //     displaySuccessMessage(data.message);
+                //     //update the preferred names
+                //     const icon = '<i class="fas fa-pencil-alt"></i>';
+                //     $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
+                //     $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
+                //     //update the data attributes
+                //     given_name_field.data('current-name', data.given_name);
+                //     family_name_field.data('current-name', data.family_name);
+                // }
+                // else {
+                //     // eslint-disable-next-line no-undef
+                //     displayErrorMessage(response.message);
+                // }
             },
             error: function() {
                 // display error message
