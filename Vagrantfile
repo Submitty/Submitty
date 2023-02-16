@@ -116,10 +116,10 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511                           # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443                           # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442                          # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: (apple_silicon ? 7001 : 7000)  # saml
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
