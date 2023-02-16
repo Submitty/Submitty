@@ -94,7 +94,7 @@ Vagrant.configure(2) do |config|
 
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
-  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || `sysctl -n machdep.cpu.brand_string`.chomp.include? 'Apple M')
+  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'Apple M'))
 
   mount_options = []
 
@@ -116,10 +116,10 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511                     # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443                     # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442                    # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: (arm_mac ? 7001 : 7000)  # saml
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511                           # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443                           # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442                          # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: (apple_silicon ? 7001 : 7000)  # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
@@ -197,7 +197,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "qemu" do |qe, override|
-    unless ENV.has_key('VAGRANT_BOX')
+    unless ENV.has_key?('VAGRANT_BOX')
       if apple_silicon
         override.vm.box = base_boxes[:arm_mac_qemu]
       end
