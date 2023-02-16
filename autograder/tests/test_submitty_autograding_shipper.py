@@ -87,7 +87,7 @@ class TestAutogradingShipper(unittest.TestCase):
         os.makedirs(WORKING_DIR, exist_ok=True)
 
         # Copy test data into the dir
-        shutil.rmtree(TEST_DATA_DIR,  ignore_errors=True)
+        # shutil.rmtree(TEST_DATA_DIR,  ignore_errors=True)
         shutil.copytree(TEST_DATA_SRC_DIR, TEST_DATA_DIR)
         
         # All testing will take place within the TEST_ENVIRONMENT directory
@@ -166,7 +166,7 @@ class TestAutogradingShipper(unittest.TestCase):
         # Initialize git homework directory
         create_git_repository = """
         cd {}/homework_01; 
-        git init --initial-branch "main";
+        git init --initial-branch "master";
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add -A;
