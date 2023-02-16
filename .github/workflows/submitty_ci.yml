@@ -17,7 +17,7 @@ env:
 
 concurrency:
   # Cancel running jobs for previous commits to any branch except for main
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref && github.ref_name != 'actions-concurrency') || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.ref }}
   cancel-in-progress: true
 jobs:
     css-lint:
