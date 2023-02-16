@@ -154,8 +154,9 @@
             paths.forEach(function(item,index,arr) {
                 arr[index] = item.slice(69);
             });
-            $("#input-provide-full-path").autocomplete({
+            $("#stuff").autocomplete({
                 source: paths,
+                appendTo: "#cm-path",
                 minLength: 0,
                 scroll: true
             }).focus(function() {
