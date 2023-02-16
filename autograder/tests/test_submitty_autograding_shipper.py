@@ -166,11 +166,11 @@ class TestAutogradingShipper(unittest.TestCase):
         # Initialize git homework directory
         create_git_repository = """
         cd {}/homework_01; 
+        git config init.defaultBranch "main";
         git init;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
-        git config init.defaultBranch "main"
-        git add -A; 
+        git add -A;
         git commit -m "testing"
         """
         os.system(create_git_repository.format(TEST_DATA_DIR))
