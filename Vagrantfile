@@ -180,16 +180,16 @@ Vagrant.configure(2) do |config|
   end
   
   config.vm.provider "libvirt" do |libvirt, override|
-      unless ENV.has_key?('VAGRANT_BOX')
-        override.vm.box = base_boxes[:libvirt]
-      end
+    unless ENV.has_key?('VAGRANT_BOX')
+      override.vm.box = base_boxes[:libvirt]
+    end
 
-      libvirt.memory = 2048
-      libvirt.cpus = 2
+    libvirt.memory = 2048
+    libvirt.cpus = 2
 
-      libvirt.forward_ssh_port = true
+    libvirt.forward_ssh_port = true
 
-      mount_folders(override, [])
+    mount_folders(override, [])
   end
 
   config.vm.provider "qemu" do |qe, override|
