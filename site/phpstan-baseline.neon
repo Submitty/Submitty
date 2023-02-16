@@ -105,11 +105,6 @@ parameters:
 			path: app/controllers/NotificationController.php
 
 		-
-			message: "#^Parameter \\#2 \\$notification_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:markNotificationAsSeen\\(\\) expects int, string given\\.$#"
-			count: 2
-			path: app/controllers/NotificationController.php
-
-		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -140,11 +135,6 @@ parameters:
 			"""
 			count: 1
 			path: app/controllers/UserProfileController.php
-
-		-
-			message: "#^Parameter \\#2 \\$callback of function usort expects callable\\(mixed, mixed\\)\\: int, Closure\\(mixed, mixed\\)\\: bool given\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
@@ -246,27 +236,12 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, true given\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Parameter \\#2 \\$semester of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:insertCourseUser\\(\\) expects string, null given\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Parameter \\#2 \\$users of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateUsersRotatingSection\\(\\) expects array\\<app\\\\models\\\\User\\>, array\\<int, string\\> given\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Parameter \\#3 \\$course of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:insertCourseUser\\(\\) expects string, null given\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: "#^Parameter \\#3 \\$length of function array_splice expects int, float given\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -292,21 +267,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: "#^Parameter \\#1 \\$thread_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThread\\(\\) expects int, string given\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Parameter \\#1 \\$thread_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:isThreadLocked\\(\\) expects int, string given\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Parameter \\#2 \\$value of function setcookie expects string, int given\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
 			message: "#^Elseif condition is always true\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -317,18 +277,8 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Parameter \\#1 \\$verify_time of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setVerifyTime\\(\\) expects string, DateTime given\\.$#"
+			message: "#^Parameter \\#1 \\$verify_time of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setVerifyTime\\(\\) expects string\\|null, DateTime given\\.$#"
 			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Parameter \\#1 \\$verify_time of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setVerifyTime\\(\\) expects string, null given\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, true given\\.$#"
-			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -511,11 +461,6 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
-			message: "#^Parameter \\#2 \\$use_include_path of function file_get_contents expects bool, null given\\.$#"
-			count: 2
-			path: app/libraries/DiffViewer.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$has_difference is never read, only written\\.$#"
 			count: 1
 			path: app/libraries/DiffViewer.php
@@ -534,16 +479,6 @@ parameters:
 			message: "#^Unsafe call to private method app\\\\libraries\\\\ExceptionHandler\\:\\:parseArgs\\(\\) through static\\:\\:\\.$#"
 			count: 1
 			path: app/libraries/ExceptionHandler.php
-
-		-
-			message: "#^Parameter \\#1 \\$input of function str_pad expects string, float given\\.$#"
-			count: 2
-			path: app/libraries/GradingQueue.php
-
-		-
-			message: "#^Parameter \\#1 \\$input of function str_pad expects string, int\\<\\-59, 59\\> given\\.$#"
-			count: 1
-			path: app/libraries/GradingQueue.php
 
 		-
 			message: "#^Property app\\\\libraries\\\\GradingQueue\\:\\:\\$grading_remaining is never read, only written\\.$#"
@@ -655,11 +590,6 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/Config.php
-
-		-
-			message: "#^Parameter \\#6 \\$id_prepend of class app\\\\libraries\\\\DiffViewer constructor expects string, int given\\.$#"
-			count: 1
-			path: app/models/GradeableAutocheck.php
 
 		-
 			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
@@ -792,11 +722,6 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
 			message: "#^Parameter \\#1 \\$dividend of static method app\\\\libraries\\\\Utils\\:\\:safeCalcPercent\\(\\) expects int, float given\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponentContainer.php
@@ -857,11 +782,6 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
-			message: "#^Parameter \\#2 \\$version of method app\\\\models\\\\notebook\\\\Notebook\\:\\:getRecentSubmissionContents\\(\\) expects string, int\\<min, \\-1\\>\\|int\\<1, max\\> given\\.$#"
-			count: 2
-			path: app/models/notebook/Notebook.php
-
-		-
 			message: "#^Left side of && is always true\\.$#"
 			count: 2
 			path: app/views/AutoGradingView.php
@@ -912,11 +832,6 @@ parameters:
 			path: app/views/course/CourseMaterialsView.php
 
 		-
-			message: "#^Parameter \\#2 \\$callback of function uasort expects callable\\(app\\\\entities\\\\course\\\\CourseMaterial, app\\\\entities\\\\course\\\\CourseMaterial\\)\\: int, Closure\\(app\\\\entities\\\\course\\\\CourseMaterial, app\\\\entities\\\\course\\\\CourseMaterial\\)\\: bool given\\.$#"
-			count: 1
-			path: app/views/course/CourseMaterialsView.php
-
-		-
 			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
 			count: 2
 			path: app/views/forum/ForumThreadView.php
@@ -959,9 +874,3 @@ parameters:
 			"""
 			count: 1
 			path: public/index.php
-
-		-
-			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, int given\\.$#"
-			count: 2
-			path: public/index.php
-

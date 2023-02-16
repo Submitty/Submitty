@@ -155,7 +155,15 @@ class AdminGradeableController extends AbstractController {
             $repo_id_number++;
         }
         usort($all_repository_config_paths, function ($a, $b) {
-            return $a[0] > $b[0];
+            if ($a[0] > $b[0]) {
+                return 1;
+            }
+            elseif ($a[0] < $b[0]) {
+                return -1;
+            }
+            else {
+                return 0;
+            }
         });
 
         $type_string = 'UNKNOWN';
