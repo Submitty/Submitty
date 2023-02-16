@@ -35,6 +35,14 @@ function showUpdateSecondaryEmailForm() {
     form.find('.form-body').scrollTop(0);
 }
 
+// eslint-disable-next-line no-unused-vars
+function showUpdatePronounsForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-pronouns-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+}
+
 /**
  * Gets the list of all available time zones as an array
  * Referenced from https://stackoverflow.com/questions/9149556/how-to-get-utc-offset-in-javascript-analog-of-timezoneinfo-getutcoffset-in-c

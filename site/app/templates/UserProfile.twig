@@ -69,9 +69,9 @@
                         <span class="label">
                             Pronouns:
                         </span>
-                        <span class="value">
-                            {{ user.getPronouns() }}
-                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdatePronounForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
+                        </button>
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">

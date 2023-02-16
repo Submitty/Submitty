@@ -60,7 +60,7 @@ class UsersController extends AbstractController {
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
-                'user_pronouns' => $student->getPronouns(),
+                'pronouns' => $student->getPronouns(),
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
@@ -128,7 +128,7 @@ class UsersController extends AbstractController {
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
-                'user_pronouns' => $grader->getPronouns(),
+                'pronouns' => $grader->getPronouns(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
