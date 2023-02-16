@@ -3453,7 +3453,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
 
         $rows = $this->course_db->rows();
-        if (empty($rows)) {
+        if (count($rows) === 0) {
             return null;
         }
         return $rows[0]['message'];
