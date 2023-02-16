@@ -97,6 +97,7 @@ class AutoGradingView extends AbstractView {
             $queueData['in_queue'] = true;
             $queueData['queue_pos'] = $version_instance->getQueuePosition();
             $queueData['queue_total'] = $this->core->getGradingQueue()->getQueueCount();
+            $queueData['check_refresh_submission_url'] = $this->core->buildCourseUrl([ 'gradeable', $gradeable->getId(), $version_instance->getVersion(), 'check_refresh']);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", array_merge($queueData, [
