@@ -65,6 +65,7 @@ base_boxes = Hash[]
 base_boxes.default         = "bento/ubuntu-20.04"
 base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2004"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -90,6 +91,10 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
+
+  arch = `uname -m`.chomp
+  arm = arch == 'arm64' || arch == 'aarch64'
+  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || `sysctl -n machdep.cpu.brand_string`.chomp.include? 'Apple M')
 
   mount_options = []
 
@@ -160,8 +165,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provider "parallels" do |prl, override|
     unless ENV.has_key?('VAGRANT_BOX')
-      arch = `uname -m`.chomp
-      if (arch == 'arm64' || arch == 'aarch64')
+      if (arm || apple_silicon)
         override.vm.box = base_boxes[:arm_parallels]
       end
     end
@@ -193,6 +197,12 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "qemu" do |qe, override|
+    unless ENV.has_key('VAGRANT_BOX')
+      if apple_silicon
+        override.vm.box = base_boxes[:arm_mac_qemu]
+      end
+    end
+
     qe.memory = "2G"
     qe.smp = 2
     qe.ssh_port = 2222
