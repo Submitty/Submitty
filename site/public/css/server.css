@@ -1625,9 +1625,11 @@ end of styles used in the admin gradeable page
     overflow-x: hidden;
     z-index: 2000;
 }
+
 #cm-path {
     position: relative;
 }
+
 /* Override the -15px that bootstrap-grid.css sets for these */
 .row {
     margin-right: 0;
