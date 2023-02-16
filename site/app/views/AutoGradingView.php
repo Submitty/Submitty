@@ -91,7 +91,15 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
+        $queueData = [ 'in_queue' => false ];
+
+        if ($version_instance->isQueued()) {
+            $queueData['in_queue'] = true;
+            $queueData['queue_pos'] = $version_instance->getQueuePosition();
+            $queueData['queue_total'] = $this->core->getGradingQueue()->getQueueCount();
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", array_merge($queueData, [
             'gradeable_id' => $gradeable->getId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
             "num_visible_testcases" => $num_visible_testcases,
@@ -108,8 +116,8 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
-        ]);
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
+        ]));
     }
 
     /**
