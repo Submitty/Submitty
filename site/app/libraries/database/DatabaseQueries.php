@@ -3452,7 +3452,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             [$g_id, $user_id]
         );
 
-        return $this->course_db->rows()[0]['message'];
+        $rows = $this->course_db->rows();
+        if (!$rows) return null;
+        return $rows[0]['message'];
     }
 
     /**
