@@ -94,7 +94,7 @@ Vagrant.configure(2) do |config|
 
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
-  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'Apple M'))
+  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
 
   mount_options = []
 
