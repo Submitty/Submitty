@@ -116,7 +116,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
         ]));
     }
 
