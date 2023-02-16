@@ -948,10 +948,9 @@ def checkout_vcs_repo(config, my_file):
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
-                
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
-                    print("\n====================================\n",file=log_file)
+                    print("\n====================================\n", file=log_file)
                     subprocess.call(['du', '-skh', checkout_path], stdout=log_file)
                 obj['revision'] = what_version
 
