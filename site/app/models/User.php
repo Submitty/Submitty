@@ -27,6 +27,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
+ * @method string getPronouns()
  * @method void setSecondaryEmail(string $email)
  * @method bool getEmailBoth()
  * @method void setEmailBoth(bool $flag)
@@ -103,6 +104,8 @@ class User extends AbstractModel {
     /** @prop @var string The secondary email of the user */
     protected $secondary_email;
     /** @prop @var string Determines whether or not user chose to receive emails to secondary email */
+    protected $pronouns;
+    /** @prop @var string The pronouns of the user */
     protected $email_both;
     /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
@@ -189,6 +192,7 @@ class User extends AbstractModel {
 
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'];
+        $this->pronouns = $details['user_pronouns'];
         $this->email_both = $details['user_email_secondary_notify'];
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
