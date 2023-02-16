@@ -69,9 +69,9 @@
                         <span class="label">
                             Pronouns:
                         </span>
-                        <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getPronous() }}
-                        </button>
+                        <span class="value">
+                            {{ user.getPronouns() }}
+                        </span>
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
@@ -151,6 +151,7 @@
 {% include 'EditNameForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
+{% include 'EditPronounsForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}
