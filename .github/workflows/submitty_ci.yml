@@ -15,6 +15,10 @@ env:
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
+concurrency:
+  # Cancel running jobs for previous commits to any branch except for main
+  group: ${{ (github.ref && github.ref_name != "main") || github.run_id }}
+  cancel-in-progress: true
 jobs:
     css-lint:
         runs-on: ubuntu-20.04
@@ -292,10 +296,6 @@ jobs:
               - 5432:5432
 
         steps:
-          - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.8.0
-            with:
-              access_token: ${{ github.token }}
           - uses: actions/checkout@v2
             with:
               path: SUBMITTY_CPY/
