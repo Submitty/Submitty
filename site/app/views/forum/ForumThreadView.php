@@ -747,9 +747,9 @@ class ForumThreadView extends AbstractView {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
-                $array_of_class_IDs = explode(" ",$class);
-                if (in_array("new_thread", $array_of_class_IDs)){
-                    $class .=" deleted_and_unviewed";
+                $array_of_class_IDs = explode(" ", $class);
+                if (in_array("new_thread", $array_of_class_IDs)) {
+                    $class .= " deleted-unviewed"; 
                 }
                 $class .= " deleted";
             }
@@ -974,7 +974,7 @@ class ForumThreadView extends AbstractView {
         if ($post["deleted"]) {
             $classes[] = "deleted";
             if (in_array("new_post",$classes)){
-                $classes[] = "deleted_and_unviewed";
+                $classes[] = "deleted-unviewed";
             }
             $deleted = true;
         }
