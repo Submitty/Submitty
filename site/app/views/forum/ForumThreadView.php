@@ -749,7 +749,7 @@ class ForumThreadView extends AbstractView {
             if ($thread["deleted"]) {
                 $array_of_class_IDs = explode(" ", $class);
                 if (in_array("new_thread", $array_of_class_IDs)) {
-                    $class .= " deleted-unviewed"; 
+                    $class .= " deleted-unviewed";
                 }
                 $class .= " deleted";
             }
@@ -973,7 +973,7 @@ class ForumThreadView extends AbstractView {
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
-            if (in_array("new_post",$classes)){
+            if (in_array("new_post", $classes)) {
                 $classes[] = "deleted-unviewed";
             }
             $deleted = true;
