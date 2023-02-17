@@ -26,7 +26,7 @@ class PollUtils {
                 'status' => $poll->getStatus(),
                 'image_path' => $poll->getImagePath(),
                 'release_histogram' => $poll->getReleaseHistogram(),
-                'show_correct_answer' => $poll->getShowCorrectAnswer()
+                'release_answer' => $poll->getReleaseAnswer()
             ];
             foreach ($poll->getOptions() as $option) {
                 $poll_data['responses'][$option->getOrderId()] = $option->getResponse();
@@ -55,4 +55,5 @@ class PollUtils {
                 || ($poll_type == "single-response-multiple-correct")
                 || ($poll_type == "single-response-survey"));
     }
+
 }

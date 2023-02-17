@@ -20,6 +20,7 @@ class PollTester extends BaseUnitTest {
                 "Is this the first poll?",
                 "single-response-single-correct",
                 new DateTime("2021-01-11"),
+                "never",
                 "never"
             ),
             1 => new Poll(
@@ -27,7 +28,8 @@ class PollTester extends BaseUnitTest {
                 "Is this the first poll?",
                 "single-response-multiple-correct",
                 new DateTime("9999-12-31"),
-                "always"
+                "always",
+                "when_ended"
             ),
             2 => new Poll(
                 "Poll #3",
@@ -35,6 +37,7 @@ class PollTester extends BaseUnitTest {
                 "multiple-response-survey",
                 new DateTime('now'),
                 "when_ended",
+                "always",
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             )
         ];
@@ -267,5 +270,11 @@ class PollTester extends BaseUnitTest {
 
         $this->expectException(\RuntimeException::class);
         $this->my_polls[0]->setReleaseHistogram("aaaaaaaaa");
+    }
+
+    public function testAnswerRelease(): void {
+        $this->assertEquals($this->my_polls[0]->getRelaseAnswer(), "never");
+        $this->assertEquals($this->my_polls[1]->getRelaseAnswer(), "when_ended");
+        $this->assertEquals($this->my_polls[2]->getRelaseAnswer(), "always");
     }
 }

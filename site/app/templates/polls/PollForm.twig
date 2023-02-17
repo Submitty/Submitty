@@ -111,10 +111,10 @@
             <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always'? "selected" : "" }}>Always</option>
         </select>
         <br><br>
-        <label for="student-histogram-show-correct-setting" class="option-title">
+        <label for="student-answer-release-setting" class="option-title">
             Show correct response to students:
         </label>
-        <select id="student-histogram-show-correct-setting" name="show_correct_answer">
+        <select id="student-answer-release-setting" name="release_answer">
             <option value="never">Never</option>
             <option value="when_ended">After Poll Ended</option>
             <option value="always">Always</option>
@@ -131,7 +131,7 @@
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Reponse text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                                   rows="10" cols="30">{{option.getResponse()}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
