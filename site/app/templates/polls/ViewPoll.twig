@@ -118,11 +118,15 @@
         const data = [{
             type: "bar",
             x: [],
-            y: []
+            y: [],
+            marker: {
+                color: [],
+            },
         }];
         {% for option in poll.getOptions() %}
         data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
         data[0].y.push({{ response_counts[option.getId()] }});
+        data[0].marker.color.push("{{ option.isCorrect() ? '#2ca02c' : '#1f77b4' }}");
         {% endfor %}
         const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
         const width = get_new_chart_width();

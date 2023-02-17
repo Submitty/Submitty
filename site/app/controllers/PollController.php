@@ -181,7 +181,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram']);
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["show_correct_answer"]);
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -209,7 +209,7 @@ class PollController extends AbstractController {
 
         foreach ($_POST['option'] as $option) {
             if (!isset($option['order']) || !isset($option['response'])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
@@ -289,14 +289,13 @@ class PollController extends AbstractController {
             return new RedirectResponse($returnUrl);
         }
 
-        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram'];
+        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram', 'show_correct_answer'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
                 $this->core->addErrorMessage("Poll must fill out all fields");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
-
 
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === false) {
@@ -346,7 +345,7 @@ class PollController extends AbstractController {
 
         foreach ($_POST['option'] as $option) {
             if (!isset($option['order']) || !isset($option['response'])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             $id = (int) $option['id'];
@@ -378,7 +377,7 @@ class PollController extends AbstractController {
         foreach ($poll->getOptions() as $poll_option) {
             if (!in_array($poll_option->getId(), $keep_ids)) {
                 if ($poll_option->hasUserResponses()) {
-                    $this->core->addErrorMessage("Error occured in editing poll: attempt to delete response option that has already been submitted as an answer");
+                    $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
                 }
                 $poll->removeOption($poll_option);
@@ -640,7 +639,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['show_correct_answer']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {

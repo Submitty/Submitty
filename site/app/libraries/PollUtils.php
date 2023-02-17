@@ -25,7 +25,8 @@ class PollUtils {
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
                 'status' => $poll->getStatus(),
                 'image_path' => $poll->getImagePath(),
-                'release_histogram' => $poll->getReleaseHistogram()
+                'release_histogram' => $poll->getReleaseHistogram(),
+                'show_correct_answer' => $poll->getShowCorrectAnswer()
             ];
             foreach ($poll->getOptions() as $option) {
                 $poll_data['responses'][$option->getOrderId()] = $option->getResponse();
