@@ -6,11 +6,7 @@ import random
 import os
 from datetime import datetime, timedelta
 from submitty_utils import dateutils
-
-DB_HOST = "localhost"
-DB_PORT = 5432
-DB_USER = "submitty_dbuser"
-DB_PASS = "submitty_dbuser"
+import json
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -29,6 +25,15 @@ def main():
 
     # set up the database connection
     database = "submitty_" + term_id + "_sample"
+    
+    usr_path = "/usr/local/submitty"
+    settings = json.load(open(os.path.join(usr_path, ".setup", "submitty_conf.json")))
+    
+    DB_HOST = settings["database_host"]
+    DB_PORT = settings["database_port"]
+    DB_USER = settings["database_user"]
+    DB_PASS = settings["database_password"]
+
     engine = create_engine(f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
     conn = engine.connect()
     metadata = MetaData(bind=engine)
