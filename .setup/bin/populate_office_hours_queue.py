@@ -12,9 +12,17 @@ DB_PORT = 5432
 DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
-def main(random_seed = 334):
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="DOCUMENTATION NEEDED"
+    )
+    parser.add_argument("--random_seed", action = "store_const", dest="seed", const = random.random(), default = 334)
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
     # setting the seed
-    random.seed(random_seed)
+    random.seed(args.seed)
 
     # get current semester
     term_id = dateutils.get_current_semester()
@@ -93,6 +101,8 @@ def main(random_seed = 334):
     # Hardcoding options that we could use
     queue_current_states = ["done", "being_helped", "waiting"]
     queue_removal_types = ["helped", "self", "emptied", "self_helped", "removed"]
+
+    random.seed(args.seed)
 
     queue_data = []
     # start generating queue data
