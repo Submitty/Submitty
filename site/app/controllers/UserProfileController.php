@@ -100,34 +100,25 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/user_profile/change_pronons", methods={"POST"})
+     * @Route("/user_profile/change_pronouns", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */
     public function changePronouns() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_pronouns_change'])) {
-            $newPronouns = trim($_POST['pronouns']);
+        $newPronouns = trim($_POST['pronouns']);
 
-            // validateUserData() checks both for length (not to exceed 30) and for valid characters.
-            // if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
-                // $user->setPreferredGivenName($newGivenName);
-                // $user->setPreferredFamilyName($newFamilyName);
-                // //User updated flag tells auto feed to not clobber some of the user's data.
-                // $user->setUserUpdated(true);
-                // $this->core->getQueries()->updateUser($user);
-                // return JsonResponse::getSuccessResponse([
-                //     'message' => "Preferred names updated successfully!",
-                //     'given_name' => $newGivenName,
-                //     'family_name' => $newFamilyName
-                // ]);
-            // }
-            // else {
-                // return JsonResponse::getErrorResponse("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
-            // }
+        // validateUserData() checks both for length (not to exceed 30) and for valid characters.
+        if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+            $user->setPronouns($newPronouns);
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => 'Pronouns updated successfully',
+                'pronouns' => $newPronouns,
+            ]);
         }
         else {
-            return JsonResponse::getErrorResponse('Preferred names cannot be empty!');
+            return JsonResponse::getErrorResponse("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
         }
     }
 

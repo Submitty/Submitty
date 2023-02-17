@@ -69,19 +69,47 @@ function getCurrentUTCOffset() {
 // eslint-disable-next-line no-unused-vars
 function updateUserPronouns () {
     const pronouns_field = $('#user-pronouns-change');
-    // If the names are not updated just display an error message and return without making any API call
+    // If the pronouns are not updated just display an error message and return without making any API call
     if (pronouns_field.data('current-pronouns') === pronouns_field.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
     else{
-        displayErrorMessage('Changes detected');
         const data = new FormData();
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns_field.val());
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
+        $.ajax({
+            url,
+            type: 'POST',
+            data,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const {data} = response;
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage(data.message);
+                    //update the preferred names
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    $('#pronouns-row .icon').html(`${icon} ${data.pronouns}`);
+                    //update the data attributes
+                    pronouns_field.data('current-pronouns', data.pronouns);
+                }
+                else {
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage(response.message);
+                }
+            },
+            error: function() {
+                // display error message
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Some went wrong while updating pronouns!');
+            },
+        });
     }
     $('.popup-form').css('display', 'none');
     return false;

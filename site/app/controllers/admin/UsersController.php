@@ -319,6 +319,8 @@ class UsersController extends AbstractController {
         $user->setEmail(trim($_POST['user_email']));
 
         $user->setSecondaryEmail(trim($_POST['user_email_secondary']));
+        
+        $user->setPronouns(trim($_POST['user_pronouns']));
 
         if (!empty($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);

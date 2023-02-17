@@ -2,21 +2,16 @@
 {% block popup_id %}edit-pronouns-form{% endblock %}
 {% block title %}Edit Pronous (Optional){% endblock %}
 {% block body %}
-    <p class="std-margin">
-       Your <em>primary email address</em> is most likely an email account affilitiated
-       with your educational institution.
-       Contact your instructor or system administrator if you need to modify the primary email
-       address associated with your Submitty account.
-    </p>
 
     <p class="std-margin">
-       You are invited to optionally add a <em>secondary email address</em> to your Submitty account.
-       This email address will be shared with your instructors.
+       You are invited to optionally add <em>pronouns</em> to your Submitty account.
+       These pronouns will be shared with your instructors.
+       Example: he/him, she/her, they/them, etc.
     </p>
     <div class="flex-col" id="user_settings_modal">
         <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="edit_user_row">
-            <label for="user-pronouns-change">Secondary Email Address:&emsp;</label>
+            <label for="user-pronouns-change">Pronouns:&emsp;</label>
             <input type="text"
                    name="user_pronouns_change"
                    value="{{ user.getPronouns() }}"

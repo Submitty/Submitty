@@ -27,8 +27,9 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
- * @method string getPronouns()
  * @method void setSecondaryEmail(string $email)
+ * @method string getPronouns()
+ * @method void setPronouns(string $pronouns)
  * @method bool getEmailBoth()
  * @method void setEmailBoth(bool $flag)
  * @method int getGroup()
@@ -547,6 +548,9 @@ class User extends AbstractModel {
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";
+            case 'user_pronouns':
+                //Pronouns may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             default:
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
