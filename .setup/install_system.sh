@@ -72,9 +72,11 @@ while :; do
     case $1 in
         --utm)
             export UTM=1
+            export DEV_VM=1
             ;;
         --vagrant)
             export VAGRANT=1
+            export DEV_VM=1
             ;;
         --worker)
             export WORKER=1
@@ -99,7 +101,7 @@ if [ ${VAGRANT} == 1 ]; then
     export DEBIAN_FRONTEND=noninteractive
 fi
 
-if { [ ${VAGRANT} == 1 ] || [ ${UTM} == 1 ]; } && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
@@ -269,7 +271,7 @@ fi
 # END UTM
 
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -501,7 +503,7 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
     fi
 
@@ -536,7 +538,7 @@ EOF
     DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
     DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
 
-    if [ ${VAGRANT} != 1 ]; then
+    if [ ${DEV_VM} != 1 ]; then
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
@@ -567,7 +569,7 @@ if [ ${WORKER} == 0 ]; then
         PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
     fi
 
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
         echo "Creating PostgreSQL users"
@@ -642,13 +644,13 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     fi
 else
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
         # in case it is not, default to our primary URL
         if [ -z "${SUBMISSION_URL}" ]; then
@@ -758,7 +760,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [ ${WORKER} == 0 ]; then
-    if [[ ${VAGRANT} == 1 ]]; then
+    if [[ ${DEV_VM} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
@@ -774,7 +776,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -823,7 +825,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""
