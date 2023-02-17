@@ -67,6 +67,28 @@ function getCurrentUTCOffset() {
 }
 
 // eslint-disable-next-line no-unused-vars
+function updateUserPronouns () {
+    const pronouns_field = $('#user-pronouns-change');
+    // If the names are not updated just display an error message and return without making any API call
+    if (pronouns_field.data('current-pronouns') === pronouns_field.val()) {
+        // eslint-disable-next-line no-undef
+        displayErrorMessage('No changes detected to update preferred names!');
+    }
+    else{
+        displayErrorMessage('Changes detected');
+        const data = new FormData();
+        // eslint-disable-next-line no-undef
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns_field.val());
+        // eslint-disable-next-line no-undef
+        const url = buildUrl(['user_profile', 'change_pronouns']);
+    }
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
+
+// eslint-disable-next-line no-unused-vars
 function updateUserPreferredNames () {
     const given_name_field = $('#user-givenname-change');
     const family_name_field = $('#user-familyname-change');
