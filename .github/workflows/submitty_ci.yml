@@ -22,14 +22,10 @@ env:
 
 concurrency:
   # Cancel running jobs for previous commits to any branch except for main
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/actions-concurrency' && github.run_id || github.head_ref || github.ref }}
+  group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
+
 jobs:
-    log-group:
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Log Group
-        - run: echo "${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/actions-concurrency' && github.run_id || github.head_ref || github.ref }}"
     css-lint:
         runs-on: ubuntu-20.04
         defaults:
