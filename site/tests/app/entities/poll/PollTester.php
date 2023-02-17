@@ -271,7 +271,6 @@ class PollTester extends BaseUnitTest {
         $this->expectException(\RuntimeException::class);
         $this->my_polls[0]->setReleaseHistogram("aaaaaaaaa");
     }
-
     public function testAnswerRelease(): void {
         $this->assertEquals($this->my_polls[0]->getReleaseAnswer(), "never");
         $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "when_ended");
