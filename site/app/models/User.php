@@ -549,8 +549,8 @@ class User extends AbstractModel {
                 //Database password cannot be blank, no check on format
                 return $data !== "";
             case 'user_pronouns':
-                //Pronouns may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
-                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
+                //Pronouns may be combination of words AND between 0 and 20 chars with forward slash(/).
+                return preg_match("~^[a-zA-Z\/]{0,20}$~", $data) === 1;
             default:
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);

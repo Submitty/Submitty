@@ -118,7 +118,7 @@ class UserProfileController extends AbstractController {
             ]);
         }
         else {
-            return JsonResponse::getErrorResponse("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
+            return JsonResponse::getErrorResponse("Pronouns must not exceed 20 chars.  Letters, slashes(/) permitted.");
         }
     }
 
