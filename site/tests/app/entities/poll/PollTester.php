@@ -273,8 +273,8 @@ class PollTester extends BaseUnitTest {
     }
 
     public function testAnswerRelease(): void {
-        $this->assertEquals($this->my_polls[0]->getRelaseAnswer(), "never");
-        $this->assertEquals($this->my_polls[1]->getRelaseAnswer(), "when_ended");
-        $this->assertEquals($this->my_polls[2]->getRelaseAnswer(), "always");
+        $this->assertEquals($this->my_polls[0]->getReleaseAnswer(), "never");
+        $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "when_ended");
+        $this->assertEquals($this->my_polls[2]->getReleaseAnswer(), "always");
     }
 }
