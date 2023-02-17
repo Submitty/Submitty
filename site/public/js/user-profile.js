@@ -74,7 +74,7 @@ function updateUserPronouns () {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
-    else{
+    else {
         const data = new FormData();
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);

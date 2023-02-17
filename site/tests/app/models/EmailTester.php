@@ -25,6 +25,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => 'Person',
             'user_email' => null,
             'user_email_secondary' => '',
+            'user_pronouns' => '',
             'user_email_secondary_notify' => false
         ]);
         $this->core->setUser($user);
