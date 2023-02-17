@@ -88,7 +88,16 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
     gradeable_path = os.path.join(ARG_DATA_DIR,'courses',semester,course,
         'submissions',gradeable)
     # make sure we are submitting to a real gradeable
-    #assert os.path.exists(gradeable_path),gradeable_path
+    assert os.path.exists(gradeable_path),gradeable_path
+    # set file permissions
+    stat = os.stat(gradeable_path)
+    for root,dirs,files in os.walk(gradeable_path):
+        for dir in dirs:
+            os.chown(os.path.join(root,dir),stat.st_uid,stat.st_gid)
+            os.chmod(os.path.join(root,dir),stat.st_mode)
+        for file in files:
+            os.chown(os.path.join(root,file),stat.st_uid,stat.st_gid)
+            os.chmod(os.path.join(root,file),stat.st_mode)
     user_path = os.path.join(gradeable_path,user)
     if not os.path.exists(user_path):
         os.makedirs(user_path)
@@ -262,7 +271,8 @@ def main():
     dbconn_course.close()
 
 if __name__ == '__main__':
-    if getpass.getuser() != 'submitty_php':
-        print('Run this as submitty_php')
+    #if getpass.getuser() != 'submitty_php':
+    if getpass.getuser() != 'root':
+        print('Please run this as root, exiting...')
         quit()
     main()
