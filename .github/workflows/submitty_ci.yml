@@ -27,7 +27,9 @@ concurrency:
 jobs:
     log-group:
       runs-on: ubuntu-20.04
-      run: echo "${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/actions-concurrency' && github.run_id || github.head_ref || github.ref }}"
+      steps:
+        - name: Log Group
+        - run: echo "${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/actions-concurrency' && github.run_id || github.head_ref || github.ref }}"
     css-lint:
         runs-on: ubuntu-20.04
         defaults:
