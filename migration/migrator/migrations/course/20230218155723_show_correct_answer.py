@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    pass
+    database.execute("ALTER TABLE polls ADD COLUMN IF NOT EXISTS release_answer character varying(10) DEFAULT 'never'")
 
 
 def down(config, database, semester, course):
