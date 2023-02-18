@@ -115,9 +115,9 @@
             Show correct response to students:
         </label>
         <select id="student-answer-release-setting" name="release_answer">
-            <option value="never">Never</option>
-            <option value="when_ended">After Poll Ended</option>
-            <option value="always">Always</option>
+            <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never'? "selected" : "" }}>Never</option>
+            <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended'? "selected" : "" }}>After Poll Ended</option>
+            <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always'? "selected" : "" }}>Always</option>
         </select>
         <br/>
 

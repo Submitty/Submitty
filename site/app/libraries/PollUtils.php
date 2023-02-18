@@ -55,5 +55,4 @@ class PollUtils {
                 || ($poll_type == "single-response-multiple-correct")
                 || ($poll_type == "single-response-survey"));
     }
-
 }

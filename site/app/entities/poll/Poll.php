@@ -175,7 +175,7 @@ class Poll {
 
     /**
      * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
-     *       isShowAnswer() is preferred if at all possible.
+     *       isReleaseAnswer() is preferred if at all possible.
      */
 
     public function setReleaseAnswer(string $status): void {
