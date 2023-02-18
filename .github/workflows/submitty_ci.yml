@@ -21,7 +21,7 @@ env:
   PYTHON_VERSION: 3.8
 
 concurrency:
-  # Cancel running jobs for previous commits to any branch except for main
+  # If this is a PR, cancel all previously running jobs on source branch
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
