@@ -14,7 +14,7 @@
                     <button id="autograding-results-regrade-all" class="dropdown-item">Regrade All Versions</button>
                     {% for version in versions %}
                     <button  id={{loop.index}} class="dropdown-item">Version #{{ loop.index }} Score: {{ version.points }} / {{ total_points }} {%- if loop.index == active_version -%} &nbsp;&nbsp;&nbsp;GRADE THIS VERSION {%- endif -%}</button>
-                {% endfor %}
+                    {% endfor %}
                 </div>
             </div>
         {% endif %}
