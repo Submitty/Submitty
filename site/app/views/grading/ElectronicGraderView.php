@@ -1201,13 +1201,7 @@ HTML;
 
         //sort array by version number after values have been mapped
         ksort($version_data);
-
-        if ($version_instance === null) {
-            $display_version = 0;
-        }
-        else {
-            $display_version = $version_instance->getVersion();
-        }
+        $display_version = $version_instance->getVersion();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
