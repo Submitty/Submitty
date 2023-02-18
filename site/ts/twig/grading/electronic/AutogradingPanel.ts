@@ -60,11 +60,11 @@ $(() => {
     $('#autograding-results-regrade-all').on('click', () => {
         regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
-    $('.dropdown-item').on('click', (event) => {
+    $('.dropdown-item').on('click', () => {
         const idValue = $('.dropdown-item').attr('id');
         if (idValue) {
             autogradingRegradeVersion(parseInt(idValue));
-          }
+        }
     });
 });
 
