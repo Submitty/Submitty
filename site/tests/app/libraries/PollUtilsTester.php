@@ -41,7 +41,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "single-response",
                 new DateTime("2020-01-12"),
                 "always",
-                "when_ended"
+                "always"
             ),
             new Poll(
                 "Poll #3",
@@ -49,7 +49,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "multiple-response",
                 new DateTime("2020-01-13"),
                 "when_ended",
-                "always"
+                "when_ended"
             ),
         ];
 
@@ -119,9 +119,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0],
                 "release_date" => "2020-01-12",
                 "status" => "open",
-                "image_path" => null,
                 "release_histogram" => "always",
-                "release_answer" => "when_ended"
+                "release_answer" => "always",
+                "image_path" => null
             ],
             [
                 "id" => 2,
@@ -132,9 +132,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [1],
                 "release_date" => "2020-01-13",
                 "status" => "ended",
-                "image_path" => null,
                 "release_histogram" => "when_ended",
-                "release_answer" => "always"
+                "release_answer" => "when_ended",
+                "image_path" => null
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

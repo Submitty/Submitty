@@ -9,7 +9,7 @@ use DateTime;
 use ReflectionProperty;
 use tests\BaseUnitTest;
 
-class PollTester extends BaseUnitTest {
+class PollTester extends \PHPUnit\Framework\TestCase {
     /** @var Poll[] */
     private $my_polls;
 
@@ -29,7 +29,7 @@ class PollTester extends BaseUnitTest {
                 "single-response-multiple-correct",
                 new DateTime("9999-12-31"),
                 "always",
-                "when_ended"
+                "always"
             ),
             2 => new Poll(
                 "Poll #3",
@@ -37,7 +37,7 @@ class PollTester extends BaseUnitTest {
                 "multiple-response-survey",
                 new DateTime('now'),
                 "when_ended",
-                "always",
+                "when_ended",
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             )
         ];
@@ -273,7 +273,13 @@ class PollTester extends BaseUnitTest {
     }
     public function testAnswerRelease(): void {
         $this->assertEquals($this->my_polls[0]->getReleaseAnswer(), "never");
-        $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "when_ended");
-        $this->assertEquals($this->my_polls[2]->getReleaseAnswer(), "always");
+        $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "always");
+        $this->assertEquals($this->my_polls[2]->getReleaseAnswer(), "when_ended");
+
+        $this->my_polls[0]->setReleaseAnswer("always");
+        $this->assertEquals("always", $this->my_polls[0]->getReleaseAnswer());
+
+        $this->expectException(\RuntimeException::class);
+        $this->my_polls[0]->setReleaseAnswer("AnInvalidStatusMessage");
     }
 }
