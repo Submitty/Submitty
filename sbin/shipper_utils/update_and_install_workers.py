@@ -57,14 +57,20 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         else:
             print(res.stdout)
         client = docker.from_env()
-        # List all image
-        image_current_list = client.images.list()
-        container_list = images_str.split(', ')
-        container_list = set(container_list)
-        image_set = {image.attrs['RepoTags'][0] for image in image_current_list}
-        image_to_remove = set.difference(image_set,container_list)
-        for imagesRemoved in image_to_remove:
-            client.images.remove(imagesRemoved)
+        try:
+            # List all images
+            image_current_list = client.images.list()
+            container_list = images_str.split(', ')
+            container_list = set(container_list)
+            image_set = {image.attrs['RepoTags'][0] for image in image_current_list}
+            image_to_remove = set.difference(image_set, container_list)
+
+            # Remove images
+            for imagesRemoved in image_to_remove:
+                client.images.remove(imagesRemoved)
+        except Exception as e:
+            # Handle the exception
+            print("An error occurred:", e)
         for image in images_to_update:
             print(f"locally pulling the image '{image}'")
             try:
