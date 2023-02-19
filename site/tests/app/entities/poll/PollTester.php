@@ -7,7 +7,6 @@ use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use DateTime;
 use ReflectionProperty;
-use tests\BaseUnitTest;
 
 class PollTester extends \PHPUnit\Framework\TestCase {
     /** @var Poll[] */
