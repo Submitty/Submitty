@@ -67,7 +67,7 @@ function addFieldOnChange() {
 }
 
 function confirmationdialog(url,id,capability) {
-    if (confirm('Are you sure you want to remove ' + id + ' image')) {
+    if (confirm("Are you sure you want to remove " + id + " image")) {
         removeImage(url,id,capability);
     }
 }
