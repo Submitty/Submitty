@@ -176,7 +176,7 @@ class DockerInterfaceController extends AbstractController {
             file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
             return JsonResponse::getSuccessResponse($_POST['image'] . ' removed from docker images!');
         }
-        else if ($key !== false && ($user->getAccessLevel() === User::LEVEL_SUPERUSER)) {
+        elseif ($key !== false && ($user->getAccessLevel() === User::LEVEL_SUPERUSER)) {
             unset($json[$_POST['capability']][$key]);
             $json[$_POST['capability']] = array_values($json[$_POST['capability']]);
             file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
