@@ -356,7 +356,7 @@ class UsersController extends AbstractController {
         }
         else {
             $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-            if ($submitty_user  === null) {
+            if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
