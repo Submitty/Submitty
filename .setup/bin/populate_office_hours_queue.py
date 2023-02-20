@@ -10,9 +10,13 @@ import json
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="DOCUMENTATION NEEDED"
+        description="Populates Office Hours Queue of the sample course in the current semester. "
+                    "It will read in configuration information from .setup/submitty_conf.json "
+                    "and populate any queue that is open in the sample course."
     )
-    parser.add_argument("--random_seed", action = "store_const", dest="seed", const = random.random(), default = 334)
+    parser.add_argument("--random_seed", action = "store_const", dest="seed",
+                        help = "when this flag is present, the script will use a random seed instead",
+                        const = random.random(), default = 334)
     return parser.parse_args()
 
 def main():
@@ -107,6 +111,7 @@ def main():
     queue_current_states = ["done", "being_helped", "waiting"]
     queue_removal_types = ["helped", "self", "emptied", "self_helped", "removed"]
 
+    # setting the seed once again just in case no one was removed from the queue
     random.seed(args.seed)
 
     queue_data = []
