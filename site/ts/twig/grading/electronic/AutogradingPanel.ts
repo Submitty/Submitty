@@ -35,7 +35,7 @@ function closeAllAutoGrading() {
     $("[id^='details_tc_']").find('.loading-tools-show').show();
 }
 
-function autogradingRegradeVersion(SELECTED_VERSION: any) {
+function autogradingRegradeVersion(SELECTED_VERSION: number) {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
     const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
     const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
