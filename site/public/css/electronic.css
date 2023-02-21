@@ -314,7 +314,7 @@ progress::-webkit-progress-value {
     border: 2px solid #249c63;
 }
 
-/* stylelint-disableselector-id-pattern */
+/* stylelint-disable selector-id-pattern */
 #grading_rubric_btn:hover,
 #grading_rubric_btn.active,
 #grading_rubric_select option:hover,

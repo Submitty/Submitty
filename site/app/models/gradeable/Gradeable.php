@@ -52,14 +52,13 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method bool isScannedExam()
- * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentViewAfterGrades()
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
+ * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -184,13 +183,13 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
     protected $ta_grading = true;
-    /** @prop @var bool If the gradeable is a 'scanned exam' */
-    protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
     protected $student_view = false;
     /** @prop @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
-    /** @prop @var bool If students can make submissions */
+    /** @prop @var bool If students can download submission files */
+    protected $student_download = false;
+    /** @prop @var bool If students can make submissions and view other versions */
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
@@ -295,9 +294,9 @@ class Gradeable extends AbstractModel {
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
-            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
+            $this->setStudentDownload($details['student_download']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
             $this->setHasReleaseDate($details['has_release_date']);
@@ -916,6 +915,23 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if the submitted files for this gradeable can be downloaded by students
+     * @return bool
+     */
+    public function canStudentDownload() {
+        return $this->student_download;
+    }
+
+    /**
+     * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
+     * grades are released)
+     * @return bool
+     */
+    public function isBulkUpload() {
+        return $this->isStudentView() && $this->isStudentViewAfterGrades();
+    }
+
+    /**
      * Gets if this gradeable has a due date or not for electronic gradeables
      * @return bool
      */
@@ -1020,7 +1036,7 @@ class Gradeable extends AbstractModel {
     private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
+            throw new \InvalidArgumentException('Gradeable id must be alphanumeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -1128,7 +1144,7 @@ class Gradeable extends AbstractModel {
         $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
+                throw new \InvalidArgumentException('Object in components array was not a component');
             }
         }
 
@@ -1764,7 +1780,7 @@ class Gradeable extends AbstractModel {
                     'graded_components' => 0,
                 ];
                 if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                 }
             }

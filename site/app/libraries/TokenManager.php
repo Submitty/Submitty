@@ -3,7 +3,7 @@
 namespace app\libraries;
 
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Token;
+use Lcobucci\JWT\Token\Plain as Token;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
@@ -27,6 +27,9 @@ class TokenManager {
     private static $issuer;
 
     public static function initialize(string $secret, string $issuer): void {
+        if (mb_strlen($secret) < 64) {
+            throw new \LengthException('Invalid secret length, expect at least 64 characters, got ' . mb_strlen($secret) . ' characters');
+        }
         self::$configuration = Configuration::forSymmetricSigner(
             new Sha256(),
             InMemory::plainText($secret)
@@ -46,7 +49,7 @@ class TokenManager {
         string $user_id,
         $persistent = true
     ): Token {
-        $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
+        $expire_time = $persistent ? (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION))->getTimestamp() : 0;
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
@@ -90,8 +93,13 @@ class TokenManager {
         return $token;
     }
 
-    private static function parseToken(string $token): Token {
-        $token = self::$configuration->parser()->parse($token);
+    private static function parseToken(string $jwt): Token {
+        $token = self::$configuration->parser()->parse($jwt);
+
+        // Narrow the type from an abstract token to concrete Plain token type
+        if (!$token instanceof Token) {
+            throw new \InvalidArgumentException("Invalid token type: " . get_class($token));
+        }
 
         if (!self::$configuration->validator()->validate($token, ...self::$configuration->validationConstraints())) {
             throw new \InvalidArgumentException("Invalid signature for token");

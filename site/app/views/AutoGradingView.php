@@ -108,7 +108,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails()
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
         ]);
     }
 
@@ -336,7 +336,7 @@ class AutoGradingView extends AbstractView {
 
         // Get the names of all full access or above graders
         $ta_grader_names = array_map(function (User $grader) {
-            return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName();
+            return $grader->getDisplayedGivenName() . ' ' . $grader->getDisplayedFamilyName();
         }, $ta_graded_gradeable->getVisibleGraders());
 
         if (count($ta_grader_names) === 0) {
@@ -383,7 +383,8 @@ class AutoGradingView extends AbstractView {
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
                 'graders' => array_map(function (User $grader) {
-                    return $grader->getDisplayedLastName();
+                    //Preferred given name, preferred family name initial for full access graders
+                    return $grader->getDisplayedGivenName() . ' ' . $grader->getDisplayedFamilyName()[0];
                 }, $container->getVisibleGraders()),
                 'marks' => $component_marks,
             ];
@@ -410,13 +411,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
 
         $id = $this->core->getUser()->getId();
@@ -460,7 +455,7 @@ class AutoGradingView extends AbstractView {
 
             $grader_info[$user_name] = [];
             $grader_info[$user_name]["attachments"] = $attachments;
-            $grader_info[$user_name]["display_name"] = $user->getDisplayedFirstName();
+            $grader_info[$user_name]["display_name"] = $user->getDisplayedGivenName();
             $grader_info[$user_name]["comment"] = "";
         }
 
@@ -477,7 +472,7 @@ class AutoGradingView extends AbstractView {
                 if (!isset($grader_info[$user_name])) {
                     $grader_info[$user_name] = [];
                     $grader_info[$user_name]["attachments"] = [];
-                    $grader_info[$user_name]["display_name"] = $comment_user->getDisplayedFirstName();
+                    $grader_info[$user_name]["display_name"] = $comment_user->getDisplayedGivenName();
                 }
                 $grader_info[$user_name]["comment"] = $comment;
             }
@@ -592,7 +587,7 @@ class AutoGradingView extends AbstractView {
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
                 'graders' => array_map(function (User $grader) {
-                    return $grader->getDisplayedLastName();
+                    return $grader->getDisplayedFamilyName();
                 }, $container->getVisibleGraders()),
                 'peer_ids' => array_values(array_map(function (User $grader) {
                     return $grader->getId();
@@ -671,14 +666,7 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-
-            // for bulk uploads only show PDFs
-            if ($gradeable->isScannedExam()) {
-                $files = $uploaded_pdfs;
-            }
-            else {
-                $files = array_merge($files['submissions'], $files['checkout']);
-            }
+            $files = array_merge($files['submissions'], $files['checkout']);
         }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();

@@ -37,7 +37,7 @@ abstract class AbstractDatabase {
 
     /**
      * Should we emulate prepares within PDO. Generally we want to leave this to false, but for some
-     * drivers (such as PDO_MySQL, it may be beneficial for performace to turn this to true
+     * drivers (such as PDO_MySQL, it may be beneficial for performance to turn this to true
      * @var bool
      */
     protected $emulate_prepares = false;
@@ -143,7 +143,7 @@ abstract class AbstractDatabase {
      * @param string $query
      * @param array $parameters
      *
-     * @return boolean true if query suceeded, else false.
+     * @return boolean true if query succeeded, else false.
      */
     public function query($query, $parameters = []) {
         try {
@@ -194,7 +194,7 @@ abstract class AbstractDatabase {
     /**
      * Given a query, if it's a SELECT, it'll run the query against the DB returning a {@see DatabaseIterator}
      * which can be used to scroll through the results. However, if the query is of any other type, it'll
-     * run it through the query() function which will just return a boolean on if the function suceeded or
+     * run it through the query() function which will just return a boolean on if the function succeeded or
      * not. In all cases, it will throw a {@see DatabaseException} on an invalid query.
      *
      * @param string $query
@@ -263,7 +263,7 @@ abstract class AbstractDatabase {
 
     /**
      * Start a DB transaction, turning off autocommit mode. Queries won't be
-     * actually commited to the database till Database::commit() is called.
+     * actually committed to the database till Database::commit() is called.
      */
     public function beginTransaction(): void {
         if (!$this->transaction) {
@@ -353,6 +353,14 @@ abstract class AbstractDatabase {
             $print[] = DatabaseUtils::formatQuery($query[0], $query[1]);
         }
         return $print;
+    }
+
+    public function hasDuplicateQueries(): bool {
+        $queries = [];
+        foreach ($this->all_queries as $query) {
+            $queries[] = $query[0];
+        }
+        return count($queries) !== count(array_unique($queries));
     }
 
     /**
