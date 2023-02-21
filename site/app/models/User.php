@@ -35,6 +35,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string courseSectionId()
  * @method int getRotatingSection()
  * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
@@ -110,6 +111,8 @@ class User extends AbstractModel {
     protected $access_level;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
+    /** @prop @var string Unique id for course section(ex: CRN at RPI) */
+    protected $course_section_id = "";
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
@@ -206,6 +209,7 @@ class User extends AbstractModel {
         $this->notification_settings = self::constructNotificationSettings($details);
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
+        $this->course_section_id = isset($details['course_section_id']) ? $details['course_section_id'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
@@ -449,6 +453,10 @@ class User extends AbstractModel {
 
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
+    }
+
+    public function CourseSectionId($course_section_id) {
+        $this->course_section_id = ($course_section_id !== null) ? $course_section_id : null;
     }
 
     public function setRotatingSection($section) {
