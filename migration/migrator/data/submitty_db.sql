@@ -239,12 +239,23 @@ DECLARE
     query_string TEXT;
 BEGIN
     db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
-    query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-        RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
+
+    IF (TG_OP = 'INSERT') THEN
+        query_string := 'INSERT INTO sections_registration (sections_registration_id, course_id) VALUES(' || quote_literal(NEW.registration_section_id) || ',' || quote_literal(NEW.course_id) || ')';
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section() when doing INSERT';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        query_string := 'UPDATE sections_registration SET course_id=' || quote_literal(NEW.course_id) || ' WHERE sections_registration_id=' || quote_literal(NEW.registration_section_id);
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section() when doing UPDATE';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
     END IF;
-    PERFORM dblink_exec(db_conn, query_string);
 
     -- All done.
     RETURN NULL;
@@ -320,7 +331,8 @@ CREATE TABLE public.courses (
 CREATE TABLE public.courses_registration_sections (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
-    registration_section_id character varying(255) NOT NULL
+    registration_section_id character varying(255) NOT NULL,
+    course_id character varying(255) DEFAULT ''::character varying
 );
 
 

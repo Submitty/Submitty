@@ -1609,7 +1609,8 @@ ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.regrade_requests.i
 --
 
 CREATE TABLE public.sections_registration (
-    sections_registration_id character varying(255) NOT NULL
+    sections_registration_id character varying(255) NOT NULL,
+    course_id character varying(255) DEFAULT ''::character varying
 );
 
 
