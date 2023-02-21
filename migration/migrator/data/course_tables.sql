@@ -1326,10 +1326,10 @@ CREATE TABLE public.poll_options (
 
 
 --
--- Name: poll_options_option_id_seq1; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: poll_options_option_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.poll_options_option_id_seq1
+CREATE SEQUENCE public.poll_options_option_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -1339,10 +1339,10 @@ CREATE SEQUENCE public.poll_options_option_id_seq1
 
 
 --
--- Name: poll_options_option_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: poll_options_option_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.poll_options_option_id_seq1 OWNED BY public.poll_options.option_id;
+ALTER SEQUENCE public.poll_options_option_id_seq OWNED BY public.poll_options.option_id;
 
 
 --
@@ -1375,26 +1375,6 @@ CREATE SEQUENCE public.poll_responses_id_seq
 --
 
 ALTER SEQUENCE public.poll_responses_id_seq OWNED BY public.poll_responses.id;
-
-
---
--- Name: poll_responses_id_seq1; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.poll_responses_id_seq1
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: poll_responses_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.poll_responses_id_seq1 OWNED BY public.poll_responses.id;
 
 
 --
@@ -1884,7 +1864,7 @@ ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('publi
 -- Name: poll_options option_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.poll_options ALTER COLUMN option_id SET DEFAULT nextval('public.poll_options_option_id_seq1'::regclass);
+ALTER TABLE ONLY public.poll_options ALTER COLUMN option_id SET DEFAULT nextval('public.poll_options_option_id_seq'::regclass);
 
 
 --
