@@ -114,7 +114,7 @@ class UserProfileController extends AbstractController {
             if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
                 $user->setPronouns($newPronouns);
                 $user->setUserUpdated(true);
-                // $this->core->getQueries()->updateUser($user);
+                $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Pronouns updated successfully",
                     'pronouns' => $newPronouns

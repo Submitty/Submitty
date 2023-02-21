@@ -128,23 +128,23 @@ function updateUserPreferredNames () {
             contentType: false,
             success: function(res) {
                 console.log(res);
-                // const response = JSON.parse(res);
-                // if (response.status === 'success') {
-                //     const {data} = response;
-                //     // eslint-disable-next-line no-undef
-                //     displaySuccessMessage(data.message);
-                //     //update the preferred names
-                //     const icon = '<i class="fas fa-pencil-alt"></i>';
-                //     $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
-                //     $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
-                //     //update the data attributes
-                //     given_name_field.data('current-name', data.given_name);
-                //     family_name_field.data('current-name', data.family_name);
-                // }
-                // else {
-                //     // eslint-disable-next-line no-undef
-                //     displayErrorMessage(response.message);
-                // }
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const {data} = response;
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage(data.message);
+                    //update the preferred names
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
+                    $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
+                    //update the data attributes
+                    given_name_field.data('current-name', data.given_name);
+                    family_name_field.data('current-name', data.family_name);
+                }
+                else {
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage(response.message);
+                }
             },
             error: function() {
                 // display error message
