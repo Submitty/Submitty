@@ -52,7 +52,7 @@ CREATE FUNCTION public.generate_api_key() RETURNS trigger
 -- table users.
 BEGIN
     NEW.api_key := encode(gen_random_bytes(16), 'hex');
-RETURN NEW;
+    RETURN NEW;
 END;
 $$;
 
@@ -64,20 +64,20 @@ $$;
 CREATE FUNCTION public.saml_mapping_check() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-BEGIN
+        BEGIN
             IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id) = 2
             THEN
                 IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id AND user_id = saml_id) > 0
                 THEN
                     RAISE EXCEPTION 'SAML mapping already exists for this user';
-end if;
+                end if;
                 IF NEW.user_id = NEW.saml_id
                 THEN
                     RAISE EXCEPTION 'Cannot create SAML mapping for proxy user';
-end if;
-end if;
-RETURN NEW;
-END;
+                end if;
+            end if;
+            RETURN NEW;
+        END;
         $$;
 
 
@@ -88,23 +88,23 @@ END;
 CREATE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-user_row record;
+    DECLARE
+        user_row record;
         db_conn varchar;
         query_string text;
-BEGIN
+    BEGIN
         db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
 
         IF (TG_OP = 'INSERT') THEN
             -- FULL data sync on INSERT of a new user record.
-SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-query_string := 'INSERT INTO users (user_id, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
+            SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
+            query_string := 'INSERT INTO users (user_id, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
                     'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
                     '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_updated) || ', ' || quote_literal(user_row.instructor_updated) || ', ' ||
                     '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
             IF query_string IS NULL THEN
                 RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
-END IF;
+            END IF;
             PERFORM dblink_exec(db_conn, query_string);
         ELSIF (TG_OP = 'UPDATE') THEN
             -- User update on registration_section
@@ -113,13 +113,13 @@ END IF;
             query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', registration_type=' || quote_literal(NEW.registration_type) || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
             IF query_string IS NULL THEN
                 RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
-END IF;
+            END IF;
             PERFORM dblink_exec(db_conn, query_string);
-END IF;
+        END IF;
 
         -- All done.
-RETURN NULL;
-END;
+        RETURN NULL;
+    END;
     $$;
 
 
@@ -132,7 +132,7 @@ CREATE FUNCTION public.sync_delete_registration_section() RETURNS trigger
     AS $$
 -- BEFORE DELETE trigger function to DELETE registration sections from course DB, as needed.
 DECLARE
-registration_row RECORD;
+    registration_row RECORD;
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
@@ -141,11 +141,11 @@ BEGIN
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
         RAISE EXCEPTION 'query_string error in trigger function sync_delete_registration_section()';
-END IF;
+    END IF;
     PERFORM dblink_exec(db_conn, query_string);
 
     -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
-RETURN OLD;
+    RETURN OLD;
 
 -- Trying to delete a registration section while users are still enrolled will raise an integrity constraint violation exception.
 -- We should catch this exception and stop execution with no rows processed.
@@ -153,7 +153,7 @@ RETURN OLD;
 EXCEPTION WHEN integrity_constraint_violation THEN
     RAISE NOTICE 'Users are still enrolled in registration section ''%''', OLD.registration_section_id;
     -- Return NULL so we do not proceed with original triggering DELETE query.
-RETURN NULL;
+    RETURN NULL;
 END;
 $$;
 
@@ -167,7 +167,7 @@ CREATE FUNCTION public.sync_delete_user() RETURNS trigger
     AS $$
 -- BEFORE DELETE trigger function to DELETE users from course DB.
 DECLARE
-db_conn VARCHAR;
+    db_conn VARCHAR;
     query_string TEXT;
 BEGIN
     db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
@@ -177,11 +177,11 @@ BEGIN
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
         RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
-END IF;
+    END IF;
     PERFORM dblink_exec(db_conn, query_string);
 
     -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
-RETURN OLD;
+    RETURN OLD;
 
 -- Trying to delete a user with existing data (via foreign keys) will raise an integrity constraint violation exception.
 -- We should catch this exception and stop execution with no rows processed.
@@ -191,7 +191,7 @@ EXCEPTION WHEN integrity_constraint_violation THEN
     RAISE NOTICE 'User ''%'' still has existing data in course DB ''%''', OLD.user_id, substring(db_conn FROM 8);
     RAISE NOTICE '%', SQLERRM;
     -- Return NULL so we do not proceed with original triggering DELETE query.
-RETURN NULL;
+    RETURN NULL;
 END;
 $$;
 
@@ -206,13 +206,13 @@ CREATE FUNCTION public.sync_delete_user_cleanup() RETURNS trigger
 -- AFTER DELETE trigger function removes user from master.users if they have no
 -- existing course enrollment.  (i.e. no entries in courses_users)
 DECLARE
-user_courses INTEGER;
+    user_courses INTEGER;
 BEGIN
-SELECT COUNT(*) INTO user_courses FROM courses_users WHERE user_id = OLD.user_id;
-IF user_courses = 0 THEN
-DELETE FROM users WHERE user_id = OLD.user_id;
-END IF;
-RETURN NULL;
+    SELECT COUNT(*) INTO user_courses FROM courses_users WHERE user_id = OLD.user_id;
+    IF user_courses = 0 THEN
+        DELETE FROM users WHERE user_id = OLD.user_id;
+    END IF;
+    RETURN NULL;
 
 -- The SELECT Count(*) / If check should prevent this exception, but this
 -- exception handling is provided 'just in case' so process isn't interrupted.
@@ -220,7 +220,7 @@ EXCEPTION WHEN integrity_constraint_violation THEN
     -- Show that an exception occurred, and what was the exception.
     RAISE NOTICE 'Integrity constraint prevented user ''%'' from being deleted from master.users table.', OLD.user_id;
     RAISE NOTICE '%', SQLERRM;
-RETURN NULL;
+    RETURN NULL;
 END;
 $$;
 
@@ -234,7 +234,7 @@ CREATE FUNCTION public.sync_insert_registration_section() RETURNS trigger
     AS $$
 -- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
 DECLARE
-registration_row RECORD;
+    registration_row RECORD;
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
@@ -243,11 +243,11 @@ BEGIN
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
         RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
-END IF;
+    END IF;
     PERFORM dblink_exec(db_conn, query_string);
 
     -- All done.
-RETURN NULL;
+    RETURN NULL;
 END;
 $$;
 
@@ -259,39 +259,39 @@ $$;
 CREATE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-course_row RECORD;
+        DECLARE
+            course_row RECORD;
             db_conn VARCHAR;
             query_string TEXT;
             preferred_name_change_details TEXT;
-BEGIN
+        BEGIN
             -- Check for changes in users.user_preferred_givenname and users.user_preferred_familyname.
             IF coalesce(OLD.user_preferred_givenname, '') <> coalesce(NEW.user_preferred_givenname, '') THEN
                 preferred_name_change_details := format('PREFERRED_GIVENNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_givenname, NEW.user_preferred_givenname);
-END IF;
+            END IF;
             IF coalesce(OLD.user_preferred_familyname, '') <> coalesce(NEW.user_preferred_familyname, '') THEN
                 preferred_name_change_details := format('%sPREFERRED_FAMILYNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_familyname, NEW.user_preferred_familyname);
-END IF;
+            END IF;
             -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
             IF preferred_name_change_details IS NOT NULL THEN
                 preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
-END IF;
+            END IF;
             -- Propagate UPDATE to course DBs
-FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
                 RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
                 query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_givenname=' || quote_literal(NEW.user_givenname) || ', user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', user_familyname=' || quote_literal(NEW.user_familyname) || ', user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
                 IF query_string IS NULL THEN
                     RAISE EXCEPTION 'query_string error in trigger function sync_user()';
-END IF;
+                END IF;
                 PERFORM dblink_exec(db_conn, query_string);
-END LOOP;
+            END LOOP;
 
             -- All done.
-RETURN NULL;
-END;
+            RETURN NULL;
+        END;
         $$;
 
 
@@ -303,12 +303,12 @@ SET default_tablespace = '';
 --
 
 CREATE TABLE public.courses (
-                                semester character varying(255) NOT NULL,
-                                course character varying(255) NOT NULL,
-                                status smallint DEFAULT 1 NOT NULL,
-                                group_name character varying(255) NOT NULL,
-                                owner_name character varying(255) NOT NULL,
-                                CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    status smallint DEFAULT 1 NOT NULL,
+    group_name character varying(255) NOT NULL,
+    owner_name character varying(255) NOT NULL,
+    CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
 );
 
@@ -318,9 +318,9 @@ CREATE TABLE public.courses (
 --
 
 CREATE TABLE public.courses_registration_sections (
-                                                      semester character varying(255) NOT NULL,
-                                                      course character varying(255) NOT NULL,
-                                                      registration_section_id character varying(255) NOT NULL
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section_id character varying(255) NOT NULL
 );
 
 
@@ -329,14 +329,14 @@ CREATE TABLE public.courses_registration_sections (
 --
 
 CREATE TABLE public.courses_users (
-                                      semester character varying(255) NOT NULL,
-                                      course character varying(255) NOT NULL,
-                                      user_id character varying NOT NULL,
-                                      user_group integer NOT NULL,
-                                      registration_section character varying(255),
-                                      registration_type character varying(255) DEFAULT 'graded'::character varying,
-                                      manual_registration boolean DEFAULT false,
-                                      CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    user_id character varying NOT NULL,
+    user_group integer NOT NULL,
+    registration_section character varying(255),
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    manual_registration boolean DEFAULT false,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -346,16 +346,16 @@ CREATE TABLE public.courses_users (
 --
 
 CREATE TABLE public.emails (
-                               id bigint NOT NULL,
-                               user_id character varying NOT NULL,
-                               subject text NOT NULL,
-                               body text NOT NULL,
-                               created timestamp without time zone NOT NULL,
-                               sent timestamp without time zone,
-                               error character varying DEFAULT ''::character varying NOT NULL,
-                               email_address character varying(255) DEFAULT ''::character varying NOT NULL,
-                               semester character varying,
-                               course character varying
+    id bigint NOT NULL,
+    user_id character varying NOT NULL,
+    subject text NOT NULL,
+    body text NOT NULL,
+    created timestamp without time zone NOT NULL,
+    sent timestamp without time zone,
+    error character varying DEFAULT ''::character varying NOT NULL,
+    email_address character varying(255) DEFAULT ''::character varying NOT NULL,
+    semester character varying,
+    course character varying
 );
 
 
@@ -384,11 +384,11 @@ ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
 --
 
 CREATE TABLE public.mapped_courses (
-                                       semester character varying(255) NOT NULL,
-                                       course character varying(255) NOT NULL,
-                                       registration_section character varying(255) NOT NULL,
-                                       mapped_course character varying(255) NOT NULL,
-                                       mapped_section character varying(255) NOT NULL
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section character varying(255) NOT NULL,
+    mapped_course character varying(255) NOT NULL,
+    mapped_section character varying(255) NOT NULL
 );
 
 
@@ -397,9 +397,9 @@ CREATE TABLE public.mapped_courses (
 --
 
 CREATE TABLE public.migrations_master (
-                                          id character varying(100) NOT NULL,
-                                          commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                          status numeric(1,0) DEFAULT 0 NOT NULL
+    id character varying(100) NOT NULL,
+    commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    status numeric(1,0) DEFAULT 0 NOT NULL
 );
 
 
@@ -408,9 +408,9 @@ CREATE TABLE public.migrations_master (
 --
 
 CREATE TABLE public.migrations_system (
-                                          id character varying(100) NOT NULL,
-                                          commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                          status numeric(1,0) DEFAULT 0 NOT NULL
+    id character varying(100) NOT NULL,
+    commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    status numeric(1,0) DEFAULT 0 NOT NULL
 );
 
 
@@ -419,10 +419,10 @@ CREATE TABLE public.migrations_system (
 --
 
 CREATE TABLE public.saml_mapped_users (
-                                          id integer NOT NULL,
-                                          saml_id character varying(255) NOT NULL,
-                                          user_id character varying(255) NOT NULL,
-                                          active boolean DEFAULT true NOT NULL
+    id integer NOT NULL,
+    saml_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    active boolean DEFAULT true NOT NULL
 );
 
 
@@ -451,10 +451,10 @@ ALTER SEQUENCE public.saml_mapped_users_id_seq OWNED BY public.saml_mapped_users
 --
 
 CREATE TABLE public.sessions (
-                                 session_id character varying(255) NOT NULL,
-                                 user_id character varying(255) NOT NULL,
-                                 csrf_token character varying(255) NOT NULL,
-                                 session_expires timestamp(6) with time zone NOT NULL
+    session_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    csrf_token character varying(255) NOT NULL,
+    session_expires timestamp(6) with time zone NOT NULL
 );
 
 
@@ -463,11 +463,11 @@ CREATE TABLE public.sessions (
 --
 
 CREATE TABLE public.terms (
-                              term_id character varying(255) NOT NULL,
-                              name character varying(255) NOT NULL,
-                              start_date date NOT NULL,
-                              end_date date NOT NULL,
-                              CONSTRAINT terms_check CHECK ((end_date > start_date))
+    term_id character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    CONSTRAINT terms_check CHECK ((end_date > start_date))
 );
 
 
@@ -476,24 +476,24 @@ CREATE TABLE public.terms (
 --
 
 CREATE TABLE public.users (
-                              user_id character varying NOT NULL,
-                              user_numeric_id character varying,
-                              user_password character varying,
-                              user_givenname character varying NOT NULL,
-                              user_preferred_givenname character varying,
-                              user_familyname character varying NOT NULL,
-                              user_preferred_familyname character varying,
-                              user_access_level integer DEFAULT 3 NOT NULL,
-                              user_email character varying NOT NULL,
-                              user_updated boolean DEFAULT false NOT NULL,
-                              instructor_updated boolean DEFAULT false NOT NULL,
-                              last_updated timestamp(6) with time zone,
-                              api_key character varying(255) DEFAULT encode(public.gen_random_bytes(16), 'hex'::text) NOT NULL,
-                              time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
-                              display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
-                              user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
-                              user_email_secondary_notify boolean DEFAULT false,
-                              CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
+    user_id character varying NOT NULL,
+    user_numeric_id character varying,
+    user_password character varying,
+    user_givenname character varying NOT NULL,
+    user_preferred_givenname character varying,
+    user_familyname character varying NOT NULL,
+    user_preferred_familyname character varying,
+    user_access_level integer DEFAULT 3 NOT NULL,
+    user_email character varying NOT NULL,
+    user_updated boolean DEFAULT false NOT NULL,
+    instructor_updated boolean DEFAULT false NOT NULL,
+    last_updated timestamp(6) with time zone,
+    api_key character varying(255) DEFAULT encode(public.gen_random_bytes(16), 'hex'::text) NOT NULL,
+    time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
+    display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
+    user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_email_secondary_notify boolean DEFAULT false,
+    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 
 
@@ -502,11 +502,11 @@ CREATE TABLE public.users (
 --
 
 CREATE TABLE public.vcs_auth_tokens (
-                                        id integer NOT NULL,
-                                        user_id character varying NOT NULL,
-                                        token character varying NOT NULL,
-                                        name character varying NOT NULL,
-                                        expiration timestamp(0) with time zone
+    id integer NOT NULL,
+    user_id character varying NOT NULL,
+    token character varying NOT NULL,
+    name character varying NOT NULL,
+    expiration timestamp(0) with time zone
 );
 
 
