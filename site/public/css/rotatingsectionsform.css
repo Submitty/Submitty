@@ -7,9 +7,15 @@ fieldset > * {
     margin-bottom: 0.5em;
 }
 
-#redo-data {
+#fewest-exclude > label {
+    display: block;
+    margin: 0.5em 0;
+}
+
+#redo-data,
+#fewest-exclude {
     margin-left: 13px;
-    border-left: solid #cccccc 1px;
+    border-left: solid var(--solution-text-background) 1px;
     padding-left: 13px;
 }
 
