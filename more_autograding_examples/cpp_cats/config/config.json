@@ -30,7 +30,7 @@
         // *************** TEST CASES *****************
         {
             "title" : "Regular char by char comparison",
-            "details" : "./byChar.exe input.txt output.txt",
+            "details" : "./byChar.exe input.txt output.txt Please Remember to Submith only when you feel simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
             "validation" : [
@@ -44,7 +44,7 @@
         },
         {
             "title" : "Test of by word comparison",
-            "details" : "./byWord.exe input.txt output.txt",
+            "details" : "./byWord.exe input.txt output.txt ASDFBASDFJDSFLKDFJQWEROADSFLSAKDFJBLKJASDFKJELRKJAKLSJFDLKDFJBLKJASRIERASDFASDFJASFDLKJASDFDFBJLKJLKWJER ERWLEKRWERLWKASDFKJDSAF AKSLDFJKBJBKJLKJFLSKDFJDFKJGLKAJWERKLJWERKAJSLDKFJASDKFJSADFKASDFSDFALDSFADFJKSFJASDLKFJASDFKADSFADSFSDFADSFASDFADFASDFADSF",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
             "validation" : [
