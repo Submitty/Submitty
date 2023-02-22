@@ -17,7 +17,7 @@
     "chosen-js": "1.8.7",
     "codemirror": "5.65.11",
     "codemirror-spell-checker": "1.1.2",
-    "@codemirror/state": "6.1.1",
+    "@codemirror/state": "6.2.0",
     "@codemirror/view": "6.2.2",
     "@codemirror/language": "6.2.1",
     "@codemirror/autocomplete": "6.1.0",
