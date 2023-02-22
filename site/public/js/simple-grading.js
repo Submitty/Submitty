@@ -365,10 +365,10 @@ function checkpointRollTo(g_id, diff) {
     setCheckpointHistory(g_id, history);
 
     // update cells for each snapshot
-    update_queue.forEach(function(snaphot) {
+    update_queue.forEach(function(snapshot) {
         // get elems from studentID
-        var elems = $("tr[data-user='" + snaphot[0] + "'] .cell-grade");
-        updateCheckpointCells(elems, snaphot[1], true);
+        var elems = $("tr[data-user='" + snapshot[0] + "'] .cell-grade");
+        updateCheckpointCells(elems, snapshot[1], true);
     });
 }
 
@@ -758,7 +758,22 @@ function setupSimpleGrading(action) {
     // default key movement
     $(document).on("keydown", function(event) {
         // if input cell selected, use this to check if cursor is in the right place
-        var input_cell = $("input.cell-grade:focus");
+        const input_cell = $("input.cell-grade:focus, textarea.cell-grade:focus");
+        if (!input_cell.length) return;
+
+        const typingMode = input_cell[0].dataset.typing === true || input_cell[0].dataset.typing === 'true';
+
+        if (event.code === 'Escape') {
+            event.preventDefault();
+            // If in typing mode, exit typing mode
+            if (typingMode) input_cell[0].dataset.typing = false;
+            // If not in typing mode, blur the input
+            else input_cell[0].blur();
+            return;
+        }
+
+        // Exit if in typing mode
+        if (typingMode) return;
 
         // if there is no selection OR there is a selection to the far left with 0 length
         if(event.code === "ArrowLeft") {

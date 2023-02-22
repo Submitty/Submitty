@@ -295,18 +295,12 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
-python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
-if [[ "$?" -ne "0" ]] ; then
-    echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
-    exit
-fi
-
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to grant table privileges to course database user"
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ${DATABASE_COURSE_USER};"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to grant sequence privileges to course database user"
     exit
@@ -321,6 +315,14 @@ if [[ "$?" -ne "0" ]] ; then
     echo "       To fix, try running 'create_term.sh'."
     exit
 fi
+
+python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
+if [[ $? -ne "0" ]] ; then
+    PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE semester='${semester}' AND course='${course}';"
+    echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
+    exit
+fi
+
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################

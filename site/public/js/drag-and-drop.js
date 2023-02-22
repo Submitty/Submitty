@@ -310,7 +310,7 @@ function setButtonStatus(inactive_version = false) {
     }
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
     // toggled the necessary flag that we're on a submission that would have previous (to prevent costly dom
-    // lookups for the existance of #getprev id in the page)
+    // lookups for the existence of #getprev id in the page)
     var files = 0;
     for (var j = 0; j < file_array.length; j++) {
         files += file_array[j].length;
@@ -735,7 +735,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
     formData.append('use_ocr', use_ocr && use_qr_codes);
-    //encode qr prefix and suffix incase URLs are used
+    //encode qr prefix and suffix in case URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
     formData.append('csrf_token', csrfToken);
@@ -1271,7 +1271,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1282,12 +1282,28 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         return;
     }
 
+    if (sections_lock === true) {
+        var numSections = sectionsEdit.length;
+        if (partialSections !== null) {
+            numSections += partialSections.length;
+            formData.append('partial_sections', partialSections);
+        }
+    }
+
+    if (sections_lock === true && numSections === 0) {
+        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        return;
+    }
+
     formData.append('csrf_token', csrf_token);
-    formData.append('hide_from_students', hide_from_students);
     formData.append('id', id);
     formData.append('release_time',cmTime);
     formData.append('sort_priority',priority);
     formData.append('sections_lock', sections_lock);
+
+    if(hide_from_students !== null) {
+        formData.append('hide_from_students', hide_from_students);
+    }
     if(link_url !== null) {
         formData.append('link_url', link_url);
     }
@@ -1321,7 +1337,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were editting. - [handleEditCourseMaterials]");
+                    "send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]");
                 console.log(data);
             }
         },

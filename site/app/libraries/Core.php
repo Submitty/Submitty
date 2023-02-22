@@ -14,6 +14,7 @@ use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -175,7 +176,14 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = ORMSetup::createAnnotationMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', 'entities')], $this->config->isDebug());
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
+        $cache = new PhpFilesAdapter("", 0, $cache_path);
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
+            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
+            $this->config->isDebug(),
+            FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
+            $cache
+        );
 
         if ($debug_stack) {
             $config->setSQLLogger($debug_stack);
@@ -265,6 +273,56 @@ class Core {
         return $queries;
     }
 
+    public function hasDBPerformanceWarning(): bool {
+        if (count($this->getSubmittyQueries()) + count($this->getCourseQueries()) > 20) {
+            return true;
+        }
+
+        if (($this->course_db !== null && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db !== null && $this->submitty_db->hasDuplicateQueries())) {
+            return true;
+        }
+
+        $queries = [];
+        if ($this->course_debug_stack !== null) {
+            foreach ($this->course_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+        if ($this->submitty_debug_stack !== null) {
+            foreach ($this->submitty_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+
+        return count($queries) !== count(array_unique($queries));
+    }
+
+    private function logPerformanceWarning(): void {
+        if (!$this->config->isDebug()) {
+            return;  // We never want to log these warnings on production
+        }
+
+        $ignore_list_path = FileUtils::joinPaths($this->config->getSubmittyInstallPath(), 'site', '.performance_warning_ignore.json');
+        $ignore_list = json_decode(file_get_contents($ignore_list_path));
+
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            return;
+        }
+
+        foreach ($ignore_list as $regex) {
+            $regex = str_replace("<semester>", $this->getConfig()->getSemester(), $regex);
+            $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
+            if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
+                return; // this route matches an ignore rule
+            }
+        }
+
+        // didn't match any of the ignore rules...print a warning
+        $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
+        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+    }
+
     /**
      * Loads the shell of the grading queue
      *
@@ -301,6 +359,11 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
+        // If this is in debug mode and performance warnings were generated, log them before closing the DB connection
+        if ($this->config !== null && $this->config->isDebug() && $this->hasDBPerformanceWarning()) {
+            $this->logPerformanceWarning();
+        }
+
         if ($this->course_db !== null) {
             $this->course_db->disconnect();
         }
@@ -455,10 +518,10 @@ class Core {
     }
 
     /**
-     * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
+     * Authenticates the user against whatever method was chosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
-     * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
+     * from this method. Returns True/False whether or not the authentication attempt succeeded/failed.
      *
      * @param bool $persistent_cookie should we store this for some amount of time (true) or till browser closure (false)
      * @return bool
@@ -761,23 +824,23 @@ class Core {
                     $_COOKIE[$cookie_key]
                 );
                 $session_id = $token->claims()->get('session_id');
-                $expire_time = $token->claims()->get('expire_time');
                 $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
-                // make sure that the session exists and it's for the user they're claiming
-                // to be
+                // make sure that the session exists and it's for the user they're claiming to be
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
                 }
                 else {
-                    if ($expire_time > 0) {
+                    // If more than a day has passed since we last updated the cookie, update it with the new timestamp
+                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                        $new_token = TokenManager::generateSessionToken(
+                            $session_id,
+                            $token->claims()->get('sub')
+                        );
                         Utils::setCookie(
                             $cookie_key,
-                            TokenManager::generateSessionToken(
-                                $session_id,
-                                $token->claims()->get('sub')
-                            )->toString(),
-                            $expire_time
+                            $new_token->toString(),
+                            $new_token->claims()->get('expire_time')
                         );
                     }
                 }

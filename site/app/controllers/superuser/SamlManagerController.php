@@ -63,7 +63,16 @@ class SamlManagerController extends AbstractController {
             $this->core->addErrorMessage("User ID already exists.");
             return new RedirectResponse($return_url);
         }
-        $auth->setValidUsernames([$user_id]);
+        if (empty(trim($_POST['user_numeric_id']))) {
+            $this->core->addErrorMessage("Numeric ID can't be empty.");
+            return new RedirectResponse($return_url);
+        }
+        $saml_id = trim($_POST['user_saml']);
+        if (empty($saml_id)) {
+            $this->core->addSuccessMessage("SAML ID not provided.");
+            return new RedirectResponse($return_url);
+        }
+        $auth->setValidUsernames([$user_id, $saml_id]);
         if ($auth->isValidUsername($user_id)) {
             $this->core->addErrorMessage("User ID is a valid SAML username and cannot be used for a proxy user.");
             return new RedirectResponse($return_url);
@@ -71,8 +80,8 @@ class SamlManagerController extends AbstractController {
 
         $error_msg = "";
         $error_msg .= User::validateUserData('user_id', $user_id) ? "" : "Error in User ID\n";
-        $error_msg .= User::validateUserData('user_legal_firstname', trim($_POST['user_first_name'])) ? "" : "Error in first name\n";
-        $error_msg .= User::validateUserData('user_legal_lastname', trim($_POST['user_last_name'])) ? "" : "Error in last name\n";
+        $error_msg .= User::validateUserData('user_legal_givenname', trim($_POST['user_given_name'])) ? "" : "Error in first name\n";
+        $error_msg .= User::validateUserData('user_legal_familyname', trim($_POST['user_family_name'])) ? "" : "Error in last name\n";
         $error_msg .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email\n";
 
         if (!is_numeric(trim($_POST['user_numeric_id']))) {
@@ -84,12 +93,6 @@ class SamlManagerController extends AbstractController {
             return new RedirectResponse($return_url);
         }
 
-        $saml_id = trim($_POST['user_saml']);
-        if (empty($saml_id)) {
-            $this->core->addSuccessMessage("SAML ID not provided.");
-            return new RedirectResponse($return_url);
-        }
-
         if (!$auth->isValidUsername($saml_id)) {
             $this->core->addErrorMessage("Provided SAML ID is not valid.");
             return new RedirectResponse($return_url);
@@ -97,8 +100,8 @@ class SamlManagerController extends AbstractController {
 
         $user = new User($this->core);
         $user->setId($user_id);
-        $user->setLegalFirstName(trim($_POST['user_first_name']));
-        $user->setLegalLastName(trim($_POST['user_last_name']));
+        $user->setLegalGivenName(trim($_POST['user_given_name']));
+        $user->setLegalFamilyName(trim($_POST['user_family_name']));
         $user->setEmail(trim($_POST['user_email']));
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
