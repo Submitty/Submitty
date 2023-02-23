@@ -76,7 +76,7 @@
                     <input type='radio' id="radio-student" name="submission-type">
                     Make Submission for a Student
                 </label>
-                {% if part_names|length == 1 and not is_vcs %}
+                {% if is_bulk_upload %}
                     <label for="radio-bulk">
                         <input type='radio' id="radio-bulk" name="submission-type">
                         Bulk PDF Upload
@@ -363,7 +363,7 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}
-    {% if not is_vcs and not is_notebook %}
+    {% if is_bulk_upload %}
         {% include 'submission/homework/BulkUploadProgressBox.twig' %}
     {% endif %}
 {% endif %}
@@ -436,6 +436,11 @@
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
                 user_id = $("#user_id").val();
+                //Adds a confirm box to prevent accidental submission as student
+                if (!confirm("Are you sure you want to submit as student " + user_id)){
+                    $(".submit-gradeable").prop('disabled',false);
+                    return;
+                }
             };
             if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();

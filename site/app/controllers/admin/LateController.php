@@ -260,8 +260,8 @@ class LateController extends AbstractController {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     $team_members = [];
                     for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
-                            $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
+                        $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedGivenName() . " " .
+                            $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFamilyName();
                     }
                     $popup_html = $this->core->getOutput()->renderTwigTemplate(
                         "admin/users/MoreExtensions.twig",
@@ -287,7 +287,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
+            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
@@ -360,7 +360,7 @@ class LateController extends AbstractController {
             if ($type === "extension" && !$this->validateHomework($fields[1])) {
                 $data = null;
                 return [
-                    "successs" => false,
+                    "success" => false,
                     "error" => "Could not resolve gradeable ID '{$fields[1]}' on row {$row_number}",
                 ];
             }

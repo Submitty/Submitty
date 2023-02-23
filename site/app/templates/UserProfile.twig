@@ -7,15 +7,15 @@
             <div class="user-img-cont">
                 {% set image = user.getDisplayImage() %}
                 {% if image is not null %}
-                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
+                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedGivenName(), user.getDisplayedFamilyName())) }}
                 {% else %}
                     <span class="center-img-tag">N/A</span>
                 {% endif %}
             </div>
             <span class="edit-user-img">
-                <a class="icon" tabindex="0" href="javascript:showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                <button class="icon" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-upload"></i> Upload profile photo
-                </a>
+                </button>
             </span>
             <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">Your preferred image was flagged as inappropriate.</span>
         </div>
@@ -33,20 +33,20 @@
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="firstname-row">
+                    <div class="flex-row" id="givenname-row">
                         <span class="label">
                             First Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFirstName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="lastname-row">
+                    <div class="flex-row" id="familyname-row">
                         <span class="label">
                             Last Name:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
-                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedLastName() }}
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
                     <div class="flex-row" id="email-row">
@@ -89,9 +89,9 @@
                                 Change Password:
                             </span>
                             <span>
-                                <a class="icon" tabindex="0" href="javascript:showUpdatePasswordForm()" aria-label="Change password" title="Change password">
+                                <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password">
                                     <i class="fas fa-pencil-alt"></i>
-                                </a>
+                                </button>
                             </span>
                         </div>
                     {% endif %}

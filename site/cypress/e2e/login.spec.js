@@ -1,7 +1,7 @@
 import {buildUrl} from '../support/utils.js';
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
-    describe('Test cases where the user should succesfully login', () => {
+    describe('Test cases where the user should successfully login', () => {
         it('should log in through root endpoint', () => {
             //should hit the login form
             cy.visit('/');
