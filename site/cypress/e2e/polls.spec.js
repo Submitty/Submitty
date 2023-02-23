@@ -149,8 +149,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('h1').click(); // get rid of the date picker
-        cy.get('#student-histogram-release-setting').select('never')
-        cy.get('#student-answer-release-setting').select('never')
+        cy.get('#student-histogram-release-setting').select('never');
+        cy.get('#student-answer-release-setting').select('never');
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
@@ -291,8 +291,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
-        cy.get('#student-histogram-release-setting').select('when_ended')
-        cy.get('#student-answer-release-setting').select('when_ended')
+        cy.get('#student-histogram-release-setting').select('when_ended');
+        cy.get('#student-answer-release-setting').select('when_ended');
         cy.get('button[type=submit]').click();
         cy.wait(1000);
 
