@@ -125,6 +125,9 @@
                             },
                             {
                                 label: "End of time"
+                            },
+                            {
+                                label: "Set time"
                             }
 
                         ],
@@ -144,6 +147,9 @@
                                 case 3:
                                     date = new Date("9998-01-01 00:00:00");
                                     break;
+                                case 4:
+                                    date = fp.selectedDates;
+                                    break;
                             }
                             fp.setDate(date);
                             fp.close();
@@ -154,6 +160,7 @@
             enableTime: true,
             enableSeconds: true,
             time_24hr: true,
+            static: true,
             dateFormat: "Y-m-d H:i:S",
             onReady: (a, b, fp) => {
                 fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
