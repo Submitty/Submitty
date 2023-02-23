@@ -149,6 +149,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('h1').click(); // get rid of the date picker
+        cy.get('#student-histogram-release-setting').select('never')
+        cy.get('#student-answer-release-setting').select('never')
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
@@ -252,6 +254,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
+        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
+        cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
         cy.get('.poll_response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
         cy.get('.poll_response').should('contain', 'Answer 2');
@@ -278,6 +282,62 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio > input').eq(2).should('be.checked');
         cy.get('.radio').eq(3).contains('Answer 2');
         cy.get('.radio > input').eq(3).should('not.be.checked');
+
+        // log into instructor and edit histogram, answer release and close the poll
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.url().should('include', 'sample/polls/editPoll');
+        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
+        cy.get('#student-histogram-release-setting').select('when_ended')
+        cy.get('#student-answer-release-setting').select('when_ended')
+        cy.get('button[type=submit]').click();
+        cy.wait(1000);
+
+        // log into student to verify histogram and answer are released
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-histogram-button').click();
+        cy.wait(1000);
+
+        // log into instructor to disable answer release
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.get('#student-answer-release-setting').select('never');
+        cy.get('button[type=submit]').click();
+        cy.wait(1000);
+
+        // log into student and verify we can see histogram but not answer
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-histogram-button').click();
+        cy.wait(1000);
+
+        // log into instructor to able both histogram and answer release
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.get('#student-histogram-release-setting').select('always');
+        cy.get('#student-answer-release-setting').select('always');
+        cy.get('button[type=submit]').click();
+        cy.wait(1000);
+
+        // log into student and verify we can see histogram with answer
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-histogram-button').click();
+        cy.wait(1000);
 
         // log into instructor and delete the poll
         cy.logout();
