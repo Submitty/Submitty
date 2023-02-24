@@ -1,17 +1,4 @@
 public/js/gradeable.js
-public/js/notebook_builder/notebook-builder-utils.js
-public/js/notebook_builder/builders/abstract-builder.js
-public/js/notebook_builder/builders/itempool-builder.js
-public/js/notebook_builder/builders/root-builder.js
-public/js/notebook_builder/widgets/form-options-widget.js
-public/js/notebook_builder/widgets/image-widget.js
-public/js/notebook_builder/widgets/item-widget.js
-public/js/notebook_builder/widgets/itempool-widget.js
-public/js/notebook_builder/widgets/markdown-widget.js
-public/js/notebook_builder/widgets/multiple-choice-widget.js
-public/js/notebook_builder/widgets/selector-widget.js
-public/js/notebook_builder/widgets/short-answer-widget.js
-public/js/notebook_builder/widgets/widget.js
 public/js/server.js
 public/js/ta-grading-keymap.js
 public/js/ta-grading-rubric-conflict.js
