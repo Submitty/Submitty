@@ -933,7 +933,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     if (versions_used >= versions_allowed) {
         message = `You have already made ${versions_used} submissions.  You are allowed ${versions_allowed} submissions before a small point penalty will be applied. Are you sure you want to continue?`;
         if (!confirm(message)) {
-            $("#submit").prop("disabled", false);
+            $('#submit').prop('disabled', false);
             return;
         }
     }
@@ -941,14 +941,14 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = `Your submission will be ${days_late} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
         if (!confirm(message)) {
-            $("#submit").prop("disabled", false);
+            $('#submit').prop('disabled', false);
             return;
         }
     }
     else if (days_late > 0 && days_late > late_days_allowed) {
         message = `Your submission will be ${days_late} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
         if (!confirm(message)) {
-            $("#submit").prop("disabled", false);
+            $('#submit').prop('disabled', false);
             return;
         }
     }
