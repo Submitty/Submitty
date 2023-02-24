@@ -110,6 +110,14 @@ class Submitter extends AbstractModel {
     }
 
     /**
+     * Get the course_section_id for the submitter
+     * @return string
+     */
+    public function getCourseSectionId() {
+        return $this->team_or_user->getCourseSectionId();
+    }
+
+    /**
      * Get the rotation section for the submitter
      * @return int
      */
