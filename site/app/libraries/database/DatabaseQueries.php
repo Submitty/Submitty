@@ -3357,7 +3357,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
             "
-            SELECT gt.team_id, gt.registration_section, gt.course_section_id, gt.rotating_section, gt.team_name, json_agg(u) AS users
+            SELECT gt.team_id, gt.registration_section, /*gt.course_section_id,*/ gt.rotating_section, gt.team_name, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*

@@ -21,8 +21,6 @@ class Team extends AbstractModel {
     protected $id;
     /** @prop @var string registration section (registration or rotating) of team creator */
     protected $registration_section;
-    /** @prop @var string course_section_id of team creator */
-    protected $course_section_id;
     /** @prop @var integer rotating section (registration or rotating) of team creator */
     protected $rotating_section;
     /** @prop @var string[] containing user ids of team members */
@@ -52,7 +50,6 @@ class Team extends AbstractModel {
 
         $this->id = $details['team_id'];
         $this->registration_section = $details['registration_section'];
-        $this->course_section_id = $details['course_section_id'];
         $this->rotating_section = $details['rotating_section'];
         $this->member_user_ids = [];
         $this->invited_user_ids = [];
@@ -115,14 +112,6 @@ class Team extends AbstractModel {
      */
     public function getRegistrationSection() {
         return $this->registration_section;
-    }
-
-    /**
-     * Get course section id 
-     * @return string
-     */
-    public function getCourseSectionId() {
-        return $this->course_section_id;
     }
 
     /**
