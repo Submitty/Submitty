@@ -13,7 +13,6 @@ public/js/notebook_builder/widgets/multiple-choice-widget.js
 public/js/notebook_builder/widgets/selector-widget.js
 public/js/notebook_builder/widgets/short-answer-widget.js
 public/js/notebook_builder/widgets/widget.js
-public/js/pdf/PDFInitToolbar.js
 public/js/server.js
 public/js/ta-grading-keymap.js
 public/js/ta-grading-rubric-conflict.js
