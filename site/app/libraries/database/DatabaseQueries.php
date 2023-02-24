@@ -3452,7 +3452,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             [$g_id, $user_id]
         );
 
-        return $this->course_db->rows()[0]['message'];
+        $row = $this->course_db->row();
+        if (count($row) === 0) {
+            return null;
+        }
+        return $row['message'];
     }
 
     /**
