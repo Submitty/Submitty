@@ -84,7 +84,7 @@ public:
     }
   }
   float getGrade() const { return grade; }
-  const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > getMessages() const { 
+  const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > getMessages() const {
     std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > answer;
     for (int i = 0; i < TEST_RESULT_NUM_MESSAGES; i++) {
       if (types[i] != MESSAGE_NONE) {
@@ -119,7 +119,7 @@ class TestResults {
 public:
 
   // CONSTRUCTOR
-  TestResults(float g=0.0, 
+  TestResults(float g=0.0,
               const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &m = {},
               const std::string &sd="") :
     my_grade(g),swap_difference(sd),distance(0),tr_error(false),tr_warning(false) {
@@ -132,7 +132,7 @@ public:
         tr_warning = true;
     }
   }
-  
+
   virtual void printJSON(std::ostream & file_out) {
     if (swap_difference != "") {
       file_out << swap_difference << std::endl;
@@ -174,8 +174,8 @@ protected:
 };
 
 struct ToleranceChange {
-  int char_start;
-  int num_change;
+  std::size_t char_start;
+  std::size_t num_change;
 };
 
 // ===================================================================================
