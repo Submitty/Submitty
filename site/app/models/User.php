@@ -100,7 +100,7 @@ class User extends AbstractModel {
     /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
     /** @prop @var string The pronouns of the user */
-    protected $pronouns = "";
+    protected $user_pronouns = "";
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
