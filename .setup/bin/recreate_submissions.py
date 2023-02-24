@@ -106,18 +106,6 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
     submission_path = os.path.join(user_path,str(highest_version+1))
     # copy submission files, the submission_path should be created here
     shutil.copytree(data,submission_path)
-    # set file permissions
-    stat = os.stat(gradeable_path)
-    os.chown(user_path,stat.st_uid,stat.st_gid)
-    os.chmod(user_path,stat.st_mode)
-    for root,dirs,files in os.walk(user_path):
-        for dir in dirs:
-            os.chown(os.path.join(root,dir),stat.st_uid,stat.st_gid)
-            os.chmod(os.path.join(root,dir),stat.st_mode)
-        for file in files:
-            os.chown(os.path.join(root,file),stat.st_uid,stat.st_gid)
-            os.chmod(os.path.join(root,file),stat.st_mode)
-    
     current_time = submitty_dateutils.get_current_time()
     current_time_str = f'{str(current_time)} {str(current_time.tzinfo)}'
     with open(os.path.join(submission_path,UST_NAME),'w') as stf:
@@ -133,6 +121,19 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
     # store updated user_assignment_settings.json file
     with open(os.path.join(user_path,UASF_NAME),'w') as uasf:
         json.dump(UAS,uasf,indent=4)
+    # set file permissions, copy owner+group from gradeable directory
+    # files should be set to -rw-r--r--
+    stat = os.stat(gradeable_path)
+    os.chown(user_path,stat.st_uid,stat.st_gid)
+    os.chmod(user_path,stat.st_mode)
+    for root,dirs,files in os.walk(user_path):
+        for dir in dirs:
+            os.chown(os.path.join(root,dir),stat.st_uid,stat.st_gid)
+            os.chmod(os.path.join(root,dir),stat.st_mode)
+        for file in files:
+            os.chown(os.path.join(root,file),stat.st_uid,stat.st_gid)
+            #os.chmod(os.path.join(root,file),stat.st_mode)
+            os.chmod(os.path.join(root,file),0o640)
     # update database
     func_add_submission(gradeable,user,highest_version+1,str(current_time))
     func_update_active(gradeable,user,highest_version+1)
