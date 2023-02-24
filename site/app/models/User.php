@@ -423,7 +423,7 @@ class User extends AbstractModel {
     }
 
     public function setPronouns($pronouns) {
-        $this->user_pronouns = $pronouns;
+        $this->pronouns = $pronouns;
     }
 
     /**
