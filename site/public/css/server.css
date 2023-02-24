@@ -1496,7 +1496,7 @@ end of styles used in the admin gradeable page
     padding-top: 15px;
     border: 1px solid var(--standard-medium-gray);
     width: 420px;
-    min-width: 400px;
+    min-width: 420px;
     border-radius: 5px;
 }
 
