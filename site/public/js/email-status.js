@@ -29,7 +29,7 @@ function loadPage(page, load_page_url) {
             $('#email-statuses').html(data);
             $('.page-btn').each(function() {
                 const id = parseInt($(this).attr('id'));
-                if (parseInt(page) - page_window <= id && id <= parseInt(page) + page_window && id != parseInt(page)) {
+                if (parseInt(page) - page_window <= id && id <= parseInt(page) + page_window && id !== parseInt(page)) {
                     $(this).removeAttr('disabled');
                     $('#page-num').removeAttr('disabled');
                     $('#page-num').val(page);
@@ -40,7 +40,7 @@ function loadPage(page, load_page_url) {
     });
 }
 
-function textPageChange(){
+function textPageChange() {
     let page = parseInt($('#page-num').val());
     if (page < 1) {
         page = 1;

@@ -2,7 +2,9 @@
 {% block popup_id %}class-list-form{% endblock %}
 {% block title %}Upload Classlist{% endblock %}
 {% block body %}
-    <p>Format your class list as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns:</p>
+    <p>
+        Format your student data as an .xlsx or .csv file with {{ use_database ? 6 : 5 }}-{{ use_database ? 9 : 8 }} columns and no header row:
+    </p>
     <ol class="full-list">
         <li>username</li>
         <li>first name</li>
@@ -12,15 +14,19 @@
         {% if use_database %}
             <li>password</li>
         {% endif %}
-        <li>preferred first name</li>
-        <li>preferred last name</li>
+        <li>preferred first name (optional)</li>
+        <li>preferred last name (optional)</li>
+        <li>registration type (optional)</li>
     </ol>
-    <span style="color: #006398">&#9734; : You can also supply just the user_id and rest of the fields will be auto-fill with the existing user data </span>
-    <p class="std-margin">
-        Preferred first and last names are optional.<br>
-        Registration section can be null.<br>
-        Do not use a header row.
+    <p>
+        For more formatting information, see
+        <a target="_blank" href="https://submitty.org/instructor/course_management/managing_enrollment#add-students-by-bulk-file-csv-upload">
+            Add Students by Bulk File CSV Upload <i style="font-style:normal;" class="fa-question-circle"></i>
+        </a>
     </p>
+    <br />
+    <span style="color: #006398">&#9734; : You can also supply just the user_id and rest of the fields will be auto-fill with the existing user data </span>
+    <p>&emsp;</p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label class="std-margin" for="move_missing">
         Move students missing from the classlist to NULL section?

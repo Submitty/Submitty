@@ -1,8 +1,8 @@
 registration_section: 1
 user_email: alyssaphacker@example.com
-user_firstname: Alyssa P
+user_givenname: Alyssa P
 user_group: 4
 user_id: aphacker
 anon_id: DF654JKL45QER34
-user_lastname: Hacker
+user_familyname: Hacker
 user_numeric_id: 121238953

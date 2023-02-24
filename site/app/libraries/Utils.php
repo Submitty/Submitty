@@ -2,14 +2,12 @@
 
 namespace app\libraries;
 
-use app\models\User;
 use Ds\Set;
 
 /**
  * Class Utils
  */
 class Utils {
-
     /**
      * Defines a new default str_pad that's useful for things like parts of a datetime
      *
@@ -99,28 +97,6 @@ class Utils {
     }
 
     /**
-     * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function startsWith(string $haystack, string $needle): bool {
-        return substr($haystack, 0, strlen($needle)) === $needle;
-    }
-
-    /**
-     * Checks if string $haystack ends with the string $needle, returning TRUE if it does or FALSE otherwise.
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
-     */
-    public static function endsWith(string $haystack, string $needle): bool {
-        return substr($haystack, (-1 * strlen($needle)), strlen($needle)) === $needle;
-    }
-
-    /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
      * the cookie data. This will also set the value in the $_COOKIE superglobal so that it's available without a
@@ -143,7 +119,7 @@ class Utils {
 
     /**
      * Given a filename, determine if it is an image.
-     * TOOD: Make this a stronger check than just on the appended file extension to the naem
+     * TODO: Make this a stronger check than just on the appended file extension to the name
      *
      * @param string $filename
      *
@@ -174,7 +150,7 @@ class Utils {
     /**
      * Compares two potentially null values using greater-than comparison.
      * @param mixed $gt_left Left operand for greater-than comparison
-     * @param mixed $gt_right Righ operand for greater-than comparison
+     * @param mixed $gt_right Right operand for greater-than comparison
      * @return bool True if $dtL > $dtR and neither are null, otherwise false
      */
     public static function compareNullableGt($gt_left, $gt_right) {
@@ -219,10 +195,10 @@ class Utils {
     }
 
     /*
-     * Given an array of students, returns a json object of formated student names in the form:
-     * First_Name Last_Name <student_id>
+     * Given an array of students, returns a json object of formatted student names in the form:
+     * Given_Name Family_Name <student_id>
      * Students in the null section are at the bottom of the list in the form:
-     * (In null section) First_Name Last_Name <student_id>
+     * (In null section) Given_Name Family_Name <student_id>
      * Optional param to show previous submission count
      * students_version is an array of user and their highest submitted version
      */
@@ -233,7 +209,7 @@ class Utils {
         foreach ($students as $student) {
             $student_entry = [
                 'value' => $student->getId(),
-                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
+                'label' => $student->getDisplayedGivenName() . ' ' . $student->getDisplayedFamilyName() . ' <' . $student->getId() . '>'
             ];
 
             if ($append_numeric_id) {
@@ -282,7 +258,7 @@ class Utils {
     }
 
     /**
-     * Convert bytes to a specified format thats human readable
+     * Convert bytes to a specified format that's human readable
      * E.g : MB, 10485760 => 10MB
      * @param string $format
      * @param int $bytes

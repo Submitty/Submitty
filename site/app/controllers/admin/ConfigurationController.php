@@ -4,7 +4,6 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\libraries\ForumUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
@@ -19,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
@@ -53,7 +51,6 @@ class ConfigurationController extends AbstractController {
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
-            'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
@@ -148,7 +145,6 @@ class ConfigurationController extends AbstractController {
                     'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
-                    'queue_contact_info',
                     'seek_message_enabled',
                     'polls_enabled'
                 ]
@@ -189,8 +185,8 @@ class ConfigurationController extends AbstractController {
             // Only create default categories when there is no existing categories (only happens when first enabled)
             if (empty($this->core->getQueries()->getCategories())) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                foreach ($categories as $category) {
-                    $this->core->getQueries()->addNewCategory($category);
+                foreach ($categories as $rank => $category) {
+                    $this->core->getQueries()->addNewCategory($category, $rank);
                 }
             }
         }
@@ -207,6 +203,11 @@ class ConfigurationController extends AbstractController {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Could not save config file')
             );
+        }
+
+        // All late day cache now invalid
+        if ($name === 'default_student_late_days') {
+            $this->core->getQueries()->flushAllLateDayCache();
         }
 
         return MultiResponse::JsonOnlyResponse(

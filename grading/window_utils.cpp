@@ -118,7 +118,7 @@ std::vector<std::string> getWindowNameAssociatedWithPid(int pid){
   std::smatch match;
   //for every open window
   while (std::getline(stream, window)) {    
-    //remove everthing before one or more spaces or tabs. 
+    //remove everything before one or more spaces or tabs. 
     //(view example output above)
     std::string myReg = "(.+?)[ \\t]+(.*)"; 
     std::regex regex(myReg);
@@ -203,7 +203,7 @@ std::set<std::string> snapshotOfActiveWindows(){
   std::smatch match;
   //for every open window
   while (std::getline(stream, window)) {    
-    //remove everthing before one or more spaces or tabs. 
+    //remove everything before one or more spaces or tabs. 
     //(view example output above)
     std::string myReg = "(.+?)[ \\t]+(.*)"; 
     std::regex regex(myReg);
@@ -392,7 +392,7 @@ std::string pad_integer(int number, int padding) {
 }
 
 /*
-* Take the screenshots neccessary to later compile a gif.
+* Take the screenshots necessary to later compile a gif.
 */
 bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds, int fps, bool save_pngs,
               int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
@@ -423,8 +423,9 @@ bool make_gif(std::string window_name, std::string gif_name, float duration_in_s
 
     //add a 1/10th second delay between each image capture.
     if(i != iterations-1){ 
+      int max_rss_memory = 0;
       killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
-        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+        seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
     if(killed){
       return false;
@@ -523,7 +524,7 @@ bool click(std::string window_name, int button){
 /**
 * This function moves the mouse to moved_mouse_x, moved_mouse_y, clamping 
 * between x_start x_end and y_start y_end.
-* NOTE: EXPECTS MOVED VARIALBES ALREADY IN WINDOW COORDINATES
+* NOTE: EXPECTS MOVED VARIABLES ALREADY IN WINDOW COORDINATES
 * This is done in the takeAction function
 */
 bool mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
@@ -1047,8 +1048,9 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
     }
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
+      int max_rss_memory = 0;
       killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
-        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+        seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
     if(killed){
       return false;
@@ -1235,6 +1237,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     std::cout << "The action was unsuccessful" << std::endl;
   }
 
+  int max_rss_memory = 0;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
-    seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);   
+    seconds_to_run, rss_memory, max_rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);
 }

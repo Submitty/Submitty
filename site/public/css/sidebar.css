@@ -85,6 +85,7 @@ aside {
         margin: 0 15px;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     aside.collapsed .icon-title {
         width: 0;
         overflow: hidden;

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace app\libraries\database;
 
-use app\libraries\Utils;
-
 class QueryIdentifier {
     const SELECT = 'select';
     const INSERT = 'insert';
@@ -15,11 +13,11 @@ class QueryIdentifier {
 
     public static function identify(string $query): string {
         $query = strtolower(trim($query));
-        if (Utils::startsWith($query, 'with')) {
+        if (str_starts_with($query, 'with')) {
             $tokens = str_split($query);
             $pos = 4;
             $tokenCount = count($tokens);
-            $paranthesis = 0;
+            $parenthesis = 0;
             $afterColumnList = false;
             $afterCte = false;
             while ($pos < $tokenCount) {
@@ -30,11 +28,11 @@ class QueryIdentifier {
 
                 if ($afterColumnList) {
                     if ($tokens[$pos] === '(') {
-                        $paranthesis++;
+                        $parenthesis++;
                     }
                     elseif ($tokens[$pos] === ')') {
-                        $paranthesis--;
-                        if ($afterColumnList && $paranthesis === 0) {
+                        $parenthesis--;
+                        if ($afterColumnList && $parenthesis === 0) {
                             $afterCte = true;
                         }
                     }
@@ -45,13 +43,13 @@ class QueryIdentifier {
                 }
 
                 $token = '';
-                while (preg_match("/[a-zA-Z0-9\._]/", $tokens[$pos])) {
+                while ($pos < $tokenCount && preg_match("/[a-zA-Z0-9\._]/", $tokens[$pos])) {
                     $token .= $tokens[$pos];
                     $pos++;
                 }
 
                 if ($token !== '') {
-                    if ($paranthesis === 0 && $token === 'as') {
+                    if ($parenthesis === 0 && $token === 'as') {
                         $afterColumnList = true;
                     }
                     elseif ($afterColumnList && $afterCte) {
@@ -66,16 +64,16 @@ class QueryIdentifier {
             $query = implode("", array_slice($tokens, $pos));
         }
 
-        if (Utils::startsWith($query, QueryIdentifier::SELECT)) {
+        if (str_starts_with($query, QueryIdentifier::SELECT)) {
             return QueryIdentifier::SELECT;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::UPDATE)) {
+        elseif (str_starts_with($query, QueryIdentifier::UPDATE)) {
             return QueryIdentifier::UPDATE;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::INSERT)) {
+        elseif (str_starts_with($query, QueryIdentifier::INSERT)) {
             return QueryIdentifier::INSERT;
         }
-        elseif (Utils::startsWith($query, QueryIdentifier::DELETE)) {
+        elseif (str_starts_with($query, QueryIdentifier::DELETE)) {
             return QueryIdentifier::DELETE;
         }
         return QueryIdentifier::UNKNOWN;

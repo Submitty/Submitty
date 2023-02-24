@@ -19,7 +19,6 @@ use app\libraries\Utils;
  * @method boolean getPublic()
  */
 class GradeableAutocheck extends AbstractModel {
-
     /** @prop @var string */
     protected $index;
 
@@ -42,11 +41,11 @@ class GradeableAutocheck extends AbstractModel {
      * GradeableAutocheck constructor.
      *
      * @param Core $core
-     * @param $details
-     * @param $course_path
-     * @param $results_path
-     * @param $results_public_path
-     * @param $idx
+     * @param array $details
+     * @param string $course_path
+     * @param string $results_path
+     * @param string $results_public_path
+     * @param int $idx
      */
     public function __construct(Core $core, $details, $course_path, $results_path, $results_public_path, $idx) {
         parent::__construct($core);
@@ -70,7 +69,7 @@ class GradeableAutocheck extends AbstractModel {
             $this->display_as_sequence_diagram = false;
         }
 
-        $actual_file = $expected_file = $difference_file = $image_difference = "";
+        $actual_file = $expected_file = $expected_string = $difference_file = $image_difference = "";
 
         if (isset($details["actual_file"])) {
             $this->public = (isset($details["results_public"]) && $details["results_public"]);
@@ -81,9 +80,15 @@ class GradeableAutocheck extends AbstractModel {
             }
         }
 
-
-
-        if (isset($details["expected_file"])) {
+        if (isset($details["use_expected_string"])) {
+            if (isset($details["expected_string"])) {
+                $expected_string = $details["expected_string"];
+            }
+            else {
+                $this->core->addErrorMessage("Expected string not specified.");
+            }
+        }
+        elseif (isset($details["expected_file"])) {
             if (substr($details["expected_file"], 0, 11) == "test_output") {
                 if (file_exists($course_path . "/" . $details["expected_file"])) {
                     $expected_file = $course_path . "/" . $details["expected_file"];
@@ -134,6 +139,6 @@ class GradeableAutocheck extends AbstractModel {
             $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
 
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $expected_string, $difference_file, $image_difference, $this->index);
     }
 }

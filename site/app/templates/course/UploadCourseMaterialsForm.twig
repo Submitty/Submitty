@@ -33,29 +33,21 @@
                 }
             </script>
             <br>
-            <span id = "show_Some_Section_Selection" style="display: none">
+            <div id = "show_Some_Section_Selection" class= "show-some-section-selection" style="display: none">
             {% for section in reg_sections %}
-                <tr>
-                    <span class = "inline">
-                        <td>
-                          <label for="section-{{ section['sections_registration_id'] }}">Section&nbsp;{{section['sections_registration_id']}}</label>
-                        </td>
-                        <td>
-                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
-                        </td>
-                        <td>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                    </span>
-                </tr>
+                <div class = "reg-section-item">
+                    <input id="section-upload-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                    <label for="section-upload-{{section['sections_registration_id']}}">Section{{ section['sections_registration_id'] }}</label>
+                </div>
             {% endfor %}
-          </span>
+            </div>
         </fieldset>
         <label id="upload_dt">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'><br>
+            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
             <span>
@@ -64,8 +56,9 @@
             <input id="upload_sort" value="0.0" type="text" size="26"/>
         </label>
         <label>
-            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
-            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
+            <input id="hide-materials-checkbox" type="checkbox" value="off">
+            Hide from Students<br>
+            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
@@ -136,7 +129,7 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-' +element['sections_registration_id']
+                    var currentSection = '#section-upload-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
@@ -145,10 +138,15 @@
                 if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
                     sections = null;
                 }
-                var cmPath = document.getElementById('cm_path').innerHTML;
-                var requestedPath = document.getElementById("input-provide-full-path").value;
-                var sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
-                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+                if(sections === null || sections.length > 0){
+                    const cmPath = document.getElementById('cm_path').innerHTML;
+                    const requestedPath = document.getElementById("input-provide-full-path").value;
+                    const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+                }
+                else {
+                    alert("Select at least one section");
+                }
                 e.stopPropagation();
             });
         });

@@ -8,14 +8,12 @@ use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\Block\Element\FencedCode;
 use League\CommonMark\Block\Element\IndentedCode;
 use League\CommonMark\Inline\Element\Code;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
-use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
-use Spatie\CommonMarkHighlighter\IndentedCodeRenderer;
-use app\libraries\CustomCodeBlockRenderer;
 use app\libraries\CustomCodeInlineRenderer;
 use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -47,10 +45,16 @@ class Output {
     private $js;
     /** @var Set */
     private $module_js;
+    /** @var String */
+    private $manifest_json = "";
+    /** @var String */
+    private $service_worker = "";
 
     private $use_header = true;
     private $use_footer = true;
     private $use_mobile_viewport = false;
+
+    private $content_only = false;
 
     private $start_time;
 
@@ -127,6 +131,10 @@ HTML;
             return $plural;
         }, ["is_safe" => ["html"]]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
+            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+        }));
+
         if ($full_load) {
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
@@ -141,12 +149,13 @@ HTML;
 
         $environment = Environment::createCommonMarkEnvironment();
         $environment->addExtension(new AutolinkExtension());
+        $environment->addExtension(new TableExtension());
         $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
         $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
         $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
         $environment->mergeConfig([]);
 
-        $converter = new CommonMarkConverter(['html_input' => 'escape'], $environment);
+        $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
         $engine = new PHPLeagueCommonMarkEngine($converter);
         $this->twig->addExtension(new MarkdownExtension($engine));
     }
@@ -173,8 +182,8 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
-        $this->addInternalModuleJs('server.js');
         $this->addInternalJs('menu.js');
+        $this->addInternalJs('testcase-output.js');
     }
 
     /**
@@ -389,7 +398,7 @@ HTML;
      * @return string
      */
     private function getView($class) {
-        if (!Utils::startsWith($class, "app\\views")) {
+        if (!str_starts_with($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
         if (!isset($this->loaded_views[$class])) {
@@ -514,6 +523,10 @@ HTML;
         $this->css->add($url);
     }
 
+    public function addInternalModuleTwigJs(string $file) {
+        $this->addModuleJs($this->timestampResource($file, 'mjs/twig'));
+    }
+
     public function addInternalModuleJs(string $file) {
         $this->addModuleJs($this->timestampResource($file, 'mjs'));
     }
@@ -534,6 +547,12 @@ HTML;
         $this->module_js->add($url);
     }
 
+    public function addServiceWorker(): void {
+        /** add the manifest.js and serverice worker files to the page */
+        $this->service_worker = ($this->timestampResource('sw.js', ''));
+        $this->manifest_json = $this->timestampResource('manifest.json', '');
+    }
+
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
         return $this->core->getConfig()->getBaseUrl() . $folder . "/" . $file . (($timestamp !== 0) ? "?v={$timestamp}" : "");
@@ -541,14 +560,21 @@ HTML;
 
     /**
      * Enable or disable whether to use the global header
-     * @param bool $bool
      */
-    public function useHeader($bool = true) {
+    public function useHeader(bool $bool = true): void {
         $this->use_header = $bool;
     }
 
-    public function useFooter($bool = true) {
+    public function useFooter(bool $bool = true): void {
         $this->use_footer = $bool;
+    }
+
+    public function setContentOnly(bool $bool = false): void {
+        $this->content_only = $bool;
+    }
+
+    public function isContentOnly(): bool {
+        return $this->content_only;
     }
 
     public function enableMobileViewport(): void {
@@ -595,6 +621,14 @@ HTML;
 
     public function getModuleJs(): Set {
         return $this->module_js;
+    }
+
+    public function getManifastPath(): string {
+        return $this->manifest_json;
+    }
+
+    public function getServiceWorkerPath(): string {
+        return $this->service_worker;
     }
 
     /**

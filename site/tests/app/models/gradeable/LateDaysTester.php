@@ -17,7 +17,6 @@ use app\models\User;
 use tests\BaseUnitTest;
 
 class LateDaysTester extends BaseUnitTest {
-
     private function mockGradedGradeable(string $gradeable_id, string $due_date, int $late_days, string $submission_date, int $late_day_exception) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
@@ -52,7 +51,7 @@ class LateDaysTester extends BaseUnitTest {
         return $graded_gradeable;
     }
 
-    private function mockCore(int $default_late_days, array $updates) {
+    private function mockCore(int $default_late_days, array $updates, array $cache = []) {
         $core = $this->createMockModel(Core::class);
         $core->method('getDateTimeNow')->willReturn(new \DateTime());
 
@@ -62,6 +61,7 @@ class LateDaysTester extends BaseUnitTest {
 
         $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
         $queries->method('getLateDayUpdates')->willReturn($updates);
+        $queries->method('getLateDayCacheForUser')->willReturn($cache);
         $core->method('getQueries')->willReturn($queries);
         return $core;
     }
@@ -94,7 +94,6 @@ class LateDaysTester extends BaseUnitTest {
         $bad_for_term = $this->mockGradedGradeable('bad_for_term', $due_date, 3, '10-10-2222 11:59:59', 0);
 
         // Add another on time / late gradeable at the end to make sure that bad status doesn't affect future gradeables
-
         $on_time1 = $this->mockGradedGradeable('on_time1', $due_date_p1d, 3, $due_date_m1d, 0);
 
         // Uses 1 late day
@@ -102,12 +101,74 @@ class LateDaysTester extends BaseUnitTest {
 
 
         // Total late days used: 3
-
-        return [$on_time, $on_time_exceptions, $late, $late_exception, $bad_for_gradeable, $bad_for_term, $on_time1, $late1];
+        return [$late_exception, $bad_for_gradeable, $bad_for_term, $late, $on_time, $on_time_exceptions, $late1, $on_time1];
     }
 
-    private function makeTestLateDays() {
-        return new LateDays($this->mockCore(5, []), $this->mockUser('testuser'), $this->mockGradedGradeables());
+    private function createMockCache(array $graded_gradeables, int $late_days, array $updates): array {
+        $late_day_cache = [];
+        $late_days_remaining = $late_days;
+        $late_days_used = 0;
+
+        usort($updates, function (array $a, array $b) {
+            return $b['since_timestamp'] - $a['since_timestamp'];
+        });
+
+        $i = 0;
+        // Visit every gradeable_id key until the end of the array
+        while ($i < count($graded_gradeables)) {
+            $gg = $graded_gradeables[$i];
+
+            if (count($updates) > 0 && $gg->getGradeable()->getSubmissionDueDate() >= end($updates)) {
+                $update = array_pop($updates);
+
+                $new_late_days_available = $update['allowed_late_days'];
+                $diff = $new_late_days_available - ($late_days_remaining + $late_days_used);
+                $late_days_change = $diff;
+                $late_days_remaining = max(0, $late_days_remaining + $diff);
+
+                $late_day_cache[] = [
+                    'late_day_date' => $update['since_timestamp'],
+                    'late_days_remaining' => $late_days_remaining,
+                    'late_days_change' => $late_days_change
+                ];
+
+                continue;
+            }
+
+            $auto_gg = $gg->getAutoGradedGradeable();
+            $submission_days_late = $auto_gg->hasActiveVersion() ? $auto_gg->getActiveVersionInstance()->getDaysLate() : 0;
+            $late_day_exceptions = $gg->getLateDayException();
+            $assignment_budget = min($gg->getGradeable()->getLateDays(), $late_days_remaining) + $late_day_exceptions;
+
+            $late_days_change = 0;
+            // clamp the days charged to be the days late minus exceptions above zero.
+            if ($submission_days_late <= $assignment_budget) {
+                $late_days_change = -max(0, min($submission_days_late, $assignment_budget) - $late_day_exceptions);
+            }
+
+            $late_day_cache[$gg->getGradeableId()] = [
+                'late_days_allowed' => $gg->getGradeable()->getLateDays(),
+                'late_day_date' => $gg->getGradeable()->getSubmissionDueDate(),
+                'submission_days_late' => $submission_days_late,
+                'late_day_exceptions' => $late_day_exceptions,
+                'late_days_remaining' => $late_days_remaining,
+                'late_days_change' => $late_days_change
+            ];
+
+            $late_days_remaining += $late_days_change;
+            $late_days_used -= $late_days_change;
+            $i++;
+        }
+
+        return $late_day_cache;
+    }
+
+    private function makeTestLateDays(int $initial_late_days = 5, array $updates = []): LateDays {
+        $graded_gradeables = $this->mockGradedGradeables();
+        $cache = $this->createMockCache($graded_gradeables, $initial_late_days, $updates);
+        $core = $this->mockCore($initial_late_days, $updates, $cache);
+
+        return new LateDays($core, $this->mockUser('testuser'), $graded_gradeables);
     }
 
     private function mockGradeable(string $gradeable_id) {
@@ -133,7 +194,7 @@ class LateDaysTester extends BaseUnitTest {
                 'allowed_late_days' => 3
             ]
         ];
-        $late_days = new LateDays($this->mockCore(2, $updates), $this->mockUser('testuser'), $this->mockGradedGradeables());
+        $late_days = $this->makeTestLateDays(2, $updates);
 
         // Since we got an extra late day as of due date, we should not be late status
         $this->assertEquals(LateDayInfo::STATUS_LATE, $late_days->getLateDayInfoByGradeable($this->mockGradeable('late1'))->getStatus(), 'Late day updates not applied correctly');

@@ -11,7 +11,6 @@ use app\exceptions\BaseException;
  * show the exact exception to the user (e.g. throwing database exceptions).
  */
 class ExceptionHandler {
-
     /**
      * Should we log any of the exceptions that the application hit?
      * @var bool
@@ -104,7 +103,7 @@ class ExceptionHandler {
         $message .= "{$trace_string}\n";
 
         if ($is_base_exception) {
-            /** @type BaseException $exception */
+            /** @var BaseException $exception */
             $extra = $exception->getDetails();
             if (count($extra) > 0) {
                 $message .= "Extra Details:\n";

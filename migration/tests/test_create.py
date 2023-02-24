@@ -65,7 +65,7 @@ def down({1}):
         self.assertEqual(1, found_files)
 
     def test_create_system(self):
-        """Test the create commmand for system environment."""
+        """Test the create command for system environment."""
         parameters = ['config']
         environment = 'system'
         module_text = 'Migration for the Submitty system.'

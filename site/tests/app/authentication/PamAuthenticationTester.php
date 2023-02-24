@@ -6,22 +6,19 @@ use app\authentication\PamAuthentication;
 use app\exceptions\CurlException;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
 use tests\BaseUnitTest;
 
 class PamAuthenticationTester extends BaseUnitTest {
-
     private function getMockCore($curl_response) {
         $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
         $core = $this->createMock(Core::class);
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
@@ -115,8 +112,8 @@ class PamAuthenticationTester extends BaseUnitTest {
         $core = $this->createMock(Core::class);
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false

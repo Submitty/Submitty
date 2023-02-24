@@ -39,50 +39,6 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(16, strlen(Utils::generateRandomString(8)));
     }
 
-    public function stringStarts() {
-        return [
-            ["test", "test", true],
-            ["test", "tes", true],
-            ["test", "te", true],
-            ["test", "t", true],
-            ["test", "", true],
-            ["test", "st", false]
-        ];
-    }
-
-    /**
-     * @dataProvider stringStarts
-     *
-     * @param $haystack
-     * @param $needle
-     * @param $result
-     */
-    public function testStartsWith($haystack, $needle, $result) {
-        $this->assertEquals(Utils::startsWith($haystack, $needle), $result);
-    }
-
-    public function stringEnds() {
-        return [
-            ["test", "test", true],
-            ["test", "est", true],
-            ["test", "st", true],
-            ["test", "t", true],
-            ["test", "", true],
-            ["test", "te", false]
-        ];
-    }
-
-    /**
-     * @dataProvider stringEnds
-     *
-     * @param $haystack
-     * @param $needle
-     * @param $result
-     */
-    public function testEndsWith($haystack, $needle, $result) {
-        $this->assertEquals(Utils::endsWith($haystack, $needle), $result);
-    }
-
     public function testPrepareHtmlString() {
         $string = "<test\n\ntest>";
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
@@ -330,10 +286,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -349,10 +305,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -380,10 +336,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -399,10 +355,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -418,10 +374,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -437,10 +393,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -468,10 +424,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -487,10 +443,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -522,10 +478,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -541,10 +497,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -560,10 +516,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
             'user_password' => "test",
-            'user_firstname' => "User",
-            'user_preferred_firstname' => null,
-            'user_lastname' => "Tester",
-            'user_preferred_lastname' => null,
+            'user_givenname' => "User",
+            'user_preferred_givenname' => null,
+            'user_familyname' => "Tester",
+            'user_preferred_familyname' => null,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -579,10 +535,10 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "anon_id",
             'user_numeric_id' => '987654321',
             'user_password' => "aphacker",
-            'user_firstname' => "Alyss",
-            'user_preferred_firstname' => "Allison",
-            'user_lastname' => "Hacker",
-            'user_preferred_lastname' => "Hacks",
+            'user_givenname' => "Alyss",
+            'user_preferred_givenname' => "Allison",
+            'user_familyname' => "Hacker",
+            'user_preferred_familyname' => "Hacks",
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,

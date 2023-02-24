@@ -15,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class NotificationController extends AbstractController {
-
     const NOTIFICATION_SELECTIONS = [
         'merge_threads',
         'all_new_threads',
@@ -50,12 +49,12 @@ class NotificationController extends AbstractController {
         }
     }
     /**
-     * @param $show_all
+     * @param string|null $show_all
      * @Route("/courses/{_semester}/{_course}/notifications")
      * @return MultiResponse
      */
-    public function showNotifications($show_all = null) {
-        $show_all = isset($show_all);
+    public function showNotifications(?string $show_all = null) {
+        $show_all = !empty($show_all);
         $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -70,8 +69,8 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @param $nid
-     * @param $seen
+     * @param string $nid
+     * @param string|null $seen
      * @Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
      * @return MultiResponse
      */
@@ -88,7 +87,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @param $nid
+     * @param string $nid
      * @Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
      * @return MultiResponse
      */

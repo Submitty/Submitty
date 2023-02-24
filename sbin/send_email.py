@@ -249,7 +249,7 @@ def send_email():
             LOG_FILE.write(e+"\n")
             print(e)
 
-    e = "[{}] Sucessfully Emailed {} Users".format(
+    e = "[{}] Successfully Emailed {} Users".format(
         str(datetime.datetime.now()), success_count)
     LOG_FILE.write(e+"\n")
 
@@ -257,7 +257,7 @@ def send_email():
 def main():
     if not EMAIL_ENABLED:
         return
-    """Send queued Submitty emails and log any errors."""
+    # Send queued Submitty emails and log any errors.
     try:
         send_email()
     except Exception as email_send_error:

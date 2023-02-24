@@ -9,13 +9,12 @@ namespace app\libraries;
  * to the user so they don't have to try and look up these codes in the PHP manual
  */
 class ErrorMessages {
-
     /**
      * Given error code from the $_FILES['file']['error'] array, will return a human string for the error
      *
      * @param int $code Error code from upload
      *
-     * @return string Message for what went wront with upload
+     * @return string Message for what went wrong with upload
      */
     public static function uploadErrors($code) {
         switch ($code) {
@@ -44,7 +43,7 @@ class ErrorMessages {
       * Given a response code after opening a Zip Archive, check if anything went wrong
       * @param bool | int $res Error code or status for opening archive
       *
-      * @return string Message for what went wront with upload
+      * @return string Message for what went wrong with upload
       */
     public static function getZipErrorMessage($res) {
 
@@ -60,7 +59,7 @@ class ErrorMessages {
             case \ZipArchive::ER_COMPNOTSUPP:
                 return "Compression method not supported.";
             case \ZipArchive::ER_INTERNAL:
-                return "Internel Error.";
+                return "Internal Error.";
             case \ZipArchive::ER_INCONS:
                 return "Zip archive inconsistent.";
             case \ZipArchive::ER_CRC:

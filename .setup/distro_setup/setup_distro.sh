@@ -39,7 +39,9 @@ fi
 # check if set, else use default /etc/motd
 # we expect that SUBMISSION_URL and GIT_URL to be set above
 
-if [ ${VAGRANT} == 1 ]; then
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+
+if [ "${VAGRANT}" == 1 ] && [ "${UTM_ARM}" == 0 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
         chmod -x /etc/update-motd.d/*

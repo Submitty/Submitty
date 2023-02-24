@@ -194,7 +194,7 @@ class TestForum(BaseTestCase):
     def announce_thread(self, title):
         assert not self.icon_exists(title, "thread-announcement")
         self.view_thread(title)
-        self.driver.find_element(By.XPATH, "//a[@title='Make thread an announcement']").click()
+        self.driver.find_element(By.XPATH, "//a[@title='Pin thread to the top']").click()
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
         assert self.icon_exists(title, "thread-announcement")

@@ -275,7 +275,7 @@ class HomePageController extends AbstractController {
                 $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
-                $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId())
+                $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
             )
         );
     }
@@ -318,6 +318,12 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewTerm() {
+        if (!$this->core->getUser()->isSuperUser()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
         $response = new MultiResponse();
         if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
             $term_id = $_POST['term_id'];

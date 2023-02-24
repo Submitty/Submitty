@@ -1,17 +1,18 @@
 module.exports = {
     collectCoverage: true,
     collectCoverageFrom: [
-        '<rootDir>/public/mjs/**/*.js',
+        '<rootDir>/ts/**/*.js',
+        '<rootDir>/ts/**/*.ts',
     ],
     coverageDirectory: '<rootDir>/tests/report/jest',
     setupFilesAfterEnv: [
-        '<rootDir>/tests/mjs/setupTests.js',
+        '<rootDir>/tests/ts/setupTests.js',
     ],
     testEnvironment: 'jsdom',
     testMatch: [
-        '<rootDir>/tests/mjs/**/*.spec.js',
+        '<rootDir>/tests/ts/**/*.spec.js',
     ],
     transform: {
-        '\\.js$': 'babel-jest',
+        '\\.[jt]s$': 'babel-jest',
     },
 };

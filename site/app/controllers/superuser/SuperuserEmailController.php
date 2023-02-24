@@ -2,13 +2,11 @@
 
 namespace app\controllers\superuser;
 
-use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use app\libraries\routers\AccessControl;
-use app\libraries\User;
 use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
@@ -17,8 +15,6 @@ use app\models\SuperuserEmail;
  * @AccessControl(level="SUPERUSER")
  */
 class SuperuserEmailController extends AbstractController {
-
-
     /**
      * @Route("/superuser/email")
      * @return MultiResponse
@@ -54,7 +50,7 @@ class SuperuserEmailController extends AbstractController {
             return JsonResponse::getFailResponse("Email subject is empty.");
         }
         else {
-            // Because AJAX stringifies everthing
+            // Because AJAX stringifies everything
             $email_instructor =  isset($_POST['email_instructor']) && $_POST['email_instructor'] == "true";
             $email_full_access = isset($_POST['email_full_access']) && $_POST['email_full_access'] == "true";
             $email_limited_access = isset($_POST['email_limited_access']) && $_POST['email_limited_access'] == "true";

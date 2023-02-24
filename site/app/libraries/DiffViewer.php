@@ -10,11 +10,12 @@ namespace app\libraries;
  * HTML or plain-text)
  */
 class DiffViewer {
-
     /** @var string */
     private $actual_file;
     /** @var string */
     private $expected_file;
+    /** @var string */
+    private $expected_string;
     /** @var string */
     private $diff_file;
     /** @var string */
@@ -134,8 +135,8 @@ class DiffViewer {
     }
 
     /**
-     * Load the actual file, expected file, and diff json, using them to populate the necessary arrays for
-     * display them later back to the user
+     * Load the actual file, expected file, expected string and diff json,
+     * using them to populate the necessary arrays for display them later back to the user
      *
      * @param string $actual_file
      * @param string $expected_file
@@ -148,6 +149,7 @@ class DiffViewer {
     public function __construct(
         string $actual_file,
         string $expected_file,
+        string $expected_string,
         string $diff_file,
         string $image_difference,
         string $id_prepend = "id"
@@ -155,6 +157,7 @@ class DiffViewer {
         $this->id = rtrim($id_prepend, "_") . "_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
+        $this->expected_string = $expected_string;
         $this->diff_file = $diff_file;
         $this->image_difference = $image_difference;
     }
@@ -178,6 +181,7 @@ class DiffViewer {
 
         $actual_file = $this->actual_file;
         $expected_file = $this->expected_file;
+        $expected_string = $this->expected_string;
         $diff_file = $this->diff_file;
         $can_diff = true;
         $image_difference = $this->image_difference;
@@ -231,6 +235,22 @@ class DiffViewer {
                     $this->expected = explode("\n", $tmp_expected);
                     $this->display_expected = true;
                 }
+            }
+        }
+        elseif ($expected_string != "") {
+            if (strlen($expected_string) < $size_limit) {
+                $tmp_expected = $expected_string;
+                $this->has_expected = trim($tmp_expected) !== "";
+                $this->expected = explode("\n", $tmp_expected);
+                $this->display_expected = true;
+            }
+            else {
+                $can_diff = false;
+                //load in the first sizelimit characters of the file (TEMP VALUE)
+                $tmp_expected = substr($expected_string, 0, $size_limit);
+                $this->has_expected = trim($tmp_expected) !== "";
+                $this->expected = explode("\n", $tmp_expected);
+                $this->display_expected = true;
             }
         }
 
@@ -530,10 +550,12 @@ class DiffViewer {
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
 
+        $num_blanks = 0;
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
+                $num_blanks = $this->add[$type][-1];
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
-                for ($k = 0; $k < $this->add[$type][-1]; $k++) {
+                for ($k = 0; $k < $num_blanks; $k++) {
                     $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
                 $html .= "\t</div>\n";
@@ -543,8 +565,13 @@ class DiffViewer {
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
          */
+        $num_chars = 0;
         $max_digits = strlen((string) count($lines));
         for ($i = 0; $i < count($lines); $i++) {
+            if ($i === 1000 - $num_blanks || $num_chars >= 50000) {
+                break;
+            }
+            $num_chars += strlen($lines[$i]);
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
@@ -636,6 +663,17 @@ class DiffViewer {
             if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
                 $start = null;
                 $html .= "\t</div>\n";
+            }
+        }
+        if (count($lines) + $num_blanks > 1000 || $num_chars >= 50000) {
+            $html .= "<p>...</p>";
+            if ($type === self::EXPECTED) {
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please contact instructor if you feel that you need the full file.</b></p>";
+                $html = $truncate_error . $html . $truncate_error;
+            }
+            elseif ($type === self::ACTUAL) {
+                $truncate_error = "<p style='color: var(--error-alert-dark-red); font-family: \"Source Sans Pro\", \"sans-serif\"'><b>This file has been truncated. Please download it to see the full file.</b></p>";
+                $html = $truncate_error . $html . $truncate_error;
             }
         }
         return $html . "</div></div>\n";

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace tests\app\libraries\database;
 
 use app\libraries\database\QueryIdentifier;
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
-use PHPUnit\Framework\ExpectationFailedException;
 
 class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
     public function dataProvider(): array {
@@ -30,9 +28,9 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
         $query = <<<SQL
             WITH
                 A AS
-                (SELECT registration_section, user_id, user_firstname, user_lastname
+                (SELECT registration_section, user_id, user_givenname, user_familyname
                 FROM users
-                ORDER BY registration_section, user_lastname, user_firstname, user_id),
+                ORDER BY registration_section, user_familyname, user_givenname, user_id),
             B AS
                 (SELECT distinct on (user_id) user_id, timestamp
                 FROM gradeable_access where user_id is not NULL
@@ -58,7 +56,7 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
                 FROM queue
                 ORDER BY user_id, time_in desc)
             SELECT
-                A.registration_section, A.user_id, user_firstname, user_lastname,
+                A.registration_section, A.user_id, user_givenname, user_familyname,
                 B.timestamp as gradeable_access,
                 C.submission_time as gradeable_submission,
                 D.timestamp as forum_view,
@@ -73,8 +71,23 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
             left join E on A.user_id=E.author_user_id
             left join F on A.user_id=F.student_id
             left join G on A.user_id=G.user_id
-            ORDER BY A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
+            ORDER BY A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
 SQL;
           $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));
+    }
+
+    public function invalidQueriesDataProvider(): array {
+        return [
+            ['invalid query'],
+            // trailing comma on CTE
+            ["WITH assigned AS (SELECT * FROM foo), SELECT * FROM bar"]
+        ];
+    }
+
+    /**
+     * @dataProvider invalidQueriesDataProvider
+     */
+    public function testInvalidQueriesReturnUnknown(string $query): void {
+          $this->assertEquals(QueryIdentifier::UNKNOWN, QueryIdentifier::identify($query));
     }
 }

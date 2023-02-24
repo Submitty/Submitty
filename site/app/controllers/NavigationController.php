@@ -5,10 +5,6 @@ namespace app\controllers;
 use app\exceptions\DatabaseException;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
-use app\libraries\GradeableType;
-use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\Submitter;
 use app\models\gradeable\GradeableList;
 use Symfony\Component\Routing\Annotation\Route;
 

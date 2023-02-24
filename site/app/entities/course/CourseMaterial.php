@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace app\entities\course;
 
-use app\libraries\DateUtils;
-use app\models\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -58,6 +56,12 @@ class CourseMaterial {
      * @var float
      */
     protected $priority;
+
+    /**
+     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
+     * @var Collection<CourseMaterialAccess>
+     */
+    protected $accesses;
 
     /**
      * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
@@ -167,8 +171,22 @@ class CourseMaterial {
         return $this->id;
     }
 
+    public function setId(int $id): void {
+        $this->id = $id;
+    }
+
     public function removeSection(CourseMaterialSection $section): void {
         $this->sections->removeElement($section);
+    }
+
+    public function addAccess(CourseMaterialAccess $access): void {
+        $this->accesses[] = $access;
+    }
+
+    public function userHasViewed(string $user_id): bool {
+        return $this->accesses->filter(function (CourseMaterialAccess $courseMaterialAccess) use ($user_id) {
+                return $courseMaterialAccess->getUserId() === $user_id;
+        })->count() > 0;
     }
 
     public function getUrl(): string {
@@ -177,5 +195,13 @@ class CourseMaterial {
 
     public function getUrlTitle(): string {
         return $this->url_title;
+    }
+
+    public function setUrl(string $url): void {
+        $this->url = $url;
+    }
+
+    public function setUrlTitle(string $url_title): void {
+        $this->url_title = $url_title;
     }
 }

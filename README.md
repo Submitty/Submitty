@@ -34,7 +34,7 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 # Contact Us
 
-If you have a question, please [contact us](https://submitty.org/#contact-us) through email or our Slack.
+If you have a question, please [contact us](https://submitty.org/index/contact) through email or our Slack.
 
 
 ### LICENSING

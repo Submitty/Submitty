@@ -1,3 +1,4 @@
+{{ add_twig_module_js('grading/electronic/StudentInformationPanel.js') }}
 <div id="student_info" class="rubric_panel">
     <div>
         <span class="grading_label">Student Information</span>
@@ -9,7 +10,7 @@
 
                     {# If viewing the active version, show cancel button, otherwise show button to switch active #}
                     {% if display_version > 0 %}
-                        <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                        <form id="student-info-ta-version-form" style="display: inline;" method="post"
                               action="{{ update_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
                             {% if display_version == active_version %}
@@ -29,10 +30,10 @@
                             Team:<br/>
 
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
-                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                                &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}
-                            {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                            {{ submitter.getUser().getDisplayedGivenName() }} {{ submitter.getUser().getDisplayedFamilyName() }} ({{ submitter.getId() }})
                             <br/>
                         {% endif %}
 
@@ -40,12 +41,60 @@
                         Submitted: {{ submission_time|date("m/d/Y H:i:s T") }}<br/>
                     </b>
                 </div>
-                <div style="padding-left:10px; padding-right:10px;">
-                        {% for table in tables %}
-                            {{ table|raw }}
-                        {% endfor %}
-                </div>
+
+                </br>
+                {% if team_assignment %}
+                    <form id="late-days-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
+                        <div class="tab-bar-wrapper">
+                            {% for team_member in submitter.getTeam().getMemberUsers() %}
+                                <a class="nav-bar key_to_click" id="page_{{loop.index}}_nav" onclick="onChangeNavTab({{loop.index}});"> 
+                                    {{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})
+                                </a>
+                            {% endfor %}
+                        </div>
+                        </br>
+
+                        <div class="modal-body">
+                            {% for table in tables %}
+                                <div class="page-content" id="page_{{loop.index}}_content">{{ table|raw }}</div>
+                            {% endfor %}
+                        </div>                        
+                    </form>
+                {% else %}
+                    {{ tables|first|raw }}
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function onChangeNavTab(tab) {
+        const table_length = {{tables|length}};
+        if (tab > table_length || tab <= 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+
+        $('.nav-bar').each(function () {
+            $('#page_' + this.id.split('_')[1] + '_nav').removeClass('active-btn');
+            $('#page_' + this.id.split('_')[1] + '_content').hide();
+        });
+
+        $('#page_' + tab + '_nav').addClass('active-btn');
+        $('#page_' + tab + '_content').show();
+    }
+
+    $(document).ready(function() {
+        // Disable any nav-bar buttons with no content
+        $('.nav-bar').each(function () {
+            if ($('#page_' + this.id.split('_')[1] + '_content').length === 0) {
+                $('#page_' + this.id.split('_')[1] + '_nav').hide();
+            }
+            $(this).addClass("normal-btn");
+        });
+
+        // Click on tab 0
+        onChangeNavTab(1);
+    });
+</script>

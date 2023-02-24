@@ -8,7 +8,6 @@ use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradeableList;
 use app\views\NavigationView;
-use DateTime;
 
 /**
  * Class CalendarInfo
@@ -17,7 +16,6 @@ use DateTime;
  */
 class CalendarInfo extends AbstractModel {
     const COLORS = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
-
     /**
      * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value

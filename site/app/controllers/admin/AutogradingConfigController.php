@@ -9,7 +9,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -205,7 +204,7 @@ class AutogradingConfigController extends AbstractController {
         }
         else {
             if (FileUtils::recursiveRmdir($config_path)) {
-                $this->core->addSuccessMessage("The config folder has been succesfully deleted");
+                $this->core->addSuccessMessage("The config folder has been successfully deleted");
             }
             else {
                 $this->core->addErrorMessage("Deleting config failed.");
@@ -219,7 +218,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @param $config_path
+     * @param string|null $config_path
      * @Route("/courses/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return MultiResponse
      */

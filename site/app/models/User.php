@@ -13,18 +13,17 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
- * @method void getNumericId()
+ * @method string getNumericId()
  * @method void setNumericId(string $id)
- * @method void setAnonId(string $anon_id)
  * @method string getPassword()
- * @method string getLegalFirstName() Get the first name of the loaded user
- * @method string getPreferredFirstName() Get the preferred first name of the loaded user
- * @method string getDisplayedFirstName() Returns the preferred first name if one exists and is not null or blank,
- *                                        otherwise return the legal first name field for the user.
- * @method string getLegalLastName() Get the last name of the loaded user
- * @method string getPreferredLastName()  Get the preferred last name of the loaded user
- * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
- *                                        otherwise return the legal last name field for the user.
+ * @method string getLegalGivenName() Get the given name of the loaded user
+ * @method string getPreferredGivenName() Get the preferred given name of the loaded user
+ * @method string getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
+ *                                        otherwise return the legal given name field for the user.
+ * @method string getLegalFamilyName() Get the family name of the loaded user
+ * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
+ * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
+ *                                        otherwise return the legal family name field for the user.
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -34,8 +33,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getGroup()
  * @method int getAccessLevel()
  * @method void setGroup(integer $group)
+ * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
  * @method int getRotatingSection()
+ * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method void setUserUpdated(bool $flag)
@@ -46,7 +47,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isLoaded()
  */
 class User extends AbstractModel {
-
     /**
      * Access groups, lower is more access
      */
@@ -65,6 +65,14 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
+    /**
+     * Profile image set return codes
+     */
+    const PROFILE_IMG_SET_FAILURE = 0;
+    const PROFILE_IMG_SET_SUCCESS = 1;
+    /** Profile image quota of 50 images exhausted */
+    const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -72,26 +80,24 @@ class User extends AbstractModel {
     protected $id;
     /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
     protected $numeric_id = null;
-    /** @prop @var string The anonymous id of this user which should be unique for each course they are in*/
-    protected $anon_id;
     /**
      * @prop
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @prop @var string The first name of the user */
-    protected $legal_first_name;
-    /** @prop @var string The preferred first name of the user */
-    protected $preferred_first_name = "";
-    /** @prop @var  string The first name to be displayed by the system (either first name or preferred first name) */
-    protected $displayed_first_name;
-    /** @prop @var string The last name of the user */
-    protected $legal_last_name;
-    /** @prop @var string The preferred last name of the user */
-    protected $preferred_last_name = "";
-    /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
-    protected $displayed_last_name;
+    /** @prop @var string The given name of the user */
+    protected $legal_given_name;
+    /** @prop @var string The preferred given name of the user */
+    protected $preferred_given_name = "";
+    /** @prop @var  string The given name to be displayed by the system (either given name or preferred given name) */
+    protected $displayed_given_name;
+    /** @prop @var string The family name of the user */
+    protected $legal_family_name;
+    /** @prop @var string The preferred family name of the user */
+    protected $preferred_family_name = "";
+    /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
+    protected $displayed_family_name;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -110,6 +116,8 @@ class User extends AbstractModel {
     protected $time_zone;
     /** @prop @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
+    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
+    protected $registration_type;
 
     /**
      * @prop
@@ -121,17 +129,17 @@ class User extends AbstractModel {
 
     /**
      * @prop
-     * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
+     * @var bool This flag is set TRUE when a user edits their own preferred givenname.  When TRUE, preferred givenname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     *           permitted to change (correct?) a user's legal givenname/familyname and email address.
      */
     protected $user_updated = false;
 
     /**
      * @prop
-     * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
+     * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred givenname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     *           permitted to change (correct?) a user's legal givenname/familyname and email address.
      */
     protected $instructor_updated = false;
 
@@ -143,6 +151,9 @@ class User extends AbstractModel {
 
     /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
+
+    /** @var array A cache of [gradeable id] => [anon id] */
+    private $anon_id_by_gradeable = [];
 
     /**
      * User constructor.
@@ -166,18 +177,14 @@ class User extends AbstractModel {
             $this->setNumericId($details['user_numeric_id']);
         }
 
-        if (!empty($details['anon_id'])) {
-            $this->anon_id = $details['anon_id'];
+        $this->setLegalGivenName($details['user_givenname']);
+        if (isset($details['user_preferred_givenname'])) {
+            $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
-        $this->setLegalFirstName($details['user_firstname']);
-        if (isset($details['user_preferred_firstname'])) {
-            $this->setPreferredFirstName($details['user_preferred_firstname']);
-        }
-
-        $this->setLegalLastName($details['user_lastname']);
-        if (isset($details['user_preferred_lastname'])) {
-            $this->setPreferredLastName($details['user_preferred_lastname']);
+        $this->setLegalFamilyName($details['user_familyname']);
+        if (isset($details['user_preferred_familyname'])) {
+            $this->setPreferredFamilyName($details['user_preferred_familyname']);
         }
 
         $this->email = $details['user_email'];
@@ -214,12 +221,15 @@ class User extends AbstractModel {
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
+
+        // Use registration type data or default to "graded" for students and "staff" for others
+        $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
     }
 
     /**
      * Gets the message the user sets when seeking a team or a parter
      * @param string $g_id the gradeable where the user is seeking for a team
-     * @return string, message if it exists or N/A if it doesnt
+     * @return string, message if it exists or N/A if it doesn't
      */
     public function getSeekMessage($g_id): string {
         $ret = $this->core->getQueries()->getSeekMessageByUserId($g_id, $this->id);
@@ -295,10 +305,10 @@ class User extends AbstractModel {
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
-     * @return bool true if the update was successful, false otherwise
+     * @return int PROFILE_IMG_SET_SUCCESS if the update was successful, PROFILE_IMG_QUOTA_EXHAUSTED if image upload quota of 50 has been exhausted, PROFILE_IMG_SET_FAILURE otherwise
      * @throws \ImagickException
      */
-    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): int {
         $image_saved = true;
 
         // Try saving image to its new spot in the file directory
@@ -307,15 +317,18 @@ class User extends AbstractModel {
         }
         catch (\Exception $exception) {
             $image_saved = false;
+            if ($exception->getCode() === self::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return self::PROFILE_IMG_QUOTA_EXHAUSTED;
+            }
         }
 
         // Update the DB to 'preferred'
         if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
             $this->display_image_state = 'preferred';
-            return true;
+            return self::PROFILE_IMG_SET_SUCCESS;
         }
 
-        return false;
+        return self::PROFILE_IMG_SET_FAILURE;
     }
 
     /**
@@ -382,14 +395,14 @@ class User extends AbstractModel {
         }
     }
 
-    public function setLegalFirstName($name) {
-        $this->legal_first_name = $name;
-        $this->setDisplayedFirstName();
+    public function setLegalGivenName($name) {
+        $this->legal_given_name = $name;
+        $this->setDisplayedGivenName();
     }
 
-    public function setLegalLastName($name) {
-        $this->legal_last_name = $name;
-        $this->setDisplayedLastName();
+    public function setLegalFamilyName($name) {
+        $this->legal_family_name = $name;
+        $this->setDisplayedFamilyName();
     }
 
     public function getNotificationSettings() {
@@ -405,29 +418,33 @@ class User extends AbstractModel {
     }
 
     /**
-     * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
+     * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
-    public function setPreferredFirstName($name) {
-        $this->preferred_first_name = $name;
-        $this->setDisplayedFirstName();
+    public function setPreferredGivenName($name) {
+        $this->preferred_given_name = $name;
+        $this->setDisplayedGivenName();
     }
 
-    public function setPreferredLastName($name) {
-        $this->preferred_last_name = $name;
-        $this->setDisplayedLastName();
+    public function setPreferredFamilyName($name) {
+        $this->preferred_family_name = $name;
+        $this->setDisplayedFamilyName();
     }
 
-    private function setDisplayedFirstName() {
-        $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
+    private function setDisplayedGivenName() {
+        $this->displayed_given_name = (!empty($this->preferred_given_name)) ? $this->preferred_given_name : $this->legal_given_name;
     }
 
-    private function setDisplayedLastName() {
-        $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
+    private function setDisplayedFamilyName() {
+        $this->displayed_family_name = (!empty($this->preferred_family_name)) ? $this->preferred_family_name : $this->legal_family_name;
     }
 
     public function getDisplayFullName() {
-        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+        return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
+    }
+
+    public function getDisplayAbbreviatedName(): string {
+        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
     }
 
     public function setRegistrationSection($section) {
@@ -444,25 +461,39 @@ class User extends AbstractModel {
         }
     }
 
-    public function getAnonId() {
-        if ($this->anon_id === null) {
+    /**
+     * Get gradeable-specific anon_id of a user
+     * @param string $g_id
+     */
+    public function getAnonId($g_id) {
+        if ($g_id === "") {
+            return "";
+        }
+        if (array_key_exists($g_id, $this->anon_id_by_gradeable)) {
+            $anon_id = $this->anon_id_by_gradeable[$g_id];
+        }
+        else {
+            $anon_id = $this->core->getQueries()->getAnonId($this->id, $g_id);
+            $anon_id = empty($anon_id) ? null : $anon_id[$this->getId()];
+            $this->anon_id_by_gradeable[$g_id] = $anon_id;
+        }
+        if ($anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $anon_ids = $this->core->getQueries()->getAllAnonIdsByGradeable($g_id);
             $alpha_length = strlen($alpha) - 1;
             do {
                 $random = "";
                 for ($i = 0; $i < 15; $i++) {
-                    // this throws an exception if there's no avaiable source for generating
-                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // this throws an exception if there's no available source for generating
+                    // random exists, but that shouldn't happen on our targeted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
                 }
             } while (in_array($random, $anon_ids));
-            $this->anon_id = $random;
-            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->insertGradeableAnonId($this->id, $g_id, $random);
         }
-        return $this->anon_id;
+        return $anon_id ?? $random ?? null;
     }
 
     /**
@@ -478,14 +509,14 @@ class User extends AbstractModel {
             case 'user_id':
                  //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
-            case 'user_legal_firstname':
-            case 'user_legal_lastname':
-                //First and last name must be alpha characters, white-space, or certain punctuation.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
-            case 'user_preferred_firstname':
-            case 'user_preferred_lastname':
-                //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
-                return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
+            case 'user_legal_givenname':
+            case 'user_legal_familyname':
+                //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
+            case 'user_preferred_givenname':
+            case 'user_preferred_familyname':
+                //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':
                 // emails are allowed to be the empty string...
@@ -503,6 +534,12 @@ class User extends AbstractModel {
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 //"NULL" registration section should be validated as a datatype, not as a string.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+            case 'grading_assignments':
+                // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
+                return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
+            case 'student_registration_type':
+                // Student registration type must be one of either 'graded','audit', or 'withdrawn
+                return preg_match("~^(graded|audit|withdrawn)$~", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";

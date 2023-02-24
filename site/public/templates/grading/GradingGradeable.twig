@@ -30,11 +30,12 @@
         {% include "OverallComment.twig" with {
                 'grading_disabled': grading_disabled,
                 'editable': false,
-                'overall_comment': graded_gradeable.ta_grading_overall_comments
+                'overall_comment': graded_gradeable.ta_grading_overall_comments,
+                'attachments': graded_gradeable.attachments,
+                'student_grader': student_grader
         } only %}
     </div>
 {# /General Comment #}
-
 {# Total Box #}
     <div id="total-score-container">
         {% if graded_gradeable.user_group < 4 %}

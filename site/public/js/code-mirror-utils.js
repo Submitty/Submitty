@@ -22,6 +22,7 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
         CodeMirrorSpellChecker({
             codeMirrorInstance:  CodeMirror,
         });
+        codemirror_config.lineWrapping = true;
         codemirror_config.mode = 'spell-checker';
     }
 

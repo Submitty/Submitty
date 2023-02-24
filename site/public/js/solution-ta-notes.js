@@ -1,5 +1,5 @@
 /* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
-/* exported updateSolutionTaNotes, showSolutionTextboxCont, cancelEditingSolution */
+/* exported updateSolutionTaNotes, detectSolutionChange */
 function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     const data = {
         solution_text: $(`#textbox-solution-${component_id}`).val().trim(),
@@ -14,12 +14,9 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
         success: function (res) {
             res = JSON.parse(res);
             if (res.status === 'success') {
-                displaySuccessMessage('Solution has been updated successfully...');
+                displaySuccessMessage('Solution has been updated successfully');
                 // Dom manipulation after the Updating/adding the solution note
                 $(`#solution-box-${component_id}`).attr('data-first-edit', 0);
-                $(`#edit-solution-btn-${component_id}`).removeClass('hide');
-                $(`#sol-textbox-cont-${component_id}-saved`).removeClass('hide');
-                $(`#sol-textbox-cont-${component_id}-edit`).addClass('hide');
 
                 // Updating the last edit info
                 $(`#solution-box-${component_id} .last-edit`).removeClass('hide');
@@ -27,11 +24,15 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
                 $(`#solution-box-${component_id} .last-edit i.last-edit-author`).text(
                     res.data.current_user_id === res.data.author ? `${res.data.author} (You)` : res.data.author,
                 );
-                // Updating the saved notes with the latest solution
-                $(`#sol-textbox-cont-${component_id}-saved .solution-notes-text`).text(res.data.solution_text);
+
+                $(`#solution-box-${component_id}`).find('.solution-cont')
+                    .attr('data-original-solution', $(`#textbox-solution-${component_id}`).val());
+
+                const save_button = $(`#solution-box-${component_id}`).find('.solution-save-btn');
+                save_button.prop('disabled', true);
             }
             else {
-                displayErrorMessage('Something went wrong while upating the solution...');
+                displayErrorMessage('Something went wrong while updating the solution');
             }
         },
         error: function(err) {
@@ -40,26 +41,15 @@ function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     });
 }
 
-function showSolutionTextboxCont(currentEle, solTextboxCont, noSolutionCont) {
-    $(currentEle).addClass('hide');
-    // Show the textbox to start writing out the solutions
-    if ($(solTextboxCont).hasClass('hide')) {
-        $(solTextboxCont).removeClass('hide');
-        $(noSolutionCont).addClass('hide');
-    }
-}
-
-function cancelEditingSolution(componentId) {
-    const isFirstEdit = $(`#solution-box-${componentId}`).attr('data-first-edit');
-
-    if (+isFirstEdit) {
-        $(`#show-sol-btn-${componentId}`).removeClass('hide');
-        $(`.solution-notes-text-${componentId}`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
+//set Save button class depending on if the solution has been altered from the previous solution
+function detectSolutionChange() {
+    const textarea = $(this);
+    const solution_div = textarea.closest('.solution-cont');
+    const save_button = solution_div.find('.solution-save-btn');
+    if (textarea.val() !== solution_div.attr('data-original-solution')) {
+        save_button.prop('disabled', false);
     }
     else {
-        $(`#edit-solution-btn-${componentId}`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-saved`).removeClass('hide');
-        $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
+        save_button.prop('disabled', true);
     }
 }

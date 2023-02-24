@@ -7,11 +7,11 @@ import os
 from pathlib import Path
 import re
 from typing import Set
-import subprocess
 
 from sqlalchemy.exc import OperationalError
 
 from . import db, get_dir_path, get_migrations_path, get_environments
+from .dumper import dump_database
 from .loader import load_module, load_migrations
 
 
@@ -71,10 +71,7 @@ def status(args):
             loop_args.config.database['dbname'] = 'submitty'
             try:
                 database = db.Database(loop_args.config.database, environment)
-                exists = database.engine.dialect.has_table(
-                    database.engine,
-                    database.migration_table.__tablename__
-                )
+                exists = database.has_table(database.migration_table.__tablename__)
                 if not exists:
                     print('Could not find migration table for {}'.format(environment))
                     database.close()
@@ -109,10 +106,7 @@ def status(args):
                     )
                     try:
                         database = db.Database(loop_args.config.database, environment)
-                        exists = database.engine.dialect.has_table(
-                            database.engine,
-                            database.migration_table.__tablename__
-                        )
+                        exists = database.has_table(database.migration_table.__tablename__)
                         if not exists:
                             print(
                                 'Could not find migration table for {}.{}'.format(
@@ -231,9 +225,32 @@ def handle_migration(args):
                 raise SystemExit(
                     f"Migrator Error:  Could not find courses directory: {course_dir}"
                 )
-            for semester in sorted(os.listdir(str(course_dir))):
-                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
-                for course in courses:
+
+            database_config = deepcopy(args.config.database)
+            database_config['dbname'] = 'submitty'
+            try:
+                database = db.Database(database_config, 'master')
+            except OperationalError:
+                raise SystemExit(
+                    'Submitty Database Migration Error:  '
+                    'Database does not exist for master for courses'
+                )
+
+            courses = {}
+            for course in database.execute(
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
+            ):
+                if course['semester'] not in courses:
+                    courses[course['semester']] = []
+                courses[course['semester']].append(course['course'])
+            database.close()
+
+            for semester in courses:
+                for course in courses[semester]:
+                    if not Path(course_dir, semester, course).exists():
+                        raise SystemExit(
+                            f'Migrator Error:  Could not find directory for {semester} {course}'
+                        )
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
                     cond2 = [semester, course] != loop_args.choose_course
@@ -255,17 +272,11 @@ def handle_migration(args):
                         )
                         database.close()
                     except OperationalError:
-                        # NOTE: Do not fail on missing database.
-                        # Older archived courses may not have a valid
-                        # or active database associated with their
-                        # filesystem.  (Old course submission files
-                        # are useful for plagiarism detection.)
-                        print(
-                            "Submitty Database Migration WARNING:  "
+                        raise SystemExit(
+                            "Submitty Database Migration Error:  "
                             "Database does not exist for "
                             "semester={} course={}".format(semester, course)
                         )
-                        continue
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()
@@ -449,17 +460,7 @@ def dump(args):
     if 'master' in args.environments:
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
-        out = subprocess.check_output([
-            'su',
-            '-',
-            'postgres',
-            '-c',
-            'pg_dump -d submitty --schema-only --no-privileges --no-owner'
-        ], universal_newlines=True)
-
-        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
-        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
-        out_file.write_text(out)
+        dump_database('submitty', out_file)
         print('DONE')
 
     if 'course' in args.environments:
@@ -467,15 +468,5 @@ def dump(args):
         print(f'Dumping course environment to {str(out_file)}... ', end='')
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
-
-        out = subprocess.check_output([
-            'su',
-            '-',
-            'postgres',
-            '-c',
-            f'pg_dump -d submitty_{semester}_sample --schema-only --no-privileges --no-owner'
-        ], universal_newlines=True)
-        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
-        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
-        out_file.write_text(out)
+        dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')

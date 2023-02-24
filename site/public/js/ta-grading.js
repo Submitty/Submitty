@@ -45,7 +45,14 @@ const taLayoutDet = {
 };
 
 let settingsCallbacks = {
-  "general-setting-arrow-function": changeStudentArrowTooltips
+  "general-setting-arrow-function": changeStudentArrowTooltips,
+  "general-setting-navigate-assigned-students-only": function(value) {
+    if (value == 'true') {
+      document.cookie = "view=assigned; path=/;";
+    } else {
+      document.cookie = "view=all; path=/;";
+    }
+  }
 }
 
 // Grading Panel header width
@@ -91,7 +98,15 @@ $(function () {
 
   loadTAGradingSettingData();
 
-  changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || "default");
+  for (let i = 0; i < settingsData.length; i++) {
+    for (let x = 0; x < settingsData[i].values.length; x++) {
+      let storageCode = settingsData[i].values[x].storageCode;
+      let item = localStorage.getItem(storageCode);
+      if (item && settingsCallbacks.hasOwnProperty(storageCode)) {
+        settingsCallbacks[storageCode](item);
+      }
+    }
+  }
 
   $('#settings-popup').on('change', '.ta-grading-setting-option', function() {
     var storageCode = $(this).attr('data-storage-code');
@@ -145,9 +160,6 @@ $(function () {
       checkNotebookScroll();
     }
   });
-  notebookScrollLoad();
-
-  checkNotebookScroll();
 
   if(localStorage.getItem('notebook-setting-file-submission-expand') == 'true') {
     let notebookPanel = $('#notebook-view');
@@ -174,16 +186,8 @@ $(function () {
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
 
-  // Dynamically resize the textarea height as per the provided content
-  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
-    textarea.addEventListener('keyup', function () {
-      setTimeout(function() {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-      },0);
-    });
-  });
-
+  notebookScrollLoad();
+  checkNotebookScroll();
 });
 
 function changeStudentArrowTooltips(data) {
@@ -502,7 +506,7 @@ function adjustGradingPanelHeader () {
       height += $(this).outerHeight(true);
     }
   });
-  
+
   document.querySelector('.panels-container').style.height = "calc(100% - " + (height) + "px)";
 }
 
@@ -607,6 +611,7 @@ function gotoMainPage() {
 function gotoPrevStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -632,6 +637,10 @@ function gotoPrevStudent() {
       break;
   }
 
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
+  }
+
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;
@@ -649,6 +658,7 @@ function gotoPrevStudent() {
 function gotoNextStudent() {
 
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
+  let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
@@ -672,6 +682,10 @@ function gotoNextStudent() {
     case "active-inquiry":
       window_location += "&component_id=" + getFirstOpenComponentId();
       break;
+  }
+
+  if (!navigate_assigned_students_only) {
+    window_location += "&navigate_assigned_students_only=false";
   }
 
   if (getGradeableId() !== '') {
@@ -708,7 +722,7 @@ function resetSinglePanelLayout() {
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
-  // remove the left bottom sectin and its drag bar
+  // remove the left bottom section and its drag bar
   $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
 
   const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop;
@@ -885,7 +899,7 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: false,
@@ -905,7 +919,7 @@ function togglePanelLayoutModes(forceVal = false) {
       rightTop: true,
       rightBottom: false,
     }
-  
+
     if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
@@ -922,7 +936,7 @@ function togglePanelLayoutModes(forceVal = false) {
   } else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-    
+
     taLayoutDet.currentActivePanels = {
       leftTop: true,
       leftBottom: true,
@@ -976,7 +990,7 @@ function updatePanelLayoutModes () {
     const panel_type = taLayoutDet.currentTwoPanels[panel];
     //get panel corresponding with the layout position
     const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
-    //get panel corresponsing with what the user selected to use for this spot (autograding, rubric, etc)
+    //get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
     const dom_panel = document.getElementById(`${panel_type}`);
     if (dom_panel) {
       $(layout_panel).append(dom_panel);
@@ -1184,7 +1198,7 @@ function checkOpenComponentMark(index) {
 function openAll(click_class, class_modifier) {
 
   let toClose = $("#div_viewer_" + $("." + click_class + class_modifier).attr("data-viewer_id")).hasClass("open");
-  
+
   $("#submission_browser").find("." + click_class + class_modifier).each(function(){
     // Check that the file is not a PDF before clicking on it
     let viewerID = $(this).attr("data-viewer_id");
@@ -1216,29 +1230,6 @@ function openAutoGrading(num){
     $('#testcase_' + num)[0].style.display="block";
   }
 }
-// expand all outputs in Auto-Grading Testcases section
-function openAllAutoGrading() {
-  // show all divs whose id starts with testcase_
-  let clickable_divs  = $("[id^='tc_']");
-
-  for(let i = 0; i < clickable_divs.length; i++){
-    let clickable_div = clickable_divs[i];
-    let num = clickable_div.id.split("_")[1];
-    let content_div = $('#testcase_' + num);
-    if(content_div.css("display") == "none"){
-      clickable_div.click();
-    }
-  }
-}
-
-// close all outputs in Auto-Grading Testcases section
-function closeAllAutoGrading() {
-  // hide all divs whose id starts with testcase_
-  $("[id^='testcase_']").hide();
-  $("[id^='details_tc_']").find("span").hide();
-  $("[id^='details_tc_']").find(".loading-tools-show").show();
-}
-
 
 function openDiv(num) {
   let elem = $('#div_viewer_' + num);
@@ -1442,7 +1433,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
     boundsHeight = iFrameBody[0].scrollHeight;
     let height = 500;
     if (iFrameTarget.css("max-height").length !== 0 && parseInt(iFrameTarget.css("max-height")) >= 0) {
-      height = parseInt(iFrameTarget.css("max-height"));      
+      height = parseInt(iFrameTarget.css("max-height"));
     }
     if (boundsHeight > height) {
       iFrameBody.css("overflow-y", "");
@@ -1457,7 +1448,7 @@ function resizeImageIFrame(imageTarget, iFrameTarget) {
 function imageRotateIcons(iframe) {
   let iframeTarget = $('iframe#' + iframe);
   let contentType = iframeTarget.contents().get(0).contentType;
-  
+
   if (contentType != undefined && contentType.startsWith('image')) {
     if (iframeTarget.attr("id").endsWith("_full_panel_iframe")) {
       let imageRotateBar = iframeTarget.parent().parent().parent().find(".image-rotate-bar").first();
@@ -1475,12 +1466,12 @@ function imageRotateIcons(iframe) {
                               <a class="image-rotate-icon-cw" onclick="rotateImage('${iframeTarget.attr('src')}', 'cw')">
                               <i class="fas fa-redo" title="Rotate image clockwise"></i></a>
                               </div>`);
-      
+
       if (sessionStorage.getItem("image-rotate-" + iframeTarget.attr("src"))) {
         rotateImage(iframeTarget.attr("src"), "none");
       }
     }
-    
+
   }
 }
 
@@ -1503,6 +1494,9 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
     else if (url_file.includes("checkout")) {
       directory = "checkout";
     }
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
     // handle pdf
     if (pdf_full_panel && url_file.substring(url_file.length - 3) === "pdf") {
       viewFileFullPanel(html_file, url_file, 0, panel).then(function(){
@@ -1514,7 +1508,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
       let targetHeight = iframe.hasClass("full_panel") ? 1200 : 500;
       let frameHtml = `
         <iframe id="${iframeId}" onload="resizeFrame('${iframeId}', ${targetHeight}, ${forceFull}); imageRotateIcons('${iframeId}');"
-                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true"
+                src="${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true&gradeable_id=${$("#submission_browser").data("gradeable-id")}"
                 width="95%">
         </iframe>
       `;
@@ -1537,7 +1531,7 @@ function openFrame(html_file, url_file, num, pdf_full_panel=true, panel="submiss
   return false;
 }
 
-let fileFullPanelOptions = {
+const fileFullPanelOptions = {
   submission: { //Main viewer (submission panel)
     viewer: "#viewer",
     fileView: "#file-view",
@@ -1586,6 +1580,8 @@ function viewFileFullPanel(name, path, page_num = 0, panel="submission") {
 }
 
 function loadPDF(name, path, page_num, panel="submission") {
+  // Store the file name of the last opened file for scrolling when switching between students
+  localStorage.setItem("ta-grading-files-full-view-last-opened", name);
   let extension = name.split('.').pop();
   if (fileFullPanelOptions[panel]["pdf"] && extension == "pdf") {
     let gradeable_id = document.getElementById(fileFullPanelOptions[panel]["panel"].substring(1)).dataset.gradeableId;
@@ -1609,6 +1605,7 @@ function loadPDF(name, path, page_num, panel="submission") {
     });
   }
   else {
+    $(fileFullPanelOptions[panel]["pdfAnnotationBar"]).hide();
     $(fileFullPanelOptions[panel]["saveStatus"]).hide();
     $(fileFullPanelOptions[panel]["fileContent"]).append("<div id=\"file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
     $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"]).empty();
@@ -1639,4 +1636,111 @@ function collapseFile(panel = "submission"){
     $(fileFullPanelOptions[panel]["fileView"]).css('left', "");
     $(fileFullPanelOptions[panel]["fileView"]).hide();
   });
+}
+
+Twig.twig({
+  id: "Attachments",
+  href: "/templates/grading/Attachments.twig",
+  async: true
+});
+
+var uploadedAttachmentIndex = 1;
+
+function uploadAttachment() {
+  let fileInput = $("#attachment-upload");
+  if (fileInput[0].files.length === 1) {
+    let formData = new FormData();
+    formData.append('attachment', fileInput[0].files[0]);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    let callAjax = true;
+    let userAttachmentList = $("#attachments-list").children().first();
+    let origAttachment = userAttachmentList.find("[data-file_name='" + CSS.escape(fileInput[0].files[0].name) + "']");
+    if (origAttachment.length !== 0) {
+      callAjax = confirm("The file '" + fileInput[0].files[0].name + "' already exists; do you want to overwrite it?");
+    }
+    if (callAjax) {
+      fileInput.prop("disabled", true);
+      $.ajax({
+        url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "upload"]),
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function(data) {
+          if (!("status" in data) || data["status"] !== "success") {
+            alert("An error has occurred trying to upload the attachment: " + data["message"]);
+          } else {
+            let renderedData = Twig.twig({
+              ref: "Attachments"
+            }).render({
+                file: data["data"],
+                id: "a-up-" + uploadedAttachmentIndex,
+                is_grader_view: true,
+                can_modify: true
+            });
+            uploadedAttachmentIndex++;
+            if (origAttachment.length === 0) {
+              userAttachmentList.append(renderedData);
+            } else {
+              origAttachment.first().parent().replaceWith(renderedData);
+            }
+            if (userAttachmentList.children().length === 0) {
+              userAttachmentList.css("display", "none")
+              $("#attachments-header").css("display", "none");
+            } else {
+              userAttachmentList.css("display", "")
+              $("#attachments-header").css("display", "");
+            }
+          }
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          alert("An error has occurred trying to upload the attachment: " + errorThrown);
+          fileInput[0].value = "";
+          fileInput.prop("disabled", false);
+        }
+      });
+    } else {
+      fileInput[0].value = "";
+    }
+  }
+}
+
+function deleteAttachment(target, file_name) {
+  let confirmation = confirm("Are you sure you want to delete attachment '" + decodeURIComponent(file_name) +"'?");
+  if (confirmation) {
+    let formData = new FormData();
+    formData.append('attachment', file_name);
+    formData.append('anon_id', getAnonId());
+    formData.append('csrf_token', csrfToken);
+    $.ajax({
+      url: buildCourseUrl(["gradeable", getGradeableId(), "grading", "attachments", "delete"]),
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function(data) {
+        if (!("status" in data) || data["status"] !== "success") {
+          alert("An error has occurred trying to delete the attachment: " + data["message"]);
+        } else {
+          $(target).parent().parent().remove();
+          let userAttachmentList = $("#attachments-list").children().first();
+          if (userAttachmentList.children().length === 0) {
+            userAttachmentList.css("display", "none")
+            $("#attachments-header").css("display", "none");
+          } else {
+            userAttachmentList.css("display", "")
+            $("#attachments-header").css("display", "");
+          }
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert("An error has occurred trying to upload the attachment: " + errorThrown);
+      }
+    });
+  }
 }

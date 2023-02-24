@@ -2,18 +2,20 @@
 
 namespace app\controllers;
 
+use app\entities\course\CourseMaterial;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
 class MiscController extends AbstractController {
-
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
     /**
@@ -31,13 +33,13 @@ class MiscController extends AbstractController {
     /**
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
-    public function decodeAnonPath($path) {
+    public function decodeAnonPath($path, $g_id = null) {
         $exploded_path = explode("/", $path);
         if (count($exploded_path) < 10) {
             return $path;
         }
         $anon_id = explode("/", $path)[9];
-        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $g_id);
         if ($correct_user_id !== null) {
             $path = str_replace($anon_id, $correct_user_id, $path);
         }
@@ -56,7 +58,7 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']));
+        $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -73,7 +75,7 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        if (!Utils::startsWith($file_path, $check_path)) {
+        if (!str_starts_with($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
@@ -94,11 +96,34 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/display_file")
      */
-    public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
+    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null) {
+        $cm = null;
         //Is this per-gradeable?
-        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        if ($course_material_id === null && ($dir !== null && $path !== null)) {
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
+            if ($dir === 'course_materials') {
+                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $path]);
+            }
+        }
+        else {
+            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['id' => $course_material_id]);
+            if ($cm !== null) {
+                $path = $cm->getPath();
+                $dir = 'course_materials';
+            }
+            else {
+                $path = null;
+            }
+        }
 
-        if (!is_null($gradeable_id)) {
+        if (!is_null($gradeable_id) && !is_null($user_id)) {
             $gradeable = $this->tryGetGradeable($gradeable_id, false);
             if ($gradeable === false) {
                 return false;
@@ -120,11 +145,20 @@ class MiscController extends AbstractController {
             }
 
             if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-                $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+                if ($cm === null) {
+                    $access_failure = 'Course material not found';
+                }
+                else {
+                    $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+                }
                 if ($access_failure) {
                     $this->core->getOutput()->showError($access_failure);
                     return false;
                 }
+            }
+
+            if ($dir === "course_materials") {
+                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
             }
         }
 
@@ -132,9 +166,9 @@ class MiscController extends AbstractController {
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        if ($mime_type === "application/pdf" || (Utils::startsWith($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+        if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
+            $this->core->getOutput()->useHeader(false);
+            $this->core->getOutput()->useFooter(false);
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
@@ -143,6 +177,11 @@ class MiscController extends AbstractController {
         else {
             $contents = file_get_contents($corrected_name);
             if (!is_null($ta_grading) && $ta_grading === "true") {
+                $newlines = substr_count($contents, "\n");
+                $carriage_returns = substr_count($contents, "\r");
+                if ($newlines + $carriage_returns > 2000) {
+                    return new WebResponse(MiscView::class, 'tooLarge');
+                }
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
             }
             else {
@@ -190,9 +229,25 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/download")
      */
-    public function downloadCourseFile($dir, $path) {
+    public function downloadCourseFile($dir = null, $path = null, $course_material_id = null, $gradeable_id = null) {
         // security check
-        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path))));
+        $cm = null;
+        if ($course_material_id === null && ($dir !== null && $path !== null)) {
+            $res_path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($path)));
+            if ($res_path === false) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+            $path = $this->decodeAnonPath($res_path, $gradeable_id);
+        }
+        elseif ($course_material_id !== null) {
+            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                ->findOneBy(['id' => $course_material_id]);
+            if ($cm !== null) {
+                $dir = 'course_materials';
+                $path = $cm->getPath();
+            }
+        }
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
@@ -200,22 +255,20 @@ class MiscController extends AbstractController {
         }
 
         if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-            $access_failure = CourseMaterialsUtils::accessCourseMaterialCheck($this->core, $path);
+            if ($cm === null) {
+                $access_failure = 'Course material not found';
+            }
+            else {
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            }
             if ($access_failure) {
                 $this->core->getOutput()->showError($access_failure);
                 return false;
             }
         }
 
-        if ($dir == 'submissions') {
-            //cannot download scanned images for bulk uploads
-            if (
-                strpos(basename($path), "upload_page_") !== false
-                && FileUtils::getContentType($path) !== "application/pdf"
-            ) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                return false;
-            }
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         $filename = pathinfo($path, PATHINFO_BASENAME);
@@ -228,13 +281,58 @@ class MiscController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/downloadTestCaseResult")
+     */
+    public function downloadTestCaseResult(string $gradeable_id, int $version, int $test_case, string $file_name, string $user_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($user_id !== $this->core->getUser()->getId()) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+                $this->core->addErrorMessage("You do not have permission to download this file!");
+                return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+            }
+        }
+        $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
+        $file_path = null;
+        $testcase = $autograde->getTestcases()[$test_case - 1];
+        if (!$testcase->getTestcase()->isHidden() && $testcase->hasAutochecks()) {
+            foreach ($testcase->getAutochecks() as $autocheck) {
+                $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
+                $actual_file_name = array_pop($path);
+                if ($file_name === $actual_file_name) {
+                    $file_path = $autocheck->getDiffViewer()->getActualFilename();
+                    break;
+                }
+            }
+        }
+        if ($file_path !== null) {
+            if (file_exists($file_path)) {
+                $this->core->getOutput()->useHeader(false);
+                $this->core->getOutput()->useFooter(false);
+                header('Content-Type: application/octet-stream');
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"{$file_name}\"");
+                readfile($file_path);
+            }
+            else {
+                $this->core->addErrorMessage("That file does not seem to exist");
+                return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+            }
+        }
+        else {
+            $this->core->addErrorMessage("That file does not seem to exist");
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+        }
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
 
         $anon_id = $user_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -328,17 +426,7 @@ class MiscController extends AbstractController {
                     $file_path = $file->getRealPath();
                     $relative_path = substr($file_path, strlen($path) + 1);
                     if ($this->core->getAccess()->canI("path.read", ["dir" => $folder_name, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
-                        // For scanned exams, the directories get polluted with the images of the split apart
-                        // pages, so we selectively only grab the PDFs there. For all other types,
-                        // we can grab all files regardless of type.
-                        if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($file_path) === 'application/pdf') {
-                                $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
-                            }
-                        }
-                        else {
-                            $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
-                        }
+                        $zip_stream->addFileFromPath(FileUtils::joinPaths($folder_name, $relative_path), $file_path);
                     }
                 }
             }
@@ -547,6 +635,7 @@ class MiscController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";

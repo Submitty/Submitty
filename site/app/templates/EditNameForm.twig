@@ -12,20 +12,20 @@
         <input id="user-preferred-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Preferred Name</h2>
         <div class="edit_user_row">
-            <label for="user-firstname-change">Preferred First / Given Name:&emsp;</label>
+            <label for="user-givenname-change">Preferred First / Given Name:&emsp;</label>
             <input type="text"
-                   name="user_firstname_change"
-                   value="{{ user_first }}"
-                   id="user-firstname-change"
-                   data-current-name="{{ user_first }}"/>
+                   name="user_givenname_change"
+                   value="{{ user_given }}"
+                   id="user-givenname-change"
+                   data-current-name="{{ user_given }}"/>
         </div>
         <div class="edit_user_row">
-            <label for="user-lastname-change">Preferred Last / Family Name:&emsp;</label>
+            <label for="user-familyname-change">Preferred Last / Family Name:&emsp;</label>
             <input type="text"
-                   name="user_lastname_change"
-                   value="{{ user_last }}"
-                   id="user-lastname-change"
-                   data-current-name="{{ user_last }}"/>
+                   name="user_familyname_change"
+                   value="{{ user_family }}"
+                   id="user-familyname-change"
+                   data-current-name="{{ user_family }}"/>
         </div>
     </div>
 {% endblock %}

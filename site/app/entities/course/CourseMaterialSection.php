@@ -2,7 +2,6 @@
 
 namespace app\entities\course;
 
-use app\libraries\Core;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

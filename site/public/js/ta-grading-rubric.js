@@ -22,7 +22,7 @@ OLD_MARK_LIST = {};
 OLD_GRADED_COMPONENT_LIST = {};
 
 /**
- * A number ot represent the id of no component
+ * A number to represent the id of no component
  * @type {int}
  */
 NO_COMPONENT_ID = -1;
@@ -1660,7 +1660,7 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
     }
     search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        search_params.set('who_id', id);
+        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
         submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));
@@ -1792,7 +1792,7 @@ function onAddComponent(peer) {
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
-            return closeAllComponents(true);
+            return closeAllComponents(true, true);
         })
         .then(function () {
           return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
@@ -1841,6 +1841,7 @@ function importComponentsFromFile() {
             }
         },
         error: function (e) {
+            console.log(e);
             alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                 "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
         }
@@ -2253,7 +2254,7 @@ function setPdfPageAssignment(page) {
         page = 1;
     }
 
-    return closeAllComponents(true)
+    return closeAllComponents(true, true)
         .then(function () {
             return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
@@ -2499,10 +2500,11 @@ function toggleComponent(component_id, saveChanges, edit_mode = false) {
 
 function open_overall_comment_tab(user) {
     const textarea = $(`#overall-comment-${user}`);
+    const comment_root = textarea.closest('.general-comment-entry');
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    textarea.parent().show();
+    comment_root.show();
     $('#overall-comment-tab-' + user ).addClass('active-btn');
 
     //if the tab is for the main user of the page
@@ -2513,15 +2515,35 @@ function open_overall_comment_tab(user) {
     } else {
         textarea.show();
     }
-}
 
-function previewOverallCommentMarkdown(user){
-    const markdown_area = $(`#overall-comment-${user}`);
-    const preview_element = $(`#overall-comment-markdown-preview-${user}`);
-    const preview_button = $(this);
-    const markdown_content = markdown_area.val();
+    let attachmentsListUser = $(`#attachments-list-${user}`);
+    if (attachmentsListUser.length !== 0) {
+        let attachmentsList = $("#attachments-list");
+        $("#attachments-list-" + attachmentsList.attr("data-active-user")).css("display", "none");
+        
+        let isUser = false;
+        if (attachmentsList.attr("data-user") === user) {
+            $("#attachment-upload-form").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+            isUser = true;
+        } else {
+            $("#attachment-upload-form").css("display", "none");
+        }
+        if (attachmentsListUser.children().length === 0) {
+            attachmentsListUser.css("display", "none")
+            $("#attachments-header").css("display", "none");
+            if (!isUser) {
+                $("#overall-comments-attachments").css("display", "none");
+            }
+        } else {
+            attachmentsListUser.css("display", "")
+            $("#attachments-header").css("display", "");
+            $("#overall-comments-attachments").css("display", "");
+        }
+        
+        attachmentsList.attr("data-active-user", user);
+    }
 
-    previewMarkdown(markdown_area, preview_element, preview_button, { content: markdown_content });
 }
 
 /**
@@ -2635,22 +2657,57 @@ function openComponentGrading(component_id) {
 
 /**
  * Scrolls the submission panel to the page number specified by the component
+ * Will open the associated image or PDF depending on if the last opened file was a bulk upload image.
  * TODO: This is currently very clunky, and only works with test files (aka upload.pdf).
  * @param {int} page_num
  * @return {void}
  */
 function scrollToPage(page_num){
     let files = $(".openable-element-submissions");
+    let activeView = $("#file-view").is(":visible");
+    let lastLoadedFile = activeView ? $("#grading_file_name").text().trim() : localStorage.getItem("ta-grading-files-full-view-last-opened") ?? "upload.pdf";
+    if (lastLoadedFile.charAt(0) === ".") {
+        lastLoadedFile = lastLoadedFile.substring(1);
+    }
+    if (lastLoadedFile.startsWith("upload_page_")) {
+        let lastLoadedFilePageNum = parseInt(lastLoadedFile.split("_")[2].split(".")[0]);
+        if (activeView && page_num === lastLoadedFilePageNum) {
+            return;
+        }
+        let maxPage = -1;
+        let maxPageName = null;
+        let maxPageLoc = null;
+        for (let i = 0; i < files.length; i++) {
+            let filename = files[i].innerText.trim();
+            let filenameNoPeriod = filename.charAt(0) === "." ? filename.substring(1) : filename;
+            if (filenameNoPeriod.startsWith("upload_page_")) {
+                let currPageNum = parseInt(filename.split("_")[2].split(".")[0]);
+                if (page_num === currPageNum) {
+                    viewFileFullPanel(filename, files[i].getAttribute("file-url"));
+                    return;
+                } else if (currPageNum > maxPage) {
+                    maxPage = currPageNum;
+                    maxPageName = filename;
+                    maxPageLoc = files[i].getAttribute("file-url");
+                }
+            }
+        }
+        if (maxPage !== -1) {
+            viewFileFullPanel(maxPageName, maxPageLoc);
+            return;
+        }
+    }
     for(let i = 0; i < files.length; i++){
-        if(files[i].innerText.trim() == "upload.pdf"){
-            let page = $("#pageContainer" + page_num);
-            if($("#file-view").is(":visible")){
+        if(files[i].innerText.trim() === "upload.pdf"){
+            if(activeView){
+                page_num = Math.min($("#viewer > .page").length, page_num);
+                let page = $("#pageContainer" + page_num);
                 if(page.length) {
-                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $("#file-view > .sticky-file-info").first().height(), 0));
                 }
             }
             else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
+                viewFileFullPanel("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }

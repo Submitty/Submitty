@@ -1,8 +1,7 @@
 """SQLAlchemy Tables module."""
 
 from pathlib import Path
-from sqlalchemy import Column, create_engine
-from sqlalchemy.engine import reflection
+from sqlalchemy import Column, create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
 from sqlalchemy.orm import sessionmaker
@@ -28,7 +27,7 @@ class Database:
 
         self.engine = create_engine(connection_string)
         self.engine.connect()
-        self.inspector = reflection.Inspector.from_engine(self.engine)
+        self.inspector = inspect(self.engine)
         self.Session = sessionmaker()
         self.Session.configure(bind=self.engine)
         self.session = self.Session()
@@ -42,7 +41,7 @@ class Database:
         """
         Get connection string for SQLAlchemy.
 
-        :param params: Dictionary containg database connection details
+        :param params: Dictionary containing database connection details
         :type params: dict
         :return: The connection string
         :rtype: str
@@ -87,7 +86,7 @@ class Database:
         self.session.commit()
 
     def close(self):
-        """Close the session and DB connnection."""
+        """Close the session and DB connection."""
         self.session.close()
         self.engine.dispose()
         self.open = False
@@ -99,7 +98,11 @@ class Database:
         :param table_name: Name of table to check for
         :type table_name: str
         """
-        return self.engine.has_table(table_name)
+        try:
+            return self.inspector.has_table(table_name)
+        except AttributeError:  # pragma: no cover
+            # To support sqlalchemy < 1.4
+            return self.engine.has_table(table_name)
 
     def table_has_column(self, table, search_column):
         """

@@ -2,13 +2,9 @@
 
 namespace app\controllers;
 
-use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\DateUtils;
-use app\exceptions\CurlException;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,11 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class DockerInterfaceController
  *
- * Works with Docker to provide a user inteface
+ * Works with Docker to provide a user interface
  *
  */
 class DockerInterfaceController extends AbstractController {
-
     /**
      * @Route("/admin/docker", methods={"GET"})
      * @Route("/api/docker", methods={"GET"})
@@ -35,26 +30,7 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        try {
-            $response = $this->core->curlRequest(
-                FileUtils::joinPaths($this->core->getConfig()->getCgiUrl(), "docker_ui.cgi")
-            );
-        }
-        catch (CurlException $exc) {
-            $msg = "Failed to get response from CGI process, please try again";
-            return new MultiResponse(
-                JsonResponse::getFailResponse($msg),
-                new WebResponse("Error", "errorPage", $msg)
-            );
-        }
-        $json = json_decode($response, true);
-
-        if ($json['success'] === false) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse($json['error']),
-                new WebResponse("Error", "errorPage", $json['error'])
-            );
-        }
+        $json = [];
 
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
@@ -115,7 +91,7 @@ class DockerInterfaceController extends AbstractController {
 
         $image_arr = explode(":", $_POST['image']);
         // ping the dockerhub API to check if docker exists
-        $url = "https://registry.hub.docker.com/v1/repositories/" . $image_arr[0] . "/tags";
+        $url = "https://registry.hub.docker.com/v2/repositories/" . $image_arr[0] . "/tags";
         $tag = $image_arr[1];
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -126,11 +102,13 @@ class DockerInterfaceController extends AbstractController {
         if (curl_errno($ch) || $http_code !== 200) {
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
-        $return_json = json_decode($return_str);
+        $return_json = (array) json_decode($return_str);
+        if (!isset($return_json['results'])) {
+            return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
+        }
         $found = false;
-
-        foreach ($return_json as $image) {
-            if ($image->name == $tag) {
+        foreach ($return_json['results'] as $result) {
+            if ($result->name === $tag) {
                 $found = true;
                 break;
             }
@@ -180,6 +158,10 @@ class DockerInterfaceController extends AbstractController {
      * @return JsonResponse
      */
     public function updateDockerCall() {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
         if (!$this->updateDocker()) {
             return JsonResponse::getErrorResponse("Failed to write to file");
         }

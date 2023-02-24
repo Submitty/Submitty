@@ -43,6 +43,11 @@
         border: none;
     }
 
+    .mobile-table tr {
+        margin-top: 1em;
+        background: none !important;
+    }
+
     /* Hide table headers */
     .mobile-table thead tr {
         position: absolute;
@@ -53,11 +58,6 @@
         overflow: hidden;
         clip: rect(0, 0, 0, 0);
         border: 0;
-    }
-
-    .mobile-table tr {
-        margin-top: 1em;
-        background: none !important;
     }
 
     .mobile-table td {

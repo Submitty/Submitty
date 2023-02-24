@@ -47,7 +47,7 @@
             </div>
             <div class="option-input col-md-6">
                 <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea><br>
-                <span class="information_type" style="overflow-wrap: anywhere">My Prior Course Codes:<br>
+                <span class="information-type" style="overflow-wrap: anywhere">My Prior Course Codes:<br>
                                   {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.</span>
             </div>
         </div>
@@ -95,7 +95,7 @@
                 <select name="group_name" id="group_name" class="auto_save" onchange="onGroupChange()">
                     <option value="">Please select an option</option>
                 </select><br>
-                <span class="information_type" id="group_users" style="display: none; overflow-wrap: anywhere">Users in this group:</span>
+                <span class="information-type" id="group_users" style="display: none; overflow-wrap: anywhere">Users in this group:</span>
             </div>
         </div>
 

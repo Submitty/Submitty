@@ -8,6 +8,15 @@
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% set data_non_item_ref = 0 %}
+    {% if is_timed and allowed_minutes > 25 %}
+        <div class="notebook-submit-popup">
+            Submit often and save your progress !<br>
+            <hr>
+            <button class="submit-gradeable btn btn-success popup-submit">Submit</button>
+            <button class="btn btn-primary" onclick="closePopupSubmit()">Close</button>
+            <button class="btn btn-danger" onclick="dontShowPopupSubmit()">Don't Ask Me Again</button>
+        </div>
+    {% endif %}
     {% for cell in notebook %}
         <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
@@ -45,10 +54,10 @@
             {% elseif cell.type == "short_answer" %}
 
 
-                {% if cell.label %}
+                {% if cell.label is defined %}
                     {% set content_label = cell.label %}
                 {% else %}
-                    {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                    {% set write_your = cell.programming_language is not defined or cell.programming_language == '' ? 'answer' : cell.programming_language %}
                     {% set content_label = "Write your " ~ write_your ~ " below:" %}
                 {% endif %}
 
@@ -61,6 +70,7 @@
                 <div
                     id="codebox_{{ num_codeboxes }}"
                     name="codebox_{{ num_codeboxes }}"
+                    data-filename="{{ cell.filename }}"
                     autocapitalization="off"
                     spellcheck="false"
                     data-initial_value="{{ cell.initial_value }}"
@@ -130,6 +140,7 @@
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"
                           class="mc"
+                          data-filename="{{ cell.filename }}"
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend>
@@ -160,7 +171,7 @@
                         {% endfor %}
                     {% else %}
                         <legend class="markdown">
-                            {% if cell.label %}
+                            {% if cell.label is defined %}
                                 {% include "misc/Markdown.twig" with {
                                     "content" : cell.label
                                 } only %}
@@ -212,7 +223,7 @@
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
 
-                {% if is_grader_view | default(null) %}
+                {% if is_grader_view %}
                     {% if old_files is empty %}
                         <p>No files were submitted</p>
                     {% endif %}
@@ -262,6 +273,52 @@
 </div>
 
 <script>
+    //for displaying popup submit button
+    //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
+    let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
+    let loadTime = 0;
+    let showPopup = false;
+
+    function notebookPopupSubmitKey(){
+        return `${gradeable_id}-${USER_ID}`;
+    }
+
+    function initializePopupTimer(){
+        if (!localStorage.getItem(notebookPopupSubmitKey())) {
+            localStorage.setItem(notebookPopupSubmitKey(), 'yes');
+        }
+        loadTime = curTime;
+        count();
+    }
+
+    function count(){
+        //clear local storage if gradeable is past due
+        if (user_deadline < curTime ) {
+            localStorage.removeItem(notebookPopupSubmitKey());
+        }
+        
+        const time_taken = Math.floor((curTime - loadTime)/1000);
+        const minutes_taken = Math.floor(time_taken / 60);
+        if (minutes_taken >= interval ) {
+            if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && showPopup) {
+                $(".notebook-submit-popup").show();
+            }
+        }
+        setTimeout(count,2000);
+    }
+
+    function closePopupSubmit() {
+        $(".notebook-submit-popup").hide();
+        //restart timer
+        loadTime = curTime;
+    }
+
+    function dontShowPopupSubmit() {
+        closePopupSubmit();
+        localStorage.setItem(notebookPopupSubmitKey(), 'no');
+    }
+
+
     function populatePreviousFiles(part){
         let prev_files = {
             {% for file in old_files %}
@@ -284,7 +341,7 @@
 
     $(function(){
 
-        {% if is_grader_view | default(null) %}
+        {% if is_grader_view %}
             //disable inputs if we're viewing from the grader's view
             let nb = document.getElementsByClassName("notebook")[0];
             let tgts = nb.querySelectorAll('input');
@@ -352,7 +409,7 @@
              role="text"
              aria-label="Press enter to upload your part {{ index }} file"
         >
-            <h2 class="label" id="label{{index}}">
+            <h2 class="label" id="label{{index}}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
                 Drag your {{ label }} file(s) here or click to open file browser
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
@@ -362,21 +419,29 @@
                         disabled="disabled"
                     {% endif %}
             />
-            <table class="file-upload-table" id="file-upload-table-{{index}}">
-            <tr style="background:transparent; display:none;">
-                <th>File Name:</th>
-                <th>Size:</th>
-            </tr>
-            </table>
-            <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+            {% if not viewing_inactive_version %}
+                <table class="file-upload-table" id="file-upload-table-{{index}}">
+                <tr style="background:transparent; display:none;">
+                    <th>File Name:</th>
+                    <th>Size:</th>
+                </tr>
+                </table>
+            {% endif %}
+            {% if viewing_inactive_version %}
+                <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
+            {% else %}
+                <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+            {% endif %}
         </div>
     </div>
 
     <script>
         $(function(){
             //initialize the dropzone just created
-            initMaxNoFiles({{max_file_uploads}});
-            initializeDropZone("upload{{ index }}");
+            {% if not viewing_inactive_version %}
+                initMaxNoFiles({{max_file_uploads}});
+                initializeDropZone("upload{{ index }}");
+            {% endif %}
         });
     </script>
 {% endmacro %}

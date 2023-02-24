@@ -13,7 +13,7 @@ class Config:
     Class to hold the config details for Submitty to use within the migrator.
 
     It dynamically loads the JSON files in the config directory into a dictionary
-    with the maching name accessible at Config.<name> (e.g. Config.database).
+    with the matching name accessible at Config.<name> (e.g. Config.database).
     """
 
     def __init__(self, config_path):
@@ -31,6 +31,11 @@ class Config:
         self.submitty = self._get_data('submitty')
         self.submitty_users = self._get_data('submitty_users')
 
+        self.authentication = self._get_data('authentication')
+
     def _get_data(self, filename):
-        with Path(self.config_path, filename + '.json').open('r') as open_file:
+        path = self.config_path / (filename + '.json')
+        if not path.exists():
+            return {}
+        with path.open('r') as open_file:
             return json.load(open_file, object_pairs_hook=OrderedDict)
