@@ -227,7 +227,7 @@ class UsersController extends AbstractController {
                 'user_familyname' => $user->getLegalFamilyName(),
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
-                'user_pronouns' => $user->getPronouns() ?? '',
+                'user_pronouns' => $user->getUserPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),

@@ -24,7 +24,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
- * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method string getUserPronouns() Returns the pronouns of the loaded user
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -185,7 +185,7 @@ class User extends AbstractModel {
             $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
-        $this->setPronouns($details['user_pronouns']);
+        $this->setUserPronouns($details['user_pronouns']);
 
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
@@ -422,7 +422,7 @@ class User extends AbstractModel {
         $this->notification_settings[$key] = $value;
     }
 
-    public function setPronouns($pronouns) {
+    public function setUserPronouns($pronouns) {
         $this->user_pronouns = $pronouns;
     }
 
