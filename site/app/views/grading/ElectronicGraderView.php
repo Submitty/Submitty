@@ -1193,7 +1193,7 @@ HTML;
         }
 
         // TODO: this is duplicated in Homework View
-        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) {
             return [
                 'points' => $version->getNonHiddenPoints(),
             ];
