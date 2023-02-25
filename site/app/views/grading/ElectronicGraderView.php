@@ -1171,7 +1171,7 @@ HTML;
 
     /**
      * Render the Autograding Testcases panel
-     * @param AutoGradedVersion|null $version_instance
+     * @param AutoGradedVersion? $version_instance
      * @param bool $show_hidden_cases
      * @param GradedGradeable $graded_gradeable
      * @return string
@@ -1195,18 +1195,11 @@ HTML;
         $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
-                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
 
         //sort array by version number after values have been mapped
         ksort($version_data);
-        if ($version_instance === null) {
-            $display_version = 0;
-        }
-        else {
-            $display_version = $version_instance->getVersion();
-        }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
@@ -1217,7 +1210,6 @@ HTML;
             "is_vcs" => $gradeable->isVcs(),
             "gradeable_id" => $gradeable->getId(),
             "user_id" => $id,
-            "display_version" => $display_version,
             "active_version" => $active_version,
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
