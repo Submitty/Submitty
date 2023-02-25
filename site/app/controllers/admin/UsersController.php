@@ -355,7 +355,8 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
+            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
@@ -365,6 +366,7 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
@@ -625,6 +627,16 @@ class UsersController extends AbstractController {
                     registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
+
+            //Gets all the ids of the excluded sections
+            $excluded_registration_sections = $_POST["excluded_registration_sections"] ?? [];
+            $excluded_users = $this->core->getQueries()->getUsersByRegistrationSections($excluded_registration_sections);
+            $excluded_user_ids = array_map(function (User $user) {
+                return $user->getId();
+            }, $excluded_users);
+
+            $unassigned_user_ids = array_values(array_diff($unassigned_user_ids, $excluded_user_ids));
+
             // 'fewest' rotating section setup option can only use random sort
             shuffle($unassigned_user_ids);
             // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
@@ -636,7 +648,7 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                return $expected_size - $curr_size['count'];
+                return $curr_size === null ? $expected_size : $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array

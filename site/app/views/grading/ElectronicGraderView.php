@@ -481,7 +481,7 @@ HTML;
             // See also note in ElectronicGradeController.php
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1 && $peer === false) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
-                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
+                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer", "sort_type" => "first"];
             }
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -523,7 +523,7 @@ HTML;
             // NOTE/REDESIGN FIXME: Same note as above.
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
-                $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
+                $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding", "sort_type" => "first"];
             }
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -873,6 +873,7 @@ HTML;
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
