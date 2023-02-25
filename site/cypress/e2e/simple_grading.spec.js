@@ -12,11 +12,13 @@ describe('Test cases revolving around simple grading lab', () => {
                 cy.get('#cell-1-0-0').click();
                 if (initialValue === '0') {
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
-                    } else if (initialValue === '0.5') {
+                }
+                else if (initialValue === '0.5') {
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0');
-                    } else if (initialValue === '1') {
+                } 
+                else if (initialValue === '1') {
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0.5');
-                    }
+                }
             });
             // Check Settings Tab
             cy.get('#settings-btn').click({force: true});
@@ -36,10 +38,12 @@ describe('Test cases revolving around simple grading lab', () => {
                 if (initialValue === '0') {
                     cy.get('#checkpoint-undo').click();
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0');
-                    } else if (initialValue === '0.5') {
+                } 
+                else if (initialValue === '0.5') {
                         cy.get('#checkpoint-undo').click();
                         cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0.5');
-                    } else if (initialValue === '1') {
+                } 
+                else if (initialValue === '1') {
                         cy.get('#checkpoint-undo').click();
                         cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
                     }
@@ -50,10 +54,12 @@ describe('Test cases revolving around simple grading lab', () => {
                 if (initialValue === '0') {
                     cy.get('#checkpoint-redo').click();
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0');
-                    } else if (initialValue === '0.5') {
+                } 
+                else if (initialValue === '0.5') {
                         cy.get('#checkpoint-redo').click();
                         cy.get('#cell-1-0-0').should('have.attr', 'data-score', '0.5');
-                    } else if (initialValue === '1') {
+                } 
+                else if (initialValue === '1') {
                         cy.get('#checkpoint-redo').click();
                         cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
                     }
