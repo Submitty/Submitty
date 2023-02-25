@@ -678,10 +678,11 @@ td > a.active-sort {
     margin-left: 10px;
     margin-top: 10px;
 }
-
+/*
 .box >h4 >code{
     word-wrap: break-word;
 }
+*/
 
 .box-block {
     vertical-align: top;
