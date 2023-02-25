@@ -1172,14 +1172,14 @@ HTML;
 
     /**
      * Render the Autograding Testcases panel
-     * @param AutoGradedVersion? $version_instance
+     * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden_cases
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
 
 
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
+    public function renderAutogradingPanel(?AutoGradedVersion $version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
