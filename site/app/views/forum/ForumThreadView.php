@@ -105,7 +105,7 @@ class ForumThreadView extends AbstractView {
                 $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
 
                 if ($is_instructor_full_access[$post["p_author"]]) {
-                    $visible_username = $first_name . " " . $last_name;
+                    $visible_username = $given_name . " " . $family_name;
                 }
 
                 if ($post["anonymous"]) {
@@ -998,7 +998,7 @@ class ForumThreadView extends AbstractView {
         }
 
         if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
-            $visible_username = $first_name . " " . $last_name;
+            $visible_username = $given_name . " " . $family_name;
         }
 
         if ($post["anonymous"]) {
