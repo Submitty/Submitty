@@ -655,7 +655,7 @@ td > a.active-sort {
 }
 
 .box-title > h4 {
-    margin-left: 20px;
+    margin-left: 90px;
 }
 
 .box-title-total > h4 {
@@ -675,7 +675,7 @@ td > a.active-sort {
 
 .box > h4 {
     margin-bottom: 10px;
-    margin-left: 90px;
+    margin-left: 10px;
     margin-top: 10px;
 }
 
