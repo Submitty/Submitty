@@ -40,7 +40,6 @@ class UserProfileController extends AbstractController {
                 ['UserProfile'],
                 'showUserProfile',
                 $this->core->getUser(),
-                $this->core->getConfig()->getUsernameChangeText(),
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
                 $this->core->getCsrfToken()
             )
