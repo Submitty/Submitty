@@ -1,6 +1,27 @@
 #!/usr/bin/env python3
 '''
 DOCUMENTATION
+
+To use this script, first do the following:
+1. Create a new course, for example "test_course"
+2. Add students to the course, possibly with CSV upload. This script will not
+create a submission for a student who is not in the course.
+3. Create and configure a gradeable, for example "test_gradeable"
+4. Make one submission to this gradeable. This is to create the submissions
+directory because the script copies permissions from it.
+5. Run the command described below and answer "y" when given the prompt to add
+submissions to the grading queue.
+6. Wait for regrading to complete.
+
+Specify command line arguments for semester, course, and gradeable, followed by
+a directory containing the submisison data. For example:
+recreate_submissions.py s23 test_course test_gradeable /root/submissions
+The --active-only or --verbose options can be included
+--active-only submits only the active version (determined from the
+user_assignment_settings.json file if it exists, otherwise the highest version
+number in the student's directory)
+--verbose shows extra output displayed for debugging purposes, such as the SQL
+queries run on the database
 '''
 
 '''
