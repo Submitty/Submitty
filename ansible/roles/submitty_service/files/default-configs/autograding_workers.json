@@ -1,0 +1,11 @@
+{
+    "primary": {
+        "capabilities": [
+            "default"
+        ],
+        "address": "localhost",
+        "username": "",
+        "num_autograding_workers": 5,
+        "enabled": true
+    }
+}
