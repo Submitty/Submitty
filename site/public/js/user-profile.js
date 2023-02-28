@@ -64,7 +64,7 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
-function updateUserPronouns () {
+function updateUserPronouns() {
     const pronouns = $('#user-pronouns-change');
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
