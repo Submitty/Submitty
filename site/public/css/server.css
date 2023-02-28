@@ -680,7 +680,7 @@ td > a.active-sort {
 }
 
 
-.box > h4 >code{
+h4 >code{
     word-wrap: break-word;
     color: orange;
 }
