@@ -92,15 +92,25 @@
     {% endif %}
 </div>
 
+<script>
+function confirmBypass(str, redirect){
+    confirmed = confirm(str);
+    if (confirmed)
+        location.href = redirect;
+}
+</script>
+
 {% macro renderButton(button, date_format) %}
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
         <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}" tabindex="0"
-            {% if (button.isDisabled()) %}
-                {% if (button.getBypass()) %}
+            {% if button.isDisabled() %}
+                {% if button.getBypass() %}
                     disabled
-                    onclick="alert('This gradeable requires {{ button.getPrerequisite()}}, [PLACEHOLDER TEXT HERE]' )"
+                    {% set str1 = 'This gradeable requires ' %}
+                    {% set str2 = ' [PLACEHOLDER TEXT HERE]'%}
+                    onclick="confirmBypass('{{ str1 ~ button.getPrerequisite() ~ str2 }}', '{{ button.getHref() }}' );"
                     title='Please complete {{ button.getPrerequisite()}} first'
                 {% else %}
                     disabled

@@ -97,9 +97,7 @@ class Button extends AbstractModel {
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
         $this->prefix = $details["prefix"] ?? "fa";
-
         $this->bypass = $details["bypass"] ?? false;
-        
     }
 
     /**

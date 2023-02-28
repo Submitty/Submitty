@@ -2358,7 +2358,7 @@ class Gradeable extends AbstractModel {
      *
      * @param string $user_id
      * @return int
-     * 
+     *
      * 0 = False, 1 = True, 2 = True but allows for change
      */
     public function isLocked(string $user_id): int {
@@ -2383,7 +2383,6 @@ class Gradeable extends AbstractModel {
         if ($user->accessGrading()) {
             return 2;
         }
-        
         return 1;
     }
     /**
