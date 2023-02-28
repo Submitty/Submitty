@@ -683,6 +683,7 @@ td > a.active-sort {
 h4 >code{
     word-wrap: break-word;
     color: orange;
+    padding-left: 1.5em;
 }
 
 .box-block {
