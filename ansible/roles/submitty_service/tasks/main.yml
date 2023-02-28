@@ -12,57 +12,42 @@
     force: yes
     update: yes
 
-# TODO find the correct path here
-#done? dont remember context
 - name: Set up Apache Submitty configuration
   ansible.builtin.copy:
     src: /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/apache/submitty.conf
     dest: /etc/apache2/sites-available/submitty.conf
     remote_src: yes
 
-- name: Copy over submitty.conf
-  ansible.builtin.copy:
-    src: "{{ lookup('file', 'submitty.conf') }}"
-    dest: /usr/local/submitty/submitty.conf
-
+# TODO change install process
 - name: Run Submitty install script.
-  ansible.builtin.shell: 
-    cmd: bash -p ./.setup/install_system.sh -c /usr/local/submitty/submitty.conf > /usr/local/submitty/install.log 2>&1
+  ansible.builtin.shell: |
+    echo "{{ submitty_dbhost }}
+      {{ submitty_port }}
+      {{ submitty_dbuser }}
+      {{ submitty_dbuser_password }}
+      {{ submitty_course_dbuser }}
+      {{ submitty_course_dbuser_password}}
+      {{ submitty_timezone }}
+      {{ submitty_submission_url }}
+      {{ submitty_vcs_url }}
+      {{ submitty_institution_name }}
+      {{ submitty_sysadmin_email }}
+      {{ submitty_help_url }}
+      {{ submitty_authentication_method }}
+      {{ submitty_admin_user }}
+      {{ submitty_email_notification_option }}
+      {{ submitty_email_user }}
+      {{ submitty_email_password }}
+      {{ submitty_email_sender }}
+      {{ submitty_email_reply }}
+      {{ submitty_email_server }}
+      {{ submitty_email_server_port }}
+      {{ submitty_email_internal_format }}
+      " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+  args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
   become: yes
   become_user: root
-
-#- name: Run Submitty install script.
-#  ansible.builtin.shell: |
-#    echo "localhost
-#      5432
-#      submitty_dbuser
-#      #password: 
-#      submitty_course_dbuser
-#      #password: 
-#      America/Los_Angeles
-#      "https://{{ submitty_url }}"
-#      #git link
-#      #organization
-#      #host?
-#      "{{ submitty_email }}"
-#      #host?
-#      1
-#      admin
-#      #password:
-#      y
-#      "{{ submitty_email }}"
-#      #password:
-#      "{{ submitty_email }}"
-#      #do_not_reply email
-#      #mail server
-#      25
-#      #host?
-#      " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
-#  args:
-#    chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
-#  become: yes
-#  become_user: root
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
