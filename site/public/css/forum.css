@@ -695,6 +695,7 @@
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: var(--deleted-discussion-post-grey);
+    color: var(--deleted-text-black) !important;
 }
 
 .deleted-unviewed {
