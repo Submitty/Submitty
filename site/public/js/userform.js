@@ -193,8 +193,6 @@ function checkValidEntries() {
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]{0,30}$/;
             setRedOrTransparent(input, valid_expression);
             break;
-        case "user_pronouns":
-            break;
         case "user_email":
         case "user_email_secondary":
             if (input.val() == '') {
@@ -352,7 +350,6 @@ function isUserFormEdited() {
   return (
     $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id'] ||
     $('[name="user_givenname"]', form).val() !== user['user_givenname'] ||
-    $('[name="user_pronouns"]', form).val() !== user['user_pronouns'] ||
     $('[name="user_familyname"]', form).val() !== user['user_familyname'] ||
     $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname'] ||
     $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname'] ||
