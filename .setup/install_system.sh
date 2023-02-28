@@ -847,23 +847,5 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 
-echo "
-#####################################################################
-
-                     INSTALLATION SUCCESS!
-
-                        .GGQGGGSlu
-                      .GGGGGGGGGGGS
-                 :llUGGGGGGGGGGGGGGGG
-                 'GGGGGGGGGGGGGGGGGGb        .
-                    %GGGGGGGGGGGGGGG~   ..GSGGG
-                       GGGGGGGGGGGGGGSGGGGGGGGGG[
-                     ;GGGGGGGGGGGGp\ \ \GGGGGGGGL
-                    !GGGGGGGGGGGGGGS\ \ \GGGGGG
-                    GGGGGGGGGGGGGGGGG\ \ \9GGGG
-                    %GGGGGGGGGGGGGGGS/ / /.GGG
-                     %GGGGGGGGGGGGGS/ / /GGG
-                      '%NNNNNNNNNNNNNNNNNN
-#####################################################################
-"
+echo "Done."
 exit 0
