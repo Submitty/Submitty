@@ -679,7 +679,7 @@ td > a.active-sort {
     margin-top: 10px;
 }
 
-.box >h4 >code{
+.box >code{
     word-wrap: break-word;
     background: blue;
 }
