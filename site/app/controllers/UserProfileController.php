@@ -106,25 +106,20 @@ class UserProfileController extends AbstractController {
      */
     public function changePronouns() {
         $user = $this->core->getUser();
-        if (!empty($_POST['pronouns'])) {
-            $newPronouns = trim($_POST['pronouns']);
+        $newPronouns = trim($_POST['pronouns']);
 
-            //validPronouns() checks for valid option
-            if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
-                $user->setPronouns($newPronouns);
-                $user->setUserUpdated(true);
-                $this->core->getQueries()->updateUser($user);
-                return JsonResponse::getSuccessResponse([
-                    'message' => "Pronouns updated successfully",
-                    'pronouns' => $newPronouns
-                ]);
-            }
-            else {
-                return JsonResponse::getErrorResponse("Pronouns is not valid");
-            }
+        //validPronouns() checks for valid option
+        if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+            $user->setPronouns($newPronouns);
+            $user->setUserUpdated(true);
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => "Pronouns updated successfully",
+                'pronouns' => $newPronouns
+            ]);
         }
         else {
-            return JsonResponse::getErrorResponse('Pronouns cannot be empty!');
+            return JsonResponse::getErrorResponse("Pronouns is not valid");
         }
     }
 
