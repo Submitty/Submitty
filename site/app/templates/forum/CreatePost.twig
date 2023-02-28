@@ -109,6 +109,21 @@
 
         <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
 
+        {# Checks whether the page is on TA grading or the Discussion forum and opens attachments based off that#}
+        <script>
+            function openAttachments() {
+                var pathArray = window.location.pathname.split("/");
+                if ( pathArray.length >= 7) { 
+                      var grade = pathArray[7];
+                     if ( grade == 'grade') {
+                        document.getElementById("{{ post_attachment.params.button_id }}").click();
+
+                     }
+                }
+            }
+            window.onload=openAttachments();
+        </script>
+
     {% endif %}
 
     {% set offset = offset + 30 %}
