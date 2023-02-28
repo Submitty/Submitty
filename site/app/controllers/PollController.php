@@ -164,7 +164,7 @@ class PollController extends AbstractController {
     public function addNewPoll(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
-        $fields = ['name', 'question', 'question_type', 'release_date'];
+        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram', 'release_answer'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
                 $this->core->addErrorMessage("Poll must fill out all fields");
@@ -178,6 +178,16 @@ class PollController extends AbstractController {
         }
         if (!in_array($_POST["question_type"], PollUtils::getPollTypes())) {
             $this->core->addErrorMessage("Invalid poll question type");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
+                    $this->core->addErrorMessage("Invalid student histogram release setting");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        if (!in_array($_POST["release_answer"], PollUtils::getReleaseAnswerSettings())) {
+                    $this->core->addErrorMessage("Invalid poll answer release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 

@@ -7,8 +7,9 @@ use app\entities\poll\Poll;
 use app\entities\poll\Response;
 use DateTime;
 use ReflectionProperty;
+use tests\BaseUnitTest;
 
-class PollTester extends \PHPUnit\Framework\TestCase {
+class PollTester extends BaseUnitTest {
     /** @var Poll[] */
     private $my_polls;
 
@@ -270,6 +271,7 @@ class PollTester extends \PHPUnit\Framework\TestCase {
         $this->expectException(\RuntimeException::class);
         $this->my_polls[0]->setReleaseHistogram("aaaaaaaaa");
     }
+
     public function testAnswerRelease(): void {
         $this->assertEquals($this->my_polls[0]->getReleaseAnswer(), "never");
         $this->assertEquals($this->my_polls[1]->getReleaseAnswer(), "always");

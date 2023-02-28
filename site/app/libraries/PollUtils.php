@@ -55,4 +55,20 @@ class PollUtils {
                 || ($poll_type == "single-response-multiple-correct")
                 || ($poll_type == "single-response-survey"));
     }
+
+     public static function getReleaseHistogramSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
+    }
+
+    public static function getReleaseAnswerSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
+    }
 }
