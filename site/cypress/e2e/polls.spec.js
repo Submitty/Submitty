@@ -353,7 +353,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
-       
+
         // yay! done.
     });
 });
