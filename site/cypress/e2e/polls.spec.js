@@ -198,7 +198,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio').eq(3).contains('Answer 3');
         cy.get('.radio > input').eq(3).should('be.disabled');
         // verify the optional buttons and histogram don't exist for student
-        cy.should('not.contain', '#toggle-histogram-button'); 
+        cy.should('not.contain', '#toggle-histogram-button');
         cy.should('not.contain', '#toggle-info-button');
         cy.should('not.contain', '#poll-histogram');
 
@@ -299,7 +299,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
-        cy.get('#poll-histogram').should('be.visible'); 
+        cy.get('#poll-histogram').should('be.visible');
         cy.should('not.contain', '#correctTag');
 
         // log into instructor to able answer release on closed poll
@@ -320,7 +320,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
-        cy.get('#poll-histogram').should('be.visible'); 
+        cy.get('#poll-histogram').should('be.visible');
         cy.get('#correctTag').should('be.visible');
 
         // log into instructor to able both histogram and answer release
@@ -353,7 +353,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
-        
+       
         // yay! done.
     });
 });

@@ -56,7 +56,7 @@ class PollUtils {
                 || ($poll_type == "single-response-survey"));
     }
 
-     public static function getReleaseHistogramSettings(): array {
+    public static function getReleaseHistogramSettings(): array {
         return [
             "never",
             "when_ended",
