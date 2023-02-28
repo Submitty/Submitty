@@ -658,6 +658,11 @@ td > a.active-sort {
     margin-left: 90px;
 }
 
+.box-title > h4 > code{
+    word-wrap: break-word;
+    color: orange;
+}
+
 .box-title-total > h4 {
     margin-left: 20px;
     margin-top: 8px;
@@ -677,12 +682,6 @@ td > a.active-sort {
     margin-bottom: 10px;
     margin-left: 10px;
     margin-top: 10px;
-}
-
-
-.box-title > h4 >code{
-    word-wrap: break-word;
-    color: orange;
 }
 
 .box-block {
