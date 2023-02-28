@@ -438,7 +438,9 @@
             disableElementChildren('.no_manual_grading', false);
             $('#regrade_request_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
+            {% if forum_enabled %}
             document.getElementById("no_discussion").checked = true;
+            {% endif %}
         }
         updateDateDisplay();
     }
