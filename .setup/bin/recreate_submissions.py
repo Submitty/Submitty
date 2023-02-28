@@ -106,10 +106,13 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
     submission_path = os.path.join(user_path,str(highest_version+1))
     # copy submission files, the submission_path should be created here
     shutil.copytree(data,submission_path)
-    current_time = submitty_dateutils.get_current_time()
-    current_time_str = f'{str(current_time)} {str(current_time.tzinfo)}'
+    #current_time = submitty_dateutils.get_current_time()
+    #current_time_str = f'{str(current_time)} {str(current_time.tzinfo)}'
+    current_time_str = submitty_dateutils.write_submitty_date()
+    # use current time for submission timestamp
     with open(os.path.join(submission_path,UST_NAME),'w') as stf:
         stf.write(current_time_str+'\n')
+    # leave the user assignment access list empty
     with open(os.path.join(submission_path,UAAF_NAME),'w') as uaaf:
         uaaf.write('[]')
     UAS['history'].append({
@@ -118,6 +121,7 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
         'who': user,
         'type': 'upload'
     })
+    UAS['active_version'] = highest_version+1
     # store updated user_assignment_settings.json file
     with open(os.path.join(user_path,UASF_NAME),'w') as uasf:
         json.dump(UAS,uasf,indent=4)
@@ -135,26 +139,8 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
             #os.chmod(os.path.join(root,file),stat.st_mode)
             os.chmod(os.path.join(root,file),0o640)
     # update database
-    func_add_submission(gradeable,user,highest_version+1,str(current_time))
+    func_add_submission(gradeable,user,highest_version+1,current_time_str)
     func_update_active(gradeable,user,highest_version+1)
-    # write a queue file for the autograding daemon
-    #queue_data = {
-    #    'semester': semester,
-    #    'course': course,
-    #    'gradeable': gradeable,
-    #    'required_capabilities': ['default'], # TODO FIXME
-    #    'is_team': False, # TODO is this bad
-    #    'max_possible_grading_time': 60, # TODO
-    #    'queue_time': str(submitty_dateutils.get_current_time()),
-    #    'regrade': False,
-    #    'user': user,
-    #    'vcs_checkout': False,
-    #    'version': highest_version+1,
-    #    'who': user
-    #}
-    #qfn = '__'.join([semester,course,gradeable,user,str(highest_version+1)])
-    #with open(os.path.join(ARG_DATA_DIR,'to_be_graded_queue',qfn),'w') as qfo:
-    #    json.dump(queue_data,qfo,indent=4)
 
 def parseArgs():
     global ARG_SEMESTER,ARG_COURSE,ARG_GRADEABLE,ARG_SUBMISSIONS
@@ -273,9 +259,14 @@ def main():
                 os.path.join(ARG_SUBMISSIONS,user,str(version)),
                 insert_egdata,update_egver)
     dbconn_course.close()
+    # initiate batch regrade
+    print(f'ADDING SUBMISSIONS TO GRADING QUEUE')
+    regrade_py = os.path.join(ARG_INSTALL_DIR,'bin','regrade.py')
+    gradeable_path = os.path.join(ARG_DATA_DIR,'courses',
+        ARG_SEMESTER,ARG_COURSE,'submissions',ARG_GRADEABLE)
+    os.system(f'{regrade_py} {gradeable_path}')
 
 if __name__ == '__main__':
-    #if getpass.getuser() != 'submitty_php':
     if getpass.getuser() != 'root':
         print('Please run this as root, exiting...')
         quit()
