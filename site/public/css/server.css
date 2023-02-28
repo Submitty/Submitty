@@ -691,10 +691,6 @@ td > a.active-sort {
     margin-bottom: 10px;
 }
 
-code {
-    word-wrap: break-word;
-}
-
 .box-block > code,
 .box-block > pre {
     padding: 10px;
