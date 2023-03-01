@@ -105,7 +105,7 @@ class CalendarItem {
             case 'text':
                 $this->type = self::TEXT;
                 break;
-            case 'ann':
+            case 'ann': // NEED TO ADD NOTE TYPE TO THIS
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:

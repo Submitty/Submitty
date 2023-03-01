@@ -134,7 +134,6 @@ class CalendarInfo extends AbstractModel {
             // Put data of current section into the by-section map
             $info->items_by_sections[] = $curr_section;
         }
-
         foreach ($courses as $course) {
             $cal_items = $calendar_items[$course->getTitle()];
             foreach ($cal_items as $cal_item) {

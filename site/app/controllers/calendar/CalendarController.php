@@ -48,11 +48,19 @@ class CalendarController extends AbstractController {
     public function viewCourseCalendar(): WebResponse {
         $calendar_messages = [];
         $user = $this->core->getUser();
-
-        $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        $courses = $this->core->getQueries()->getCourseForUserId($user->getId()); // Needs to be fixed, need to pass single course, not all courses that student is enrolled in
+        $name = $this->core->getConfig()->getCourse();
+        foreach($courses as $course)
+        {
+            if($course->getTitle() == $name)
+            {
+                $oneCourse = [$course];
+                break;
+            }
+        }
         $gradeables = GradeableUtils::getGradeablesFromUserAndCourse($this->core, $calendar_messages);
 
-        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables, $courses, $calendar_messages), true);
+        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables, $oneCourse, $calendar_messages), true);
     }
 
     /**
@@ -74,7 +82,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("That is not a valid calendar item type");
+            $this->core->addErrorMessage("That is not a valid calendar item type".$type);
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
         $calendar_item->setDate(new \DateTime($date));
