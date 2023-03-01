@@ -955,20 +955,40 @@ def checkout_vcs_repo(config, my_file):
 
                 # copy the subfolder we want to the old checkout path and remove the rest
                 if tmp_checkout != "":
-                    os.chdir(tmp_checkout)
-                    if vcs_subdirectory[0] == '/':
-                        vcs_subdirectory = vcs_subdirectory[1:]
-                    files = os.listdir(os.path.join(checkout_path, vcs_subdirectory))
-                    if files:
-                        for f in files:
-                            shutil.move(
-                                        os.path.join(
-                                                     checkout_path,
-                                                     vcs_subdirectory,
-                                                     f),
-                                        tmp_checkout)
-                    else:
-                        subprocess.check_call('not_a_commadn')
+                    try:
+                        os.chdir(tmp_checkout)
+                        if vcs_subdirectory[0] == '/':
+                            vcs_subdirectory = vcs_subdirectory[1:]
+                        files = os.listdir(os.path.join(checkout_path, vcs_subdirectory))
+                        if files:
+                            for f in files:
+                                shutil.move(
+                                            os.path.join(
+                                                        checkout_path,
+                                                        vcs_subdirectory,
+                                                        f),
+                                            tmp_checkout)
+                        else:
+                            raise FileNotFoundError
+
+                    except FileNotFoundError as error:
+                        shutil.rmtree(tmp_checkout, ignore_errors = true)
+                        config.logger.log_message(
+                            f"ERROR: failed to find {vcs_subdirectory} in repository",
+                            job_id=job_id
+                        )
+                        os.chdir(checkout_path)
+                        error_path = os.path.join(
+                            checkout_path, "failed_no_files_in_subfolder.txt"
+                        )
+                        with open(error_path, 'w') as f:
+                            print(str(error), file=f)
+                            print("\n", file=f)
+                            print("Check to be sure the subfolder is not empty.\n", file=f)
+                            print("Check to be sure the repository has been committed with the " +
+                                "subfolder present.\n", file=f)
+                            
+
                     shutil.rmtree(checkout_path, ignore_errors=True)
                     checkout_path = tmp_checkout
 
