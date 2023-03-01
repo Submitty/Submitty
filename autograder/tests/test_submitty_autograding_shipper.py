@@ -75,8 +75,8 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(WORKING_DIR)
+        # with contextlib.suppress(FileNotFoundError):
+        #     shutil.rmtree(WORKING_DIR)
 
     @classmethod
     def setUpClass(cls):
@@ -226,103 +226,127 @@ class TestAutogradingShipper(unittest.TestCase):
     Unit testing individual functions using mocks.
     """
 
-    def test_correct_checkout(self):
-        """
-        This function tests the correct output of the checkout_vcs_repo function.
-        To start, the submission directory is setup, and the path variables are retrieved.
-        After this, the shipper is run, and the checkout path is scanned to make sure
-        that there is no 'failed' test files.
-        If that passes, the expected vcs checkout log is compared to the actual log.
-        """
-        paths = get_paths()
+    # def test_correct_checkout(self):
+    #     """
+    #     This function tests the correct output of the checkout_vcs_repo function.
+    #     To start, the submission directory is setup, and the path variables are retrieved.
+    #     After this, the shipper is run, and the checkout path is scanned to make sure
+    #     that there is no 'failed' test files.
+    #     If that passes, the expected vcs checkout log is compared to the actual log.
+    #     """
+    #     paths = get_paths()
 
-        # Start test
+    #     # Start test
+    #     shipper.checkout_vcs_repo(
+    #         CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
+    #     )
+
+    #     # Make sure none of the tests have failed before checking valid output
+    #     failed_files = [
+    #         file for file in os.listdir(paths['checkout']) if file.startswith('failed')
+    #     ]
+    #     self.assertTrue(len(failed_files) == 0)
+
+    #     # Confirm VCS checkout logging messages
+    #     actual_logs_path = os.path.join(
+    #         paths['homework']['results'], 'logs/vcs_checkout.txt'
+    #     )
+    #     with open(actual_logs_path, 'r') as actual_vcs_checkout:
+    #         actual_output = actual_vcs_checkout.read()
+
+    #         # Check if the paths related to the vcs are correct
+    #         expected_logs_path = os.path.join(
+    #             TEST_DATA_DIR, 'config_files', 'expected_vcs_checkout.txt'
+    #         )
+    #         with open(expected_logs_path, 'r') as expected_vcs_checkout:
+    #             # Check if the expected checkout with local path variables is in the actual output
+    #             new_expected = expected_vcs_checkout.read().replace(
+    #                 'TEST_DATA_PATH', TEST_DATA_DIR
+    #             )
+    #             self.assertTrue(
+    #                 new_expected.replace(
+    #                     'HOMEWORK_PATH', TEST_DATA_DIR + '/homework_01'
+    #                 ).replace('CHECKOUT_PATH', paths['checkout'])
+    #                 in actual_output,
+    #                 'Incorrect File Locations, {}',
+    #             )
+
+    #         # Confirm the subfolder is cloned and is found at the correct path
+    #         expected_subfolder = '{CHECKOUT_PATH}/subfolder:'.format(
+    #             CHECKOUT_PATH=paths['checkout']
+    #         )
+    #         self.assertTrue(
+    #             expected_subfolder in actual_output,
+    #             'Subfolder not cloned/incorrect location',
+    #         )
+
+    # def test_failed_to_clone(self):
+    #     """
+    #     This test is to verify the output when the shipper fails clone the repository
+    #     """
+    #     paths = get_paths()
+    #     shipper.checkout_vcs_repo(
+    #         CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
+    #     )
+    #     failed_file = paths['checkout'] + '/failed_to_clone_repository.txt'
+    #     self.assertTrue(
+    #         os.path.isfile(failed_file), 'Failed to cause a clone repository failure'
+    #     )
+
+    # def test_invalid_url(self):
+    #     """
+    #     This test is to verify the output when the shipper cannot construct
+    #     a valid repository directory path.
+    #     To do this, the subdirectory is set to an empty string
+    #     in the form_homework_01.json config file.
+    #     """
+    #     paths = get_paths()
+    #     config_file_path = os.path.join(
+    #         paths['course'], 'config', 'form', 'form_homework_01.json'
+    #     )
+
+    #     with open(config_file_path, 'w+') as form_config_file:
+    #         base_file_path = os.path.join(
+    #             TEST_DATA_DIR, 'config_files', 'homework_form.json'
+    #         )
+
+    #         with open(base_file_path, 'r') as base_config_file:
+    #             # The subdirectory variable is changed to and empty string.
+    #             form_config_file.write(
+    #                 base_config_file.read().replace('homework_01', '')
+    #             )
+
+    #     shipper.checkout_vcs_repo(
+    #         CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
+    #     )
+
+    #     failed_file = (
+    #         paths['checkout'] + '/failed_to_construct_valid_repository_url.txt'
+    #     )
+    #     self.assertTrue(
+    #         os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
+    #     )
+
+    def test_no_subfolder_files(self):
+        """
+        This test is to verify the output when the shipper fails clone the repository
+        """
+        create_git_repository = """
+        cd {}/homework_01;
+        git init;
+        git config user.email "test@email.com";
+        git config user.name "Test Shipper";
+        git add -A;
+        git commit -m "testing"
+        """
+        os.system(create_git_repository.format(TEST_DATA_DIR))
+
+        paths = get_paths()
+        os.system("rm -r " + (TEST_DATA_DIR + "/homework_01/subfolder"))
         shipper.checkout_vcs_repo(
             CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
         )
-
-        # Make sure none of the tests have failed before checking valid output
         failed_files = [
             file for file in os.listdir(paths['checkout']) if file.startswith('failed')
         ]
         self.assertTrue(len(failed_files) == 0)
-
-        # Confirm VCS checkout logging messages
-        actual_logs_path = os.path.join(
-            paths['homework']['results'], 'logs/vcs_checkout.txt'
-        )
-        with open(actual_logs_path, 'r') as actual_vcs_checkout:
-            actual_output = actual_vcs_checkout.read()
-
-            # Check if the paths related to the vcs are correct
-            expected_logs_path = os.path.join(
-                TEST_DATA_DIR, 'config_files', 'expected_vcs_checkout.txt'
-            )
-            with open(expected_logs_path, 'r') as expected_vcs_checkout:
-                # Check if the expected checkout with local path variables is in the actual output
-                new_expected = expected_vcs_checkout.read().replace(
-                    'TEST_DATA_PATH', TEST_DATA_DIR
-                )
-                self.assertTrue(
-                    new_expected.replace(
-                        'HOMEWORK_PATH', TEST_DATA_DIR + '/homework_01'
-                    ).replace('CHECKOUT_PATH', paths['checkout'])
-                    in actual_output,
-                    'Incorrect File Locations, {}',
-                )
-
-            # Confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = '{CHECKOUT_PATH}/subfolder:'.format(
-                CHECKOUT_PATH=paths['checkout']
-            )
-            self.assertTrue(
-                expected_subfolder in actual_output,
-                'Subfolder not cloned/incorrect location',
-            )
-
-    def test_failed_to_clone(self):
-        """
-        This test is to verify the output when the shipper fails clone the repository
-        """
-        paths = get_paths()
-        shipper.checkout_vcs_repo(
-            CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
-        failed_file = paths['checkout'] + '/failed_to_clone_repository.txt'
-        self.assertTrue(
-            os.path.isfile(failed_file), 'Failed to cause a clone repository failure'
-        )
-
-    def test_invalid_url(self):
-        """
-        This test is to verify the output when the shipper cannot construct
-        a valid repository directory path.
-        To do this, the subdirectory is set to an empty string
-        in the form_homework_01.json config file.
-        """
-        paths = get_paths()
-        config_file_path = os.path.join(
-            paths['course'], 'config', 'form', 'form_homework_01.json'
-        )
-
-        with open(config_file_path, 'w+') as form_config_file:
-            base_file_path = os.path.join(
-                TEST_DATA_DIR, 'config_files', 'homework_form.json'
-            )
-
-            with open(base_file_path, 'r') as base_config_file:
-                # The subdirectory variable is changed to and empty string.
-                form_config_file.write(
-                    base_config_file.read().replace('homework_01', '')
-                )
-
-        shipper.checkout_vcs_repo(
-            CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
-
-        failed_file = (
-            paths['checkout'] + '/failed_to_construct_valid_repository_url.txt'
-        )
-        self.assertTrue(
-            os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
-        )

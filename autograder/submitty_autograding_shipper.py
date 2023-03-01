@@ -837,6 +837,7 @@ def checkout_vcs_repo(config, my_file):
 
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
+        tmp_checkout = ""   
         if vcs_subdirectory == '':
             with open(
                 os.path.join(submission_path, ".submit.VCS_CHECKOUT")
@@ -852,6 +853,7 @@ def checkout_vcs_repo(config, my_file):
                 vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
+       
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             if '.git' in vcs_base_url:
                 vcs_path = vcs_base_url
