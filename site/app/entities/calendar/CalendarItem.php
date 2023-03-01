@@ -102,10 +102,13 @@ class CalendarItem {
      */
     public function setStringType(string $type): void {
         switch ($type) {
-            case 'text':
+            case 'note':
                 $this->type = self::TEXT;
                 break;
-            case 'ann': // NEED TO ADD NOTE TYPE TO THIS
+            case 'important':
+                $this->type = self::TEXT;
+                break;
+            case 'announcement': // NEED TO ADD NOTE TYPE TO THIS
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:
