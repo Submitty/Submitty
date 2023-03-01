@@ -242,9 +242,9 @@
                                         {{ file.name }}</a> &nbsp;
                                     <a id = 'open_file_{{ file.name|url_encode }}' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                                     {% if is_grader_view %}
-                                    <a onclick='viewFileFullPanel("{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+                                    <button onclick='viewFileFullPanel("{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></button>
                                     {% endif %}
-                                    <a onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                                    <button onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></button>
                                 </div>
                                 <div id="file_viewer_{{ id }}" data-file_name="{{ file.name }}" data-file_url="{{ file.path }}"></div>
                             </div>

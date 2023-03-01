@@ -56,7 +56,7 @@
                                 <form method="post" action="{{ view_grades_url }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
-                                    <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
+                                    <button onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></button>
                                 </form>
                             </td>
                             <td>{{ student.getRegistrationType() }}</td>
