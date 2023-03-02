@@ -101,3 +101,10 @@ form {
     flex-grow: 100;
     margin-left: 0.5em;
 }
+
+#correct-tag {
+    font-family: Copperplate;
+    font-weight: 900; 
+    color: var(--default-green);
+    margin-left: 0.5em;
+}
