@@ -3,11 +3,9 @@
 #include "cat.h"
 
 //constructor that takes in arguments
-Cat::Cat(std::string n, float av_size, float av_lifeSpan, std::string interesting)
+Cat::Cat(const std::string &n, float av_size, float av_lifeSpan, const std::string &interesting)
+:name(n),average_size(av_lifeSpan),average_lifeSpan(av_lifeSpan)
 {
-	name = n;
-	average_size = av_size;
-	average_lifeSpan = av_lifeSpan;
 	interestingFact = interesting.substr(0, interesting.size()-1);
 }
 
