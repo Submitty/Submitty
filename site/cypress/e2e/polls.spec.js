@@ -300,7 +300,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
-        cy.should('not.contain', '#correct-tag');   
+        cy.should('not.contain', '#correct-tag');
 
         // log into instructor to able answer release on closed poll
         cy.logout();
