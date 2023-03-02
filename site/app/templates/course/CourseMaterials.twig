@@ -8,7 +8,7 @@
 
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         {# button to open all of the subfolders and cookie it#}            
-        <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
+        <a onclick='folderopencookie();' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
         {% if user_group == 1 %}
             {# button to set the release dates of all files in the page/course materials #}
             <a
@@ -181,6 +181,19 @@
 {% endmacro %}
 
 <script>
+    function folderopencookie(){
+        var fileNames = [];
+        {% for file in material_list %}
+        fileNames.push("{{ file.getPath }}".substring("{{ file.getPath }}".lastIndexOf("/") + 1));
+        {% endfor %}
+        fileNames = fileNames.filter(function(fileName) {
+            return !fileName.includes(".");
+            });
+        fileNames.forEach(function(fileName) {
+            setCookie(fileName, openAllDivForCourseMaterials());
+            });
+        setCookie("foldersOpen", openAllDivForCourseMaterials());        
+    }
     //set cookie for open adapted from w3schools
     function setCookie(cName,cVal){
         document.cookie = cName+'='+cVal;
