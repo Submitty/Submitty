@@ -300,7 +300,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
-        cy.should('not.contain', '#correct-tag');      
+        cy.should('not.contain', '#correct-tag');   
 
         // log into instructor to able answer release on closed poll
         cy.logout();
@@ -323,7 +323,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-histogram').should('be.visible');
         cy.get('#correct-tag').should('be.visible');
         // check if word correct is placed next to actual answer
-        cy.get('#correct-tag').siblings(':nth-child(2)').should('contain', "Answer 0")
+        cy.get('#correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 0');
 
         // log into instructor to able both histogram and answer release
         cy.logout();
@@ -342,7 +342,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
         cy.get('#correct-tag').should('be.visible');
-        cy.get('#correct-tag').siblings(':nth-child(2)').should('contain', "Answer 0")
+        cy.get('#correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 0');
 
         // log into instructor and delete the poll
         cy.logout();
