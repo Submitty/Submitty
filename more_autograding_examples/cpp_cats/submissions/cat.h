@@ -7,13 +7,15 @@ class Cat
 {
 	public:
 		Cat();
-		Cat(std::string n, float av_size, float av_lifeSpan, std::string interesting);
+        // pass string by reference to avoid copy
+		Cat(const std::string &n, float av_size, float av_lifeSpan,const std::string &interesting);
 
 		//get functions
-		std::string getBreed() const { return  name; }
+        // change return type to be const for more security, reference to avoid copy
+		const std::string &getBreed() const { return  name; }
 		float getAverageSize() const { return average_size; }
 		float getAverageLifeSpan() const { return average_lifeSpan; }
-		std::string getInterestingFact() const { return interestingFact; }
+		const std::string &getInterestingFact() const { return interestingFact; }
 
 	private:
 		std::string name;
