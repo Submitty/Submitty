@@ -515,7 +515,7 @@ class NavigationView extends AbstractView {
             if (!$gradeable->hasDueDate()) {
                 $date_text = "";
             }
-            if (!$gradeable->isStudentSubmit() && $core->getUser()->accessFullGrading()) {
+            if (!$gradeable->isStudentSubmit() && $core->getUser()->accessFullGrading() && $core->getUser()->getGroup() <= $gradeable->getMinGradingGroup()) {
                 // Student isn't submitting
                 $title = "BULK UPLOAD";
                 $class = "btn-primary";
