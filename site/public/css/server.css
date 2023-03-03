@@ -657,11 +657,11 @@ td > a.active-sort {
 .box-title > h4 {
     margin-left: 90px;
 }
-
+/*
 .box-title > h4 > code{
     word-wrap: break-word;
 }
-
+*/
 .box-title-total > h4 {
     margin-left: 20px;
     margin-top: 8px;
