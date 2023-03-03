@@ -17,7 +17,7 @@ def up(config, database):
     pass
 
 
-def down(config):
+def down(config, database):
     """
     Run down migration (rollback).
 
