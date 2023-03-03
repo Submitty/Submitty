@@ -14,7 +14,6 @@
     --focus-warning-brown: #ad7c37;
     --hover-warning-brown: #9c5b00;
     --active-warning-brown: #b58a4e;
-    --default-green: #018201;
     --good-green: #5fb760;
     --hover-good-green: #66cc77;
     --disabled-good-green: #5cb85c;
@@ -319,5 +318,5 @@
     --viewed-content: #50535a;
     --code-box-background-light-gray: #282c34;
     --code-box-font-color-dark-gray: #abb2bf;
-    --default-green: #1dc41d;
+    --standard-dark-green: #1dc41d;
 }

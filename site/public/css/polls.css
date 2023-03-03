@@ -102,8 +102,8 @@ form {
     margin-left: 0.5em;
 }
 
-#correct-tag {
-    color: var(--default-green);
+.correct-tag {
+    color: var(--standard-dark-green);
     margin-left: 0.5em;
 }
 
