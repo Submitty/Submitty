@@ -218,8 +218,8 @@
 }
 
 [data-black_mode="black"][data-theme="dark"] {
-    --deleted-and-unviewed-thread: #939494;
     --default-white: #000000;
+    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
 }
