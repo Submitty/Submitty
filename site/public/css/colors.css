@@ -214,12 +214,12 @@
     --viewed-content: #e8f0f7;
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
-    
-    --deleted-color: white;
+
+    --deleted-color: #ffffff;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
-    --deleted-color: black;
+    --deleted-color: #000000;
     --deleted-and-unviewed-thread: #939494;
     --default-white: #000000;
     --background-blue: #000000;
@@ -230,7 +230,7 @@
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
-    --deleted-color: black;
+    --deleted-color: #000000;
     --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
