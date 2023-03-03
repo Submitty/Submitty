@@ -103,7 +103,7 @@ form {
 }
 
 #correct-tag {
-    font-weight: 900; 
     color: var(--default-green);
     margin-left: 0.5em;
 }
+
