@@ -127,8 +127,6 @@
     --focus-dropdown: #f5f5f5;
 
 
-    --deleted-text-black: #000000;
-
     /* text and fonts */
     --text-black: #000000; /* use only on white/background-blue */
     --text-white: #ffffff; /* use on all colors */
@@ -223,7 +221,6 @@
     --default-white: #000000;
     --background-blue: #000000;
     --default-black: #ffffff;
-    --deleted-text-black: #252525
 }
 
 [data-theme="dark"] {
@@ -271,7 +268,6 @@
     --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
 
-    --deleted-text-black: #252525
 
     /* text and fonts */
     --text-black: #ffffff; /* use only on white/background-blue */
