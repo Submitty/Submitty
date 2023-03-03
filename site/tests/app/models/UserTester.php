@@ -138,6 +138,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $expected = [
             'displayed_given_name' => 'User',
             'displayed_family_name' => 'Tester',
+            'pronouns' => '',
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
