@@ -586,12 +586,12 @@ jobs:
               browser: chrome
               headless: true
 
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-screenshots
               path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-videos
