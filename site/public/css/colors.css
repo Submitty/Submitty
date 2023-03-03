@@ -133,6 +133,7 @@
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
+    --deleted-color: #000000;
 
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
@@ -214,7 +215,6 @@
     --viewed-content: #e8f0f7;
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
-    --deleted-color: #000000;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
