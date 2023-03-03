@@ -74,9 +74,11 @@ function updateUserPronouns() {
     }
     else {
         const data = new FormData();
-        data.append('csrf_token', csrfToken); //undefined
-        data.append('pronouns', pronouns.val()); //Currently undefined
-        const url = buildUrl(['user_profile', 'change_pronouns']); //Currently undefined
+        // eslint-disable-next-line no-undef
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns.val());
+        // eslint-disable-next-line no-undef
+        const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
             url,
             type: 'POST',
@@ -88,7 +90,7 @@ function updateUserPronouns() {
                 if (response.status === 'success') {
                     const {data} = response;
                     // eslint-disable-next-line no-undef
-                    displaySuccessMessage(data.message); 
+                    displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns
                     $('#pronouns-row').html(`${icon} ${data.pronouns}`);
@@ -102,7 +104,7 @@ function updateUserPronouns() {
             },
             error: function() {
                 // eslint-disable-next-line no-undef
-                displayErrorMessage('Some went wrong while updating pronouns!'); 
+                displayErrorMessage('Some went wrong while updating pronouns!');
             },
         });
     }
