@@ -215,7 +215,7 @@
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
 
-    --deleted-color: #ffffff;
+    --deleted-color: #000000;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
