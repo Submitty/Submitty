@@ -31,6 +31,10 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 * Supports multiple instructors and TAs per course
 * Open-source, free to use, install on your own hardware, or VPS
 
+# Contributing Guidelines
+
+Here are the guidelines to contribute \
+[Contributing Guidelines](https://github.com/Submitty/Submitty/blob/main/CONTRIBUTING.md)
 
 # Contact Us
 
