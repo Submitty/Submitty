@@ -192,7 +192,8 @@ class DockerInterfaceController extends AbstractController {
             else {
                 return JsonResponse::getFailResponse('This image is not listed.');
             }
-        } else {
+        } 
+        else {
             return JsonResponse::getFailResponse('Invalid Docker image name.');
         }
     }
