@@ -674,6 +674,7 @@ function initSocketClient() {
                 break;
             case 'new_post':
                 // eslint-disable-next-line eqeqeq
+                $('data#current-thread').classList.add("new_thread");
                 if ($('data#current-thread').val() == msg.thread_id) {
                     socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id);
                 }
@@ -687,6 +688,7 @@ function initSocketClient() {
             case 'edit_post':
                 // eslint-disable-next-line eqeqeq
                 if ($('data#current-thread').val() == msg.thread_id) {
+
                     socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id, true);
                 }
                 break;
