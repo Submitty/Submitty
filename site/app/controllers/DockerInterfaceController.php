@@ -171,7 +171,7 @@ class DockerInterfaceController extends AbstractController {
         $json = json_decode(file_get_contents($jsonFilePath), true);
         if (preg_match($pattern, $_POST['capability'])) {
             $key = array_search($_POST['image'], $json[$_POST['capability']]);
-            if ($key !== false ){
+            if ($key !== false) {
                 $Verify = $this->core->getQueries()->removeDockerImageOwner($_POST['image'], $user_id);
                 if ($Verify != false) {
                     unset($json[$_POST['capability']][$key]);
@@ -192,7 +192,8 @@ class DockerInterfaceController extends AbstractController {
             else {
                 return JsonResponse::getFailResponse('This image is not listed.');
             }
-        } else {
+        } 
+        else {
             return JsonResponse::getFailResponse('Invalid Docker image name.');
         }
     }
