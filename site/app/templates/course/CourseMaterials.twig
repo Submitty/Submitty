@@ -184,15 +184,12 @@
     function folderopencookie(){
         var fileNames = [];
         {% for file in material_list %}
-        fileNames.push("{{ file.getPath }}".substring("{{ file.getPath }}".lastIndexOf("/") + 1));
+        fileNames.push("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
         {% endfor %}
-        fileNames = fileNames.filter(function(fileName) {
-            return !fileName.includes(".");
-            });
         fileNames.forEach(function(fileName) {
             setCookie(fileName, openAllDivForCourseMaterials());
             });
-        setCookie("foldersOpen", openAllDivForCourseMaterials());        
+        setCookie("foldersOpen", openAllDivForCourseMaterials());   
     }
     //set cookie for open adapted from w3schools
     function setCookie(cName,cVal){

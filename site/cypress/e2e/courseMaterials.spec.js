@@ -183,7 +183,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
         cy.get('.file-viewer').should('have.length', 29);
 
         cy.get('#file-container .btn').eq(9).click();
@@ -303,7 +303,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
         cy.get('a[id=zip]').parent().parent().find('.fa-pencil-alt').eq(24).click();
         cy.get('#all-sections-showing-yes').click();
         cy.get('#section-edit-2').check();
@@ -369,7 +369,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
         });
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         for (let i = 5; i > 0; i--) {
             cy.get(`.folder-container:nth-child(4) :nth-child(${6-i}) > .file-viewer`).contains(`file${i}.txt` );
@@ -395,7 +395,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Edit folder b1 sorting order
         cy.get('.fa-pencil-alt').eq(1).click();
@@ -436,7 +436,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Check that student cannot view unreleased files
         cy.logout();
@@ -500,7 +500,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Restrict course materials in folder to section 1
         cy.get('.fa-pencil-alt').first().click();
@@ -566,7 +566,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Visually hide course materials in folder from students
         cy.get('.fa-pencil-alt').first().click();
@@ -631,7 +631,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Edit folders' sorting order
         for (let i = 1; i >= 0; i--) {
@@ -682,7 +682,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
 
         // Perform recursive updates
         cy.get('.fa-pencil-alt').first().click();
@@ -711,7 +711,7 @@ describe('Test cases revolving around course material uploading and access contr
     });
 
     it('Should show partially and fully restricted sections correctly', () => {
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
         cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(0).click();
         cy.get('input[id=all-sections-showing-yes]').click();
         cy.get('input[id=section-edit-1]').click();
@@ -744,7 +744,7 @@ describe('Test cases revolving around course material uploading and access contr
     });
 
     it('Should also let a folder to have only partial sections when applying recursive updates', () => {
-        cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
+        cy.get('[onclick=\'folderopencookie();\']').click();
         for (let i = 0; i <= 1; i++) {
             cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(i).click();
             cy.get('input[id=all-sections-showing-yes]').click();
