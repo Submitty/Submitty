@@ -22,8 +22,8 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
@@ -44,8 +44,8 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
@@ -68,8 +68,8 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
@@ -94,8 +94,8 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: shivammathur/setup-php@2.7.0
+            - uses: actions/checkout@v3
+            - uses: shivammathur/setup-php@2.24.0
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
@@ -129,8 +129,8 @@ jobs:
           run:
               working-directory: site
       steps:
-          - uses: actions/checkout@v2
-          - uses: shivammathur/setup-php@2.7.0
+          - uses: actions/checkout@v3
+          - uses: shivammathur/setup-php@2.24.0
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
@@ -159,7 +159,7 @@ jobs:
     python-lint:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
@@ -181,7 +181,7 @@ jobs:
     python-unit:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
@@ -258,7 +258,7 @@ jobs:
       name: ShellCheck
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - name: install ShellCheck
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
@@ -293,15 +293,15 @@ jobs:
 
         steps:
           - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.8.0
+            uses: styfle/cancel-workflow-action@0.11.0
             with:
               access_token: ${{ github.token }}
-          - uses: actions/checkout@v2
+          - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
           - name: Copy Repo
             run: |
-              # have to copy first, absolute paths not supported by actions/checkout@v2
+              # have to copy first, absolute paths not supported by actions/checkout@v3
                 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
@@ -310,7 +310,7 @@ jobs:
           - uses: actions/setup-python@v4
             with:
               python-version: ${{ env.PYTHON_VERSION }}
-          - uses: shivammathur/setup-php@2.7.0
+          - uses: shivammathur/setup-php@2.24.0
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
@@ -586,12 +586,12 @@ jobs:
               browser: chrome
               headless: true
 
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-screenshots
               path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-videos

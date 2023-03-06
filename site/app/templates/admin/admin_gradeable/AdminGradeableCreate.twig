@@ -168,12 +168,13 @@
                                 {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
                         <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
                                 {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
-                    </fieldset>
-                    <div class="discussion_id_wrapper">
+
+                        <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
                             <input style="width: 85px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
                                    value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}" placeholder="(Required)"/>
-                    </div>
+                        </div>
+                    </fieldset>
                 </div>
             {% endif %}
 
@@ -436,9 +437,13 @@
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
+            $("#yes_discussion").prop('checked', false);
+            $("#no_discussion").prop('checked', true);
             $('#regrade_request_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
+            {% if forum_enabled %}
             document.getElementById("no_discussion").checked = true;
+            {% endif %}
         }
         updateDateDisplay();
     }
