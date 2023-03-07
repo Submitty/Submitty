@@ -960,13 +960,11 @@ class ForumThreadView extends AbstractView {
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
         }
+        $isNewPost = false;
         if (in_array($post_id, $unviewed_posts)) {
             if ($current_user != $post["author_user_id"]) {
                 $classes[] = "new_post";
                 $isNewPost = true;
-            }
-            else {
-                $isNewPost = false;
             }
         }
         else {
