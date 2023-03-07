@@ -12,7 +12,7 @@ def up(config, database):
     """
     # add pronouns column into user table
     sql = """ALTER TABLE users ADD COLUMN IF NOT EXISTS user_pronouns 
-      character varying NOT NULL DEFAULT '';"""
+      character varying(255) DEFAULT '';"""
     database.execute(sql)
     pass
 
