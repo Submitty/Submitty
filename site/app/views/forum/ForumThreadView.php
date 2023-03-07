@@ -965,7 +965,7 @@ class ForumThreadView extends AbstractView {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
-            else{
+            else {
                 $isNewPost = false;
             }
         }
