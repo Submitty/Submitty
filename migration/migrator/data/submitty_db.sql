@@ -505,7 +505,7 @@ CREATE TABLE public.users (
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
-    user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_pronouns character varying DEFAULT ''::character varying NOT NULL,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 
