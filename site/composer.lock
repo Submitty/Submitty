@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "17fb32c30adb19be32b971b908f69dbf",
+    "content-hash": "352767f799e98484c1eb1fade33599ee",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3427,16 +3427,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v5.4.19",
+            "version": "v5.4.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "9bd60843443cda9638efdca7c41eb82ed0026179"
+                "reference": "2a6b1111d038adfa15d52c0871e540f3b352d1e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/9bd60843443cda9638efdca7c41eb82ed0026179",
-                "reference": "9bd60843443cda9638efdca7c41eb82ed0026179",
+                "url": "https://api.github.com/repos/symfony/config/zipball/2a6b1111d038adfa15d52c0871e540f3b352d1e4",
+                "reference": "2a6b1111d038adfa15d52c0871e540f3b352d1e4",
                 "shasum": ""
             },
             "require": {
@@ -3486,7 +3486,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v5.4.19"
+                "source": "https://github.com/symfony/config/tree/v5.4.21"
             },
             "funding": [
                 {
@@ -3502,7 +3502,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-01-08T13:23:55+00:00"
+            "time": "2023-02-14T08:03:56+00:00"
         },
         {
             "name": "symfony/console",
@@ -3672,16 +3672,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v5.4.19",
+            "version": "v5.4.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "648bfaca6a494f3e22378123bcee2894045dc9d8"
+                "reference": "e75960b1bbfd2b8c9e483e0d74811d555ca3de9f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/648bfaca6a494f3e22378123bcee2894045dc9d8",
-                "reference": "648bfaca6a494f3e22378123bcee2894045dc9d8",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/e75960b1bbfd2b8c9e483e0d74811d555ca3de9f",
+                "reference": "e75960b1bbfd2b8c9e483e0d74811d555ca3de9f",
                 "shasum": ""
             },
             "require": {
@@ -3716,7 +3716,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v5.4.19"
+                "source": "https://github.com/symfony/filesystem/tree/v5.4.21"
             },
             "funding": [
                 {
@@ -3732,7 +3732,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-01-14T19:14:44+00:00"
+            "time": "2023-02-14T08:03:56+00:00"
         },
         {
             "name": "symfony/http-foundation",
