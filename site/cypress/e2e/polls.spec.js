@@ -14,7 +14,6 @@ describe('Test cases revolving around polls functionality', () => {
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
-        cy.wait(500);
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
 
@@ -65,7 +64,6 @@ describe('Test cases revolving around polls functionality', () => {
         // toggle all the drop down
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
-        cy.wait(500);
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
 
@@ -149,6 +147,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('h1').click(); // get rid of the date picker
+        // test default release histogram and answer settings
         cy.get('#image-file').attachFile('sea_animals.png');
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
@@ -178,7 +177,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.get('#old-table-dropdown').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(5)').children().click();
-        cy.wait(1000);
 
         // log in from student and verify we can now view but not answer the poll
         cy.logout();
@@ -199,13 +197,16 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio > input').eq(2).should('be.disabled');
         cy.get('.radio').eq(3).contains('Answer 3');
         cy.get('.radio > input').eq(3).should('be.disabled');
+        // verify the optional buttons and histogram don't exist for student
+        cy.should('not.contain', '#toggle-histogram-button');
+        cy.should('not.contain', '#toggle-info-button');
+        cy.should('not.contain', '#poll-histogram');
 
         // log into instructor and open the poll
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
-        cy.wait(1000);
 
         // log into student and verify we can answer the poll
         cy.logout();
@@ -223,7 +224,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio > input').eq(3).should('not.be.disabled');
         cy.get('.radio > input').eq(2).check();
         cy.get('button[type=submit]').click();
-        cy.wait(1000);
         cy.url().should('include', 'sample/polls');
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 2');
 
@@ -233,7 +233,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio > input').eq(3).should('not.be.checked');
         cy.get('.radio > input').eq(3).check();
         cy.get('button[type=submit]').click();
-        cy.wait(1000);
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');
 
         // log into instructor, edit the poll
@@ -252,6 +251,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-type-multiple-response-flexible').should('not.be.checked');
         cy.get('#poll-type-multiple-response-survey').should('not.be.checked');
         cy.get('#poll-date').invoke('val').should('eq', '1970-01-01');
+        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
+        cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
         cy.get('.poll_response').should('contain', 'Answer 1');
         cy.get('.correct-box').eq(0).should('be.checked');
         cy.get('.poll_response').should('contain', 'Answer 2');
@@ -263,7 +264,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#responses').children(':nth-child(2)').children(':nth-child(4)').contains('Answer 3');
         cy.get('#responses').children(':nth-child(3)').children(':nth-child(4)').contains('Answer 2');
         cy.get('button[type=submit]').click();
-        cy.wait(1000);
 
         // log into student and verify the edits were made
         cy.logout();
@@ -279,12 +279,81 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.radio').eq(3).contains('Answer 2');
         cy.get('.radio > input').eq(3).should('not.be.checked');
 
+        // log into instructor, release histogram on poll closing, and close the poll
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.url().should('include', 'sample/polls/editPoll');
+        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
+        cy.get('#student-histogram-release-setting').select('when_ended');
+        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'when_ended');
+        cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
+        cy.get('button[type=submit]').click();
+
+        // log into student to verify histogram is released but answer is not
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-info-button').should('be.visible');
+        cy.get('#toggle-histogram-button').should('be.visible').click();
+        cy.get('#poll-histogram').should('be.visible');
+        cy.should('not.contain', '.correct-tag');
+
+        // log into instructor to able answer release on closed poll
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
+        cy.get('#student-answer-release-setting').select('when_ended');
+        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'when_ended');
+        cy.get('#student-answer-release-setting').invoke('val').should('eq', 'when_ended');
+        cy.get('button[type=submit]').click();
+
+        // log into student and verify we can see both histogram and answer
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-info-button').should('be.visible');
+        cy.get('#toggle-histogram-button').should('be.visible').click();
+        cy.get('#poll-histogram').should('be.visible');
+        cy.get('.correct-tag').should('be.visible');
+        // check if word correct is placed next to actual answer
+        cy.get('.correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 0');
+        cy.get('.correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 3');
+        cy.get('.correct-tag').should('have.length', 2);
+
+        // log into instructor to able both histogram and answer release
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
+        cy.get('#student-histogram-release-setting').select('always');
+        cy.get('#student-answer-release-setting').select('always');
+        cy.get('button[type=submit]').click();
+
+        // log into student and verify we can see both histogram and answer
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
+        cy.get('#toggle-histogram-button').should('be.visible').click();
+        cy.get('#poll-histogram').should('be.visible');
+        cy.get('.correct-tag').should('be.visible');
+        cy.get('.correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 0');
+        cy.get('.correct-tag').siblings(':nth-child(2)').should('contain', 'Answer 3');
+        cy.get('.correct-tag').should('have.length', 2);
+
         // log into instructor and delete the poll
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
-        cy.wait(1000);
+        cy.wait(500);
 
         // log into student and verify the poll is no longer there
         cy.logout();
