@@ -16,9 +16,9 @@ from the
 by the [Department of Computer Science](https://science.rpi.edu/computer-science) at 
 [Rensselaer Polytechnic Institute (RPI)](https://rpi.edu/).
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).
+]
 
-
-# Key Features
+# [Key Features](https://submitty.org/index/features)
 
 * Secure testing of many languages: Python, C/C++, Java, Scheme, Prolog, SPIM, and anything available on GNU / Linux!
 * Customizable automated grading with immediate feedback to students
