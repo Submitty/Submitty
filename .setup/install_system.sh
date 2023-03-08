@@ -102,6 +102,10 @@ if [ ${VAGRANT} == 1 ]; then
     export DEBIAN_FRONTEND=noninteractive
 fi
 
+if [ ${UTM} == 1 ]; then
+    mkdir ${SUBMITTY_REPOSITORY}/.utm
+fi
+
 if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh

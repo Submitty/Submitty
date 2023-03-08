@@ -32,6 +32,11 @@ if [ -d "${THIS_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
+UTM=0
+if [ -d "${THIS_DIR}/../.utm" ]; then
+    UTM=1
+fi
+
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
