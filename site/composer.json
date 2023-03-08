@@ -32,8 +32,8 @@
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
     "spatie/commonmark-highlighter": "2.1.1",
-    "symfony/cache": "5.4.19",
-    "symfony/config": "5.4.19",
+    "symfony/cache": "5.4.21",
+    "symfony/config": "5.4.21",
     "symfony/http-foundation": "5.4.21",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "5.4.21",
@@ -45,7 +45,7 @@
     "php-mock/php-mock-phpunit": "2.6.1",
     "phpstan/phpstan": "1.9.18",
     "phpstan/phpstan-deprecation-rules": "1.1.1",
-    "phpunit/phpunit": "9.6.3",
+    "phpunit/phpunit": "9.6.4",
     "submitty/php-codesniffer": "2.5.0"
   },
   "scripts": {
