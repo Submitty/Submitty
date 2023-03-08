@@ -743,7 +743,6 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-
             $isNewThread = !$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by'];
             if ($isNewThread) {
                 $class .= " new_thread";
