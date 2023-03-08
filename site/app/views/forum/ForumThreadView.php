@@ -743,10 +743,15 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
+
+            $isNewThread = !$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by'];
+            if ($isNewThread) {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
+                if ($isNewThread) {
+                    $class .= " deleted-unviewed";
+                }
                 $class .= " deleted";
             }
 
@@ -956,9 +961,11 @@ class ForumThreadView extends AbstractView {
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
         }
+        $isNewPost = false;
         if (in_array($post_id, $unviewed_posts)) {
             if ($current_user != $post["author_user_id"]) {
                 $classes[] = "new_post";
+                $isNewPost = true;
             }
         }
         else {
@@ -969,6 +976,9 @@ class ForumThreadView extends AbstractView {
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
+            if ($isNewPost) {
+                $classes[] = "deleted-unviewed";
+            }
             $deleted = true;
         }
         else {
