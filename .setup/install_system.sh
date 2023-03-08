@@ -59,6 +59,7 @@ source ${CURRENT_DIR}/bin/versions.sh
 # PROVISION SETUP
 #################
 
+export DEV_VM=0
 export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
