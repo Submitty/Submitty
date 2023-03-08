@@ -685,6 +685,11 @@ td > a.active-sort {
     margin-top: 10px;
 }
 
+.box > h4 > code{
+    word-wrap: break-word;
+    padding-left: 50px;
+}
+
 .box-block {
     vertical-align: top;
     margin-left: 10px;
@@ -701,8 +706,9 @@ td > a.active-sort {
 .box-block > pre {
     padding: 10px;
     background-color: var(--standard-pale-gray);
-    border: 1px solid var(--standard-light-gray);
+    border: 10px solid var(--standard-light-gray);
     white-space: pre;
+    word-break: break-word;
 }
 
 .half {
