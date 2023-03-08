@@ -219,9 +219,11 @@ bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 # STACK SETUP
 #################
 
-# We only might build analysis tools from source while using vagrant
-echo "Installing stack (haskell)"
-curl -sSL https://get.haskellstack.org/ | sh
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+    # We only might build analysis tools from source on a development machine
+    echo "Installing stack (haskell)"
+    curl -sSL https://get.haskellstack.org/ | sh
+fi
 
 #################################################################
 # USERS SETUP
