@@ -32,9 +32,10 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 * Open-source, free to use, install on your own hardware, or VPS
 
 ## Contributing
-Whether you are a community member or not, we would love your point of view! Feel free to first check out our
-- [contribution guidelines](https://github.com/Submitty/Submitty/blob/main/CONTRIBUTING.md) 
-- The guide outlines the process for **creating an issue** and **submitting a pull request.**
+
+Please Read:  
+[How to Make a Pull Request](https://submitty.org/developer/getting_started/make_a_pull_request)  
+[How to Review a Pull Request](https://submitty.org/developer/getting_started/review_a_pull_request)  
 
 
 # Contact Us
