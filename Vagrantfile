@@ -120,8 +120,8 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
-    vb.memory = 2048
-    vb.cpus = 2
+    vb.memory = 4096
+    vb.cpus = 6
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
     # of sync timewise with the host for however long the host was asleep. Of course, the VM by default will
     # detect this and if the drift is great enough, it'll resync things such that the time matches, otherwise
