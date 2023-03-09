@@ -1804,7 +1804,7 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
           for (auto it = choices.begin(); it != choices.end(); ++it){
               auto it_next = it;
               for (++it_next; it_next != choices.end(); ++it_next){
-                assert (it->value() != it_next->value()); 
+                assert (it.value() != it_next.value()); 
               }
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
