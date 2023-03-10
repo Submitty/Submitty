@@ -1802,12 +1802,6 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
 
           int num_of_choices = 0;
           for (auto it = choices.begin(); it != choices.end(); ++it){
-              auto it_next = it;
-              for (++it_next; it_next != choices.end(); ++it_next){
-                //if (it.value() == it_next.value()) 
-                std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
-                assert (it.value() != it_next.value()); 
-              }
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
 
@@ -1819,6 +1813,15 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
               assert(value != "");
               assert(description != "");
 
+              auto it_next = it;
+              for (++it_next; it_next != choices.end(); ++it_next){
+
+                nlohmann::json choice_next = it_next.value();
+                std::string value_next = choice_next.value("value", "");
+                std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
+                assert (value != value_next); 
+                
+              }
               num_of_choices++;
           }
 
