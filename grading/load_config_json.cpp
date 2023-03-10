@@ -1804,8 +1804,8 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
           for (auto it = choices.begin(); it != choices.end(); ++it){
               auto it_next = it;
               for (++it_next; it_next != choices.end(); ++it_next){
-                if (it.value() == it_next.value()) 
-                  std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
+                //if (it.value() == it_next.value()) 
+                std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
                 assert (it.value() != it_next.value()); 
               }
               // Reassign the value of this iteration to choice
