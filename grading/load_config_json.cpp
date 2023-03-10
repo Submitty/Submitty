@@ -1815,8 +1815,9 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
 
                 nlohmann::json choice_next = it_next.value();
                 std::string value_next = choice_next.value("value", "");
-                if (value == value_next)
+                if (value == value_next) {
                   std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
+                }
                 assert (value != value_next); 
 
               }
