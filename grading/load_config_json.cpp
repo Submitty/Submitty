@@ -1819,7 +1819,9 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
                 std::string value_next = choice_next.value("value", "");
                 std::string description_next = choice_next.value("description", "");
                 if (value == value_next){
-                  std::cout  << "ERROR: Multiple choice question, two answers have the same value. Description: " << description << " and " << description_next << " both have the value: " << value << ". Please change on of the values!" std::endl;
+                  std::cout  << "ERROR: Multiple choice question: two answers have the same value! " << std::endl;
+                  std::cout << "For answer descriptions: " << description << " and " << description_next << " both have the value: " << value << ". "<< std::endl;
+                  std::cout << "Please change one of the values!" << std::endl;
                 }
                 assert (value != value_next); 
 
