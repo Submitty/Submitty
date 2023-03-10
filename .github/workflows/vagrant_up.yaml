@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Installing this is skipped in CI as using it was causing some corruption in
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.
