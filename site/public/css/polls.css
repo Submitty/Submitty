@@ -101,3 +101,8 @@ form {
     flex-grow: 100;
     margin-left: 0.5em;
 }
+
+.correct-tag {
+    color: var(--standard-dark-green);
+    margin-left: 0.5em;
+}

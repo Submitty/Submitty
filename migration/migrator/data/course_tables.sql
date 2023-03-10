@@ -1389,7 +1389,8 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) DEFAULT 'never'::character varying
+    release_histogram character varying(10) DEFAULT 'never'::character varying,
+    release_answer character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -1609,7 +1610,8 @@ ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.regrade_requests.i
 --
 
 CREATE TABLE public.sections_registration (
-    sections_registration_id character varying(255) NOT NULL
+    sections_registration_id character varying(255) NOT NULL,
+    course_section_id character varying(255) DEFAULT ''::character varying
 );
 
 

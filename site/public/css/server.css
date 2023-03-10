@@ -648,6 +648,12 @@ td > a.active-sort {
     font-weight: bold;
 }
 
+#auto-results-queue-msg {
+    padding: 5px 12px;
+    margin-top: 10px;
+    font-size: 15px;
+}
+
 .submission-page-total-header {
     padding: 6px;
     color: var(--text-black);
@@ -683,6 +689,11 @@ td > a.active-sort {
     margin-top: 10px;
 }
 
+.box > h4 > code{
+    word-wrap: break-word;
+    padding-left: 50px;
+}
+
 .box-block {
     vertical-align: top;
     margin-left: 10px;
@@ -699,8 +710,9 @@ td > a.active-sort {
 .box-block > pre {
     padding: 10px;
     background-color: var(--standard-pale-gray);
-    border: 1px solid var(--standard-light-gray);
-    white-space: pre-wrap;
+    border: 10px solid var(--standard-light-gray);
+    white-space: pre;
+    word-break: break-word;
 }
 
 .half {
