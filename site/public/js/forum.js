@@ -1951,6 +1951,7 @@ function loadThreadHandler() {
                     return;
                 }
                 $(obj).find('.thread_box').removeClass('new_thread');
+                $(obj).find('.thread_box').removeClass('deleted-unviewed');
 
                 $('.thread_box').removeClass('active');
 

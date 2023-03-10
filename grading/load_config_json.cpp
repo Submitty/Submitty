@@ -758,9 +758,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  0, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag" << std::endl;
         }
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
@@ -772,10 +771,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag delta" << std::endl;
         }
-
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click has an optional mouse button.
