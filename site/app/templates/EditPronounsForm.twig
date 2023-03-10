@@ -12,9 +12,10 @@
         <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Preferred Pronouns</h2>
         <div class="edit_user_row">
-            <label for="user-pronouns-change">Preferred Pronouns&emsp;</label>
+            <label for="user-pronouns-change">Preferred Pronouns:&emsp;</label>
             <input type="text"
                    name="user_pronouns_change"
+                   value="{{ user_pronouns }}"
                    id="user-pronouns-change"
                    list="default_pronouns_list"
                    placeholder="Type Custom Or Select">
@@ -22,6 +23,7 @@
                     <option value="He/Him"></option>
                     <option value="She/Her"></option>
                     <option value="They/Them"></option>
+                    <option value="Custom(Type Here)"></option>
                 </datalist>
             </input>
         </div>

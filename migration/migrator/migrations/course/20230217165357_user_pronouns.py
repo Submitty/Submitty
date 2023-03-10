@@ -15,7 +15,7 @@ def up(config, database, semester, course):
     :type course: str
     """
     sql = """ALTER TABLE users ADD COLUMN IF NOT EXISTS user_pronouns 
-      character varying NOT NULL DEFAULT '';"""
+      character varying(255) DEFAULT '';"""
     database.execute(sql)
     pass
 

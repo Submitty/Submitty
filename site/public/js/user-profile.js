@@ -7,6 +7,7 @@ function showUpdatePrefNameForm() {
     $('[name="user_name_change"]', form).val('');
     $('#user-givenname-change').focus();
 }
+// eslint-disable-next-line no-unused-vars
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
@@ -64,7 +65,8 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
-function updateUserPronouns () {
+// eslint-disable-next-line no-unused-vars
+function updateUserPronouns() {
     const pronouns = $('#user-pronouns-change');
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
@@ -72,9 +74,11 @@ function updateUserPronouns () {
     }
     else {
         const data = new FormData();
-        data.append('csrf_token', csrfToken); //undefined
-        data.append('pronouns', pronouns.val()); //Currently undefined
-        const url = buildUrl(['user_profile', 'change_pronouns']); //Currently undefined
+        // eslint-disable-next-line no-undef
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns.val());
+        // eslint-disable-next-line no-undef
+        const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
             url,
             type: 'POST',
@@ -85,7 +89,8 @@ function updateUserPronouns () {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const {data} = response;
-                    displaySuccessMessage(data.message); //Currently undefined
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns
                     $('#pronouns-row').html(`${icon} ${data.pronouns}`);
@@ -93,11 +98,13 @@ function updateUserPronouns () {
                     pronouns.data('current-pronouns', data.pronouns);
                 }
                 else {
-                    displayErrorMessage(response.message); //currently undefined
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage(response.message);
                 }
             },
             error: function() {
-                displayErrorMessage('Some went wrong while updating pronouns!'); //currently undefined
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Some went wrong while updating pronouns!');
             },
         });
     }
