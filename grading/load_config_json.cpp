@@ -1801,7 +1801,7 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
           nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
 
           int num_of_choices = 0;
-          for (auto it = choices.begin(); it != choices.end(); ++it){
+          for (auto it = choices.begin(), it_next = it; it != choices.end(); ++it, it_next = it){
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
 
@@ -1813,13 +1813,14 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
               assert(value != "");
               assert(description != "");
 
-              auto it_next = it;
               for (++it_next; it_next != choices.end(); ++it_next){
 
                 nlohmann::json choice_next = it_next.value();
                 std::string value_next = choice_next.value("value", "");
-                if (value == value_next)
-                  std::cout  << "ERROR: " << it.value() << " == " << it_next.value() << std::endl;
+                std::string description_next = choice_next.value("description", "");
+                if (value == value_next){
+                  std::cout  << "ERROR: Multiple choice question, two answers have the same value. Description: " << description << " and " << description_next << " both have the value: " << value << ". Please change on of the values!" std::endl;
+                }
                 assert (value != value_next); 
 
               }
