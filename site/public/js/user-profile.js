@@ -13,7 +13,6 @@ function showUpdatePronounsForm() {
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
-    console.log('check');
 }
 // eslint-disable-next-line no-unused-vars
 function showUpdatePasswordForm() {
