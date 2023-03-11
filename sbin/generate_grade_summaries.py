@@ -39,6 +39,7 @@ with open(submitty_creds_file, 'r') as file:
 if 'token' not in creds or not creds['token']:
     raise Exception('Unable to read credentials from submitty_admin.json')
 
+
 def main():
     """Automatically call Generate Grade Summaries API."""
     parser = argparse.ArgumentParser(
