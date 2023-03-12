@@ -155,9 +155,19 @@
 
 {% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
     {% set showFolder = false %}
-    {% for name, course_material in course_materials %}
-        {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
-        {% set showFolder = true %}
+    {% for course_material in course_materials %}
+        {% if course_material is iterable %}
+            {% set indent = indent + 1 %}
+            {% for inner_course_material in course_material %}
+                {% if user_group < 4 or ( not inner_course_material.isHiddenFromStudents and (inner_course_material.isSectionAllowed(user_section)) ) %}
+                    {% set showFolder = true %}
+                {% endif %}
+            {% endfor %}
+            {% set indent = indent - 1 %}
+        {% else %}
+            {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
+                {% set showFolder = true %}
+            {% endif %}
         {% endif %}
     {% endfor %}
     {% if showFolder %}
@@ -185,7 +195,7 @@
                 </div>
             </div>
         {% endif %}
-    {% endif %}    
+    {% endif %}
 {% endmacro %}
 
 <script>
