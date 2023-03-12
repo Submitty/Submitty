@@ -159,6 +159,15 @@
         {% if course_material is iterable %}
             {% set indent = indent + 1 %}
             {% for inner_course_material in course_material %}
+                {% if inner_course_material is iterable %}
+                    {% set indent = indent + 1 %}
+                    {% for index3_course_material in inner_course_material %}
+                        {% if user_group < 4 or ( not index3_course_material.isHiddenFromStudents and (index3_course_material.isSectionAllowed(user_section)) ) %}
+                            {% set showFolder = true %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set indent = indent - 1 %}
+                {% endif %}
                 {% if user_group < 4 or ( not inner_course_material.isHiddenFromStudents and (inner_course_material.isSectionAllowed(user_section)) ) %}
                     {% set showFolder = true %}
                 {% endif %}
