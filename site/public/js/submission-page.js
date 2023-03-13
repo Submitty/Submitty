@@ -42,7 +42,8 @@ function syncWithServer(criticalSync) {
 
             try {
                 response = JSON.parse(res);
-            } catch (err) {
+            }
+            catch (err) {
                 handleSyncError(err);
                 return;
             }
