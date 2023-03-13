@@ -184,6 +184,7 @@ HTML;
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
+        $this->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
     }
 
     /**
