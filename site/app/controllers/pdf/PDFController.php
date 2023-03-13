@@ -33,7 +33,7 @@ class PDFController extends AbstractController {
                 if ($real) {
                     $path .= "/" . $id;
                 }
-                else{
+                else {
                     $user_id = $file_path_parts[$index];
                     $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $id);
                     $path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
