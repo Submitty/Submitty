@@ -77,7 +77,12 @@
     border: groove;
     border-width: 2px;
     border-radius: 8px;
+    text-align: center;
 }
+.bob:hover{
+    background-color: blue;
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
