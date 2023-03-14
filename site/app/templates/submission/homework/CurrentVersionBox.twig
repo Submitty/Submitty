@@ -35,11 +35,11 @@
             </div>
             
 
-            <a onclick='downloadFile("/usr/local/submitty/more_autograding_examples/notebook_basic/config/config.json")' 
+            <a onclick='downloadFile("{{ /usr/local/submitty/more_autograding_examples/notebook_basic/config/config.json|url_encode }}", "submissions")' 
             aria-label="Print to PDF" class="bob" tabindex="0">
              Print to PDF </a>
 
-
+             
 
             {# /Switch version button #}
 
