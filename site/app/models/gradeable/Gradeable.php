@@ -2359,7 +2359,6 @@ class Gradeable extends AbstractModel {
      * @param string $user_id
      * @return bool
      *
-     * 0 = False, 1 = True, 2 = True but allows for change
      */
     public function isLocked(string $user_id): bool {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
