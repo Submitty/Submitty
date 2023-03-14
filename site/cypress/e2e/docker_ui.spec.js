@@ -169,7 +169,7 @@ describe('Docker UI Test', () => {
             .contains('td', 'submitty/python:2.7')
             .parent('tr')
             .find('td')
-            .eq(7) 
+            .eq(7)
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
