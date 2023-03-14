@@ -75,6 +75,7 @@
     margin-right: 10px;
     margin: 10px;
     background-color: yellow;
+    width: 30px;
 }
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
