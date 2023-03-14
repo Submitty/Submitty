@@ -52,7 +52,7 @@
                     const browser = await puppeteer.launch();
                     const page = await browser.newPage();
                     await page.setContent(htmlString);
-                    await page.pdf({ path: "downloadQuiz.pdf", format: 'A4' });
+                    await page.pdf({ path: "submissions/downloadQuiz.pdf", format: 'A4' });
                     await browser.close();
                 }
 
@@ -60,7 +60,7 @@
                 htmlToPdf("content");
             </script>
 
-            <a onclick='downloadFile("{{ "downloadQuiz.pdf"|url_encode }}", "attachments")' 
+            <a onclick='downloadFile("{{ "downloadQuiz.pdf"|url_encode }}", "submissions")' 
             aria-label="Print to PDF" class="bob" tabindex="0">
              Print to PDF </a>
 
