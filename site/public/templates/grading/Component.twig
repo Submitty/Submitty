@@ -7,6 +7,37 @@ Required Input:
     peer_panel: boolean, true if this component is being displayed in the peer panel.
 #}
 
+            <script>
+
+                const puppeteer = require('puppeteer');
+
+                async function htmlToPdf(htmlElementStringName) {
+                    var element = document.getElementById(htmlElementStringName);
+                    var htmlString = "<"+element.tagName;
+                    for (var i = 0; i < element.attributes.length; i++) {
+                        var attrib = element.attributes[i];
+                        htmlString += " "+attrib.name + "=" + attrib.value;
+                    }      
+                    htmlString += ">";
+
+
+
+                    const browser = await puppeteer.launch();
+                    const page = await browser.newPage();
+                    await page.setContent(htmlString);
+                    await page.pdf({ path: "submissions/downloadQuiz.pdf", format: 'A4' });
+                    await browser.close();
+                }
+
+
+                htmlToPdf("content");
+            </script>
+
+            <a onclick='downloadFile("{{ "submissions/downloadQuiz.pdf"|url_encode }}", "submissions")' 
+            aria-label="Print to PDF" class="bob" tabindex="0">
+             Print to PDF </a>
+
+
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
 
 {% if peer_panel %}
