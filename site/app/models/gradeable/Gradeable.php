@@ -2357,11 +2357,11 @@ class Gradeable extends AbstractModel {
      * Determines if gradeable is locked for user
      *
      * @param string $user_id
-     * @return int
+     * @return bool
      *
      * 0 = False, 1 = True, 2 = True but allows for change
      */
-    public function isLocked(string $user_id): int {
+    public function isLocked(string $user_id): bool {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             if ($dependent_gradeable != null) {
@@ -2369,21 +2369,16 @@ class Gradeable extends AbstractModel {
                 if ($dependent_gradeable_graded != null) {
                     if ($dependent_gradeable_graded->hasSubmission()) {
                         if ($dependent_gradeable_graded->getAutoGradingScore() >= $this->depends_on_points) {
-                            return 0;
+                            return false;
                         }
                     }
                 }
             }
         }
         else {
-            return 0;
+            return false;
         }
-
-        $user = $this->core->getUser();
-        if ($user->accessGrading()) {
-            return 2;
-        }
-        return 1;
+        return true;
     }
     /**
      * Returns prerequisite for a gradeable
