@@ -593,9 +593,8 @@ class NavigationView extends AbstractView {
         }
         $bypass = false;
         $prerequisite = '';
-        if ($gradeable->isLocked($core->getUser()->getId())) {
-            $user = $core->getUser();
-            if ($user->accessGrading()) {
+        if ($gradeable->isLocked($core->getUser()->getId()) == 1 || $gradeable->isLocked($core->getUser()->getId()) == 2) {
+            if ($gradeable->isLocked($core->getUser()->getId()) == 2) {
                 $bypass = true;
             }
             $disabled = true;
