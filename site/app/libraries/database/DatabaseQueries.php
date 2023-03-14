@@ -815,7 +815,23 @@ SQL;
 
     public function isStaffPost($author_id) {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
-        return intval($this->course_db->rows()[0]['user_group']) <= 3;
+        return intval($this->course_db->row()['user_group']) <= User::GROUP_LIMITED_ACCESS_GRADER;
+    }
+
+    public function isLimitedAccessGraderPost($author_id) {
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
+        return intval($this->course_db->row()['user_group']) === User::GROUP_LIMITED_ACCESS_GRADER;
+    }
+
+    public function isInstructorOrFullAccessGraderPost($author_id) {
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
+        return intval($this->course_db->row()['user_group']) <= User::GROUP_FULL_ACCESS_GRADER;
+    }
+
+    public function getAuthorUserGroups($author_ids) {
+        $placeholders = $this->createParamaterList(count($author_ids));
+        $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
+        return $this->course_db->rows();
     }
 
     public function postHasHistory($post_id) {

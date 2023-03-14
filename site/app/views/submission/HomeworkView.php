@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -1173,12 +1174,27 @@ class HomeworkView extends AbstractView {
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
             $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
                 if ($gc_id != 0) {
                     $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
                     $gc_title = $component->getTitle();
+                }
+
+                $instructor_full_access = [];
+                $limited_access_grader = [];
+
+                $grade_inquiry_posts_for_id = $grade_inquiry_posts[$grade_inquiry->getId()];
+                $author_user_ids = array_map(function ($post) {
+                    return $post["user_id"];
+                }, $grade_inquiry_posts_for_id);
+                $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+                foreach ($author_user_groups as $author) {
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] == User::GROUP_LIMITED_ACCESS_GRADER;
+                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
                 }
 
                 // format posts
@@ -1188,7 +1204,21 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+
+                   // $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName(); - >changed from displayedfirstName to givenName
+
+                    $is_limited_access_grader = $limited_access_grader[$post['user_id']];
+                    $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
+                    $first_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $last_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedLastName();
+                    $name = $first_name;
+                    if ($is_limited_access_grader) {
+                        $name = $first_name . " " . substr($last_name, 0, 1) . ".";
+                    }
+                    if ($is_instructor_or_full_access_grader) {
+                        $name = $first_name . ' ' . $last_name;
+                    }
+//End of changes 
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
