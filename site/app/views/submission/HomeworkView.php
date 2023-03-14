@@ -1173,7 +1173,8 @@ class HomeworkView extends AbstractView {
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
-            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+            $queries = $this->core->getQueries();
+            $grade_inquiry_posts = $queries->getRegradeDiscussions($grade_inquiries);
 
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
@@ -1190,7 +1191,7 @@ class HomeworkView extends AbstractView {
                 $author_user_ids = array_map(function ($post) {
                     return $post["user_id"];
                 }, $grade_inquiry_posts_for_id);
-                $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+                $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
 
                 foreach ($author_user_groups as $author) {
                     $limited_access_grader[$author["user_id"]] = $author["user_group"] == User::GROUP_LIMITED_ACCESS_GRADER;
@@ -1203,12 +1204,12 @@ class HomeworkView extends AbstractView {
                     if (empty($post)) {
                         break;
                     }
-                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+                    $is_staff = $queries->isStaffPost($post['user_id']);
 
                     $is_limited_access_grader = $limited_access_grader[$post['user_id']];
                     $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
-                    $given_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
-                    $family_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFamilyName();
+                    $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
                     $name = $given_name;
                     if ($is_limited_access_grader) {
                         $name = $given_name . " " . substr($family_name, 0, 1) . ".";
@@ -1216,7 +1217,7 @@ class HomeworkView extends AbstractView {
                     if ($is_instructor_or_full_access_grader) {
                         $name = $given_name . ' ' . $family_name;
                     }
-//End of changes 
+
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
