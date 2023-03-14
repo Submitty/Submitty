@@ -73,9 +73,10 @@
 
 .bob {
     background-color: cadetblue;
+    border-color: black;
     width: 120px;
     border: groove;
-    border-width: 2px;
+    border-width: 5px;
     border-radius: 8px;
     text-align: center;
 }
