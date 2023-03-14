@@ -443,7 +443,7 @@ class User extends AbstractModel {
     private function setDisplayedGivenName() {
         $this->displayed_given_name = (!empty($this->preferred_given_name)) ? $this->preferred_given_name : $this->legal_given_name;
     }
-    
+
     private function setDisplayedFamilyName() {
         $this->displayed_family_name = (!empty($this->preferred_family_name)) ? $this->preferred_family_name : $this->legal_family_name;
     }
