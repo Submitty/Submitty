@@ -79,7 +79,7 @@ echo "installing cmake"
 apt-get install -qqy cmake
 
 # for Lichen (Plagiarism Detection)
-apt-get install -qqy python-clang-6.0
+apt-get install -qqy python3-clang-11
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
