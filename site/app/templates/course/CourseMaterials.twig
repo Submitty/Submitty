@@ -162,14 +162,35 @@
                 {% if inner_course_material is iterable %}
                     {% set indent = indent + 1 %}
                     {% for index3_course_material in inner_course_material %}
-                        {% if user_group < 4 or ( not index3_course_material.isHiddenFromStudents and (index3_course_material.isSectionAllowed(user_section)) ) %}
-                            {% set showFolder = true %}
+                        {% if index3_course_material is iterable %}
+                            {% set indent = indent + 1 %}
+                            {% for index4_course_material in index3_course_material %}
+                                {% if index4_course_material is iterable %}
+                                    {% set indent = indent + 1 %}
+                                    {% for index5_course_material in index4_course_material %}
+                                        {% if user_group < 4 or (  not index5_course_material.isHiddenFromStudents and (index5_course_material.isSectionAllowed(user_section)) ) %}
+                                            {% set showFolder = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% set indent = indent - 1 %}
+                                {% else %}
+                                    {% if user_group < 4 or (  not index4_course_material.isHiddenFromStudents and (index4_course_material.isSectionAllowed(user_section)) ) %}
+                                        {% set showFolder = true %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% set indent = indent - 1 %}
+                        {% else %}
+                            {% if user_group < 4 or (  not index3_course_material.isHiddenFromStudents and (index3_course_material.isSectionAllowed(user_section)) ) %}
+                                {% set showFolder = true %}
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                     {% set indent = indent - 1 %}
-                {% endif %}
-                {% if user_group < 4 or ( not inner_course_material.isHiddenFromStudents and (inner_course_material.isSectionAllowed(user_section)) ) %}
-                    {% set showFolder = true %}
+                {% else %}
+                    {% if user_group < 4 or (  not inner_course_material.isHiddenFromStudents and (inner_course_material.isSectionAllowed(user_section)) ) %}
+                        {% set showFolder = true %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
             {% set indent = indent - 1 %}
