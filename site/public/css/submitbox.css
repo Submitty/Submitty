@@ -71,6 +71,10 @@
     margin-right: 10px;
 }
 
+.bob {
+    margin-right: 10px;
+    background-color: blue;
+}
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
