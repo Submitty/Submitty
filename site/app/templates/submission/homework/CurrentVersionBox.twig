@@ -34,6 +34,13 @@
 
             </div>
             <h3 class = "bob"> Print to PDF </h3>
+
+            <a onclick='downloadFile("{{ file.path|url_encode }}", "attachments")' 
+
+            aria-label="Print to PDF" class="bob" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+
+
+
             {# /Switch version button #}
 
             {# disable changing submissions or cancelling assignment if student submit not allowed #}

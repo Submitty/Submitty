@@ -81,6 +81,7 @@
     text-align: center;
 }
 .bob:hover{
+    border-color: grey;
     background-color: #79cbcd;
 }
 
