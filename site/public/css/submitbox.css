@@ -74,7 +74,7 @@
 .bob {
     margin-right: 10px;
     margin: 10px;
-    background-color: blue;
+    background-color: yellow;
 }
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
