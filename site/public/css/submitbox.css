@@ -80,7 +80,7 @@
     text-align: center;
 }
 .bob:hover{
-    background-color: blue;
+    background-color: #79cbcd;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
