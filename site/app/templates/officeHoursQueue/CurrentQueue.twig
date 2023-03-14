@@ -24,7 +24,7 @@
 
           {% if entry['current_state'] == 'waiting' %}
             <td>
-             <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/startHelp" {% if entry['paused'] %}onsubmit="return confirm('Are you sure you want to start helping this student? This student is currently paused.');"{% endif %}> 
+              <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/startHelp" {% if entry['paused'] %}onsubmit="return confirm('Are you sure you want to start helping this student? This student is currently paused.');"{% endif %}>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['paused'] %}

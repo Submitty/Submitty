@@ -103,7 +103,7 @@ class CalendarInfo extends AbstractModel {
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
                     'class' => ($submit_btn === null) ? "" : explode(' ', $submit_btn->getClass())[1],
-                    'disabled' => !($submit_btn === null) && ($submit_btn->isDisabled()),
+                    'disabled' => !($submit_btn === null) && $submit_btn->isDisabled(),
                     'show_due' => true,
                     'icon' => '',
                 ];

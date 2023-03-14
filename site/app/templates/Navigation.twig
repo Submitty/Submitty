@@ -109,7 +109,7 @@ function confirmBypass(str, redirect){
                 {% if button.getBypass() %}
                     disabled
                     {% set str1 = 'This gradeable requires ' %}
-                    {% set str2 = ' [PLACEHOLDER TEXT HERE]'%}
+                    {% set str2 = ' Waiting on Barb to give me a prompt!!!'%}
                     onclick="confirmBypass('{{ str1 ~ button.getPrerequisite() ~ str2 }}', '{{ button.getHref() }}' );"
                     title='Please complete {{ button.getPrerequisite()}} first'
                 {% else %}
