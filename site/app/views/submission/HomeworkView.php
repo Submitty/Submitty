@@ -1205,18 +1205,16 @@ class HomeworkView extends AbstractView {
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
 
-                   // $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName(); - >changed from displayedfirstName to givenName
-
                     $is_limited_access_grader = $limited_access_grader[$post['user_id']];
                     $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
-                    $first_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
-                    $last_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedLastName();
-                    $name = $first_name;
+                    $given_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $family_name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFamilyName();
+                    $name = $given_name;
                     if ($is_limited_access_grader) {
-                        $name = $first_name . " " . substr($last_name, 0, 1) . ".";
+                        $name = $given_name . " " . substr($family_name, 0, 1) . ".";
                     }
                     if ($is_instructor_or_full_access_grader) {
-                        $name = $first_name . ' ' . $last_name;
+                        $name = $given_name . ' ' . $family_name;
                     }
 //End of changes 
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
