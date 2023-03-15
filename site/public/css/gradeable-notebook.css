@@ -129,7 +129,8 @@ img {
 
 
 @media print {
-    *:not(aside){
+
+    :not(.content){
         display: none;
     }
 
