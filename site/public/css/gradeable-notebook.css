@@ -141,11 +141,8 @@ img {
     }
 
     gradeable-submission-cont{
-        width: 100%;
-        height: 100%;
-    }
-    wrapper{
-        display: none;
+        margin: 0px;
+        padding: 0px;
     }
     
 
