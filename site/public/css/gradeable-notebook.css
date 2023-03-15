@@ -138,10 +138,6 @@ img {
     }
 
     .markdown.content.gradeable_message{
-        display: none;
-    }
-
-    .content{
-        display: none;
+        
     }
 }
