@@ -132,4 +132,16 @@ img {
     aside{
         display: none;
     }
+
+    nav{
+        display: none;
+    }
+
+    .markdown.content.gradeable_message{
+        display: none;
+    }
+
+    .content{
+        display: none;
+    }
 }
