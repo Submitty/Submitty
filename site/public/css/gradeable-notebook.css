@@ -129,7 +129,10 @@ img {
 
 
 @media print {
-    :not(#gradeable-submission-cont){
+    div:not(#gradeable-submission-cont){
+        display: none;
+    }
+    :not(div){
         display: none;
     }
 }
