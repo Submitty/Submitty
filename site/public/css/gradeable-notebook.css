@@ -140,6 +140,10 @@ img {
         display: none;
     }
 
+    gradeable-submission-cont{
+        width: 100%;
+        height: 100%;
+    }
     
 
 }
