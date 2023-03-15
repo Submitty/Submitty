@@ -74,11 +74,17 @@
 #print-button-for-quiz {
     background-color: cadetblue;
     border-color: black;
-    width: 120px;
+    width: 70px;
+    height: 30px;
     border: groove;
     border-width: 5px;
     border-radius: 8px;
     text-align: center;
+}
+
+#print-button-for-quiz:hover{
+    border-color: grey;
+    background-color: #79cbcd;
 }
 
 
