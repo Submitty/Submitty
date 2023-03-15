@@ -130,8 +130,14 @@ img {
 
 @media print {
 
-  .content:not(.content#gradeable-submission-cont) {
-    display: none;
-}
+    .content:not(.content#gradeable-submission-cont) {
+        display: none;
+    }
+    aside{
+        display: none;
+    }
+    .flex-row.shadow{
+        display: none;
+    }
 
 }
