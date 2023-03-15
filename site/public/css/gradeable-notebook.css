@@ -129,18 +129,6 @@ img {
 
 
 @media print {
-    aside{
-        display: none;
-    }
-
-    .flex-row.shadow{
-        display: none;
-    }
-
-    .markdown.content.gradeable_message{
-        display: none;
-    }
-    .content{
-        display: none;
-    }
+    * {display:none;}
+    
 }
