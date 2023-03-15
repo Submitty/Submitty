@@ -129,9 +129,7 @@ img {
 
 
 @media print {
-    * {display:none;}
-
-    gradeable-submission-cont{
-        display: true;
+    :not(gradeable-submission-cont){
+        display: none;
     }
 }
