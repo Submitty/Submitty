@@ -130,7 +130,7 @@ img {
 
 @media print {
 
-    .content:not(.content#gradeable-submission-cont) {
+    .content:not(#gradeable-submission-cont) {
         display: none;
     }
     aside{
@@ -139,5 +139,7 @@ img {
     .flex-row.shadow{
         display: none;
     }
+
+    
 
 }
