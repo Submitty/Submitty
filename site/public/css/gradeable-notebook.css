@@ -133,11 +133,11 @@ img {
         display: none;
     }
 
-    .flex-row{
+    nav{
         display: none;
     }
 
-    .markdown{
+    .markdown.content.gradeable_message{
         display: none;
     }
 
