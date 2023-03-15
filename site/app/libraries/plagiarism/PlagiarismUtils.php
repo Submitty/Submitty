@@ -68,15 +68,7 @@ class PlagiarismUtils {
 
         // sort array before returning
         usort($resultArray, function (Interval $a, Interval $b) {
-            if ($a->getStart() > $b->getStart()) {
-                return 1;
-            }
-            elseif ($a->getStart() < $b->getStart()) {
-                return -1;
-            }
-            else {
-                return 0;
-            }
+            return $a->getStart() - $b->getStart();
         });
 
         // prevent overlapping regions on the UI
