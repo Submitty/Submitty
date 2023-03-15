@@ -32,15 +32,8 @@
                 {% endif %}
             </div>
 
-            <button id="print-button-for-quiz">Print</button>
-            <script>
-                const printButton = document.getElementById('print-button-for-quiz');
-  
-                printButton.addEventListener('click', function(event) {
-                const ctrlPEvent = new KeyboardEvent('keydown', { key: 'p', ctrlKey: true });
-                document.dispatchEvent(ctrlPEvent);
-                });
-            </script>
+            <button id="print-button-for-quiz" onclick="window.print()">Print</button>
+
 
             {# /Switch version button #}
 
