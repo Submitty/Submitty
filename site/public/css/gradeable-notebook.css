@@ -130,8 +130,12 @@ img {
 
 @media print {
 
-    :not(.content){
-        display: none;
-    }
+
+
+    @media print {
+  *:not(#gradeable-submission-cont) {
+    display: none;
+  }
+}
 
 }
