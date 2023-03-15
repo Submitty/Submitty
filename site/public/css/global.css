@@ -59,6 +59,10 @@ nav a > i.f {
     padding-right: 70px;
 }
 
+.flatpickr-calendar {
+    position: fixed !important;
+}
+
 @media (max-width: 541px) {
     #breadcrumbs {
         padding-left: 0;

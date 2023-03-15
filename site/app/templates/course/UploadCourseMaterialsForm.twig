@@ -165,6 +165,9 @@
                                 },
                                 {
                                     label: "End of time"
+                                },
+                                  {
+                                    label: "Close Calendar"
                                 }
                             ],
                             onClick: (index, fp) => {
@@ -183,6 +186,11 @@
                                     case 3:
                                         date = new Date("9998-01-01 00:00:00");
                                         break;
+                                    case 4:
+                                    date = fp.selectedDates;
+                                    fp.setDate(date);
+                                    fp.close();
+                                    break;
                                 }
                                 fp.setDate(date);
                             }
