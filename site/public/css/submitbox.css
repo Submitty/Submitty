@@ -71,7 +71,7 @@
     margin-right: 10px;
 }
 
-print-button-for-quiz {
+#print-button-for-quiz {
     background-color: cadetblue;
     border-color: black;
     width: 120px;
@@ -80,10 +80,7 @@ print-button-for-quiz {
     border-radius: 8px;
     text-align: center;
 }
-print-button-for-quiz:hover{
-    border-color: grey;
-    background-color: #79cbcd;
-}
+
 
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
