@@ -130,12 +130,8 @@ img {
 
 @media print {
 
-
-
-    @media print {
-  *:not(#gradeable-submission-cont) {
+  .content:not(.content#gradeable-submission-cont) {
     display: none;
-  }
 }
 
 }
