@@ -140,7 +140,7 @@ img {
         display: none;
     }
 
-    gradeable-submission-cont{
+    .content{
         margin: 0px;
         padding: 0px;
     }
