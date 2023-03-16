@@ -226,7 +226,7 @@ $(document).ready(function () {
         if (data['depends_on'] !== null) {
             data['depends_on_points'] == points;
         }
-        else if (data['depends_on_points'] != null) {
+        else if (data['depends_on_points'] !== null) {
             data['depends_on'] = gradeable;
         }
 
