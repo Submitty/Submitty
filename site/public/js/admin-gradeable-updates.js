@@ -223,8 +223,8 @@ $(document).ready(function () {
             }
             data[val.name] = $(val).val();
         };
-        if (data['depends_on'] != null) {
-            data['depends_on_points'] = points;
+        if (data['depends_on'] !== null) {
+            data['depends_on_points'] == points;
         }
         else if (data['depends_on_points'] != null) {
             data['depends_on'] = gradeable;
