@@ -129,7 +129,6 @@ img {
 
 
 @media print {
-
     .content:not(#gradeable-submission-cont), aside, .flex-row.shadow {
         display: none;
     }
@@ -150,11 +149,6 @@ img {
     p{
         font-size: 16px;
     }
-    .notebook h1, .notebook h2, .notebook h3, .notebook h4, .notebook h5, .notebook h6, .notebook h7 {
-        margin-top: 0;
-        margin-bottom: 0;
-        margin-left: 0;
-        margin-right: 0;
-    }
+
 
 }
