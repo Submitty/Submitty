@@ -82,6 +82,14 @@
     }
 }
 
+
+.mobile-table th,
+.mobile-table td {
+    text-align: center;
+    padding: 5px 10px;
+}
+
+
 @media (min-width: 831px) {
     .mobile-table {
         border: 1px solid var(--standard-hover-light-gray);
@@ -108,6 +116,11 @@
     .mobile-table th:last-child {
         padding-right: 15px;
     }
+    
+    .mobile-table tr:nth-child(even) td {
+        background: var(--standard-light-gray);
+    }
+    
 }
 
 .peer-table-data {
