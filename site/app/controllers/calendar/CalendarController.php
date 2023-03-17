@@ -50,10 +50,8 @@ class CalendarController extends AbstractController {
         $user = $this->core->getUser();
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId()); // Needs to be fixed, need to pass single course, not all courses that student is enrolled in
         $name = $this->core->getConfig()->getCourse();
-        foreach($courses as $course)
-        {
-            if($course->getTitle() == $name)
-            {
+        foreach ($courses as $course) {
+            if ($course->getTitle() == $name) {
                 $oneCourse = [$course];
                 break;
             }
@@ -82,7 +80,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("That is not a valid calendar item type".$type);
+            $this->core->addErrorMessage("That is not a valid calendar item type");
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
         $calendar_item->setDate(new \DateTime($date));

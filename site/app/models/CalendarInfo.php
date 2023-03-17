@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\entities\calendar\CalendarItem;
 use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
