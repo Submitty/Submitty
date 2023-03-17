@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\poll\Poll;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
@@ -90,8 +91,8 @@ class ReportController extends AbstractController {
         ];
 
         // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c, $d) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c, $d);
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c);
             return null;
         });
 
@@ -274,15 +275,13 @@ class ReportController extends AbstractController {
             $all_late_days[$row['user_id']][] = $row;
         }
 
-        $all_polls = $this->core->getQueries()->getPolls();
-
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
 
         // Method to call the callback with the required parameters
-        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days, $all_polls) {
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days) {
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
             $late_days = new LateDays($this->core, $current_user, $ggs, $all_late_days[$current_user->getId()] ?? []);
-            return $per_user_callback($current_user, $ggs, $late_days, $all_polls);
+            return $per_user_callback($current_user, $ggs, $late_days);
         };
         foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $graded_gradeable_sort_keys) as $gg) {
             /** @var GradedGradeable $gg */
@@ -308,7 +307,7 @@ class ReportController extends AbstractController {
                     // This user had no results, so generate results
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
                     $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
-                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days, $all_polls);
+                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days);
                 }
             }
         }
@@ -331,8 +330,8 @@ class ReportController extends AbstractController {
         $row = [];
 
         $row['User ID'] = $user->getId();
-        $row['First Name'] = $user->getDisplayedFirstName();
-        $row['Last Name'] = $user->getDisplayedLastName();
+        $row['Given Name'] = $user->getDisplayedGivenName();
+        $row['Family Name'] = $user->getDisplayedFamilyName();
         $row['Registration Section'] = $user->getRegistrationSection();
 
         foreach ($ggs as $gg) {
@@ -364,14 +363,15 @@ class ReportController extends AbstractController {
      * @param GradedGradeable[] $ggs The list of graded gradeables, indexed by gradeable id
      * @param LateDays $late_days The late day info for these graded gradeables
      */
-    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days, array $polls) {
+    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days) {
 
         $user_data = [];
         $user_data['user_id'] = $user->getId();
-        $user_data['legal_first_name'] = $user->getLegalFirstName();
-        $user_data['preferred_first_name'] = $user->getPreferredFirstName();
-        $user_data['legal_last_name'] = $user->getLegalLastName();
-        $user_data['preferred_last_name'] = $user->getPreferredLastName();
+        $user_data['user_numeric_id'] = $user->getNumericId();
+        $user_data['legal_given_name'] = $user->getLegalGivenName();
+        $user_data['preferred_given_name'] = $user->getPreferredGivenName();
+        $user_data['legal_family_name'] = $user->getLegalFamilyName();
+        $user_data['preferred_family_name'] = $user->getPreferredFamilyName();
         $user_data['registration_section'] = $user->getRegistrationSection();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
@@ -391,12 +391,23 @@ class ReportController extends AbstractController {
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {
-        $polls = $this->core->getQueries()->getPolls();
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
+        $polls = $repo->findAllWithAllResponses();
         $polls_data = [];
         foreach ($polls as $poll) {
+            $responses = [];
+            /** @var \app\entities\poll\Response */
+            foreach ($poll->getUserResponses() as $response) {
+                if (!array_key_exists($response->getStudentId(), $responses)) {
+                    $responses[$response->getStudentId()] = [];
+                }
+                $responses[$response->getStudentId()][] = $response->getOption()->getOrderId();
+            }
+
             $polls_data[] = [
                 "id" => $poll->getId(),
-                "responses" => $poll->getUserResponses()
+                "responses" => $responses
             ];
         }
         FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses.json"), $polls_data);

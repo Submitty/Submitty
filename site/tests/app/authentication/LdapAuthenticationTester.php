@@ -46,8 +46,8 @@ class LdapAuthenticationTester extends TestCase {
         $queries = $this->createMock(DatabaseQueries::class);
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
@@ -79,8 +79,8 @@ class LdapAuthenticationTester extends TestCase {
         $queries = $this->createMock(DatabaseQueries::class);
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false

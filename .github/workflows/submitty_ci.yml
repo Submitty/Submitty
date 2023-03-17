@@ -11,7 +11,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.2
+  PHP_VER: 7.4
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
@@ -22,12 +22,12 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -44,12 +44,12 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -68,12 +68,12 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
             - name: Cache Node Modules
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.npm
                   key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -94,15 +94,15 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: shivammathur/setup-php@2.7.0
+            - uses: actions/checkout@v3
+            - uses: shivammathur/setup-php@2.24.0
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
               id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
             - name: Install Composer
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -129,17 +129,17 @@ jobs:
           run:
               working-directory: site
       steps:
-          - uses: actions/checkout@v2
-          - uses: shivammathur/setup-php@2.7.0
+          - uses: actions/checkout@v3
+          - uses: shivammathur/setup-php@2.24.0
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
               coverage: pcov
           - name: Cache Composer
             id: composer-cache
-            run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
           - name: Install Composer
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
                 path: ${{ steps.composer-cache.outputs.dir }}
                 key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -159,12 +159,12 @@ jobs:
     python-lint:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
-          uses: actions/cache@v2
+          uses: actions/cache@v3
           with:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -181,12 +181,12 @@ jobs:
     python-unit:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
-          uses: actions/cache@v2
+          uses: actions/cache@v3
           with:
             path: ~/.cache/pip
             key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -235,6 +235,35 @@ jobs:
             files: autograder/coverage.xml
             flags: autograder
 
+        #submitty_daemon_jobs unit tests
+        - name: Install bulk upload dependencies
+          run: |
+            sudo apt-get install -y poppler-utils
+            sudo apt-get install -y libzbar0
+
+        - name: Run bulk upload unit tests
+          working-directory: sbin/submitty_daemon_jobs
+          run : |
+            coverage run -m unittest discover tests -t .
+            coverage xml -i
+
+        - name: Upload submitty_daemon_jobs Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: sbin/submitty_daemon_jobs/coverage.xml
+            flags: submitty_daemon_jobs
+
+
+    shellcheck:
+      name: ShellCheck
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v3
+        - name: install ShellCheck
+          run: sudo apt-get install -y shellcheck
+        - name: Run ShellCheck
+          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
 
     e2e:
         needs:
@@ -245,6 +274,7 @@ jobs:
           - python-lint
           - python-unit
           - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -263,24 +293,24 @@ jobs:
 
         steps:
           - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.8.0
+            uses: styfle/cancel-workflow-action@0.11.0
             with:
               access_token: ${{ github.token }}
-          - uses: actions/checkout@v2
+          - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
           - name: Copy Repo
             run: |
-              # have to copy first, absolute paths not supported by actions/checkout@v2
+              # have to copy first, absolute paths not supported by actions/checkout@v3
                 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
                 sudo chmod -R a+rwx /tmp/
 
-          - uses: actions/setup-python@v2
+          - uses: actions/setup-python@v4
             with:
               python-version: ${{ env.PYTHON_VERSION }}
-          - uses: shivammathur/setup-php@2.7.0
+          - uses: shivammathur/setup-php@2.24.0
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
@@ -290,7 +320,7 @@ jobs:
               sudo timedatectl set-timezone America/New_York
 
           - name: Cache pip
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ~/.cache/pip
               key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -318,9 +348,9 @@ jobs:
             id: composer-cache
             run: |
               cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-              echo "::set-output name=dir::$(composer config cache-files-dir)"
+              echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
           - name: Install composer Cache
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ${{ steps.composer-cache.outputs.dir }}
               key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
@@ -367,6 +397,7 @@ jobs:
               sudo apt-get install php${PHP_VER}-fpm
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
+              sudo apt-get install moreutils
 
           - name: Install third party dependencies
             run: |
@@ -377,6 +408,10 @@ jobs:
             run: |
               cd $SUBMITTY_REPOSITORY
               sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+                | sudo sponge /usr/local/submitty/config/submitty_users.json
+              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
           - name: Setup ldap
             run: |
@@ -449,7 +484,7 @@ jobs:
 
           # TODO: Remove this block after upgrading jsPDF
           - name: Cache Node Modules
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ~/.npm
               key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -469,12 +504,11 @@ jobs:
               BASE_URL: http://localhost
 
           - name: Run cypress e2e tests with pam auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: run_area=CI
 
           - name: Stop autograding services
@@ -483,13 +517,12 @@ jobs:
               sudo systemctl stop submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_1.spec.js
+              spec: cypress/e2e/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: autograding_shipper_off=True
 
           - name: Restart autograding shipper
@@ -497,13 +530,12 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
 
           - name: Run autograding status test
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/autograding_status_2.spec.js
+              spec: cypress/e2e/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: autograding_shipper_off=True
 
           - name: Restart autograding worker
@@ -513,26 +545,24 @@ jobs:
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-          - name: Run cypress e2e login tests with databse auth
-            uses: cypress-io/github-action@v2
+          - name: Run cypress e2e login tests with database auth
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
           - name: Switch to LDAP auth
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
           - name: Setup SAML
             run: |
@@ -543,20 +573,19 @@ jobs:
             run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
           - name: Run cypress e2e login tests with SAML auth
-            uses: cypress-io/github-action@v2
+            uses: cypress-io/github-action@v5
             with:
               config: baseUrl=http://localhost,chromeWebSecurity=false
-              spec: cypress/integration/login.spec.js
+              spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-screenshots
               path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-videos

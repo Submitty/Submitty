@@ -10,7 +10,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div id="today-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown')" class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['today'] ? ' down'}} fa fa-chevron-right"></i>
@@ -39,14 +39,14 @@
                 {% for poll in todays_polls %}
                     <tr>
                         <td>
-                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
-                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                </a>
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                            </a>
                         </td>
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left">
                             {{ poll.getName() }}
                         </td>
                         <td>
@@ -55,15 +55,14 @@
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
-                                {% if poll.isHistogramAvailable() %}
-                                    <i class="fas fa-lock-open">
-                                {% else %}
-                                    <i class="fas fa-lock">
-                                {% endif %}
-                                </i>
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
+                            {% if poll.isHistogramAvailable() %}
+                                <i class="fas fa-lock-open"></i>
+                            {% else %}
+                                <i class="fas fa-lock"></i>
+                            {% endif %}
                                 &nbsp;View Poll
                             </a>
                         </td>
@@ -78,7 +77,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div id="old-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div id="old-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'old_polls_dropdown')" class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['old'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -109,32 +108,31 @@
                 {% for poll in older_polls %}
                     <tr>
                         <td>
-                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
-                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                </a>
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                            </a>
                         </td>
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left">
                             {{ poll.getName() }}
                         </td>
-                        <td> {{ poll.getReleaseDate() }} </td>
+                        <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_visible" aria-label="label" onclick='updatePollVisible("{{ poll.getId() }}", "{{ base_url }}")' {{ (poll.isOpen() or poll.isEnded) ? 'checked' : '' }}>
                         </td>
                         <td>
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
-                                    <i class="fas fa-lock-open">
+                                    <i class="fas fa-lock-open"></i>
                                 {% else %}
-                                    <i class="fas fa-lock">
+                                    <i class="fas fa-lock"></i>
                                 {% endif %}
-                                </i>
                                 &nbsp;View Poll
                             </a>
                         </td>
@@ -148,7 +146,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div id="future-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown', '{{ base_url }}')" class="dropdown-bar">
+        <div id="future-table-dropdown" onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'future_polls_dropdown')" class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['future'] ? ' down' : ' right'}} fa fa-chevron-right"></i>
@@ -175,26 +173,25 @@
                 {% for poll in future_polls %}
                     <tr>
                         <td>
-                                <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
-                                        <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
-                                </a>
+                            <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
+                                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                            </a>
                         </td>
                         <td>
-                                <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
+                            <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left">
                             {{ poll.getName() }}
                         </td>
-                        <td> {{ poll.getReleaseDate() }} </td>
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
-                            <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
-                                    <i class="fas fa-lock-open">
+                                    <i class="fas fa-lock-open"></i>
                                 {% else %}
-                                    <i class="fas fa-lock">
+                                    <i class="fas fa-lock"></i>
                                 {% endif %}
-                                </i>
                                 &nbsp;View Poll
                             </a>
                         </td>
@@ -204,109 +201,3 @@
         </table>
     </div>
 </div>
-
-<script>
-
-    function newDeletePollForm(pollid, pollname, base_url) {
-        if (confirm("This will delete poll '" + pollname +"'. Are you sure?")) {
-            let url = base_url + "/deletePoll";
-            let fd = new FormData();
-            fd.append('csrf_token', csrfToken);
-            fd.append('poll_id', pollid);
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: fd,
-                processData: false,
-                cache: false,
-                contentType: false,
-                success: function(data) {
-                    window.location.reload(false);
-                },
-                error: function(err) {
-                    console.error(err);
-                    window.alert("Something went wrong. Please try again.");
-                }
-            });
-        }
-    }
-
-    function updatePollAcceptingAnswers(pollid, base_url) {
-        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
-        let visible_checkbox = "#poll_" + pollid + "_visible";
-        let url = base_url;
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('poll_id', pollid);
-        if ($(accepting_answers_checkbox).is(':checked')) {
-            $(visible_checkbox).prop('checked', true);
-            url += "/setOpen";
-        } else {
-            url += "/setEnded";
-        }
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function updatePollVisible(pollid, base_url) {
-        let visible_checkbox = "#poll_" + pollid + "_visible";
-        let accepting_answers_checkbox = "#poll_" + pollid + "_view_results";
-        let url = base_url;
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('poll_id', pollid);
-        if (!$(visible_checkbox).is(':checked')) {
-            $(accepting_answers_checkbox).prop('checked',false);
-            url += "/setClosed";
-        } else {
-            url += "/setEnded";
-        }
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function updateDropdownStates(curr_state, cookie_key, base_url) {
-        let url = base_url + "/updateDropdownStates";
-        let fd = new FormData();
-        fd.append('csrf_token', csrfToken);
-        fd.append('new_state', !curr_state);
-        fd.append('cookie_key', cookie_key);
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: fd,
-            processData: false,
-            cache: false,
-            contentType: false,
-            error: function(err) {
-                console.error(err);
-                window.alert("Something went wrong. Please try again.");
-            }
-        });
-    }
-
-    function importPolls() {
-        $("#import-polls-form").submit();
-    }
-
-</script>
