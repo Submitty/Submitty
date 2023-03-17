@@ -102,21 +102,21 @@ class UserProfileController extends AbstractController {
     /**
      * @Route("/user_profile/change_pronouns", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changePronouns() {
         $user = $this->core->getUser();
-        $newPronouns = trim($_POST['pronouns']);
-
-        //validPronouns() checks for valid option
-        if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
-            $user->setPronouns($newPronouns);
-            $user->setUserUpdated(true);
-            $this->core->getQueries()->updateUser($user);
-            return JsonResponse::getSuccessResponse([
-                'message' => "Pronouns updated successfully",
-                'pronouns' => $newPronouns
-            ]);
+        if (isset($_POST['pronouns'])) {
+          $newPronouns = trim($_POST['pronouns']);
+          //validPronouns() checks for valid option
+          if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+              $user->setPronouns($newPronouns);
+              $user->setUserUpdated(true);
+              $this->core->getQueries()->updateUser($user);
+              return JsonResponse::getSuccessResponse([
+                  'message' => "Pronouns updated successfully",
+                  'pronouns' => $newPronouns
+              ]);
+          }
         }
         else {
             return JsonResponse::getErrorResponse("Pronouns are not valid");
@@ -126,11 +126,10 @@ class UserProfileController extends AbstractController {
     /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (!empty($_POST['given_name']) && !empty($_POST['family_name'])) {
+        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
             $newFamilyName = trim($_POST['family_name']);
 
