@@ -10,7 +10,7 @@ function validate_navigation_page_sections(sections) {
 }
 
 describe('navigation page', () => {
-    before(() => {
+    beforeEach(() => {
         cy.visit('/');
         cy.wait(500);
         cy.viewport(1920,1200);

@@ -4,8 +4,8 @@
     </h1>
 
     {% if user_admin or poll.isHistogramAvailable() %}
-        <button class="btn btn-primary" onclick="toggle_section('poll-info')">Toggle Poll Info</button>
-        <button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
+        <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
+        <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
     {% endif %}
     <br/>
     <div class="poll-view-table" id="info-histogram-table">
@@ -63,10 +63,13 @@
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
+                            {% if option.isCorrect() and poll.isReleaseAnswer()%}
+                                <i class="fa-solid fa-square-check correct-tag"></i>
+                            {% endif %}
                             <br/>
                             <br/>
                         </div>
-                        {% set index = index + 1%}
+                        {% set index = index + 1 %}
                     {% endfor %}
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
@@ -118,11 +121,20 @@
         const data = [{
             type: "bar",
             x: [],
-            y: []
+            y: [],
+            marker: {
+                color: [],
+            },
         }];
+        const [correctColor, defaultColor] =
+        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
+            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
         {% for option in poll.getOptions() %}
         data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
         data[0].y.push({{ response_counts[option.getId()] }});
+        data[0].marker.color.push(
+            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+        );
         {% endfor %}
         const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
         const width = get_new_chart_width();
