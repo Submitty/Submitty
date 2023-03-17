@@ -188,7 +188,7 @@
 
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
                         <td>
-                            <a href="{{base_url}}/viewPoll/{{ poll.getId() }}" class="btn btn-primary">
+                            <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
                                     <i class="fas fa-lock-open">
                                 {% else %}
