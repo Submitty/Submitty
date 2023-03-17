@@ -5,7 +5,6 @@ namespace app\models\gradeable;
 use app\entities\calendar\CalendarItem;
 use app\libraries\Core;
 use app\models\Button;
-use app\models\Course;
 use app\models\User;
 use app\views\NavigationView;
 
