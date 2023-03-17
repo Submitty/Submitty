@@ -213,10 +213,8 @@ a.cal-gradeable-status-ann {
     color: #218ffd;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
-    /*border: none;*/
     border-style: solid;
     border-width: 3px;
-    /*border-color: #218ffd;*/
     box-shadow: none;
 }
 
@@ -225,10 +223,8 @@ a.cal-gradeable-status-ann:hover {
     padding: 0;
     font-style: italic;
     cursor: default;
-    /*border: none;*/
     border-style: solid;
     border-width: 3px;
-    /*border-color: #218ffd;*/
 }
 
 a.cal-gradeable-status-ann:focus {
@@ -259,7 +255,7 @@ a.cal-gradeable-status-link:focus {
     border: none;
 }
 
-.calendar_color_blue {
+.calendar-color-blue {
     background-color: #218ffd;
     color: var(--text-black) !important;
 }
