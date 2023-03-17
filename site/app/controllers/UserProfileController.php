@@ -107,7 +107,6 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         if (isset($_POST['pronouns'])) {
             $newPronouns = trim($_POST['pronouns']);
-            
             //validPronouns() checks for valid option
             if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
                 $user->setPronouns($newPronouns);
