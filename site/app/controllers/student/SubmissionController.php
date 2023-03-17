@@ -1069,7 +1069,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if ($gradeable->isLocked($user_id) && ($user_id->accessGrading === false)) {
+        if ($gradeable->isLocked($user_id) && (!$this->core->getUser()->accessGrading())) {
             return $this->uploadResult("Gradeable is locked for you.", false);
         }
 
