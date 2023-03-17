@@ -35,7 +35,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
- * @method string courseSectionId()
+ * @method string setCourseSectionId()
+ * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
  * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
@@ -453,10 +454,6 @@ class User extends AbstractModel {
 
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
-    }
-
-    public function CourseSectionId($course_section_id) {
-        $this->course_section_id = ($course_section_id !== null) ? $course_section_id : null;
     }
 
     public function setRotatingSection($section) {
