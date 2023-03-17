@@ -22,10 +22,8 @@ class PDFController extends AbstractController {
         $path = "";
         $file_path_parts = explode("/", $file_path);
 
-        if ($real) {
-            if (str_contains($file_path, "..")) {
-                return "INVALID FILE PATH";
-            }
+        if ($real && str_contains($file_path, "..")) {
+            return "INVALID FILE PATH";
         }
 
         for ($index = 1; $index < count($file_path_parts); $index++) {
