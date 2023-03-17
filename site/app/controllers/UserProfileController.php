@@ -117,7 +117,7 @@ class UserProfileController extends AbstractController {
                     'pronouns' => $newPronouns
                 ]);
             }
-            else{
+            else {
                 return JsonResponse::getErrorResponse("Pronouns are not valid");
             }
         }
