@@ -411,6 +411,6 @@ class UpdateSystemInfo(AbstractJob):
 
         log_msg = f"[Last ran on: {today.isoformat()}]\n"
         logger.write_to_log(log_file, log_msg)
-        
+
     def cleanup_job(self):
         pass

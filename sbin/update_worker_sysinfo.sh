@@ -27,7 +27,7 @@ display_help() {
     echo -e "Dispatch \033[0;36m<JobName>\033[0m to the daemon job queue"
 
     for (( i=0; i<op_size; i++ )); do
-        IFS=':' read -r name _pref <<< "${OPS[i]}"
+        IFS=':' read -r name _ <<< "${OPS[i]}"
         echo -e "  \033[0;36m${name}\033[0m"
     done
 }
