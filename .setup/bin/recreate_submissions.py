@@ -54,7 +54,6 @@ COURSE.electronic_gradeable_version
 '''
 
 import argparse
-import getpass
 import json
 import os
 import shutil
@@ -122,8 +121,10 @@ def submit(semester:str, course:str, gradeable:str, user:str, data: str,
             'active_version': 0,
             'history': []
         }
-    highest_version = 0 if len(UAS['history']) == 0 else max(obj['version']
-        for obj in UAS['history'])
+    if len(UAS['history']) == 0:
+        highest_version = 0
+    else:
+        highest_version = max(obj['version'] for obj in UAS['history'])
     submission_path = os.path.join(user_path,str(highest_version+1))
     # copy submission files, the submission_path should be created here
     shutil.copytree(data,submission_path)
@@ -288,7 +289,8 @@ def main():
     os.system(f'{regrade_py} {gradeable_path}')
 
 if __name__ == '__main__':
-    if getpass.getuser() != 'root':
+    if os.getuid() == 0:
+        main()
+    else:
         print('Please run this as root, exiting...')
         quit()
-    main()
