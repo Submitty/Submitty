@@ -1981,7 +1981,7 @@ function loadThreadHandler() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function loadAllInlineImages() {
+function loadAllInlineImages(open_override = false) {
     const toggleButton = $('#toggle-attachments-button');
 
     const allShown = $('.attachment-well').filter(function() {
@@ -2006,7 +2006,7 @@ function loadAllInlineImages() {
         $(this).click();
 
         //overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all')) {
+        if (toggleButton.hasClass('show-all') || open_override) {
             $('.attachment-well').eq(i).show();
         }
         else {

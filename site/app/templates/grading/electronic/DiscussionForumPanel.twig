@@ -9,11 +9,15 @@
 </div>
 
 <script>
-
 	
-		$('#posts_list').css('min-width', '-webkit-fill-available');
-		$(function() {
-			generateCodeMirrorBlocks(document);
-		});
+$('#posts_list').css('min-width', '-webkit-fill-available');
+$(function() {
+	generateCodeMirrorBlocks(document);
+});
+
+$(document).ready(function() {
+    loadAllInlineImages(true);
+
+});
 
 </script>
