@@ -102,7 +102,6 @@ class UserProfileController extends AbstractController {
     /**
      * @Route("/user_profile/change_pronouns", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changePronouns() {
         $user = $this->core->getUser();
@@ -127,7 +126,6 @@ class UserProfileController extends AbstractController {
     /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
