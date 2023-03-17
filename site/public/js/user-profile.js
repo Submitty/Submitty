@@ -65,7 +65,9 @@ function getCurrentUTCOffset() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function updateUserPronouns() {
+function updateUserPronouns(e) {
+    console.log(e);
+    e.preventDefault();
     const pronouns = $('#user-pronouns-change');
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
@@ -92,9 +94,10 @@ function updateUserPronouns() {
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns
-                    $('#pronouns-row').html(`${icon} ${data.pronouns}`);
+                    $('#pronouns_val').html(`${icon} ${data.pronouns}`);
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
+                    $('#edit-pronouns-form').hide();
                 }
                 else {
                     // eslint-disable-next-line no-undef

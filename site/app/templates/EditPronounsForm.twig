@@ -30,7 +30,7 @@
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" onsubmit="return updateUserPronouns()">
+    <form method="post" onsubmit="return updateUserPronouns(event)">
         {{ parent() }}
     </form>
 {% endblock %}
