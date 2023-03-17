@@ -25,6 +25,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method void setPronouns($pronouns)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -422,10 +423,6 @@ class User extends AbstractModel {
         $this->notification_settings[$key] = $value;
     }
 
-    public function setPronouns($pronouns) {
-        $this->pronouns = $pronouns;
-    }
-
     /**
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
@@ -523,8 +520,8 @@ class User extends AbstractModel {
                 //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
             case 'user_pronouns':
-                // if the length is less than 12
-                return strlen($data) <= 12;
+                //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\)\\\/ ]{0,30}$~", $data) === 1;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
                 //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
