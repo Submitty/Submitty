@@ -1195,7 +1195,7 @@ class HomeworkView extends AbstractView {
                 $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
 
                 foreach ($author_user_groups as $author) {
-                    $limited_access_grader[$author["user_id"]] = $author["user_group"] == User::GROUP_LIMITED_ACCESS_GRADER;
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] === User::GROUP_LIMITED_ACCESS_GRADER;
                     $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
                 }
 
