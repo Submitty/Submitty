@@ -50,6 +50,7 @@ class CalendarController extends AbstractController {
         $user = $this->core->getUser();
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId()); // Needs to be fixed, need to pass single course, not all courses that student is enrolled in
         $name = $this->core->getConfig()->getCourse();
+        $oneCourse = $courses[0];
         foreach ($courses as $course) {
             if ($course->getTitle() == $name) {
                 $oneCourse = [$course];

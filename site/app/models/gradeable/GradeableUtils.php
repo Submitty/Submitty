@@ -102,7 +102,6 @@ class GradeableUtils {
      * This function assumes that you are calling it where Core has a defined course
      *
      * @param Core $core
-     * @param User $user
      * @param array $calendar_messages
      * @return \app\models\Button[][]|Gradeable[][]|GradedGradeable[][]|array[]
      * @throws \Exception
