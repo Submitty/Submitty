@@ -246,15 +246,6 @@ class DatabaseQueries {
         return $ret;
     }
 
-    public function getGradingSectionsByUserId($user_id) {
-        $this->course_db->query("
-SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-FROM grading_registration
-WHERE user_id=?
-GROUP BY user_id", [$user_id]);
-        return $this->course_db->row();
-    }
-
     /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
@@ -264,7 +255,6 @@ GROUP BY user_id", [$user_id]);
     public function getAllUsers($section_key = "registration_section") {
         $keys = ["registration_section", "rotating_section"];
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        $orderBy = "";
         if ($section_key == "registration_section") {
             $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
@@ -565,13 +555,7 @@ SQL;
      */
     public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id) {
         $blockSize = 30;
-        $loadLastPage = false;
 
-        $query_raw_select = null;
-        $query_raw_join   = null;
-        $query_raw_where  = null;
-        $query_raw_order  = null;
-        $query_parameters = null;
         // $blockNumber is 1 based index
         if ($blockNumber <= -1) {
             // Find the last block
@@ -1487,48 +1471,6 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Get the late day information for a specific user (graded gradeable information)
-     * @param string $user_id
-     * @param string $g_id
-     * @return null|array $return = [
-     *      'g_id' => string,
-     *      'user_id' => string,
-     *      'team_id' => string,
-     *      'late_days_allowed' => int,
-     *      'late_day_date' => DateTime,
-     *      'submission_days_late' => int,
-     *      'late_day_exceptions' => int,
-     *      'late_days_remaining' => int,
-     *      'late_day_status' => int,
-     *      'late_days_change' => int
-     * ]
-     */
-    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
-        $params = [$user_id, $g_id];
-        $query = "SELECT * FROM late_day_cache
-                    WHERE user_id=?
-                    AND g_id=?";
-        $this->course_db->query($query, $params);
-
-        $row = $this->course_db->row();
-
-        // If cache doesn't exist, generate it and query again
-        if (empty($row)) {
-            $this->generateLateDayCacheForUser($user_id);
-            $this->course_db->query($query, $params);
-            $row = $this->course_db->row();
-        }
-
-        // If cache still doesn't exist, the gradeable is not associated with
-        // LateDays OR there has been a computation error
-        if (empty($row)) {
-            return null;
-        }
-
-        return $row;
-    }
-
-    /**
      * Generate and update the late day cache for all of the students in the course
      */
     public function generateLateDayCacheForUsers(): void {
@@ -1610,15 +1552,6 @@ WHERE semester=? AND course=? AND user_id=?",
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
-        }
-        return $return;
-    }
-
-    public function getUsersInNullSection($orderBy = "user_id") {
-        $return = [];
-        $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IS NULL ORDER BY {$orderBy}");
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new User($this->core, $row);
         }
         return $return;
     }
@@ -2386,16 +2319,6 @@ ORDER BY g.sections_rotating_id, g.user_id",
     }
 
     /**
-     * Gets all the gradeable IDs of the rotating sections
-     *
-     * @return array
-     */
-    public function getRotatingSectionsGradeableIDS() {
-        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grader_assignment_method = {0} ORDER BY g_grade_start_date ASC");
-        return $this->course_db->rows();
-    }
-
-    /**
      * Gets gradeables for all graders with the sections they were assigned to grade
      * Only includes gradeables that are set to be graded by rotating section or all access, and were in the past
      * With the exception of $gradeable_id, which will always be included
@@ -3114,16 +3037,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * Gets id's and titles of the electronic gradeables that have non-inherited teams
-     *
-     * @return string
-     */
-    // public function getAllElectronicGradeablesWithBaseTeams() {
-    //     $this->course_db->query('SELECT g_id, g_title FROM gradeable WHERE g_id=ANY(SELECT g_id FROM electronic_gradeable WHERE eg_team_assignment IS TRUE AND (eg_inherit_teams_from=\'\') IS NOT FALSE) ORDER BY g_title ASC');
-    //     return $this->course_db->rows();
-    // }
-
-    /**
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      *
      * @param  string  $g_id
@@ -3267,12 +3180,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
-
     /**
      * Return Team object for team with given Team ID
      *
      * @param  string $team_id
-     * @return \app\models\Team|null
+     * @return Team|null
      */
     public function getTeamById($team_id) {
         $this->course_db->query(
@@ -3301,7 +3213,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      *
      * @param  string $g_id
      * @param  string $user_id
-     * @return \app\models\Team|null
+     * @return Team|null
      */
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
@@ -3352,7 +3264,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Return an array of Team objects for all teams on given gradeable
      *
      * @param  string $g_id
-     * @return \app\models\Team[]
+     * @return Team[]
      */
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
@@ -4222,41 +4134,6 @@ AND gc_id IN (
         return $return;
     }
 
-    public function getGradedPeerComponentsByRotatingSection($gradeable_id, $sections = []) {
-        $where = "";
-        $params = [];
-        if (count($sections) > 0) {
-            $where = "WHERE rotating_section IN " . $this->createParamaterList(count($sections));
-            $params = $sections;
-        }
-        $params[] = $gradeable_id;
-        $this->course_db->query(
-            "
-        SELECT count(u.*), u.rotating_section
-        FROM users as u
-        INNER JOIN(
-            SELECT gd.* FROM gradeable_data as gd
-            LEFT JOIN(
-                gradeable_component_data as gcd
-                LEFT JOIN gradeable_component as gc
-                ON gcd.gc_id = gc.gc_id and gc.gc_is_peer = 't'
-            ) as gcd ON gcd.gd_id = gd.gd_id
-            WHERE gd.g_id = ?
-            GROUP BY gd.gd_id
-        ) as gd ON gd.gd_user_id = u.user_id
-        {$where}
-        GROUP BY u.rotating_section
-        ORDER BY u.rotating_section",
-            $params
-        );
-
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['rotating_section']] = intval($row['count']);
-        }
-        return $return;
-    }
-
     public function existsThread($thread_id) {
         $this->course_db->query("SELECT 1 FROM threads where deleted = false AND id = ?", [$thread_id]);
         $result = $this->course_db->rows();
@@ -4645,7 +4522,7 @@ AND gc_id IN (
         return $this->rowsToArray($this->course_db->rows());
     }
 
-    /*
+    /**
      * helper function to convert rows array to one dimensional array of user ids
      *
      * @return array
@@ -4890,7 +4767,7 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
-    /*
+    /**
      * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
@@ -4957,7 +4834,7 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id
-     * @return \app\models\gradeable\Gradeable
+     * @return Gradeable
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
@@ -5113,7 +4990,7 @@ AND gc_id IN (
             }
 
             // Finally, create the gradeable
-            $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
+            $gradeable = new Gradeable($this->core, $row);
             $overrides = [];
             $users = json_decode($row['gamo_users']);
             $minutes = json_decode($row['gamo_minutes']);
@@ -5333,32 +5210,16 @@ AND gc_id IN (
     }
 
     /**
-     * Gets user or team submitters by id
-     *
-     * @param  string[] $ids User or team ids
-     * @return Submitter[]
-     */
-    public function getSubmittersById(array $ids) {
-        //Get Submitter for each id in ids
-        return array_map(
-            function ($id) {
-                return $this->getSubmitterById($id);
-            },
-            $ids
-        );
-    }
-
-    /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrieved if provided
      *
-     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param  string|null                     $user      The id of the user to get data for
      * @param  string|null                     $team      The id of the team to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeable(\app\models\gradeable\Gradeable $gradeable, $user, $team = null) {
+    public function getGradedGradeable(Gradeable $gradeable, $user, $team = null) {
         foreach ($this->getGradedGradeables([$gradeable], $user, $team) as $gg) {
             return $gg;
         }
@@ -5374,7 +5235,7 @@ AND gc_id IN (
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeableForSubmitter(\app\models\gradeable\Gradeable $gradeable, Submitter $submitter) {
+    public function getGradedGradeableForSubmitter(Gradeable $gradeable, Submitter $submitter) {
         //Either user or team is set, the other should be null
         $user_id = $submitter->getUser() ? $submitter->getUser()->getId() : null;
         $team_id = $submitter->getTeam() ? $submitter->getTeam()->getId() : null;
@@ -5386,7 +5247,7 @@ AND gc_id IN (
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
      *
-     * @param  \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
+     * @param Gradeable[] $gradeables The gradeable(s) to retrieve data for
      * @param  string[]|string|null              $users     The id(s) of the user(s) to get data for
      * @param  string[]|string|null              $teams     The id(s) of the team(s) to get data for
      * @param  string[]|string|null              $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
@@ -5671,9 +5532,9 @@ AND gc_id IN (
     /**
      * Creates a new gradeable in the database
      *
-     * @param \app\models\gradeable\Gradeable $gradeable The gradeable to insert
+     * @param Gradeable $gradeable The gradeable to insert
      */
-    public function createGradeable(\app\models\gradeable\Gradeable $gradeable) {
+    public function createGradeable(Gradeable $gradeable) {
         $params = [
             $gradeable->getId(),
             $gradeable->getTitle(),
@@ -5797,9 +5658,9 @@ AND gc_id IN (
      *  it in the database as necessary.  It also reloads the marks/components
      *  if any were added
      *
-     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      */
-    private function updateGradeableComponents(\app\models\gradeable\Gradeable $gradeable) {
+    private function updateGradeableComponents(Gradeable $gradeable) {
 
         // sort components by order
         $components = $gradeable->getComponents();
@@ -5830,12 +5691,9 @@ AND gc_id IN (
     /**
      * Updates the gradeable and its components/marks with new properties
      *
-     * @param \app\models\gradeable\Gradeable $gradeable The gradeable to update
+     * @param Gradeable $gradeable The gradeable to update
      */
-    public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
-
-
-
+    public function updateGradeable(Gradeable $gradeable) {
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
             $params = [
@@ -6291,7 +6149,7 @@ AND gc_id IN (
     /**
      * Gets if the provided submitter has a submission for a particular gradeable
      *
-     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param  Submitter                       $submitter
      * @return bool
      */
@@ -6326,7 +6184,7 @@ AND gc_id IN (
     /**
      * Gets if the provided submitter has a submission for a particular gradeable
      *
-     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param  String                     $userid
      * @return bool
      */
@@ -6342,7 +6200,7 @@ AND gc_id IN (
      * Get the active version for all given submitter ids. If they do not have an active version,
      * their version will be zero.
      *
-     * @param  \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param  string[]                        $submitter_ids
      * @return bool[] Map of id=>version
      */
@@ -6626,7 +6484,6 @@ AND gc_id IN (
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['contact_information'];
     }
-
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
@@ -7001,7 +6858,7 @@ WHERE current_state IN
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  Note: The users' teams will be included in the search
      *
-     * @param  \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
+     * @param Gradeable[] $gradeables The gradeable(s) to retrieve data for
      * @param  string[]|string|null              $users      The id(s) of the user(s) to get data for
      * @param  string[]|string|null              $teams      The id(s) of the team(s) to get data for
      * @param  string[]|string|null              $sort_keys  An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
@@ -7014,7 +6871,7 @@ WHERE current_state IN
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
         foreach ($gradeables as $gradeable) {
-            if (!($gradeable instanceof \app\models\gradeable\Gradeable)) {
+            if (!($gradeable instanceof Gradeable)) {
                 throw new \InvalidArgumentException('Gradeable array must only contain Gradeables');
             }
             $gradeables_by_id[$gradeable->getId()] = $gradeable;
@@ -7963,22 +7820,6 @@ SQL;
       END) AS not_helped_count
 
 SQL;
-    }
-
-    private function getGradeableMinutesOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
-    }
-
-    /**
-     * Gets the number of students who have submitted to a given gradeable
-     *
-     * @param string $gradeable_id
-     * @return int
-     */
-    public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
-        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows()[0]["user_id"];
     }
 
     /**
