@@ -20,7 +20,7 @@ class CalendarController extends AbstractController {
     /**
      * This function loads the gradeable information from all courses, and list them
      * on a calendar. The calendar is accessible through the side bar button in a
-     * global scope
+     * global scope.
      *
      * @Route("/calendar")
      *
@@ -48,8 +48,9 @@ class CalendarController extends AbstractController {
     public function viewCourseCalendar(): WebResponse {
         $calendar_messages = [];
         $user = $this->core->getUser();
-        $courses = $this->core->getQueries()->getCourseForUserId($user->getId()); // Needs to be fixed, need to pass single course, not all courses that student is enrolled in
+        $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
         $name = $this->core->getConfig()->getCourse();
+        // Initialize $oneCourse and get the specific course for the course calendar
         $oneCourse = $courses[0];
         foreach ($courses as $course) {
             if ($course->getTitle() == $name) {

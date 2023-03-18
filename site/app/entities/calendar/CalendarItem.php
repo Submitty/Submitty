@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="calendar_messages")
  */
 class CalendarItem {
+    // Note the 'Important' type is also treated as regular text
     const TEXT = 0;
     const ANNOUNCEMENT = 1;
 
@@ -88,7 +89,7 @@ class CalendarItem {
     }
 
     /**
-     * @param int $type
+     * @param int $type Takes in either 0 or 1
      */
     public function setType(int $type): void {
         if ($type === self::ANNOUNCEMENT || $type === self::TEXT) {
@@ -108,7 +109,7 @@ class CalendarItem {
             case 'important':
                 $this->type = self::TEXT;
                 break;
-            case 'announcement': // NEED TO ADD NOTE TYPE TO THIS
+            case 'announcement':
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:
@@ -117,7 +118,7 @@ class CalendarItem {
     }
 
     /**
-     * @return int
+     * @return int 1 for ANNOUNCEMENT and 0 for TEXT
      */
     public function getType(): int {
         return $this->type;

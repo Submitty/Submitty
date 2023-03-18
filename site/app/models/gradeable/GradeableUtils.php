@@ -12,9 +12,6 @@ class GradeableUtils {
     /**
      * Get the gradeables of a specified course.
      *
-     * @param Core $core
-     * @param string $semester
-     * @param string $title
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
@@ -76,8 +73,6 @@ class GradeableUtils {
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
      *
-     * @param Core $core
-     * @param User $user The user to filter gradeables by
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
      */
@@ -100,9 +95,7 @@ class GradeableUtils {
 
     /**
      * This function assumes that you are calling it where Core has a defined course
-     *
-     * @param Core $core
-     * @param array $calendar_messages
+     * 
      * @return \app\models\Button[][]|Gradeable[][]|GradedGradeable[][]|array[]
      * @throws \Exception
      */

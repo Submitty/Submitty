@@ -77,7 +77,7 @@ class CalendarInfo extends AbstractModel {
             }
         }
 
-        // get the gradeables from the GradeableList and group them by section
+        // Get the gradeables from the GradeableList and group them by section
         $gradeable_list_sections = [
             GradeableList::OPEN => $gradeable_list->getOpenGradeables(),
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
@@ -156,29 +156,6 @@ class CalendarInfo extends AbstractModel {
                 }
             }
         }
-
-        /*foreach ($calendar_items as $course => $cal_items) {
-            /** @var CalendarItem $cal_item
-            foreach ($cal_items as $cal_item) {
-                $date = $cal_item->getDate()->format('Y-m-d');
-                try {
-                    $curItem = [
-                        'title' => htmlspecialchars($cal_item->getText()),
-                        'status' => $cal_item->getTypeString(),
-                        'course' => $course,
-                        'icon' => '',
-                        'url' => '',
-                        'show_due' => false,
-                        'submission' => '',
-                        'status_note' => '',
-                        'color' => $colors[]
-                    ];
-                    $info->items_by_date[$date][] = $curItem;
-                }
-                catch (\Exception $e) { //Empty catch to skip this item
-                }
-            }
-        }*/
 
         $info->empty_message = "There are currently no assignments posted.  Please check back later.";
 
