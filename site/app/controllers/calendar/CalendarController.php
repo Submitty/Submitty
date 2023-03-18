@@ -53,7 +53,7 @@ class CalendarController extends AbstractController {
         // Initialize $oneCourse and get the specific course for the course calendar
         $oneCourse = $courses[0];
         foreach ($courses as $course) {
-            if ($course->getTitle() == $name) {
+            if ($course->getTitle() === $name) {
                 $oneCourse = [$course];
                 break;
             }
