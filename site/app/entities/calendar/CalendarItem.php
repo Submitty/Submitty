@@ -57,30 +57,18 @@ class CalendarItem {
         return $this->type === self::TEXT;
     }
 
-    /**
-     * @return DateTime
-     */
     public function getDate(): DateTime {
         return $this->date;
     }
 
-    /**
-     * @return string
-     */
     public function getText(): string {
         return $this->text;
     }
 
-    /**
-     * @param DateTime $date
-     */
     public function setDate(DateTime $date): void {
         $this->date = $date;
     }
 
-    /**
-     * @param string $text
-     */
     public function setText(string $text): void {
         if (strlen($text) > 255) {
             throw new \InvalidArgumentException();
@@ -88,9 +76,6 @@ class CalendarItem {
         $this->text = $text;
     }
 
-    /**
-     * @param int $type Takes in either 0 or 1
-     */
     public function setType(int $type): void {
         if ($type === self::ANNOUNCEMENT || $type === self::TEXT) {
             $this->type = $type;
@@ -98,9 +83,6 @@ class CalendarItem {
         throw new \InvalidArgumentException();
     }
 
-    /**
-     * @param string $type
-     */
     public function setStringType(string $type): void {
         switch ($type) {
             case 'note':
@@ -117,17 +99,10 @@ class CalendarItem {
         }
     }
 
-    /**
-     * @return int 1 for ANNOUNCEMENT and 0 for TEXT
-     */
     public function getType(): int {
         return $this->type;
     }
 
-    /**
-     * @return string
-     * @throws \Exception
-     */
     public function getTypeString(): string {
         switch ($this->type) {
             case self::TEXT:

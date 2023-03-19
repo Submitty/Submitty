@@ -43,7 +43,6 @@ class CalendarController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/calendar")
-     * @return WebResponse
      */
     public function viewCourseCalendar(): WebResponse {
         $calendar_messages = [];
@@ -53,7 +52,7 @@ class CalendarController extends AbstractController {
         // Initialize $oneCourse and get the specific course for the course calendar
         $oneCourse = $courses[0];
         foreach ($courses as $course) {
-            if ($course->getTitle() == $name) {
+            if ($course->getTitle() === $name) {
                 $oneCourse = [$course];
                 break;
             }
@@ -64,13 +63,34 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/newItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/new", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function createMessage(): RedirectResponse {
-        $type = $_POST['type'];
-        $date = $_POST['date'];
-        $text = $_POST['text'];
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
 
         if (strip_tags($text) !== $text) {
             $this->core->addErrorMessage("HTML cannot be used in this text");
@@ -102,14 +122,42 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/editItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function editMessage(): RedirectResponse {
-        $type = $_POST['type'];
-        $date = $_POST['date'];
-        $text = $_POST['text'];
-        $id = $_POST['id'];
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
+
+        if (isset($_POST['id'])) {
+            $id = $_POST['id']; 
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect id");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
 
         if (strip_tags($text) !== $text) {
             $this->core->addErrorMessage("HTML cannot be used in this text");
@@ -137,11 +185,17 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/deleteItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/delete", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteMessage(): JsonResponse {
-        $id = $_POST['id'];
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        else {
+            $this->core->addErrorMessage("Error: No id specified");
+            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        }
         $item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
             ->findOneBy(['id' => $id]);
         if ($item !== null) {
