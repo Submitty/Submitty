@@ -1471,6 +1471,48 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get the late day information for a specific user (graded gradeable information)
+     * @param string $user_id
+     * @param string $g_id
+     * @return null|array $return = [
+     *      'g_id' => string,
+     *      'user_id' => string,
+     *      'team_id' => string,
+     *      'late_days_allowed' => int,
+     *      'late_day_date' => DateTime,
+     *      'submission_days_late' => int,
+     *      'late_day_exceptions' => int,
+     *      'late_days_remaining' => int,
+     *      'late_day_status' => int,
+     *      'late_days_change' => int
+     * ]
+     */
+    public function getLateDayCacheForUserGradeable(string $user_id, string $g_id): ?array {
+        $params = [$user_id, $g_id];
+        $query = "SELECT * FROM late_day_cache
+                     WHERE user_id=?
+                     AND g_id=?";
+        $this->course_db->query($query, $params);
+
+        $row = $this->course_db->row();
+
+        // If cache doesn't exist, generate it and query again
+        if (empty($row)) {
+            $this->generateLateDayCacheForUser($user_id);
+            $this->course_db->query($query, $params);
+            $row = $this->course_db->row();
+        }
+
+        // If cache still doesn't exist, the gradeable is not associated with
+        // LateDays OR there has been a computation error
+        if (empty($row)) {
+            return null;
+        }
+
+        return $row;
+    }
+
+    /**
      * Generate and update the late day cache for all of the students in the course
      */
     public function generateLateDayCacheForUsers(): void {
@@ -7820,17 +7862,6 @@ SQL;
       END) AS not_helped_count
 
 SQL;
-    }
-
-    /**
-     * Gets the number of students who have submitted to a given gradeable
-     *
-     * @param string $gradeable_id
-     * @return int
-     */
-    public function getTotalStudentsWithSubmissions(string $gradeable_id): int {
-        $this->course_db->query('SELECT DISTINCT COUNT(*) user_id FROM electronic_gradeable_data WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows()[0]["user_id"];
     }
 
     /**
