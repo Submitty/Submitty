@@ -43,6 +43,11 @@
     vertical-align: top;
 }
 
+.radio {
+    padding-left: 24.2px;
+    text-indent: -24.2px;
+}
+
 .radio p {
     display: inline;
 }
@@ -104,5 +109,5 @@ form {
 
 .correct-tag {
     color: var(--standard-dark-green);
-    margin-left: 0.5em;
+    margin-left: 1.5em;
 }
