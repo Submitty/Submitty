@@ -326,7 +326,6 @@ function ajaxGetBuildLogs(gradeable_id) {
         success: function (response) {
             var build_info = response['data'][0];
             var cmake_info = response['data'][1];
-            var make_info = response['data'][2];
 
             if (build_info != null) {
                 $('#build-log-body').html(build_info);
@@ -339,12 +338,6 @@ function ajaxGetBuildLogs(gradeable_id) {
             }
             else {
                 $('#cmake-log-body').html('There is currently no cmake output.');
-            }
-            if (make_info != null) {
-                $('#make-log-body').html(make_info);
-            }
-            else {
-                $('#make-log-body').html('There is currently no make output.');
             }
 
             $('.log-container').show();

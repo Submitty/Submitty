@@ -126,14 +126,17 @@
     --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
 
+
     /* text and fonts */
     --text-black: #000000; /* use only on white/background-blue */
     --text-white: #ffffff; /* use on all colors */
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
+    --deleted-color: #000000;
 
     /* discussion forum */
+    --deleted-and-unviewed-thread: #acc0d7;
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /* is also for star color */
@@ -216,6 +219,7 @@
 
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
+    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
 }
@@ -224,6 +228,7 @@
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
+    --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
@@ -263,6 +268,7 @@
     --hover-dropdown: #f5f5f5;
     --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
+
 
     /* text and fonts */
     --text-black: #ffffff; /* use only on white/background-blue */
