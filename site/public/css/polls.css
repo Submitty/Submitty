@@ -43,8 +43,8 @@
     vertical-align: top;
 }
 
-.radio {
-    padding-left: 24.2px;
+.response {
+    margin-left: 24.2px;
     text-indent: -24.2px;
 }
 
@@ -67,6 +67,11 @@ input[type="radio"][disabled=""]:checked::before {
     height: 7px;
     border-radius: 100%;
     background: var(--standard-medium-dark-gray);
+}
+
+input[type="checkbox"] {
+    margin: 0;
+    transform: scale(0.8);
 }
 
 .active {
@@ -109,5 +114,5 @@ form {
 
 .correct-tag {
     color: var(--standard-dark-green);
-    margin-left: 1.5em;
+    padding-left: 1.25em;
 }
