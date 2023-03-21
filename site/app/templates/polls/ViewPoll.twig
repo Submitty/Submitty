@@ -29,7 +29,7 @@
                     </legend>
                     {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
-                        <label class="radio no-response" for="answer-no-response">
+                        <label class="radio" for="answer-no-response">
                             <input class="no-response-radio response-btn"
                                    type="{{button_type}}"
                                    value="-1"
@@ -61,10 +61,10 @@
                             />
                             {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
-                                "style": "display: inline;"
+                                "style": "display: inline"
                             } only %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
-                                <i class="fa-solid fa-square-check fa-lg  correct-tag"></i>
+                                <i class="fa-solid fa-square-check fa-lg correct-tag"></i>
                             {% endif %}
                             <br/>
                             <br/>
