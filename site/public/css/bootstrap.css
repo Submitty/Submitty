@@ -201,12 +201,6 @@ fieldset[disabled] .btn-primary.focus {
     background-color: var(--btn-default-white);
 }
 
-.btn-course-material-folder-set-time {
-    line-height: 15px;
-    height: 30px;
-    margin: 1px;
-}
-
 .btn-success {
     color: var(--btn-text-black) !important;
     background-color: var(--good-green);
