@@ -47,6 +47,7 @@ class Container():
         self.log_function = log_function
         self.log_container = log_container
         self.container = None
+        self.temp_image = None
         # A socket for communication with the container.
         self.socket = None
         # Maps a network name to an ip address
@@ -73,6 +74,15 @@ class Container():
             }
         }
 
+        # Checking for Docker Image Availability
+        try:
+            client.images.get(self.image)
+        except docker.errors.ImageNotFound:
+            image_name, image_tag = self.image.split(":")
+            self.log_function(f'ERROR: The image {self.image} is not available on this worker, Pulling from Docker Hub')
+            client.images.pull(image_name, image_tag)
+            self.temp_image = self.image
+            self.log_function(f'{self.image} pulled successfully.')
         # Only pass container name to testcases with greater than one container.
         # (Doing otherwise breaks compilation)
         container_name_argument = ['--container_name', self.name] if more_than_one else []
@@ -146,7 +156,8 @@ class Container():
         return self.ip_address_map[network_name]
 
     def cleanup_container(self, logfile):
-        """ Remove this container. """
+        """ Remove this container and image if pulled at time of grading. """
+        client = docker.from_env(timeout=60)
         cleanup_start = timer()
         if not self.is_server:
             status = self.container.wait()
@@ -163,7 +174,12 @@ class Container():
 
         self.container.remove(force=True)
         self.container.client.api.close()
+        self.log_function(
+            f'{self.temp_image} image removed'
+        )
+        client.images.remove(self.temp_image)
         self.container.client.close()
+        client.close()
         self.log_function(
             f'{dateutils.get_current_time()} docker container '
             f'{self.container.short_id} destroyed'
