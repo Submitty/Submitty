@@ -79,7 +79,8 @@ class Container():
             client.images.get(self.image)
         except docker.errors.ImageNotFound:
             image_name, image_tag = self.image.split(":")
-            self.log_function(f'ERROR: The image {self.image} is not available on this worker, Pulling from Docker Hub')
+            self.log_function(f'ERROR: The image {self.image} is not available on this worker,
+Pulling from Docker Hub')
             client.images.pull(image_name, image_tag)
             self.temp_image = self.image
             self.log_function(f'{self.image} pulled successfully.')
