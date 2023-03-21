@@ -82,6 +82,8 @@ class Core {
     /** @var bool */
     private $testing = false;
 
+    /** @var array */
+    public $lang = [];
 
     /**
      * Core constructor.

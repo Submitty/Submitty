@@ -106,6 +106,9 @@ class Config extends AbstractModel {
     /** @prop @var array */
     protected $course_json = [];
 
+    /** @prop @var string path on the filesystem that points to the lang directory */
+    protected $lang_path;
+
     /**
      * Indicates whether a course config has been successfully loaded.
      * @var bool
@@ -135,6 +138,10 @@ class Config extends AbstractModel {
     protected $timezone;
     /** @var string */
     protected $default_timezone = 'America/New_York';
+    /** @prop @var Locale */
+    protected $locale;
+    /** @prop @var string */
+    protected $default_locale = 'en_US';
     /** @prop @var string */
     protected $submitty_path;
     /** @prop @var string */
@@ -291,6 +298,7 @@ class Config extends AbstractModel {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
+        $this->locale = new Locale($this->core, $this->default_locale);
 
         // For now this will be set to 'MDY', and configured as a property of the Config class
         // Eventually this should be moved to the User class and configured on a per-user basis
@@ -363,6 +371,14 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
             }
             $this->timezone = new \DateTimeZone($submitty_json['timezone']);
+        }
+
+        if (isset($submitty_json['default_locale'])) {
+            $this->locale = new Locale($this->core, $submitty_json['default_locale']);
+        }
+
+        if (isset($submitty_json['site_lang_dir'])) {
+            $this->lang_path = $submitty_json['site_lang_dir'];
         }
 
         if (isset($submitty_json['institution_name'])) {
@@ -646,5 +662,9 @@ class Config extends AbstractModel {
                 isset($this->feature_flags[$flag])
                 && $this->feature_flags[$flag] === true
             );
+    }
+
+    public function getLocale(): Locale {
+        return $this->locale;
     }
 }
