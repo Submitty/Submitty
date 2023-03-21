@@ -170,6 +170,7 @@ describe('Docker UI Test', () => {
             .parent('tr')
             .find('td')
             .eq(7)
+            .should('be.visible', { timeout: 10000 })
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
