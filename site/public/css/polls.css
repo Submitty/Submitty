@@ -43,9 +43,15 @@
     vertical-align: top;
 }
 
-table {
-    border-color: black;
-    border-width: 1px;
+td {
+    vertical-align: middle;
+    padding-bottom: 1.25em;
+    padding-right: 0.2em;
+}
+
+.no-response {
+    font-style: italic;
+    font-weight: bold;
 }
 
 .radio p {

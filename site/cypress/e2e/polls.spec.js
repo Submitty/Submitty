@@ -188,7 +188,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('h2').contains('Possible responses:');
         cy.get('.markdown').should('contain', 'Question goes here...?');
         cy.get('.markdown').should('not.contain', '#');
-        cy.get('.radio').eq(0).contains('No response');
+        cy.get('.radio').eq(0).contains('no response');
         cy.get('.radio > input').eq(0).should('be.disabled');
         cy.get('.radio > input').eq(0).should('be.checked');
         cy.get('.radio').eq(1).contains('Answer 1');
