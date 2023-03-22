@@ -367,17 +367,14 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.login();
 
-        // toggle tomorrow's table  drop down
-        cy.get('#tomorrow-table-dropdown').click();
-        cy.get('#tomorrow-table').should('be.visible');
-
         //tomorrow's poll test, name poll 5
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll 5');
-        //cy.get('#poll-question').type('What is your favorite class?');
+        cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
-
-        cy.get('#poll-date').type((Date.now() + 1).toString().substring(0, 10), {force: true});
+        const tomorrow = new Date(Date.now());
+        tomorrow.setDate(tomorrow.getDate() + 1); // set date to one day forward
+        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
@@ -388,7 +385,20 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls');
         cy.contains('Poll 5');
         cy.get('#tomorrow-table').contains('Poll 5');
+
+        //log into student and should not be able to see tomorrow's poll
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.get('poll 5').should('not.exist');
+
+        //log into instructor, and delete poll
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+
         // delete the poll 5
+        cy.get('#tomorrow-table-dropdown').click();
         cy.contains('Poll 5').siblings(':nth-child(2)').click();
 
         // verify the poll is no longer there
