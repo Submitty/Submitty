@@ -116,27 +116,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#chartContainer').contains('2 * 3 = 6');
         cy.get('#chartContainer').contains('8 / 2 = 3');
         cy.get('#chartContainer').contains('1 * 3 = 4');
-        cy.go('back');
-
-        //tomorrow's poll test, name poll 5
-        cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll 5');
-        cy.get('#poll-question').type('What is your favorite class?');
-        cy.get('#poll-date').clear({force: true});
-
-        tomorrow.setDate(Date.now() + 1); // set date to one day forward
-        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
-        cy.contains('Add Response').click();
-        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
-        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
-        cy.get('h1').click();
-
-        // submit and verify on main polls page, poll should be in tomorrow table
-        cy.get('#poll-form-submit').click();
-        cy.url().should('include', 'sample/polls');
-        cy.contains('Poll 5');
-        cy.get('#tomorrow-table').contains('Poll 5');
-
 
     });
     it('Should verify making, editing, deleting poll works as expected', () => {
@@ -381,12 +360,31 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
+    });
 
+    it("Test cases for tomorrow's poll section", () => {
+        //tomorrow's poll test, name poll 5
+        cy.contains('New Poll').click();
+        cy.get('#poll-name').type('Poll 5');
+        //cy.get('#poll-question').type('What is your favorite class?');
+        cy.get('#poll-date').clear({force: true});
+
+        cy.get('#poll-date').type((Date.now() + 1).toString().substring(0, 10), {force: true});
+        cy.contains('Add Response').click();
+        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
+        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
+        cy.get('h1').click();
+
+        // submit and verify on main polls page, poll should be in tomorrow table
+        cy.get('#poll-form-submit').click();
+        cy.url().should('include', 'sample/polls');
+        cy.contains('Poll 5');
+        cy.get('#tomorrow-table').contains('Poll 5');
         // delete the poll 5
-        cy.contains('Poll 5').siblings(':nth-child(2)').click();
+        //cy.contains('Poll 5').siblings(':nth-child(2)').click();
 
         // verify the poll is no longer there
-        cy.get('poll5 ').should('not.exist');
+        cy.get('poll 5').should('not.exist');
         // yay! done.
     });
 });
