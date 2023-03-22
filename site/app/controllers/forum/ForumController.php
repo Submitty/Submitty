@@ -865,14 +865,14 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1) {
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1, $sort = null) {
         $current_user = $this->core->getUser()->getId();
         if (!$this->isValidCategories($categories_ids)) {
             // No filter for category
             $categories_ids = [];
         }
 
-        $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
+        $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id, $sort);
 
         $ordered_threads = $thread_block['threads'];
         $blockNumber = $thread_block['block_number'];
@@ -949,7 +949,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
      */
-    public function showFullThreads() {
+    public function showFullThreads($sort = null) {
         // preparing the params for threads
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_deleted = $this->showDeleted();
@@ -964,7 +964,14 @@ class ForumController extends AbstractController {
         $thread_id = -1;
         $pageNumber = 0;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
-        $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        // filter out only accepted sort options
+        if (in_array($sort, ["time", "reverse_time"])){
+            $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id, $sort);
+        } else {
+            $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+        }
+
 
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }

@@ -563,7 +563,7 @@ SQL;
      * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
      * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id) {
+    public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id, $sortOption = null) {
         $blockSize = 30;
         $loadLastPage = false;
 
@@ -600,6 +600,11 @@ SQL;
         }
         $query_offset = ($blockNumber - 1) * $blockSize;
         $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
+        if ($sortOption == "time") {
+            $query_order = "t.id ASC";
+        } else if ($sortOption == "reverse-time") {
+            $query_order = "t.id DESC";
+        }
         $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
         $query_parameters[] = $blockSize;
         $query_parameters[] = $query_offset;

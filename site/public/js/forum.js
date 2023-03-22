@@ -952,6 +952,12 @@ function changeDisplayOptions(option) {
     window.location.replace(`${buildCourseUrl(['forum', 'threads', thread_id])}?option=${option}`);
 }
 
+// eslint-disable-next-line no-unused-vars
+function changeDisplayOptionsForThreads(option) {
+    // eslint-disable-next-line no-undef
+    window.location.replace(`${buildCourseUrl(['forum'])}?sort=${option}`);
+}
+
 function readCategoryValues() {
     const categories_value = [];
     $('#thread_category button').each(function() {
