@@ -363,6 +363,14 @@ describe('Test cases revolving around polls functionality', () => {
     });
 
     it("Test cases for tomorrow's poll section", () => {
+        // log in from instructor account
+        cy.visit(['sample', 'polls']);
+        cy.login();
+
+        // toggle tomorrow's table  drop down
+        cy.get('#tomorrow-table-dropdown').click();
+        cy.get('#tomorrow-table').should('be.visible');
+
         //tomorrow's poll test, name poll 5
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll 5');
@@ -381,7 +389,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 5');
         cy.get('#tomorrow-table').contains('Poll 5');
         // delete the poll 5
-        //cy.contains('Poll 5').siblings(':nth-child(2)').click();
+        cy.contains('Poll 5').siblings(':nth-child(2)').click();
 
         // verify the poll is no longer there
         cy.get('poll 5').should('not.exist');
