@@ -43,9 +43,9 @@
     vertical-align: top;
 }
 
-.response {
-    margin-left: 24.2px;
-    text-indent: -24.2px;
+table {
+    border-color: black;
+    border-width: 1px;
 }
 
 .radio p {
@@ -69,9 +69,12 @@ input[type="radio"][disabled=""]:checked::before {
     background: var(--standard-medium-dark-gray);
 }
 
-input[type="checkbox"] {
-    margin: 0;
-    transform: scale(0.8);
+input[type="checkbox"][name="answers[]"] {
+    transform: scale(0.75);
+    margin-right: 1;
+    margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .active {
@@ -114,5 +117,4 @@ form {
 
 .correct-tag {
     color: var(--standard-dark-green);
-    padding-left: 1.25em;
 }

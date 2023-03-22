@@ -29,8 +29,8 @@
                     </legend>
                     {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
-                        <label class="radio" for="answer-no-response">
-                            <input class="no-response-radio response-btn"
+                        <table class="radio" for="answer-no-response">
+                            <td><input class="no-response-radio response-btn"
                                    type="{{button_type}}"
                                    value="-1"
                                    name="answers[]"
@@ -38,18 +38,19 @@
                                    {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="clearResponses()"
-                            >
+                            /></td>
+                            <td>
                             No response
-                        </label>
-                        <br/>
+                            </td>
+                        </table>
                         <br/>
                     {% endif %}
                     {% set index = 0 %}
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
-                        <div class="radio response">
-                            <input class="response-radio response-btn"
+                        <table class="radio">
+                            <td><input class="response-radio response-btn"
                                    type={{ button_type }}
                                    aria-label="Option {{ index + 1 }}"
                                    value="{{ option.getId() }}"
@@ -58,17 +59,16 @@
                                    {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="disableNoResponse();"
-                            />
-                            {% include "misc/Markdown.twig" with {
+                                /></td>
+                            <td>{% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <i class="fa-solid fa-square-check fa-lg correct-tag"></i>
-                            {% endif %}
-                            <br/>
-                            <br/>
-                        </div>
+                            {% endif %}</td>
+                        </table>
+                        <br/>
                         {% set index = index + 1 %}
                     {% endfor %}
                 </fieldset>
