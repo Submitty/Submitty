@@ -123,9 +123,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-name').type('Poll 5');
         cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
-        const today = new Date(Date.now());
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1); // set date to one day forward
+
+        tomorrow.setDate(Date.now() + 1); // set date to one day forward
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
@@ -138,11 +137,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 5');
         cy.get('#tomorrow-table').contains('Poll 5');
 
-        // delete the poll
-        cy.contains('Poll 5').siblings(':nth-child(2)').click();
 
-        // verify the poll is no longer there
-        cy.get('poll5 ').should('not.exist');
     });
     it('Should verify making, editing, deleting poll works as expected', () => {
         // log in from instructor account
@@ -387,6 +382,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
 
+        // delete the poll 5
+        cy.contains('Poll 5').siblings(':nth-child(2)').click();
+
+        // verify the poll is no longer there
+        cy.get('poll5 ').should('not.exist');
         // yay! done.
     });
 });
