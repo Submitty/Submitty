@@ -71,7 +71,7 @@ input[type="radio"][disabled=""]:checked::before {
 
 input[type="checkbox"][name="answers[]"] {
     transform: scale(0.75);
-    margin: 0px 1px 0px 0px;
+    margin: 0 1px 0 0;
 }
 
 .active {
