@@ -441,7 +441,7 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
-			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\IndentedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
+			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeBlockRenderer.php
 
