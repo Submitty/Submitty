@@ -101,7 +101,7 @@ function generateCalendarItem(item) {
         </a>`;
 }
 
-/*function generateItemHtml(item, date) {
+function generateItemHtml(item, date) {
     let styleString = '';
     switch (item['type']) {
         case 'announcement':
@@ -123,7 +123,7 @@ function generateCalendarItem(item) {
             return `<p ${styleString}>${item['text']}</p>`;
         }
     }
-}*/
+}
 
 function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
@@ -399,4 +399,8 @@ function loadCalendar(month_, year_) {
  */
 function loadFullCalendar(start, end, semester_name) {
     $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
+}
+
+function openNewItemModal() {
+    $('#new-calendar-item-form').css('display', 'block');
 }
