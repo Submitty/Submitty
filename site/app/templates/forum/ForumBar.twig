@@ -81,8 +81,6 @@
 						<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" >Edit Categories</a>
 					{% endif %}
 					{% if thread_exists %}
-					    <a href="#" id="thread-time" class="key_to_click dropdown-item" tabindex="0" title="Sort threads by ascending chronological order" onclick="changeDisplayOptionsForThreads('time')">Chronological  <i class="fas fa-angle-up"></i> </a>
-                        <a href="#" id="thread-reverse_time" class="key_to_click dropdown-item" tabindex="0" title="Sort threads by descending chronological order" onclick="changeDisplayOptionsForThreads('reverse_time')">Chronological <i class="fas fa-angle-down"></i> </a>
 
 					    {% if is_full_threads_page is not defined or not is_full_threads_page %}
                             <div class="dropdown-divider"></div>
@@ -98,6 +96,9 @@
                                 <a href="#" id="alpha_by_registration" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's registration section then last name" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a>
                                 <a href="#" id="alpha_by_rotating" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's rotating section then last name" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a>
                             {% endif %}
+                        {% else %}
+                            <a href="#" id="thread-time" class="key_to_click dropdown-item" tabindex="0" title="Sort threads by ascending chronological order" onclick="changeDisplayOptionsForThreads('time')">Chronological  <i class="fas fa-angle-up"></i> </a>
+                            <a href="#" id="thread-reverse_time" class="key_to_click dropdown-item" tabindex="0" title="Sort threads by descending chronological order" onclick="changeDisplayOptionsForThreads('reverse_time')">Chronological <i class="fas fa-angle-down"></i> </a>
 					    {% endif %}
 					{% endif %}
 				</div>

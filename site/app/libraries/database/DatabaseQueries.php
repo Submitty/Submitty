@@ -602,7 +602,7 @@ SQL;
         $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
         if ($sortOption == "time") {
             $query_order = "t.id ASC";
-        } else if ($sortOption == "reverse-time") {
+        } elseif ($sortOption == "reverse-time") {
             $query_order = "t.id DESC";
         }
         $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";

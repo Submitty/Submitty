@@ -949,7 +949,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
      */
-    public function showFullThreads($sort = null) {
+    public function showFullThreads() {
         // preparing the params for threads
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_deleted = $this->showDeleted();
@@ -965,10 +965,16 @@ class ForumController extends AbstractController {
         $pageNumber = 0;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
 
+        $sort = null;
+        if (!empty($_COOKIE['forum_thread_display_option'])) {
+            $sort = $_COOKIE['forum_thread_display_option'];
+
+        }
         // filter out only accepted sort options
-        if (in_array($sort, ["time", "reverse_time"])){
+        if (in_array($sort, ["time", "reverse_time"])) {
             $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id, $sort);
-        } else {
+        }
+        else {
             $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
         }
 

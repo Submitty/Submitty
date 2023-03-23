@@ -955,7 +955,9 @@ function changeDisplayOptions(option) {
 // eslint-disable-next-line no-unused-vars
 function changeDisplayOptionsForThreads(option) {
     // eslint-disable-next-line no-undef
-    window.location.replace(`${buildCourseUrl(['forum'])}?sort=${option}`);
+    document.cookie = `forum_thread_display_option=${option};`;
+    // eslint-disable-next-line no-undef
+    window.location.replace(`${buildCourseUrl(['forum'])}`);
 }
 
 function readCategoryValues() {
