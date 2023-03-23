@@ -1133,7 +1133,7 @@ class AdminGradeableController extends AbstractController {
                             $gradeable->setDependsOnPoints(0);
                         }
                         else {
-                            if ($depends_on_points < 0 || $depends_on_points > $temp_gradeable->getDependsOnPoints()) {
+                            if ($depends_on_points < 0 || ($depends_on_points > $temp_gradeable->getDependsOnPoints() && $temp_gradeable->getDependsOnPoints() !== null)) {
                                 $errors['depends_on_points'] = "Invalid depends on points!";
                             }
                         }
