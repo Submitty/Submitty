@@ -1,0 +1,15 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}toggle-columns-form{% endblock %}
+{% block title %}Toggle Columns{% endblock %}
+{% block body %}
+    
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateManageStudentsColumns()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

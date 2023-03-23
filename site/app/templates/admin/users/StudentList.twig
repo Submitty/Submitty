@@ -74,6 +74,7 @@
     {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}
+{% include('admin/users/ToggleManageStudentsColumns.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
 {% include('admin/users/DeleteUserForm.twig') %}
