@@ -188,15 +188,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('h2').contains('Possible responses:');
         cy.get('.markdown').should('contain', 'Question goes here...?');
         cy.get('.markdown').should('not.contain', '#');
-        cy.get('.radio').eq(0).contains('no response');
-        cy.get('.radio > input').eq(0).should('be.disabled');
-        cy.get('.radio > input').eq(0).should('be.checked');
-        cy.get('.radio').eq(1).contains('Answer 1');
-        cy.get('.radio > input').eq(1).should('be.disabled');
-        cy.get('.radio').eq(2).contains('Answer 2');
-        cy.get('.radio > input').eq(2).should('be.disabled');
-        cy.get('.radio').eq(3).contains('Answer 3');
-        cy.get('.radio > input').eq(3).should('be.disabled');
+        cy.contains('tr', 'no response').find('.option-button').get('input').should('be.disabled');
+        cy.contains('tr', 'no response').find('.option-button').get('input').should('be.checked');
+        cy.contains('tr', 'Answer 1').find('.option-button').get('input').should('be.disabled');
+        cy.contains('tr', 'Answer 2').find('.option-button').get('input').should('be.disabled');
+        cy.contains('tr', 'Answer 3').find('.option-button').get('input').should('be.disabled');
         // verify the optional buttons and histogram don't exist for student
         cy.should('not.contain', '#toggle-histogram-button');
         cy.should('not.contain', '#toggle-info-button');
@@ -213,24 +209,21 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.get('.radio').eq(0).contains('No response');
-        cy.get('.radio > input').eq(0).should('not.be.disabled');
-        cy.get('.radio > input').eq(0).should('be.checked');
-        cy.get('.radio').eq(1).contains('Answer 1');
-        cy.get('.radio > input').eq(1).should('not.be.disabled');
-        cy.get('.radio').eq(2).contains('Answer 2');
-        cy.get('.radio > input').eq(2).should('not.be.disabled');
-        cy.get('.radio').eq(3).contains('Answer 3');
-        cy.get('.radio > input').eq(3).should('not.be.disabled');
-        cy.get('.radio > input').eq(2).check();
+        cy.contains('tr', 'no response').find('.option-button').get('input').should('not.be.disabled');
+        cy.contains('tr', 'no response').find('.option-button').get('input').should('be.checked');
+        cy.contains('tr', 'Answer 1').find('.option-button').get('input').should('not.be.disabled');
+        cy.contains('tr', 'Answer 2').find('.option-button').get('input').should('not.be.disabled');
+        cy.contains('tr', 'Answer 3').find('.option-button').get('input').should('not.be.disabled');
+        cy.contains('tr', 'Answer 2').find('.option-button').get('input').check();
         cy.get('button[type=submit]').click();
         cy.url().should('include', 'sample/polls');
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 2');
 
         // try switching the answer and verify it got saved
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.get('.radio > input').eq(2).should('be.checked');
-        cy.get('.radio > input').eq(3).should('not.be.checked');
+        cy.contains('tr', 'Answer 2').find('.option-button').get('input').should('be.checked');
+        cy.contains('tr', 'Answer 3').find('.option-button').get('input').should('not.be.checked');
+        cy.contains('tr', 'Answer 2').find('.option-button').get('input').check()
         cy.get('.radio > input').eq(3).check();
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');

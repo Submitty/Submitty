@@ -30,8 +30,8 @@
                     </legend>
                     {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
-                        <tr class="radio" for="answer-no-response">
-                            <td><input class="no-response-radio response-btn"
+                        <tr class="radio answer-row" for="answer-no-response">
+                            <td class="option-button"><input class="no-response-radio response-btn"
                                    type="{{button_type}}"
                                    value="-1"
                                    name="answers[]"
@@ -49,8 +49,8 @@
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
-                        <tr class="radio">
-                            <td><input class="response-radio response-btn"
+                        <tr class="radio answer-row">
+                            <td class="option-button"><input class="response-radio response-btn"
                                    type={{ button_type }}
                                    aria-label="Option {{ index + 1 }}"
                                    value="{{ option.getId() }}"
@@ -66,7 +66,8 @@
                             } only %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <i class="fa-solid fa-square-check fa-lg correct-tag"></i>
-                            {% endif %}</td>
+                            {% endif %}
+                            </td>
                         </tr>
                         {% set index = index + 1 %}
                     {% endfor %}
