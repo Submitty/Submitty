@@ -372,7 +372,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-name').type('Poll 5');
         cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
-        const tomorrow = new Date(Date.now());
+        const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1); // set date to one day forward
         cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.contains('Add Response').click();
