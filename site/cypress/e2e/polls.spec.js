@@ -396,8 +396,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-
-        // delete the poll 5
         cy.get('#tomorrow-table-dropdown').click();
         cy.contains('Poll 5').siblings(':nth-child(2)').click();
 
