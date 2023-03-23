@@ -116,8 +116,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#chartContainer').contains('2 * 3 = 6');
         cy.get('#chartContainer').contains('8 / 2 = 3');
         cy.get('#chartContainer').contains('1 * 3 = 4');
-
     });
+    
     it('Should verify making, editing, deleting poll works as expected', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
