@@ -68,6 +68,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
+        cy.get('#tomorrow-table-dropdown').click();
+        cy.get('#tomorrow-table').should('be.visible');
 
         // go to poll 1 result page
         cy.contains('Poll 1').siblings().last().click();
@@ -120,6 +122,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#chartContainer').contains('1 * 3 = 4');
 
     });
+
     it('Should verify making, editing, deleting poll works as expected', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
@@ -147,6 +150,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-name').type('Poll Cypress Test');
         cy.get('#poll-question').type('# Question goes here...?');
         cy.get('#poll-date').clear({force: true});
+        // manually setting the release date to some time in the past
         cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
@@ -177,6 +181,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
+        // verify the poll is in the old polls
         cy.get('#old-table-dropdown').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(5)').children().click();
 
@@ -355,7 +360,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
-        cy.wait(500);
+        cy.wait(500); // short wait must be inserted here to support the stability of poll deletion
 
         // log into student and verify the poll is no longer there
         cy.logout();
@@ -364,86 +369,89 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
     });
 
-    it("Test cases for tomorrow's poll section", () => {
+    it('Should verify today, tomorrow, and future sections contain own related polls', () => {
         // log in from instructor account
+        cy.logout();
         cy.visit(['sample', 'polls']);
         cy.login();
 
-        //tomorrow's poll test, name poll 5
+        // toggle all the drop down
+        cy.get('#old-table-dropdown').click();
+        cy.get('#older-table').should('be.visible');
+        cy.get('#future-table-dropdown').click();
+        cy.get('#future-table').should('be.visible');
+        cy.get('#tomorrow-table-dropdown').click();
+        cy.get('#tomorrow-table').should('be.visible');
+
+        // make a poll, set release date to today
         cy.contains('New Poll').click();
-        cy.get('#poll-name').type('Poll 5');
+        cy.get('#poll-name').type('Poll Today');
+        cy.get('#poll-question').type('# Question goes here...?');
+        cy.get('#poll-date').clear({force: true});
+        // make a date variable on the same day the test being run
+        const today = new Date();
+        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
+        cy.get('h1').click(); // get rid of the date picker
+        cy.contains('Add Response').click();
+        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
+        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
+        cy.get('h1').click();
+        cy.get('#poll-form-submit').click();
+
+        // make a poll, set release date to tomorrow
+        cy.contains('New Poll').click();
+        cy.get('#poll-name').type('Poll Tomorrow');
         cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1); // set date to one day forward
-        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset ).toISOString().slice(0, 10), {force: true});
-        console.log(new Date(tomorrow - tzoffset ).toISOString().slice(0, 10));
+        // set date to the next day from when the test is being run
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        cy.get('#poll-date').type((tomorrow).toISOString().substring(0, 10), {force: true});
+        cy.get('h1').click();
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
         cy.get('#response_0_wrapper').children(':nth-child(4)').type('Data Structures');
         cy.get('h1').click();
-
-        // submit and verify on main polls page, poll should be in tomorrow table
         cy.get('#poll-form-submit').click();
-        cy.url().should('include', 'sample/polls');
-        cy.contains('Poll 5');
-        cy.get('#tomorrow-table').contains('Poll 5');
 
-        //log into student and should not be able to see tomorrow's poll
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'polls']);
-        cy.get('poll 5').should('not.exist');
-
-        //log into instructor, and delete poll
-        cy.logout();
-        cy.login();
-        cy.visit(['sample', 'polls']);
-
-        cy.get('#tomorrow-table-dropdown').click();
-        //change date next week, should not be visible in tomorrow's table
-        cy.contains('Poll 5').siblings(':nth-child(1)').children().click();
-        cy.url().should('include', 'sample/polls/editPoll');
-        tomorrow.setDate(tomorrow.getDate() + 7); // set date to one week forward
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset ).toISOString().slice(0, 10), {force: true});
+        // make a poll, set release date to some time in the future
+        cy.contains('New Poll').click();
+        cy.get('#poll-name').type('Poll Future');
+        cy.get('#poll-question').type('Why do you want to pick this date?');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type('2049-06-30', {force: true});
+        cy.get('h1').click();
+        cy.contains('Add Response').click();
+        cy.get('#response_0_wrapper').children(':nth-child(3)').check();
+        cy.get('#response_0_wrapper').children(':nth-child(4)').type('Answer 1');
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
-        cy.url().should('include', 'sample/polls');
-        cy.get('#future-table').contains('Poll 5');
 
-        cy.get('#tomorrow-table-dropdown').click();
-        //change date to 100 days ago, should be visible to old table
-        cy.contains('Poll 5').siblings(':nth-child(1)').children().click();
+        // verify on main polls page, three newly created polls should be in their own time section
+        cy.url().should('include', 'sample/polls');
+        cy.get('#today-table').contains('Poll Today').should('be.visible');
+        cy.get('#tomorrow-table').contains('Poll Tomorrow').should('be.visible');
+        cy.get('#future-table').contains('Poll Future').should('be.visible');
+
+        // change the release date of Poll Future to tomorrow
+        cy.contains('Poll Future').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        tomorrow.setDate(tomorrow.getDate() - 100); // set date to 100 days ago
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset ).toISOString().slice(0, 10), {force: true});
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type((tomorrow).toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
-        cy.url().should('include', 'sample/polls');
-        cy.url().shuold('not.include','editPoll');
-        cy.contains('Poll 5').siblings(':nth-child(5)').children().click();//visible
-        cy.get('#poll_5_visible').should('be.checked');//make sure its visible.
-        cy.get('#older-table').contains('Poll 5');
 
-        //change date to today, should be visible to today's table
-        cy.contains('Poll 5').siblings(':nth-child(1)').children().click();
-        cy.url().should('include', 'sample/polls/editPoll');
-        tomorrow.setDate(new Date()); // set date to today
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset ).toISOString().slice(0, 10), {force: true});
-        cy.get('#poll-form-submit').click();
-        cy.get('h1').click();
-        cy.get('#old-table').contains('Poll 5');
-        cy.get('#poll-form-submit').click();
-        cy.url().should('include', 'sample/polls');
+        // now this poll should be in tomorrow's section
+        cy.get('#tomorrow-table').contains('Poll Future').should('be.visible');
 
-        // delete the poll 5
-        cy.get('#old-table-dropdown').click();
-        cy.contains('Poll 5').siblings(':nth-child(2)').click();
-
-        // verify the poll is no longer there
-        cy.get('poll 5').should('not.exist');
-        // yay! done.
-
+        // delete the new polls
+        cy.contains('Poll Today').siblings(':nth-child(2)').click();
+        cy.wait(500);
+        cy.contains('Poll Tomorrow').siblings(':nth-child(2)').click();
+        cy.wait(500);
+        cy.contains('Poll Future').siblings(':nth-child(2)').click();
+        cy.wait(500);
     });
+
+    // Done.
 });
