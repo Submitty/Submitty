@@ -63,7 +63,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/newItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/new", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function createMessage(): RedirectResponse {
@@ -122,7 +122,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/editItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function editMessage(): RedirectResponse {
