@@ -7971,11 +7971,6 @@ SQL;
 SQL;
     }
 
-    private function getGradeableMinutesOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
-    }
-
     /**
      * Gets the number of students who have submitted to a given gradeable
      *
