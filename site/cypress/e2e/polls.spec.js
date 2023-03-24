@@ -38,7 +38,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll_3_responses').invoke('text').then(parseInt).should('be.eq', 0);
 
         cy.get('#future-table').contains('Poll 4');
-        //cy.get('#poll_4_responses').invoke('text').then(parseInt).should('be.eq', 0);
+        cy.get('#poll_4_responses').invoke('text').then(parseInt).should('be.eq', 0);
     });
 
     it('Should verify all existing polls are on the student page', () => {
