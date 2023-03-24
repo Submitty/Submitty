@@ -12,8 +12,9 @@
     <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
-<div class="content displayed-when-printed" id="gradeable-submission-cont">
-    <header id="gradeable-info">
+<div class="content">
+    <div id="gradeable-submission-cont">
+        <header id="gradeable-info">
         <h1>
             New submission for: {{ gradeable_name }}
             {% if gradeable_url|trim != "" %}
@@ -52,19 +53,19 @@
             <span>Upload progress: <span id="loading-bar-percentage"></span></span>
             <progress id="loading-bar" value="0" ></progress>
         </div>
-    </header>
+        </header>
 
-    {% if part_names|length > 1 and one_part_only %}
+        {% if part_names|length > 1 and one_part_only %}
         <h4 style="color: red;">
             Please drag and drop your files into only one area below. Files submitted to additional areas will not be graded.
         </h4>
-    {% endif %}
+        {% endif %}
 
-    {% if show_no_late_submission_warning %}
+        {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
-    {% endif %}
-    {# Admin submission type selector #}
-    {% if core.getUser().accessFullGrading() and bulk_upload_access %}
+        {% endif %}
+        {# Admin submission type selector #}
+        {% if core.getUser().accessFullGrading() and bulk_upload_access %}
         <form id="submission-form" method="post">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
@@ -137,10 +138,10 @@
 
         <div id="submission-mode-warning" class="text-center">
         </div>
-    {% endif %}
-    {# /Admin submission type selector #}
+        {% endif %}
+        {# /Admin submission type selector #}
 
-    {% if is_vcs %}
+        {% if is_vcs %}
         {% if vcs_host_type == 0 or vcs_host_type == 1 %}
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
@@ -179,7 +180,7 @@
         </div>
         <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
     
-    {% else %}
+        {% else %}
         {% if is_notebook %}
             {% include 'notebook/Notebook.twig' with {
                 "notebook": notebook,
@@ -354,7 +355,8 @@
             //TODO: move the logic on loading submission mode into a module
 
         </script>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 {% if core.getUser().accessFullGrading() %}
