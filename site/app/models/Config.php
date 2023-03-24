@@ -298,7 +298,6 @@ class Config extends AbstractModel {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
-        $this->locale = new Locale($this->core, $this->default_locale);
 
         // For now this will be set to 'MDY', and configured as a property of the Config class
         // Eventually this should be moved to the User class and configured on a per-user basis
@@ -373,12 +372,13 @@ class Config extends AbstractModel {
             $this->timezone = new \DateTimeZone($submitty_json['timezone']);
         }
 
-        if (isset($submitty_json['default_locale'])) {
-            $this->locale = new Locale($this->core, $submitty_json['default_locale']);
-        }
-
         if (isset($submitty_json['site_lang_dir'])) {
             $this->lang_path = $submitty_json['site_lang_dir'];
+            if (isset($submitty_json['default_locale'])) {
+                $this->locale = new Locale($this->core, $submitty_json['default_locale']);
+            } else {
+                $this->locale = new Locale($this->core, $this->default_locale);
+            }
         }
 
         if (isset($submitty_json['institution_name'])) {
@@ -666,5 +666,9 @@ class Config extends AbstractModel {
 
     public function getLocale(): Locale {
         return $this->locale;
+    }
+
+    public function getLangPath(): string {
+        return $this->lang_path;
     }
 }
