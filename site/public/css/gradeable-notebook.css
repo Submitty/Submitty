@@ -125,8 +125,8 @@ img {
 .notebook .markdown {
     max-width: 700px;
 }
-/* stylelint-enable selector-class-pattern */
 
+/* stylelint-enable selector-class-pattern */
 @media print {
     .content:not(#gradeable-submission-cont), aside, .flex-row.shadow {
         display: none;
