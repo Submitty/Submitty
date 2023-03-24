@@ -607,7 +607,7 @@ class NavigationView extends AbstractView {
             "disabled" => $disabled,
             "class" => "btn {$class} btn-nav btn-nav-submit",
             "name" => "submit-btn",
-            "prerequisite" => $prerequisite,
+            "prerequisite" => $prerequisite
         ]);
     }
 

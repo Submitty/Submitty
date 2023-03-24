@@ -69,6 +69,7 @@ class Button extends AbstractModel {
     protected $icon;
      /** @prop @var string|null $prefix */
     protected $prefix;
+    
     /**
      * @param Core $core
      * @param array $details
