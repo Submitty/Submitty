@@ -165,6 +165,7 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
+SITE_LANG_DIR = os.path.join(SUBMITTY_REPOSITORY, 'site', 'lang')
 
 ##############################################################################
 
@@ -288,6 +289,8 @@ else:
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
     print()
 
+    DEFAULT_LOCALE = get_input('What default language should the Submitty site use? (Default: en_US)')
+
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
@@ -406,6 +409,8 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 
+config['site_lang_dir'] = SITE_LANG_DIR
+
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 config['num_untrusted'] = NUM_UNTRUSTED
@@ -435,6 +440,7 @@ else:
     config['database_course_user'] = DATABASE_COURSE_USER
     config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['timezone'] = TIMEZONE
+    config['default_locale'] = DEFAULT_LOCALE
 
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['vcs_url'] = VCS_URL
@@ -625,6 +631,7 @@ if not args.worker:
     config['sys_admin_url'] = SYS_ADMIN_URL
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
+config['site_lang_dir'] = SITE_LANG_DIR
 
 if not args.worker:
     config['submission_url'] = SUBMISSION_URL
@@ -635,6 +642,7 @@ if not args.worker:
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['timezone'] = TIMEZONE
+    config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
 
 config['worker'] = True if args.worker == 1 else False
