@@ -128,5 +128,5 @@ img {
 
 /* stylelint-enable selector-class-pattern */
 @media print {
-.content{ margin: 0px; padding: 0px; }
+    .content{ margin: 0px; padding: 0px; }
 }
