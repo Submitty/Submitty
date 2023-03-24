@@ -137,23 +137,19 @@ class CalendarInfo extends AbstractModel {
             $cal_items = $calendar_items[$course->getTitle()];
             foreach ($cal_items as $cal_item) {
                 $date = $cal_item->getDate()->format('Y-m-d');
-                try {
-                    $curItem = [
-                        'title' => htmlspecialchars($cal_item->getText()),
-                        'status' => $cal_item->getTypeString(),
-                        'course' => $course,
-                        'icon' => '',
-                        'url' => '',
-                        'show_due' => false,
-                        'submission' => '',
-                        'status_note' => '',
-                        'color' => $info->colors[$course->getSemester() . $course->getTitle()],
-                        'type' => 'item'
-                    ];
-                    $info->items_by_date[$date][] = $curItem;
-                }
-                catch (\Exception $e) { //Empty catch to skip this item
-                }
+                $curItem = [
+                    'title' => htmlspecialchars($cal_item->getText()),
+                    'status' => $cal_item->getTypeString(),
+                    'course' => $course,
+                    'icon' => '',
+                    'url' => '',
+                    'show_due' => false,
+                    'submission' => '',
+                    'status_note' => '',
+                    'color' => $info->colors[$course->getSemester() . $course->getTitle()],
+                    'type' => 'item'
+                ];
+                $info->items_by_date[$date][] = $curItem;
             }
         }
 
