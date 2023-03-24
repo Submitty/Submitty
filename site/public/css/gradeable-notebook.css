@@ -128,7 +128,7 @@ img {
 
 /* stylelint-enable selector-class-pattern */
 @media print {
-    .content:not(#gradeable-submission-cont), aside, .flex-row.shadow {
+    .content.displayed-when-printed:not(#gradeable-submission-cont), aside, .flex-row.shadow {
         display: none;
     }
 
