@@ -126,10 +126,29 @@ img {
     max-width: 700px;
 }
 
+/* stylelint-enable selector-class-pattern */
 @media print {
-    .content{ 
-        margin: 0px; 
-        padding: 0px; 
+    .content:not(#gradeable-submission-cont), aside, .flex-row.shadow {
+        display: none;
+    }
+
+    .content{
+        margin: 0px;
+        padding: 0px;
+    }
+    
+    h1{
+        font-size: 25px;
+    }
+
+    h2{
+        font-size: 21px;
+    }
+
+    p{
+        font-size: 16px;
+    }
+    performance-warning-system-message-text{
+        display: none;
     }
 }
-/* stylelint-enable selector-class-pattern */
