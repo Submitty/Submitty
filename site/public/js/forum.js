@@ -377,7 +377,11 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                         const last = last_bookmarked.length === 0 ? last_announcement : last_bookmarked;
 
                         if (last.length === 0) {
-                            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
+                            var spot_after_announcements = $('.thread_box_link').first();
+                            while(spot_after_announcements.find('.thread-announcement-expiring').length != 0){
+                                spot_after_announcements = spot_after_announcements.next();
+                            }
+                            $(new_thread).insertBefore(spot_after_announcements).hide().fadeIn('slow');
                         }
                         else {
                             $(new_thread).insertAfter(last.next()).hide().fadeIn('slow');
