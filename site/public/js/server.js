@@ -1096,10 +1096,10 @@ function enableTabsInTextArea(jQuerySelector) {
     });
 }
 
-function confirmBypass(str, redirect){
-    confirmed = confirm(str);
-    if (confirmed)
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
         location.href = redirect;
+    }
 }
 
 function updateGradeOverride(data) {
