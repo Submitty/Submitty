@@ -128,17 +128,19 @@ img {
 
 /* stylelint-enable selector-class-pattern */
 @media print {
+    .content{
+        margin: 0;
+        padding: 0;
+    }
+
     .content:not(#gradeable-submission-cont){
         display: none;
+        margin: 0;
+        padding: 0;
     }
 
     aside, .flex-row.shadow {
         display: none;
-    }
-
-    .content{
-        margin: 0;
-        padding: 0;
     }
     
     h1{
