@@ -71,24 +71,6 @@
     margin-right: 10px;
 }
 
-#print-button-for-quiz {
-    background-color: cadetblue;
-    border: groove;
-    border-color: #1f5e66;
-    width: 70px;
-    height: 30px;
-    border: groove;
-    border-width: 5px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-#print-button-for-quiz:hover{
-    border-color: grey;
-    background-color: #79cbcd;
-}
-
-
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
