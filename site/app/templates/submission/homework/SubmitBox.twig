@@ -234,7 +234,6 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            <button id="print-button-for-quiz" onclick="window.print()">Print</button>
         </div>
 
         {# Page selector #}
@@ -259,6 +258,7 @@
             <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
+            <button id="print-button-for-quiz" onclick="window.print()">Print</button>
             {% if viewing_inactive_version %}
                 <a href="{{ recent_version_url }}" class="btn btn-primary">
                     Switch to Most Recent Version
