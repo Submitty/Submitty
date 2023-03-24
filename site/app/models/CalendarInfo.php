@@ -14,7 +14,6 @@ use app\views\NavigationView;
  * Container of information used to fill the calendar.
  */
 class CalendarInfo extends AbstractModel {
-    const COLORS = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
     /**
      * @var array<string, array<string, string|bool>>
      * the structure of the array is a "YYYY-mm-dd" date string as key, and value
@@ -68,11 +67,11 @@ class CalendarInfo extends AbstractModel {
 
         $gradeable_list = new GradeableList($core, $core->getUser(), $gradeables_of_user["gradeables"]);
 
-        $i = 0;
+        $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            $info->colors[$course->getSemester() . $course->getTitle()] = self::COLORS[$i];
-            if ($i < 19) {
+            $info->colors[$course->getSemester() . $course->getTitle()] = "var(--category-color-".$i.")";
+            if ($i < 21) {
                 $i++;
             }
         }
