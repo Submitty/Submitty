@@ -18,12 +18,12 @@ class Locale extends AbstractModel {
     /** @prop @var array */
     private $lang_data = [];
 
-    public function __construct(Core $core, string $lang) {
+    public function __construct(Core $core, string $lang_path, string $lang) {
         parent::__construct($core);
 
         $this->lang = $lang;
 
-        $lang_data = FileUtils::readJsonFile(FileUtils::joinPaths($core->getConfig()->getLangPath(), $lang . ".json"));
+        $lang_data = FileUtils::readJsonFile(FileUtils::joinPaths($lang_path, $lang . ".json"));
         if ($lang_data) {
             $this->lang_data = $lang_data;
             $core->lang = $lang_data;

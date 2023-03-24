@@ -375,10 +375,10 @@ class Config extends AbstractModel {
         if (isset($submitty_json['site_lang_dir'])) {
             $this->lang_path = $submitty_json['site_lang_dir'];
             if (isset($submitty_json['default_locale'])) {
-                $this->locale = new Locale($this->core, $submitty_json['default_locale']);
+                $this->locale = new Locale($this->core, $this->lang_path, $submitty_json['default_locale']);
             }
             else {
-                $this->locale = new Locale($this->core, $this->default_locale);
+                $this->locale = new Locale($this->core, $this->lang_path, $this->default_locale);
             }
         }
 
