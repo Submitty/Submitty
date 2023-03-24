@@ -181,7 +181,6 @@
     
     {% else %}
         {% if is_notebook %}
-            <button id="print-button-for-quiz" onclick="window.print()">Print</button>
             {% include 'notebook/Notebook.twig' with {
                 "notebook": notebook,
                 "testcase_messages" : testcase_messages,
@@ -197,6 +196,7 @@
                 "allowed_minutes" : allowed_minutes > 0 ? allowed_minutes : 0,
                 "is_grader_view" : false
             } %}
+            <button id="print-button-for-quiz" onclick="window.print()">Print</button>
         {% endif %}
 
         {# File upload boxes #}
