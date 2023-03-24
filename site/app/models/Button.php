@@ -22,7 +22,6 @@ use app\libraries\Core;
  * @method string|null getBadge()
  * @method string|null getIcon()
  * @method bool getPrefix()
- * @method bool getBypass()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
@@ -37,7 +36,6 @@ use app\libraries\Core;
  * @method void setAriaLabel(string|null $ariaLabel)
  * @method void setBadge(string|null $badge)
  * @method void setIcon(string|null $icon)
- * @method bool setBypass(bool $bypass)
  */
 class Button extends AbstractModel {
     /** @prop @var string|null $title */
@@ -71,8 +69,6 @@ class Button extends AbstractModel {
     protected $icon;
      /** @prop @var string|null $prefix */
     protected $prefix;
-     /** @prop @var bool $bypass */
-    protected $bypass;
     /**
      * @param Core $core
      * @param array $details
@@ -97,7 +93,6 @@ class Button extends AbstractModel {
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
         $this->prefix = $details["prefix"] ?? "fa";
-        $this->bypass = $details["bypass"] ?? false;
     }
 
     /**

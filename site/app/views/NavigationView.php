@@ -591,13 +591,8 @@ class NavigationView extends AbstractView {
                 }
             }
         }
-        $bypass = false;
         $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
-            $user = $core->getUser();
-            if ($user->accessGrading()) {
-                $bypass = true;
-            }
             $disabled = true;
             $title = "LOCKED";
             $prerequisite = $gradeable->getPrerequisite();
@@ -613,7 +608,6 @@ class NavigationView extends AbstractView {
             "class" => "btn {$class} btn-nav btn-nav-submit",
             "name" => "submit-btn",
             "prerequisite" => $prerequisite,
-            "bypass" => $bypass
         ]);
     }
 
