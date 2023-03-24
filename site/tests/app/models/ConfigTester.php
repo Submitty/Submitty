@@ -350,7 +350,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'date_time_format' => ['modified' => false],
             "lang_path" => FileUtils::joinPaths($this->temp_dir, "lang"),
             "default_locale" => "en_US",
-            "locale" => [ "lang_key" => "lang_val" ]
+            "locale" => ['modified' => false],
         ];
         $actual = $config->toArray();
 
