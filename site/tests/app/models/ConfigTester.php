@@ -53,6 +53,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'site_errors'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'ta_grading'));
 
+        $lang_path = FileUtils::joinPaths($this->temp_dir, "lang");
+        FileUtils::createDir($lang_path);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($lang_path, "en_US.json"), [ "lang_key" => "lang_val" ]);
+
         $config = [
             "authentication_method" => "PamAuthentication",
             "ldap_options" => [],
@@ -92,7 +96,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => "Some system message",
             "duck_special_effects" => false,
             "default_locale" => "en_US",
-            "site_lang_dir" => "/usr/local/submitty/GIT_CHECKOUT/Submitty/site/lang"
+            "site_lang_dir" => $lang_path
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -344,9 +348,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
-            "lang_path" => "/usr/local/submitty/GIT_CHECKOUT/Submitty/site/lang",
+            "lang_path" => FileUtils::joinPaths($this->temp_dir, "lang"),
             "default_locale" => "en_US",
-            "locale" => null
+            "locale" => [ "lang_key" => "lang_val" ]
         ];
         $actual = $config->toArray();
 
