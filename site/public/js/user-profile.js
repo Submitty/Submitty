@@ -68,7 +68,6 @@ function getCurrentUTCOffset() {
 
 // eslint-disable-next-line no-unused-vars
 function updateUserPronouns(e) {
-    console.log(e);
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
     if (pronouns.data('current-pronouns') === pronouns.val()) {
