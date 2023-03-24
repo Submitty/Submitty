@@ -45,6 +45,6 @@ a.popout-item > .fas:hover {
     font-weight: bold;
 }
 
-.btn.btn-primary.key_to_click{
+a.btn-primary {
     margin: 1.5px;
 }
