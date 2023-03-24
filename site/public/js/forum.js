@@ -377,7 +377,6 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                         const last = last_bookmarked.length === 0 ? last_announcement : last_bookmarked;
 
                         if (last.length === 0) {
-                            console.log("I reflect on my reflection");
                             if ($(new_thread).find('.thread-announcement-expiring').length == 1) {
                                 $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
                             }
