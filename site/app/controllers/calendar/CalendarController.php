@@ -152,7 +152,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['id'])) {
-            $id = $_POST['id']; 
+            $id = $_POST['id'];
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect id");
