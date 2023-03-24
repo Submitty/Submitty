@@ -28,7 +28,7 @@ class Locale extends AbstractModel {
             $this->lang_data = $lang_data;
             $core->lang = $lang_data;
         }
-   }
+    }
 
     public function getLang(): string {
         return $this->lang;
