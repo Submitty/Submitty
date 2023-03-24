@@ -90,7 +90,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
-            "duck_special_effects" => false
+            "duck_special_effects" => false,
+            "default_locale" => "en_US",
+            "site_lang_dir" => "/usr/local/submitty/GIT_CHECKOUT/Submitty/site/lang"
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -341,7 +343,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
-            'date_time_format' => ['modified' => false]
+            'date_time_format' => ['modified' => false],
+            "lang_path" => "/usr/local/submitty/GIT_CHECKOUT/Submitty/site/lang",
+            "default_locale" => "en_US",
+            "locale" => null
         ];
         $actual = $config->toArray();
 
