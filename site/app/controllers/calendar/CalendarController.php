@@ -152,7 +152,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['id'])) {
-            $id = $_POST['id']; 
+            $id = $_POST['id'];
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect id");
@@ -185,10 +185,10 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/deleteItem", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/delete", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function deleteMessage(): JsonResponse {
+    public function deleteMessage(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
         }
