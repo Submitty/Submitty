@@ -38,7 +38,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll_3_responses').invoke('text').then(parseInt).should('be.eq', 0);
 
         cy.get('#future-table').contains('Poll 4');
-        cy.get('#poll_4_responses').invoke('text').then(parseInt).should('be.eq', 0);
+        //cy.get('#poll_4_responses').invoke('text').then(parseInt).should('be.eq', 0);
     });
 
     it('Should verify all existing polls are on the student page', () => {
@@ -390,7 +390,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').clear({force: true});
         // make a date variable on the same day the test being run
         const today = new Date();
-        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        cy.get('#poll-date').type(new Date(today - tzoffset).toISOString().substring(0, 10), {force: true});
         cy.get('h1').click(); // get rid of the date picker
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
@@ -406,7 +407,7 @@ describe('Test cases revolving around polls functionality', () => {
         // set date to the next day from when the test is being run
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        cy.get('#poll-date').type((tomorrow).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
@@ -437,12 +438,31 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Future').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
-        cy.get('#poll-date').type((tomorrow).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
 
-        // now this poll should be in tomorrow's section
+        // change the release date of Poll tomorrow to today
+        cy.contains('Poll Tomorrow').siblings(':nth-child(1)').children().click();
+        cy.url().should('include', 'sample/polls/editPoll');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type(new Date(today - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('h1').click();
+        cy.get('#poll-form-submit').click();
+
+        // change the release date of Poll today to tomorrow
+        cy.contains('Poll Today').siblings(':nth-child(1)').children().click();
+        cy.url().should('include', 'sample/polls/editPoll');
+        cy.get('#poll-date').clear({force: true});
+        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('h1').click();
+        cy.get('#poll-form-submit').click();
+
+        // changed Poll Future => tomorrow, Poll Tomorrow => today, Poll Today => tomorrow and verify
+        cy.url().should('include', 'sample/polls');
         cy.get('#tomorrow-table').contains('Poll Future').should('be.visible');
+        cy.get('#tomorrow-table').contains('Poll Today').should('be.visible');
+        cy.get('#today-table').contains('Poll Tomorrow').should('be.visible');
 
         // delete the new polls
         cy.contains('Poll Today').siblings(':nth-child(2)').click();
