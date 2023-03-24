@@ -289,7 +289,8 @@ else:
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
     print()
 
-    DEFAULT_LOCALE = get_input('What default language should the Submitty site use? (Default: en_US)')
+    DEFAULT_LOCALE = get_input('What default language should the Submitty site use?', 'en_US')
+    print()
 
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
