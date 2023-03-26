@@ -1625,7 +1625,7 @@ class PlagiarismController extends AbstractController {
         $return = [];
         foreach ($ranking as $item) {
             $display_name = "";
-            if (!$is_team_assignment) {
+            if (!$is_team_assignment && array_key_exists($item[0], $user_ids_and_names)) {
                 $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
