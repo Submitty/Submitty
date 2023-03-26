@@ -1253,7 +1253,7 @@ class ElectronicGraderController extends AbstractController {
                 unlink($csv_file);
             }
         );
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($contents === false) {
