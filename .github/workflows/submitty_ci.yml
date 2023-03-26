@@ -264,7 +264,11 @@ jobs:
         - name: Run ShellCheck
           run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
-
+#changes to be made here, look at "name". split into:
+#Selenium tests
+#Cypress test part 1
+#Cypress test part 2
+#Integration tests
     e2e:
         needs:
           - js-lint
