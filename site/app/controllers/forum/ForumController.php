@@ -968,7 +968,6 @@ class ForumController extends AbstractController {
         $sort = null;
         if (!empty($_COOKIE['forum_thread_display_option'])) {
             $sort = $_COOKIE['forum_thread_display_option'];
-
         }
         // filter out only accepted sort options
         if (in_array($sort, ["time", "reverse_time"])) {
