@@ -451,7 +451,7 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", ($markdown ? 1 : 0), time() + (86400 * 30), "/");
+        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30), "/");
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -467,7 +467,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
-        elseif ($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
+        elseif ($this->core->getQueries()->isThreadLocked(intval($thread_id)) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         }
@@ -494,7 +494,7 @@ class ForumController extends AbstractController {
                 }
 
                 $full_course_name = $this->core->getFullCourseName();
-                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
+                $thread_title = $this->core->getQueries()->getThread(intval($thread_id))['title'];
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
