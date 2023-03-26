@@ -166,7 +166,9 @@ function addConfetti() {
         // Run each step of the animation for 9 seconds then hide the confetti.
         let start = null;
         function confettiStepAnimation(timestamp) {
-            if (!start) start = timestamp;
+            if (!start) {
+                start = timestamp;
+            }
             const progress = timestamp - start;
             if (progress < 9000) {
                 update();
@@ -185,7 +187,8 @@ function addConfetti() {
                     ctx.restore();
                 });
                 requestAnimationFrame(confettiStepAnimation);
-            } else {
+            }
+            else {
                 canvas.style.display = 'none';
                 cancelAnimationFrame(frame);
                 is_drawing = false;
