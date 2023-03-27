@@ -1011,7 +1011,7 @@ class HomeworkView extends AbstractView {
                         $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
                         $notebook,
                         $this->core->getUser()->getId(),
-                        $version_instance !== null ? $version_instance->getVersion() : 0,
+                        $version_instance->getVersion(),
                         $graded_gradeable->getGradeableId()
                     );
                 }
