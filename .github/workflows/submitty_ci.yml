@@ -478,8 +478,6 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
-
-
     Selenium:
         needs:
           - js-lint
@@ -604,12 +602,7 @@ jobs:
 
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-
-
-
-
-
+          
           - name: Run cypress e2e login tests with database auth
             uses: cypress-io/github-action@v5
             with:
@@ -628,9 +621,7 @@ jobs:
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-
-
-    Cypress e2e:
+    CypressTwo:
         needs:
           - js-lint
           - js-unit
