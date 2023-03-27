@@ -1015,8 +1015,8 @@ class HomeworkView extends AbstractView {
                         $graded_gradeable->getGradeableId()
                     );
                 }
-                foreach($notebook_data as $note) {
-                    if(array_key_exists('filename', $note)) {
+                foreach ($notebook_data as $note) {
+                    if (array_key_exists('filename', $note)) {
                         array_push($showfiles,$note['filename']);
                     }
                 }
