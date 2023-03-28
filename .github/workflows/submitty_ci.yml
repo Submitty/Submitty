@@ -483,7 +483,7 @@ jobs:
             uses: actions/upload-artifact@v2
             with:
               name: my-repository
-              path: ${SUBMITTY_REPOSITORY}
+              path: /tmp/
     Selenium:
         needs:
           - js-lint
@@ -516,7 +516,7 @@ jobs:
             uses: actions/download-artifact@v2
             with:
               name: my-repository
-              path: ${SUBMITTY_REPOSITORY}
+              path: /tmp/
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
