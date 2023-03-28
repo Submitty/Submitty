@@ -12,7 +12,7 @@
     <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
-<div class="content displayed-when-printed" id="gradeable-submission-cont">
+<div class="content" id="gradeable-submission-cont">
     <header id="gradeable-info">
         <h1>
             New submission for: {{ gradeable_name }}
@@ -259,7 +259,7 @@
                 Submit
             </button>
             {% if is_notebook %}
-            <button class = "btn btn-default" onclick="window.print()">Print Quiz as PDF</button>
+            <button class = "btn btn-default" id = "printing" onclick="window.print()">Print Quiz as PDF</button>
             {% endif %}
             {% if viewing_inactive_version %}
                 <a href="{{ recent_version_url }}" class="btn btn-primary">

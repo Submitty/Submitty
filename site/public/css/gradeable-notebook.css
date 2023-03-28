@@ -131,6 +131,7 @@ img {
     @page{
         size: auto;
         margin: 0;
+        break-inside: avoid;
     }
     
     gradeable-time-remaining-text{
@@ -155,7 +156,15 @@ img {
     aside, .flex-row.shadow {
         display: none;
     }
-    
+
+    #printing{
+        display: none;
+    }
+
+    #gradeable-time-remaining-text{
+        display: none;
+    }
+
     h1{
         font-size: 25px;
     }
