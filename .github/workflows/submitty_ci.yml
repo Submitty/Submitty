@@ -1,11 +1,6 @@
 name: Submitty CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request]
 
 env:
   PGPASSWORD: submitty_dbuser
@@ -19,11 +14,6 @@ env:
   PHP_VER: 7.4
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
-
-concurrency:
-  # If this is a PR, cancel all previously running jobs on source branch
-  group: ${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 
 jobs:
     css-lint:
@@ -268,8 +258,12 @@ jobs:
         - name: Run ShellCheck
           run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
-
-    e2e:
+#changes to be made here, look at "name". split into:
+#Selenium tests
+#Cypress test part 1
+#Cypress test part 2
+#Integration tests
+    e2eStart:
         needs:
           - js-lint
           - js-unit
@@ -296,6 +290,10 @@ jobs:
               - 5432:5432
 
         steps:
+          - name: Cancel Previous Runs
+            uses: styfle/cancel-workflow-action@0.11.0
+            with:
+              access_token: ${{ github.token }}
           - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
@@ -313,12 +311,7 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
-          - name: Save Repo Artifact
-            id: save-repo
-            uses: actions/upload-artifact@v2
-            with:
-              name: submitty-repo
-              path: ${{ SUBMITTY_INSTALL_DIR }}/GIT_CHECKOUT/Submitty
+
           - name: Set Timezone
             run: |
               sudo timedatectl set-timezone America/New_York
@@ -340,6 +333,7 @@ jobs:
               sudo pip3 -V
           - name: Install python dependencies
             run: |
+              
               # Install for local
               pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
               # Install globally
@@ -461,6 +455,44 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
+          - name: Create artifact
+            uses: actions/upload-artifact@v2
+            with:
+              name: my-repository
+              path: /tmp/
+    Selenium:
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
+          - e2eStart
+        runs-on: ubuntu-20.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
+
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: /tmp/
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
@@ -485,7 +517,39 @@ jobs:
             run: npm run test:api
             env:
               BASE_URL: http://localhost
+    cypressOne:
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
+          - e2eStart
+        runs-on: ubuntu-20.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
 
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v5
             with:
@@ -524,7 +588,7 @@ jobs:
               sudo systemctl restart submitty_autograding_worker
           - name: Switch to database auth
             run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
+          
           - name: Run cypress e2e login tests with database auth
             uses: cypress-io/github-action@v5
             with:
@@ -543,7 +607,39 @@ jobs:
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
+    CypressTwo:
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
+          - e2eStart
+        runs-on: ubuntu-20.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
 
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Setup SAML
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -583,7 +679,7 @@ jobs:
           - python-unit
           - css-lint
           - shellcheck
-          - e2e
+          - e2eStart
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -601,9 +697,10 @@ jobs:
               - 5432:5432
 
         steps:
-          - name: Download Repo Artifact
+          - name: Download artifact
             uses: actions/download-artifact@v2
             with:
-              name: submitty-repo
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
