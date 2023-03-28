@@ -41,7 +41,7 @@
                                    onchange="clearResponses()"
                             /></td>
                             <td class="no-response option-text">
-                            no response
+                            No response
                             </td>
                         </tr>
                     {% endif %}
@@ -74,7 +74,6 @@
                     </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
-                    <br/>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 {% endif %}
             </form>
