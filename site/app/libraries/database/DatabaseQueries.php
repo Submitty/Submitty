@@ -813,22 +813,22 @@ SQL;
         $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", [$post_id]);
     }
 
-    public function isStaffPost($author_id) {
+    public function isStaffPost(int $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) <= User::GROUP_LIMITED_ACCESS_GRADER;
     }
 
-    public function isLimitedAccessGraderPost($author_id) {
+    public function isLimitedAccessGraderPost(int $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) === User::GROUP_LIMITED_ACCESS_GRADER;
     }
 
-    public function isInstructorOrFullAccessGraderPost($author_id) {
+    public function isInstructorOrFullAccessGraderPost(int $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) <= User::GROUP_FULL_ACCESS_GRADER;
     }
 
-    public function getAuthorUserGroups($author_ids) {
+    public function getAuthorUserGroups(array $author_ids): array {
         $placeholders = $this->createParamaterList(count($author_ids));
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
