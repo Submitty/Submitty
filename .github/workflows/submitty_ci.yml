@@ -480,7 +480,44 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
+          - name: Create artifact
+            uses: actions/upload-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
+    Selenium:
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
+          - e2eStart
+        runs-on: ubuntu-20.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
 
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
@@ -509,6 +546,12 @@ jobs:
             env:
               BASE_URL: http://localhost
 
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v5
             with:
@@ -570,6 +613,12 @@ jobs:
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
 
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Setup SAML
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -601,5 +650,12 @@ jobs:
             working-directory: ${{ env.SUBMITTY_REPOSITORY }}
             run: sudo bash tests/test_site_error_log.sh
 
+
+        steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
