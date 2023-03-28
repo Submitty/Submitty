@@ -320,7 +320,12 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
-
+          - name: Save Repo Artifact
+            id: save-repo
+            uses: actions/upload-artifact@v2
+            with:
+              name: submitty-repo
+              path: ${{ SUBMITTY_INSTALL_DIR }}/GIT_CHECKOUT/Submitty
           - name: Set Timezone
             run: |
               sudo timedatectl set-timezone America/New_York
@@ -600,6 +605,37 @@ jobs:
           - name: Check for site errors
             working-directory: ${{ env.SUBMITTY_REPOSITORY }}
             run: sudo bash tests/test_site_error_log.sh
+    Integration:
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
+          - e2e
+        runs-on: ubuntu-20.04
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
 
+        steps:
+          - name: Download Repo Artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: submitty-repo
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
