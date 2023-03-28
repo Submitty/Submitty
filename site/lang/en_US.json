@@ -1,1 +1,46 @@
-{}
+{
+    "profile": {
+        "my_profile": "My Profile",
+        "upload_profile_photo": "Upload profile photo",
+        "basic_information": "Basic Information",
+        "username": "Username",
+        "given_name": "First Name",
+        "family_name": "Last Name",
+        "email_primary": "Primary Email",
+        "email_secondary": "Secondary Email",
+        "send_email_to_secondary": "Send Email to Secondary Address",
+        "access_level": "Access Level",
+        "change_password": "Change Password",
+        "timezone": "Time Zone",
+        "utc_offset": "UTC Offset",
+        "select_timezone": "Select Timezone",
+        "color_theme": "Color Theme",
+        "choose_color_theme": "Choose a color theme",
+        "color_themes": {
+            "system": "Follow Device Theme",
+            "light": "Light Mode",
+            "dark": "Dark Mode",
+            "black": "(Black)"
+        },
+        "pwa_messages": {
+            "browser_support": {
+                "a": "Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see ",
+                "b": "here",
+                "c": " for installation instructions"
+            },
+            "install_app": "Install App",
+            "uninstall_lable": {
+                "a": "The Submitty Progressive Web App (PWA) has already been installed, see ",
+                "b": "here",
+                "c": " to uninstall it"
+            }
+        },
+        "image_flagged_msg": "Your preferred image was flagged as inappropriate."
+    },
+    "globals": {
+        "bools": {
+            "true": "True",
+            "false": "False"
+        }
+    }
+}
