@@ -479,6 +479,11 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
+          - name: Create artifact
+            uses: actions/upload-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
     Selenium:
         needs:
           - js-lint
@@ -507,6 +512,11 @@ jobs:
               - 5432:5432
 
         steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
@@ -562,6 +572,11 @@ jobs:
               - 5432:5432
 
         steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run cypress e2e tests with pam auth
             uses: cypress-io/github-action@v5
             with:
@@ -650,6 +665,11 @@ jobs:
               - 5432:5432
 
         steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Setup SAML
             run: |
               cd $SUBMITTY_REPOSITORY
@@ -708,5 +728,10 @@ jobs:
               - 5432:5432
 
         steps:
+          - name: Download artifact
+            uses: actions/download-artifact@v2
+            with:
+              name: my-repository
+              path: ${SUBMITTY_REPOSITORY}
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
