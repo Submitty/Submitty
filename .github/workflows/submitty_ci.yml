@@ -456,6 +456,8 @@ jobs:
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
           - name: Create artifact
+            run: |
+              sudo chmod -R a+rwx /tmp/
             uses: actions/upload-artifact@v2
             with:
               name: my-repository
