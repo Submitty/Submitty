@@ -128,9 +128,9 @@ img {
 
 /* stylelint-enable selector-class-pattern */
 @media print {
-    @page {
-      size: auto;
-      margin: 0;
+    @page{
+        size: auto;
+        margin: 0;
     }
     
     gradeable-time-remaining-text{
