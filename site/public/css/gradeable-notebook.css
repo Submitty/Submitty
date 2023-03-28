@@ -128,9 +128,6 @@ img {
 
 /* stylelint-enable selector-class-pattern */
 @media print {
-    *{
-        display: inline;
-    }
 
     @page{
         size: auto;
