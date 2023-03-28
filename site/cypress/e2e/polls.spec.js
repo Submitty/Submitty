@@ -242,7 +242,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Save Poll');
+        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
         cy.get('#poll-name').invoke('val').should('eq', 'Poll Cypress Test');
         cy.get('#poll-question').contains('Question goes here...?');
         cy.get('#poll-type-single-response-single-correct').should('not.be.checked');
