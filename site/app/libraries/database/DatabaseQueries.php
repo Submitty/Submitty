@@ -813,17 +813,17 @@ SQL;
         $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", [$post_id]);
     }
 
-    public function isStaffPost(int $author_id): bool {
+    public function isStaffPost(string $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) <= User::GROUP_LIMITED_ACCESS_GRADER;
     }
 
-    public function isLimitedAccessGraderPost(int $author_id): bool {
+    public function isLimitedAccessGraderPost(string $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) === User::GROUP_LIMITED_ACCESS_GRADER;
     }
 
-    public function isInstructorOrFullAccessGraderPost(int $author_id): bool {
+    public function isInstructorOrFullAccessGraderPost(string $author_id): bool {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) <= User::GROUP_FULL_ACCESS_GRADER;
     }
