@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+from pathlib import Path
 import shutil
 import sqlalchemy as sql
 import sys
@@ -97,7 +98,7 @@ UAAF_NAME = '.user_assignment_access.json'
 UST_NAME = '.submit.timestamp'
 
 
-def submit(semester: str, course: str, gradeable: str, user: str, data: str,
+def submit(semester: str, course: str, gradeable: str, user: str, data: Path,
            func_add_submission: typing.Callable[[str, str, int, str], None],
            func_update_active: typing.Callable[[str, str, int], None]):
     '''
@@ -106,16 +107,16 @@ def submit(semester: str, course: str, gradeable: str, user: str, data: str,
     user = user to submit as
     data = path to directory containing the files for submission
     '''
-    gradeable_path = os.path.join(ARG_DATA_DIR, 'courses', semester, course,
-                                  'submissions', gradeable)
+    gradeable_path = Path(ARG_DATA_DIR, 'courses', semester,
+                          course, 'submissions', gradeable)
     # make sure we are submitting to a real gradeable
-    assert os.path.exists(gradeable_path), gradeable_path
-    user_path = os.path.join(gradeable_path, user)
-    if not os.path.exists(user_path):
-        os.makedirs(user_path)
+    assert gradeable_path.is_dir(), gradeable_path
+    user_path = gradeable_path / user
+    if not user_path.exists():
+        user_path.mkdir(parents=True)
     # load data from the user_assignment_settings.json file if it exists
-    if os.path.exists(os.path.join(user_path, UASF_NAME)):
-        with open(os.path.join(user_path, UASF_NAME), 'r') as uasf:
+    if (user_path / UASF_NAME).exists():
+        with open(user_path / UASF_NAME, 'r') as uasf:
             UAS = json.load(uasf)
     else:  # initialize empty
         UAS = {
@@ -126,15 +127,15 @@ def submit(semester: str, course: str, gradeable: str, user: str, data: str,
         highest_version = 0
     else:
         highest_version = max(obj['version'] for obj in UAS['history'])
-    submission_path = os.path.join(user_path, str(highest_version+1))
+    submission_path = user_path / str(highest_version+1)
     # copy submission files, the submission_path should be created here
     shutil.copytree(data, submission_path)
     current_time_str = submitty_dateutils.write_submitty_date()
     # use current time for submission timestamp
-    with open(os.path.join(submission_path, UST_NAME), 'w') as stf:
+    with open(submission_path / UST_NAME, 'w') as stf:
         stf.write(current_time_str+'\n')
     # leave the user assignment access list empty
-    with open(os.path.join(submission_path, UAAF_NAME), 'w') as uaaf:
+    with open(submission_path / UAAF_NAME, 'w') as uaaf:
         uaaf.write('[]')
     UAS['history'].append({
         'version': highest_version+1,
@@ -144,7 +145,7 @@ def submit(semester: str, course: str, gradeable: str, user: str, data: str,
     })
     UAS['active_version'] = highest_version+1
     # store updated user_assignment_settings.json file
-    with open(os.path.join(user_path, UASF_NAME), 'w') as uasf:
+    with open(user_path / UASF_NAME, 'w') as uasf:
         json.dump(UAS, uasf, indent=4)
     # set file permissions, copy owner+group from gradeable directory
     # files should be set to -rw-r--r--
@@ -153,11 +154,11 @@ def submit(semester: str, course: str, gradeable: str, user: str, data: str,
     os.chmod(user_path, stat.st_mode)
     for root, dirs, files in os.walk(user_path):
         for dir in dirs:
-            os.chown(os.path.join(root, dir), stat.st_uid, stat.st_gid)
-            os.chmod(os.path.join(root, dir), stat.st_mode)
+            os.chown(Path(root, dir), stat.st_uid, stat.st_gid)
+            os.chmod(Path(root, dir), stat.st_mode)
         for file in files:
-            os.chown(os.path.join(root, file), stat.st_uid, stat.st_gid)
-            os.chmod(os.path.join(root, file), 0o640)
+            os.chown(Path(root, file), stat.st_uid, stat.st_gid)
+            os.chmod(Path(root, file), 0o640)
     # update database
     func_add_submission(gradeable, user, highest_version+1, current_time_str)
     func_update_active(gradeable, user, highest_version+1)
@@ -258,19 +259,18 @@ def main():
             print(f'    SQL: {query}')
         dbconn_course.execute(query)
     for user in os.listdir(ARG_SUBMISSIONS):
-        if not os.path.isdir(os.path.join(ARG_SUBMISSIONS, user)):
+        if not Path(ARG_SUBMISSIONS, user).is_dir():
             continue
         if user not in user_list:
             print(f'WARNING: found dir for {user} who is not in the course')
             continue
         print(f'SUBMITTING FOR USER {user}')
-        user_dirlist = os.listdir(os.path.join(ARG_SUBMISSIONS, user))
-        versions = [int(f) for f in user_dirlist if os.path.isdir(
-            os.path.join(ARG_SUBMISSIONS, user, f))]
+        user_dirlist = os.listdir(Path(ARG_SUBMISSIONS, user))
+        versions = [int(f) for f in user_dirlist
+                    if Path(ARG_SUBMISSIONS, user, f).is_dir()]
         # determine active version
-        if os.path.isfile(os.path.join(ARG_SUBMISSIONS, user, UASF_NAME)):
-            with open(os.path.join(ARG_SUBMISSIONS, user,
-                                   UASF_NAME)) as uasfile:
+        if Path(ARG_SUBMISSIONS, user, UASF_NAME).is_file():
+            with open(Path(ARG_SUBMISSIONS, user, UASF_NAME)) as uasfile:
                 uasdata = json.load(uasfile)
             active_version = uasdata['active_version']
         else:  # use highest
@@ -281,15 +281,14 @@ def main():
                 continue
             print(f'  SUBMITTING VERSION {version}')
             submit(ARG_SEMESTER, ARG_COURSE, ARG_GRADEABLE, user,
-                   os.path.join(ARG_SUBMISSIONS, user, str(version)),
+                   Path(ARG_SUBMISSIONS, user, str(version)),
                    insert_egdata, update_egver)
     dbconn_course.close()
     # initiate batch regrade
     print('ADDING SUBMISSIONS TO GRADING QUEUE')
-    regrade_py = os.path.join(ARG_INSTALL_DIR, 'bin', 'regrade.py')
-    gradeable_path = os.path.join(ARG_DATA_DIR, 'courses',
-                                  ARG_SEMESTER, ARG_COURSE,
-                                  'submissions', ARG_GRADEABLE)
+    regrade_py = Path(ARG_INSTALL_DIR, 'bin', 'regrade.py')
+    gradeable_path = Path(ARG_DATA_DIR, 'courses', ARG_SEMESTER,
+                          ARG_COURSE, 'submissions', ARG_GRADEABLE)
     os.system(f'{regrade_py} {gradeable_path}')
 
 
