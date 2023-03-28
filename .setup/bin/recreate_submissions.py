@@ -298,4 +298,3 @@ if __name__ == '__main__':
         main()
     else:
         print('Please run this as root, exiting...')
-        quit()
