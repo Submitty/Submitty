@@ -186,7 +186,7 @@
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
 
-                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getUserResponses()|length }} </td>
+                        <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                                 {% if poll.isHistogramAvailable() %}
