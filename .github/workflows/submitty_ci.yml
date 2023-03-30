@@ -315,7 +315,7 @@ jobs:
             uses: actions/upload-artifact@v2
             with:
               name: my-repository
-              path: /tmp/
+              path: ${{env.SUBMITTY_REPOSITORY}}/site/
           - name: Set Timezone
             run: |
               sudo timedatectl set-timezone America/New_York
