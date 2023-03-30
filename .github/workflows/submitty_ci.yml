@@ -315,7 +315,7 @@ jobs:
             uses: actions/upload-artifact@v2
             with:
               name: my-repository
-              path: ${{env.SUBMITTY_REPOSITORY}}/site/
+              path: ${{env.SUBMITTY_REPOSITORY}}/
           - name: Set Timezone
             run: |
               sudo timedatectl set-timezone America/New_York
@@ -490,7 +490,7 @@ jobs:
             uses: actions/download-artifact@v2
             with:
               name: my-repository
-              path: /tmp/
+              path: ${{env.SUBMITTY_REPOSITORY}}/
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
