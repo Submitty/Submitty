@@ -64,7 +64,7 @@
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
     {# Admin submission type selector #}
-    {% if core.getUser().accessFullGrading() %}
+    {% if core.getUser().accessFullGrading() and bulk_upload_access %}
         <form id="submission-form" method="post">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
