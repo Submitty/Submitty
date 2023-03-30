@@ -311,7 +311,11 @@ jobs:
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
-
+          - name: Create artifact
+            uses: actions/upload-artifact@v2
+            with:
+              name: my-repository
+              path: /tmp/
           - name: Set Timezone
             run: |
               sudo timedatectl set-timezone America/New_York
@@ -333,7 +337,6 @@ jobs:
               sudo pip3 -V
           - name: Install python dependencies
             run: |
-              
               # Install for local
               pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
               # Install globally
@@ -455,13 +458,6 @@ jobs:
               sudo systemctl restart submitty_autograding_shipper
               export DISPLAY=:99
               chromedriver --url-base=/wd/hub &
-          - name: Create artifact
-            uses: actions/upload-artifact@v2
-            with:
-              run: |
-                sudo chmod -R a+rwx /tmp/
-              name: my-repository
-              path: /tmp/
     Selenium:
         needs:
           - js-lint
