@@ -13,10 +13,9 @@ def up(config, database):
     # create pronouns column
     sql = """ALTER TABLE users ADD COLUMN IF NOT EXISTS user_pronouns 
       character varying(255) DEFAULT '';"""
-    database.execute(sql)
     
     # modify sync_user trigger
-    sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
+    sql += """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
         LANGUAGE plpgsql
         AS $$
         DECLARE
@@ -53,10 +52,9 @@ def up(config, database):
             RETURN NULL;
         END;
         $$;"""
-    database.execute(sql)
     
     #sync course user pronouns fetch
-    sql = """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
+    sql += """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
             DECLARE
