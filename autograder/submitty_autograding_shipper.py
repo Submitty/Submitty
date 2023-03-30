@@ -856,7 +856,7 @@ def checkout_vcs_repo(config, my_file):
        
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             if '.git' in vcs_base_url:
-                vcs_path = vcs_base_url[1:]
+                # vcs_path = vcs_base_url[1:]
                 sub_checkout_path = os.path.join(checkout_path, "tmp")                
             else:
                 vcs_path = vcs_subdirectory
@@ -997,8 +997,6 @@ def checkout_vcs_repo(config, my_file):
                             print("Check to be sure the repository has been committed with the " +
                                 "subdirectory and relevant files present.\n", file=f)
                             
-                    
-
                 subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
                 print(
                     "\n====================================\n",
