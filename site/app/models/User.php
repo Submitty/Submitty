@@ -25,7 +25,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
- * @method void setPronouns($pronouns)
+ * @method void setPronouns(string $pronouns)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
