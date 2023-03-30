@@ -513,21 +513,21 @@ class User extends AbstractModel {
 
         switch ($field) {
             case 'user_id':
-                 //Username / user_id must contain only lowercase alpha, 
+                 //Username / user_id must contain only lowercase alpha,
                  //numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_givenname':
             case 'user_legal_familyname':
-                //Given and family name must be alpha characters, latin chars, 
+                //Given and family name must be alpha characters, latin chars,
                 //white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
             case 'user_pronouns':
-                //pronouns may be "", alpha chars, latin chars, white-space, 
+                //pronouns may be "", alpha chars, latin chars, white-space,
                 //certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\)\\\/ ]{0,30}$~", $data) === 1;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
-                //Preferred given and family name may be "", alpha chars, 
+                //Preferred given and family name may be "", alpha chars,
                 //latin chars, white-space, 
                 //certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
