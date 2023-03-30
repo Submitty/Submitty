@@ -458,6 +458,8 @@ jobs:
           - name: Create artifact
             uses: actions/upload-artifact@v2
             with:
+              run: |
+                sudo chmod -R a+rwx /tmp/
               name: my-repository
               path: /tmp/
     Selenium:
