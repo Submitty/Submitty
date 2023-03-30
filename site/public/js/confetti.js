@@ -163,39 +163,23 @@ function addConfetti() {
             return;
         }
 
-        // Run each step of the animation for 9 seconds then hide the confetti.
-        let start = null;
-        function confettiStepAnimation(timestamp) {
-            if (!start) {
-                start = timestamp;
-            }
-            const progress = timestamp - start;
-            if (progress < 9000) {
-                update();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+        update();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                pieces.forEach((p) => {
-                    ctx.save();
+        pieces.forEach((p) => {
+            ctx.save();
 
-                    ctx.fillStyle = p.color;
+            ctx.fillStyle = p.color;
 
-                    ctx.translate(p.x + p.size / 25, p.y + p.size / 2);
-                    ctx.rotate(p.rotation);
+            ctx.translate(p.x + p.size / 25, p.y + p.size / 2);
+            ctx.rotate(p.rotation);
 
-                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
 
-                    ctx.restore();
-                });
-                requestAnimationFrame(confettiStepAnimation);
-            }
-            else {
-                canvas.style.display = 'none';
-                cancelAnimationFrame(confettiStepAnimation);
-                is_drawing = false;
-            }
-        }
+            ctx.restore();
+        });
 
-        frame = requestAnimationFrame(confettiStepAnimation);
+        frame = requestAnimationFrame(draw);
     }
 
     function Piece (x, y) {
