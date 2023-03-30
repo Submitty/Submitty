@@ -138,9 +138,9 @@ function addConfetti() {
 
         times_ran ++;
 
-        if (times_ran >= max_times * 10) {
+        if (times_ran >= max_times * 2.25) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.style.display = '';
+            canvas.style.display = 'none';
             canvas.width = 0;
             canvas.height = 0;
         }
