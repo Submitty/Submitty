@@ -490,10 +490,10 @@ jobs:
             uses: actions/download-artifact@v2
             with:
               name: my-repository
-              path: ${{env.SUBMITTY_REPOSITORY}}/
+              path: sudo chmod -R 755 ${{env.SUBMITTY_REPOSITORY}}/
           - name: Run selenium e2e tests with pam auth
             run: |
-              pushd ${SUBMITTY_REPOSITORY}
+              pushd my-repository
               echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
               TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
               sudo bash tests/test_site_error_log.sh
