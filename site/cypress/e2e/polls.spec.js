@@ -286,7 +286,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
-        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
+        cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Save Poll');
         cy.get('#student-histogram-release-setting').select('when_ended');
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'when_ended');
         cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
