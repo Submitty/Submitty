@@ -528,7 +528,7 @@ class User extends AbstractModel {
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
                 //Preferred given and family name may be "", alpha chars,
-                //latin chars, white-space, 
+                //latin chars, white-space,
                 //certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
