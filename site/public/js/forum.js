@@ -2501,7 +2501,4 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
-function autoOpenImages() {
-    generateCodeMirrorBlocks(document);
-    loadAllInlineImages(true);
-}
+
