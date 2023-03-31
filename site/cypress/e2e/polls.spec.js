@@ -313,7 +313,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();     
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
 
         // log into student, now we can see the histogram on closed poll
         cy.logout();
@@ -330,7 +330,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
-        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'when_ended'); 
+        cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'when_ended');
         cy.get('#student-histogram-release-setting').select('always');  // test always enable histogram
         cy.get('#student-answer-release-setting').invoke('val').should('eq', 'never');
         cy.get('#student-answer-release-setting').select('when_ended');
