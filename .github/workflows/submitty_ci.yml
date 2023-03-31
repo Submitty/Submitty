@@ -751,28 +751,6 @@ jobs:
           - name: Restart autograding worker
             run: |
               sudo systemctl restart submitty_autograding_worker
-
-          - name: Switch to database auth
-            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-          - name: Run cypress e2e login tests with database auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/login.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-
-          - name: Switch to LDAP auth
-            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-
-          - name: Run cypress e2e login tests with LDAP auth
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/login.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
     e2eCypressTwo:
         needs:
           - js-lint
@@ -1018,7 +996,27 @@ jobs:
           - name: Restart autograding worker
             run: |
               sudo systemctl restart submitty_autograding_worker
+          - name: Switch to database auth
+            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
+          - name: Run cypress e2e login tests with database auth
+            uses: cypress-io/github-action@v5
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/e2e/login.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+
+          - name: Switch to LDAP auth
+            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+          - name: Run cypress e2e login tests with LDAP auth
+            uses: cypress-io/github-action@v5
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/e2e/login.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
           - name: Setup SAML
             run: |
               cd $SUBMITTY_REPOSITORY
