@@ -154,6 +154,7 @@
 {% endmacro %}
 
 {% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
+    {# The current version will check five layers of folder to see if all files in it set hidden, or the folder will be shown. IF there are more than five layers in this folder, the folder will be shown even all files in it set hidden. #}
     {% set showFolder = false %}
     {% for course_material in course_materials %}
         {% if course_material is iterable %}
