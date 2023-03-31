@@ -22,16 +22,17 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
                 <fieldset>
-                    <table>
                     <legend>
                         <h2>
                             Possible responses:
                         </h2>
                     </legend>
+                    <table class="poll-content">
                     {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
-                        <tr class="radio answer-row" for="answer-no-response">
-                            <td class="option-button"><input class="no-response-radio response-btn"
+                        <tr class="radio" for="answer-no-response">
+                            <td class="option-btn">
+                            <input class="no-response-radio"
                                    type="{{button_type}}"
                                    value="-1"
                                    name="answers[]"
@@ -39,7 +40,8 @@
                                    {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="clearResponses()"
-                            /></td>
+                            />
+                            </td>
                             <td class="no-response option-text">
                             No response
                             </td>
@@ -49,8 +51,9 @@
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
-                        <tr class="radio answer-row">
-                            <td class="option-button"><input class="response-radio response-btn"
+                        <tr class="radio option-row">
+                            <td class="option-btn">
+                            <input class="response-radio"
                                    type={{ button_type }}
                                    aria-label="Option {{ index + 1 }}"
                                    value="{{ option.getId() }}"
@@ -59,22 +62,24 @@
                                    {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="disableNoResponse();"
-                                /></td>
-                            <td class="option-text">{% include "misc/Markdown.twig" with {
+                            />
+                            </td>
+                            <td class="option-text">
+                            {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <i class="fa-solid fa-square-check fa-lg correct-tag"></i>
-                            {% endif %}
-                            </td>
+                            {% endif %}                                
+                            </td>                       
                         </tr>
                         {% set index = index + 1 %}
                     {% endfor %}
                     </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
         </div>

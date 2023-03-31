@@ -39,20 +39,26 @@
     cursor: pointer;
 }
 
-.response-btn {
+.option-btn {
+    vertical-align: middle;
+}
+
+.option-btn input[type="radio"]{
     vertical-align: top;
 }
 
-.option-button {
-    vertical-align: middle;
-    padding-bottom: 1.25em;
-    padding-right: 0.2em;
+.option-btn input[type="checkbox"]{
+    transform: scale(0.8);
+}
+
+.student-submit[type="submit"] {
+    margin-top: 2em;
 }
 
 .option-text {
-    vertical-align: middle;
-    padding-bottom: 1.25em;
-    padding-right: 0.2em;
+    padding-top: 0.55em;
+    padding-bottom: 0.55em;
+    padding-left: 0.25em;
 }
 
 .radio p {
@@ -74,11 +80,6 @@ input[type="radio"][disabled=""]:checked::before {
     height: 7px;
     border-radius: 100%;
     background: var(--standard-medium-dark-gray);
-}
-
-input[type="checkbox"][name="answers[]"] {
-    transform: scale(0.75);
-    margin: 0 1px 0 0;
 }
 
 .active {
@@ -121,4 +122,5 @@ form {
 
 .correct-tag {
     color: var(--standard-dark-green);
+    display: inline-flex;
 }
