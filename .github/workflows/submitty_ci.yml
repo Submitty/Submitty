@@ -295,8 +295,8 @@ jobs:
         #       - 5432:5432
 
         steps:
-          - name: setup the repo
-            uses: .github/workflows/CISetup.yml
+          # - name: setup the repo
+          #   uses: .github/workflows/CISetup.yml
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
