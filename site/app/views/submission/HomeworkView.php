@@ -1001,7 +1001,7 @@ class HomeworkView extends AbstractView {
             $files = $version_instance->getFiles();
 
             $notebook_data = null;
-            $showfiles = [];
+            $hidefiles = [];
             if ($autograding_config->isNotebookGradeable()) {
                 $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
 
@@ -1017,12 +1017,12 @@ class HomeworkView extends AbstractView {
                 }
                 foreach ($notebook_data as $note) {
                     if (array_key_exists('filename', $note)) {
-                        array_push($showfiles, $note['filename']);
+                        array_push($hidefiles, $note['filename']);
                     }
                 }
             }
             $param = array_merge($param, [
-                'notebook' => $showfiles,
+                'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
