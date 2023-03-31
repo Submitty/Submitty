@@ -103,6 +103,11 @@ form {
 }
 
 .correct-tag {
+    background-image: linear-gradient(to bottom, 
+    transparent 0%, transparent 25%,
+    white 25%, white 75%,
+    transparent 75%, transparent 100%
+    );
     color: var(--standard-dark-green);
     margin-left: 0.5em;
 }
