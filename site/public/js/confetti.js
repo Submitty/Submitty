@@ -31,8 +31,6 @@ function addConfetti() {
     });
 
     canvas.width  = window.innerWidth;
-    const body = document.body;
-    const html = document.documentElement;
     canvas.height = document.body.clientHeight;
 
     canvas.style.display = 'block';
@@ -136,7 +134,7 @@ function addConfetti() {
         lastUpdateTime = now;
 
         times_ran ++;
-        
+
         if (pieces.length <= 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             canvas.style.display = 'none';
