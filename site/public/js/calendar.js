@@ -101,30 +101,6 @@ function generateCalendarItem(item) {
         </a>`;
 }
 
-function generateItemHtml(item, date) {
-    let styleString = '';
-    switch (item['type']) {
-        case 'announcement':
-            styleString = 'style="font-weight: bold;"';
-            break;
-        case 'important':
-            styleString = 'style="font-style: italic;"';
-            break;
-    }
-    if (isGlobal) {
-        return `<p ${styleString}>${item['course']}: ${item['text']}`;
-    }
-    else {
-        if (isInstructor) {
-            const string =  `<p ${styleString}>${item['text']} <a data-id="${item['id']}" data-type="${item['type']}" data-text="${window.btoa(item['text'])}" data-date="${date}" class="calendar-item-edit-button"><i class="fas fa-pencil-alt"></i></a></p>`;
-            return string;
-        }
-        else {
-            return `<p ${styleString}>${item['text']}</p>`;
-        }
-    }
-}
-
 function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
     $('#calendar-item-text-edit').val(itemText);
@@ -399,8 +375,4 @@ function loadCalendar(month_, year_) {
  */
 function loadFullCalendar(start, end, semester_name) {
     $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
-}
-
-function openNewItemModal() {
-    $('#new-calendar-item-form').css('display', 'block');
 }
