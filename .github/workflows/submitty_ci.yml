@@ -295,6 +295,9 @@ jobs:
         #       - 5432:5432
 
         steps:
+          - uses: actions/checkout@v3
+            with:
+              path: SUBMITTY_CPY/
           - name: setup the repo
             uses: ./.github/workflows/CISetup.yml
           - name: Run selenium e2e tests with pam auth
