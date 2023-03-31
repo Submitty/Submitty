@@ -2,7 +2,6 @@ name: e2eSetup
 
 on:
   workflow_call:
-  push:
 
 env:
   PGPASSWORD: submitty_dbuser
