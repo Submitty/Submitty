@@ -279,8 +279,11 @@
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
-                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked').id;
-                        if(selected_radio_id !== 'radio-normal'){
+                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked');
+                        if (selected_radio_id !== null) {
+                            selected_radio_id = selected_radio_id.id;
+                        }
+                        if(selected_radio_id !== null && selected_radio_id !== 'radio-normal'){
                             for(let idx = 1; idx <= window.num_submission_boxes; idx++){
                                 window.deleteFiles(idx);
                             }
