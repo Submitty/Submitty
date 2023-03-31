@@ -299,7 +299,7 @@ jobs:
             with:
               path: SUBMITTY_CPY/
           - run: pwd && ls
-          - uses: ./.github/workflows/CISetup.yml
+          - uses: ./Submitty_CPY/.github/workflows/CISetup.yml
           # - name: Run selenium e2e tests with pam auth
           #   run: |
           #     pushd ${SUBMITTY_REPOSITORY}
