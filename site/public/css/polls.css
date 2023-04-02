@@ -47,17 +47,13 @@
     vertical-align: top;
 }
 
-.option-btn input[type="checkbox"]{
-    transform: scale(0.8);
-}
-
 .student-submit[type="submit"] {
     margin-top: 2em;
 }
 
 .option-text {
-    padding-top: 0.55em;
-    padding-bottom: 0.55em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
     padding-left: 0.25em;
 }
 
