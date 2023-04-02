@@ -64,7 +64,7 @@
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
     {# Admin submission type selector #}
-    {% if core.getUser().accessFullGrading() %}
+    {% if core.getUser().accessFullGrading() and bulk_upload_access %}
         <form id="submission-form" method="post">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
@@ -286,8 +286,9 @@
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
-                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked').id;
-                        if(selected_radio_id !== 'radio-normal'){
+                        const getSubmissionType = document.querySelector('input[name="submission-type"]:checked');
+                        const selected_radio_id = getSubmissionType === null ? null : getSubmissionType.id;
+                        if(selected_radio_id !== null && selected_radio_id !== 'radio-normal'){
                             for(let idx = 1; idx <= window.num_submission_boxes; idx++){
                                 window.deleteFiles(idx);
                             }
