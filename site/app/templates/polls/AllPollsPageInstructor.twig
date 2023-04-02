@@ -10,7 +10,7 @@
     <hr>
 
     <div class="dropdown-wrapper">
-        <div  onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown')" class="dropdown-bar">
+        <div id="today-table-dropdown"   onclick="updateDropdownStates($(this).find('.dropdown-arrow').hasClass('down'), 'today_polls_dropdown')" class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
                 <i class="dropdown-arrow{{dropdown_states['today'] ? ' down'}} fa fa-chevron-right"></i>

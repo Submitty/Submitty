@@ -6,12 +6,59 @@
  */
 
 describe('Test cases revolving around polls functionality', () => {
-    it('Should verify all existing polls are on the instructor page', () => {
+    it('Should verify the default settings and functionality of the dropdown bars', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
         cy.login();
 
-        // today and tomorrow's polls are in display by default
+        // verify the today's and tomorrow's sections are open by default
+        cy.get('#today-table').should('be.visible');
+        cy.get('#tomorrow-table').should('be.visible');
+        cy.get('#today-table-dropdown').click();
+        cy.get('#today-table').should('not.be.visible');
+        cy.get('#tomorrow-table-dropdown').click();
+        cy.get('#tomorrow-table').should('not.be.visible');
+
+        // verify that old and future sections are not
+        cy.get('#old-table-dropdown').click();
+        cy.get('#older-table').should('be.visible');
+        cy.get('#future-table-dropdown').click();
+        cy.get('#future-table').should('be.visible');
+
+        // status of the dropdowns should persist after page refresh
+        cy.reload();
+        cy.get('#today-table').should('not.be.visible');
+        cy.get('#tomorrow-table').should('not.be.visible');
+        cy.get('#older-table').should('be.visible');
+        cy.get('#future-table').should('be.visible');
+
+        // log in from student account
+        cy.logout();
+        cy.visit(['sample', 'polls']);
+        cy.login('student');
+
+        // verify that today's and old sections are open by default
+        cy.get('#today-table').should('be.visible');
+        cy.get('#older-table').should('be.visible');
+
+        // log back into instructor account
+        cy.logout();
+        cy.visit(['sample', 'polls']);
+        cy.login();
+        // status of the dropdowns should remain
+        cy.get('#today-table').should('not.be.visible');        
+        cy.get('#tomorrow-table').should('not.be.visible');
+        cy.get('#older-table').should('be.visible');
+        cy.get('#future-table').should('be.visible');
+    })
+
+    it('Should verify all existing polls are on the instructor page', () => {
+        // log in from instructor account
+        cy.logout();
+        cy.visit(['sample', 'polls']);
+        cy.login();
+
+        // today's and tomorrow's polls are in display by default
         // toggle future and old polls dropdowns
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
