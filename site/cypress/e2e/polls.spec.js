@@ -189,17 +189,17 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.markdown').should('contain', 'Question goes here...?');
         cy.get('.markdown').should('not.contain', '#');
         // go through options, verify text and status of buttons
-        cy.get('table').contains('td','No response');
-        cy.get('table > tbody > tr:nth-child(1) > td:nth-child(2)').contains('No response');
-        cy.get('table > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.disabled');
-        cy.get('table > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.checked');
-        cy.get('table > tbody > tr:nth-child(2) > td:nth-child(2)').contains('Answer 1');
-        cy.get('table > tbody > tr:nth-child(2) > td:nth-child(1) > input').should('be.disabled');
-        cy.get('table > tbody > tr:nth-child(3) > td:nth-child(2)').contains('Answer 2');
-        cy.get('table > tbody > tr:nth-child(3) > td:nth-child(1) > input').should('be.disabled');
-        cy.get('table > tbody > tr:nth-child(4) > td:nth-child(2)').contains('Answer 3');
-        cy.get('table > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('be.disabled');
-        // verify the optional buttons and histogram don't exist for student
+        cy.get('.poll-content').contains('td','No response');
+        cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(2)').contains('No response');
+        cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.disabled');
+        cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.checked');
+        cy.get('.poll-content > tbody > tr:nth-child(2) > td:nth-child(2)').contains('Answer 1');
+        cy.get('.poll-content > tbody > tr:nth-child(2) > td:nth-child(1) > input').should('be.disabled');
+        cy.get('.poll-content > tbody > tr:nth-child(3) > td:nth-child(2)').contains('Answer 2');
+        cy.get('.poll-content > tbody > tr:nth-child(3) > td:nth-child(1) > input').should('be.disabled');
+        cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(2)').contains('Answer 3');
+        cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('be.disabled');
+        // verify the optional display buttons and histogram don't exist for student
         cy.should('not.contain', '#toggle-histogram-button');
         cy.should('not.contain', '#toggle-info-button');
         cy.should('not.contain', '#poll-histogram');
