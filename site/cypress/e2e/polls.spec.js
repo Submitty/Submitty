@@ -46,7 +46,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.login();
         // status of the dropdowns should remain
-        cy.get('#today-table').should('not.be.visible');    
+        cy.get('#today-table').should('not.be.visible');
         cy.get('#tomorrow-table').should('not.be.visible');
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table').should('be.visible');
