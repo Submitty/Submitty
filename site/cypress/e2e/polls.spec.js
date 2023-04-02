@@ -11,13 +11,12 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         cy.login();
 
-        // toggle all the drop down
+        // today and tomorrow's polls are in display by default
+        // toggle future and old polls dropdowns
         cy.get('#old-table-dropdown').click();
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
-        cy.get('#tomorrow-table-dropdown').click();
-        cy.get('#tomorrow-table').should('be.visible');
 
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
@@ -68,8 +67,6 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
-        cy.get('#tomorrow-table-dropdown').click();
-        cy.get('#tomorrow-table').should('be.visible');
 
         // go to poll 1 result page
         cy.contains('Poll 1').siblings().last().click();
@@ -369,7 +366,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.content').should('not.contain', 'Poll Cypress Test');
     });
 
-    it('Should verify today, tomorrow, and future sections contain own related polls', () => {
+    it('Should verify today, tomorrow, and future sections contain related polls', () => {
         // log in from instructor account
         cy.logout();
         cy.visit(['sample', 'polls']);
@@ -380,18 +377,19 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#older-table').should('be.visible');
         cy.get('#future-table-dropdown').click();
         cy.get('#future-table').should('be.visible');
-        cy.get('#tomorrow-table-dropdown').click();
-        cy.get('#tomorrow-table').should('be.visible');
+
+        // to test today and tomorrow's polls, we have to consider timezone offset
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        const today = new Date(new Date() - tzoffset);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
 
         // make a poll, set release date to today
         cy.contains('New Poll').click();
         cy.get('#poll-name').type('Poll Today');
         cy.get('#poll-question').type('# Question goes here...?');
         cy.get('#poll-date').clear({force: true});
-        // make a date variable on the same day the test being run
-        const today = new Date();
-        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-        cy.get('#poll-date').type(new Date(today - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
         cy.get('h1').click(); // get rid of the date picker
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
@@ -404,10 +402,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-name').type('Poll Tomorrow');
         cy.get('#poll-question').type('What is your favorite class?');
         cy.get('#poll-date').clear({force: true});
-        // set date to the next day from when the test is being run
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.contains('Add Response').click();
         cy.get('#response_0_wrapper').children(':nth-child(3)').check();
