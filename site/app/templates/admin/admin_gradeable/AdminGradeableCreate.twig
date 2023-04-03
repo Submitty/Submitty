@@ -266,7 +266,7 @@
 		    <div class="team_no">
                         <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
                             {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
-                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Submitty hosted - single repository per user per course, assignments in subdirectories</label>
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - single repository per user per course, assignments in subdirectories</label>
 
                         <div id="vcs_self_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}

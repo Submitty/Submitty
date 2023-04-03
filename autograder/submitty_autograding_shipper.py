@@ -988,7 +988,7 @@ def checkout_vcs_repo(config, my_file):
                         )
                         os.chdir(checkout_path)
                         error_path = os.path.join(
-                            checkout_path, "failed_with_no_files_in_subdirectory.txt"
+                            checkout_path, "failed_subdirectory_empty.txt"
                         )
                         with open(error_path, 'w') as f:
                             print(str(error), file=f)
