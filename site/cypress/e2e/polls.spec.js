@@ -198,7 +198,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-date').type('1970-01-01', {force: true});
         cy.get('h1').click(); // get rid of the date picker
         // test default release histogram and answer settings
-        cy.get('#image-file').attachFile('sea_animals.png');
+        cy.get('#image-file').selectFile('cypress/fixtures/sea_animals.png');
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
         cy.contains('Add Response').click();
