@@ -295,8 +295,7 @@ jobs:
         #       - 5432:5432
 
         steps:
-          - uses: actions/checkout@v3 with: ${SUBMITTY_REPOSITORY}
-          # Repository name with owner. For example, actions/checkout Default: ${{ github.repository }}
+          - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
           - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
