@@ -1,4 +1,13 @@
 /** exported updateUserPronouns */
+/** exported showUpdatePrefNameForm */
+/** exported showUpdatePronounsForm */
+/** exported showUpdatePasswordForm */
+/** exported showUpdateProfilePhotoForm*/
+/** exported showUpdateSecondaryEmailForm */
+/** exported updateUserPreferredNames */
+/** exported updateUserProfilePhoto */
+/** exported updateUserSecondaryEmail */
+/** exported changeSecondaryEmail */
 
 // eslint-disable-next-line no-unused-vars
 function showUpdatePrefNameForm() {
