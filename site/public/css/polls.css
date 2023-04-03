@@ -102,7 +102,10 @@ form {
     margin-left: 0.5em;
 }
 
-.correct-tag {
+.correct-tag-background {
     color: var(--standard-dark-green);
-    margin-left: 0.5em;
+}
+
+.correct-tag-checkmark {
+    color: var(--text-white);
 }
