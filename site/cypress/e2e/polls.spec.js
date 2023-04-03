@@ -494,7 +494,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Future').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
 
@@ -502,7 +502,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Tomorrow').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
-        cy.get('#poll-date').type(new Date(today - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(today.toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
 
@@ -510,7 +510,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Today').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#poll-date').clear({force: true});
-        cy.get('#poll-date').type(new Date(tomorrow - tzoffset).toISOString().substring(0, 10), {force: true});
+        cy.get('#poll-date').type(tomorrow.toISOString().substring(0, 10), {force: true});
         cy.get('h1').click();
         cy.get('#poll-form-submit').click();
 
@@ -522,12 +522,14 @@ describe('Test cases revolving around polls functionality', () => {
 
         // delete the new polls
         cy.contains('Poll Today').siblings(':nth-child(2)').click();
+        cy.wait(500);
         cy.get('Poll Today').should('not.exist');
         cy.contains('Poll Tomorrow').siblings(':nth-child(2)').click();
+        cy.wait(500);
         cy.get('Poll Tomorrow').should('not.exist');
         cy.contains('Poll Future').siblings(':nth-child(2)').click();
+        cy.wait(500);
         cy.get('Poll Future').should('not.exist');
-
     });
 
     // Done.
