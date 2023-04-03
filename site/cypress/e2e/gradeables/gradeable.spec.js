@@ -1,5 +1,5 @@
 describe('Tests cases revolving around gradeable access and submition', () => {
-    ['student','instructor'].forEach((user) => {
+    ['student','ta','grader','instructor'].forEach((user) => {
         beforeEach(() => {
             cy.visit('/');
         });
