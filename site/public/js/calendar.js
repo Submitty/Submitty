@@ -376,3 +376,7 @@ function loadCalendar(month_, year_) {
 function loadFullCalendar(start, end, semester_name) {
     $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
 }
+
+function openNewItemModal() {
+    $('#new-calendar-item-form').css('display', 'block');
+}
