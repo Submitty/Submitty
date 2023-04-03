@@ -9,12 +9,12 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             const testfile2 = 'cypress/fixtures/file2.txt';
 
             cy.visit(['sample','gradeable','open_homework']);
-            //Makes sure the clear button is not disabled
+            //Makes sure the clear button is not disabled by adding a file
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
             cy.get('#startnew').click();
 
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
-            
+
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
             });
@@ -28,12 +28,12 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
             });
-            
-            //Checks version
-            cy.get('#submitted-files > div').contains('span','file1.txt')
+
+            //Checks submitted files
+            cy.get('#submitted-files > div').contains('span','file1.txt');
             cy.get('#submitted-files > div').contains('span','file2.txt');
             cy.get('#submitted-files > div').contains('Download all files:');
-            
+
             cy.get('[aria-label="Download file1.txt"]').click();
             cy.readFile('cypress/downloads/file1.txt').should('eq','a\n');
         });
