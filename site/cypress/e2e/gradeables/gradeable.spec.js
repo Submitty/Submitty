@@ -35,7 +35,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             cy.get('#submitted-files > div').contains('Download all files:');
             
             cy.get('[aria-label="Download file1.txt"]').click();
-            cy.readFile('cypress/downloads/file.txt');
+            cy.readFile('cypress/downloads/file1.txt').should('eq','a\n');
         });
     });
 });
