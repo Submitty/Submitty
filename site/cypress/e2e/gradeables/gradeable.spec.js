@@ -9,6 +9,12 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             const testfile2 = 'cypress/fixtures/file2.txt';
 
             cy.visit(['sample','gradeable','open_homework']);
+
+            //Change when use most recent submission button is changed to be a button
+            if (user === 'grader') {
+                //clicks on useMostRecentSubmission
+                cy.get('#gradeable-submission-cont > a').click();
+            }
             //Makes sure the clear button is not disabled by adding a file
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
             cy.get('#startnew').click();
