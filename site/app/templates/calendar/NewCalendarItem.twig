@@ -3,8 +3,13 @@
 {% block title %}New Calendar Item{% endblock %}
 {% block body %}
     <p class="std-margin">
-        Please select the type of item, when it should be, and the text it should display.
+        Please select the course, type of item, when it should be, and the text it should display.
     </p>
+    <label for="calendar-course">Course</label>
+    <select id="calendar-course" name="course">
+    {% for one_course in instructor_courses %}
+        <option value="{{one_course.title}}">{{ one_course.title }}</option>
+    {% endfor %}
     <label for="calendar-item-type">Message Type</label>
     <select id="calendar-item-type" name="type">
         <option value="note">Note</option>

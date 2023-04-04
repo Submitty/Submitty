@@ -43,27 +43,6 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar")
-     */
-    public function viewCourseCalendar(): WebResponse {
-        $calendar_messages = [];
-        $user = $this->core->getUser();
-        $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
-        $name = $this->core->getConfig()->getCourse();
-        // Initialize $oneCourse and get the specific course for the course calendar
-        $oneCourse = $courses[0];
-        foreach ($courses as $course) {
-            if ($course->getTitle() === $name) {
-                $oneCourse = [$course];
-                break;
-            }
-        }
-        $gradeables = GradeableUtils::getGradeablesFromUserAndCourse($this->core, $calendar_messages);
-
-        return new WebResponse(CalendarView::class, 'showCalendar', CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables, $oneCourse, $calendar_messages), true);
-    }
-
-    /**
      * @Route("/courses/{_semester}/{_course}/calendar/items/new", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
