@@ -166,7 +166,11 @@ class TestAutogradingShipper(unittest.TestCase):
         ) as config_file:
             with open(course_config_file, 'w') as new_config_file:
                 new_config_file.write(
+<<<<<<< HEAD
                     config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + "/test.git/")
+=======
+                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR)
+>>>>>>> origin/master
                 )
 
         # Write course form config
@@ -182,7 +186,11 @@ class TestAutogradingShipper(unittest.TestCase):
         # Initialize git homework directory
         create_git_repository = """
         cd {}/homework_01;
+<<<<<<< HEAD
         git init;
+=======
+        git init --initial-branch "master";
+>>>>>>> origin/master
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add -A;
