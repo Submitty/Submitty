@@ -294,10 +294,10 @@ jobs:
         #       --health-retries 5
         #     ports:
         #       - 5432:5432
-        steps:
-          - uses: actions/checkout@v3
-            with:
-              path: SUBMITTY_CPY/
+        # steps:
+        #   - uses: actions/checkout@v3
+        #     with:
+        #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - uses: ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - name: Run selenium e2e tests with pam auth
