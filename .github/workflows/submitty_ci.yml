@@ -269,7 +269,7 @@ jobs:
     #     - name: Run ShellCheck
     #       run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
     e2eSelenium:
-       - uses: .github/workflows/CISetup.yml
+       - uses: ./.github/workflows/CISetup.yml
         # needs:
         #   - js-lint
         #   - js-unit
