@@ -2501,4 +2501,3 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
-
