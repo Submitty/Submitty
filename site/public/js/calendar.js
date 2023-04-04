@@ -107,7 +107,7 @@ function generateCalendarItem(item) {
  * @param itemType : string the calendar item type
  * @param itemText : string the text the item shoukd contain
  * @param itemId : (Not sure, possibly string or int) the item ID
- * @param date : string the item date 
+ * @param date : string the item date
  * @returns {void} : only has to update existing variables
  */
 function editCalendarItemForm(itemType, itemText, itemId, date) {
@@ -121,7 +121,7 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
 
 /**
  * Deletes the selected calendar item.
- * 
+ *
  * @returns {void} : Just deleting.
  */
 function deleteCalendarItem() {
