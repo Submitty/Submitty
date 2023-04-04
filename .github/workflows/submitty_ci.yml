@@ -269,7 +269,6 @@ jobs:
     #     - name: Run ShellCheck
     #       run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
     e2e:
-        uses: ./.github/workflows/CISetup.yml
         # needs:
         #   - js-lint
         #   - js-unit
@@ -294,8 +293,8 @@ jobs:
         #       --health-retries 5
         #     ports:
         #       - 5432:5432
-        # steps:
-        #   - uses: actions/checkout@v3
+        steps:
+          uses: ./.github/workflows/CISetup.yml
         #     with:
         #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
