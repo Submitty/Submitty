@@ -2677,12 +2677,12 @@ ORDER BY user_id ASC"
     }
 
     /**
-     * Updates all given Users in $users array to have rotating section $section
+     * Updates all given users in $users array to have rotating section $section
      *
      * @param integer $section
-     * @param User[] $users
+     * @param array<string> $users An array of user IDs
      */
-    public function updateUsersRotatingSection($section, $users) {
+    public function updateUsersRotatingSection(int $section, array $users) {
         $update_array = array_merge([$section], $users);
         $placeholders = $this->createParamaterList(count($users));
         $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
@@ -3428,12 +3428,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     /**
      * Edit the user's message from table seeking_team
-     *
-     * @param string $g_id
-     * @param string $user_id
-     * @param string $message
      */
-    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+    public function updateSeekingTeamMessageById(string $g_id, string $user_id, ?string $message) {
         $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
     }
 
@@ -3452,7 +3448,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             [$g_id, $user_id]
         );
 
-        return $this->course_db->rows()[0]['message'];
+        $row = $this->course_db->row();
+        if (count($row) === 0) {
+            return null;
+        }
+        return $row['message'];
     }
 
     /**
@@ -4938,8 +4938,8 @@ AND gc_id IN (
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
-        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", [$regrade_id]);
     }
 
     public function deleteGradeable($g_id) {
@@ -6383,12 +6383,8 @@ AND gc_id IN (
 
     /**
      * Gives true if thread is locked
-     *
-     * @param  int $thread_id
-     * @return bool
      */
-    public function isThreadLocked($thread_id) {
-
+    public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
         if (empty($this->course_db->rows()[0]['lock_thread_date'])) {
             return false;
@@ -7343,7 +7339,7 @@ WHERE current_state IN
                     GROUP BY gc_id, gd_id, gcd_grader_id
                   ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id AND gcmd.gcd_grader_id=in_gcd.gcd_grader_id
 
-                  /* Join grader data; TODO: do we want/need 'sr' information? */
+                  /* Join grader data; TODO: do we want/need 'sr' information */
                   LEFT JOIN (
                     SELECT u.*, ga.anon_id AS g_anon, ga.g_id, grading_registration_sections
                     FROM users u
@@ -7959,11 +7955,6 @@ SQL;
       END) AS not_helped_count
 
 SQL;
-    }
-
-    private function getGradeableMinutesOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
     }
 
     /**
