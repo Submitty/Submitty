@@ -132,7 +132,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['date'])) {
-            $date = $_POST['date'];
+            $date = new DateTime($_POST['date']);
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect date given");
@@ -164,7 +164,7 @@ class CalendarController extends AbstractController {
             ->findOneBy(['id' => $id]);
 
         if ($calendar_item === null) {
-            $this->core->addErrorMessage("An error has occured.")
+            $this->core->addErrorMessage("An error has occured.");
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
 
