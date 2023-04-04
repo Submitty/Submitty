@@ -298,7 +298,7 @@ jobs:
           #   with:
           #     path: SUBMITTY_CPY/
           - name: call workflow
-            uses: ./.github/workflows/actions/set-up-composite/action.yml
+            uses: ./.github/workflows/actions/set-up-composite/action.yml@v1
         #     with:
         #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
