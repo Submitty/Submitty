@@ -837,7 +837,7 @@ def checkout_vcs_repo(config, my_file):
 
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
-        sub_checkout_path = ''
+        sub_checkout_path = ""
         if vcs_subdirectory == '':
             with open(
                 os.path.join(submission_path, ".submit.VCS_CHECKOUT")
