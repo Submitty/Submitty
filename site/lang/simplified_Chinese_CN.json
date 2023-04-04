@@ -1,0 +1,47 @@
+{
+    "profile": {
+        "my_profile": "个人资料",
+        "upload_profile_photo": "上传头像照片",
+        "basic_information": "基础信息",
+        "username": "用户昵称",
+        "given_name": "名",
+        "family_name": "姓",
+        "email_primary": "首选邮箱",
+        "email_secondary": "第二邮箱",
+        "send_email_to_secondary": "发送邮件至第二邮箱",
+        "access_level": "用户访问级别",
+        "change_password": "更换密码",
+        "timezone": "时区",
+        "utc_offset": "UTC 时差 (协调世界时偏移量）",
+        "select_timezone": "选择时区",
+        "color_theme": "主题颜色",
+        "choose_color_theme": "选择一个主题",
+        "color_themes": {
+            "system": "跟随设备主题",
+            "system_black":"跟随设备主题(全黑)",
+            "light": "日间模式",
+            "dark": "夜间模式",
+            "black": "夜间模式(全黑)"
+        },
+        "pwa_messages": {
+            "browser_support": {
+                "a": "Submitty支持渐进式网络应用程序 (PWA), 需要谷歌网页浏览器, 看 ",
+                "b": "这里",
+                "c": " 去安装教程"
+            },
+            "install_app": "安装应用",
+            "uninstall_lable": {
+                "a": "Submity 渐进式网络应用程序 (PWA) 已经被安装, 看 ",
+                "b": "这里",
+                "c": " 去卸载"
+            }
+        },
+        "image_flagged_msg": "你倾向的图片被认为不合适."
+    },
+    "globals": {
+        "bools": {
+            "true": "正确",
+            "false": "错误"
+        }
+    }
+}
