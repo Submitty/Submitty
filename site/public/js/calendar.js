@@ -108,7 +108,7 @@ function generateCalendarItem(item) {
  * @param itemText : string the text the item shoukd contain
  * @param itemId : (Not sure, possibly string or int) the item ID
  * @param date : string the item date 
- *  @returns {void} : only has to update existing variables
+ * @returns {void} : only has to update existing variables
  */
 function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
