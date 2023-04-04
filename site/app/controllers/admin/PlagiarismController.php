@@ -288,7 +288,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $target_dir = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files");
-        FileUtils::createDir($target_dir, "true", 0770); // creates dir if not yet exists
+        FileUtils::createDir($target_dir, true, 0770); // creates dir if not yet exists
 
         if (mime_content_type($temporary_file_path) == "application/zip") {
             $zip = new \ZipArchive();
@@ -455,14 +455,18 @@ class PlagiarismController extends AbstractController {
             $all_configurations[] = $configuration;
         }
 
-        usort($all_configurations, function ($a, $b) {
-            if ($a['due_date'] == null) {
-                return false;
+        usort($all_configurations, function ($a, $b): int {
+            if ($a['due_date'] === null) {
+                return -1;
+            }
+
+            if ($a["due_date"] === $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] === $b["g_config_version"]) {
+                return 0;
             }
 
             return $a['due_date'] > $b['due_date']
-                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] > $b["g_title"])
-                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]);
+                   || ($a["due_date"] === $b["due_date"] && $a["g_title"] > $b["g_title"])
+                   || ($a["due_date"] === $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]) ? 1 : -1;
         });
 
         // TODO: return to this and enable later
@@ -962,7 +966,7 @@ class PlagiarismController extends AbstractController {
 
         // Create directory structure //////////////////////////////////////////
         if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
-            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), "true", 0770);
+            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), true, 0770);
         }
 
         // Upload instructor provided code /////////////////////////////////////
@@ -1032,7 +1036,15 @@ class PlagiarismController extends AbstractController {
                 return false;
             }
 
-            return new DateTime($a['due_date']) > new DateTime($b['due_date']);
+            if (new DateTime($a['due_date']) > new DateTime($b['due_date'])) {
+                return 1;
+            }
+            elseif (new DateTime($a['due_date']) < new DateTime($b['due_date'])) {
+                return -1;
+            }
+            else {
+                return 0;
+            }
         });
 
         $em = $this->core->getCourseEntityManager();
@@ -1613,7 +1625,7 @@ class PlagiarismController extends AbstractController {
         $return = [];
         foreach ($ranking as $item) {
             $display_name = "";
-            if (!$is_team_assignment) {
+            if (!$is_team_assignment && array_key_exists($item[0], $user_ids_and_names)) {
                 $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
