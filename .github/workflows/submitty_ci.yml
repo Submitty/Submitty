@@ -278,7 +278,7 @@ jobs:
         #   - python-unit
         #   - css-lint
         #   - shellcheck
-        #runs-on: ubuntu-20.04
+        runs-on: ubuntu-20.04
         # services:
         #   postgres:
         #     image: postgres
@@ -294,10 +294,10 @@ jobs:
         #     ports:
         #       - 5432:5432
         #- uses: ./.github/workflows/CISetup.yml
-        # steps:
-          # - uses: actions/checkout@v3
-          #   with:
-          #     path: SUBMITTY_CPY/
+        steps:
+          - uses: actions/checkout@v3
+              with:
+                  path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - uses: ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - name: Run selenium e2e tests with pam auth
