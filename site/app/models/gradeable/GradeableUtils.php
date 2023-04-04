@@ -104,7 +104,7 @@ class GradeableUtils {
             $core,
             $core->getConfig()->getSemester(),
             $core->getConfig()->getCourse(),
-            $calendar_messages, 
+            $calendar_messages,
             false
         );
 
