@@ -187,7 +187,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('have.length', 29);
 
         cy.get('#file-container .btn').eq(9).click();
-        cy.get('#date_to_release').clear().type('2021-06-29 21:37:53');
+        cy.get('#date_to_release').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.waitPageChange(() => {
             cy.get('#submit_time').click();
         });
