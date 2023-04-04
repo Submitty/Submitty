@@ -996,12 +996,10 @@ def checkout_vcs_repo(config, my_file):
                             print("Check to be sure the repository has been committed with the " +
                                 "subdirectory and relevant files present.\n", file=f)
                             
-                subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
-                print(
-                    "\n====================================\n",
-                    file=open(checkout_log_file, 'a')
-                )
-                subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
+                with open(checkout_log_file, 'a') as log_file:
+                    subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
+                    print("\n====================================\n", file=log_file)
+                    subprocess.call(['du', '-skh', checkout_path], stdout=log_file)
                 obj['revision'] = what_version
 
             # exception on git rev-list

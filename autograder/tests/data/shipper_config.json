@@ -20,7 +20,5 @@
     "waittime": 0.861367,
     "which_machine": "primary",
     "which_untrusted": "untrusted02",
-    "who": "test_student",
-    "subdirectory_grading": false,
-    "subdirectory": "subfolder"
-}   
+    "who": "test_student"
+}
