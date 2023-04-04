@@ -1,5 +1,7 @@
 
 
+//Data structure for active columns
+
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
     $('.popup-form').css('display', 'none');

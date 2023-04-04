@@ -6,19 +6,33 @@
     <p>
         Select which columns you would like to display.
     </p>
-    <div class="edit_user_row">
-        <input type="checkbox"
-                name="user_secondary_email_notify_change"
-                {% if user.getEmailBoth() %}
-                    checked
-                {% endif %}
-                id="user-secondary-email-notify-change"
-                {% if user.getEmailBoth() %}
-                    data-current-second-email-notify="1"/>
-                {% else %}
-                    data-current-second-email-notify="0"/>
-                {% endif %}
-        <label for="user-secondary-email-notify-change">Enable Second Email Notifications:</label>
+    <div class="edit-user-row">
+        <input type="checkbox" name="checkbox-registration-section">
+        <label>Registration Section</label>
+        <br>
+        <input type="checkbox" name="checkbox-user-id">
+        <label>User ID</label>
+        <br>
+        <input type="checkbox" name="checkbox-first-name">
+        <label>First Name</label>
+        <br>
+        <input type="checkbox" name="checkbox-last-name">
+        <label>Last Name</label>
+        <br>
+        <input type="checkbox" name="checkbox-rotation-section">
+        <label>Rotating Section</label>
+        <br>
+        <input type="checkbox" name="checkbox-time-zone">
+        <label>UTC Offset / Time Zone</label>
+        <br>
+        <input type="checkbox" name="checkbox-registration-type">
+        <label>Registration Type</label>
+        <br>
+        <input type="checkbox" name="checkbox-edit-student">
+        <label>Edit Student</label>
+        <br>
+        <input type="checkbox" name="checkbox-delete-student"x>
+        <label>Delete Student</label>
     </div>
 {% endblock %}
 {% block form %}
