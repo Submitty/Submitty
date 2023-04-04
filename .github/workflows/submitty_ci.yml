@@ -294,11 +294,11 @@ jobs:
         #     ports:
         #       - 5432:5432
         - uses: ./.github/workflows/CISetup.yml
-        steps:
+        # steps:
           # - uses: actions/checkout@v3
           #   with:
           #     path: SUBMITTY_CPY/
-          - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
+          # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - uses: ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           # - name: Run selenium e2e tests with pam auth
           #   run: |
