@@ -95,6 +95,8 @@ Vagrant.configure(2) do |config|
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
+  
+  custom_box = ENV.has_key?('VAGRANT_BOX')
 
   mount_options = []
 
@@ -164,7 +166,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
-    unless ENV.has_key?('VAGRANT_BOX')
+    unless custom_box
       if (arm || apple_silicon)
         override.vm.box = base_boxes[:arm_parallels]
       end
@@ -184,7 +186,7 @@ Vagrant.configure(2) do |config|
   end
   
   config.vm.provider "libvirt" do |libvirt, override|
-    unless ENV.has_key?('VAGRANT_BOX')
+    unless custom_box
       override.vm.box = base_boxes[:libvirt]
     end
 
@@ -197,7 +199,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "qemu" do |qe, override|
-    unless ENV.has_key?('VAGRANT_BOX')
+    unless custom_box
       if apple_silicon
         override.vm.box = base_boxes[:arm_mac_qemu]
       end
