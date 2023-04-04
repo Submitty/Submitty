@@ -355,7 +355,8 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
+            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
@@ -365,6 +366,7 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
@@ -610,7 +612,7 @@ class UsersController extends AbstractController {
             // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
-                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, intval($counts[$i]));
                     $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
@@ -646,7 +648,7 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                return $expected_size - $curr_size['count'];
+                return $curr_size === null ? $expected_size : $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
@@ -769,7 +771,7 @@ class UsersController extends AbstractController {
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
