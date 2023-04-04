@@ -294,7 +294,7 @@ jobs:
         #     ports:
         #       - 5432:5432
         steps:
-          - name: blah
+          - name: yoyoyo
             uses: ./.github/workflows/CISetup.yml
         #     with:
         #       path: SUBMITTY_CPY/
