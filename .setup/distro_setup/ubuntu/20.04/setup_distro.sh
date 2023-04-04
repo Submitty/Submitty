@@ -106,13 +106,13 @@ add-apt-repository ppa:git-core/ppa -y
 apt-get install git -y
 # ------------------------------------------------------------------
 
-# Install OpenLDAP for testing on DEV_VM
+# Install OpenLDAP for testing on Vagrant
 if [ ${DEV_VM} == 1 ]; then
     apt-get install -qqy php-ldap
 
     CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-    source "$CUR_DIR/../../../DEV_VM/setup_ldap.sh"
+    source "$CUR_DIR/../../../vagrant/setup_ldap.sh"
 fi
 
 # Install SAML IdP docker container for testing
