@@ -1,4 +1,4 @@
-/** exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
+/* exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
 showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
 updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail
