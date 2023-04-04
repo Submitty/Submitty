@@ -42,9 +42,6 @@ class CalendarItem {
      */
     protected $date;
 
-    /**
-     * @return int
-     */
     public function getId(): int {
         return $this->id;
     }
@@ -71,7 +68,7 @@ class CalendarItem {
 
     public function setText(string $text): void {
         if (strlen($text) > 255) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException("Invalid text, may be too many characters.");
         }
         $this->text = $text;
     }
@@ -80,7 +77,7 @@ class CalendarItem {
         if ($type === self::ANNOUNCEMENT || $type === self::TEXT) {
             $this->type = $type;
         }
-        throw new \InvalidArgumentException();
+        throw new \InvalidArgumentException("Invalid type specified.");
     }
 
     public function setStringType(string $type): void {
@@ -95,7 +92,7 @@ class CalendarItem {
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:
-                throw new \InvalidArgumentException();
+                throw new \InvalidArgumentException("Invalid type specified.");
         }
     }
 
@@ -110,6 +107,6 @@ class CalendarItem {
             case self::ANNOUNCEMENT:
                 return 'ann';
         }
-        throw new \Exception();
+        throw new \RuntimeException();
     }
 }

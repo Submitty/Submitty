@@ -101,6 +101,14 @@ function generateCalendarItem(item) {
         </a>`;
 }
 
+/**
+ * Shows the edit calendar item form
+ *
+ * @param itemType : the type of the item added to the calendar
+ * @param itemText : string of the message added
+ * @param itemId : the id of the added element
+ * @param date : the date that the added element shows up on the calendar
+ */
 function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
     $('#calendar-item-text-edit').val(itemText);
@@ -110,6 +118,9 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#edit-calendar-item-form').show();
 }
 
+/**
+ * Deletes the current calendar item
+ */
 function deleteCalendarItem() {
     const id = $('#calendar-item-id').val();
     if (id !== '') {

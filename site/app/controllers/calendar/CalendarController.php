@@ -93,17 +93,12 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
 
-        if (strip_tags($text) !== $text) {
-            $this->core->addErrorMessage("HTML cannot be used in this text");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
-        }
-
         $calendar_item = new CalendarItem();
         try {
             $calendar_item->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("That is not a valid calendar item type");
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
         $calendar_item->setDate(new \DateTime($date));
@@ -111,7 +106,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setText($text);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("Text exceeds 255 characters which is not allowed");
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
 
@@ -169,6 +164,7 @@ class CalendarController extends AbstractController {
             ->findOneBy(['id' => $id]);
 
         if ($calendar_item === null) {
+            $this->core->addErrorMessage("An error has occured.")
             return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
         }
 
