@@ -710,7 +710,6 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('have.length', 6);
     });
 
-
     it('Should show partially and fully restricted sections correctly', () => {
         cy.get('[onclick=\'setCookie("foldersOpen",openAllDivForCourseMaterials());\']').click();
         cy.get('#div_viewer_sd1d1 > .file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]').eq(0).click();
