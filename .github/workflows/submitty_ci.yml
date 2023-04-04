@@ -294,11 +294,11 @@ jobs:
             ports:
               - 5432:5432
         steps:
-          - uses: actions/checkout@v3
-            with:
-              path: SUBMITTY_CPY/
+          # - uses: actions/checkout@v3
+          #   with:
+          #     path: SUBMITTY_CPY/
           - name: call workflow
-            uses: ./actions/action.yml
+            uses: ./.github/workflows/actions/action.yml
         #     with:
         #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
