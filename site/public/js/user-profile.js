@@ -1,13 +1,8 @@
-/** exported updateUserPronouns */
-/** exported showUpdatePrefNameForm */
-/** exported showUpdatePronounsForm */
-/** exported showUpdatePasswordForm */
-/** exported showUpdateProfilePhotoForm*/
-/** exported showUpdateSecondaryEmailForm */
-/** exported updateUserPreferredNames */
-/** exported updateUserProfilePhoto */
-/** exported updateUserSecondaryEmail */
-/** exported changeSecondaryEmail */
+/** exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
+ * showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+ * updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
+ * changeSecondaryEmail
+ */
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
