@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2cd10bac64e9583719d6dab919b9e94e",
+    "content-hash": "0cc37425ac3b646b0faed22512d0d424",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -5446,22 +5446,22 @@
         },
         {
             "name": "php-mock/php-mock-phpunit",
-            "version": "2.7.0",
+            "version": "2.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-phpunit.git",
-                "reference": "97b3278e65863e53066f31adb85d92334c0ea07b"
+                "reference": "dc4cf8896bf47647080dc5709a2c67ee9d437c21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/97b3278e65863e53066f31adb85d92334c0ea07b",
-                "reference": "97b3278e65863e53066f31adb85d92334c0ea07b",
+                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/dc4cf8896bf47647080dc5709a2c67ee9d437c21",
+                "reference": "dc4cf8896bf47647080dc5709a2c67ee9d437c21",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7",
                 "php-mock/php-mock-integration": "^2.2.1",
-                "phpunit/phpunit": "^6 || ^7 || ^8 || ^9 || ^10"
+                "phpunit/phpunit": "^6 || ^7 || ^8 || ^9 || ^10.0.17"
             },
             "require-dev": {
                 "mockery/mockery": "^1.3.6"
@@ -5501,7 +5501,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mock/php-mock-phpunit/issues",
-                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.7.0"
+                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.7.1"
             },
             "funding": [
                 {
@@ -5509,7 +5509,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-03-06T17:25:07+00:00"
+            "time": "2023-03-21T06:55:31+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -5566,16 +5566,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.7",
+            "version": "1.10.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "b10ceb526d9607903c5b2673f1fc8775dbe48975"
+                "reference": "0166aef76e066f0dd2adc2799bdadfa1635711e9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b10ceb526d9607903c5b2673f1fc8775dbe48975",
-                "reference": "b10ceb526d9607903c5b2673f1fc8775dbe48975",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0166aef76e066f0dd2adc2799bdadfa1635711e9",
+                "reference": "0166aef76e066f0dd2adc2799bdadfa1635711e9",
                 "shasum": ""
             },
             "require": {
@@ -5624,7 +5624,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-16T15:24:20+00:00"
+            "time": "2023-03-24T10:28:16+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
