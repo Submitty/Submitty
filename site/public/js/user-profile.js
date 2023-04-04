@@ -1,7 +1,7 @@
 /** exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
- * showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
- * updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
- * changeSecondaryEmail
+showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
+changeSecondaryEmail
  */
 
 function showUpdatePrefNameForm() {
