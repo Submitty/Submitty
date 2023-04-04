@@ -294,6 +294,9 @@ jobs:
         #     ports:
         #       - 5432:5432
         steps:
+          - uses: actions/checkout@v3
+            with:
+              path: SUBMITTY_CPY/
           - name: yoyoyo
             uses: ./.github/workflows/CISetup.yml
         #     with:
