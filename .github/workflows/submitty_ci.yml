@@ -279,26 +279,26 @@ jobs:
         #   - css-lint
         #   - shellcheck
         runs-on: ubuntu-20.04
-        # services:
-        #   postgres:
-        #     image: postgres
-        #     env:
-        #       POSTGRES_PASSWORD: submitty_dbuser
-        #       POSTGRES_USER: postgres
-        #       TZ: America/New_York
-        #     options: >-
-        #       --health-cmd pg_isready
-        #       --health-interval 10s
-        #       --health-timeout 5s
-        #       --health-retries 5
-        #     ports:
-        #       - 5432:5432
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_PASSWORD: submitty_dbuser
+              POSTGRES_USER: postgres
+              TZ: America/New_York
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              - 5432:5432
         steps:
           - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
-          - name: yoyoyo
-            uses: ./.github/workflows/CISetup.yml
+          - name: call workflow
+            uses: ./.github/workflows/action.yml
         #     with:
         #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
