@@ -100,19 +100,20 @@ class GradeableUtils {
      * @return \app\models\Button[][]|Gradeable[][]|GradedGradeable[][]|array[]
      */
     public static function getGradeablesFromUserAndCourse(Core $core, array &$calendar_messages): array {
-        $gradeables_of_course = self::getGradeablesFromCourse($core, 
-        $core->getConfig()->getSemester(), 
-        $core->getConfig()->getCourse(), 
-        $calendar_messages, 
-        false
-    );
+        $gradeables_of_course = self::getGradeablesFromCourse(
+            $core,
+            $core->getConfig()->getSemester(),
+            $core->getConfig()->getCourse(),
+            $calendar_messages, 
+            false
+        );
 
         $gradeables = $gradeables_of_course["gradeables"];
         $graded_gradeables = $gradeables_of_course["graded_gradeables"];
         $submit_btns = $gradeables_of_course["submit_btns"];
 
-        return ["gradeables" => $gradeables, 
-            "graded_gradeables" => $graded_gradeables, 
+        return ["gradeables" => $gradeables,
+            "graded_gradeables" => $graded_gradeables,
             "submit_btns" => $submit_btns];
     }
 }
