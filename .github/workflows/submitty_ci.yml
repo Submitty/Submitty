@@ -293,7 +293,7 @@ jobs:
         #       --health-retries 5
         #     ports:
         #       - 5432:5432
-        #- uses: ./.github/workflows/CISetup.yml
+        uses: ./.github/workflows/CISetup.yml
         steps:
           - uses: actions/checkout@v3
             with:
