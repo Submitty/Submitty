@@ -9,7 +9,6 @@
 /** exported updateUserSecondaryEmail */
 /** exported changeSecondaryEmail */
 
-// eslint-disable-next-line no-unused-vars
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
@@ -18,14 +17,14 @@ function showUpdatePrefNameForm() {
     $('[name="user_name_change"]', form).val('');
     $('#user-givenname-change').focus();
 }
-// eslint-disable-next-line no-unused-vars
+
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
 }
-// eslint-disable-next-line no-unused-vars
+
 function showUpdatePasswordForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#change-password-form');
@@ -36,7 +35,6 @@ function showUpdatePasswordForm() {
     $('#new_password').focus();
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateProfilePhotoForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-profile-photo-form');
@@ -44,7 +42,6 @@ function showUpdateProfilePhotoForm() {
     form.find('.form-body').scrollTop(0);
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
@@ -75,7 +72,6 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserPronouns(e) {
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
@@ -122,7 +118,6 @@ function updateUserPronouns(e) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserPreferredNames () {
     const given_name_field = $('#user-givenname-change');
     const family_name_field = $('#user-familyname-change');
@@ -176,7 +171,6 @@ function updateUserPreferredNames () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserProfilePhoto () {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
@@ -226,7 +220,6 @@ function updateUserProfilePhoto () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserSecondaryEmail () {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
@@ -282,7 +275,6 @@ function updateUserSecondaryEmail () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function changeSecondaryEmail() {
     const email = $('#user-secondary-email-change').val();
     const checkbox = $('#user-secondary-email-notify-change');
