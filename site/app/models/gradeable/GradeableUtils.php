@@ -72,6 +72,7 @@ class GradeableUtils {
      * gradeables in all courses of a single user.
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
+     * NOTE: Calendar Messages is passed by refence in order to be changed in "getGradeablesFromCourse"
      *
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
