@@ -297,7 +297,6 @@ jobs:
         steps:
           - uses: actions/checkout@v3
             with:
-              ${SUBMITTY_REPOSITORY}
               path: SUBMITTY_CPY/
           - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
           - uses: ./.github/actions/action.yml
