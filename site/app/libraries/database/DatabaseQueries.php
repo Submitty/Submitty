@@ -1053,7 +1053,7 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $course
      */
     public function updateUser(User $user, $semester = null, $course = null) {
-        $params = [$user->getNumericId(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
+        $params = [$user->getNumericId(), $user->getPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
                        $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
@@ -1075,7 +1075,7 @@ VALUES (?,?,?,?,?,?)",
             "
 UPDATE users
 SET
-  user_numeric_id=?, user_givenname=?, user_preferred_givenname=?,
+  user_numeric_id=?, user_pronouns=?, user_givenname=?, user_preferred_givenname=?,
   user_familyname=?, user_preferred_familyname=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
@@ -7131,6 +7131,7 @@ WHERE current_state IN
               u.user_givenname,
               u.user_preferred_givenname,
               u.user_familyname,
+              u.user_pronouns,
               u.user_preferred_familyname,
               u.user_email,
               u.user_email_secondary,
@@ -7211,6 +7212,7 @@ WHERE current_state IN
               gcd.array_grader_anon_id,
               gcd.array_grader_user_givenname,
               gcd.array_grader_user_preferred_givenname,
+              gcd.array_grader_user_pronouns,
               gcd.array_grader_user_familyname,
               gcd.array_grader_user_email,
               gcd.array_grader_user_email_secondary,
@@ -7227,6 +7229,7 @@ WHERE current_state IN
               gcd.array_verifier_user_id,
               gcd.array_verifier_user_givenname,
               gcd.array_verifier_user_preferred_givenname,
+              gcd.array_verifier_user_pronouns,
               gcd.array_verifier_user_familyname,
               gcd.array_verifier_user_email,
               gcd.array_verifier_user_email_secondary,
@@ -7301,6 +7304,7 @@ WHERE current_state IN
                   json_agg(ug.g_anon) AS array_grader_anon_id,
                   json_agg(ug.user_givenname) AS array_grader_user_givenname,
                   json_agg(ug.user_preferred_givenname) AS array_grader_user_preferred_givenname,
+                  json_agg(ug.user_pronouns) AS array_grader_user_pronouns,
                   json_agg(ug.user_familyname) AS array_grader_user_familyname,
                   json_agg(ug.user_email) AS array_grader_user_email,
                   json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
@@ -7315,6 +7319,7 @@ WHERE current_state IN
                   json_agg(uv.user_id) AS array_verifier_user_id,
                   json_agg(uv.user_givenname) AS array_verifier_user_givenname,
                   json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
+                  json_agg(uv.user_pronouns) AS array_verifier_user_pronouns,
                   json_agg(uv.user_familyname) AS array_verifier_user_familyname,
                   json_agg(uv.user_email) AS array_verifier_user_email,
                   json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
@@ -7489,6 +7494,7 @@ WHERE current_state IN
                 'anon_id',
                 'user_givenname',
                 'user_preferred_givenname',
+                'user_pronouns',
                 'user_familyname',
                 'user_email',
                 'user_email_secondary',
