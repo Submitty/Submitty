@@ -327,10 +327,10 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
         )
 
-    def test_deleted_subfolder_files(self):
-        # """
-        # This test is to verify the output when the shipper fails tries to clone a repository with an empty subdirectory.
-        # """
+    def test_deleted_subdirectory_files(self):
+        """
+        This test is to verify the output when the shipper fails tries to clone a repository with an empty subdirectory.
+        """
         paths = get_paths()
         os.chdir(TEST_DATA_DIR)
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
@@ -338,10 +338,10 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolders.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectories.json'
         )
 
-        # Set the vcs_base_url to include .git for subdirectory grading.
+        # Set the vcs_base_url to include .git to imitate a git repository for subdirectory grading.
         with open(
             os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
         ) as config_file:
@@ -356,14 +356,14 @@ class TestAutogradingShipper(unittest.TestCase):
                     base_config_file.read()
                 )
                 
-        # Setup the new git repository in the test folder.
+        # Setup the new git repository in the test directory.
         setup = """
         cd ./bad.git
         git init --initial-branch master;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add .
-        git commit -m \"test_subfolder\"
+        git commit -m \"test_subdirectory\"
         """
         os.system(setup)
 
@@ -373,13 +373,13 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['checkout'] + '/failed_subdirectory_empty.txt'
         )
         self.assertTrue(
-            os.path.isfile(failed_file), 'Failed test with no files in subdirectory')
+            os.path.isfile(failed_file), 'Failed test when no files in subdirectory')
 
 
-    def test_good_subfolder_files(self):
-        # """
-        # This test is to verify the output when the shipper successfully tries to clone a repository with an empty subdirectory.
-        # """
+    def test_good_subdirectory_files(self):
+        """
+        This test is to verify the output when the shipper successfully tries to clone a repository with complete subdirectories.
+        """
         paths = get_paths()
         os.chdir(TEST_DATA_DIR)
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
@@ -387,7 +387,7 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolders.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectories.json'
         )
 
         # Set the vcs_base_url to include .git for subdirectory grading.
@@ -405,14 +405,14 @@ class TestAutogradingShipper(unittest.TestCase):
                     base_config_file.read()
                 )
                 
-        # Setup the new git repository in the test folder.
+        # Setup the new git repository in the test directory.
         setup = """
         cd ./good.git
         git init --initial-branch master;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add .
-        git commit -m \"test_subfolder\"
+        git commit -m \"test_subdirectory\"
         """
         os.system(setup)
 
