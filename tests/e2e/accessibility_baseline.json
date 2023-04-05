@@ -5,7 +5,7 @@
     "/courses/{}/{}/gradeable/future_no_tas_homework/update?nav_tab=0": [
         "Attribute “placeholder” not allowed on element “input” at this point.",
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
-        "Attribute 'maxlength' is only allowed when the input type is 'email', 'password', 'search', 'tel', 'text', or 'url'."
+        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
     ],
     "/courses/{}/{}/autograding_config?g_id=future_no_tas_homework": [],
     "/courses/{}/{}/gradeable/future_no_tas_lab/grading?view=all": [
