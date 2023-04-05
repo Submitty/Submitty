@@ -856,7 +856,7 @@ def checkout_vcs_repo(config, my_file):
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             if '.git' in vcs_base_url:
                 vcs_path = vcs_base_url
-                sub_checkout_path = os.path.join(checkout_path, "tmp")             
+                sub_checkout_path = os.path.join(checkout_path, "tmp")
             else:
                 vcs_path = vcs_subdirectory
         else:
