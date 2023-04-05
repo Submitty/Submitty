@@ -856,7 +856,7 @@ def checkout_vcs_repo(config, my_file):
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             if '.git' in vcs_base_url:
                 vcs_path = vcs_base_url
-                sub_checkout_path = os.path.join(checkout_path, "tmp")               
+                sub_checkout_path = os.path.join(checkout_path, "tmp")             
             else:
                 vcs_path = vcs_subdirectory
         else:
@@ -920,7 +920,8 @@ def checkout_vcs_repo(config, my_file):
 
         if '.git' in vcs_base_url:
             clone_command = [
-                '/usr/bin/git', 'clone', vcs_path, sub_checkout_path, '--depth', '1', '-b', which_branch
+                '/usr/bin/git', 'clone', vcs_path,
+                sub_checkout_path, '--depth', '1', '-b', which_branch
             ]
         else:
             clone_command = [
@@ -994,8 +995,8 @@ def checkout_vcs_repo(config, my_file):
                             print("\n", file=f)
                             print("Check to be sure the subdirectory is not empty.\n", file=f)
                             print("Check to be sure the repository has been committed with the " +
-                                "subdirectory and relevant files present.\n", file=f)
-                            
+                                  "subdirectory and relevant files present.\n", file=f)
+
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
                     print("\n====================================\n", file=log_file)

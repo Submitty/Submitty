@@ -75,8 +75,8 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        # with contextlib.suppress(FileNotFoundError):
-        #     shutil.rmtree(WORKING_DIR)
+        with contextlib.suppress(FileNotFoundError):
+            shutil.rmtree(WORKING_DIR)
 
     @classmethod
     def setUpClass(cls):
@@ -182,7 +182,7 @@ class TestAutogradingShipper(unittest.TestCase):
         # Initialize git homework directory
         create_git_repository = """
         cd {}/homework_01;
-        git init;
+        git init --initial_branch master;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add -A;
@@ -359,7 +359,7 @@ class TestAutogradingShipper(unittest.TestCase):
         # Setup the new git repository in the test folder.
         setup = """
         cd ./bad.git
-        git init;
+        git init --initial_branch master;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add .
@@ -408,7 +408,7 @@ class TestAutogradingShipper(unittest.TestCase):
         # Setup the new git repository in the test folder.
         setup = """
         cd ./good.git
-        git init;
+        git init --initial-branch master;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add .
