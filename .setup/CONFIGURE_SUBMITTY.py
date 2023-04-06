@@ -165,7 +165,6 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
-SITE_LANG_DIR = os.path.join(SUBMITTY_REPOSITORY, 'site', 'lang')
 
 ##############################################################################
 
@@ -410,8 +409,6 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 
-config['site_lang_dir'] = SITE_LANG_DIR
-
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 config['num_untrusted'] = NUM_UNTRUSTED
@@ -632,7 +629,6 @@ if not args.worker:
     config['sys_admin_url'] = SYS_ADMIN_URL
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
-config['site_lang_dir'] = SITE_LANG_DIR
 
 if not args.worker:
     config['submission_url'] = SUBMISSION_URL
