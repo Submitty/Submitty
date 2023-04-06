@@ -20,6 +20,7 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
