@@ -301,7 +301,7 @@ class Config extends AbstractModel {
         $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
 
         if ($this->submitty_install_path) {
-            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $this->default_locale);
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
         }
     }
 
@@ -482,10 +482,10 @@ class Config extends AbstractModel {
         }
 
         if (isset($submitty_json['default_locale'])) {
-            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $submitty_json['default_locale']);
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $submitty_json['default_locale']);
         }
         elseif (!isset($this->locale)) {
-            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $this->default_locale);
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
         }
     }
 
