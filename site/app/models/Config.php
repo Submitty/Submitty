@@ -106,9 +106,6 @@ class Config extends AbstractModel {
     /** @prop @var array */
     protected $course_json = [];
 
-    /** @prop @var string path on the filesystem that points to the lang directory */
-    protected $lang_path;
-
     /**
      * Indicates whether a course config has been successfully loaded.
      * @var bool
@@ -487,6 +484,9 @@ class Config extends AbstractModel {
         if (isset($submitty_json['default_locale'])) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $submitty_json['default_locale']);
         }
+        elseif (!isset($this->locale)) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $this->default_locale);
+        }
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
@@ -666,9 +666,5 @@ class Config extends AbstractModel {
 
     public function getLocale(): Locale {
         return $this->locale;
-    }
-
-    public function getLangPath(): string {
-        return $this->lang_path;
     }
 }
