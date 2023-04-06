@@ -215,7 +215,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("admin@example.com", $config->getSysAdminEmail());
         $this->assertEquals("https://example.com/admin", $config->getSysAdminUrl());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
-        $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 

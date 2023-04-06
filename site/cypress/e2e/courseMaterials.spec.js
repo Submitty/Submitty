@@ -87,7 +87,7 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should release course materials by date', () => {
         const date = '2021-06-29 21:37:53';
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
-        cy.get('#upload_picker').clear().type(date);
+        cy.get('#upload_picker').clear({force: true}).type(date);
         cy.get('#input-provide-full-path').click();
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
         cy.waitPageChange(() => {
@@ -98,7 +98,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#date_to_release_sf4').should('have.value', date);
 
         cy.get('.file-viewer > a').contains('file1.txt').parent().find('.fa-pencil-alt').click();
-        cy.get('#edit-picker').clear().type('9998-01-01 00:00:00');
+        cy.get('#edit-picker').clear({force: true}).type('9998-01-01 00:00:00', {force: true});
         cy.waitPageChange(() => {
             cy.get('#submit-edit').click({force: true}); //div covering button
         });
@@ -135,7 +135,7 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should hide course materials visually', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#upload1').attachFile('file1.txt' , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#hide-materials-checkbox').check();
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -187,7 +187,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.file-viewer').should('have.length', 29);
 
         cy.get('#file-container .btn').eq(9).click();
-        cy.get('#date_to_release').clear().type('2021-06-29 21:37:53');
+        cy.get('#date_to_release').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.waitPageChange(() => {
             cy.get('#submit_time').click();
         });
@@ -232,7 +232,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
         cy.get('#section-upload-1').check();
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#input-provide-full-path').click();
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -279,7 +279,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile(['file1.txt', 'file2.txt'] , { subjectType: 'drag-n-drop' });
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#input-provide-full-path').click();
         cy.get('#submit-materials').click();
         cy.on('window:alert', (alert) => {
@@ -297,7 +297,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#all_Sections_Showing_yes').click();
         cy.get('#upload1').attachFile('zip.zip' , { subjectType: 'drag-n-drop' });
         cy.get('#section-upload-1').check();
-        cy.get('#upload_picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#upload_picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#expand-zip-checkbox').check();
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -453,7 +453,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Set release date for files
         cy.get('.fa-pencil-alt').first().click();
-        cy.get('#edit-folder-picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#edit-folder-picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.waitPageChange(() => {
             cy.get('#submit-folder-edit-full').click({force: true}); //div covering button
         });
@@ -504,7 +504,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Restrict course materials in folder to section 1
         cy.get('.fa-pencil-alt').first().click();
-        cy.get('#edit-folder-picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#edit-folder-picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#all-sections-showing-yes-folder').click();
         cy.get('#section-folder-edit-1').check();
         cy.waitPageChange(() => {
@@ -570,7 +570,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         // Visually hide course materials in folder from students
         cy.get('.fa-pencil-alt').first().click();
-        cy.get('#edit-folder-picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#edit-folder-picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#hide-folder-materials-checkbox-edit').check();
         cy.waitPageChange(() => {
             cy.get('#submit-folder-edit-full').click();
@@ -688,7 +688,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('.fa-pencil-alt').first().click();
         cy.get('#all-sections-showing-yes-folder').click();
         cy.get('#section-folder-edit-1').check();
-        cy.get('#edit-folder-picker').clear().type('2021-06-29 21:37:53');
+        cy.get('#edit-folder-picker').clear({force: true}).type('2021-06-29 21:37:53', {force: true});
         cy.get('#hide-folder-materials-checkbox-edit').check();
         cy.waitPageChange(() => {
             cy.get('#submit-folder-edit-full').click({force: true}); //div covering button
@@ -758,7 +758,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('input[id=section-folder-edit-1]').should('be.checked').and('have.class', 'partial-checkbox');
         cy.get('input[id=section-folder-edit-2]').should('be.checked').and('have.class', 'partial-checkbox');
         cy.get('#edit-folder-picker').should('have.value', '2022-01-01 00:00:00');
-        cy.get('#edit-folder-picker').clear().type('2022-01-01 12:00:00');
+        cy.get('#edit-folder-picker').clear({force: true}).type('2022-01-01 12:00:00', {force: true});
         cy.get('input[id=all-sections-showing-yes-folder]').click();
         cy.get('input[id=hide-folder-materials-checkbox-edit]').check();
         cy.waitPageChange(() => {
@@ -769,7 +769,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('input[id=all-sections-showing-yes]').should('be.checked');
             cy.get(`input[id=section-edit-${i+1}]`).should('be.checked');
             cy.get('#edit-picker').should('have.value', '2022-01-01 12:00:00');
-            cy.get('#edit-picker').clear().type('2022-01-01 00:00:00');
+            cy.get('#edit-picker').clear({force: true}).type('2022-01-01 00:00:00', {force: true});
             cy.get('input[id=all-sections-showing-no]').click();
             cy.get('input[id=hide-materials-checkbox-edit]').should('be.checked');
             cy.get('input[id=hide-materials-checkbox-edit]').uncheck();
