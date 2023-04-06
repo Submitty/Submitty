@@ -1,0 +1,123 @@
+.flagged-row {
+    background-color: red;
+}
+
+#empty-table {
+    margin: 10px auto;
+    padding: 1.6em 1em;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.mobile-table {
+    width: 100%;
+    text-align: center;
+}
+
+.mobile-table caption {
+    padding: 0.5em;
+    font-weight: bold;
+    font-size: 1.2em;
+    width: 100%;
+    display: block;
+}
+
+.mobile-table th {
+    padding: 5px;
+}
+
+.section-break {
+    border-top: 1px solid var(--standard-hover-light-gray);
+    font-weight: normal;
+    padding: 0.5em;
+}
+
+@media (max-width: 830px) {
+    table.mobile-table,
+    .mobile-table thead,
+    .mobile-table tbody,
+    .mobile-table th,
+    .mobile-table td,
+    .mobile-table tr {
+        display: block;
+        border: none;
+    }
+
+    .mobile-table tr {
+        margin-top: 1em;
+        background: none !important;
+    }
+
+    /* Hide table headers */
+    .mobile-table thead tr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    .mobile-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2px 8px;
+        margin: 2px 0;
+    }
+
+    .mobile-table tr:nth-child(even) td {
+        background: var(--standard-hover-light-gray);
+    }
+
+    .mobile-table tr:nth-child(odd) td {
+        background: var(--standard-light-gray);
+    }
+
+    .mobile-table td::before {
+        padding-right: 1em;
+        font-weight: bold;
+    }
+}
+
+@media (min-width: 831px) {
+    .mobile-table {
+        border: 1px solid var(--standard-hover-light-gray);
+    }
+
+    .mobile-table caption {
+        display: table-caption;
+    }
+
+    .section-break {
+        padding: 0;
+    }
+
+    .mobile-table td::before {
+        content: none !important;
+    }
+
+    .mobile-table td:first-child,
+    .mobile-table th:first-child {
+        padding-left: 15px;
+    }
+
+    .mobile-table td:last-child,
+    .mobile-table th:last-child {
+        padding-right: 15px;
+    }
+}
+
+.peer-table-data {
+    width: 50px;
+}
+
+.peer-table-header {
+    width: 80px;
+}
+
+.peer-table-title-data {
+    text-align: left;
+}
