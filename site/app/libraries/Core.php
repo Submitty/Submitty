@@ -879,7 +879,7 @@ class Core {
 
     /**
      * Get the lang data for the current locale.
-     * 
+     *
      * @return array|null
      */
     public function getLang() {
