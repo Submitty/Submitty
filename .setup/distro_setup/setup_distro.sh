@@ -41,7 +41,7 @@ fi
 
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
 
-if [ "${VAGRANT}" == 1 ] && [ "${UTM_ARM}" == 0 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
         chmod -x /etc/update-motd.d/*

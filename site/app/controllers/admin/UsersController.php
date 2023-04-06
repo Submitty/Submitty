@@ -57,6 +57,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $student->getDisplayedGivenName(),
                 'family_name' => $student->getDisplayedFamilyName(),
+                'pronouns' => $student->getPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -124,6 +125,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
+                'pronouns' => $grader->getPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -191,6 +193,7 @@ class UsersController extends AbstractController {
             'user_familyname' => $user->getLegalFamilyName(),
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
+            'user_pronouns' => $user->getPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
@@ -224,6 +227,7 @@ class UsersController extends AbstractController {
                 'user_familyname' => $user->getLegalFamilyName(),
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
+                'user_pronouns' => $user->getPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
@@ -264,6 +268,8 @@ class UsersController extends AbstractController {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
+        //Pronouns must be less than 12 characters.
+        $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "" : "Error in pronouns: \"" . strip_tags($_POST['user_pronouns']) . "\"<br>";
         //Given and Family name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
         $error_message .= User::validateUserData('user_legal_familyname', trim($_POST['user_familyname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_familyname']) . "\"<br>";
@@ -311,6 +317,8 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_preferred_familyname'])) {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
+
+        $user->setPronouns(trim($_POST['user_pronouns']));
 
         $user->setEmail(trim($_POST['user_email']));
 
@@ -612,7 +620,7 @@ class UsersController extends AbstractController {
             // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
-                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, intval($counts[$i]));
                     $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
@@ -771,7 +779,7 @@ class UsersController extends AbstractController {
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
