@@ -28,7 +28,6 @@ class Locale extends AbstractModel {
             $lang_data = include $lang_file;
             if (gettype($lang_data) === "array") {
                 $this->lang_data = $lang_data;
-                $this->core->lang = $lang_data;
             }
         }
     }

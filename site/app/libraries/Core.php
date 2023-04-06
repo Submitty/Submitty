@@ -82,9 +82,6 @@ class Core {
     /** @var bool */
     private $testing = false;
 
-    /** @var array */
-    public $lang = [];
-
     /**
      * Core constructor.
      *
@@ -878,5 +875,17 @@ class Core {
         }
 
         return $logged_in;
+    }
+
+    /**
+     * Get the lang data for the current locale.
+     * 
+     * @return array|null
+     */
+    public function getLang() {
+        if ($this->config) {
+            return $this->config->getLocale()->getLangData();
+        }
+        return null;
     }
 }
