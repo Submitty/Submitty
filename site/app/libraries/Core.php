@@ -883,7 +883,7 @@ class Core {
      * @return array|null
      */
     public function getLang() {
-        if ($this->config) {
+        if ($this->config !== null) {
             return $this->config->getLocale()->getLangData();
         }
         return null;
