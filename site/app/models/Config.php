@@ -106,9 +106,6 @@ class Config extends AbstractModel {
     /** @prop @var array */
     protected $course_json = [];
 
-    /** @prop @var string path on the filesystem that points to the lang directory */
-    protected $lang_path;
-
     /**
      * Indicates whether a course config has been successfully loaded.
      * @var bool
@@ -302,6 +299,10 @@ class Config extends AbstractModel {
         // For now this will be set to 'MDY', and configured as a property of the Config class
         // Eventually this should be moved to the User class and configured on a per-user basis
         $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
+
+        if ($this->submitty_install_path) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $this->default_locale);
+        }
     }
 
     public function loadMasterConfigs($config_path) {
@@ -372,15 +373,6 @@ class Config extends AbstractModel {
             $this->timezone = new \DateTimeZone($submitty_json['timezone']);
         }
 
-        if (isset($submitty_json['site_lang_dir'])) {
-            $this->lang_path = $submitty_json['site_lang_dir'];
-            if (isset($submitty_json['default_locale'])) {
-                $this->locale = new Locale($this->core, $this->lang_path, $submitty_json['default_locale']);
-            }
-            else {
-                $this->locale = new Locale($this->core, $this->lang_path, $this->default_locale);
-            }
-        }
 
         if (isset($submitty_json['institution_name'])) {
             $this->institution_name = $submitty_json['institution_name'];
@@ -487,6 +479,13 @@ class Config extends AbstractModel {
             }
 
             $this->php_user = $users_json['php_user'];
+        }
+
+        if (isset($submitty_json['default_locale'])) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $submitty_json['default_locale']);
+        }
+        elseif (!isset($this->locale)) {
+            $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site/cache/lang"), $this->default_locale);
         }
     }
 
@@ -667,9 +666,5 @@ class Config extends AbstractModel {
 
     public function getLocale(): Locale {
         return $this->locale;
-    }
-
-    public function getLangPath(): string {
-        return $this->lang_path;
     }
 }
