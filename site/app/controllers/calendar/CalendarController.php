@@ -43,7 +43,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/items/new", methods={"POST"})
+     * @Route("/calendar", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function createMessage(): RedirectResponse {

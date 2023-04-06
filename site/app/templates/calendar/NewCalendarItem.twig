@@ -8,8 +8,9 @@
     <label for="calendar-course">Course</label>
     <select id="calendar-course" name="course">
     {% for one_course in instructor_courses %}
-        <option value="{{one_course.title}}">{{ one_course.title }}</option>
+        <option value="{{ one_course.semester ~ one_course.course }}">{{ one_course.semester ~ one_course.course }}</option>
     {% endfor %}
+    </select><br>
     <label for="calendar-item-type">Message Type</label>
     <select id="calendar-item-type" name="type">
         <option value="note">Note</option>
@@ -51,7 +52,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/items/new">
+    <form method="post" action="calendar">
         {{ parent() }}
     </form>
 {% endblock %}
