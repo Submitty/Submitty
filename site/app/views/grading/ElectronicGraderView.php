@@ -1420,7 +1420,7 @@ HTML;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $new_version = $display_version === $active_version ? 0 : $display_version;
 
-        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
+        $this->core->getOutput()->addInternalCss('table.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
