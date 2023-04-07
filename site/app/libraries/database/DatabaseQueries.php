@@ -1053,7 +1053,7 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $course
      */
     public function updateUser(User $user, $semester = null, $course = null) {
-        $params = [$user->getNumericId(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
+        $params = [$user->getNumericId(), $user->getPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
                        $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
@@ -1075,7 +1075,7 @@ VALUES (?,?,?,?,?,?)",
             "
 UPDATE users
 SET
-  user_numeric_id=?, user_givenname=?, user_preferred_givenname=?,
+  user_numeric_id=?, user_pronouns=?, user_givenname=?, user_preferred_givenname=?,
   user_familyname=?, user_preferred_familyname=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
@@ -2677,12 +2677,12 @@ ORDER BY user_id ASC"
     }
 
     /**
-     * Updates all given Users in $users array to have rotating section $section
+     * Updates all given users in $users array to have rotating section $section
      *
      * @param integer $section
-     * @param User[] $users
+     * @param array<string> $users An array of user IDs
      */
-    public function updateUsersRotatingSection($section, $users) {
+    public function updateUsersRotatingSection(int $section, array $users) {
         $update_array = array_merge([$section], $users);
         $placeholders = $this->createParamaterList(count($users));
         $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
@@ -3428,12 +3428,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     /**
      * Edit the user's message from table seeking_team
-     *
-     * @param string $g_id
-     * @param string $user_id
-     * @param string $message
      */
-    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+    public function updateSeekingTeamMessageById(string $g_id, string $user_id, ?string $message) {
         $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
     }
 
@@ -4942,8 +4938,8 @@ AND gc_id IN (
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
-        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", [$regrade_id]);
     }
 
     public function deleteGradeable($g_id) {
@@ -6387,12 +6383,8 @@ AND gc_id IN (
 
     /**
      * Gives true if thread is locked
-     *
-     * @param  int $thread_id
-     * @return bool
      */
-    public function isThreadLocked($thread_id) {
-
+    public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
         if (empty($this->course_db->rows()[0]['lock_thread_date'])) {
             return false;
@@ -7140,6 +7132,7 @@ WHERE current_state IN
               u.user_givenname,
               u.user_preferred_givenname,
               u.user_familyname,
+              u.user_pronouns,
               u.user_preferred_familyname,
               u.user_email,
               u.user_email_secondary,
@@ -7221,6 +7214,7 @@ WHERE current_state IN
               gcd.array_grader_anon_id,
               gcd.array_grader_user_givenname,
               gcd.array_grader_user_preferred_givenname,
+              gcd.array_grader_user_pronouns,
               gcd.array_grader_user_familyname,
               gcd.array_grader_user_email,
               gcd.array_grader_user_email_secondary,
@@ -7238,6 +7232,7 @@ WHERE current_state IN
               gcd.array_verifier_user_id,
               gcd.array_verifier_user_givenname,
               gcd.array_verifier_user_preferred_givenname,
+              gcd.array_verifier_user_pronouns,
               gcd.array_verifier_user_familyname,
               gcd.array_verifier_user_email,
               gcd.array_verifier_user_email_secondary,
@@ -7313,6 +7308,7 @@ WHERE current_state IN
                   json_agg(ug.g_anon) AS array_grader_anon_id,
                   json_agg(ug.user_givenname) AS array_grader_user_givenname,
                   json_agg(ug.user_preferred_givenname) AS array_grader_user_preferred_givenname,
+                  json_agg(ug.user_pronouns) AS array_grader_user_pronouns,
                   json_agg(ug.user_familyname) AS array_grader_user_familyname,
                   json_agg(ug.user_email) AS array_grader_user_email,
                   json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
@@ -7327,6 +7323,7 @@ WHERE current_state IN
                   json_agg(uv.user_id) AS array_verifier_user_id,
                   json_agg(uv.user_givenname) AS array_verifier_user_givenname,
                   json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
+                  json_agg(uv.user_pronouns) AS array_verifier_user_pronouns,
                   json_agg(uv.user_familyname) AS array_verifier_user_familyname,
                   json_agg(uv.user_email) AS array_verifier_user_email,
                   json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
@@ -7501,6 +7498,7 @@ WHERE current_state IN
                 'anon_id',
                 'user_givenname',
                 'user_preferred_givenname',
+                'user_pronouns',
                 'user_familyname',
                 'user_email',
                 'user_email_secondary',
@@ -7968,11 +7966,6 @@ SQL;
       END) AS not_helped_count
 
 SQL;
-    }
-
-    private function getGradeableMinutesOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
     }
 
     /**
