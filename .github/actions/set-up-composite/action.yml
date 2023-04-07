@@ -10,3 +10,4 @@ runs:
   steps:
     - name: Greet someone
       run: echo "Hello"
+      shell: bash
