@@ -306,7 +306,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         // ignore the identifier error
     }
     repairPDF();
-    updateAnnotations()
+    updateAnnotations();
 }
 
 
@@ -389,38 +389,24 @@ function updateAnnotations() {
         let hasTranslate = false;
 
         if (transform) {
-            // Split the transform attribute into separate transformations
-            let transformations = transform.split(/\s*(?=[a-zA-Z]+\()/);
+            let updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
+                hasTranslate = true;
+                x = x ? parseFloat(x) : 0;
+                y = y ? parseFloat(y) : 0;
 
-            // Check if a translate transformation exists and update it
-            for (let i = 0; i < transformations.length; i++) {
-                if (transformations[i].startsWith('translate(')) {
-                    hasTranslate = true;
-                    let coords = transformations[i].match(/-?[\d.]+/g);
+                return `translate(${x}, ${y})`;
+            });
 
-                    if (coords && coords.length === 2) {
-                        coords[0] = parseFloat(coords[0]);
-                        coords[1] = parseFloat(coords[1]);
-                    } else {
-                        // Set the translate values to (0, 0) if they are not valid numbers
-                        coords = [0, 0];
-                    }
-
-                    transformations[i] = `translate(${coords[0]}, ${coords[1]})`;
-                }
-            }
-
-            // Update the transform attribute with the new transformations
-            transform = transformations.join(' ');
+            transform = updatedTransform;
         }
 
         // Add translate(0, 0) if there's no translate transformation
         if (!hasTranslate) {
-            transform = transform ? `${transform} translate(0, 0)` : 'translate(0, 0)';
+            transform = transform ? `${transform.trim()} translate(0, 0)` : 'translate(0, 0)';
         }
 
-        // Update the transform attribute of the element
-        element.setAttribute('transform', transform);
+        // Update the transform attribute of the element, removing unnecessary spaces
+        element.setAttribute('transform', transform.replace(/\s+/g, ' '));
     });
 }
 
