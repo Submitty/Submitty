@@ -10,9 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use app\libraries\Core;
 use app\models\gradeable\LateDays;
-use app\models\User;
 
 /**
  * Class LateController
@@ -284,9 +282,9 @@ class LateController extends AbstractController {
     }
 
     /**
-    * @AccessControl(role="INSTRUCTOR")
-    * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"POST"})
-    **/
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"POST"})
+     **/
     public function viewStudentLatedays() {
         if (!isset($_POST["student_id"])) {
             $this->core->addErrorMessage("No student ID provided");
