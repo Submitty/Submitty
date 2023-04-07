@@ -7094,6 +7094,7 @@ WHERE current_state IN
                team.team_id,
                team.array_team_users,
                team.registration_section,
+               team.course_secion_id,
                team.rotating_section,
                team.team_name';
 
@@ -7148,6 +7149,7 @@ WHERE current_state IN
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section,
+              u.course_section_id,
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
@@ -7227,6 +7229,7 @@ WHERE current_state IN
               gcd.array_grader_manual_registration,
               gcd.array_grader_last_updated,
               gcd.array_grader_registration_section,
+              gcd.array_grader_course_section_id,
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
@@ -7243,6 +7246,7 @@ WHERE current_state IN
               gcd.array_verifier_manual_registration,
               gcd.array_verifier_last_updated,
               gcd.array_verifier_registration_section,
+              gcd.array_verifier_course_section_id,
               gcd.array_verifier_rotating_section,
               gcd.array_verifier_registration_type,
 
@@ -7723,6 +7727,7 @@ WHERE current_state IN
 
         $users = [];
         foreach ($details_list as $details) {
+            $details['course_section_id'] = '3';
             $users[$details['user_id']] = new User($this->core, $details);
         }
 
