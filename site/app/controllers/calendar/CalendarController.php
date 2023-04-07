@@ -132,7 +132,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['date'])) {
-            $date = new DateTime($_POST['date']);
+            $date = $_POST['date'];
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect date given");
