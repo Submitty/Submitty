@@ -21,263 +21,263 @@ env:
   PYTHON_VERSION: 3.8
 
 jobs:
-    # css-lint:
-    #     runs-on: ubuntu-20.04
-    #     defaults:
-    #         run:
-    #             working-directory: site
-    #     steps:
-    #         - uses: actions/checkout@v3
-    #         - uses: actions/setup-node@v3
-    #           with:
-    #             node-version: ${{ env.NODE_VERSION }}
-    #         - name: Cache Node Modules
-    #           uses: actions/cache@v3
-    #           with:
-    #               path: ~/.npm
-    #               key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-    #               restore-keys: |
-    #                    ${{ runner.os }}-cache-node-modules-
-    #         - run: npm install
-    #         - name: Run stylelint
-    #           run: npm run css-stylelint
+    css-lint:
+        runs-on: ubuntu-20.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run stylelint
+              run: npm run css-stylelint
 
 
-    # js-lint:
-    #     runs-on: ubuntu-20.04
-    #     defaults:
-    #         run:
-    #             working-directory: site
-    #     steps:
-    #         - uses: actions/checkout@v3
-    #         - uses: actions/setup-node@v3
-    #           with:
-    #             node-version: ${{ env.NODE_VERSION }}
-    #         - name: Cache Node Modules
-    #           uses: actions/cache@v3
-    #           with:
-    #               path: ~/.npm
-    #               key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-    #               restore-keys: |
-    #                    ${{ runner.os }}-cache-node-modules-
-    #         - run: npm install
-    #         - name: Run eslint
-    #           run: npm run eslint
-    #         - name: Run npm build (tsc and esbuild)
-    #           run: npm run build
+    js-lint:
+        runs-on: ubuntu-20.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - name: Run eslint
+              run: npm run eslint
+            - name: Run npm build (tsc and esbuild)
+              run: npm run build
 
 
-    # js-unit:
-    #     runs-on: ubuntu-20.04
-    #     defaults:
-    #         run:
-    #             working-directory: site
-    #     steps:
-    #         - uses: actions/checkout@v3
-    #         - uses: actions/setup-node@v3
-    #           with:
-    #             node-version: ${{ env.NODE_VERSION }}
-    #         - name: Cache Node Modules
-    #           uses: actions/cache@v3
-    #           with:
-    #               path: ~/.npm
-    #               key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-    #               restore-keys: |
-    #                   ${{ runner.os }}-cache-node-modules-
-    #         - run: npm install
-    #         - run: npm run test
-    #         - name: Upload Coverage
-    #           uses: codecov/codecov-action@v1
-    #           with:
-    #               files: site/tests/report/jest/clover.xml
-    #               flags: js
+    js-unit:
+        runs-on: ubuntu-20.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: ${{ env.NODE_VERSION }}
+            - name: Cache Node Modules
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-node-modules-
+            - run: npm install
+            - run: npm run test
+            - name: Upload Coverage
+              uses: codecov/codecov-action@v1
+              with:
+                  files: site/tests/report/jest/clover.xml
+                  flags: js
 
 
-    # php-lint:
-    #     runs-on: ubuntu-20.04
-    #     defaults:
-    #         run:
-    #             working-directory: site
-    #     steps:
-    #         - uses: actions/checkout@v3
-    #         - uses: shivammathur/setup-php@2.24.0
-    #           with:
-    #             php-version: ${{ env.PHP_VER }}
-    #         - name: Cache Composer
-    #           id: composer-cache
-    #           run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-    #         - name: Install Composer
-    #           uses: actions/cache@v3
-    #           with:
-    #               path: ${{ steps.composer-cache.outputs.dir }}
-    #               key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-    #               restore-keys: |
-    #                   ${{ runner.os }}-composer-
+    php-lint:
+        runs-on: ubuntu-20.04
+        defaults:
+            run:
+                working-directory: site
+        steps:
+            - uses: actions/checkout@v3
+            - uses: shivammathur/setup-php@2.24.0
+              with:
+                php-version: ${{ env.PHP_VER }}
+            - name: Cache Composer
+              id: composer-cache
+              run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+            - name: Install Composer
+              uses: actions/cache@v3
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
 
-    #         - name: Install dependencies
-    #           run: composer install --prefer-dist --dev
-    #         - name: Check syntax
-    #           run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    #         - name: Lint PHP code
-    #           run: |
-    #               php vendor/bin/phpcs --version
-    #               php vendor/bin/phpcs
-    #         - name: Static analysis
-    #           run: |
-    #               php vendor/bin/phpstan  --version
-    #               php vendor/bin/phpstan analyze app public/index.php socket/index.php
-
-
-    # php-unit:
-    #   runs-on: ubuntu-20.04
-    #   defaults:
-    #       run:
-    #           working-directory: site
-    #   steps:
-    #       - uses: actions/checkout@v3
-    #       - uses: shivammathur/setup-php@2.24.0
-    #         with:
-    #           php-version: ${{ env.PHP_VER }}
-    #           extensions: imagick
-    #           coverage: pcov
-    #       - name: Cache Composer
-    #         id: composer-cache
-    #         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-    #       - name: Install Composer
-    #         uses: actions/cache@v3
-    #         with:
-    #             path: ${{ steps.composer-cache.outputs.dir }}
-    #             key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-    #             restore-keys: |
-    #                 ${{ runner.os }}-composer-
-    #       - name: Install dependencies
-    #         run: composer install --prefer-dist --dev
-    #       - name: Run php unit tests
-    #         run : php vendor/bin/phpunit
-    #       - name: Upload Coverage
-    #         uses: codecov/codecov-action@v1
-    #         with:
-    #           files: site/tests/report/clover.xml
-    #           flags: php
+            - name: Install dependencies
+              run: composer install --prefer-dist --dev
+            - name: Check syntax
+              run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+            - name: Lint PHP code
+              run: |
+                  php vendor/bin/phpcs --version
+                  php vendor/bin/phpcs
+            - name: Static analysis
+              run: |
+                  php vendor/bin/phpstan  --version
+                  php vendor/bin/phpstan analyze app public/index.php socket/index.php
 
 
-    # python-lint:
-    #   runs-on: ubuntu-20.04
-    #   steps:
-    #     - uses: actions/checkout@v3
-    #     - uses: actions/setup-python@v4
-    #       with:
-    #         python-version: ${{ env.PYTHON_VERSION }}
-    #     - name: Cache Pip
-    #       uses: actions/cache@v3
-    #       with:
-    #         path: ~/.cache/pip
-    #         key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
-    #         restore-keys: |
-    #             ${{ runner.os }}-${{ github.job }}-pip-
-    #     - name: Install python libraries
-    #       run : |
-    #         python3 -m pip install --upgrade pip
-    #         python3 -m pip install flake8 flake8-bugbear
-    #     - name: Run python linting
-    #       run : python3 -m flake8
+    php-unit:
+      runs-on: ubuntu-20.04
+      defaults:
+          run:
+              working-directory: site
+      steps:
+          - uses: actions/checkout@v3
+          - uses: shivammathur/setup-php@2.24.0
+            with:
+              php-version: ${{ env.PHP_VER }}
+              extensions: imagick
+              coverage: pcov
+          - name: Cache Composer
+            id: composer-cache
+            run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+          - name: Install Composer
+            uses: actions/cache@v3
+            with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                restore-keys: |
+                    ${{ runner.os }}-composer-
+          - name: Install dependencies
+            run: composer install --prefer-dist --dev
+          - name: Run php unit tests
+            run : php vendor/bin/phpunit
+          - name: Upload Coverage
+            uses: codecov/codecov-action@v1
+            with:
+              files: site/tests/report/clover.xml
+              flags: php
 
 
-    # python-unit:
-    #   runs-on: ubuntu-20.04
-    #   steps:
-    #     - uses: actions/checkout@v3
-    #     - uses: actions/setup-python@v4
-    #       with:
-    #         python-version: ${{ env.PYTHON_VERSION }}
-    #     - name: Cache Pip
-    #       uses: actions/cache@v3
-    #       with:
-    #         path: ~/.cache/pip
-    #         key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
-    #         restore-keys: |
-    #             ${{ runner.os }}-${{ github.job }}-pip-
-    #     - name: Install python libraries
-    #       run : |
-    #         python3 -m pip install -r .setup/pip/system_requirements.txt
-    #         python3 -m pip install coverage # Testing util.
-
-    #     # Submitty utils install & unit testing, must be put before auto grader
-    #     # testing as auto grader depends on submitty utils to function.
-    #     - name: Run python_submitty_utils python unit tests
-    #       working-directory: python_submitty_utils
-    #       run : |
-    #         pip3 install .
-    #         coverage run -m unittest discover
-    #         coverage xml
-    #     - name: Upload submitty python utils Coverage
-    #       uses: codecov/codecov-action@v1
-    #       with:
-    #         files: python_submitty_utils/coverage.xml
-    #         flags: python_submitty_utils
-
-    #     # Migrator unit test
-    #     - name: Run migrator python unit tests
-    #       working-directory: migration
-    #       run : |
-    #         coverage run -m unittest discover
-    #         coverage xml
-    #     - name: Upload migrator Coverage
-    #       uses: codecov/codecov-action@v1
-    #       with:
-    #         files: migration/coverage.xml
-    #         flags: migrator
-
-    #     # Auto grader unit test
-    #     - name: Run autograder python unit tests
-    #       working-directory: autograder
-    #       run : |
-    #         coverage run -m unittest discover
-    #         coverage xml
-    #     - name: Upload autograder Coverage
-    #       uses: codecov/codecov-action@v1
-    #       with:
-    #         files: autograder/coverage.xml
-    #         flags: autograder
-
-    #     #submitty_daemon_jobs unit tests
-    #     - name: Install bulk upload dependencies
-    #       run: |
-    #         sudo apt-get install -y poppler-utils
-    #         sudo apt-get install -y libzbar0
-
-    #     - name: Run bulk upload unit tests
-    #       working-directory: sbin/submitty_daemon_jobs
-    #       run : |
-    #         coverage run -m unittest discover tests -t .
-    #         coverage xml -i
-
-    #     - name: Upload submitty_daemon_jobs Coverage
-    #       uses: codecov/codecov-action@v1
-    #       with:
-    #         files: sbin/submitty_daemon_jobs/coverage.xml
-    #         flags: submitty_daemon_jobs
+    python-lint:
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
+          with:
+            python-version: ${{ env.PYTHON_VERSION }}
+        - name: Cache Pip
+          uses: actions/cache@v3
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+            restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install flake8 flake8-bugbear
+        - name: Run python linting
+          run : python3 -m flake8
 
 
-    # shellcheck:
-    #   name: ShellCheck
-    #   runs-on: ubuntu-20.04
-    #   steps:
-    #     - uses: actions/checkout@v3
-    #     - name: install ShellCheck
-    #       run: sudo apt-get install -y shellcheck
-    #     - name: Run ShellCheck
-    #       run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+    python-unit:
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
+          with:
+            python-version: ${{ env.PYTHON_VERSION }}
+        - name: Cache Pip
+          uses: actions/cache@v3
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+            restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install -r .setup/pip/system_requirements.txt
+            python3 -m pip install coverage # Testing util.
+
+        # Submitty utils install & unit testing, must be put before auto grader
+        # testing as auto grader depends on submitty utils to function.
+        - name: Run python_submitty_utils python unit tests
+          working-directory: python_submitty_utils
+          run : |
+            pip3 install .
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload submitty python utils Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: python_submitty_utils/coverage.xml
+            flags: python_submitty_utils
+
+        # Migrator unit test
+        - name: Run migrator python unit tests
+          working-directory: migration
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload migrator Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: migration/coverage.xml
+            flags: migrator
+
+        # Auto grader unit test
+        - name: Run autograder python unit tests
+          working-directory: autograder
+          run : |
+            coverage run -m unittest discover
+            coverage xml
+        - name: Upload autograder Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: autograder/coverage.xml
+            flags: autograder
+
+        #submitty_daemon_jobs unit tests
+        - name: Install bulk upload dependencies
+          run: |
+            sudo apt-get install -y poppler-utils
+            sudo apt-get install -y libzbar0
+
+        - name: Run bulk upload unit tests
+          working-directory: sbin/submitty_daemon_jobs
+          run : |
+            coverage run -m unittest discover tests -t .
+            coverage xml -i
+
+        - name: Upload submitty_daemon_jobs Coverage
+          uses: codecov/codecov-action@v1
+          with:
+            files: sbin/submitty_daemon_jobs/coverage.xml
+            flags: submitty_daemon_jobs
+
+
+    shellcheck:
+      name: ShellCheck
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v3
+        - name: install ShellCheck
+          run: sudo apt-get install -y shellcheck
+        - name: Run ShellCheck
+          run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
     e2e:
-        # needs:
-        #   - js-lint
-        #   - js-unit
-        #   - php-lint
-        #   - php-unit
-        #   - python-lint
-        #   - python-unit
-        #   - css-lint
-        #   - shellcheck
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -305,15 +305,15 @@ jobs:
               sudo bash tests/test_site_error_log.sh
 
     e2eCypressOne:
-        # needs:
-        #   - js-lint
-        #   - js-unit
-        #   - php-lint
-        #   - php-unit
-        #   - python-lint
-        #   - python-unit
-        #   - css-lint
-        #   - shellcheck
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -394,15 +394,15 @@ jobs:
             run: |
               sudo systemctl restart submitty_autograding_worker
     e2eCypressTwo:
-#         needs:
-#           - js-lint
-#           - js-unit
-#           - php-lint
-#           - php-unit
-#           - python-lint
-#           - python-unit
-#           - css-lint
-#           - shellcheck
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -515,15 +515,15 @@ jobs:
             working-directory: ${{ env.SUBMITTY_REPOSITORY }}
             run: sudo bash tests/test_site_error_log.sh
     e2eIntegrationTests:
-#         needs:
-#           - js-lint
-#           - js-unit
-#           - php-lint
-#           - php-unit
-#           - python-lint
-#           - python-unit
-#           - css-lint
-#           - shellcheck
+        needs:
+          - js-lint
+          - js-unit
+          - php-lint
+          - php-unit
+          - python-lint
+          - python-unit
+          - css-lint
+          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
