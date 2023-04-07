@@ -430,6 +430,19 @@ class ReportController extends AbstractController {
             'grade_released_date' => $g->hasReleaseDate() ? $g->getGradeReleasedDate()->format('Y-m-d H:i:s O') : $g->getSubmissionOpenDate()->format('Y-m-d H:i:s O'),
         ];
 
+        // Export the grade inquiry status
+        if ($gg->hasRegradeRequest()) {
+            if ($gg->hasActiveRegradeRequest()) {
+                $entry['inquiry_status'] = 'Open';
+            }
+            else {
+                $entry['inquiry_status'] = 'Resolved';
+            }
+        }
+        else {
+            $entry['inquiry_status'] = 'None';
+        }
+
         // Add team members to output
         if ($g->isTeamAssignment()) {
             $entry['team_members'] = $gg->getSubmitter()->isTeam() ? $gg->getSubmitter()->getTeam()->getMemberUserIds()
