@@ -73,6 +73,7 @@ function updateUserPronouns(e) {
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
+        $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();
