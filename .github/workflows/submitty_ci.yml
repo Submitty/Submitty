@@ -297,14 +297,11 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
-          - name: Cache pip
-            uses: actions/cache@v3
-            with:
-              path: ~/.cache/pip
-              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
-              restore-keys: |
-                ${{ runner.os }}-${{ github.job }}-pip-
-
+          - name: Setup ldap
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+            shell: bash
           # - name: Run selenium e2e tests with pam auth
           #   run: |
           #     pushd ${SUBMITTY_REPOSITORY}
