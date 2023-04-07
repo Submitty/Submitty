@@ -284,7 +284,6 @@ class LateController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"POST"})
-     * @return MultiResponse
      **/
     public function viewStudentLatedays() {
         if (!isset($_POST["student_id"])) {
