@@ -100,8 +100,8 @@
             {% if button.isDisabled() %}
                 {% if core.getUser().accessFullGrading() %}
                     disabled
-                    {% set str1 = 'This gradeable requires ' %}
-                    {% set str2 = ' Waiting on Barb to give me a prompt!!!'%}
+                    {% set str1 = 'Students are expected to satisfactorily complete ' %}
+                    {% set str2 = ' before they may access this gradeable.  Click OK to bypass this requirement.'%}
                     onclick="confirmBypass('{{ str1 ~ button.getPrerequisite() ~ str2 }}', '{{ button.getHref() }}' );"
                     title='Please complete {{ button.getPrerequisite()}} first'
                 {% else %}
