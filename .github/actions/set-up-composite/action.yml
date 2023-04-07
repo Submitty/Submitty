@@ -5,6 +5,19 @@ descriptions: 'Uses the composite action to copy and set up files'
 #   name:
 #     description: 'A name to include in the greeting'
 
+env:
+  PGPASSWORD: submitty_dbuser
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
+  SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  POSTGRES_HOST: localhost
+  PHP_VER: 7.4
+  NODE_VERSION: 16
+  PYTHON_VERSION: 3.8
+
 runs:
   using: "composite"
   steps:
