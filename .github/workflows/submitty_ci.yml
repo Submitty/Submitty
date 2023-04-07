@@ -294,9 +294,6 @@ jobs:
             ports:
               - 5432:5432
         steps:
-          # - uses: actions/checkout@v3
-          #   with:
-          #     path: SUBMITTY_CPY/
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
