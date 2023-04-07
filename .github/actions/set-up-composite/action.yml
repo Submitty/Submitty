@@ -42,18 +42,18 @@ runs:
 
 
 
-    # - uses: actions/setup-python@v4
-    #   with:
-    #     python-version: ${{ env.PYTHON_VERSION }}
-    # - uses: shivammathur/setup-php@2.24.0
-    #   with:
-    #     php-version: ${{ env.PHP_VER }}
-    #     extensions: imagick, ldap
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - uses: shivammathur/setup-php@2.24.0
+      with:
+        php-version: ${{ env.PHP_VER }}
+        extensions: imagick, ldap
 
-    # - name: Set Timezone
-    #   run: |
-    #     sudo timedatectl set-timezone America/New_York
-    #   shell: bash
+    - name: Set Timezone
+      run: |
+        sudo timedatectl set-timezone America/New_York
+      shell: bash
 
     # - name: Cache pip
     #   uses: actions/cache@v3

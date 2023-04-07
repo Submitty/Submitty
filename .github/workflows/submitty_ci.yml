@@ -297,13 +297,14 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
-          - uses: actions/setup-python@v4
+          - name: Cache pip
+            uses: actions/cache@v3
             with:
-              python-version: ${{ env.PYTHON_VERSION }}
-          - uses: shivammathur/setup-php@2.24.0
-            with:
-              php-version: ${{ env.PHP_VER }}
-              extensions: imagick, ldap
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+              restore-keys: |
+                ${{ runner.os }}-${{ github.job }}-pip-
+
           # - name: Run selenium e2e tests with pam auth
           #   run: |
           #     pushd ${SUBMITTY_REPOSITORY}
