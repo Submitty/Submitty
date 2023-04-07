@@ -18,6 +18,7 @@ function showUpdatePronounsForm() {
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
+    document.getElementById('user-pronouns-change').value = pronouns.val();
 }
 
 function showUpdatePasswordForm() {
@@ -65,6 +66,10 @@ function getCurrentUTCOffset() {
     let hours = Math.floor(offset / 60);
     hours = (hours < 10 ? `0${hours}` : hours);
     return `${sign + hours}:00`;
+}
+
+function clearPronounsBox(){
+    document.getElementById('user-pronouns-change').value = '';
 }
 
 function updateUserPronouns(e) {
