@@ -297,10 +297,16 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
-          - name: Set up test suite
+          - name: Switch to database auth
+            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+            shell: bash
+          - name: Switch to LDAP auth
+            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+            shell: bash
+          - name: Setup SAML
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
             shell: bash
 
           # - name: Run selenium e2e tests with pam auth
