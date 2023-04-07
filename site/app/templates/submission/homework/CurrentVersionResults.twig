@@ -22,16 +22,10 @@
                  </div>
             {% endfor %}
             {% if can_download and files|length > 1 %}
-                <br />
                 <div class="flex-row">
-                    <span>Download all files:</span>
-                    <a aria-label="Download zip of all files"
-                       onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")'
-                       class="key_to_click"
-                       tabindex="0"
-                    >
-                        <i class="fas fa-download" title="Download zip of all files"></i>
-                    </a>
+                    <span></span>
+                     <button class = 'btn btn-primary key_to_click' onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download"> Download all files
+                        <i class="fas fa-download" title="Download zip of all files"></i></button> 
                 </div>
             {% endif %}
         </div>
