@@ -1,10 +1,6 @@
 name: 'copyFiles'
 descriptions: 'Uses the composite action to copy and set up files'
 
-
-name: My Composite Action
-description: An example composite action
-
 # inputs:
 #   name:
 #     description: 'A name to include in the greeting'
