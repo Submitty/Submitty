@@ -297,11 +297,12 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
-          - name: Setup ldap
+          - name: Set up test suite
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
             shell: bash
+
           # - name: Run selenium e2e tests with pam auth
           #   run: |
           #     pushd ${SUBMITTY_REPOSITORY}
