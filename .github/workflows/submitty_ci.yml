@@ -20,6 +20,12 @@ env:
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
+concurrency:
+  # If this is a PR, cancel all previously running jobs on source branch
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
 jobs:
     css-lint:
         runs-on: ubuntu-20.04
@@ -545,7 +551,7 @@ jobs:
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
 
-          
+
           - name: Cache Node Modules
             uses: actions/cache@v3
             with:
