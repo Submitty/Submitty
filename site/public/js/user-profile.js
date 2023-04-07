@@ -4,6 +4,8 @@ updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail
  */
 
+var pronounsLastVal = null;
+
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
@@ -18,7 +20,9 @@ function showUpdatePronounsForm() {
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
-    document.getElementById('user-pronouns-change').value = pronouns.val();
+    if (pronounsLastVal != null && document.getElementById('user-pronouns-change').value == ''){
+        document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
 }
 
 function showUpdatePasswordForm() {
@@ -69,7 +73,11 @@ function getCurrentUTCOffset() {
 }
 
 function clearPronounsBox(){
-    document.getElementById('user-pronouns-change').value = '';
+    const pronounsInput = document.getElementById('user-pronouns-change');
+    if (pronounsLastVal == null || pronounsLastVal != pronounsInput.value){
+        pronounsLastVal = pronounsInput.value;
+    }
+    pronounsInput.value = '';
 }
 
 function updateUserPronouns(e) {
