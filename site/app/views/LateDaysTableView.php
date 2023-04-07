@@ -36,10 +36,9 @@ class LateDaysTableView extends AbstractView {
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->enableMobileViewport();
         $preferred_name = $late_days->getUser()->getDisplayFullName();
-        $table_data = $this->core->getOutput()->renderTwigTemplate('LateDaysTableGrader.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('LateDaysTableGrader.twig', [
             'late_days' => $late_days,
-            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
-        return $table_data;
     }
 }
