@@ -45,6 +45,13 @@
             {% elseif message.type == 'getting_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 Your grade for this assignment will be recorded as a zero.
+            {% elseif message.type == 'has_valid_version' %}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
+                {% if message.info.valid > 0 %}
+                    Currently your Version #{{ message.info.remaining }} is a VALID submission.
+                {% else %}
+                    Currently you have no Version # that is a VALID submission
+                {% endif %}
             {% elseif message.type == 'would_late' %}
                 {# PRINT WOULD BE HOW MANY DAYS LATE #}
                 {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}

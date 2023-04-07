@@ -163,6 +163,11 @@ class HomeworkView extends AbstractView {
         if ($graded_gradeable !== null) {
             $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
+        // Finds the valid version
+        $valid_version = 0;
+        if ($graded_gradeable !== null) {
+            $valid_version = $late_days->getLatestValidVersion($graded_gradeable);
+        }
         // LateDays data
         $late_days_remaining = $late_days->getLateDaysRemaining();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
@@ -228,6 +233,9 @@ class HomeworkView extends AbstractView {
             if ($error) {
                 //You're going to get a zero
                 $messages[] = ['type' => 'getting_zero'];
+                $messages[] = ['type' => 'has_valid_version', 'info' =>[
+                    'valid' => $valid_version
+                ]];
             }
         }
 

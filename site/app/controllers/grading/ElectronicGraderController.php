@@ -1788,7 +1788,7 @@ class ElectronicGraderController extends AbstractController {
             $late_days_users = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers();
         }
         else {
-            $late_days_user[] = $graded_gradeable->getSubmitter()->getUser();
+            $late_days_users[] = $graded_gradeable->getSubmitter()->getUser();
         }
 
         $late_status = null;  // Assume its good
