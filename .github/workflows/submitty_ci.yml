@@ -298,9 +298,8 @@ jobs:
           #   with:
           #     path: SUBMITTY_CPY/
           - name: Checkout repository
-            uses: actions/checkout@v2
-          - name: call workflow
-            uses: ./.github/workflows/actions/set-up-composite/action.yml@v1
+            uses: actions/checkout@v3
+          - uses: ./.github/actions/set-up-composite
         #     with:
         #       path: SUBMITTY_CPY/
           # - run: pwd && ls SUBMITTY_CPY && cat ./SUBMITTY_CPY/.github/workflows/CISetup.yml
