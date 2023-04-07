@@ -56,9 +56,13 @@
     {% else %}
     loadGraderAnnotations(annotations, "{{ filename }}", "{{ grader_id }}");
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
-    document.getElementById("download-annotations-btn").onclick = function() {
-        downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs");
-    }
+    $(document).ready(function() {
+        if (document.getElementById("download-annotations-btn") !== null) {
+            document.getElementById("download-annotations-btn").onclick = function() {
+                downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ filename }}&path={{ download_path|url_encode }}&anon_path={{ anon_path|url_encode }}&student_id={{ user_id }}", "{{download_path|url_encode}}", "annotated_pdfs");
+            };
+        }
+    } );
     {% endif %}
 
     /* The function below adds a dynamic offset to annotataion pdf in order to prevent overlapping with toolbar ,
