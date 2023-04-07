@@ -306,6 +306,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         // ignore the identifier error
     }
     repairPDF();
+    updateAnnotations()
 }
 
 
@@ -378,6 +379,49 @@ function toggleOtherAnnotations(hide_others) {
         }
     }
     render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+}
+
+function updateAnnotations() {
+    const elements = document.querySelectorAll('path, g');
+
+    elements.forEach((element) => {
+        let transform = element.getAttribute('transform');
+        let hasTranslate = false;
+
+        if (transform) {
+            // Split the transform attribute into separate transformations
+            let transformations = transform.split(/\s*(?=[a-zA-Z]+\()/);
+
+            // Check if a translate transformation exists and update it
+            for (let i = 0; i < transformations.length; i++) {
+                if (transformations[i].startsWith('translate(')) {
+                    hasTranslate = true;
+                    let coords = transformations[i].match(/-?[\d.]+/g);
+
+                    if (coords && coords.length === 2) {
+                        coords[0] = parseFloat(coords[0]);
+                        coords[1] = parseFloat(coords[1]);
+                    } else {
+                        // Set the translate values to (0, 0) if they are not valid numbers
+                        coords = [0, 0];
+                    }
+
+                    transformations[i] = `translate(${coords[0]}, ${coords[1]})`;
+                }
+            }
+
+            // Update the transform attribute with the new transformations
+            transform = transformations.join(' ');
+        }
+
+        // Add translate(0, 0) if there's no translate transformation
+        if (!hasTranslate) {
+            transform = transform ? `${transform} translate(0, 0)` : 'translate(0, 0)';
+        }
+
+        // Update the transform attribute of the element
+        element.setAttribute('transform', transform);
+    });
 }
 
 function repairPDF() {
