@@ -372,14 +372,20 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                         }
                     }
                     else {
+
                         let spot_after_announcements = $('.thread_box_link').first();
-                        while (spot_after_announcements.find('.thread-announcement-expiring').length !== 0) {
-                            spot_after_announcements = spot_after_announcements.next();
+                        if($(new_thread).find('.thread-announcement-expiring').length === 1) {
+                            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
                         }
-                        while (spot_after_announcements.find('.thread-favorite').length !== 0) {
-                            spot_after_announcements = spot_after_announcements.next();
+                        else {
+                            while (spot_after_announcements.find('.thread-announcement-expiring').length !== 0) {
+                                spot_after_announcements = spot_after_announcements.next();
+                            }
+                            while (spot_after_announcements.find('.thread-favorite').length !== 0) {
+                                spot_after_announcements = spot_after_announcements.next();
+                            }
+                            $(new_thread).insertBefore(spot_after_announcements).hide().fadeIn('slow');
                         }
-                        $(new_thread).insertBefore(spot_after_announcements).hide().fadeIn('slow');
                     }
                 }
                 else {
