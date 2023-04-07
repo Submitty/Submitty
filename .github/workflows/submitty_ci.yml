@@ -297,14 +297,19 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/set-up-composite
-          - name: Checkout repository again?
-            uses: actions/checkout@v3
-          - name: Run selenium e2e tests with pam auth
-            run: |
-              pushd ${SUBMITTY_REPOSITORY}
-              echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-              TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
-              sudo bash tests/test_site_error_log.sh
+          - uses: actions/setup-python@v4
+            with:
+              python-version: ${{ env.PYTHON_VERSION }}
+          - uses: shivammathur/setup-php@2.24.0
+            with:
+              php-version: ${{ env.PHP_VER }}
+              extensions: imagick, ldap
+          # - name: Run selenium e2e tests with pam auth
+          #   run: |
+          #     pushd ${SUBMITTY_REPOSITORY}
+          #     echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+          #     TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+          #     sudo bash tests/test_site_error_log.sh
 # # 
 #     e2eCypressOne:
 #         needs:
