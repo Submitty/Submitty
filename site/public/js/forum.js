@@ -372,7 +372,6 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                         }
                     }
                     else {
-
                         let spot_after_announcements = $('.thread_box_link').first();
                         if ($(new_thread).find('.thread-announcement-expiring').length === 1) {
                             $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
