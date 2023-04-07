@@ -389,7 +389,7 @@ function updateAnnotations() {
         let hasTranslate = false;
 
         if (transform) {
-            let updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
+            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
                 hasTranslate = true;
                 x = x ? parseFloat(x) : 0;
                 y = y ? parseFloat(y) : 0;
