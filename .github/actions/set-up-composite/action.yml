@@ -39,9 +39,6 @@ runs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
       shell: bash
-
-
-
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
@@ -167,61 +164,61 @@ runs:
       run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
       shell: bash
 
-    # - name: Set up test suite
-    #   run: |
-    #     cd $SUBMITTY_REPOSITORY
-    #     sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
-    #   shell: bash
+    - name: Set up test suite
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+      shell: bash
 
-    # - name: Set up apache
-    #   run: |
-    #     cd $SUBMITTY_REPOSITORY
-    #     sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
-    #     sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
-    #     sudo mkdir -p /run/php
-    #     sudo chown www-data:www-data /run/php
-    #     sudo chmod 755 /run/php
-    #     sudo a2dissite 000-default
-    #     sudo rm -rf /etc/apache2/sites-available/*
-    #     sudo rm -rf /etc/apache2/sites-enabled/*
-    #     sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
-    #     sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
-    #     sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
-    #     sudo chmod 0640 /etc/apache2/suexec/www-data
-    #     sudo a2ensite submitty
-    #     sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-    #     sudo apache2ctl -t
-    #     sudo service php${PHP_VER}-fpm restart
-    #     sudo service apache2 restart
-    #   shell: bash
+    - name: Set up apache
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+        sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
+        sudo mkdir -p /run/php
+        sudo chown www-data:www-data /run/php
+        sudo chmod 755 /run/php
+        sudo a2dissite 000-default
+        sudo rm -rf /etc/apache2/sites-available/*
+        sudo rm -rf /etc/apache2/sites-enabled/*
+        sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+        sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+        sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+        sudo chmod 0640 /etc/apache2/suexec/www-data
+        sudo a2ensite submitty
+        sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        sudo apache2ctl -t
+        sudo service php${PHP_VER}-fpm restart
+        sudo service apache2 restart
+      shell: bash
 
-    # - name: Set up nginx
-    #   run: |
-    #     cd $SUBMITTY_REPOSITORY
-    #     sudo mkdir /etc/systemd/system/nginx.service.d
-    #     sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
-    #     sudo systemctl daemon-reload
-    #     sudo rm -rf /etc/nginx/sites-available/*
-    #     sudo rm -rf /etc/nginx/sites-enabled/*
-    #     sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
-    #     sudo chmod 644 /etc/nginx/sites-available/submitty.conf
-    #     sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
-    #     sudo service nginx restart
-    #   shell: bash
+    - name: Set up nginx
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        sudo mkdir /etc/systemd/system/nginx.service.d
+        sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+        sudo systemctl daemon-reload
+        sudo rm -rf /etc/nginx/sites-available/*
+        sudo rm -rf /etc/nginx/sites-enabled/*
+        sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+        sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+        sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+        sudo service nginx restart
+      shell: bash
 
-    # - name: Run git tests
-    #   run: |
-    #     cd $SUBMITTY_REPOSITORY
-    #     SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-    #     sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
-    #     bash tests/git_test.sh
-    #   shell: bash
+    - name: Run git tests
+      run: |
+        cd $SUBMITTY_REPOSITORY
+        SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+        sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        bash tests/git_test.sh
+      shell: bash
 
-    # - uses: nanasess/setup-chromedriver@master
-    # - name: Setup chromedriver
-    #   run: |
-    #     sudo systemctl restart submitty_autograding_worker
-    #     sudo systemctl restart submitty_autograding_shipper
-    #     export DISPLAY=:99
-    #     chromedriver --url-base=/wd/hub &
-    #   shell: bash
+    - uses: nanasess/setup-chromedriver@master
+    - name: Setup chromedriver
+      run: |
+        sudo systemctl restart submitty_autograding_worker
+        sudo systemctl restart submitty_autograding_shipper
+        export DISPLAY=:99
+        chromedriver --url-base=/wd/hub &
+      shell: bash
