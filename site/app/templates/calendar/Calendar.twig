@@ -20,11 +20,11 @@
     <h1>Calendar</h1>
     <div class="cal-content">
         <div class="cal-toolbar">
-            {# {% if is_instructor %} #}
+            {% if instructor_courses|length > 0 %}
                 <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Item
                 </button>
-            {# {% endif %} #}
+            {% endif %}
         </div>
 
         <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
