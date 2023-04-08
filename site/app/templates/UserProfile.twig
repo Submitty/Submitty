@@ -1,6 +1,6 @@
 <div class="content">
     <h1>
-        {{ core.lang.profile.my_profile ?? "My Profile" }}
+        {{ text('profile.my_profile', "My Profile") }}
     </h1>
     <div class="user-info-wrapper">
         <div id="user-card-img">
@@ -14,20 +14,20 @@
             </div>
             <span class="edit-user-img">
                 <button class="icon" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
-                    <i class="fas fa-upload"></i> {{ core.lang.profile.upload_profile_photo ?? "Upload profile photo" }}
+                    <i class="fas fa-upload"></i> {{ text('profile.upload_profile_photo', "Upload profile photo") }}
                 </button>
             </span>
-            <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">{{ core.lang.profile.image_flagged_msg ?? "Your preferred image was flagged as inappropriate." }}</span>
+            <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">{{ text('profile.image_flagged_msg', "Your preferred image was flagged as inappropriate.") }}</span>
         </div>
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
-                    <span>{{ core.lang.profile.basic_information ?? "Basic Information" }}</span>
+                    <span>{{ text('profile.basic_information', "Basic Information") }}</span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row" id="username-row">
                         <span class="label">
-                            {{ core.lang.profile.username ?? "Username" }}:
+                            {{ text('profile.username', "Username") }}:
                         </span>
                         <span class="value">
                             {{ user.getId() }}
@@ -35,7 +35,7 @@
                     </div>
                     <div class="flex-row" id="givenname-row">
                         <span class="label">
-                            {{ core.lang.profile.given_name ?? "First Name" }}:
+                            {{ text('profile.given_name', "First Name") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
@@ -43,7 +43,7 @@
                     </div>
                     <div class="flex-row" id="familyname-row">
                         <span class="label">
-                            {{ core.lang.profile.family_name ?? "Last Name" }}:
+                            {{ text('profile.family_name', "Last Name") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
@@ -59,7 +59,7 @@
                     </div>
                     <div class="flex-row" id="email-row">
                         <span class="label">
-                            {{ core.lang.profile.email_primary ?? "Primary Email" }}:
+                            {{ text('profile.email_primary', "Primary Email") }}:
                         </span>
                         <span class="value">
                             {{ user.getEmail() }}
@@ -67,7 +67,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-row">
                         <span class="label">
-                            {{ core.lang.profile.email_secondary ?? "Secondary Email" }}:
+                            {{ text('profile.email_secondary', "Secondary Email") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {{ user.getSecondaryEmail() }}
@@ -75,16 +75,16 @@
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
-                            {{ core.lang.profile.send_email_to_secondary ?? "Send Email to Secondary Address" }}:
+                            {{ text('profile.send_email_to_secondary', "Send Email to Secondary Address") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
-                            <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}{{ core.lang.globals.bools.true ?? "True" }}{% else %}{{ core.lang.globals.bools.false ?? "False" }}{% endif %}
+                            <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}{{ text('globals.bools.true', "True") }}{% else %}{{ text('globals.bools.false', "False") }}{% endif %}
                         </button>
                     </div>
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">
                             <span class="label">
-                                {{ core.lang.profile.access_level ?? "Access Level" }}:
+                                {{ text('profile.access_level', "Access Level") }}:
                             </span>
                             <span class="value">
                                 {{ access_level }}
@@ -94,7 +94,7 @@
                     {% if show_change_password %}
                         <div class="flex-row-col" id="password-row">
                             <span>
-                                {{ core.lang.profile.change_password ?? "Change Password" }}:
+                                {{ text('profile.change_password', "Change Password") }}:
                             </span>
                             <span>
                                 <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password">
@@ -110,7 +110,7 @@
                    <span id="time_zone_selector_label"
                          data-user_time_zone="{{ user_time_zone_with_offset }}"
                          data-available_time_zones="{{ available_time_zones }}"
-                   >{{ core.lang.profile.timezone ?? "Time Zone" }} (<span id="utc_offset_stub">{{ core.lang.profile.utc_offset ?? "UTC Offset" }} <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
+                   >{{ text('profile.timezone', "Time Zone") }} (<span id="utc_offset_stub">{{ text('profile.utc_offset', "UTC Offset") }} <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
                        <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
                            <i style="font-style:normal;" class="fa-question-circle"></i>
                        </a>
@@ -118,32 +118,32 @@
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <label for="time_zone_drop_down">{{ core.lang.profile.select_timezone ?? "Select Timezone" }}: </label>
+                        <label for="time_zone_drop_down">{{ text('profile.select_timezone', "Select Timezone") }}: </label>
                         <select id="time_zone_drop_down"></select>
                     </div>
                 </div>
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
-                    <span>{{ core.lang.profile.color_theme ?? "Color Theme" }}:</span>
+                    <span>{{ text('profile.color_theme', "Color Theme") }}:</span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <label for="theme_change_select">{{ core.lang.profile.choose_color_theme ?? "Choose a color theme" }}</label>
+                        <label for="theme_change_select">{{ text('profile.choose_color_theme', "Choose a color theme") }}</label>
                         <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
-                            <option value="system">{{ core.lang.profile.color_themes.system ?? "Follow Device Theme" }}</option>
-                            <option value="system_black">{{ core.lang.profile.color_themes.system ?? "Follow Device Theme" }} {{ core.lang.profile.color_themes.black ?? "(Black)" }}</option>
-                            <option value="light">{{ core.lang.profile.color_themes.light ?? "Light Mode" }}</option>
-                            <option value="dark">{{ core.lang.profile.color_themes.dark ?? "Dark Mode" }}</option>
-                            <option value="dark_black">{{ core.lang.profile.color_themes.dark ?? "Dark Mode" }} {{ core.lang.profile.color_themes.black ?? "(Black)" }}</option>
+                            <option value="system">{{ text('profile.color_themes.system', "Follow Device Theme") }}</option>
+                            <option value="system_black">{{ text('profile.color_themes.system', "Follow Device Theme") }} {{ text('profile.color_themes.black', "(Black)") }}</option>
+                            <option value="light">{{ text('profile.color_themes.light', "Light Mode") }}</option>
+                            <option value="dark">{{ text('profile.color_themes.dark', "Dark Mode") }}</option>
+                            <option value="dark_black">{{ text('profile.color_themes.dark', "Dark Mode") }} {{ text('profile.color_themes.black', "(Black)") }}</option>
                         </select>
                     </div>
                 </div>
             </div>
             <div>
-            <span class="option-alt" id="browser-support">{{ core.lang.profile.pwa_messages.browser_support.a ?? "Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see " }}<a href="https://support.google.com/chrome/answer/9658361">{{ core.lang.profile.pwa_messages.browser_support.b ?? "here" }}</a>{{ core.lang.profile.pwa_messages.browser_support.c ?? " for installation instructions" }}</span>
-            <button class="addpwa btn btn-primary">{{ core.lang.profile.pwa_messages.install_app ?? "Install App" }}</button>
-            <span class="option-alt" id="pwa-uninstall-lable">{{ core.lang.profile.pwa_messages.uninstall_lable ?? "The Submitty Progressive Web App (PWA) has already been installed, see " }}<a href="https://support.google.com/chrome/answer/9658361">{{ core.lang.profile.pwa_messages.uninstall_lable.b ?? "here" }}</a>{{ core.lang.profile.pwa_messages.uninstall_lable.c ?? " to uninstall it" }}</span>
+            <span class="option-alt" id="browser-support">{{ text('profile.pwa_messages.browser_support.a', "Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see ") }}<a href="https://support.google.com/chrome/answer/9658361">{{ text('profile.pwa_messages.browser_support.b', "here") }}</a>{{ text('profile.pwa_messages.browser_support.c', " for installation instructions") }}</span>
+            <button class="addpwa btn btn-primary">{{ text('profile.pwa_messages.install_app', "Install App") }}</button>
+            <span class="option-alt" id="pwa-uninstall-lable">{{ text('profile.pwa_messages.uninstall_lable', "The Submitty Progressive Web App (PWA) has already been installed, see ") }}<a href="https://support.google.com/chrome/answer/9658361">{{ text('profile.pwa_messages.uninstall_lable.b', "here") }}</a>{{ text('profile.pwa_messages.uninstall_lable.c', " to uninstall it") }}</span>
             </div>
         </div>
     </div>
