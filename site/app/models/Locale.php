@@ -39,4 +39,24 @@ class Locale extends AbstractModel {
     public function getLangData(): array {
         return $this->lang_data;
     }
+
+    public function fetchKey(string $key): ?string {
+        preg_match_all('/\w+/', $key, $parts, PREG_PATTERN_ORDER);
+
+        $val = $this->lang_data;
+        
+        foreach ($parts[0] as $part) {
+            if (gettype($val) !== "array") {
+                break;
+            }
+
+            $val = $val[$part] ?? null;
+        }
+
+        if (gettype($val) !== "string") {
+            return null;
+        }
+
+        return $val;
+    }
 }

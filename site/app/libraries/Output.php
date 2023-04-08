@@ -115,6 +115,21 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
+        $this->twig->addFunction(new \Twig\TwigFunction("text", function ($key, $default) {
+            $config = $this->core->getConfig();
+            if ($config) {
+                $locale = $config->getLocale();
+                if ($locale) {
+                    $val = $locale->fetchKey($key);
+                    if ($val) {
+                        return $val;
+                    }
+                }
+            }
+
+            return $default;
+        }));
+
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
