@@ -284,23 +284,21 @@ class LateController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"POST"})
+     * @return JsonResponse
      **/
     public function viewStudentLatedays() {
         if (!isset($_POST["student_id"])) {
             $error = "No student ID provided";
             $this->core->addErrorMessage($error);
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse($error)
-            );
+            return JsonResponse::getFailResponse($error);
+
         }
         $student_id = $_POST["student_id"];
         $user = $this->core->getQueries()->getUserById($student_id);
         if ($user === null) {
             $error = "Invalid Student ID";
             $this->core->addErrorMessage($error);
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse($error)
-            );
+            return JsonResponse::getFailResponse($error);
         }
           $this->core->getOutput()->renderOutput(['LateDaysTable'], 'showLateTabletoInstructor', LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id)));
     }
