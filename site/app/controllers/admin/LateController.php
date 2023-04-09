@@ -291,7 +291,6 @@ class LateController extends AbstractController {
             $error = "No student ID provided";
             $this->core->addErrorMessage($error);
             return JsonResponse::getFailResponse($error);
-
         }
         $student_id = $_POST["student_id"];
         $user = $this->core->getQueries()->getUserById($student_id);
