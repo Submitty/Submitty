@@ -299,7 +299,7 @@ class LateController extends AbstractController {
             $this->core->addErrorMessage($error);
             return JsonResponse::getFailResponse($error);
         }
-          $this->core->getOutput()->renderOutput(['LateDaysTable'], 'showLateTabletoInstructor', LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id)));
+          return $this->core->getOutput()->renderOutput(['LateDaysTable'], 'showLateTabletoInstructor', LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id)));
     }
 
     /**
