@@ -18,7 +18,7 @@
     "codemirror": "5.65.12",
     "codemirror-spell-checker": "1.1.2",
     "@codemirror/state": "6.2.0",
-    "@codemirror/view": "6.9.2",
+    "@codemirror/view": "6.9.3",
     "@codemirror/language": "6.6.0",
     "@codemirror/autocomplete": "6.4.2",
     "@codemirror/commands": "6.2.2",
