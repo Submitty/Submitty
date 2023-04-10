@@ -275,15 +275,6 @@ jobs:
         - name: Run ShellCheck
           run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
     e2e:
-        needs:
-          - js-lint
-          - js-unit
-          - php-lint
-          - php-unit
-          - python-lint
-          - python-unit
-          - css-lint
-          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -302,7 +293,12 @@ jobs:
         steps:
           - name: Checkout repository
             uses: actions/checkout@v3
-          - uses: ./.github/actions/set-up-composite
+          - uses: ./.github/actions/e2e-Setup-Composite
+          - name: Install accessibility checker
+            run: |
+              wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
+              unzip vnu.jar_20.3.16.zip
+              sudo mv dist/vnu.jar /usr/bin/
           - name: Run selenium e2e tests with pam auth
             run: |
               pushd ${SUBMITTY_REPOSITORY}
@@ -311,15 +307,6 @@ jobs:
               sudo bash tests/test_site_error_log.sh
 
     e2eCypressOne:
-        needs:
-          - js-lint
-          - js-unit
-          - php-lint
-          - php-unit
-          - python-lint
-          - python-unit
-          - css-lint
-          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -339,7 +326,7 @@ jobs:
         steps:
           - name: Checkout repository
             uses: actions/checkout@v3
-          - uses: ./.github/actions/set-up-composite
+          - uses: ./.github/actions/e2e-Setup-Composite
 
           - name: Cache Node Modules
             uses: actions/cache@v3
@@ -400,15 +387,6 @@ jobs:
             run: |
               sudo systemctl restart submitty_autograding_worker
     e2eCypressTwo:
-        needs:
-          - js-lint
-          - js-unit
-          - php-lint
-          - php-unit
-          - python-lint
-          - python-unit
-          - css-lint
-          - shellcheck
         runs-on: ubuntu-20.04
         services:
           postgres:
@@ -428,7 +406,7 @@ jobs:
         steps:
           - name: Checkout repository
             uses: actions/checkout@v3
-          - uses: ./.github/actions/set-up-composite
+          - uses: ./.github/actions/e2e-Setup-Composite
 
           - name: Cache Node Modules
             uses: actions/cache@v3
@@ -521,75 +499,224 @@ jobs:
             working-directory: ${{ env.SUBMITTY_REPOSITORY }}
             run: sudo bash tests/test_site_error_log.sh
     e2eIntegrationTests:
-        needs:
-          - js-lint
-          - js-unit
-          - php-lint
-          - php-unit
-          - python-lint
-          - python-unit
-          - css-lint
-          - shellcheck
         runs-on: ubuntu-20.04
-        services:
-          postgres:
-            image: postgres
-            env:
-              POSTGRES_PASSWORD: submitty_dbuser
-              POSTGRES_USER: postgres
-              TZ: America/New_York
-            options: >-
-              --health-cmd pg_isready
-              --health-interval 10s
-              --health-timeout 5s
-              --health-retries 5
-            ports:
-              - 5432:5432
 
         steps:
-          - name: Checkout repository
-            uses: actions/checkout@v3
-          - uses: ./.github/actions/set-up-composite
-
-
-          - name: Cache Node Modules
-            uses: actions/cache@v3
+          - uses: actions/checkout@v3
             with:
-              path: ~/.npm
-              key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
-              restore-keys: |
-                 ${{ runner.os }}-cache-node-modules-dev
-
-          - name: Install node dependencies
-            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              path: SUBMITTY_CPY/
+          - name: Copy Repo
             run: |
-              npm install file-saver --save
-              npm install --production=false
-          - name: Stop autograding services
-            run: |
-              sudo systemctl stop submitty_autograding_worker
-              sudo systemctl stop submitty_autograding_shipper
-          - name: Restart autograding shipper
-            run: |
-              sudo systemctl restart submitty_autograding_shipper
-          - name: Restart autograding worker
-            run: |
-              sudo systemctl restart submitty_autograding_worker
-
-          - name: Switch to database auth
-            run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-          - name: Switch to LDAP auth
-            run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-          - name: Setup SAML
+              # have to copy first, absolute paths not supported by actions/checkout@v3
+                sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+                sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+                sudo chmod -R a+rwx /tmp/
+          - name: Install third party dependencies
             run: |
               cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
 
-          - name: Switch to SAML auth
-            run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-          - name: Check for site errors
-            working-directory: ${{ env.SUBMITTY_REPOSITORY }}
-            run: sudo bash tests/test_site_error_log.sh
+          - name: Configure Test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+                | sudo sponge /usr/local/submitty/config/submitty_users.json
+              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+
+
+
+
+    # e2ETestIntegrationTests:
+    #     steps:
+    #       - uses: actions/checkout@v3
+    #         with:
+    #           path: SUBMITTY_CPY/
+    #       - name: Copy Repo
+    #         run: |
+    #           # have to copy first, absolute paths not supported by actions/checkout@v3
+    #             sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+    #             sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
+    #             sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+    #             sudo chmod -R a+rwx /tmp/
+
+    #       - uses: actions/setup-python@v4
+    #         with:
+    #           python-version: ${{ env.PYTHON_VERSION }}
+    #       - uses: shivammathur/setup-php@2.24.0
+    #         with:
+    #           php-version: ${{ env.PHP_VER }}
+    #           extensions: imagick, ldap
+
+    #       - name: Set Timezone
+    #         run: |
+    #           sudo timedatectl set-timezone America/New_York
+
+    #       - name: Cache pip
+    #         uses: actions/cache@v3
+    #         with:
+    #           path: ~/.cache/pip
+    #           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+    #           restore-keys: |
+    #             ${{ runner.os }}-${{ github.job }}-pip-
+
+    #       - name: Install Test-specific python dependencies
+    #         run: |
+    #           # Install for local
+    #           python3 -m pip install --upgrade pip setuptools wheel
+    #           pip3 -V
+    #           pip3 install selenium websocket_client
+    #           # Install globally
+    #           sudo python3 -m pip install --upgrade pip setuptools wheel
+    #           sudo pip3 -V
+
+    #       - name: Install python dependencies
+    #         run: |
+    #           # Install for local
+    #           pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+    #           # Install globally
+    #           sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+
+    #       - name: Install composer Cache
+    #         uses: actions/cache@v3
+    #         with:
+    #           path: ${{ steps.composer-cache.outputs.dir }}
+    #           key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
+    #           restore-keys: |
+    #             ${{ runner.os }}-php-composer-
+
+    #       - name: Install Submitty python utils
+    #         run: |
+    #           cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+    #           pip3 install .
+    #           pip3 show submitty_utils
+    #           umask 022
+    #           sudo -H pip3 install .
+    #           sudo pip3 show submitty_utils
+
+    #       - name: Install accessibility checker
+    #         run: |
+    #           wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
+    #           unzip vnu.jar_20.3.16.zip
+    #           sudo mv dist/vnu.jar /usr/bin/
+
+    #       - name: Create Database and default users
+    #         run: |
+    #           PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+    #           PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+    #           PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+
+    #       - name: Install apt-get packages
+    #         run: |
+    #           sudo apt-get update
+    #           sudo apt-get install libseccomp-dev
+    #           sudo apt-get install libboost-all-dev
+    #           sudo apt-get install apache2
+    #           sudo apt-get install apache2-suexec-custom
+    #           sudo apt-get install libapache2-mod-authnz-external
+    #           sudo apt-get install libapache2-mod-authz-unixgroup
+    #           sudo apt-get install libapache2-mod-wsgi-py3
+    #           sudo apt-get install nginx
+    #           sudo apt-get install php${PHP_VER}-fpm
+    #           sudo apt-get install poppler-utils
+    #           sudo apt-get install valgrind
+    #           sudo apt-get install moreutils
+
+    #       - name: Install third party dependencies
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+
+    #       - name: Configure Test suite
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+    #           sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+    #             | sudo sponge /usr/local/submitty/config/submitty_users.json
+    #           sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+    #           sudo chmod 440 /usr/local/submitty/config/submitty_users.json
+
+    #       - name: Setup ldap
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
+    #       - name: Set up test suite
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+
+         
+    #       - name: Run git tests
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+    #           sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+    #           bash tests/git_test.sh
+
+    #       - uses: nanasess/setup-chromedriver@master
+    #       - name: Setup chromedriver
+    #         run: |
+    #           sudo systemctl restart submitty_autograding_worker
+    #           sudo systemctl restart submitty_autograding_shipper
+    #           export DISPLAY=:99
+    #           chromedriver --url-base=/wd/hub &
+    #       # TODO: Remove this block after upgrading jsPDF
+    #       - name: Cache Node Modules
+    #         uses: actions/cache@v3
+    #         with:
+    #           path: ~/.npm
+    #           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+    #           restore-keys: |
+    #              ${{ runner.os }}-cache-node-modules-dev
+
+    #       - name: Stop autograding services
+    #         run: |
+    #           sudo systemctl stop submitty_autograding_worker
+    #           sudo systemctl stop submitty_autograding_shipper
+
+    #       - name: Restart autograding shipper
+    #         run: |
+    #           sudo systemctl restart submitty_autograding_shipper
+
+    #       - name: Restart autograding worker
+    #         run: |
+    #           sudo systemctl restart submitty_autograding_worker
+
+    #       - name: Switch to database auth
+    #         run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+    #       - name: Run cypress e2e login tests with database auth
+    #         uses: cypress-io/github-action@v5
+    #         with:
+    #           config: baseUrl=http://localhost
+    #           spec: cypress/e2e/login.spec.js
+    #           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+    #           browser: chrome
+
+    #       - name: Switch to LDAP auth
+    #         run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+    #       - name: Run cypress e2e login tests with LDAP auth
+    #         uses: cypress-io/github-action@v5
+    #         with:
+    #           config: baseUrl=http://localhost
+    #           spec: cypress/e2e/login.spec.js
+    #           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+    #           browser: chrome
+
+    #       - name: Setup SAML
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+
+    #       - name: Switch to SAML auth
+    #         run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+    #       - name: Run integration tests
+    #         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py

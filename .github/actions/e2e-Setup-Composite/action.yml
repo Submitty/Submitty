@@ -1,9 +1,5 @@
-name: 'copyFiles'
-descriptions: 'Uses the composite action to copy and set up files'
-
-# inputs:
-#   name:
-#     description: 'A name to include in the greeting'
+name: 'SetUpForE2e'
+descriptions: 'Uses the composite action to copy and set up our e2e Selenium and cypress tests'
 
 env:
   PGPASSWORD: submitty_dbuser
@@ -17,13 +13,6 @@ env:
   PHP_VER: 7.4
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
-
-# runs:
-#   using: "composite"
-#   steps:
-#     - name: Greet someone
-#       run: echo "Hello"
-#       shell: bash
 
 runs:
   using: "composite"
@@ -105,13 +94,6 @@ runs:
         umask 022
         sudo -H pip3 install .
         sudo pip3 show submitty_utils
-      shell: bash
-
-    - name: Install accessibility checker
-      run: |
-        wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
-        unzip vnu.jar_20.3.16.zip
-        sudo mv dist/vnu.jar /usr/bin/
       shell: bash
 
     - name: Create Database and default users
