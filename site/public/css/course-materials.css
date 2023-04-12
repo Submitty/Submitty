@@ -46,7 +46,5 @@ a.popout-item > .fas:hover {
 }
 
 .btn-course-material-folder-set-time {
-    line-height: 15px;
-    height: 30px;
-    margin: 1px;
+    padding: 2.5px;
 }
