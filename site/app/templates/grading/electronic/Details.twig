@@ -122,7 +122,7 @@
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
                         <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">
-                            <a href="{{ details_base_url }}?sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
+                            <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
@@ -733,6 +733,12 @@
         else {
             document.cookie = 'sort=random;';
         }
+        location.reload();
+    }
+
+    function sortTableByColumn(sort_type = 'id', direction) {
+        document.cookie = `sort=${sort_type}`;
+        document.cookie = `direction=${direction}`;
         location.reload();
     }
 

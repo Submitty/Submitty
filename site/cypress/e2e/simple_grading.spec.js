@@ -1,7 +1,7 @@
 
 describe('Test cases revolving around simple grading lab', () => {
     ['ta', 'instructor'].forEach((user) => {
-        before(() => {
+        beforeEach(() => {
             cy.visit('/');
         });
 
@@ -72,7 +72,7 @@ describe('Test cases revolving around simple grading lab', () => {
 
 describe('Test cases revolving around simple grading test', () => {
     ['ta', 'instructor'].forEach((user) => {
-        before(() => {
+        beforeEach(() => {
             cy.visit('/');
         });
 

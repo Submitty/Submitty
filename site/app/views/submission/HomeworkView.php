@@ -478,6 +478,7 @@ class HomeworkView extends AbstractView {
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && !$gradeable->isTaGradeReleased()),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
+            'bulk_upload_access' => $this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable]),
             'user_id' => $this->core->getUser()->getId(),
             'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
