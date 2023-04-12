@@ -31,7 +31,6 @@
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
-    "spatie/commonmark-highlighter": "2.1.1",
     "symfony/cache": "5.4.22",
     "symfony/config": "5.4.21",
     "symfony/http-foundation": "5.4.22",
