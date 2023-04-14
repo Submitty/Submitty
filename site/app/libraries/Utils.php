@@ -105,16 +105,17 @@ class Utils {
      * @param string        $name name of the cookie
      * @param string|array  $data data of the cookie, if array, will json_encode it
      * @param int           $expire when should the cookie expire
+     * @param bool          $http_only toggle the http only flag on the cookie
      *
      * @return bool true if successfully able to set the cookie, else false
      */
-    public static function setCookie(string $name, $data, int $expire = 0): bool {
+    public static function setCookie(string $name, $data, int $expire = 0, bool $http_only = true): bool {
         if (is_array($data)) {
             $data = json_encode($data);
         }
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
         $_COOKIE[$name] = $data;
-        return setcookie($name, $data, $expire, "/", "", $secure);
+        return setcookie($name, $data, $expire, "/", "", $secure, $http_only);
     }
 
     /**
