@@ -300,7 +300,7 @@ def generate_pronoun():
         return "She/Her"
     elif pronoun_num <= .70:
         return "They/Them"
-    else return "He/Him"
+    else: return "He/Him"
 
 
 def generate_random_marks(default_value, max_value):
