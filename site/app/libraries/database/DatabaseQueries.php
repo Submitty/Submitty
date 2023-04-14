@@ -768,7 +768,7 @@ SQL;
     }
 
     public function getPostsInThreads($thread_ids) {
-        $placeholders = $this->createParamaterList(count($thread_ids));
+        $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query("SELECT * FROM posts where deleted = false and thread_id in {$placeholders} ORDER BY timestamp ASC", $thread_ids);
         return $this->course_db->rows();
     }
@@ -825,7 +825,7 @@ SQL;
     }
 
     public function getAuthorUserGroups($author_ids) {
-        $placeholders = $this->createParamaterList(count($author_ids));
+        $placeholders = $this->createParameterList(count($author_ids));
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
     }
