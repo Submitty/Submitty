@@ -265,6 +265,9 @@ class HomeworkView extends AbstractView {
                     ]];
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
+                    $messages[] = ['type' => 'would_have_valid_version', 'info' =>[
+                        'valid' => $valid_version
+                    ]];
                 } // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
                 elseif ($new_late_charged > $late_days_allowed) {
                     $messages[] = ['type' => 'would_too_many_used', 'info' => [
@@ -272,6 +275,9 @@ class HomeworkView extends AbstractView {
                     ]];
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
+                    $messages[] = ['type' => 'would_have_valid_version', 'info' =>[
+                    'valid' => $valid_version
+                ]];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
                     $new_late_charged = max(0, $would_be_days_late - $active_days_late - $extensions);

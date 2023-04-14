@@ -943,15 +943,15 @@ HTML;
         }
         elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE && $rollback_submission > 0) {
             $error_message = [
-                "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission - Version #" . $rollback_submission . ")"
+                "color" => "var(--standard-red-orange)", // fire engine red
+                "message" => "BAD Submission, Not Enough Latedays (Student has an on-time submission - Roll Back to Version #" . $rollback_submission . ")"
             ];
         }
         elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
             if ($gradeable->isTeamAssignment()) {
                 $error_message = [
                     "color" => "var(--standard-red-orange)", // fire engine red
-                    "message" => "Late Submission (At least 1 team member has no on-time submission)"
+                    "message" => "BAD Submission (At least 1 team member has no on-time submission) Roll Back to Version #" . $rollback_submission . ")"
                 ];
             }
             else {

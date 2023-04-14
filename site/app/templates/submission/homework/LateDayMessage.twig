@@ -48,7 +48,11 @@
             {% elseif message.type == 'has_valid_version' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 {% if message.info.valid > 0 %}
-                    Currently your Version #{{ message.info.remaining }} is a VALID submission.
+                    Currently your Version #{{ message.info.valid }} is a VALID submission. 
+                    {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
+                    To "Roll Back" to a valid submission. Scroll down to "Select Submission Version:" and select Version #{{ message.info.valid }}
+                    {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
+                    Then click "Grade This Version" button.
                 {% else %}
                     Currently you have no Version # that is a VALID submission
                 {% endif %}
@@ -82,6 +86,17 @@
             {% elseif message.type == 'would_get_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 If you submit to this assignment now, your grade for this assignment will be recorded as a zero.
+            {% elseif message.type == 'would_have_valid_version' %}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
+                {% if message.info.valid > 0 %}
+                    Currently your Version #{{ message.info.valid }} is a VALID submission. 
+                    {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
+                    To "Roll Back" to a valid submission. Scroll down to "Select Submission Version:" and select Version #{{ message.info.valid }}
+                    {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
+                    Then click "Grade This Version" button.
+                {% else %}
+                    Currently you have no Version # that is a VALID submission
+                {% endif %}
             {% elseif message.type == 'contact_instructor' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Contact your instructor if you believe that this is an error or that you should be granted
