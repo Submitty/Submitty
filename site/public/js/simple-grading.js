@@ -477,7 +477,7 @@ function setupNumericTextCells() {
               // Finds the element that stores the total and updates it to reflect increase
               if (row_el.find(".cell-total").text() != total)
                 row_el.find(".cell-total").text(total).hide().fadeIn("slow");
-              
+
               window.socketClient.send({'type': "update_numeric", 'elem': split_id[3], 'user': row_el.data("anon"), 'value': value, 'total': total});
             },
             function() {
@@ -706,7 +706,7 @@ function setupSimpleGrading(action) {
                     new_cell = $("#" + new_selector_array.join("-"));
                 }
                 new_selector_array[2] -= 1;
-                
+
                 new_cell = $("#" + new_selector_array.join("-"));
                 if (new_cell.length) {
                     prev_cell.blur();
@@ -884,38 +884,7 @@ function setupSimpleGrading(action) {
         $(this).val("");
     });
 
-    // the offset of the search bar: used to lock the search bar on scroll
-    var sticky_offset = $("#checkpoint-sticky").offset();
 
-    // used to reposition the search field when the window scrolls
-    $(window).on("scroll", function(event) {
-        var sticky = $("#checkpoint-sticky");
-        if(sticky_offset.top < $(window).scrollTop()) {
-            sticky.addClass("sticky-top");
-        }
-        else {
-            sticky.removeClass("sticky-top");
-        }
-    });
-
-    // check if the search field needs to be repositioned when the page is loaded
-    if(sticky_offset.top < $(window).scrollTop()) {
-        var sticky = $("#checkpoint-sticky");
-        sticky.addClass("sticky-top");
-    }
-
-    // check if the search field needs to be repositioned when the page is resized
-    $(window).on("resize", function(event) {
-        var settings_btn_offset = $("#settings-btn").offset();
-        sticky_offset = {
-            top : settings_btn_offset.top,
-        };
-        if(sticky_offset.top < $(window).scrollTop()) {
-            var sticky = $("#checkpoint-sticky");
-            sticky.addClass("sticky-top");
-        }
-    });
-    // search bar code ends here
   initSocketClient();
 }
 
