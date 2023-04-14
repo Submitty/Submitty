@@ -177,6 +177,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+            $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('websocket.js');
@@ -786,10 +788,14 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']) {
+            $isNewThread = !$this->core->getQueries()->viewedThread($current_user, $thread["id"]);
+            if ($isNewThread) {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
+                if ($isNewThread) {
+                    $class .= " deleted-unviewed";
+                }
                 $class .= " deleted";
             }
 
@@ -1008,9 +1014,11 @@ class ForumThreadView extends AbstractView {
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
         }
+        $isNewPost = false;
         if (in_array($post_id, $unviewed_posts)) {
             if ($current_user != $post["author_user_id"]) {
                 $classes[] = "new_post";
+                $isNewPost = true;
             }
         }
         else {
@@ -1021,6 +1029,9 @@ class ForumThreadView extends AbstractView {
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
+            if ($isNewPost) {
+                $classes[] = "deleted-unviewed";
+            }
             $deleted = true;
         }
         else {

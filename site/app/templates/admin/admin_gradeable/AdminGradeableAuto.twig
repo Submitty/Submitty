@@ -21,7 +21,10 @@
 
     <div id="student_download_view">
         <div>
-            <fieldset><legend>View and download submitted files?</legend>
+            <fieldset><legend>View and download submitted files? 
+            {% if gradeable.isBulkUpload() %}
+            <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span></legend>
+            {% endif %}
             <input type="radio" id="yes_student_download" name="student_download" value="true"
                     {{ gradeable.canStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
             <input type="radio" id="no_student_download" name="student_download" value="false"
@@ -131,11 +134,6 @@
         <pre id="cmake-log-body"></pre>
     </div>
 
-    <div class="log-container" hidden>
-        <div class="option-title">Make output:</div>
-        <pre id="make-log-body"></pre>
-    </div>
-
 </div>
 
 <script>
@@ -190,6 +188,15 @@
         }
     }
 
+    function onStudentDownloadChange() {
+        if($('#no_student_download').is(':checked')) {
+            disableElementChildren('#view-files-warning', false);
+        }
+        else {
+            disableElementChildren('#view-files-warning', true);
+        }
+    }
+
     $(document).ready(function() {
 
         // Hide PDF settings if not in use
@@ -201,7 +208,9 @@
 
         // Only show the settings if the setting is enabled
         onStudentViewChange();
+        onStudentDownloadChange();
         $('[name="student_view"]').change(onStudentViewChange);
+        $('[name="student_download"]').change(onStudentDownloadChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             const elem = $('#yes_student_view');
