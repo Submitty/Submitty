@@ -173,6 +173,7 @@ def main():
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
+                              user_pronoun=generate_pronoun(),
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -185,6 +186,7 @@ def main():
                               user_familyname=user.familyname,
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
+                              user_pronoun=generate_pronoun(),
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
@@ -286,6 +288,19 @@ def generate_random_ta_note():
 
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
+
+def generate_pronoun():
+    pronoun_num = random()
+    if pronoun_num <= .05: 
+        pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+        return random.choice(pronoun_list)
+    elif pronoun_num <= .30:
+        return ""
+    elif pronoun_num <= .60:
+        return "She/Her"
+    elif pronoun_num <= .70:
+        return "They/Them"
+    else return "He/Him"
 
 
 def generate_random_marks(default_value, max_value):
@@ -604,6 +619,7 @@ class User(object):
         self.numeric_id = user['user_numeric_id']
         self.password = self.id
         self.givenname = user['user_givenname']
+        self.pronoun = user['user_pronoun']
         self.familyname = user['user_familyname']
         self.email = self.id + "@example.com"
         self.group = 4
