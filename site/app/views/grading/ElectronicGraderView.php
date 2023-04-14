@@ -443,6 +443,8 @@ HTML;
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids) {
+        $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
+
         $peer = false;
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             $peer = true;
@@ -479,7 +481,7 @@ HTML;
             // See also note in ElectronicGradeController.php
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1 && $peer === false) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
-                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
+                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer", "sort_type" => "first"];
             }
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -521,7 +523,7 @@ HTML;
             // NOTE/REDESIGN FIXME: Same note as above.
             if (count($gradeable->getAutogradingConfig()->getAllTestCases()) > 1) {
                 //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
-                $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
+                $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding", "sort_type" => "first"];
             }
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -787,6 +789,7 @@ HTML;
             }
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('details.js');
@@ -816,6 +819,8 @@ HTML;
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
             "details_base_url" => $details_base_url,
+            "details_base_path" => $details_base_path,
+            "collapsed_sections" => $collapsed_sections,
             "sort" => $sort,
             "direction" => $direction,
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
@@ -868,6 +873,7 @@ HTML;
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
@@ -1090,6 +1096,8 @@ HTML;
         CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+        $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1414,7 +1422,7 @@ HTML;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $new_version = $display_version === $active_version ? 0 : $display_version;
 
-        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),

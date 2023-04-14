@@ -1136,6 +1136,12 @@ function enableTabsInTextArea(jQuerySelector) {
     });
 }
 
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
+        location.href = redirect;
+    }
+}
+
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
     var url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);

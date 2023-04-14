@@ -32,12 +32,9 @@ if [ -d "${THIS_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-
-#
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-UTM_ARM=0
-if [[ "$(uname -m)" = "aarch64" ]] ; then
-    UTM_ARM=1
+UTM=0
+if [ -d "${THIS_DIR}/../.utm" ]; then
+    UTM=1
 fi
 
 
@@ -60,7 +57,7 @@ fi
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ ${UTM_ARM} == 1 ]; then
+if [ "${UTM}" == 1 ]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start
@@ -634,11 +631,6 @@ echo -e "Compile and install analysis tools"
 
 mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# HASKELL BINARY IS NOT AVAILABLE ARM64
-if [ "${UTM_ARM}" == 0 ]; then
-# END ARM64
-
 pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
@@ -648,13 +640,6 @@ if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     echo "${AnalysisTools_Version}" > VERSION
 fi
 popd > /dev/null
-
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# HASKELL BINARY IS NOT AVAILABLE ARM64
-else
-    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
-fi
-# END ARM64
 
 # change permissions
 chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
