@@ -63,7 +63,7 @@
                                 </form>
                             </td>
                              <td>
-                                <form method="post" action="{{ view_latedays_url }}">
+                                <form method="get" action="{{ view_latedays_url }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
                                     <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
