@@ -7094,6 +7094,7 @@ WHERE current_state IN
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
+                  gt.course_section_id,
                   gt.rotating_section,
                   gt.team_name,
                   json_agg(tu) AS array_team_users
@@ -7320,6 +7321,7 @@ WHERE current_state IN
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  json_agg(ug.course_section_id) AS array_grader_course_section_id,
                   json_agg(uv.user_id) AS array_verifier_user_id,
                   json_agg(uv.user_givenname) AS array_verifier_user_givenname,
                   json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
@@ -7332,6 +7334,7 @@ WHERE current_state IN
                   json_agg(uv.manual_registration) AS array_verifier_manual_registration,
                   json_agg(uv.last_updated) AS array_verifier_last_updated,
                   json_agg(uv.registration_section) AS array_verifier_registration_section,
+                  json_agg(uv.course_section_id) AS array_verifier_course_section_id,
                   json_agg(uv.rotating_section) AS array_verifier_rotating_section,
                   json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
@@ -7507,6 +7510,7 @@ WHERE current_state IN
                 'manual_registration',
                 'last_updated',
                 'registration_section',
+                'course_section_id',
                 'rotating_section',
                 'registration_type',
                 'grading_registration_sections'
