@@ -7086,7 +7086,7 @@ WHERE current_state IN
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.course_secion_id,
+               team.course_section_id,
                team.rotating_section,
                team.team_name';
 
