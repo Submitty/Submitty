@@ -43,8 +43,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/calendar", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/items/new", methods={"POST"})
      */
     public function createMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -53,7 +52,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect type given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         if (isset($_POST['date'])) {
@@ -61,7 +60,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect date given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         if (isset($_POST['text'])) {
@@ -69,12 +68,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect text given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
-        }
-
-        if (strip_tags($text) !== $text) {
-            $this->core->addErrorMessage("HTML cannot be used in this text");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         $calendar_item = new CalendarItem();
@@ -83,7 +77,7 @@ class CalendarController extends AbstractController {
         }
         catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage("That is not a valid calendar item type");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
         $calendar_item->setDate(new \DateTime($date));
         try {
@@ -91,14 +85,29 @@ class CalendarController extends AbstractController {
         }
         catch (\InvalidArgumentException $e) {
             $this->core->addErrorMessage("Text exceeds 255 characters which is not allowed");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['course'])) {
+            $set_course = $_POST['course'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid course given.");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
+        foreach($instructor_courses as $course) {
+            if($set_course === ($course->semester . $course->course)) {
+                break;
+            }
         }
 
         $this->core->getCourseEntityManager()->persist($calendar_item);
         $this->core->getCourseEntityManager()->flush();
 
         $this->core->addSuccessMessage("Calendar item successfully added");
-        return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
     /**
