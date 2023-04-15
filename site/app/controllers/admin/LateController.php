@@ -298,9 +298,10 @@ class LateController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['users']));
         }
         return new WebResponse(
-            ['LateDaysTable'],
-            'showLateTabletoInstructor',
-            LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id)));
+        ['LateDaysTable'],
+        'showLateTabletoInstructor',
+        LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id))
+        );
     }
 
     /**
