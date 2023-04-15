@@ -805,7 +805,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @return bool true|array<int, string>|bool true
+     * @return bool true|array<int, string>
      */
     private function resolveClashingMaterials(string $upload_path, array $file_names, bool $overwrite_all) {
         $prepend_path = function ($elem) use ($upload_path) {
