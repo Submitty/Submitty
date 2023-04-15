@@ -804,6 +804,11 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     * @return string from joinPaths|bool true|array paths of clashing files
+     */
+
     private function resolveClashingMaterials(string $upload_path, array $file_names, bool $overwrite_all) {
         $prepend_path = function ($elem) use ($upload_path) {
             return FileUtils::joinPaths($upload_path, $elem);

@@ -142,7 +142,7 @@
                     const cmPath = document.getElementById('cm_path').innerHTML;
                     const requestedPath = document.getElementById("input-provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
-                    let overwrite_input = document.body.querySelector('input[name=overwrite-all]');
+                    const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
                     makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
                 }

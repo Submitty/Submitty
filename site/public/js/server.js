@@ -182,7 +182,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     const form = $('#overwrite-course-material-form');
     form.css('display', 'block');
     if (clashing_names.length === 1) {
-        let to_replace = [[' All', '']];
+        const to_replace = [[' All', '']];
         if (is_link) {
             to_replace.push(['file', 'link']);
         }
@@ -203,7 +203,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
             return html;
         });
     }
-    var clash_list = $('#existing-names');
+    const clash_list = $('#existing-names');
     clash_list.html("");
     clashing_names.forEach((elem) => {
         clash_list.append($('<li>', {
