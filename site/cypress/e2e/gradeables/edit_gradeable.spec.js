@@ -3,14 +3,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.visit('/');
         cy.login('instructor');
     });
-    it('Should look through', () => {
+    it('Should make sure edit gradeables does not contain errors', () => {
         cy.visit(['sample','gradeable','open_peer_homework','update']);
 
         cy.get('#no_ta_grade').click();
         cy.get('#discussion_grading_enable_container').should('not.be.visible');
         cy.get('#yes_ta_grade').click();
         cy.get('#discussion_grading_enable_container').should('be.visible');
-        cy.get('#syllabus_bucket');
+        cy.get('#syllabus_bucket').should('exist');
 
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view').click();
@@ -51,11 +51,45 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#registration_section').click();
 
         cy.get('#page_4_nav').click();
+        cy.get('#peer_graders_list').should('exist');
         
+        cy.get('#clear_peer_matrix').click();
+
+        cy.on('window:confirm', (str) =>{
+            expect(str).to.equal('Each student grades every other student! Continue?');
+        });
+        cy.on('window:confirm', () => false);
+
+        cy.on('window:confirm', (str) =>{
+            expect(str).to.equal('This will update peer matrix. Are you sure?');
+        });
+        cy.on('window:confirm', () => false);
+
+        cy.get('#download_peer_csv').click();
+
+        const newFile = after.filter(file => !before.includes(file))[0]
+        cy.readFile('cypress/downloads/' + newFile);
+        cy.get('#hidden_files').should('exist');
+        cy.get('#add-peer-grader').click();
+        cy.get('.form-button-container > a').click();
+
+        cy.get('#has_due_date_no').click();
+
+        cy.get('#has_due_date_yes').click();
+
+        cy.get('has_release_date_no').click();
+        cy.get('has_release_date_yes').click();
+
+        cy.get('#no_late_submission').click();
+        cy.get('#yes_late_submission').click();
 
         cy.get('#page_5_nav').click();
 
         //Goes back to general
         cy.get('#page_0_nav').click();
+    });
+
+    it('Should verify changed settings in edit gradeables', ()=> {
+
     });
 });
