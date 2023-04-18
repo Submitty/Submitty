@@ -287,20 +287,20 @@ class LateController extends AbstractController {
      * @return RedirectResponse|WebResponse
      **/
     public function viewStudentLatedays() {
-        if (!isset($_GET["student_id"])) {
+        if (!isset($_GET['student_id'])) {
             $this->core->addErrorMessage("No student ID provided");
             return new RedirectResponse($this->core->buildCourseUrl(['users']));
         }
-        $student_id = $_GET["student_id"];
+        $student_id = $_GET['student_id'];
         $user = $this->core->getQueries()->getUserById($student_id);
         if ($user === null) {
-            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
+            $this->core->addErrorMessage("Invalid Student ID \"" . $_GET['student_id'] . "\"");
             return new RedirectResponse($this->core->buildCourseUrl(['users']));
         }
         return new WebResponse(
-            ['LateDaysTable'],
+            'LateDaysTable',
             'showLateTabletoInstructor',
-            LateDays::fromUser($this->core, $this->core->getQueries()->getUserById($student_id))
+            LateDays::fromUser($this->core, $user)
         );
     }
 
