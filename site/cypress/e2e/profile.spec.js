@@ -7,7 +7,7 @@ const form_visible = (button_id, form_id) => {
     for (let i = form_id + 1; i < 4; i++) {
         cy.get('.popup-form').eq(i).should('not.be.visible');
     }
-}
+};
 
 const makeid = () => {
     let result = '';
@@ -18,12 +18,12 @@ const makeid = () => {
         counter += 1;
     }
     return result;
-}
+};
 
 const given = makeid();
 const family = makeid();
 const pronouns = makeid();
-const mail = makeid() + '@rpi.edu';
+const mail = makeid();
 
 describe('Test cases revolving around user profile page', () => {
     it('Should verify the basic info column\'s visibility', () => {
@@ -41,7 +41,7 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#edit-pronouns-form').should('not.be.visible');
         cy.get('#edit-secondary-email-form').should('not.be.visible');
         cy.get('#edit-secondary-email-form').should('not.be.visible');
-    })
+    });
 
     //verify each input form
     it('Verify every pop-up form', () => {
@@ -51,7 +51,7 @@ describe('Test cases revolving around user profile page', () => {
         // verify that every form can be intrigued
         cy.get('.fa-pencil-alt').should(($icon) => {
             expect($icon).to.have.length(5);
-        })
+        });
 
         // verify prederred name form
         for (let i = 0; i < 1; i++) {
@@ -72,12 +72,12 @@ describe('Test cases revolving around user profile page', () => {
         // verify secondary_email form
         for (let i = 3; i < 4; i++) {
             form_visible(i, 2);
-            cy.get('input[name=user_secondary_email_change]').clear().type(mail);
+            cy.get('input[name=user_secondary_email_change]').clear().type(mail + '@rpi.edu');
             cy.get('input[name=user_secondary_email_notify_change]').click();
             cy.get('.btn-primary').eq(3).click();
-            cy.get('#secondary-email-row > button').contains(mail);
+            cy.get('#secondary-email-row > button').contains(mail + '@rpi.edu');
         }
-    })
+    });
 
     // verify database was updated
     it('verify that database was updated', () => {
@@ -86,7 +86,6 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#givenname-row > button').contains(given);
         cy.get('#familyname-row > button').contains(family);
         cy.get('#pronouns_val').contains(pronouns);
-        cy.get('#secondary-email-row > button').contains(mail);
-
-    })
-})
+        cy.get('#secondary-email-row > button').contains(mail + '@rpi.edu');
+    });
+});
