@@ -104,6 +104,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "spim",                    "/usr/bin/spim" },
     { "clang",                   "/usr/bin/clang" },
     { "gdb",                     "/usr/bin/gdb" },
+    { "iverilog",                "/usr/bin/iverilog" },
+    { "vvp",                     "/usr/bin/vvp" },
 
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
