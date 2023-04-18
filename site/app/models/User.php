@@ -37,7 +37,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
- * @method string setCourseSectionId()
+ * @method string getCourseSectionId()
  * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
  * @method string getRegistrationType()
@@ -552,6 +552,9 @@ class User extends AbstractModel {
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 //"NULL" registration section should be validated as a datatype, not as a string.
+                return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+            case 'course_section_id':
+                //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
             case 'grading_assignments':
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).

@@ -7729,7 +7729,6 @@ WHERE current_state IN
 
         $users = [];
         foreach ($details_list as $details) {
-            $details['course_section_id'] = '3';
             $users[$details['user_id']] = new User($this->core, $details);
         }
 
