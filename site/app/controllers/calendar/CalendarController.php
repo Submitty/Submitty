@@ -97,21 +97,30 @@ class CalendarController extends AbstractController {
         }
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
+        $exists = false;
         foreach($instructor_courses as $course) {
-            if($set_course === ($course->semester . $course->course)) {
+            if($set_course === ($course['semester'] . $course['course'])) {
+                $this->core->loadCourseConfig($course['semester'], $course['course']);
+                $this->core->loadCourseDatabase();
+                $this->core->getCourseEntityManager()->persist($calendar_item);
+                $this->core->getCourseEntityManager()->flush();
+                $this->core->getCourseDB()->disconnect();
+                $exists = true;
                 break;
             }
         }
 
-        $this->core->getCourseEntityManager()->persist($calendar_item);
-        $this->core->getCourseEntityManager()->flush();
+        if(!$exists) {
+            $this->core->addErrorMessage("No valid course found by that name.");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
 
         $this->core->addSuccessMessage("Calendar item successfully added");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/edit", methods={"POST"})
+     * @Route("items/{id}/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function editMessage(): RedirectResponse {
@@ -121,7 +130,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect type given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         if (isset($_POST['date'])) {
@@ -129,7 +138,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect date given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         if (isset($_POST['text'])) {
@@ -137,7 +146,7 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect text given");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
         if (isset($_POST['id'])) {
@@ -145,32 +154,41 @@ class CalendarController extends AbstractController {
         }
         else {
             $this->core->addErrorMessage("Invalid or incorrect id");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        if (strip_tags($text) !== $text) {
-            $this->core->addErrorMessage("HTML cannot be used in this text");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        if (isset($_POST['course'])) {
+            $set_course = $_POST['course'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid course given.");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
-            ->findOneBy(['id' => $id]);
-
-        if ($calendar_item === null) {
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        foreach($instructor_courses as $course) {
+            if($set_course === ($course['semester'] . $course['course'])) {
+                $this->core->loadCourseConfig($course['semester'], $course['course']);
+                $this->core->loadCourseDatabase();
+                $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
+                    ->findOneBy(['id' => $id]); 
+                if ($calendar_item === null) {
+                    return new RedirectResponse($this->core->buildUrl(['calendar']));
+                }
+                $calendar_item->setText($text);
+                $calendar_item->setDate(new \DateTime($date));
+                try {
+                    $calendar_item->setStringType($type);
+                }
+                catch (\InvalidArgumentException  $e) {
+                    $this->core->addErrorMessage("That is not a valid calendar item type");
+                    return new RedirectResponse($this->core->buildUrl(['calendar']));
+                }
+                $this->core->getCourseEntityManager()->flush();
+                $this->core->getCourseDB()->disconnect();
+            }
         }
 
-        $calendar_item->setText($text);
-        $calendar_item->setDate(new \DateTime($date));
-        try {
-            $calendar_item->setStringType($type);
-        }
-        catch (\InvalidArgumentException  $e) {
-            $this->core->addErrorMessage("That is not a valid calendar item type");
-            return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
-        }
-        $this->core->getCourseEntityManager()->flush();
-        return new RedirectResponse($this->core->buildCourseUrl(['calendar']));
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
     /**
