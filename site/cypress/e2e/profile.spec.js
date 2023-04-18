@@ -23,7 +23,8 @@ const makeid = () => {
 const given = makeid();
 const family = makeid();
 const pronouns = makeid();
-const mail = makeid();
+var mail = makeid();
+mail += '@rpi.edu';
 
 describe('Test cases revolving around user profile page', () => {
     it('Should verify the basic info column\'s visibility', () => {
@@ -72,10 +73,10 @@ describe('Test cases revolving around user profile page', () => {
         // verify secondary_email form
         for (let i = 3; i < 4; i++) {
             form_visible(i, 2);
-            cy.get('input[name=user_secondary_email_change]').clear().type(mail + '@rpi.edu');
+            cy.get('input[name=user_secondary_email_change]').clear().type(mail);
             cy.get('input[name=user_secondary_email_notify_change]').click();
             cy.get('.btn-primary').eq(3).click();
-            cy.get('#secondary-email-row > button').contains(mail + '@rpi.edu');
+            cy.get('#secondary-email-row > button').contains(mail);
         }
     });
 
@@ -86,6 +87,6 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#givenname-row > button').contains(given);
         cy.get('#familyname-row > button').contains(family);
         cy.get('#pronouns_val').contains(pronouns);
-        cy.get('#secondary-email-row > button').contains(mail + '@rpi.edu');
+        cy.get('#secondary-email-row > button').contains(mail);
     });
 });
