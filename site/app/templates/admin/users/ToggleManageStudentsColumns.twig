@@ -19,6 +19,9 @@
         <input type="checkbox" name="checkbox-last-name">
         <label>Last Name</label>
         <br>
+        <input type="checkbox" name="checkbox-pronouns">
+        <label>Pronouns</label>
+        <br>
         <input type="checkbox" name="checkbox-rotation-section">
         <label>Rotating Section</label>
         <br>
@@ -35,12 +38,9 @@
         <label>Delete Student</label>
     </div>
 {% endblock %}
-{% block form %}
-    <form method="post" onsubmit="return updateManageStudentsColumns()">
-        {{ parent() }}
-    </form>
-{% endblock %}
+
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageStudentsColumns()"/>
+
 {% endblock %}
