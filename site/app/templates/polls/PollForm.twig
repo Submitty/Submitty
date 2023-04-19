@@ -106,10 +106,20 @@
             Release response histogram to students:
         </label>
         <select id="student-histogram-release-setting" name="release_histogram">
-            <option value="never" {{ poll is null or poll.getReleaseHistogram() == 'never'? "selected" : "" }}>Never</option>
-            <option value="when_ended" {{ poll is not null and poll.getReleaseHistogram() == 'when_ended'? "selected" : "" }}>After Poll Ended</option>
-            <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always'? "selected" : "" }}>Always</option>
+            <option value="never" {{ poll is null or poll.getReleaseHistogram() == 'never' ? "selected" : "" }}>Never</option>
+            <option value="when_ended" {{ poll is not null and poll.getReleaseHistogram() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
+            <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always' ? "selected" : "" }}>Always</option>
         </select>
+        <br><br>
+        <label for="student-answer-release-setting" class="option-title">
+            Show correct response to students:
+        </label>
+        <select id="student-answer-release-setting" name="release_answer">
+            <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never' ? "selected" : "" }}>Never</option>
+            <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
+            <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
+        </select>
+        <br/>
 
         <hr>
         <h2> Responses: </h2>
@@ -121,7 +131,7 @@
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Reponse text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
                                   rows="10" cols="30">{{option.getResponse()}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
@@ -153,7 +163,7 @@
         <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
         <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
         <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
-        <button type="submit" id="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Edit' }} Poll</button>
+        <button type="submit" id="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Save' }} Poll</button>
     </form>
 </div>
 
@@ -357,7 +367,7 @@
                     }
                 },
                 error: function(e) {
-                    alert("Error occured when requesting via ajax. Please refresh the page and try again.");
+                    alert("Error occurred when requesting via ajax. Please refresh the page and try again.");
                 }
             });
         });
