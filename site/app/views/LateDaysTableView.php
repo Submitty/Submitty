@@ -27,7 +27,7 @@ class LateDaysTableView extends AbstractView {
             'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
-    
+
     /**
      * @param LateDays $late_days
      * @return string
