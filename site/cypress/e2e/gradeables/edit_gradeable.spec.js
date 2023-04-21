@@ -4,7 +4,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
     });
-    
+
     it('Should test settings page 0-2', () => {
         cy.get('#no_ta_grade').click();
         cy.get('#discussion_grading_enable_container').should('not.be.visible');
@@ -42,22 +42,22 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // cy.get('#grade_by_count_down_118').click();
         cy.get('[value="Add New Mark"]').eq(-1).click();
 
-        cy.get('[title="Delete this component"]').eq(-1).click().then(()=>{
-            cy.on('window:confirm', (str) =>{
+        cy.get('[title="Delete this component"]').eq(-1).click().then(() => {
+            cy.on('window:confirm', (str) => {
                 expect(str).to.equal('Are you sure you want to delete this component?');
             });
         });
     });
 
-    it('Should test settings page 3-5', ()=>{
+    it('Should test settings page 3-5', () => {
         cy.get('#page_3_nav').click();
         cy.get('#all_access').click();
         cy.get('#registration_section').click();
 
         cy.get('#page_4_nav').click();
         cy.get('#peer_graders_list').should('exist');
-        
-        cy.get('#clear_peer_matrix').click().then(()=>{
+
+        cy.get('#clear_peer_matrix').click().then(() => {
             cy.on('window:confirm', () => false);
         });
 
@@ -86,7 +86,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#page_0_nav').click();
     });
 
-    it('Should test the change of settings in student view', ()=> {
+    it('Should test the change of settings in student view', () => {
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view').click();
         //student should not be able to see open_peer_homework
@@ -107,7 +107,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#submission-version-select').should('not.exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('exist');
         cy.contains('No submissions for this assignment.').should('exist');
-        
+
         //Makes sure we can undo the setting change
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
@@ -122,9 +122,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.contains('No submissions for this assignment.').should('not.exist');
 
     });
-    
-    it('Should test locking the gradeable',() =>{
-        //testing 
+
+    it('Should test locking the gradeable',() => {
+        //testing
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
         cy.get('#page_1_nav').click();
@@ -139,10 +139,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
             cy.visit('/');
             cy.login(user);
             cy.get('[title="Please complete C Malloc Not Allowed first"]').should('exist');
-            if (user === 'ta'){
+            if (user === 'ta') {
                 cy.get('[title="Please complete C Malloc Not Allowed first"]').click();
                 cy.get('#upload1').should('exist');
-            }else{
+            }
+            else {
                 cy.get('#upload1').should('not.exist');
             }
         });
@@ -151,7 +152,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.visit(['sample','gradeable','open_peer_homework','update']);
         cy.get('#page_1_nav').click();
         cy.get('[value=""]').click();
-        
+
         ['student','grader','ta'].forEach((user) => {
             cy.login(user);
             cy.visit(['sample','gradeable','open_peer_homework']);
