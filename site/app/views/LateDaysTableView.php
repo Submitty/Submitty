@@ -32,7 +32,7 @@ class LateDaysTableView extends AbstractView {
      * @param LateDays $late_days
      * @return string
      */
-    public function showLateTabletoInstructor(LateDays $late_days) {
+    public function showLateTabletoInstructor(LateDays $late_days): string {
         $manage_url = $this->core->buildCourseUrl(['users']);
         $this->core->getOutput()->addBreadcrumb('Manage Students', $manage_url);
         $this->core->getOutput()->addBreadcrumb($late_days->getUser()->getDisplayFullName());
