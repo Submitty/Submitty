@@ -123,37 +123,39 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     });
     
-    // it('Should test locking the gradeable',() =>{
-    //     //testing 
-    //     cy.login('instructor');
-    //     cy.visit(['sample','gradeable','open_peer_homework','update']);
-    //     cy.get('#page_1_nav').click();
-    //     //Locking the gradeable
-    //     cy.get('[value="open_homework"]').click();
-    //     //unlocking the gradeable
-    //     cy.get('[value=""]').click();
-    //     //Relocks the gradeable
-    //     cy.get('[value="open_homework"]').click();
+    it('Should test locking the gradeable',() =>{
+        //testing 
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update']);
+        cy.get('#page_1_nav').click();
+        //Locking the gradeable
+        cy.get('[value="grades_released_homework_autota"]').click();
+        //unlocking the gradeable
+        cy.get('[value=""]').click();
+        //Relocks the gradeable
+        cy.get('[value="grades_released_homework_autota"]').click();
 
-    //     ['student','grader','ta'].forEach((user) => {
-    //         cy.login(user);
+        ['student','grader','ta'].forEach((user) => {
+            cy.visit('/');
+            cy.login(user);
+            cy.get('[title="Please complete C Malloc Not Allowed first"]').should('exist');
+            if (user === 'ta'){
+                cy.get('[title="Please complete C Malloc Not Allowed first"]').click();
+                cy.get('#upload1').should('exist');
+            }else{
+                cy.get('#upload1').should('not.exist');
+            }
+        });
 
-    //     });
-
-    //     cy.login('instructor');
-    //     cy.visit(['sample','gradeable','open_peer_homework','update']);
-    //     cy.get('#page_1_nav').click();
-    //     cy.get('[value=""]').click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update']);
+        cy.get('#page_1_nav').click();
+        cy.get('[value=""]').click();
         
-    //     ['student','grader','ta'].forEach((user) => {
-    //         cy.login(user);
-    //         if (user === 'ta'){
+        ['student','grader','ta'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['sample','gradeable','open_peer_homework']);
+        });
 
-    //         }
-    //         if (user === 'student'){
-
-    //         }
-    //     });
-
-    // });
+    });
 });
