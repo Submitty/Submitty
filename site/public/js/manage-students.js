@@ -1,31 +1,45 @@
 
 
 //Data structure for active columns
-let activeColumns = new Array(10).fill(1);
+let activeColumns = new Array(10).fill(true);
 
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
-    //loadColumns();
+    activeColumns = loadColumns();
+    alert(activeColumns);
 
-    //$('.popup-form').css('display', 'none');
     var form = $("#toggle-columns-form");
     form.css("display", "block");
-    //form.find('.form-body').scrollTop(0);
-    //captureTabInModal("toggle-columns-form");
 }
 
 function updateManageStudentsColumns() {
-    //saveColumns();
-
+    saveColumns();
     alert("Update Columns");
+
+    location.reload();
 }
 
 //Cookies (loading and storing)
 function saveColumns() {
-    //$.cookie('activeColumns', JSON.stringify(activeColumns));
-    //document.cookie = `active_columns=${encodeURIComponent(JSON.stringify(activeColumns))}`;
+    document.cookie = `active_columns=${encodeURIComponent(JSON.stringify(activeColumns))}`;
 }
 
 function loadColumns() {
-    return JSON.parse($.cookie('activeColumns'));
+    return getCookie('active_columns');
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
 }
