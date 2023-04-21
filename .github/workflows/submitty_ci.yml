@@ -512,19 +512,19 @@ jobs:
                 sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
                 sudo chmod -R a+rwx /tmp/
-          - name: Install third party dependencies
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+    #       - name: Install third party dependencies
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
 
-          - name: Configure Test suite
-            run: |
-              cd $SUBMITTY_REPOSITORY
-              sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
-              sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
-                | sudo sponge /usr/local/submitty/config/submitty_users.json
-              sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
-              sudo chmod 440 /usr/local/submitty/config/submitty_users.json
+    #       - name: Configure Test suite
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           sudo -E env "PATH=$PATH" bash .setup/testing/setup.sh
+    #           sudo jq '. |= . + {"verified_submitty_admin_user": "submitty-admin"}' /usr/local/submitty/config/submitty_users.json \
+    #             | sudo sponge /usr/local/submitty/config/submitty_users.json
+    #           sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
+    #           sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
           - name: Run integration tests
             run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
