@@ -803,13 +803,19 @@ function openAllDivForCourseMaterials() {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        }
         return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        }
         return 'open';
     }
     return false;
