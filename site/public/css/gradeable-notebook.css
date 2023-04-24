@@ -180,4 +180,8 @@ img {
     performance-warning-system-message-text{
         display: none;
     }
+
+    .mc-clear, .mc-recent, .codebox-clear-reset{
+        display: none;
+    }
 }
