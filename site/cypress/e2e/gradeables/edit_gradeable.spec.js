@@ -39,7 +39,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#pdf_page').should('not.be.visible');
         cy.get('[value="Add New Component"]').click();
 
-        // cy.get('#grade_by_count_down_118').click();
         cy.get('[value="Add New Mark"]').eq(-1).click();
 
         cy.get('[title="Delete this component"]').eq(-1).click().then(() => {
@@ -68,20 +67,24 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('.form-button-container > a').click({force:true,multiple:true});
 
         cy.get('#page_5_nav').click();
+
         cy.get('#has_due_date_no').click();
-        //Check for hidden elements
+        cy.get('#date_due').should('not.be.visible');
+
         cy.get('#has_due_date_yes').click();
-        //check if the hidden elements are back
+        cy.get('#date_due').should('be.visible');
 
         cy.get('#has_release_date_yes').click();
-        //check for hidden elements
+        cy.get('#date_released').should('be.visible');
+
         cy.get('#has_release_date_no').click();
-        //check for the hidden elements are back
+        cy.get('#date_released').should('not.be.visible');
 
         cy.get('#no_late_submission').click();
-        //check for hidden elements
+        cy.get('#late_days').should('not.be.visible');
         cy.get('#yes_late_submission').click();
-        //check for elements
+        cy.get('#late_days').should('be.visible');
+        
         //Goes back to general
         cy.get('#page_0_nav').click();
     });
@@ -90,30 +93,34 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#page_1_nav').click();
         cy.get('#no_student_view').click();
         //student should not be able to see open_peer_homework
-
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('student');
         cy.visit('sample');
         cy.get('#open_peer_homework').should('not.exist');
 
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
         cy.get('#page_1_nav').click();
-        cy.get('#yes_student_view').click();
+        cy.get('#no_student_view_after_grades').click();
 
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('student');
         cy.visit(['sample','gradeable','open_peer_homework']);
 
         cy.get('#upload1').should('not.exist');
         cy.get('#submission-version-select').should('not.exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('exist');
-        cy.contains('No submissions for this assignment.').should('exist');
 
         //Makes sure we can undo the setting change
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
+        cy.get('#page_1_nav').click();
         cy.get('#yes_student_download').click();
         cy.get('#yes_student_submit').click();
 
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('student');
         cy.visit(['sample','gradeable','open_peer_homework']);
         cy.get('#upload1').should('exist');
@@ -125,22 +132,23 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
     it('Should test locking the gradeable',() => {
         //testing
-        cy.login('instructor');
-        cy.visit(['sample','gradeable','open_peer_homework','update']);
         cy.get('#page_1_nav').click();
         //Locking the gradeable
-        cy.get('[value="grades_released_homework_autota"]').click();
+        cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
+        cy.get('#gradeable-lock-points').should('be.visible');
         //unlocking the gradeable
-        cy.get('[value=""]').click();
+        cy.get('#gradeable-lock').select('');
         //Relocks the gradeable
-        cy.get('[value="grades_released_homework_autota"]').click();
+        cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
+        cy.get('#gradeable-lock-points').type('10');
 
-        ['student','grader','ta'].forEach((user) => {
-            cy.visit('/');
+        ['instructor','student','grader','ta'].forEach((user) => {
+            cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
-            cy.get('[title="Please complete C Malloc Not Allowed first"]').should('exist');
-            if (user === 'ta') {
-                cy.get('[title="Please complete C Malloc Not Allowed first"]').click();
+            cy.visit(['sample']);
+            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
+            if (user === 'ta' || user === 'instructor') {
+                cy.on('window:confirm',()=>true);
                 cy.get('#upload1').should('exist');
             }
             else {
@@ -148,15 +156,102 @@ describe('Tests cases revolving around modifying gradeables', () => {
             }
         });
 
+        cy.get('.fa-power-off').eq(1).click();
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update']);
         cy.get('#page_1_nav').click();
-        cy.get('[value=""]').click();
+        cy.get('#gradeable-lock').select('');
 
-        ['student','grader','ta'].forEach((user) => {
+    });
+
+    it('Should test the dates page',() => {
+        const future_date = '9994-12-31 23:59:59';
+        const past_date = '1970-10-10 23:59:59';
+        cy.get('#page_5_nav').click();
+        cy.get('#has_release_date_yes').click();
+
+        cy.get('#date_ta_view').clear();
+        cy.get('#date_ta_view').type(past_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
-            cy.visit(['sample','gradeable','open_peer_homework']);
         });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+        
+        cy.get('#date_ta_view').clear();
+        cy.get('#date_ta_view').type(future_date);
+        //clicks out of the calendar
+        cy.get('body').click(0,0);
+
+        cy.get('#date_submit').clear();
+        cy.get('#date_submit').type(past_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
+            cy.login(user);
+        });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+
+        cy.get('#date_submit').clear();
+        cy.get('#date_submit').type(future_date);
+        cy.get('body').click(0,0);
+
+        cy.get('#date_due').type(past_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
+            cy.login(user);
+        });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+
+        cy.get('#date_due').clear();
+        cy.get('#date_due').type(future_date);
+        cy.get('body').click(0,0);
+
+        cy.get('#date_grade').clear();
+        cy.get('#date_grade').type(past_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
+            cy.login(user);
+        });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+
+        cy.get('#date_grade').clear();
+        cy.get('#date_grade').type(future_date);
+        cy.get('body').click(0,0);
+
+        cy.get('#date_grade_due').type(past_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
+            cy.login(user);
+        });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+        
+        cy.get('#date_grade_due').clear();
+        cy.get('#date_grade_due').type(future_date);
+        ['student','grader','ta'].forEach((user)=>{
+            cy.get('.fa-power-off').eq(1).click();
+            cy.login(user);
+        });
+
+        cy.get('.fa-power-off').eq(1).click();
+        cy.login('instructor');
+        cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
+
+        cy.get('#date_grade_due').type(past_date);
 
     });
 });
