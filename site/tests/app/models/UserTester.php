@@ -143,6 +143,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
             'legal_given_name' => 'User',
+            'last_initial_format' => User::LAST_INITIAL_SINGLE,
             'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,
