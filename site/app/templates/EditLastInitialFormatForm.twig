@@ -6,7 +6,7 @@
         <input id="user-last-initial-format-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="edit_user_row">
             <label for="user-last-initial-format-change">Display Format:&emsp;</label>
-            <select id="user-last-initial-format-change" value="{{ user.getLastInitialFormat() }}">
+            <select id="user-last-initial-format-change" data-default="{{ user.getLastInitialFormat() }}">
                 <option value="0">Single</option>
                 <option value="1">Multi</option>
                 <option value="2">Hyphen-Multi</option>

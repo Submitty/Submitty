@@ -18,6 +18,8 @@ function showUpdateLastInitialFormatForm() {
     const form = $('#edit-last-initial-format-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
+    const dropdown = $('#user-last-initial-format-change');
+    dropdown.val(dropdown.data().default || 0);
 }
 
 function showUpdatePronounsForm() {
@@ -198,7 +200,7 @@ function updateUserLastInitialFormat() {
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
                 $('#last-initial-format-row .icon').html(`${icon} ${data.display_format}`);
-                $('#user-last-initial-format-change').val(data.format);
+                $('#user-last-initial-format-change').data('default', data.format);
             }
             else {
             // eslint-disable-next-line no-undef
