@@ -180,7 +180,7 @@ function updateUserLastInitialFormat() {
         return displayErrorMessage('Invalid option for last initial format!');
     }
     const data = new FormData();
-    data.append('csrf_token', $('#user-profile-photo-csrf').val());
+    data.append('csrf_token', $('#user-last-initial-format-csrf').val());
     data.append('format', newVal);
     // eslint-disable-next-line no-undef
     const url = buildUrl(['user_profile', 'update_last_initial_format']);

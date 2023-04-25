@@ -1,0 +1,26 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-last-initial-format-form{% endblock %}
+{% block title %}Edit Last Initial Format{% endblock %}
+{% block body %}
+    <div class="flex-col" id="user_settings_modal">
+        <input id="user-last-initial-format-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="edit_user_row">
+            <label for="user-last-initial-format-change">Display Format:&emsp;</label>
+            <select id="user-last-initial-format-change" value="{{ user.getLastInitialFormat() }}">
+                <option value="0">Single</option>
+                <option value="1">Multi</option>
+                <option value="2">Hyphen-Multi</option>
+                <option value="3">None</option>
+            </select>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserLastInitialFormat()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
