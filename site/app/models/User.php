@@ -485,7 +485,7 @@ class User extends AbstractModel {
                 $last_initial .= $part[0] . '.';
             }
         }
-        else if ($last_initial_format === self::LAST_INITIAL_HYPHEN) {
+        elseif ($last_initial_format === self::LAST_INITIAL_HYPHEN) {
             $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
             foreach ($spaced as $part) {
                 $dashed = preg_split('/-/', $part, -1, PREG_SPLIT_NO_EMPTY);
@@ -493,7 +493,7 @@ class User extends AbstractModel {
                 $last_initial .= implode('-', $l) . '.';
             }
         }
-        else if ($last_initial_format === self::LAST_INITIAL_NO_DISPLAY) {
+        elseif ($last_initial_format === self::LAST_INITIAL_NO_DISPLAY) {
             $last_initial = '';
         }
         else {
