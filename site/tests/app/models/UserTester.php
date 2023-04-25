@@ -219,6 +219,28 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('NOT SET', $user->getUTCOffset());
     }
 
+    public function testLastInitialFormat() {
+        $formats = [
+            User::LAST_INITIAL_SINGLE       => 'John S.',
+            User::LAST_INITIAL_MULTI        => 'John S.W.',
+            User::LAST_INITIAL_HYPHEN       => 'John S-J.W.',
+            User::LAST_INITIAL_NO_DISPLAY   => 'John'
+        ];
+        foreach ($formats as $format => $expected) {
+            $user = new User($this->core, [
+                'user_id' => 'test',
+                'user_givenname' => 'John',
+                'user_familyname' => 'Smith-Jones Warren',
+                'user_pronouns' => '',
+                'user_email' => 'user@email.com',
+                'user_email_secondary' => 'test@exampletwo.com',
+                'user_email_secondary_notify' => false,
+                'user_last_initial_format' => $format
+            ]);
+            $this->assertEquals($expected, $user->getDisplayAbbreviatedName());
+        }
+    }
+
 
     public function validateUserDataProvider(): array {
         $return = [
