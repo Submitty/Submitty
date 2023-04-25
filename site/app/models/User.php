@@ -75,6 +75,14 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Last initial display formats
+     */
+    const LAST_INITIAL_SINGLE = 0;
+    const LAST_INITIAL_MULTI = 1;
+    const LAST_INITIAL_HYPHEN = 2;
+    const LAST_INITIAL_NO_DISPLAY = 3;
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -102,6 +110,8 @@ class User extends AbstractModel {
     protected $displayed_family_name;
     /** @prop @var string The pronouns of the user */
     protected $pronouns = "";
+    /** @prop @var int The display format for the last initial of the user */
+    protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -191,6 +201,11 @@ class User extends AbstractModel {
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
+        }
+
+        $this->last_initial_format = isset($details['user_last_initial_format']) ? intval($details['user_last_initial_format']) : 0;
+        if ($this->last_initial_format < 0 || $this->last_initial_format > 3) {
+            $this->last_initial_format = 0;
         }
 
         $this->email = $details['user_email'];
@@ -449,8 +464,33 @@ class User extends AbstractModel {
         return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
     }
 
-    public function getDisplayAbbreviatedName(): string {
-        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
+    public function getDisplayAbbreviatedName(int $last_initial_format = -1): string {
+        if ($last_initial_format < 0) {
+            $last_initial_format = $this->last_initial_format;
+        }
+        $last_initial = ' ';
+        $family_name = $this->getDisplayedFamilyName();
+        if ($last_initial_format === self::LAST_INITIAL_MULTI) {
+            $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($spaced as $part) {
+                $last_initial .= $part[0] . '.';
+            }
+        }
+        else if ($last_initial_format === self::LAST_INITIAL_HYPHEN) {
+            $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($spaced as $part) {
+                $dashed = preg_split('/-/', $part, -1, PREG_SPLIT_NO_EMPTY);
+                $l = array_map(fn(string $part) => $part[0], $dashed);
+                $last_initial .= implode('-', $l) . '.';
+            }
+        }
+        else if ($last_initial_format === self::LAST_INITIAL_NO_DISPLAY) {
+            $last_initial = '';
+        }
+        else {
+            $last_initial .= $family_name[0] . '.';
+        }
+        return $this->getDisplayedGivenName() . $last_initial;
     }
 
     public function setRegistrationSection($section) {
