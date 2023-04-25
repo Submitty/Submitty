@@ -591,10 +591,10 @@ jobs:
           #     sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
           #     sudo chmod 440 /usr/local/submitty/config/submitty_users.json
 
-          # - name: Set up test suite
-          #   run: |
-          #     cd $SUBMITTY_REPOSITORY
-          #     sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+          - name: Set up test suite
+            run: |
+              cd $SUBMITTY_REPOSITORY
+              sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
 
           - name: Run git tests #prob just selenium
             run: |
