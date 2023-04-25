@@ -29,9 +29,9 @@ class MiscView extends AbstractView {
         if ($search_enabled) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'search', 'search.js'));
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'search', 'searchcursor.js'));
-            $this->core->getoutput()->addvendorjs(fileutils::joinpaths('codemirror', 'addon', 'search', 'match-highlighter.js'));
-            $this->core->getoutput()->addvendorjs(fileutils::joinpaths('codemirror', 'addon', 'search', 'matchesonscrollbar.js'));
-            $this->core->getoutput()->addvendorjs(fileutils::joinpaths('codemirror', 'addon', 'search', 'jump-to-line.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'match-highlighter.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'matchesonscrollbar.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'jump-to-line.js'));
             $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'addon', 'search', 'matchesonscrollbar.css'));
 
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'dialog', 'dialog.js'));
