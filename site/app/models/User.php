@@ -26,6 +26,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method void setPronouns(string $pronouns)
+ * @method int getLastInitialFormat()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -426,6 +427,14 @@ class User extends AbstractModel {
         $this->setDisplayedFamilyName();
     }
 
+    public function setLastInitialFormat($format): bool {
+        if ($format < 0 || $format > 3) {
+            return false;
+        }
+        $this->last_initial_format = $format;
+        return true;
+    }
+
     public function getNotificationSettings() {
         return $this->notification_settings; //either receives it or not
     }
@@ -466,7 +475,7 @@ class User extends AbstractModel {
 
     public function getDisplayAbbreviatedName(int $last_initial_format = -1): string {
         if ($last_initial_format < 0) {
-            $last_initial_format = $this->last_initial_format;
+            $last_initial_format = $this->getLastInitialFormat();
         }
         $last_initial = ' ';
         $family_name = $this->getDisplayedFamilyName();
@@ -491,6 +500,23 @@ class User extends AbstractModel {
             $last_initial .= $family_name[0] . '.';
         }
         return $this->getDisplayedGivenName() . $last_initial;
+    }
+
+    public function getDisplayLastInitialFormat(): string {
+        $format = $this->getLastInitialFormat();
+        if ($format === self::LAST_INITIAL_SINGLE) {
+            return "Single";
+        }
+        if ($format === self::LAST_INITIAL_MULTI) {
+            return "Multi";
+        }
+        if ($format === self::LAST_INITIAL_HYPHEN) {
+            return "Hyphen-Multi";
+        }
+        if ($format === self::LAST_INITIAL_NO_DISPLAY) {
+            return "None";
+        }
+        return '';
     }
 
     public function setRegistrationSection($section) {
