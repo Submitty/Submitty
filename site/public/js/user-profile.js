@@ -1,4 +1,9 @@
-// eslint-disable-next-line no-unused-vars
+/* exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
+showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
+changeSecondaryEmail
+ */
+
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
@@ -8,7 +13,13 @@ function showUpdatePrefNameForm() {
     $('#user-givenname-change').focus();
 }
 
-// eslint-disable-next-line no-unused-vars
+function showUpdatePronounsForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-pronouns-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+}
+
 function showUpdatePasswordForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#change-password-form');
@@ -19,7 +30,6 @@ function showUpdatePasswordForm() {
     $('#new_password').focus();
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateProfilePhotoForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-profile-photo-form');
@@ -27,7 +37,6 @@ function showUpdateProfilePhotoForm() {
     form.find('.form-body').scrollTop(0);
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
@@ -58,7 +67,52 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
-// eslint-disable-next-line no-unused-vars
+function updateUserPronouns(e) {
+    e.preventDefault();
+    const pronouns = $('#user-pronouns-change');
+    if (pronouns.data('current-pronouns') === pronouns.val()) {
+        // eslint-disable-next-line no-undef
+        displayErrorMessage('No changes detected to update pronouns!');
+    }
+    else {
+        const data = new FormData();
+        // eslint-disable-next-line no-undef
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns.val());
+        // eslint-disable-next-line no-undef
+        const url = buildUrl(['user_profile', 'change_pronouns']);
+        $.ajax({
+            url,
+            type: 'POST',
+            data,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const {data} = response;
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage(data.message);
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    // update the pronouns
+                    $('#pronouns_val').html(`${icon} ${data.pronouns}`);
+                    // update the data attributes
+                    pronouns.data('current-pronouns', data.pronouns);
+                    $('#edit-pronouns-form').hide();
+                }
+                else {
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage(response.message);
+                }
+            },
+            error: function() {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Some went wrong while updating pronouns!');
+            },
+        });
+    }
+}
+
 function updateUserPreferredNames () {
     const given_name_field = $('#user-givenname-change');
     const family_name_field = $('#user-familyname-change');
@@ -112,7 +166,6 @@ function updateUserPreferredNames () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserProfilePhoto () {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
@@ -162,7 +215,6 @@ function updateUserProfilePhoto () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserSecondaryEmail () {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
@@ -218,7 +270,6 @@ function updateUserSecondaryEmail () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function changeSecondaryEmail() {
     const email = $('#user-secondary-email-change').val();
     const checkbox = $('#user-secondary-email-notify-change');
