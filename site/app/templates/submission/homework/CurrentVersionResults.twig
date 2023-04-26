@@ -16,7 +16,7 @@
                     </span>
                 {# download icon if student can download files #}
                 {% if can_download %}
-                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}" style="background-color: #4CAF50; color: #fff; padding: 10px 20px; font-size: 16px; border-radius: 4px; border: none; cursor: pointer; width: 150px; height: 40px;"> Download
                         <i class="fas fa-download" title="Download the file"></i></button>
                 {% endif %}
                  </div>
@@ -24,6 +24,7 @@
             {% if can_download and files|length > 1 %}
                 <br />
                 <div class="flex-row">
+<<<<<<< Updated upstream
                     <span>Download all files:</span>
                     <a aria-label="Download zip of all files"
                        onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")'
@@ -32,6 +33,11 @@
                     >
                         <i class="fas fa-download" title="Download zip of all files"></i>
                     </a>
+=======
+                    <span></span>
+                     <button class = 'btn btn-primary key_to_click' onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download" style="background-color: #4CAF50; color: #fff; padding: 10px 50px 30px 10px; font-size: 16px; border-radius: 4px; border: none; cursor: pointer; width: 150px; height: 40px;"> Download all files
+                        <i class="fas fa-download" title="Download zip of all files"></i></button> 
+>>>>>>> Stashed changes
                 </div>
             {% endif %}
         </div>
