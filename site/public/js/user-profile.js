@@ -4,6 +4,7 @@ updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail, clearPronounsBox
  */
 
+//This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
 
 function showUpdatePrefNameForm() {

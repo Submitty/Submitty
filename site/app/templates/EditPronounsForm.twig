@@ -11,7 +11,7 @@
     <div class="flex-col" id="user_settings_modal">
         <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My Pronouns</h2>
-        <div class="edit_user_row">
+        <div class="edit_user_row ui-front">
             <label for="user-pronouns-change">Pronouns:&emsp;</label>
             <input type="text"
                    name="user_pronouns_change"
@@ -27,7 +27,7 @@
                     <option value="(Type Custom Here)"></option>
                 </datalist>
             </input>
-            <a href="javascript:clearPronounsBox();"><i class="fas fa-trash" style="padding:0.5rem;"></i></a>
+            <button aria-label="Clear pronoun input" type="button" style="background: none;border:none;" onclick="clearPronounsBox();"><i class="fas fa-trash" style="padding:0.5rem;" title="Clear pronouns field"></i></button>
         </div>
     </div>
 {% endblock %}
