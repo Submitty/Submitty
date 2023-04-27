@@ -30,11 +30,11 @@
                 }
             </script>
         </fieldset>
-        <label>
+        <label id="edit_dt" style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-picker" class="edit-picker" type="text" size="26"><br>
+            <input id="edit-picker" class="edit-picker" type="text" size="26" style="pointer-events:auto;"><br>
             <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
@@ -93,7 +93,7 @@
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
-        flatpickr('.edit-picker', {
+        let edit_fp = flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
@@ -132,6 +132,7 @@
                     }
                 }
             )],
+            appendTo: document.getElementById('edit-course-materials-form'),
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -142,6 +143,9 @@
               fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
+    $('.form-body').on('scroll', function() {
+        edit_fp._positionCalendar();
+    });
     </script>
 {% endblock %}
 {% block buttons %}

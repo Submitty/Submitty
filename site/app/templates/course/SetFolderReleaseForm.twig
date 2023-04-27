@@ -67,7 +67,7 @@
         }
 
 
-        flatpickr("#date_to_release", {
+        let release_date_folder_fp = flatpickr("#date_to_release", {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -115,6 +115,9 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
+    $('.form-body').on('scroll', function() {
+        release_date_folder_fp._positionCalendar();
+    });
     </script>
 
 {% endblock %}
