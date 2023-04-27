@@ -84,7 +84,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#late_days').should('not.be.visible');
         cy.get('#yes_late_submission').click();
         cy.get('#late_days').should('be.visible');
-        
+
         //Goes back to general
         cy.get('#page_0_nav').click();
     });
@@ -148,7 +148,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
             cy.visit(['sample']);
             cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').click();
             if (user === 'ta' || user === 'instructor') {
-                cy.on('window:confirm',()=>true);
+                cy.on('window:confirm',() => true);
                 cy.get('#upload1').should('exist');
             }
             else {
@@ -172,7 +172,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(past_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });
@@ -180,7 +180,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('.fa-power-off').eq(1).click();
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
-        
+
         cy.get('#date_ta_view').clear();
         cy.get('#date_ta_view').type(future_date);
         //clicks out of the calendar
@@ -188,7 +188,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_submit').clear();
         cy.get('#date_submit').type(past_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });
@@ -202,7 +202,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('body').click(0,0);
 
         cy.get('#date_due').type(past_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });
@@ -217,7 +217,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#date_grade').clear();
         cy.get('#date_grade').type(past_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });
@@ -231,7 +231,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('body').click(0,0);
 
         cy.get('#date_grade_due').type(past_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });
@@ -239,10 +239,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('.fa-power-off').eq(1).click();
         cy.login('instructor');
         cy.visit(['sample','gradeable','open_peer_homework','update?nav_tab=5']);
-        
+
         cy.get('#date_grade_due').clear();
         cy.get('#date_grade_due').type(future_date);
-        ['student','grader','ta'].forEach((user)=>{
+        ['student','grader','ta'].forEach((user) => {
             cy.get('.fa-power-off').eq(1).click();
             cy.login(user);
         });

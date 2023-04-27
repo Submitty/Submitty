@@ -1204,6 +1204,7 @@ gradeables:
   g_type: 2
   g_bucket: test
 
+        gcm_points : 0
 - g_id: future_tas_test
   components:
   - gc_lower_clamp: 0
