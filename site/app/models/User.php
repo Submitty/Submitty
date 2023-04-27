@@ -424,7 +424,7 @@ class User extends AbstractModel {
         $this->setDisplayedFamilyName();
     }
 
-    public function setLastInitialFormat($format): bool {
+    public function setLastInitialFormat(int $format): bool {
         if ($format < 0 || $format > 3) {
             return false;
         }
@@ -487,7 +487,7 @@ class User extends AbstractModel {
             case 'Hyphen-Multi':
                 $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
                 foreach ($spaced as $part) {
-                    $dashed = preg_split('/-/', $part, -1, PREG_SPLIT_NO_EMPTY);
+                    $dashed = explode('-', $part);
                     $l = array_map(fn(string $part) => $part[0], $dashed);
                     $last_initial .= implode('-', $l) . '.';
                 }
