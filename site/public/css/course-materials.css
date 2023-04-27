@@ -44,3 +44,7 @@ a.popout-item > .fas:hover {
 .delete-course-material-message {
     font-weight: bold;
 }
+
+.view-row {
+    padding: 0.8px;
+}
