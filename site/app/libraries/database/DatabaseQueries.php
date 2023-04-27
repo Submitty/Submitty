@@ -6610,7 +6610,10 @@ AND gc_id IN (
     }
 
     public function getStarType(string $user_id, string $queue_code): string {
-        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ORDER BY entry_id DESC LIMIT 1", [$user_id, $queue_code]);
+        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? 
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) 
+            ORDER BY entry_id DESC LIMIT 1", [$user_id, $queue_code]);
+
         return $this->course_db->row()['star_type'];
     }
 
@@ -6734,7 +6737,11 @@ AND gc_id IN (
             $star_type = 'prev_half';
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id,$queue_code]);
+        $this->course_db->query("UPDATE queue 
+            SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ? 
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) 
+            and current_state IN ('being_helped')", 
+            [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id,$queue_code]);
     }
 
     public function setQueuePauseState(bool $new_state) {
