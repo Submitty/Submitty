@@ -3,6 +3,7 @@ showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, show
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
 changeSecondaryEmail, previewUserLastInitialFormat
  */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl */
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
@@ -178,13 +179,11 @@ function updateUserPreferredNames () {
 function updateUserLastInitialFormat() {
     const newVal = Number($('#user-last-initial-format-change').val());
     if (isNaN(newVal)) {
-        // eslint-disable-next-line no-undef
         return displayErrorMessage('Invalid option for last initial format!');
     }
     const data = new FormData();
     data.append('csrf_token', $('#user-last-initial-format-csrf').val());
     data.append('format', newVal);
-    // eslint-disable-next-line no-undef
     const url = buildUrl(['user_profile', 'update_last_initial_format']);
     $.ajax({
         url,
@@ -196,19 +195,16 @@ function updateUserLastInitialFormat() {
             const response = JSON.parse(res);
             if (response.status === 'success') {
                 const { data } = response;
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
                 $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
                 $('#user-last-initial-format-change').data('default', data.format);
             }
             else {
-            // eslint-disable-next-line no-undef
                 displayErrorMessage(response.message);
             }
         },
         error: function() {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Something went wrong!');
         },
     });
