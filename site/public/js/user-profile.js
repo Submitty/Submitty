@@ -199,7 +199,7 @@ function updateUserLastInitialFormat() {
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
-                $('#last-initial-format-row .icon').html(`${icon} ${data.display_format}`);
+                $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
                 $('#user-last-initial-format-change').data('default', data.format);
             }
             else {

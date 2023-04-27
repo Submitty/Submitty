@@ -175,7 +175,8 @@ class UserProfileController extends AbstractController {
                     return JsonResponse::getSuccessResponse([
                         'message' => "Last initial format successfully updated!",
                         'format' => $user->getLastInitialFormat(),
-                        'display_format' => $user->getDisplayLastInitialFormat()
+                        'display_format' => $user->getDisplayLastInitialFormat(),
+                        'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
                     ]);
                 } finally {}
             }
