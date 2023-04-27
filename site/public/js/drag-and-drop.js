@@ -1145,7 +1145,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all) {
     const submit_url = buildCourseUrl(['course_materials', 'upload']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1167,7 +1167,12 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (sections !== null) {
         formData.append('sections', sections);
     }
+
+    if (overwrite_all !== null) {
+        formData.append('overwrite_all', overwrite_all);
+    }
     let target_path = cmPath; // this one has slash at the end.
+
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;
     }
@@ -1247,7 +1252,12 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
                     window.location.href = return_url;
                 }
                 else {
-                    alert(jsondata['message']);
+                    if (jsondata['message'].indexOf('Name clash') !== -1) {
+                        newOverwriteCourseMaterialForm(jsondata['data'], linkToBeAdded, false);
+                    }
+                    else {
+                        alert(jsondata['message']);
+                    }
                 }
             }
             catch (e) {
@@ -1265,8 +1275,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1306,6 +1315,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (link_title !== null) {
         formData.append('link_title', link_title);
     }
+    if (overwrite !== null) {
+        formData.append('overwrite', overwrite);
+    }
     if (folderUpdate !== null) {
         formData.append('folder_update', folderUpdate);
     }
@@ -1328,7 +1340,12 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                     window.location.href = return_url;
                 }
                 else {
-                    alert(jsondata['message']);
+                    if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {
+                        newOverwriteCourseMaterialForm(jsondata['data'], true, true);
+                    }
+                    else {
+                        alert(jsondata['message']);
+                    }
                 }
             }
             catch (e) {
