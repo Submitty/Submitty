@@ -1,3 +1,5 @@
+/* global displaySuccessMessage */
+
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({
@@ -280,12 +282,21 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         success: function (response) {
             try {
                 const new_post = JSON.parse(response).data;
-
+                const forum_display_setting = getCookie('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
                     if (parent_post.hasClass('first_post')) {
-                        $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                        if (forum_display_setting === 'reverse-tree') {
+                            $(new_post).insertBefore('.first_post').hide().fadeIn();
+                        }
+                        else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                            displaySuccessMessage('Refresh for correct ordering');
+                        }
+                        else {
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                        }
                     }
                     else {
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
@@ -295,9 +306,15 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             });
                             if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
+                                displaySuccessMessage('Refresh for correct ordering');
                             }
                             else {
-                                $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                                if (forum_display_setting === 'reverse-time') {
+                                    $(new_post).insertBefore('.first_post').hide().fadeIn();
+                                }
+                                else {
+                                    $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                                }
                             }
                         }
                         else {
@@ -2503,4 +2520,19 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
+}
+function getCookie(cname) {
+    const name = `${cname}=`;
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return '';
 }
