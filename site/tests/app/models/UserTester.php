@@ -221,12 +221,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testLastInitialFormat() {
-        $formats = [
-            'Single'       => 'John S.',
-            'Multi'        => 'John S.W.',
-            'Hyphen-Multi' => 'John S-J.W.',
-            'None'         => 'John'
-        ];
+        $formats = [ 'John S.', 'John S.W.', 'John S-J.W.', 'John' ];
         foreach ($formats as $format => $expected) {
             $user = new User($this->core, [
                 'user_id' => 'test',
@@ -236,7 +231,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'user_email' => 'user@email.com',
                 'user_email_secondary' => 'test@exampletwo.com',
                 'user_email_secondary_notify' => false,
-                'user_last_initial_format' => User::LAST_INITIAL_FORMATS[$format]
+                'user_last_initial_format' => $format
             ]);
             $this->assertEquals($expected, $user->getDisplayAbbreviatedName());
         }
