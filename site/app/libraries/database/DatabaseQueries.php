@@ -769,8 +769,7 @@ SQL;
 
     public function getPostsInThreads($thread_ids) {
         if (count($thread_ids) == 0) {
-            $rows = [];
-            return $rows;
+            return [];
         }
         $placeholders = $this->createParameterList(count($thread_ids));
         $this->course_db->query("SELECT * FROM posts where deleted = false and thread_id in {$placeholders} ORDER BY timestamp ASC", $thread_ids);
@@ -830,9 +829,8 @@ SQL;
 
     public function getAuthorUserGroups($author_ids) {
         if (count($author_ids) == 0) {
-            $rows = [];
-            return $rows;
-        }        
+            return [];
+        }
         $placeholders = $this->createParameterList(count($author_ids));
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
