@@ -42,11 +42,11 @@
             {% endfor %}
             </div>
         </fieldset>
-        <label id="upload_dt">
+        <label id="upload_dt" style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'><br>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
             <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
@@ -150,7 +150,7 @@
                 e.stopPropagation();
             });
         });
-        flatpickr('#upload_picker', {
+        const upload_fp = flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -188,6 +188,7 @@
                             }
                         }
                     )],
+                    appendTo: document.getElementById('upload-course-materials-form'),
                     allowInput: true,
                     enableTime: true,
                     enableSeconds: true,
@@ -198,6 +199,9 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
+    $('.form-body').on('scroll', function() {
+        upload_fp._positionCalendar();
+    });
     </script>
     <script>
         createArray(1);
