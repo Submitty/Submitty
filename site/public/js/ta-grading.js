@@ -1744,3 +1744,8 @@ function deleteAttachment(target, file_name) {
     });
   }
 }
+$(document).ready(function() {
+  $('#posts_list').css('min-width', '-webkit-fill-available');
+  generateCodeMirrorBlocks(document);
+  loadAllInlineImages(true);
+});

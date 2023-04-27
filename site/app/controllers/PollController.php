@@ -33,7 +33,7 @@ class PollController extends AbstractController {
 
         if ($this->core->getUser()->accessAdmin()) {
             // Check if we have a saved cookie session with the dropdown states for each of the instructor polls sections
-            $dropdown_states = ['today' => true, 'old' => false, 'future' => false];
+            $dropdown_states = ['today' => true, 'tomorrow' => true, 'old' => false, 'future' => false];
             foreach ($dropdown_states as $key => $val) {
                 $cookie_key = $key . "_polls_dropdown";
                 if (array_key_exists($cookie_key, $_COOKIE)) {
