@@ -13,7 +13,7 @@
                     <option value="{{ i }}">{{ user.getDisplayLastInitialFormat(i) }}</option>
                 {% endfor %}
             </select>
-            <span id="user-last-initial-format-preview" style="margin-left: 10px; font-weight: bold;" data-options="{{ (0..3)|map(i => user.getDisplayAbbreviatedName(i))|join('|') }}">Joe S.</span>
+            <span id="user-last-initial-format-preview" style="margin-left: 10px; font-weight: bold;" data-options="{{ (0..3)|map(i => user.getDisplayAbbreviatedName(i))|join('|') }}">{{ user.getDisplayAbbreviatedName() }}</span>
         </div>
     </div>
 {% endblock %}
