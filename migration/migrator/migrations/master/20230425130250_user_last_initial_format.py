@@ -11,8 +11,10 @@ def up(config, database):
     :type database: migrator.db.Database
     """
 
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL;")
-    database.execute("ALTER TABLE users ADD CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));")
+    database.execute("""
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL;
+ALTER TABLE users ADD CONSTRAINT IF NOT EXISTS users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));
+    """)
 
     database.execute("""
 CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
@@ -183,4 +185,7 @@ CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
         $$;
     """)
 
-    database.execute("ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;")
+    database.execute("""
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
+ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;
+    """)

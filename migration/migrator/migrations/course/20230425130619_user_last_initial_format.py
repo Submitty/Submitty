@@ -15,7 +15,10 @@ def up(config, database, semester, course):
     :type course: str
     """
     
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL; ALTER TABLE users ADD CONSTRAINT IF NOT EXISTS users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));")
+    database.execute("""
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL;
+ALTER TABLE users ADD CONSTRAINT IF NOT EXISTS users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));
+    """)
 
 
 def down(config, database, semester, course):
@@ -32,4 +35,7 @@ def down(config, database, semester, course):
     :type course: str
     """
 
-    database.execute("ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;")
+    database.execute("""
+ALTED TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
+ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;
+    """)
