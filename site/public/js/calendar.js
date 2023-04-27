@@ -97,12 +97,14 @@ function generateCalendarItem(item) {
         }
         if (exists) {
             onclick = `editCalendarItemForm('${item['status']}', '${item['title']}', '${item['id']}', '${item['date']}')`;
-            inst = `-inst`;
+            inst = `-inst`; 
         }
     }
     const icon = item['icon'];
     const element = document.createElement('a');
-    element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}${inst}`, 'cal-gradeable-item');
+    console.log(`cal-gradeable-status-${item['status']}${inst}`);
+    console.log(inst);
+    element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
@@ -117,6 +119,7 @@ function generateCalendarItem(item) {
         element.appendChild(iconElement);
     }
     element.append(item['title']);
+    console.log(element);
     return element;
 }
 
