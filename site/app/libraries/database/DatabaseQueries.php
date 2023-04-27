@@ -768,7 +768,7 @@ SQL;
     }
 
     public function getPostsInThreads($thread_ids) {
-        if (count($thread_ids) == 0) {
+        if (count($thread_ids) === 0) {
             return [];
         }
         $placeholders = $this->createParameterList(count($thread_ids));
