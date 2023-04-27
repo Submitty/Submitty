@@ -118,7 +118,7 @@ class CalendarInfo extends AbstractModel {
                     'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
-                    'class' => 'btn-nav calendar-color-blue',
+                    'class' => 'btn-nav',
                     'disabled' => !($submit_btn === null) && $submit_btn->isDisabled(),
                     'show_due' => true,
                     'icon' => '',

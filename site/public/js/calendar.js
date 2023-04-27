@@ -105,6 +105,12 @@ function generateCalendarItem(item) {
     console.log(`cal-gradeable-status-${item['status']}${inst}`);
     console.log(inst);
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
+    if(item['show_due']) {
+        element.style.setProperty('background-color', item['color']);
+    }
+    if(item['status'] === "ann") {
+        element.style.setProperty('border-color', item['color']);
+    }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
