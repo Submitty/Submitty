@@ -236,6 +236,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_paused_start'];
     }
 
+    public function getCurrentStarType(): ?string {
+        return $this->current_queue_state['star_type'];
+    }
+
     /**
      * function to return the name of the person who is currently helping the
      * student of a particular query row, if null is passed in, it will return
