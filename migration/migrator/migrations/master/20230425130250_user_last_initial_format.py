@@ -15,9 +15,6 @@ def up(config, database):
 ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL;
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
 ALTER TABLE users ADD CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));
-    """)
-
-    database.execute("""
 CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -54,9 +51,6 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                 RETURN NULL;
             END;
             $$;
-    """)
-
-    database.execute("""
 CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -144,9 +138,6 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                 RETURN NULL;
             END;
             $$;
-    """)
-
-    database.execute("""
 CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -184,9 +175,6 @@ CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
             RETURN NULL;
         END;
         $$;
-    """)
-
-    database.execute("""
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
 ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;
     """)
