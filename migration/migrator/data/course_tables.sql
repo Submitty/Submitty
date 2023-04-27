@@ -1475,7 +1475,8 @@ CREATE TABLE public.queue (
     time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL,
     time_paused integer DEFAULT 0 NOT NULL,
-    time_paused_start timestamp with time zone
+    time_paused_start timestamp with time zone,
+    star_type character varying(16) DEFAULT 'none'::character varying
 );
 
 
