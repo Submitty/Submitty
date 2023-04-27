@@ -178,7 +178,8 @@ class UserProfileController extends AbstractController {
                         'display_format' => $user->getDisplayLastInitialFormat(),
                         'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
                     ]);
-                } finally {
+                }
+                catch (\InvalidArgumentException $e) {
                 }
             }
         }

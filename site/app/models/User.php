@@ -426,7 +426,7 @@ class User extends AbstractModel {
 
     public function setLastInitialFormat(int $format) {
         if ($format < 0 || $format > 3) {
-            throw new \Exception("Invalid format value specified");
+            throw new \InvalidArgumentException("Invalid format value specified");
         }
         $this->last_initial_format = $format;
     }
