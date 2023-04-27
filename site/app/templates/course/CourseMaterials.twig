@@ -158,7 +158,7 @@
         {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
     {% else %}
         <div class="folder-container">
-            <div class="div-viewer">
+            <div class="div-viewer view-row">
                 <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setCookie('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
