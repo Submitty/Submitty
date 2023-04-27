@@ -168,8 +168,8 @@ class UserProfileController extends AbstractController {
             $newVal = intval($_POST['format']);
             // Handle the case where intval returns zero due to an invalid string
             if ($newVal !== 0 || $_POST['format'] === '0' || $_POST['format'] === 0) {
-                $success = $user->setLastInitialFormat($newVal);
-                if ($success) {
+                try {
+                    $user->setLastInitialFormat($newVal);
                     $user->setUserUpdated(true);
                     $this->core->getQueries()->updateUser($user);
                     return JsonResponse::getSuccessResponse([
@@ -177,7 +177,7 @@ class UserProfileController extends AbstractController {
                         'format' => $user->getLastInitialFormat(),
                         'display_format' => $user->getDisplayLastInitialFormat()
                     ]);
-                }
+                } finally {}
             }
         }
         return JsonResponse::getErrorResponse("Invalid option for last initial format!");

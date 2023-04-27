@@ -424,12 +424,11 @@ class User extends AbstractModel {
         $this->setDisplayedFamilyName();
     }
 
-    public function setLastInitialFormat(int $format): bool {
+    public function setLastInitialFormat(int $format) {
         if ($format < 0 || $format > 3) {
-            return false;
+            throw new \Exception("Invalid format value specified");
         }
         $this->last_initial_format = $format;
-        return true;
     }
 
     public function getNotificationSettings() {
