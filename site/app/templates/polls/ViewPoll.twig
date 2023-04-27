@@ -4,8 +4,8 @@
     </h1>
 
     {% if user_admin or poll.isHistogramAvailable() %}
-        <button class="btn btn-primary" onclick="toggle_section('poll-info')">Toggle Poll Info</button>
-        <button class="btn btn-primary" onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
+        <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
+        <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
     {% endif %}
     <br/>
     <div class="poll-view-table" id="info-histogram-table">
@@ -27,10 +27,12 @@
                             Possible responses:
                         </h2>
                     </legend>
+                    <table class="poll-content">
                     {% set button_type = is_single_response ? "radio": "checkbox" %}
                     {% if not user_admin %}
-                        <label class="radio" for="answer-no-response">
-                            <input class="no-response-radio response-btn"
+                        <tr class="radio" for="answer-no-response">
+                            <td class="option-btn">
+                            <input class="no-response-radio"
                                    type="{{button_type}}"
                                    value="-1"
                                    name="answers[]"
@@ -38,18 +40,20 @@
                                    {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="clearResponses()"
-                            >
+                            />
+                            </td>
+                            <td class="no-response option-text">
                             No response
-                        </label>
-                        <br/>
-                        <br/>
+                            </td>
+                        </tr>
                     {% endif %}
                     {% set index = 0 %}
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
-                        <div class="radio">
-                            <input class="response-radio response-btn"
+                        <tr class="radio option-row">
+                            <td class="option-btn">
+                            <input class="response-radio"
                                    type={{ button_type }}
                                    aria-label="Option {{ index + 1 }}"
                                    value="{{ option.getId() }}"
@@ -59,18 +63,26 @@
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="disableNoResponse();"
                             />
+                            </td>
+                            <td class="option-text">
                             {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
-                            <br/>
-                            <br/>
-                        </div>
-                        {% set index = index + 1%}
+                            {% if option.isCorrect() and poll.isReleaseAnswer()%}
+                                <span class="fa-stack fa-2xs correct-tag">
+                                    <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
+                                    <i class="fa fa-check fa-stack-1x fa-xl correct-tag-checkmark"></i>
+                                </span>
+                            {% endif %}                                
+                            </td>                       
+                        </tr>
+                        {% set index = index + 1 %}
                     {% endfor %}
+                    </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
         </div>
@@ -118,11 +130,20 @@
         const data = [{
             type: "bar",
             x: [],
-            y: []
+            y: [],
+            marker: {
+                color: [],
+            },
         }];
+        const [correctColor, defaultColor] =
+        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
+            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
         {% for option in poll.getOptions() %}
         data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
         data[0].y.push({{ response_counts[option.getId()] }});
+        data[0].marker.color.push(
+            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+        );
         {% endfor %}
         const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
         const width = get_new_chart_width();
