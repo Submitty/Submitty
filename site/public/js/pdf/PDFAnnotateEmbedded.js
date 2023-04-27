@@ -109,13 +109,12 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
     }
 }
 function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
+    const scale = 3; // Define the scale factor here
     if (num < targetNum) {
-        // eslint-disable-next-line eqeqeq
-        if (num != 1) {
+        if (num !== 1) {
             doc.addPage();
         }
         pdf.getPage(num).then((page) => {
-            const scale = 3; // Increase the scale factor for higher resolution
             const viewport = page.getViewport({scale: scale});
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -133,32 +132,31 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     for (let an = 0; an < annotations.length; an++) {
                         const annotation = annotations[an];
                         if (annotation.type === 'drawing') {
-                            ctx.lineWidth = annotation.width;
+                            ctx.lineWidth = annotation.width * scale;
                             ctx.strokeStyle = annotation.color;
                             ctx.beginPath();
                             for (let line = 1; line < annotation.lines.length; line++) {
-                                ctx.moveTo(annotation.lines[line - 1][0], annotation.lines[line - 1][1]);
-                                ctx.lineTo(annotation.lines[line][0], annotation.lines[line][1]);
+                                ctx.moveTo(annotation.lines[line - 1][0] * scale, annotation.lines[line - 1][1] * scale);
+                                ctx.lineTo(annotation.lines[line][0] * scale, annotation.lines[line][1] * scale);
                                 ctx.stroke();
                             }
                         }
 
                         if (annotation.type === 'textbox') {
-                            ctx.font = `${annotation.size}px sans-serif`;
+                            ctx.font = `${annotation.size * scale}px sans-serif`;
                             ctx.fillStyle = annotation.color;
                             const text = annotation.content;
-                            // eslint-disable-next-line eqeqeq
-                            if (text != null) {
-                                ctx.fillText(text, annotation.x, annotation.y);
+                            if (text !== null) {
+                                ctx.fillText(text, annotation.x * scale, annotation.y * scale);
                             }
                         }
                     }
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98); // Use JPEG format with higher compression quality
+                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
                     const width = doc.internal.pageSize.getWidth();
                     const height = doc.internal.pageSize.getHeight();
                     doc.addImage(imgData, 'JPEG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                    //TODO: Get the saving and loading from annotated_pdfs working
+                     //TODO: Get the saving and loading from annotated_pdfs working
                     /*console.log("CHECK2");
                     var fd = new FormData();
                     var pdfToSave = btoa(doc.output());
