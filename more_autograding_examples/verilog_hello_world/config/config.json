@@ -8,10 +8,12 @@
     },
     "autograding_method": "docker",
     "autograding": {
+        // compile .v files
         "submission_to_compilation": ["**/*.v"],
+        // run a.out
         "compilation_to_runner": ["**/a.out"]
-        //"compilation_to_validation": ["**/STDOUT*.txt","**/STDERR*.txt","**/a.out"]
     },
+    // use the verilog container for grading
     "container_options": {
         "container_image": "tkoz0/submitty-verilog"
     },
@@ -28,6 +30,7 @@
             "details": "details",
             "command": "./a.out",
             "points": 5,
+            // check STDOUT.txt for a single line containing "hello world"
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
