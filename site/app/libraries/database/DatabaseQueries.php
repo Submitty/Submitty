@@ -828,7 +828,7 @@ SQL;
     }
 
     public function getAuthorUserGroups($author_ids) {
-        if (count($author_ids) == 0) {
+        if (count($author_ids) === 0) {
             return [];
         }
         $placeholders = $this->createParameterList(count($author_ids));
