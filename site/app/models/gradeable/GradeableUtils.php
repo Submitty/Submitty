@@ -72,6 +72,7 @@ class GradeableUtils {
      * gradeables in all courses of a single user.
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
+     * NOTE: Calendar Messages is passed by refence in order to be changed in "getGradeablesFromCourse"
      *
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
@@ -97,14 +98,22 @@ class GradeableUtils {
      * This function assumes that you are calling it where Core has a defined course
      *
      * @return \app\models\Button[][]|Gradeable[][]|GradedGradeable[][]|array[]
-     * @throws \Exception
      */
     public static function getGradeablesFromUserAndCourse(Core $core, array &$calendar_messages): array {
-        $gradeables_of_course = self::getGradeablesFromCourse($core, $core->getConfig()->getSemester(), $core->getConfig()->getCourse(), $calendar_messages, false);
+        $gradeables_of_course = self::getGradeablesFromCourse(
+            $core,
+            $core->getConfig()->getSemester(),
+            $core->getConfig()->getCourse(),
+            $calendar_messages,
+            false
+        );
+
         $gradeables = $gradeables_of_course["gradeables"];
         $graded_gradeables = $gradeables_of_course["graded_gradeables"];
         $submit_btns = $gradeables_of_course["submit_btns"];
 
-        return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
+        return ["gradeables" => $gradeables,
+            "graded_gradeables" => $graded_gradeables,
+            "submit_btns" => $submit_btns];
     }
 }

@@ -98,8 +98,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-                    query_string := 'INSERT INTO users (user_id, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
-                            'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
+                    query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
+                            'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_pronouns) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
                             '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_email_secondary) || ', ' || quote_literal(user_row.user_email_secondary_notify) || ', ' || quote_literal(user_row.user_updated) || ', ' ||
                             '' || quote_literal(user_row.instructor_updated) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
                     IF query_string IS NULL THEN
@@ -505,7 +505,7 @@ CREATE TABLE public.users (
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
-    user_pronouns character varying DEFAULT ''::character varying NOT NULL,
+    user_pronouns character varying(255) DEFAULT ''::character varying,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
 );
 

@@ -47,6 +47,11 @@ class CalendarInfo extends AbstractModel {
      */
     private $items_by_sections = [];
 
+    /**
+     * @var array<string, string>
+     * the structure is a string as the key and a string as the value
+     * the value is the color given to a specific course at a given semester
+     */
     private $colors = [];
 
     /** @var string */
