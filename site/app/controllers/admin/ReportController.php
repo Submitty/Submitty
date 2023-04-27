@@ -434,14 +434,14 @@ class ReportController extends AbstractController {
             // Export the grade inquiry status
             if ($gg->hasRegradeRequest()) {
                 if ($gg->hasActiveRegradeRequest()) {
-                    $entry['inquiry_status'] = 'Open';
+                    $entry['inquiry'] = 'Open';
                 }
                 else {
-                    $entry['inquiry_status'] = 'Resolved';
+                    $entry['inquiry'] = 'Resolved';
                 }
             }
             else {
-                $entry['inquiry_status'] = 'None';
+                $entry['inquiry'] = 'None';
             }
         }
 
