@@ -1,5 +1,5 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem */
-/* global curr_day, curr_month, curr_year, gradeables_by_date */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses */
 /* global csrfToken, buildCourseUrl */
 
 // List of names of months in English
@@ -65,7 +65,6 @@ function dateToStr(year, month, day) {
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
- * @param type : string the calendar item type
  * @returns {string} the HTML string containing the calendar item
  */
 function generateCalendarItem(item) {
@@ -87,10 +86,23 @@ function generateCalendarItem(item) {
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
-    const onclick = item['onclick'];
+    let onclick = item['onclick'];
+    let inst = "";
+    if(!item['show_due']) {
+        let exists = false;
+        for(let course = 0; course < instructor_courses.length; course++) {
+            if(instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
+                exists = true;
+            }
+        }
+        if (exists) {
+            onclick = `editCalendarItemForm('${item['status']}', '${item['title']}', '${item['id']}', '${item['date']}')`;
+            inst = `-inst`;
+        }
+    }
     const icon = item['icon'];
     const disabled = item['disabled'] ? 'disabled' : '';
-    return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']} cal-gradeable-item"
+    return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']}${inst} cal-gradeable-item"
            title="${tooltip}" 
            style="${(item['type'] === 'gradeable') ? `background-color: ${item['color']}` : `border-color: ${item['color']}`}"
            ${(link !== '') ? `href="${link}"` : ''} 
@@ -105,7 +117,7 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
     $('#calendar-item-type-edit').val(itemType);
     $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
-    $('#calendar-item-id').val(itemId);
+    $('#calendar-item-id').val(itemId); 
 
     $('#edit-calendar-item-form').show();
 }

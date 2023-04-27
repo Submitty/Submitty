@@ -38,7 +38,7 @@ class CalendarInfo extends AbstractModel {
     /**
      * @see GradeableList for constant integers used as keys
      * @var array<int, array>
-     * the structure of the array is a integer as key, and value
+     * the structure of the array is an integer as key, and value
      * contains an array with a structure of
      * "title"      => string (title shown at the top of the table),
      * "subtitle"   => string (title shown at the top of the table, if any. Can be empty),
@@ -139,14 +139,16 @@ class CalendarInfo extends AbstractModel {
                 $curItem = [
                     'title' => htmlspecialchars($cal_item->getText()),
                     'status' => $cal_item->getTypeString(),
-                    'course' => $course,
+                    'course' => $course->getTitle(),
+                    'semester' => $course->getSemester(),
                     'icon' => '',
                     'url' => '',
                     'show_due' => false,
                     'submission' => '',
                     'status_note' => '',
                     'color' => $info->colors[$course->getSemester() . $course->getTitle()],
-                    'type' => 'item'
+                    'type' => 'item',
+                    'date' => $date
                 ];
                 $info->items_by_date[$date][] = $curItem;
             }

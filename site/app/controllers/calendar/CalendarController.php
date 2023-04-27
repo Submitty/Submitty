@@ -96,7 +96,7 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        $instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId());
+        $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach($instructor_courses as $course) {
             if($set_course === ($course['semester'] . $course['course'])) {
@@ -120,8 +120,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("items/{id}/edit", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
+     * @Route("items/edit", methods={"POST"})
      */
     public function editMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -157,14 +156,6 @@ class CalendarController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
-        if (isset($_POST['course'])) {
-            $set_course = $_POST['course'];
-        }
-        else {
-            $this->core->addErrorMessage("Invalid course given.");
-            return new RedirectResponse($this->core->buildUrl(['calendar']));
-        }
-
         foreach($instructor_courses as $course) {
             if($set_course === ($course['semester'] . $course['course'])) {
                 $this->core->loadCourseConfig($course['semester'], $course['course']);
@@ -192,7 +183,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/calendar/items/{id}/delete", methods={"POST"})
+     * @Route("/calendar/items/delete", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteMessage(): ResponseInterface {

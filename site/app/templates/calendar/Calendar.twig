@@ -5,8 +5,7 @@
     const curr_year = {{ curr_year }};
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
-    const isGlobal = {% if not in_course %}true{% else %}false{% endif %};
-    const isInstructor = {% if is_instructor %}true{% else %}false{% endif %};
+    const instructor_courses = {{ instructor_courses|json_encode|raw }};
 
     window.addEventListener("load", function () {
         loadCalendar({{ view_month }}, {{ view_year }});

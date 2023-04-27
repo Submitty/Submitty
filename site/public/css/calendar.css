@@ -208,6 +208,26 @@ a.cal-gradeable-status-text:focus {
     border: none;
 }
 
+a.cal-gradeable-status-text-inst {
+    color: var(--text-black);
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+a.cal-gradeable-status-text-inst:hover {
+    color: var(--text-black);
+    padding: 0;
+    cursor: pointer;
+    border: none;
+}
+
+a.cal-gradeable-status-text-inst:focus {
+    color: var(--text-black);
+    padding: 0;
+    border: none;
+}
+
 /** Announcement **/
 a.cal-gradeable-status-ann {
     color: #218ffd;  /* This color is from DS website */
@@ -228,6 +248,31 @@ a.cal-gradeable-status-ann:hover {
 }
 
 a.cal-gradeable-status-ann:focus {
+    color: #218ffd;
+    padding: 0;
+    font-style: italic;
+    border: none;
+}
+
+a.cal-gradeable-status-ann-inst {
+    color: #218ffd;  /* This color is from DS website */
+    padding: 0;
+    font-style: italic;
+    border-style: solid;
+    border-width: 3px;
+    box-shadow: none;
+}
+
+a.cal-gradeable-status-ann-inst:hover {
+    color: #218ffd;
+    padding: 0;
+    font-style: italic;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 3px;
+}
+
+a.cal-gradeable-status-ann-inst:focus {
     color: #218ffd;
     padding: 0;
     font-style: italic;

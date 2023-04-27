@@ -44,7 +44,6 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
-        $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
 
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
@@ -57,10 +56,8 @@ class CalendarView extends AbstractView {
             "gradeables_by_date" => $info->getItemsByDate(),
             "gradeables_by_section" => $info->getItemsBySections(),
             "empty_message" => $info->getEmptyMessage(),
-            "in_course" => $in_course,
-            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
-            "instructor_courses" => $this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())
+            "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId())
         ]);
     }
 }
