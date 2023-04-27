@@ -93,7 +93,7 @@
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
         };
 
-        let edit_fp = flatpickr('.edit-picker', {
+        const edit_fp = flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
