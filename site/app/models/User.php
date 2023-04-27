@@ -24,6 +24,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
+ * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method void setPronouns(string $pronouns)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -98,6 +100,8 @@ class User extends AbstractModel {
     protected $preferred_family_name = "";
     /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
+    /** @prop @var string The pronouns of the user */
+    protected $pronouns = "";
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -181,6 +185,8 @@ class User extends AbstractModel {
         if (isset($details['user_preferred_givenname'])) {
             $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
+
+        $this->setPronouns($details['user_pronouns']);
 
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
@@ -507,15 +513,23 @@ class User extends AbstractModel {
 
         switch ($field) {
             case 'user_id':
-                 //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
+                 //Username / user_id must contain only lowercase alpha,
+                 //numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_givenname':
             case 'user_legal_familyname':
-                //Given and family name must be alpha characters, latin chars, white-space, or certain punctuation.
+                //Given and family name must be alpha characters, latin chars,
+                //white-space, or certain punctuation.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]+$~", $data) === 1;
+            case 'user_pronouns':
+                //pronouns may be "", alpha chars, latin chars, white-space,
+                //certain punctuation AND between 0 and 30 chars.
+                return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\)\\\/ ]{0,30}$~", $data) === 1;
             case 'user_preferred_givenname':
             case 'user_preferred_familyname':
-                //Preferred given and family name may be "", alpha chars, latin chars, white-space, certain punctuation AND between 0 and 30 chars.
+                //Preferred given and family name may be "", alpha chars,
+                //latin chars, white-space,
+                //certain punctuation AND between 0 and 30 chars.
                 return preg_match("~^[a-zA-ZÀ-ÖØ-Ýà-öø-ÿ'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
             case 'user_email_secondary':
