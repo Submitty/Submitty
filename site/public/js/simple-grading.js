@@ -925,8 +925,8 @@ function setupSimpleGrading(action) {
     $('#student-search-input').on('focus', function() {
         $(this).val('');
     });
-    
-  initSocketClient();
+
+    initSocketClient();
 
 }
 
