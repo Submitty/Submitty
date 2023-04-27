@@ -1,7 +1,7 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
 showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
-changeSecondaryEmail
+changeSecondaryEmail, previewUserLastInitialFormat
  */
 
 function showUpdatePrefNameForm() {
@@ -332,6 +332,13 @@ function changeSecondaryEmail() {
         checkbox.prop('disabled', true);
         checkbox.prop('checked', false);
     }
+}
+
+function previewUserLastInitialFormat() {
+    const format = Number($('#user-last-initial-format-change').val());
+    const preview = $('#user-last-initial-format-preview');
+    const options = preview.data('options').split('|');
+    preview.text(options[format]);
 }
 
 $(document).ready(() => {

@@ -79,10 +79,7 @@ class User extends AbstractModel {
     /**
      * Last initial display formats
      */
-    const LAST_INITIAL_SINGLE = 0;
-    const LAST_INITIAL_MULTI = 1;
-    const LAST_INITIAL_HYPHEN = 2;
-    const LAST_INITIAL_NO_DISPLAY = 3;
+    const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
 
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
@@ -479,44 +476,40 @@ class User extends AbstractModel {
         }
         $last_initial = ' ';
         $family_name = $this->getDisplayedFamilyName();
-        if ($last_initial_format === self::LAST_INITIAL_MULTI) {
-            $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
-            foreach ($spaced as $part) {
-                $last_initial .= $part[0] . '.';
-            }
-        }
-        elseif ($last_initial_format === self::LAST_INITIAL_HYPHEN) {
-            $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
-            foreach ($spaced as $part) {
-                $dashed = preg_split('/-/', $part, -1, PREG_SPLIT_NO_EMPTY);
-                $l = array_map(fn(string $part) => $part[0], $dashed);
-                $last_initial .= implode('-', $l) . '.';
-            }
-        }
-        elseif ($last_initial_format === self::LAST_INITIAL_NO_DISPLAY) {
-            $last_initial = '';
-        }
-        else {
-            $last_initial .= $family_name[0] . '.';
+        $format_name = self::LAST_INITIAL_FORMATS[$last_initial_format];
+        switch ($format_name) {
+            case 'Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $last_initial .= $part[0] . '.';
+                }
+                break;
+            case 'Hyphen-Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $dashed = preg_split('/-/', $part, -1, PREG_SPLIT_NO_EMPTY);
+                    $l = array_map(fn(string $part) => $part[0], $dashed);
+                    $last_initial .= implode('-', $l) . '.';
+                }
+                break;
+            case 'None':
+                $last_initial = '';
+                break;
+            default:
+                $last_initial .= $family_name[0] . '.';
+                break;
         }
         return $this->getDisplayedGivenName() . $last_initial;
     }
 
-    public function getDisplayLastInitialFormat(): string {
-        $format = $this->getLastInitialFormat();
-        if ($format === self::LAST_INITIAL_SINGLE) {
-            return "Single";
+    public function getDisplayLastInitialFormat(int $format = -1): string {
+        if ($format < 0) {
+            $format = $this->last_initial_format;
         }
-        if ($format === self::LAST_INITIAL_MULTI) {
-            return "Multi";
+        if ($format < 0 || $format > count(self::LAST_INITIAL_FORMATS)) {
+            return '';
         }
-        if ($format === self::LAST_INITIAL_HYPHEN) {
-            return "Hyphen-Multi";
-        }
-        if ($format === self::LAST_INITIAL_NO_DISPLAY) {
-            return "None";
-        }
-        return '';
+        return self::LAST_INITIAL_FORMATS[$format];
     }
 
     public function setRegistrationSection($section) {
