@@ -6738,10 +6738,11 @@ AND gc_id IN (
         }
 
         $this->course_db->query("UPDATE queue 
-            SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ? 
-            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) 
-            and current_state IN ('being_helped')", 
-            [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id,$queue_code]);
+            SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ?
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
+            and current_state IN ('being_helped')",
+            [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id,$queue_code]
+        );
     }
 
     public function setQueuePauseState(bool $new_state) {
