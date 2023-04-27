@@ -12,13 +12,13 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * @param year : int the current year
  * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
  */
-function prevMonth(month, year) {
+function prevMonth(month, year, day) {
     month = month - 1;
     if (month <= 0) {
         month = 12 + month;
         year = year - 1;
     }
-    return [month, year];
+    return [month, year, day, "month"];
 }
 
 /**
@@ -28,14 +28,95 @@ function prevMonth(month, year) {
  * @param year : int the current year
  * @returns {number[]} : array<int> {next_month, year_of_next_month}
  */
-function nextMonth(month, year) {
+function nextMonth(month, year, day) {
     month = month + 1;
     if (month > 12) {
         month = month - 12;
         year = year + 1;
     }
-    return [month, year];
+    return [month, year, day, "month"];
 }
+
+/**
+ * Gets the previous two weeks of a given month
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
+ */
+function prevTwoWeeks(month, year, day) {
+    day = day - 14;
+    if (day <= 0) {
+        month = month - 1;
+        if (month <= 0) {
+            month = 12 + month;
+            year = year - 1;
+        }
+        day = 31 + day;
+    }
+    return [month, year, day, "two_week"];
+}
+
+/**
+ * Gets the next two weeks of a given month
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {next_month, year_of_next_month}
+ */
+function nextTwoWeeks(month, year, day) {
+    day = day + 14;
+    if (day > 31) {
+        month = month + 1;
+        if (month > 12) {
+            month = month - 12;
+            year = year + 1;
+        }
+        day = day - 31;
+    }
+    return [month, year, day, "two_week"];
+}
+
+/**
+ * Gets the previous week of a given month
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
+ */
+ function prevWeek(month, year, day) {
+    day = day - 7;
+    if (day <= 0) {
+        month = month - 1;
+        if (month <= 0) {
+            month = 12 + month;
+            year = year - 1;
+        }
+        day = 31 + day;
+    }
+    return [month, year, day, "one_week"];
+}
+
+/** 
+ * Gets the next week of a given week
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {next_month, year_of_next_month}
+ */
+function nextWeek(month, year, day) {
+    day = day + 7;
+    if (day > 31) {
+        month = month + 1;
+        if (month > 12) {
+            month = month - 12;
+            year = year + 1;
+        }
+        day = day - 31;
+    }
+    return [month, year, day, "one_week"];
+}
+
 
 
 /**
@@ -238,13 +319,13 @@ function generateCalendarHeader(title_area) {
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
  * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
  */
-function generateCalendarOfMonth(view_year, view_month) {
+function generateCalendarOfMonth(view_year, view_month, view_day) {
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
     // Header area: two buttons to move, and month
     let content = generateCalendarHeader(
         `<th colspan="3">
                 <div class="cal-switch" id="prev-month-switch">
-                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-left"></i></a>
                 </div>            
             </th>
             <th colspan="1">
@@ -255,7 +336,7 @@ function generateCalendarOfMonth(view_year, view_month) {
             </th>
             <th colspan="3">
                 <div class="cal-switch" id="next-month-switch">
-                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-right"></i></a>
                 </div>            
             </th>`);
 
@@ -305,6 +386,160 @@ function generateCalendarOfMonth(view_year, view_month) {
 }
 
 /**
+ * This function creates a table that shows the calendar for one week.
+ *
+ * @param view_year : int year that the calendar is viewing
+ * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
+ * @param view_day : int day that the calendar is viewing
+ * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ */
+function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
+    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
+    const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
+    // Header area: two buttons to move, and month
+    let content = generateCalendarHeader(
+        `<th colspan="3">
+                <div class="cal-switch" id="prev-month-switch">
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevWeek(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-left"></i></a>
+                </div>            
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
+                    <h3 class="cal-year-title" >${view_year}</h3>
+                </div>
+            </th>
+            <th colspan="3">
+                <div class="cal-switch" id="next-month-switch">
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextWeek(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-right"></i></a>
+                </div>            
+            </th>`);
+    console.log(view_day, startWeekday, currentDay);
+    // Show days at the end of last month that belongs to the first week of current month
+        const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+        const lastMonthStart = lastMonthEnd + 1 - startWeekday;
+        const daysInMonth = new Date(view_year, view_month, 0).getDate();
+        let print_day = 0;
+        // Show days at the end of last month that belongs to the first week of current month
+        if(view_day-currentDay <= 0 ){
+            for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
+                content += generateDayCell(view_year, view_month - 1, day, view_month);
+                print_day++
+            }
+        }
+
+        // Make the day cells before the "current" date
+        if (print_day < currentDay) {
+            for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
+                content += generateDayCell(view_year, view_month, day, view_month);
+                print_day++
+            }
+        }
+
+        // Make the "current" day, and the days after in the month 
+        for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
+            content += generateDayCell(view_year, view_month, day, view_month);
+            print_day++
+        }
+
+        // Makes any days that spill into the next month
+        for (let day = 1; print_day <= 6; day++) {
+            content += generateDayCell(view_year, view_month + 1, day, view_month);
+            print_day++
+        }
+    content += `
+        </tr>
+        </tbody>
+    </table> 
+    `;
+    return content;
+}
+
+/**
+ * This function creates a table that shows the calendar for two weeks.
+ *
+ * @param view_year : int year that the calendar is viewing
+ * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
+ * @param view_day : int day that the calendar is viewing
+ * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ */
+function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
+    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
+    const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
+    // Header area: two buttons to move, and month
+    let content = generateCalendarHeader(
+        `<th colspan="3">
+                <div class="cal-switch" id="prev-month-switch">
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevTwoWeeks(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-left"></i></a>
+                </div>            
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
+                    <h3 class="cal-year-title" >${view_year}</h3>
+                </div>
+            </th>
+            <th colspan="3">
+                <div class="cal-switch" id="next-month-switch">
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextTwoWeeks(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-right"></i></a>
+                </div>            
+            </th>`);
+    console.log(view_day, startWeekday, currentDay);
+    // Show days at the end of last month that belongs to the first week of current month
+    const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+    const lastMonthStart = lastMonthEnd + 1 - startWeekday;
+    const daysInMonth = new Date(view_year, view_month, 0).getDate();
+    let print_day = 0;
+    // If last months days should show, generate them.
+    if(view_day-currentDay <= 0 ){
+        for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
+            content += generateDayCell(view_year, view_month - 1, day, view_month);
+            print_day++
+        }
+    }
+
+    // Make the day cells before the "current" date
+    if (print_day < currentDay) {
+        for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
+            content += generateDayCell(view_year, view_month, day, view_month);
+            print_day++
+        }
+    }
+
+    // Make the "current" day, and the days after in the month 
+    for (let day = view_day; print_day <= 13 && day <= daysInMonth; day++) {
+        content += generateDayCell(view_year, view_month, day, view_month);
+        print_day++
+        // If the day is the last day of the week, make a new row
+        if (print_day === 7) {
+            content += `
+                </tr>
+                <tr>
+            `;
+        }
+    }
+
+    // Makes any days that spill into the next month
+    for (let day = 1; print_day <= 13; day++) {
+        content += generateDayCell(view_year, view_month + 1, day, view_month);
+        print_day++
+        // If the day is the last day of the week, make a new row
+        if (print_day === 7) {
+            content += `
+                </tr>
+                <tr>
+            `;
+        }
+    }
+    content += `
+        </tr>
+        </tbody>
+    </table> 
+    `;
+    return content;
+}
+
+/**
  * Creates a calendar of the entire semester.
  *
  * @param start the start date of the semester in the format of YYYY-mm-dd
@@ -331,7 +566,7 @@ function generateFullCalendar(start, end, semester_name) {
     const currDate = startDate;
 
 
-    const startWeekday = startDate.getDay();
+    const startWeekday = start();
     // Skip days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
         content += `<td class="cal-day-cell" colspan="${startWeekday}"></td>`;
@@ -372,8 +607,16 @@ function generateFullCalendar(start, end, semester_name) {
  * @param month_ : int month that the calendar will show (1 as January and 12 as December)
  * @param year_ : int year that the calendar will show
  */
-function loadCalendar(month_, year_) {
-    $('#full-calendar').html(generateCalendarOfMonth(year_, month_));
+function loadCalendar(month_, year_, day_, type) {
+    if (type === 'month') {
+        $('#full-calendar').html(generateCalendarOfMonth(year_, month_));
+    }
+    else if (type === 'two_week') {
+        $('#full-calendar').html(generateCalendarOfMonthTwoWeek(year_, month_, day_));
+    }
+    else if (type === 'one_week') {
+        $('#full-calendar').html(generateCalendarOfMonthWeek(year_, month_, day_));
+    }
     $('.calendar-item-edit-button').on('click', function () {
         const dataset = this.dataset;
         editCalendarItemForm(dataset.type, window.atob(dataset.text), dataset.id, dataset.date);
@@ -394,3 +637,4 @@ function loadFullCalendar(start, end, semester_name) {
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
+

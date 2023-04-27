@@ -56,6 +56,10 @@ a.cal-btn:focus {
     text-align: left;
 }
 
+#calendar-item-type-edit{
+    float: right;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;

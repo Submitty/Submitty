@@ -11,13 +11,6 @@
 #   WORKER_PAIR=1 vagrant up
 #
 #
-# If you want to override the default image used for the virtual machines, you can set the
-# environment variable VAGRANT_BOX. See https://vagrantup.com/boxes/search for a list of
-# distributed boxes. For example:
-#
-# VAGRANT_BOX=ubuntu/focal64 vagrant up
-#
-#
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
 # variable EXTRA set. The easiest way to do this is doing:
 #
@@ -59,12 +52,13 @@ VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
-base_boxes = Hash[]
+box_name = "bento/ubuntu-20.04"
 
-# Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-20.04"
-base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2004"
+arm_mac = Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1') || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M2'))
+
+if arm_mac
+  box_name = "perk/ubuntu-20.04-arm64"
+end
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -73,27 +67,29 @@ def mount_folders(config, mount_options)
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
 
   optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
     end
   }
 end
 
 Vagrant.configure(2) do |config|
-  if Vagrant.has_plugin?('vagrant-env')
-    config.env.enable
+  if Vagrant.has_plugin?('env')
+    config.env.enable # env file plugin
   end
 
-  config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
+  if ENV.has_key?('VAGRANT_BOX')
+    box_name = ENV['VAGRANT_BOX']
+  end
 
   mount_options = []
 
-  # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
+  # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
   # Specify the various machines that we might develop on. After defining a name, we
@@ -102,6 +98,7 @@ Vagrant.configure(2) do |config|
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
+    ubuntu.vm.box = box_name
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "172.18.2.8"
@@ -111,10 +108,11 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
+    ubuntu.vm.box = box_name
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511                     # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443                     # Websockets
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442                    # database
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: (arm_mac ? 7001 : 7000)  # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
@@ -159,13 +157,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
-    unless ENV.has_key?('VAGRANT_BOX')
-      arch = `uname -m`.chomp
-      if (arch == 'arm64' || arch == 'aarch64')
-        override.vm.box = base_boxes[:arm_parallels]
-      end
-    end
-
     prl.memory = 2048
     prl.cpus = 2
 
@@ -179,17 +170,12 @@ Vagrant.configure(2) do |config|
     mount_folders(override, [])
   end
 
-  config.vm.provider "libvirt" do |libvirt, override|
-      unless ENV.has_key?('VAGRANT_BOX')
-        override.vm.box = base_boxes[:libvirt]
-      end
+  config.vm.provider "qemu" do |qe, override|
+    qe.memory = "2G"
+    qe.smp = 2
+    qe.ssh_port = 2222
 
-      libvirt.memory = 2048
-      libvirt.cpus = 2
-
-      libvirt.forward_ssh_port = true
-
-      mount_folders(override, [])
+    mount_folders(override, [])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
