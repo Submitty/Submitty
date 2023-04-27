@@ -389,12 +389,16 @@ function updateAnnotations() {
         let hasTranslate = false;
 
         if (transform) {
-            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
-                hasTranslate = true;
-                x = x ? parseFloat(x) : 0;
-                y = y ? parseFloat(y) : 0;
+            const updatedTransform = transform.replace(/(translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\))?/, (match, wholeMatch, x, y) => {
+                if (wholeMatch) {
+                    hasTranslate = true;
+                    x = x ? parseFloat(x) : 0;
+                    y = y ? parseFloat(y) : 0;
 
-                return `translate(${x}, ${y})`;
+                    return `translate(${x}, ${y})`;
+                } else {
+                    return match; // Return the original match if there's no "translate" property
+                }
             });
 
             transform = updatedTransform;
