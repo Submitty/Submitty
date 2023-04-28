@@ -31,6 +31,7 @@ distro==1.8.0
 jsonschema==3.2.0
 jsonref==0.2
 docker==6.0.1
+urllib3==1.26.14
 
 # For Lichen / Plagiarism Detection
 parso==0.8.3
