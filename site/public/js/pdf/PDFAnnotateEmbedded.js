@@ -202,6 +202,8 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
+        updateAnnotations();
+        
         let currentTool;
         let NUM_PAGES = 0;
 
@@ -389,16 +391,13 @@ function updateAnnotations() {
         let hasTranslate = false;
 
         if (transform) {
-            const updatedTransform = transform.replace(/(translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\))?/, (match, wholeMatch, x, y) => {
-                if (wholeMatch) {
-                    hasTranslate = true;
-                    x = x ? parseFloat(x) : 0;
-                    y = y ? parseFloat(y) : 0;
+            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
+                hasTranslate = true;
 
-                    return `translate(${x}, ${y})`;
-                } else {
-                    return match; // Return the original match if there's no "translate" property
-                }
+                x = x !== undefined ? parseFloat(x) : 0;
+                y = y !== undefined ? parseFloat(y) : 0;
+
+                return `translate(${x}, ${y})`;
             });
 
             transform = updatedTransform;
