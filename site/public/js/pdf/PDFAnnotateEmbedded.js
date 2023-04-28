@@ -203,7 +203,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
         updateAnnotations();
-        
+
         let currentTool;
         let NUM_PAGES = 0;
 
