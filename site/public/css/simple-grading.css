@@ -54,8 +54,14 @@ tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
 }
 
 #data-table td:focus,
+#data-table textarea:focus,
 #data-table input:focus {
     outline: 3px dashed var(--standard-medium-blue);
+}
+
+#data-table textarea[data-typing="true"]:focus,
+#data-table input[data-typing="true"]:focus {
+    outline-style: solid;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
