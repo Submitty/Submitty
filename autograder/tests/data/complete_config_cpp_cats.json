@@ -202,7 +202,7 @@
                 }
             ],
             "timestamped_stdout": false,
-            "title": "Regular char by char comparision",
+            "title": "Regular char by char comparison",
             "use_router": false,
             "validation": [
                 {
@@ -448,7 +448,7 @@
                 }
             ],
             "timestamped_stdout": false,
-            "title": "Regular char by char comparision NO PARTIAL CREDIT",
+            "title": "Regular char by char comparison NO PARTIAL CREDIT",
             "use_router": false,
             "validation": [
                 {

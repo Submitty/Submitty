@@ -250,7 +250,7 @@ function loadUser1VersionDropdownList(state) {
 
         refreshUser1VersionDropdown(state);
 
-        // reload conents of panel 1 (async)
+        // reload contents of panel 1 (async)
         loadConcatenatedFileForEditor(state, 1);
 
         // update user 2 dropdown, will call other functions to update panel 2 (async)
@@ -372,7 +372,7 @@ function requestAjaxData(url, f, es) {
             f(data.data, es);
         },
         error: function() {
-            alert('Error occured when requesting via ajax. Please refresh the page and try again.');
+            alert('Error occurred when requesting via ajax. Please refresh the page and try again.');
         },
     });
 }

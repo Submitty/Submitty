@@ -5,6 +5,7 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\models\User;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -79,6 +80,18 @@ class ForumThreadView extends AbstractView {
 
         $thread_list = [];
 
+        $is_instructor_full_access = [];
+
+        $posts_in_threads = $this->core->getQueries()->getPostsInThreads(array_keys($threadArray));
+        $author_user_ids = array_map(function ($post) {
+            return $post["author_user_id"];
+        }, $posts_in_threads);
+        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+        foreach ($author_user_groups as $author) {
+            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+        }
+
         foreach ($threadArray as $thread_id => $data) {
             $thread_title = $fromIdtoTitle[$thread_id];
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
@@ -87,9 +100,13 @@ class ForumThreadView extends AbstractView {
             foreach ($data as $post) {
                 $author = $post['author'];
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-                $first_name = trim($user_info["first_name"]);
-                $last_name = trim($user_info["last_name"]);
-                $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
+                $given_name = trim($user_info["given_name"]);
+                $family_name = trim($user_info["family_name"]);
+                $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
+
+                if ($is_instructor_full_access[$post["p_author"]]) {
+                    $visible_username = $given_name . " " . $family_name;
+                }
 
                 if ($post["anonymous"]) {
                     $visible_username = 'Anonymous';
@@ -160,6 +177,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+            $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('websocket.js');
@@ -430,6 +449,18 @@ class ForumThreadView extends AbstractView {
         $totalAttachments = 0;
         $GLOBALS['totalAttachments'] = 0;
 
+        $author_user_groups_map = [];
+
+        $author_user_ids = array_map(function ($post) {
+            return $post["author_user_id"];
+        }, $posts);
+
+        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+        foreach ($author_user_groups as $author) {
+            $author_user_groups_map[$author["user_id"]] = $author["user_group"];
+        }
+
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -469,6 +500,8 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
+                        $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
+
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
 
                         break;
@@ -487,6 +520,8 @@ class ForumThreadView extends AbstractView {
                 }
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
+
+                $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
 
@@ -709,6 +744,16 @@ class ForumThreadView extends AbstractView {
 
         $thread_content = [];
 
+        $is_instructor_full_access = [];
+        $author_user_ids = array_map(function ($thread) {
+            return $thread["created_by"];
+        }, $threads);
+        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
+
+        foreach ($author_user_groups as $author) {
+            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+        }
+
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
@@ -743,10 +788,14 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']) {
+            $isNewThread = !$this->core->getQueries()->viewedThread($current_user, $thread["id"]);
+            if ($isNewThread) {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
+                if ($isNewThread) {
+                    $class .= " deleted-unviewed";
+                }
                 $class .= " deleted";
             }
 
@@ -839,14 +888,19 @@ class ForumThreadView extends AbstractView {
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
                 $email = trim($user_info['user_email']);
-                $first_name = trim($user_info["first_name"]);
-                $last_name = trim($user_info["last_name"]);
+                $given_name = trim($user_info["given_name"]);
+                $family_name = trim($user_info["family_name"]);
+                $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
+
+                if ($is_instructor_full_access[$first_post["author_user_id"]]) {
+                    $visible_username = $given_name . " " . $family_name;
+                }
 
                 $author_info = [
                     "user_id" => $first_post['author_user_id'],
-                    "name" => $first_post['anonymous'] ? "Anonymous" : $first_name . " " . substr($last_name, 0, 1) . ".",
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $visible_username,
                     "email" => $email,
-                    "full_name" => $first_name . " " . $last_name . " (" . $first_post['author_user_id'] . ")",
+                    "full_name" => $given_name . " " . $family_name . " (" . $first_post['author_user_id'] . ")",
                 ];
                 $thread_info = array_merge($thread_info, [
                     "post_id" => $first_post["id"],
@@ -940,13 +994,17 @@ class ForumThreadView extends AbstractView {
 
         $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
         $author_email = trim($user_info['user_email']);
-        $first_name = trim($user_info["first_name"]);
-        $last_name = trim($user_info["last_name"]);
-        $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
+        $given_name = trim($user_info["given_name"]);
+        $family_name = trim($user_info["family_name"]);
+        $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
         if ($display_option != 'tree') {
             $reply_level = 1;
+        }
+
+        if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
+            $visible_username = $given_name . " " . $family_name;
         }
 
         if ($post["anonymous"]) {
@@ -956,9 +1014,11 @@ class ForumThreadView extends AbstractView {
         if ($first && $display_option != 'alpha') {
             $classes[] = "first_post";
         }
+        $isNewPost = false;
         if (in_array($post_id, $unviewed_posts)) {
             if ($current_user != $post["author_user_id"]) {
                 $classes[] = "new_post";
+                $isNewPost = true;
             }
         }
         else {
@@ -969,6 +1029,9 @@ class ForumThreadView extends AbstractView {
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
+            if ($isNewPost) {
+                $classes[] = "deleted-unviewed";
+            }
             $deleted = true;
         }
         else {
@@ -988,7 +1051,7 @@ class ForumThreadView extends AbstractView {
 
         $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
-            $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
+            $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
@@ -1287,8 +1350,8 @@ class ForumThreadView extends AbstractView {
         $userData = [];
 
         foreach ($users as $user => $details) {
-            $first_name = $details["first_name"];
-            $last_name = $details["last_name"];
+            $given_name = $details["given_name"];
+            $family_name = $details["family_name"];
             $post_count = count($details["posts"]);
             $posts = json_encode($details["posts"]);
             $ids = json_encode($details["id"]);
@@ -1298,8 +1361,8 @@ class ForumThreadView extends AbstractView {
             $num_deleted = ($details["num_deleted_posts"]);
 
             $userData[] = [
-                "last_name" => $last_name,
-                "first_name" => $first_name,
+                "family_name" => $family_name,
+                "given_name" => $given_name,
                 "post_count" => $post_count,
                 "details_total_threads" => $details["total_threads"],
                 "num_deleted" => $num_deleted,

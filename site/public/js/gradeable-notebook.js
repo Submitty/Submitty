@@ -315,7 +315,7 @@ $(document).ready(() => {
     $('.sa-clear-reset').click(function() {
 
         // Collect the id of the button and split it apart to find out which short answer it is bound to
-        // and which action it preforms
+        // and which action it performs
         const items = this.id.split('_');
 
         const index_num = items[2];

@@ -87,7 +87,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
- * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
@@ -1036,7 +1035,7 @@ class Gradeable extends AbstractModel {
     private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
+            throw new \InvalidArgumentException('Gradeable id must be alphanumeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -1144,7 +1143,7 @@ class Gradeable extends AbstractModel {
         $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
+                throw new \InvalidArgumentException('Object in components array was not a component');
             }
         }
 
@@ -1780,7 +1779,7 @@ class Gradeable extends AbstractModel {
                     'graded_components' => 0,
                 ];
                 if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                 }
             }
