@@ -87,7 +87,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
- * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)

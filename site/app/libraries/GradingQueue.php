@@ -308,11 +308,11 @@ class GradingQueue {
                 $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60 * 24);
             }
             // Calculate the hours elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":";
+            $elapsed_time .= str_pad(strval(floor($job_file["elapsed_time"] / (60 * 60))), 2, "0", STR_PAD_LEFT) . ":";
             $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60);
             // Format the string with the minutes and seconds elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60), 2, "0", STR_PAD_LEFT) . ":"
-                . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT);
+            $elapsed_time .= str_pad(strval(floor($job_file["elapsed_time"] / 60)), 2, "0", STR_PAD_LEFT) . ":"
+                . str_pad(strval($job_file["elapsed_time"] % 60), 2, "0", STR_PAD_LEFT);
             $ongoing_job_info[$machine][] = [
                 "semester" => $file_segments[0],
                 "course" => $file_segments[1],
