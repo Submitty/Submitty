@@ -288,7 +288,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     const parent_post = $(`#${parent_id}`);
                     if (parent_post.hasClass('first_post')) {
                         if (forum_display_setting === 'reverse-tree') {
-                            $(new_post).insertBefore('.first_post').hide().fadeIn();
+                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
                         else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
@@ -310,7 +310,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             }
                             else {
                                 if (forum_display_setting === 'reverse-time') {
-                                    $(new_post).insertBefore('.first_post').hide().fadeIn();
+                                    $(new_post).insertAfter('#current-thread').hide().fadeIn();
                                 }
                                 else {
                                     $(new_post).insertBefore('#post-hr').hide().fadeIn();
