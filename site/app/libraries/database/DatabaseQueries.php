@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -23,7 +24,6 @@ use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
-use app\models\PollModel;
 use app\models\SimpleStat;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
@@ -158,7 +158,7 @@ class DatabaseQueries {
     }
 
     /**
-     * Gets a list of first and last names from the database given an array of IDs.
+     * Gets a list of given and family names from the database given an array of IDs.
      *
      * @param array $user_id_list
      * @return array|null
@@ -177,9 +177,9 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_firstname,''), user_firstname) as user_firstname, COALESCE(NULLIF(user_preferred_lastname,''), user_lastname) as user_lastname
+        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) as user_givenname, COALESCE(NULLIF(user_preferred_familyname,''), user_familyname) as user_familyname
         FROM users
-        ORDER BY registration_section, user_lastname, user_firstname, user_id),
+        ORDER BY registration_section, user_familyname, user_givenname, user_id),
         B AS
         (SELECT distinct on (user_id) user_id, timestamp
         FROM gradeable_access where user_id is not NULL
@@ -205,7 +205,7 @@ class DatabaseQueries {
         FROM queue
         ORDER BY user_id, time_in desc)
         SELECT
-        A.registration_section, A.user_id, A.user_firstname, user_lastname,
+        A.registration_section, A.user_id, A.user_givenname, user_familyname,
         B.timestamp as gradeable_access,
         C.submission_time as gradeable_submission,
         D.timestamp as forum_view,
@@ -220,7 +220,7 @@ class DatabaseQueries {
         left join E on A.user_id=E.author_user_id
         left join F on A.user_id=F.student_id
         left join G on A.user_id=G.user_id
-        ORDER BY length(A.registration_section), A.registration_section, A.user_lastname, A.user_firstname, A.user_id;
+        ORDER BY length(A.registration_section), A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
         ");
         return $this->course_db->rows();
     }
@@ -429,13 +429,13 @@ SQL;
      */
     public function insertSubmittyUser(User $user) {
         $array = [$user->getId(), $user->getPassword(), $user->getNumericId(),
-                       $user->getLegalFirstName(), $user->getPreferredFirstName(),
-                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
+                       $user->getLegalGivenName(), $user->getPreferredGivenName(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
 
         $this->submitty_db->query(
-            "INSERT INTO users (user_id, user_password, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+            "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $array
         );
@@ -767,6 +767,15 @@ SQL;
         return $this->course_db->rows();
     }
 
+    public function getPostsInThreads($thread_ids) {
+        if (count($thread_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM posts where deleted = false and thread_id in {$placeholders} ORDER BY timestamp ASC", $thread_ids);
+        return $this->course_db->rows();
+    }
+
     public function getPostHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", [$post_id]);
         return $this->course_db->rows();
@@ -816,6 +825,15 @@ SQL;
     public function isStaffPost($author_id) {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
+    }
+
+    public function getAuthorUserGroups($author_ids) {
+        if (count($author_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($author_ids));
+        $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
+        return $this->course_db->rows();
     }
 
     public function postHasHistory($post_id) {
@@ -1053,8 +1071,8 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $course
      */
     public function updateUser(User $user, $semester = null, $course = null) {
-        $params = [$user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
-                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(), $user->getSecondaryEmail(),
+        $params = [$user->getNumericId(), $user->getPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
                        $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
@@ -1075,8 +1093,8 @@ VALUES (?,?,?,?,?,?)",
             "
 UPDATE users
 SET
-  user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
-  user_lastname=?, user_preferred_lastname=?,
+  user_numeric_id=?, user_pronouns=?, user_givenname=?, user_preferred_givenname=?,
+  user_familyname=?, user_preferred_familyname=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
@@ -1243,7 +1261,7 @@ WHERE semester=? AND course=? AND user_id=?",
         return count($this->course_db->rows()) > 0 && $this->course_db->rows()[0]['autograding_complete'] === true;
     }
 
-    protected function createParamaterList($len) {
+    protected function createParameterList($len) {
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
@@ -1309,7 +1327,7 @@ WHERE semester=? AND course=? AND user_id=?",
         if ($user_id != null) {
             $query = "SELECT * FROM late_days WHERE user_id";
             if (is_array($user_id)) {
-                $query .= ' IN ' . $this->createParamaterList(count($user_id));
+                $query .= ' IN ' . $this->createParameterList(count($user_id));
                 $params = $user_id;
             }
             else {
@@ -1605,7 +1623,7 @@ WHERE semester=? AND course=? AND user_id=?",
                 "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",
                 $orderBy
             );
-            $values = $this->createParamaterList(count($sections));
+            $values = $this->createParameterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
@@ -1628,7 +1646,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $params = [];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE {$section_key} IN " . $this->createParameterList(count($sections));
             $params = $sections;
         }
         if ($section_key === 'registration_section') {
@@ -1662,7 +1680,7 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
@@ -1702,7 +1720,7 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
@@ -1832,7 +1850,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParameterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2151,7 +2169,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $sections_query = "{$grade_type}_section IN " . $this->createParameterList(count($sections));
             $params = array_merge($sections, $params);
         }
 
@@ -2187,7 +2205,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $sections_query = "{$grade_type}_section IN " . $this->createParameterList(count($sections));
             $params = array_merge($sections, $params);
         }
 
@@ -2262,7 +2280,7 @@ AND rotating_section IS NOT NULL;"
         $params = [];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE sections_registration_id IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE sections_registration_id IN " . $this->createParameterList(count($sections));
             $params = $sections;
         }
         $this->course_db->query(
@@ -2300,7 +2318,7 @@ ORDER BY SUBSTRING(g.sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(g
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = " AND sections_rotating_id IN " . $this->createParamaterList(count($sections));
+            $where = " AND sections_rotating_id IN " . $this->createParameterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2356,7 +2374,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getUsersByRotatingSections($sections, $orderBy = "rotating_section") {
         $return = [];
         if (count($sections) > 0) {
-            $placeholders = $this->createParamaterList(count($sections));
+            $placeholders = $this->createParameterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
@@ -2511,8 +2529,8 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getGradersByUserType() {
         $this->course_db->query(
             "SELECT
-                COALESCE(NULLIF(user_preferred_firstname, ''), user_firstname) AS user_firstname,
-                COALESCE(NULLIF(user_preferred_lastname, ''), user_lastname) AS user_lastname,
+                COALESCE(NULLIF(user_preferred_givenname, ''), user_givenname) AS user_givenname,
+                COALESCE(NULLIF(user_preferred_familyname, ''), user_familyname) AS user_familyname,
                 user_id,
                 user_group
             FROM
@@ -2525,7 +2543,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $users = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $users[$row['user_group']][] = [$row['user_id'], $row['user_firstname'], $row['user_lastname']];
+            $users[$row['user_group']][] = [$row['user_id'], $row['user_givenname'], $row['user_familyname']];
         }
         return $users;
     }
@@ -2677,14 +2695,14 @@ ORDER BY user_id ASC"
     }
 
     /**
-     * Updates all given Users in $users array to have rotating section $section
+     * Updates all given users in $users array to have rotating section $section
      *
      * @param integer $section
-     * @param User[] $users
+     * @param array<string> $users An array of user IDs
      */
-    public function updateUsersRotatingSection($section, $users) {
+    public function updateUsersRotatingSection(int $section, array $users) {
         $update_array = array_merge([$section], $users);
-        $placeholders = $this->createParamaterList(count($users));
+        $placeholders = $this->createParameterList(count($users));
         $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$placeholders}", $update_array);
     }
 
@@ -2985,7 +3003,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @return array
      */
     public function getSession($session_id) {
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=?", [$session_id]);
+        // We only ever want to get sessions which aren't expired.  Don't rely upon other PHP code checking for this...
+        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=? AND session_expires > current_timestamp", [$session_id]);
         return $this->submitty_db->row();
     }
 
@@ -2999,30 +3018,22 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
             "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?,?,?,current_timestamp + interval '336 hours')",
-            [$session_id, $user_id, $csrf_token]
+                                   VALUES(?, ?, ?, current_timestamp + ?::interval)",
+            [$session_id, $user_id, $csrf_token, SessionManager::SESSION_EXPIRATION]
         );
     }
 
     /**
-     * Updates a given session by setting it's expiration date to be 2 weeks into the future
+     * Updates a given session by setting its expiration date to be 2 weeks into the future
      *
      * @param string $session_id
      */
     public function updateSessionExpiration($session_id) {
         $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours')
+            "UPDATE sessions SET session_expires=(current_timestamp + ?::interval)
                                    WHERE session_id=?",
-            [$session_id]
+            [SessionManager::SESSION_EXPIRATION, $session_id]
         );
-    }
-
-    /**
-     * Remove sessions which have their expiration date before the
-     * current timestamp
-     */
-    public function removeExpiredSessions() {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 
     /**
@@ -3150,6 +3161,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$team_id, $g_id, $registration_section, $rotating_section, $team_name];
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section, team_name) VALUES(?,?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", [$team_id, $user_id]);
+        $this->core->getQueries()->getTeamById($team_id)->getAnonId();
         return $team_id;
     }
 
@@ -3192,7 +3204,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function updateTeamsRotatingSection($team_ids, $section, $g_id) {
         $update_array = array_merge([$section, $g_id], $team_ids);
-        $placeholders = $this->createParamaterList(count($team_ids));
+        $placeholders = $this->createParameterList(count($team_ids));
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE g_id=? AND team_id IN {$placeholders}", $update_array);
     }
 
@@ -3434,12 +3446,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
     /**
      * Edit the user's message from table seeking_team
-     *
-     * @param string $g_id
-     * @param string $user_id
-     * @param string $message
      */
-    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+    public function updateSeekingTeamMessageById(string $g_id, string $user_id, ?string $message) {
         $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
     }
 
@@ -3458,7 +3466,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             [$g_id, $user_id]
         );
 
-        return $this->course_db->rows()[0]['message'];
+        $row = $this->course_db->row();
+        if (count($row) === 0) {
+            return null;
+        }
+        return $row['message'];
     }
 
     /**
@@ -3497,7 +3509,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
+            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $this->course_db->query(
@@ -3531,7 +3543,7 @@ ORDER BY {$section_key}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
@@ -3562,7 +3574,7 @@ ORDER BY {$section_key}",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
+            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
@@ -3602,7 +3614,7 @@ ORDER BY {$orderBy}",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
+            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
@@ -3643,7 +3655,7 @@ ORDER BY {$orderBy}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE {$section_key} IN " . $this->createParameterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -3672,8 +3684,8 @@ ORDER BY gt.{$section_key}",
     public function getUsersWithLateDays() {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname, user_preferred_firstname,
-          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp
+        SELECT u.user_id, user_givenname, user_preferred_givenname,
+          user_familyname, user_preferred_familyname, allowed_late_days, since_timestamp
         FROM users AS u
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id
@@ -3698,8 +3710,8 @@ ORDER BY gt.{$section_key}",
     public function getUsersWithExtensions($gradeable_id) {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, late_day_exceptions
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, late_day_exceptions
         FROM users as u
         FULL OUTER JOIN late_day_exceptions as l
           ON u.user_id=l.user_id
@@ -3740,8 +3752,8 @@ ORDER BY gt.{$section_key}",
     public function getRawUsersWithOverriddenGrades(string $gradeable_id): array {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, marks, comment
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, marks, comment
         FROM users as u
         FULL OUTER JOIN grade_override as g
           ON u.user_id=g.user_id
@@ -3763,8 +3775,8 @@ ORDER BY gt.{$section_key}",
     public function getAUserWithOverriddenGrades($gradeable_id, $user_id) {
         $this->course_db->query(
             "
-        SELECT u.user_id, user_firstname,
-          user_preferred_firstname, user_lastname, marks, comment
+        SELECT u.user_id, user_givenname,
+          user_preferred_givenname, user_familyname, marks, comment
         FROM users as u
         FULL OUTER JOIN grade_override as g
           ON u.user_id=g.user_id
@@ -3782,9 +3794,9 @@ ORDER BY gt.{$section_key}",
 SELECT
     u.user_id,
     g.g_id,
-    u.user_firstname,
-    u.user_preferred_firstname,
-    u.user_lastname,
+    u.user_givenname,
+    u.user_preferred_givenname,
+    u.user_familyname,
     g.marks,
     g.comment
 FROM users as u
@@ -4172,7 +4184,7 @@ SQL;
         else {
             $params = $grader;
         }
-        $grader_list = $this->createParamaterList(count($params));
+        $grader_list = $this->createParameterList(count($params));
         $params[] = $gradeable_id;
         $this->course_db->query(
             "SELECT COUNT(*) as cnt
@@ -4193,7 +4205,7 @@ AND gc_id IN (
         $where = "";
         $params = [];
         if (count($sections) > 0) {
-            $where = "WHERE registration_section IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE registration_section IN " . $this->createParameterList(count($sections));
             $params = $sections;
         }
         $params[] = $gradeable_id;
@@ -4228,7 +4240,7 @@ AND gc_id IN (
         $where = "";
         $params = [];
         if (count($sections) > 0) {
-            $where = "WHERE rotating_section IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE rotating_section IN " . $this->createParameterList(count($sections));
             $params = $sections;
         }
         $params[] = $gradeable_id;
@@ -4284,11 +4296,11 @@ AND gc_id IN (
     }
 
     public function getDisplayUserInfoFromUserId($user_id) {
-        $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email FROM users WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
         $ar = [];
-        $ar["first_name"] = (empty($name_rows["user_preferred_firstname"])) ? $name_rows["user_firstname"]      : $name_rows["user_preferred_firstname"];
-        $ar["last_name"]  = (empty($name_rows["user_preferred_lastname"]))  ? " " . $name_rows["user_lastname"] : " " . $name_rows["user_preferred_lastname"];
+        $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
+        $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
         return $ar;
     }
@@ -4362,15 +4374,15 @@ AND gc_id IN (
         $param_list[] = $thread_id;
         $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
         if ($option == 'alpha') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp, posts.id;", [$thread_id]);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_familyname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_familyname, posts.timestamp, posts.id;", [$thread_id]);
         }
         elseif ($option == 'alpha_by_registration') {
-            $order = self::generateOrderByClause(["registration_section", "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_lastname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
+            $order = self::generateOrderByClause(["registration_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
         }
         elseif ($option == 'alpha_by_rotating') {
-            $order = self::generateOrderByClause(["rotating_section", "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_lastname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
+            $order = self::generateOrderByClause(["rotating_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
         }
         elseif ($option == 'reverse-time') {
             $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC, id ASC", array_reverse($param_list));
@@ -4478,7 +4490,7 @@ AND gc_id IN (
      */
     public function getAnonId($user_ids, $g_id) {
         $params = (is_array($user_ids)) ? $user_ids : [$user_ids];
-        $question_marks = $this->createParamaterList(count($params));
+        $question_marks = $this->createParameterList(count($params));
         $params[] = $g_id;
         if (count($params) < 2) {
             return [];
@@ -4494,7 +4506,7 @@ AND gc_id IN (
     public function getTeamAnonId($team_id) {
         $params = (is_array($team_id)) ? $team_id : [$team_id];
 
-        $question_marks = $this->createParamaterList(count($params));
+        $question_marks = $this->createParameterList(count($params));
         $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE team_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
@@ -4505,7 +4517,7 @@ AND gc_id IN (
 
     public function getUserFromAnon($anon_id, $g_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
-        $question_marks = $this->createParamaterList(count($params));
+        $question_marks = $this->createParameterList(count($params));
         $params[] = $g_id;
         $this->course_db->query("SELECT anon_id, user_id FROM gradeable_anon WHERE anon_id IN {$question_marks} AND g_id=?", $params);
         $return = [];
@@ -4518,7 +4530,7 @@ AND gc_id IN (
     public function getTeamIdFromAnonId($anon_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
 
-        $question_marks = $this->createParamaterList(count($params));
+        $question_marks = $this->createParameterList(count($params));
         $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
@@ -4595,7 +4607,7 @@ AND gc_id IN (
      */
     public function getUsersNotificationSettings(array $user_ids) {
         $params = $user_ids;
-        $user_id_query = $this->createParamaterList(count($user_ids));
+        $user_id_query = $this->createParameterList(count($user_ids));
         $query = "SELECT * FROM notification_settings WHERE user_id in " . $user_id_query;
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
@@ -4904,7 +4916,7 @@ AND gc_id IN (
         if (count($grade_inquiries) == 0) {
             return [];
         }
-        $grade_inquiry_ids = $this->createParamaterList(count($grade_inquiries));
+        $grade_inquiry_ids = $this->createParameterList(count($grade_inquiries));
         $params = array_map(
             function ($grade_inquiry) {
                 return $grade_inquiry->getId();
@@ -4944,8 +4956,8 @@ AND gc_id IN (
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
-        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", [$regrade_id]);
     }
 
     public function deleteGradeable($g_id) {
@@ -5014,6 +5026,7 @@ AND gc_id IN (
               g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
+              gamo.*,
               gc.*,
               (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
@@ -5052,6 +5065,14 @@ AND gc_id IN (
                   eg_depends_on_points as depends_on_points
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
+              LEFT JOIN (
+                SELECT
+                  g_id AS gamo_g_id,
+                  json_agg(user_id) AS gamo_users,
+                  json_agg(allowed_minutes) AS gamo_minutes
+                FROM gradeable_allowed_minutes_override
+                GROUP BY gamo_g_id
+              ) AS gamo ON g.g_id=gamo.gamo_g_id
               LEFT JOIN (
                 SELECT
                   g_id AS gc_g_id,
@@ -5107,7 +5128,18 @@ AND gc_id IN (
 
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
-            $gradeable->setAllowedMinutesOverrides($this->getGradeableMinutesOverride($gradeable->getId()));
+            $overrides = [];
+            $users = json_decode($row['gamo_users']);
+            $minutes = json_decode($row['gamo_minutes']);
+            if ($users !== null) {
+                for ($i = 0; $i < count($users); $i++) {
+                    $overrides[] = [
+                        'user_id' => $users[$i],
+                        'allowed_minutes' => $minutes[$i]
+                    ];
+                }
+            }
+            $gradeable->setAllowedMinutesOverrides($overrides);
 
             // Construct the components
             $component_properties = [
@@ -5469,7 +5501,7 @@ AND gc_id IN (
                 $marks
             )
         );
-        $place_holders = $this->createParamaterList(count($marks));
+        $place_holders = $this->createParameterList(count($marks));
 
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN {$place_holders}", $mark_ids);
         $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id IN {$place_holders}", $mark_ids);
@@ -5626,7 +5658,7 @@ AND gc_id IN (
                 $components
             )
         );
-        $place_holders = $this->createParamaterList(count($components));
+        $place_holders = $this->createParameterList(count($components));
 
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN {$place_holders}", $component_ids);
         $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN {$place_holders}", $component_ids);
@@ -5955,7 +5987,7 @@ AND gc_id IN (
             ],
             $mark_ids
         );
-        $place_holders = $this->createParamaterList(count($mark_ids));
+        $place_holders = $this->createParameterList(count($mark_ids));
         $this->course_db->query(
             "DELETE FROM gradeable_component_mark_data
             WHERE gd_id=? AND gc_id=? AND gcd_grader_id=? AND gcm_id IN {$place_holders}",
@@ -6340,20 +6372,14 @@ AND gc_id IN (
             SELECT ids.id, (CASE WHEN m IS NULL THEN 0 ELSE m END) AS max
             FROM (VALUES $id_placeholders) ids(id)
             LEFT JOIN (
-              (SELECT user_id AS id, active_version as m
+              SELECT COALESCE(user_id, team_id) AS id, active_version as m
               FROM electronic_gradeable_version
-              WHERE g_id = ? AND user_id IS NOT NULL)
-
-              UNION
-
-              (SELECT team_id AS id, active_version as m
-              FROM electronic_gradeable_version
-              WHERE g_id = ? AND team_id IS NOT NULL)
+              WHERE g_id = ? AND (user_id IS NOT NULL OR team_id IS NOT NULL)
             ) AS versions
             ON versions.id = ids.id
         ";
 
-        $params = array_merge($submitter_ids, [$gradeable->getId(), $gradeable->getId()]);
+        $params = array_merge($submitter_ids, [$gradeable->getId()]);
 
         $this->course_db->query($query, $params);
         $versions = [];
@@ -6375,12 +6401,8 @@ AND gc_id IN (
 
     /**
      * Gives true if thread is locked
-     *
-     * @param  int $thread_id
-     * @return bool
      */
-    public function isThreadLocked($thread_id) {
-
+    public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
         if (empty($this->course_db->rows()[0]['lock_thread_date'])) {
             return false;
@@ -6474,12 +6496,58 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where current_state IN ('waiting','being_helped') order by ROW_NUMBER");
+        $query = "
+        SELECT ROW_NUMBER()
+            OVER (order by time_in ASC),
+                queue.*,
+                helper.user_givenname AS helper_givenname,
+                helper.user_preferred_givenname AS helper_preferred_givenname,
+                helper.user_familyname AS helper_familyname,
+                helper.user_preferred_familyname AS helper_preferred_familyname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                helper.user_group AS helper_group
+            FROM queue
+            LEFT JOIN users helper on helper.user_id = queue.help_started_by
+            WHERE current_state IN ('waiting','being_helped')
+            ORDER BY ROW_NUMBER
+        ";
+        $this->course_db->query($query);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $query = "
+        SELECT Row_number()
+            OVER (ORDER BY time_out DESC, time_in DESC),
+                queue.*,
+                helper.user_givenname AS helper_givenname,
+                helper.user_preferred_givenname AS helper_preferred_givenname,
+                helper.user_familyname AS helper_familyname,
+                helper.user_preferred_familyname AS helper_preferred_familyname,
+                helper.user_id AS helper_id,
+                helper.user_email AS helper_email,
+                helper.user_email_secondary AS helper_email_secondary,
+                helper.user_email_secondary_notify AS helper_email_secondary_notify,
+                helper.user_group AS helper_group,
+                remover.user_givenname AS remover_givenname,
+                remover.user_preferred_givenname AS remover_preferred_givenname,
+                remover.user_familyname AS remover_familyname,
+                remover.user_preferred_familyname AS remover_preferred_familyname,
+                remover.user_id AS remover_id,
+                remover.user_email AS remover_email,
+                remover.user_email_secondary AS remover_email_secondary,
+                remover.user_email_secondary_notify AS remover_email_secondary_notify,
+                remover.user_group AS remover_group
+            FROM    queue
+            LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+            LEFT JOIN users remover ON remover.user_id = queue.removed_by
+            WHERE   time_in > ? AND current_state IN ( 'done' )
+            ORDER BY row_number
+        ";
+        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
@@ -6490,7 +6558,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code, $token, $regex_pattern, $require_contact_info) {
+    public function openQueue(string $queue_code, $token, $regex_pattern, $require_contact_info) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -6502,12 +6570,12 @@ AND gc_id IN (
         return true;
     }
 
-    public function getQueueRegex($queue_code) {
+    public function getQueueRegex(string $queue_code) {
         $this->course_db->query("SELECT regex_pattern FROM queue_settings WHERE code = ?", [$queue_code]);
         return $this->course_db->rows();
     }
 
-    public function toggleQueue($queue_code, $state) {
+    public function toggleQueue(string $queue_code, string $state) {
         if ($state === "1") {
             $state = 'false';
         }
@@ -6517,12 +6585,12 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", [$state, $queue_code]);
     }
 
-    public function deleteQueue($queue_code) {
+    public function deleteQueue(string $queue_code) {
         $this->emptyQueue($queue_code);
         $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
     }
 
-    public function getValidatedCode($queue_code, $token = null) {
+    public function getValidatedCode(string $queue_code, string $token = null) {
         //first check if the queue has an access code
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", [$queue_code]);
         if ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['token'] == null) {
@@ -6540,7 +6608,7 @@ AND gc_id IN (
         return false;
     }
 
-    public function alreadyInAQueue($user_id = null) {
+    public function alreadyInAQueue(string $user_id = null) {
         if (is_null($user_id)) {
             $user_id = $this->core->getUser()->getId();
         }
@@ -6548,18 +6616,26 @@ AND gc_id IN (
         return $this->course_db->row()['count'] > 0;
     }
 
-    public function getLastTimeInQueue($user_id, $queue_code) {
+    public function getLastTimeInQueue(string $user_id, string $queue_code) {
         $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL) ", [$user_id, $queue_code]);
         return $this->course_db->rows()[0]['max'];
     }
 
     //Gets the time a student joined the queue they are currently in
-    public function getTimeJoinedQueue($user_id, $queue_code) {
+    public function getTimeJoinedQueue(string $user_id, string $queue_code) {
         $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) ", [$user_id, $queue_code]);
         return $this->course_db->rows()[0]['max'];
     }
 
-    public function getQueueId($queue_code) {
+    public function getStarType(string $user_id, string $queue_code): string {
+        $this->course_db->query("SELECT star_type FROM queue WHERE user_id = ? 
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) 
+            ORDER BY entry_id DESC LIMIT 1", [$user_id, $queue_code]);
+
+        return $this->course_db->row()['star_type'];
+    }
+
+    public function getQueueId(string $queue_code) {
         $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
         return $this->course_db->rows()[0]['id'];
     }
@@ -6570,8 +6646,18 @@ AND gc_id IN (
     }
 
 
-    public function addToQueue($queue_code, $user_id, $name, $contact_info, $time_in = 0) {
+    public function addToQueue(string $queue_code, string $user_id, string $name, $contact_info, $time_in = 0) {
+        $star_type = 'none';
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $one_day_ago = date_sub(new \DateTime('tomorrow', $this->core->getConfig()->getTimezone()), date_interval_create_from_date_string('1 days'));
+        $one_week_ago = date_sub(new \DateTime('tomorrow', $this->core->getConfig()->getTimezone()), date_interval_create_from_date_string('5 days'));
+        if ($last_time_in_queue === null || DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_week_ago) {
+            $star_type = 'full';
+        }
+        elseif (DateUtils::parseDateTime($last_time_in_queue, $this->core->getConfig()->getTimezone()) < $one_day_ago) {
+            $star_type = 'half';
+        }
+
         $entry_time = $time_in == 0 ? $this->core->getDateTimeNow() : $time_in;
         $this->course_db->query("INSERT INTO queue
             (
@@ -6589,7 +6675,8 @@ AND gc_id IN (
                 contact_info,
                 last_time_in_queue,
                 time_paused,
-                time_paused_start
+                time_paused_start,
+                star_type
             ) VALUES (
                 'waiting',
                 NULL,
@@ -6605,11 +6692,12 @@ AND gc_id IN (
                 ?,
                 ?,
                 ?,
-                NULL
-            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0]);
+                NULL,
+                ?
+            )", [$queue_code,$user_id,$name, $entry_time,$user_id,$contact_info,$last_time_in_queue,0,$star_type]);
     }
 
-    public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
+    public function removeUserFromQueue(string $user_id, string $remove_type, string $queue_code) {
         $status_code = null;
         if ($remove_type !== 'self') {//user removing themselves
             $status_code = 'being_helped';//dont allow removing yourself if you are being helped
@@ -6630,10 +6718,19 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $star_type = 'none';
+        $prev_type = $this->getStarType($user_id, $queue_code);
+        if ($prev_type === 'full') {
+            $star_type = 'prev_full';
+        }
+        elseif ($prev_type === 'half') {
+            $star_type = 'prev_half';
+        }
+
+        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id, $queue_code]);
     }
 
-    public function startHelpUser($user_id, $queue_code) {
+    public function startHelpUser(string $user_id, string $queue_code) {
         $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$user_id, $queue_code]);
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("User not in queue");
@@ -6642,17 +6739,31 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue SET current_state = 'being_helped', time_help_start = ?, help_started_by = ? WHERE user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", [$this->core->getDateTimeNow(), $this->core->getUser()->getId(), $user_id, $queue_code]);
     }
 
-    public function finishHelpUser($user_id, $queue_code, $remove_type) {
+    public function finishHelpUser(string $user_id, string $queue_code, string $remove_type) {
         $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$user_id, $queue_code]);
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("User not in queue");
             return false;
         }
 
-        $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+        $star_type = 'none';
+        $current_star_type = $this->getStarType($user_id, $queue_code);
+        if ($current_star_type === 'full') {
+            $star_type = 'prev_full';
+        }
+        elseif ($current_star_type === 'half') {
+            $star_type = 'prev_half';
+        }
+
+        $this->course_db->query(
+            "UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ?, star_type = ? WHERE user_id = ?
+            AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))
+            and current_state IN ('being_helped')",
+            [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(),$star_type,$user_id,$queue_code]
+        );
     }
 
-    public function setQueuePauseState($new_state) {
+    public function setQueuePauseState(bool $new_state) {
         $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
         $time_paused_start = $current_queue_state['time_paused_start'];
         $current_state = $time_paused_start != null;
@@ -6677,11 +6788,11 @@ AND gc_id IN (
         }
     }
 
-    public function emptyQueue($queue_code) {
+    public function emptyQueue(string $queue_code) {
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = ? where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", [$this->core->getUser()->getId(),$this->core->getDateTimeNow(), $queue_code]);
     }
 
-    public function getQueueFromEntryId($entry_id) {
+    public function getQueueFromEntryId(int $entry_id) {
         $this->course_db->query("SELECT * FROM queue WHERE entry_id = ?", [$entry_id]);
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("Invalid Entry ID");
@@ -6690,7 +6801,7 @@ AND gc_id IN (
         return $this->course_db->rows()[0];
     }
 
-    public function restoreUserToQueue($entry_id) {
+    public function restoreUserToQueue(int $entry_id) {
         $row = $this->getQueueFromEntryId($entry_id);
         $user_id = $row['user_id'];
         $queue_code = $row['queue_code'];
@@ -6701,8 +6812,18 @@ AND gc_id IN (
             $this->core->addErrorMessage("Cannot restore a user that is currently in the queue. Please remove them first.");
             return;
         }
+
+        $star_type = 'none';
+        $prev_type = $this->getStarType($user_id, $queue_code);
+        if ($prev_type === 'prev_full') {
+            $star_type = 'full';
+        }
+        elseif ($prev_type === 'prev_half') {
+            $star_type = 'half';
+        }
+
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
-        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ? where entry_id = ?", [$last_time_in_queue, $entry_id]);
+        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ?, star_type = ? where entry_id = ?", [$last_time_in_queue, $star_type, $entry_id]);
         $this->core->addSuccessMessage("Student restored");
     }
 
@@ -6752,7 +6873,22 @@ WHERE current_state IN
     }
 
     public function getCurrentQueueState() {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", [$this->core->getUser()->getId()]);
+        $query = "
+        SELECT
+            queue.*,
+            helper.user_givenname AS helper_givenname,
+            helper.user_preferred_givenname AS helper_preferred_givenname,
+            helper.user_familyname AS helper_familyname,
+            helper.user_preferred_familyname AS helper_preferred_familyname,
+            helper.user_id AS helper_id,
+            helper.user_email AS helper_email,
+            helper.user_email_secondary AS helper_email_secondary,
+            helper.user_email_secondary_notify AS helper_email_secondary_notify,
+            helper.user_group AS helper_group
+        FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+        WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
+        ";
+        $this->course_db->query($query, [$this->core->getUser()->getId()]);
         if ($this->course_db->rows()) {
             return $this->course_db->rows()[0];
         }
@@ -6797,13 +6933,13 @@ WHERE current_state IN
               FROM (SELECT
                 user_id AS id,
                 CASE
-                  WHEN user_preferred_firstname IS NULL THEN user_firstname
-                  ELSE user_preferred_firstname
-                END AS first_name,
+                  WHEN user_preferred_givenname IS NULL THEN user_givenname
+                  ELSE user_preferred_givenname
+                END AS given_name,
                 CASE
-                  WHEN user_preferred_lastname IS NULL THEN user_lastname
-                  ELSE user_preferred_lastname
-                END AS lastname
+                  WHEN user_preferred_familyname IS NULL THEN user_familyname
+                  ELSE user_preferred_familyname
+                END AS familyname
               FROM users
               WHERE user_group = 4) AS user_data
               LEFT JOIN (SELECT
@@ -7061,11 +7197,13 @@ WHERE current_state IN
         else {
             $submitter_data_inject = '
               u.user_id,
+              u.user_numeric_id,
               u.g_anon,
-              u.user_firstname,
-              u.user_preferred_firstname,
-              u.user_lastname,
-              u.user_preferred_lastname,
+              u.user_givenname,
+              u.user_preferred_givenname,
+              u.user_familyname,
+              u.user_pronouns,
+              u.user_preferred_familyname,
               u.user_email,
               u.user_email_secondary,
               u.user_email_secondary_notify,
@@ -7143,9 +7281,10 @@ WHERE current_state IN
               /* Aggregate Gradeable Component Grader Data */
               gcd.array_grader_user_id,
               gcd.array_grader_anon_id,
-              gcd.array_grader_user_firstname,
-              gcd.array_grader_user_preferred_firstname,
-              gcd.array_grader_user_lastname,
+              gcd.array_grader_user_givenname,
+              gcd.array_grader_user_preferred_givenname,
+              gcd.array_grader_user_pronouns,
+              gcd.array_grader_user_familyname,
               gcd.array_grader_user_email,
               gcd.array_grader_user_email_secondary,
               gcd.array_grader_user_email_secondary_notify,
@@ -7159,9 +7298,10 @@ WHERE current_state IN
               
               /* Aggregate Gradeable Component Verifier Data */
               gcd.array_verifier_user_id,
-              gcd.array_verifier_user_firstname,
-              gcd.array_verifier_user_preferred_firstname,
-              gcd.array_verifier_user_lastname,
+              gcd.array_verifier_user_givenname,
+              gcd.array_verifier_user_preferred_givenname,
+              gcd.array_verifier_user_pronouns,
+              gcd.array_verifier_user_familyname,
               gcd.array_verifier_user_email,
               gcd.array_verifier_user_email_secondary,
               gcd.array_verifier_user_email_secondary_notify,
@@ -7233,9 +7373,10 @@ WHERE current_state IN
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.g_anon) AS array_grader_anon_id,
-                  json_agg(ug.user_firstname) AS array_grader_user_firstname,
-                  json_agg(ug.user_preferred_firstname) AS array_grader_user_preferred_firstname,
-                  json_agg(ug.user_lastname) AS array_grader_user_lastname,
+                  json_agg(ug.user_givenname) AS array_grader_user_givenname,
+                  json_agg(ug.user_preferred_givenname) AS array_grader_user_preferred_givenname,
+                  json_agg(ug.user_pronouns) AS array_grader_user_pronouns,
+                  json_agg(ug.user_familyname) AS array_grader_user_familyname,
                   json_agg(ug.user_email) AS array_grader_user_email,
                   json_agg(ug.user_email_secondary) AS array_grader_user_email_secondary,
                   json_agg(ug.user_email_secondary_notify) AS array_grader_user_email_secondary_notify,
@@ -7247,9 +7388,10 @@ WHERE current_state IN
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
                   json_agg(uv.user_id) AS array_verifier_user_id,
-                  json_agg(uv.user_firstname) AS array_verifier_user_firstname,
-                  json_agg(uv.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
-                  json_agg(uv.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(uv.user_givenname) AS array_verifier_user_givenname,
+                  json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
+                  json_agg(uv.user_pronouns) AS array_verifier_user_pronouns,
+                  json_agg(uv.user_familyname) AS array_verifier_user_familyname,
                   json_agg(uv.user_email) AS array_verifier_user_email,
                   json_agg(uv.user_email_secondary) AS array_verifier_user_email_secondary,
                   json_agg(uv.user_email_secondary_notify) AS array_verifier_user_email_secondary_notify,
@@ -7273,7 +7415,7 @@ WHERE current_state IN
                     GROUP BY gc_id, gd_id, gcd_grader_id
                   ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id AND gcmd.gcd_grader_id=in_gcd.gcd_grader_id
 
-                  /* Join grader data; TODO: do we want/need 'sr' information? */
+                  /* Join grader data; TODO: do we want/need 'sr' information */
                   LEFT JOIN (
                     SELECT u.*, ga.anon_id AS g_anon, ga.g_id, grading_registration_sections
                     FROM users u
@@ -7421,9 +7563,10 @@ WHERE current_state IN
             $user_properties = [
                 'user_id',
                 'anon_id',
-                'user_firstname',
-                'user_preferred_firstname',
-                'user_lastname',
+                'user_givenname',
+                'user_preferred_givenname',
+                'user_pronouns',
+                'user_familyname',
                 'user_email',
                 'user_email_secondary',
                 'user_email_secondary_notify',
@@ -7592,7 +7735,7 @@ WHERE current_state IN
      * @return array|null
      */
     private function getUsers(array $user_id_list, bool $is_numeric = false): ?array {
-        $placeholders = $this->createParamaterList(count($user_id_list));
+        $placeholders = $this->createParameterList(count($user_id_list));
 
         if (!$is_numeric) {
             $this->submitty_db->query("SELECT * FROM users WHERE user_id IN {$placeholders}", $user_id_list);
@@ -7762,195 +7905,6 @@ WHERE current_state IN
         }
         return '';
     }
-    //// BEGIN ONLINE POLLING QUERIES ////
-
-    public function addNewPoll($poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $release_histogram) {
-        $this->course_db->query("INSERT INTO polls(name, question, question_type, status, release_date, image_path, release_histogram) VALUES (?, ?, ?, ?, ?, ?, ?)", [$poll_name, $question, $question_type, "closed", $release_date, null, $release_histogram]);
-        $this->course_db->query("SELECT max(poll_id) from polls");
-        $poll_id = $this->course_db->rows()[0]['max'];
-        foreach ($responses as $option_id => $response) {
-            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$option_id, $orders[$option_id], $poll_id, $response]);
-        }
-        foreach ($answers as $answer) {
-            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
-        }
-        return $poll_id;
-    }
-
-    public function endPoll($poll_id) {
-        $this->course_db->query("UPDATE polls SET status = 'ended' where poll_id = ?", [$poll_id]);
-    }
-
-    public function closePoll($poll_id) {
-        $this->course_db->query("UPDATE polls SET status = 'closed' where poll_id = ?", [$poll_id]);
-    }
-
-    public function openPoll($poll_id) {
-        $this->course_db->query("UPDATE polls SET status = 'open' where poll_id = ?", [$poll_id]);
-    }
-
-    public function getPolls() {
-        $polls = [];
-        $this->course_db->query("SELECT * from polls order by poll_id ASC");
-        $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
-
-        foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
-        }
-
-        return $polls;
-    }
-
-    public function getTodaysPolls() {
-        $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date = ? order by name", [date("Y-m-d")]);
-        $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
-
-        foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
-        }
-
-        return $polls;
-    }
-
-    public function getOlderPolls() {
-        $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date < ? order by release_date DESC, name ASC", [date("Y-m-d")]);
-        $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
-
-        foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
-        }
-
-        return $polls;
-    }
-
-    public function getFuturePolls() {
-        $polls = [];
-        $this->course_db->query("SELECT * from polls where release_date > ? order by release_date ASC, name ASC", [date("Y-m-d")]);
-        $polls_rows = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
-
-        foreach ($polls_rows as $row) {
-            $polls[] = $this->getPoll($row["poll_id"]);
-        }
-
-        return $polls;
-    }
-
-    public function getPoll($poll_id) {
-        $this->course_db->query("SELECT * from polls where poll_id = ?", [$poll_id]);
-        $row = $this->course_db->rows();
-        $user = $this->core->getUser()->getId();
-        if (count($row) <= 0) {
-            return null;
-        }
-        $row = $row[0];
-        $responses = $this->getResponses($row["poll_id"]);
-        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $row["question_type"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"], $row["image_path"], $row["release_histogram"]);
-    }
-
-    public function getResponses($poll_id) {
-        $this->course_db->query("SELECT * from poll_options where poll_id = ? order by order_id ASC", [$poll_id]);
-        $responses = [];
-        $responses_rows = $this->course_db->rows();
-        foreach ($responses_rows as $rep_row) {
-            $responses[$rep_row["option_id"]] = $rep_row["response"];
-        }
-        return $responses;
-    }
-
-    public function getUserResponses($poll_id) {
-        $this->course_db->query("SELECT * from poll_responses where poll_id = ?", [$poll_id]);
-        $rows = $this->course_db->rows();
-        $responses = [];
-        foreach ($rows as $row) {
-            if (!isset($responses[$row["student_id"]])) {
-                $responses[$row["student_id"]] = [];
-            }
-            array_push($responses[$row["student_id"]], $row["option_id"]);
-        }
-        return $responses;
-    }
-
-    public function submitResponse($poll_id, $responses) {
-        $user = $this->core->getUser()->getId();
-        $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
-        // clear all existing answers of the student
-        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
-        // insert new answers
-        foreach ($responses as $index => $response_id) {
-            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response_id]);
-        }
-    }
-
-    public function getAnswers($poll_id) {
-        $this->course_db->query("SELECT option_id from poll_options where poll_id = ? and correct = TRUE order by order_id ASC", [$poll_id]);
-        $answers = [];
-        foreach ($this->course_db->rows() as $row) {
-            $answers[] = $row["option_id"];
-        }
-        return $answers;
-    }
-
-    public function editPoll($poll_id, $poll_name, $question, $question_type, array $responses, array $answers, $release_date, array $orders, $image_path, $release_histogram) {
-        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, question_type = ?, release_date = ?, image_path = ?, release_histogram = ? where poll_id = ?", [$poll_name, $question, $question_type, $release_date, $image_path, $release_histogram, $poll_id]);
-        foreach ($responses as $order_id => $response) {
-            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
-        }
-        foreach ($answers as $answer) {
-            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
-        }
-    }
-
-    public function deletePoll($poll_id) {
-        $this->course_db->query("DELETE FROM poll_responses where poll_id = ?", [$poll_id]);
-        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
-        $this->course_db->query("DELETE FROM polls where poll_id = ?", [$poll_id]);
-    }
-
-    public function getResults($poll_id) {
-        $results = [];
-        $query = <<<SQL
-SELECT
-    po.option_id,
-    COALESCE(pr.count, 0) AS count
-FROM
-    poll_options AS po
-    LEFT JOIN (
-        SELECT option_id, COUNT(*) AS count FROM poll_responses WHERE poll_id = ? GROUP BY option_id
-    ) AS pr ON pr.option_id = po.option_id
-WHERE
-    po.poll_id = ?
-ORDER BY
-    po.order_id ASC
-SQL;
-        $this->course_db->query($query, [$poll_id, $poll_id]);
-        foreach ($this->course_db->rows() as $row) {
-            $results[$row["option_id"]] = $row['count'];
-        }
-        return $results;
-    }
-
-    public function deleteUserResponseIfExists($poll_id) {
-        $user = $this->core->getUser()->getId();
-        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
-    }
-
-    public function setPollImage($poll_id, $image_path) {
-        $this->course_db->query("UPDATE polls SET image_path = ? where poll_id = ?", [$image_path, $poll_id]);
-    }
-
-    public function getHistogramSetting($poll_id) {
-        $this->course_db->query("SELECT release_histogram FROM polls WHERE poll_id = ?", [$poll_id]);
-        return $this->course_db->rows()[0]["release_histogram"];
-    }
-
-    //// END ONLINE POLLING QUERIES ////
 
     /**
      * Delete user from DBs identified by user_id, semester, and course.
@@ -8080,11 +8034,6 @@ SQL;
 SQL;
     }
 
-    private function getGradeableMinutesOverride(string $gradeable_id): array {
-        $this->course_db->query('SELECT * FROM gradeable_allowed_minutes_override WHERE g_id=?', [$gradeable_id]);
-        return $this->course_db->rows();
-    }
-
     /**
      * Gets the number of students who have submitted to a given gradeable
      *
@@ -8140,7 +8089,7 @@ SQL;
             throw new NotImplementedException("Leaderboards do not work for teams");
         }
 
-        $param_list = $this->createParamaterList(count($valid_testcases));
+        $param_list = $this->createParameterList(count($valid_testcases));
 
         array_unshift($valid_testcases, $gradeable_id);
         $valid_testcases[] = $countHidden;
@@ -8153,9 +8102,9 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-              COALESCE (NULLIF(user_preferred_firstname, ''), user_firstname),
+              COALESCE (NULLIF(user_preferred_givenname, ''), user_givenname),
               ' ',
-              COALESCE (NULLIF(user_preferred_lastname, ''), user_lastname)
+              COALESCE (NULLIF(user_preferred_familyname, ''), user_familyname)
           ) as name
 FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,

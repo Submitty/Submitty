@@ -1,3 +1,6 @@
+/* global buildCourseUrl, csrfToken, displayErrorMessage */
+/* exported uploadFiles, getBadItemNames */
+
 /**
  * Asynchronous upload of configuration dependency file.
  * These would typically be files that go in the 'test_input' or 'test_output' directory

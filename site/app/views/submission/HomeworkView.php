@@ -447,6 +447,8 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+        $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $has_overridden_grades = false;
@@ -455,9 +457,7 @@ class HomeworkView extends AbstractView {
         }
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
-        // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
-            'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
@@ -468,16 +468,17 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
-            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
             'github_user_id' => $github_user_id,
             'github_repo_id' => $github_repo_id,
+            'is_bulk_upload' => $gradeable->isBulkUpload(),
             'has_due_date' => $gradeable->hasDueDate(),
             'is_timed' => $gradeable->hasAllowedTime(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && !$gradeable->isTaGradeReleased()),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
+            'bulk_upload_access' => $this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable]),
             'user_id' => $this->core->getUser()->getId(),
             'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
@@ -489,7 +490,6 @@ class HomeworkView extends AbstractView {
             'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
-            'team_assignment' => $gradeable->isTeamAssignment(),
             'student_id' => $student_id,
             'numberUtils' => new class () {
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
@@ -498,7 +498,6 @@ class HomeworkView extends AbstractView {
             },
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'inputs' => $input_data,
             'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
             'image_data' => $image_data ?? null,
@@ -1192,7 +1191,7 @@ class HomeworkView extends AbstractView {
                         break;
                     }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
@@ -1275,7 +1274,7 @@ class HomeworkView extends AbstractView {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
 
         $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
         $content = $post['content'];
         $post_id = $post['id'];

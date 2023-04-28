@@ -114,7 +114,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if ($gradeable->isLocked($this->core->getUser()->getId())) {
+        if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
             $this->core->addErrorMessage('You have not unlocked this gradeable yet');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'You have not completed the pre-requisite gradeable'];
@@ -987,7 +987,7 @@ class SubmissionController extends AbstractController {
                     "semester" => $this->core->getConfig()->getSemester(),
                     "team" => $team_id,
                     "user" => $user_id,
-                    "vcs_checkout" => false,
+                    "vcs_checkout" => $gradeable->isVcs(),
                     "version" => $active_version,
                     "who" => $who_id
                 ];
@@ -1069,7 +1069,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if ($gradeable->isLocked($user_id)) {
+        if ($gradeable->isLocked($user_id) && !$this->core->getUser()->accessGrading()) {
             return $this->uploadResult("Gradeable is locked for you.", false);
         }
 
@@ -1897,8 +1897,8 @@ class SubmissionController extends AbstractController {
                 continue;
             }
             $file_contents = FileUtils::readJsonFile($json_path);
-            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]["given_name"] = $user->getDisplayedGivenName();
+            $users[$user_id_arr[$i]]["family_name"] = $user->getDisplayedFamilyName();
             $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];

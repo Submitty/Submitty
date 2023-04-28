@@ -84,7 +84,7 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['authentication', 'logout']),
-            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedGivenName(),
             "id" => "logout",
             "icon" => "fa-power-off"
         ]);
@@ -583,8 +583,10 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
+
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
     }
 
     private function routeEquals(string $a, string $b) {

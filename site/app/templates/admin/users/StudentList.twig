@@ -15,9 +15,10 @@
                 <tr>
                     <th>#</th>
                     <th>Registration Section</th>
-                    <th>User ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th style="text-align:left;">User ID</th>
+                    <th style="text-align:left;">First Name</th>
+                    <th style="text-align:left;">Last Name</th>
+                    <th style="text-align:left;">Pronouns</th>
                     <th>Rotating Section</th>
                     <th>UTC Offset / Time Zone</th>
                     <th>View Grades</th>
@@ -29,7 +30,7 @@
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="11">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="12">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -48,8 +49,9 @@
                                 {% endif %}
                             </td>
                             <td class="align-left">{{ student.getId() }}</td>
-                            <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
-                            <td class="align-left">{{ student.getDisplayedLastName() }}</td>
+                            <td class="align-left">{{ student.getDisplayedGivenName() }}</td>
+                            <td class="align-left">{{ student.getDisplayedFamilyName() }}</td>
+                            <td class="align-left">{{ student.getPronouns() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ formatted_tzs[student.getId()] }}</td>
                             <td>
@@ -60,8 +62,8 @@
                                 </form>
                             </td>
                             <td>{{ student.getRegistrationType() }}</td>
-                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedFirstName() }}', '{{ student.getDisplayedLastName() }}');" aria-label="delete student {{ student.getDisplayedFirstName() }} {{ student.getDisplayedLastName() }}"><i class="fas fa-trash"></i></a></td>
+                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

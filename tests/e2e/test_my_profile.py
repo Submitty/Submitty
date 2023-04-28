@@ -14,11 +14,11 @@ class TestMyProfile(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
         self.student_id = "student"
-        self.student_first_name = "Joe"
-        self.student_last_name = "Student"
+        self.student_given_name = "Joe"
+        self.student_family_name = "Student"
 
     def setup_test_start(self):
-        self.log_in(user_id=self.student_id, user_name=self.student_first_name)
+        self.log_in(user_id=self.student_id, user_name=self.student_given_name)
         # click on my-profile icon
         self.driver.find_element(By.ID, "nav-sidebar-my-profile").click()
 
@@ -26,13 +26,13 @@ class TestMyProfile(BaseTestCase):
     def test_basic_info(self):
         self.setup_test_start()
         student_id = self.driver.find_element(By.XPATH, "//div[@id='username-row']/span[@class='value']").text
-        student_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").text
-        student_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/button").text
+        student_given_name = self.driver.find_element(By.XPATH, "//div[@id='givenname-row']/button").text
+        student_family_name = self.driver.find_element(By.XPATH, "//div[@id='familyname-row']/button").text
         user_time_zone = self.driver.find_element(By.ID, "time_zone_selector_label").get_attribute('data-user_time_zone')
         time_zone_selector = Select(self.driver.find_element(By.ID, "time_zone_drop_down"))
         self.assertEqual(self.student_id, student_id)
-        self.assertEqual(self.student_first_name, student_first_name)
-        self.assertEqual(self.student_last_name, student_last_name)
+        self.assertEqual(self.student_given_name, student_given_name)
+        self.assertEqual(self.student_family_name, student_family_name)
         self.assertEqual(user_time_zone, time_zone_selector.first_selected_option.get_attribute('value'))
 
     def test_time_zone_selection(self):
@@ -55,10 +55,10 @@ class TestMyProfile(BaseTestCase):
 
     def test_edit_preferred_names(self):
         self.setup_test_start()
-        new_first_name = "Rachel"
-        new_last_name = "Green"
+        new_given_name = "Rachel"
+        new_family_name = "Green"
         # click on the edit-preferred-name link
-        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
+        self.driver.find_element(By.XPATH, "//div[@id='givenname-row']/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-username-form")))
         # Hit submit without any changes
         self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
@@ -66,13 +66,13 @@ class TestMyProfile(BaseTestCase):
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-js-0")))
 
         # again click on the edit-preferred-name link
-        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
+        self.driver.find_element(By.XPATH, "//div[@id='givenname-row']/button").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-username-form")))
         # Clear the previous name and enter new names
-        self.driver.find_element(By.ID, "user-firstname-change").clear()
-        self.driver.find_element(By.ID, "user-lastname-change").clear()
-        self.driver.find_element(By.ID, "user-firstname-change").send_keys(new_first_name)
-        self.driver.find_element(By.ID, "user-lastname-change").send_keys(new_last_name)
+        self.driver.find_element(By.ID, "user-givenname-change").clear()
+        self.driver.find_element(By.ID, "user-familyname-change").clear()
+        self.driver.find_element(By.ID, "user-givenname-change").send_keys(new_given_name)
+        self.driver.find_element(By.ID, "user-familyname-change").send_keys(new_family_name)
         self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
         # Look for success message
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-js-1")))
@@ -80,17 +80,17 @@ class TestMyProfile(BaseTestCase):
         # edit form should be out-of-the screen
         self.assertFalse(self.driver.find_element(By.ID, "edit-username-form").is_displayed())
         # Assert that names are updated
-        displayed_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").text
-        displayed_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/button").text
-        self.assertEqual(new_first_name, displayed_first_name)
-        self.assertEqual(new_last_name, displayed_last_name)
+        displayed_given_name = self.driver.find_element(By.XPATH, "//div[@id='givenname-row']/button").text
+        displayed_family_name = self.driver.find_element(By.XPATH, "//div[@id='familyname-row']/button").text
+        self.assertEqual(new_given_name, displayed_given_name)
+        self.assertEqual(new_family_name, displayed_family_name)
 
         # Reset the names back to original
-        self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/button").click()
-        self.driver.find_element(By.ID, "user-firstname-change").clear()
-        self.driver.find_element(By.ID, "user-lastname-change").clear()
-        self.driver.find_element(By.ID, "user-firstname-change").send_keys(self.student_first_name)
-        self.driver.find_element(By.ID, "user-lastname-change").send_keys(self.student_last_name)
+        self.driver.find_element(By.XPATH, "//div[@id='givenname-row']/button").click()
+        self.driver.find_element(By.ID, "user-givenname-change").clear()
+        self.driver.find_element(By.ID, "user-familyname-change").clear()
+        self.driver.find_element(By.ID, "user-givenname-change").send_keys(self.student_given_name)
+        self.driver.find_element(By.ID, "user-familyname-change").send_keys(self.student_family_name)
         self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
 
 
@@ -109,7 +109,7 @@ class TestMyProfile(BaseTestCase):
         # Assert that image is added and alt-tag value is updated correctly
         alt_tag_val = self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").get_attribute('alt')
         self.assertTrue(self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").is_displayed())
-        self.assertEqual("{} {}".format(self.student_first_name, self.student_last_name), alt_tag_val)
+        self.assertEqual("{} {}".format(self.student_given_name, self.student_family_name), alt_tag_val)
 
     def test_flagged_profile_photo(self):
         self.setup_test_start()
