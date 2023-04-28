@@ -1,3 +1,6 @@
+/* global Widget, ItempoolBuilder */
+/* exported ItempoolWidget */
+
 class ItempoolWidget extends Widget {
     constructor() {
         super();
@@ -6,7 +9,7 @@ class ItempoolWidget extends Widget {
 
         this.builder;
 
-        this.state = {}
+        this.state = {};
     }
 
     render() {
@@ -20,7 +23,7 @@ class ItempoolWidget extends Widget {
 
         const heading_area = container.querySelector('.heading-container');
         heading_area.innerHTML = '';
-        heading_area.appendChild(item_name_div)
+        heading_area.appendChild(item_name_div);
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
