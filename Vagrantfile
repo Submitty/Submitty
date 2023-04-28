@@ -54,19 +54,11 @@ SCRIPT
 
 box_name = "bento/ubuntu-20.04"
 
-<<<<<<< HEAD
 arm_mac = Vagrant::Util::Platform.darwin? && (`uname -m`.chomp == "arm64" || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M1') || (`sysctl -n machdep.cpu.brand_string`.chomp.include? 'M2'))
 
 if arm_mac
   box_name = "perk/ubuntu-20.04-arm64"
 end
-=======
-# Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-20.04"
-base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2004"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
->>>>>>> calendar_messages
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -94,12 +86,6 @@ Vagrant.configure(2) do |config|
   if ENV.has_key?('VAGRANT_BOX')
     box_name = ENV['VAGRANT_BOX']
   end
-
-  arch = `uname -m`.chomp
-  arm = arch == 'arm64' || arch == 'aarch64'
-  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
-  
-  custom_box = ENV.has_key?('VAGRANT_BOX')
 
   mount_options = []
 
@@ -171,15 +157,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
-<<<<<<< HEAD
-=======
-    unless custom_box
-      if (arm || apple_silicon)
-        override.vm.box = base_boxes[:arm_parallels]
-      end
-    end
-
->>>>>>> calendar_messages
     prl.memory = 2048
     prl.cpus = 2
 
@@ -192,40 +169,12 @@ Vagrant.configure(2) do |config|
 
     mount_folders(override, [])
   end
-<<<<<<< HEAD
 
   config.vm.provider "qemu" do |qe, override|
     qe.memory = "2G"
     qe.smp = 2
     qe.ssh_port = 2222
 
-=======
-  
-  config.vm.provider "libvirt" do |libvirt, override|
-    unless custom_box
-      override.vm.box = base_boxes[:libvirt]
-    end
-
-    libvirt.memory = 2048
-    libvirt.cpus = 2
-
-    libvirt.forward_ssh_port = true
-
-    mount_folders(override, [])
-  end
-
-  config.vm.provider "qemu" do |qe, override|
-    unless custom_box
-      if apple_silicon
-        override.vm.box = base_boxes[:arm_mac_qemu]
-      end
-    end
-
-    qe.memory = "2G"
-    qe.smp = 2
-    qe.ssh_port = 2222
-
->>>>>>> calendar_messages
     mount_folders(override, [])
   end
 

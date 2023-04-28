@@ -38,6 +38,64 @@ function nextMonth(month, year, day) {
 }
 
 /**
+ * Gets the previous week of a given month
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
+ */
+ function prevWeek(month, year, day, type) {
+    currentDay = new Date(year, month, day)
+    // Move the date back by 7 days
+    currentDay.setDate(currentDay.getDate() - 7);
+    // Get the new month, year, and day
+    month = currentDay.getMonth();
+    year = currentDay.getFullYear();
+    day = currentDay.getDate();
+
+
+    // day = day - 7;
+
+    // if (day <= 0) {
+    //     month = month - 1;
+    //     if (month <= 0) {
+    //         month = 12 + month;
+    //         year = year - 1;
+    //     }
+    //     day = 31 + day;
+    // }
+    return [month, year, day, type];
+}
+
+/** 
+ * Gets the next week of a given week
+ * @param month : int the current month (1 as January and 12 as December)
+ * @param year : int the current year
+ * @param day : int the current day
+ * @returns {number[]} : array<int> {next_month, year_of_next_month}
+ */
+function nextWeek(month, year, day, type) {
+    let currentDay = new Date(year, month, day)
+    // Move the date forward by 7 days
+    currentDay.setDate(currentDay.getDate() + 7);
+    // Get the new month, year, and day
+    month = currentDay.getMonth();
+    year = currentDay.getFullYear();
+    day = currentDay.getDate();
+    // day = day;
+    // if (day > 31) {
+    //     month = month + 1;
+    //     if (month > 12) {
+    //         month = month - 12;
+    //         year = year + 1;
+    //     }
+    //     day = day - 31;
+    // }
+    return [month, year, day, type];
+}
+
+
+/**
  * Gets the previous two weeks of a given month
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
@@ -76,129 +134,6 @@ function nextTwoWeeks(month, year, day) {
     }
     return [month, year, day, "two_week"];
 }
-
-/**
- * Gets the previous week of a given month
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
- */
- function prevWeek(month, year, day) {
-    day = day - 7;
-    if (day <= 0) {
-        month = month - 1;
-        if (month <= 0) {
-            month = 12 + month;
-            year = year - 1;
-        }
-        day = 31 + day;
-    }
-    return [month, year, day, "one_week"];
-}
-
-/** 
- * Gets the next week of a given week
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {next_month, year_of_next_month}
- */
-function nextWeek(month, year, day) {
-    day = day + 7;
-    if (day > 31) {
-        month = month + 1;
-        if (month > 12) {
-            month = month - 12;
-            year = year + 1;
-        }
-        day = day - 31;
-    }
-    return [month, year, day, "one_week"];
-}
-
-
-/**
- * Gets the previous two weeks of a given month
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
- */
-function prevTwoWeeks(month, year, day) {
-    day = day - 14;
-    if (day <= 0) {
-        month = month - 1;
-        if (month <= 0) {
-            month = 12 + month;
-            year = year - 1;
-        }
-        day = 31 + day;
-    }
-    return [month, year, day, "two_week"];
-}
-
-/**
- * Gets the next two weeks of a given month
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {next_month, year_of_next_month}
- */
-function nextTwoWeeks(month, year, day) {
-    day = day + 14;
-    if (day > 31) {
-        month = month + 1;
-        if (month > 12) {
-            month = month - 12;
-            year = year + 1;
-        }
-        day = day - 31;
-    }
-    return [month, year, day, "two_week"];
-}
-
-/**
- * Gets the previous week of a given month
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
- */
- function prevWeek(month, year, day) {
-    day = day - 7;
-    if (day <= 0) {
-        month = month - 1;
-        if (month <= 0) {
-            month = 12 + month;
-            year = year - 1;
-        }
-        day = 31 + day;
-    }
-    return [month, year, day, "one_week"];
-}
-
-/** 
- * Gets the next week of a given week
- * @param month : int the current month (1 as January and 12 as December)
- * @param year : int the current year
- * @param day : int the current day
- * @returns {number[]} : array<int> {next_month, year_of_next_month}
- */
-function nextWeek(month, year, day) {
-    day = day + 7;
-    if (day > 31) {
-        month = month + 1;
-        if (month > 12) {
-            month = month - 12;
-            year = year + 1;
-        }
-        day = day - 31;
-    }
-    return [month, year, day, "one_week"];
-}
-
-
 
 /**
  * This function creates a Date object based on a string.
@@ -412,7 +347,7 @@ function generateCalendarHeader(title_area) {
  * @param view_month : int the month currently in view
  * @returns {DocumentFragment} the HTML element containing the title/header
  */
-function buildSwitchingHeader(view_year, view_month) {
+function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const fragment = document.createDocumentFragment();
 
     // Build first header
@@ -423,9 +358,19 @@ function buildSwitchingHeader(view_year, view_month) {
     div.id = 'prev-month-switch';
     let a = document.createElement('a');
     a.classList.add('cal-btn', 'cal-prev-btn');
-    const prev = prevMonth(view_month, view_year);
+
+    // Change onlick based on type
+    let prev;
+    if (type === 'month') {
+        prev = prevMonth(view_month, view_year, view_day);
+    }
+    else {
+        prev = prevWeek(view_month, view_year, view_day, type);
+    }
     a.onclick = () => loadCalendar.apply(this, prev);
     a.innerHTML = '&#60;';
+
+    // Append to header
     div.appendChild(a);
     th1.appendChild(div);
 
@@ -452,9 +397,19 @@ function buildSwitchingHeader(view_year, view_month) {
     div.id = 'next-month-switch';
     a = document.createElement('a');
     a.classList.add('cal-btn', 'cal-next-btn');
-    const next = nextMonth(view_month, view_year);
+
+    // Change onclick based on type
+    let next;
+    if (type === 'month') {
+         next = nextMonth(view_month, view_year, view_day);
+    }
+    else {
+         next = nextWeek(view_month, view_year, view_day, type);
+    }
     a.onclick = () => loadCalendar.apply(this, next);
     a.innerHTML = '&#62;';
+
+    // Append to header
     div.appendChild(a);
     th3.appendChild(div);
 
@@ -504,7 +459,7 @@ function buildSemesterHeader(semester_name) {
  */
 function generateCalendarOfMonth(view_year, view_month, view_day) {
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    const title = buildSwitchingHeader(view_year, view_month);
+    const title = buildSwitchingHeader(view_year, view_month, view_day, 'month');
     const table = generateCalendarHeader(title);
     const tableBody = document.createElement('tbody');
     let curRow = document.createElement('tr');
@@ -561,65 +516,51 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
  * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
  */
 function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
+    // Header area: two buttons to move, and month
+    const title = buildSwitchingHeader(view_year, view_month, view_day, 'one_week');
+
+    // Body area: table
+    const table = generateCalendarHeader(title);
+    const tableBody = document.createElement('tbody');
+    let curRow = document.createElement('tr');
+
+    // Show days at the end of last month that belongs to the first week of current month
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
     const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
-    // Header area: two buttons to move, and month
-    let content = generateCalendarHeader(
-        `<th colspan="3">
-                <div class="cal-switch" id="prev-month-switch">
-                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevWeek(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-left"></i></a>
-                </div>            
-            </th>
-            <th colspan="1">
-                <div class="cal-title">
-                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
-                    <h3 class="cal-year-title" >${view_year}</h3>
-                </div>
-            </th>
-            <th colspan="3">
-                <div class="cal-switch" id="next-month-switch">
-                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextWeek(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-right"></i></a>
-                </div>            
-            </th>`);
-    console.log(view_day, startWeekday, currentDay);
+    const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
+    const lastMonthStart = lastMonthEnd + 1 - startWeekday;
+    const daysInMonth = new Date(view_year, view_month, 0).getDate();
+    let print_day = 0;
     // Show days at the end of last month that belongs to the first week of current month
-        const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
-        const lastMonthStart = lastMonthEnd + 1 - startWeekday;
-        const daysInMonth = new Date(view_year, view_month, 0).getDate();
-        let print_day = 0;
-        // Show days at the end of last month that belongs to the first week of current month
-        if(view_day-currentDay <= 0 ){
-            for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-                content += generateDayCell(view_year, view_month - 1, day, view_month);
-                print_day++
-            }
-        }
-
-        // Make the day cells before the "current" date
-        if (print_day < currentDay) {
-            for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-                content += generateDayCell(view_year, view_month, day, view_month);
-                print_day++
-            }
-        }
-
-        // Make the "current" day, and the days after in the month 
-        for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
-            content += generateDayCell(view_year, view_month, day, view_month);
+    if(view_day-currentDay <= 0 ){
+        for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
             print_day++
         }
+    }
 
-        // Makes any days that spill into the next month
-        for (let day = 1; print_day <= 6; day++) {
-            content += generateDayCell(view_year, view_month + 1, day, view_month);
+    // Make the day cells before the "current" date
+    if (print_day < currentDay) {
+        for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
             print_day++
         }
-    content += `
-        </tr>
-        </tbody>
-    </table> 
-    `;
-    return content;
+    }
+
+    // Make the "current" day, and the days after in the month 
+    for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        print_day++
+    }
+
+    // Makes any days that spill into the next month
+    for (let day = 1; print_day <= 6; day++) {
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+        print_day++
+    }
+    tableBody.appendChild(curRow);
+    table.appendChild(tableBody);
+    return table;
 }
 
 /**
@@ -631,36 +572,27 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
  * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
  */
 function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
+    // Header area: two buttons to move, and month
+    const title = buildSwitchingHeader(view_year, view_month, view_day, 'two_week');
+
+    // Body area: table
+    const table = generateCalendarHeader(title);
+    const tableBody = document.createElement('tbody');
+    let curRow = document.createElement('tr');
+
+    // Show days at the end of last month that belongs to the first week of current month
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
     const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
-    // Header area: two buttons to move, and month
-    let content = generateCalendarHeader(
-        `<th colspan="3">
-                <div class="cal-switch" id="prev-month-switch">
-                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevTwoWeeks(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-left"></i></a>
-                </div>            
-            </th>
-            <th colspan="1">
-                <div class="cal-title">
-                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
-                    <h3 class="cal-year-title" >${view_year}</h3>
-                </div>
-            </th>
-            <th colspan="3">
-                <div class="cal-switch" id="next-month-switch">
-                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextTwoWeeks(${view_month}, ${view_year}, ${view_day}))"><i class="fas fa-angle-right"></i></a>
-                </div>            
-            </th>`);
-    console.log(view_day, startWeekday, currentDay);
-    // Show days at the end of last month that belongs to the first week of current month
     const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
     const lastMonthStart = lastMonthEnd + 1 - startWeekday;
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let print_day = 0;
-    // If last months days should show, generate them.
+
+    console.log(view_day, lastMonthEnd)
+    // Show days at the end of last month that belongs to the first week of current month
     if(view_day-currentDay <= 0 ){
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            content += generateDayCell(view_year, view_month - 1, day, view_month);
+            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
             print_day++
         }
     }
@@ -668,65 +600,55 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     // Make the day cells before the "current" date
     if (print_day < currentDay) {
         for (let day = view_day - currentDay + print_day; print_day < currentDay; day++) {
-            content += generateDayCell(view_year, view_month, day, view_month);
+            curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
             print_day++
         }
     }
 
     // Make the "current" day, and the days after in the month 
     for (let day = view_day; print_day <= 13 && day <= daysInMonth; day++) {
-        content += generateDayCell(view_year, view_month, day, view_month);
+        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
         print_day++
-        // If the day is the last day of the week, make a new row
+        // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
-            content += `
-                </tr>
-                <tr>
-            `;
+            // Next week should show on next line
+            tableBody.appendChild(curRow);
+            curRow = document.createElement('tr');
         }
     }
 
     // Makes any days that spill into the next month
     for (let day = 1; print_day <= 13; day++) {
-        content += generateDayCell(view_year, view_month + 1, day, view_month);
+        curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
         print_day++
-        // If the day is the last day of the week, make a new row
+        // If the day is the last day of the week, then make a new row
         if (print_day === 7) {
-            content += `
-                </tr>
-                <tr>
-            `;
+            // Next week should show on next line
+            tableBody.appendChild(curRow);
+            curRow = document.createElement('tr');
         }
     }
-    content += `
-        </tr>
-        </tbody>
-    </table> 
-    `;
-    return content;
+    tableBody.appendChild(curRow);
+    table.appendChild(tableBody);
+    return table;
 }
 
 /**
- * This function creates a table that shows the calendar for two weeks.
+ * Creates a calendar of the entire semester.
  *
  * @param start the start date of the semester in the format of YYYY-mm-dd
  * @param end the end date of the semester in the format of YYYY-mm-dd
  * @param semester_name the name of the semester
  * @returns {HTMLElement} the HTML Element containing the calendar
  */
-function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
-    const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    const currentDay = new Date(view_year, view_month - 1, view_day).getDay();
+ function generateFullCalendar(start, end, semester_name) {
     // Header area: two buttons to move, and month
     const table = generateCalendarHeader(buildSemesterHeader(semester_name));
     const tableBody = document.createElement('tbody');
-
     const startDate = parseDate(start);
     const endDate = parseDate(end);
     const currDate = startDate;
-
-
-    const startWeekday = start();
+    const startWeekday = startDate.getDay();
     // Skip days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
         const td = document.createElement('td');
@@ -734,9 +656,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
         td.colSpan = startWeekday;
         tableBody.appendChild(td);
     }
-
     let curRow = document.createElement('tr');
-
     let weekday = startWeekday;
     while ((endDate.getTime() - startDate.getTime()) >= 0) {
         // Shows each day of current month
@@ -750,11 +670,9 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
         else {
             weekday = weekday + 1;
         }
-
         currDate.setDate(currDate.getDate() + 1);
     }
     tableBody.appendChild(curRow);
-
     if (weekday !== 0) {
         const remain = 7 - weekday;
         const td = document.createElement('td');
@@ -763,9 +681,9 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
         tableBody.appendChild(td);
     }
     table.appendChild(tableBody);
-
     return table;
 }
+
 
 /**
  * Changes the calendar div to the required month and year.
@@ -773,10 +691,18 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
  * @param month_ : int month that the calendar will show (1 as January and 12 as December)
  * @param year_ : int year that the calendar will show
  */
-function loadCalendar(month_, year_) {
+function loadCalendar(month_, year_, day_, type) {
     const calendar = document.getElementById('full-calendar');
     calendar.innerHTML = '';
-    calendar.appendChild(generateCalendarOfMonth(year_, month_));
+    if (type === 'month') {
+    calendar.appendChild(generateCalendarOfMonth(year_, month_, day_));
+    }
+    else if (type === 'two_week') {
+        calendar.appendChild(generateCalendarOfMonthTwoWeek(year_, month_, day_));
+    }
+    else {
+        calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
+    }
 }
 
 /**

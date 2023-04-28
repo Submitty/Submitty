@@ -16,17 +16,16 @@
 
     window.changeView = function(x){
         if(x.value === "month"){
-            loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, "month");
             document.cookie = "view=month";
         }
         else if(x.value === "two_week"){
-            loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, "two_week");
             document.cookie = "view=two_week";
         }
         else if(x.value === "one_week"){
-            loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, "one_week");
             document.cookie = "view=one_week";
         }
+        console.log(x.value);
+        loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
     }
 </script>
 
