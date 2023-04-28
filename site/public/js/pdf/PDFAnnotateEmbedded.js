@@ -156,7 +156,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     const height = doc.internal.pageSize.getHeight();
                     doc.addImage(imgData, 'JPEG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                     //TODO: Get the saving and loading from annotated_pdfs working
+                    //TODO: Get the saving and loading from annotated_pdfs working
                     /*console.log("CHECK2");
                     var fd = new FormData();
                     var pdfToSave = btoa(doc.output());
