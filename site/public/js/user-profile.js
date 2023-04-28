@@ -1,8 +1,11 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
 showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
 updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
-changeSecondaryEmail
+changeSecondaryEmail, clearPronounsBox
  */
+
+//This variable is to store changes to the pronouns form that have not been submitted
+let pronounsLastVal = null;
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
@@ -18,6 +21,9 @@ function showUpdatePronounsForm() {
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
+    if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
+        document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
 }
 
 function showUpdatePasswordForm() {
@@ -67,12 +73,22 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
+function clearPronounsBox() {
+    const pronounsInput = document.getElementById('user-pronouns-change');
+    if (pronounsLastVal === null || pronounsLastVal !== pronounsInput.value) {
+        pronounsLastVal = pronounsInput.value;
+    }
+    pronounsInput.value = '';
+}
+
 function updateUserPronouns(e) {
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
+    pronounsLastVal = pronouns.val();
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
+        $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();

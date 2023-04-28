@@ -187,6 +187,12 @@ function generateCalendarItem(item) {
     const icon = item['icon'];
     const element = document.createElement('a');
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
+    if (item['show_due']) {
+        element.style.setProperty('background-color', item['color']);
+    }
+    if (item['status'] === 'ann') {
+        element.style.setProperty('border-color', item['color']);
+    }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
@@ -721,4 +727,3 @@ function loadFullCalendar(start, end, semester_name) {
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
-

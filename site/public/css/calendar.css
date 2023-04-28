@@ -169,6 +169,7 @@ h2.cal-month-title {
 
 /* each item in the day cell */
 .cal-gradeable-item {
+    color: var(--text-black)!important;
     margin: 1px;
     text-decoration: none;
     white-space: normal;
@@ -179,7 +180,7 @@ h2.cal-month-title {
     vertical-align: baseline;
     padding: 0 0 0 5px;
     display: block;
-    width: 100%;
+    width: 98%;
     user-select: none;
     background-image: none;
     border-radius: 4px;
@@ -219,7 +220,7 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd;  /* This color is from DS website */
+    color: #218ffd!important;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
     border-style: solid;
@@ -233,7 +234,7 @@ a.cal-gradeable-status-ann:hover {
     font-style: italic;
     cursor: default;
     border-style: solid;
-    border-width: 3px;
+    border-width: 3px!important;
 }
 
 a.cal-gradeable-status-ann:focus {
@@ -266,7 +267,7 @@ a.cal-gradeable-status-link:focus {
 
 .calendar-color-blue {
     background-color: #218ffd;
-    color: var(--text-black) !important;
+    color: var(--text-black)!important;
 }
 
 @media (max-width: 800px) {

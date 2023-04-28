@@ -107,6 +107,6 @@ class CalendarItem {
             case self::ANNOUNCEMENT:
                 return 'ann';
         }
-        throw new \RuntimeException();
+        throw new \RuntimeException("This type is not a text or announcement.");
     }
 }
