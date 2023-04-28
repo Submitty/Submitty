@@ -1,6 +1,6 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
 /* global curr_day, curr_month, curr_year, gradeables_by_date */
-/* global csrfToken, buildCourseUrl */
+/* global csrfToken */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -86,11 +86,11 @@ function generateCalendarItem(item) {
     }
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
-    let onclick = item['onclick'];
+    const onclick = item['onclick'];
     let exists = false;
-    if(!item['show_due']) {
-        for(let course = 0; course < instructor_courses.length; course++) {
-            if(instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
+    if (!item['show_due']) {
+        for (let course = 0; course < instructor_courses.length; course++) {
+            if (instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
                 exists = true;
             }
         }
@@ -98,21 +98,21 @@ function generateCalendarItem(item) {
     const icon = item['icon'];
     const element = document.createElement('a');
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
-    if(item['show_due']) {
+    if (item['show_due']) {
         element.style.setProperty('background-color', item['color']);
     }
-    if(item['status'] === "ann") {
+    if (item['status'] === 'ann') {
         element.style.setProperty('border-color', item['color']);
     }
-    if(exists) {
-        element.style.setProperty('cursor','pointer')
+    if (exists) {
+        element.style.setProperty('cursor','pointer');
     }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
     }
     if (onclick !== '') {
-        if(!item['show_due']) {
+        if (!item['show_due']) {
             element.addEventListener('click', function() {
                 editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
             });
@@ -139,10 +139,10 @@ function generateCalendarItem(item) {
  * @returns {void} : only has to update existing variables
  */
 function editCalendarItemForm(itemType, itemText, itemId, date, semester, course) {
-    $('#calendar-item-type-edit>option[value='+itemType+']').attr('selected', true);
+    $('#calendar-item-type-edit>option[value=' + itemType + ']').attr('selected', true);
     $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
-    $('#calendar-item-id').val(itemId); 
+    $('#calendar-item-id').val(itemId);
     $('#calendar-item-semester-edit').val(semester);
     $('#calendar-item-course-edit').val(course);
 

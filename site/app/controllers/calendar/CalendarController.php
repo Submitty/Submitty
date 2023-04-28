@@ -11,7 +11,6 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
-use app\libraries\routers\AccessControl;
 use app\models\CalendarInfo;
 use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
@@ -98,8 +97,8 @@ class CalendarController extends AbstractController {
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
-        foreach($instructor_courses as $course) {
-            if($set_course === ($course['semester'] . $course['course'])) {
+        foreach ($instructor_courses as $course) {
+            if ($set_course === ($course['semester'] . $course['course'])) {
                 $this->core->loadCourseConfig($course['semester'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $this->core->getCourseEntityManager()->persist($calendar_item);
@@ -110,7 +109,7 @@ class CalendarController extends AbstractController {
             }
         }
 
-        if(!$exists) {
+        if (!$exists) {
             $this->core->addErrorMessage("No valid course found by that name.");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
@@ -174,8 +173,8 @@ class CalendarController extends AbstractController {
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
-        foreach($instructor_courses as $course) {
-            if(($semester === $course['semester']) && ($InputCourse === $course['course'])) {
+        foreach ($instructor_courses as $course) {
+            if (($semester === $course['semester']) && ($InputCourse === $course['course'])) {
                 $this->core->loadCourseConfig($course['semester'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
@@ -228,18 +227,17 @@ class CalendarController extends AbstractController {
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
-        foreach($instructor_courses as $currCourse) {
-
-            if($currCourse['semester'] === $semester && $currCourse['course'] === $course) {
+        foreach ($instructor_courses as $currCourse) {
+            if ($currCourse['semester'] === $semester && $currCourse['course'] === $course) {
                 $exists = true;
                 break;
             }
         }
-        if(!$exists) {
+        if (!$exists) {
             $this->core->addErrorMessage("Error: Invalid Course");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
-        
+
         $this->core->loadCourseConfig($semester, $course);
         $this->core->loadCourseDatabase();
 
