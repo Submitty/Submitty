@@ -189,3 +189,9 @@ footer .footer-separator {
 #loading-bar-percentage {
     margin-left: 10px;
 }
+
+#no-style-invisible-button {
+    background: none;
+    border:none;
+    all:unset;
+}
