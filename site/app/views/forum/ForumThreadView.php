@@ -447,7 +447,7 @@ class ForumThreadView extends AbstractView {
                     $place = array_search($post["parent_id"], $order_array);
                     $tmp_array = [$post["id"]];
                     $parent_reply_level = $reply_level_array[$place];
-                    while ($plac !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
                         $place++;
                     }
                     array_splice($order_array, $place + 1, 0, $tmp_array);
