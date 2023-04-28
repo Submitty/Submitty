@@ -12,9 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="calendar_messages")
  */
 class CalendarItem {
-    // Note the 'Important' type is also treated as regular text
-    const ANNOUNCEMENT = 1;
     const TEXT = 0;
+    const ANNOUNCEMENT = 1;
 
     /**
      * @ORM\Id
