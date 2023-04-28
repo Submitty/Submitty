@@ -1507,7 +1507,8 @@ CREATE TABLE public.queue (
     time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL,
     time_paused integer DEFAULT 0 NOT NULL,
-    time_paused_start timestamp with time zone
+    time_paused_start timestamp with time zone,
+    star_type character varying(16) DEFAULT 'none'::character varying
 );
 
 
@@ -1801,8 +1802,10 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_last_initial_format integer DEFAULT 0 NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
+    CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
 
