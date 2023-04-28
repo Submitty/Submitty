@@ -189,10 +189,10 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        res = conn.execute(
-            f"SELECT max(time_in) FROM queue WHERE user_id = '{queue_entry['user_id']}' AND"
-            "UPPER(TRIM(queue_code)) = UPPER(TRIM('{queue_entry['queue_code']}')) AND"
-            "(removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
+        res = conn.execute(f"SELECT max(time_in) FROM queue WHERE user_id = \
+            '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = \
+            UPPER(TRIM('{queue_entry['queue_code']}')) AND \
+            (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
         queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
         res.close()
 
