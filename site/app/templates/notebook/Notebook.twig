@@ -244,7 +244,9 @@
                                     {% if is_grader_view %}
                                     <button onclick='viewFileFullPanel("{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0" id="no-style-invisible-button"><i class="fas fa-share" title="Show file in full panel"></i></button>
                                     {% endif %}
-                                    <button onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0" id="no-style-invisible-button"><i class="fas fa-download" title="Download the file"></i></button>
+                                    <button onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file" class="key_to_click" tabindex="0" id="no-style-invisible-button">
+                                        <i class="fas fa-download" title="Download the file"></i>
+                                    </button>
                                 </div>
                                 <div id="file_viewer_{{ id }}" data-file_name="{{ file.name }}" data-file_url="{{ file.path }}"></div>
                             </div>
