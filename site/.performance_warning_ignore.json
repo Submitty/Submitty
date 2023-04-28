@@ -1,5 +1,6 @@
 [
   "/courses/<semester>/<course>",
+  "/courses/<semester>/<course>/download",
   "/courses/<semester>/<course>/autograding_config",
   "/courses/<semester>/<course>/gradeable/<gradeable>",
   "/courses/<semester>/<course>/gradeable/<gradeable>/[0-9]+",
