@@ -6,7 +6,6 @@ namespace app\views\calendar;
 
 use app\libraries\FileUtils;
 use app\models\CalendarInfo;
-use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
 
