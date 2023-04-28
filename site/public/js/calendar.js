@@ -45,7 +45,7 @@ function nextMonth(month, year, day) {
  * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
  */
  function prevWeek(month, year, day, type) {
-    currentDay = new Date(year, month, day)
+    currentDay = new Date(year, month - 1, day)
     // Move the date back by 7 days
     currentDay.setDate(currentDay.getDate() - 7);
     // Get the new month, year, and day
@@ -53,18 +53,7 @@ function nextMonth(month, year, day) {
     year = currentDay.getFullYear();
     day = currentDay.getDate();
 
-
-    // day = day - 7;
-
-    // if (day <= 0) {
-    //     month = month - 1;
-    //     if (month <= 0) {
-    //         month = 12 + month;
-    //         year = year - 1;
-    //     }
-    //     day = 31 + day;
-    // }
-    return [month, year, day, type];
+    return [month + 1, year, day, type];
 }
 
 /** 
@@ -75,23 +64,14 @@ function nextMonth(month, year, day) {
  * @returns {number[]} : array<int> {next_month, year_of_next_month}
  */
 function nextWeek(month, year, day, type) {
-    let currentDay = new Date(year, month, day)
+    let currentDay = new Date(year, month - 1, day)
     // Move the date forward by 7 days
     currentDay.setDate(currentDay.getDate() + 7);
     // Get the new month, year, and day
     month = currentDay.getMonth();
     year = currentDay.getFullYear();
     day = currentDay.getDate();
-    // day = day;
-    // if (day > 31) {
-    //     month = month + 1;
-    //     if (month > 12) {
-    //         month = month - 12;
-    //         year = year + 1;
-    //     }
-    //     day = day - 31;
-    // }
-    return [month, year, day, type];
+    return [month + 1, year, day, type];
 }
 
 
@@ -537,6 +517,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     const lastMonthStart = lastMonthEnd + 1 - startWeekday;
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let print_day = 0;
+
     // Show days at the end of last month that belongs to the first week of current month
     if(view_day-currentDay <= 0 ){
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
@@ -594,7 +575,6 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let print_day = 0;
 
-    console.log(view_day)
     // Show days at the end of last month that belongs to the first week of current month
     if(view_day-currentDay <= 0 ){
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
