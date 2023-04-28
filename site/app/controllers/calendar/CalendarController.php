@@ -242,7 +242,6 @@ class CalendarController extends AbstractController {
         
         $this->core->loadCourseConfig($semester, $course);
         $this->core->loadCourseDatabase();
-
         $item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
             ->findOneBy(['id' => $id]);
         if ($item !== null) {
