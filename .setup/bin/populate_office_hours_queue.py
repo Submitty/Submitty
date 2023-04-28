@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
 from sqlalchemy import create_engine, Table, MetaData, select, update, insert
@@ -8,16 +8,20 @@ from datetime import datetime, timedelta
 from submitty_utils import dateutils
 import json
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Populates Office Hours Queue of the sample course in the current semester. "
                     "It will read in configuration information from .setup/submitty_conf.json "
                     "and populate any queue that is open in the sample course."
+                    "Run Python3 .setup/bin/populate_office_hours_queue.py  or"
+                    "Python3 .setup/bin/populate_office_hours_queue.py --random_seed"
     )
-    parser.add_argument("--random_seed", action = "store_const", dest="seed",
-                        help = "when this flag is present, the script will use a random seed instead",
-                        const = random.random(), default = 334)
+    parser.add_argument("--random_seed", action="store_const", dest="seed",
+                        help="when this flag is present, the script will use a random seed instead",
+                        const=random.random(), default=334)
     return parser.parse_args()
+
 
 def main():
     args = parse_args()
@@ -29,16 +33,17 @@ def main():
 
     # set up the database connection
     database = "submitty_" + term_id + "_sample"
-    
+
     usr_path = "/usr/local/submitty"
     settings = json.load(open(os.path.join(usr_path, ".setup", "submitty_conf.json")))
-    
+
     DB_HOST = settings["database_host"]
     DB_PORT = settings["database_port"]
     DB_USER = settings["database_user"]
     DB_PASS = settings["database_password"]
 
-    engine = create_engine(f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
+    engine = create_engine(
+        f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
     conn = engine.connect()
     metadata = MetaData(bind=engine)
     queues_table = Table("queue_settings", metadata, autoload=True)
@@ -63,7 +68,9 @@ def main():
     res.close()
 
     # Find all ids of students and graders
-    all_student_ids = [x['user_id'] for x in all_users if x['user_group'] == 4 and x['registration_section'] is not None]
+    all_student_ids = [
+        x['user_id'] for x in all_users if x['user_group'] == 4 and
+        x['registration_section'] is not None]
     all_grader_ids = [x['user_id'] for x in all_users if x['user_group'] < 4]
 
     # create a lookup table from user id to name
@@ -75,20 +82,21 @@ def main():
             user_name += x["user_preferred_givenname"]
         else:
             user_name += x["user_givenname"]
-        
+
         user_name += " "
 
         if x["user_preferred_familyname"] is not None:
             user_name += x["user_preferred_familyname"]
         else:
             user_name += x["user_familyname"]
-        
+
         name_lookup[x["user_id"]] = user_name
 
     # To make it easier to code, we will empty the queues
     # For those who are being helped, they will finish getting helped
     # Otherwise, they will get either emptied or removed
-    res = conn.execute(select(queue_entries_table).where(queue_entries_table.c.current_state != "done"))
+    res = conn.execute(
+        select(queue_entries_table).where(queue_entries_table.c.current_state != "done"))
     tmp = res.fetchall()
     res.close()
     for row in tmp:
@@ -104,7 +112,9 @@ def main():
 
         update_query = update(queue_entries_table)
         update_query = update_query.values(update_dict)
-        update_query = update_query.where((queue_entries_table.c.user_id == row["user_id"]) & (queue_entries_table.c.time_in == row["time_in"]))
+        update_query = update_query.where(
+            (queue_entries_table.c.user_id == row["user_id"]) &
+            (queue_entries_table.c.time_in == row["time_in"]))
         conn.execute(update_query)
 
     # Hardcoding options that we could use
@@ -142,12 +152,12 @@ def main():
 
         # get a random join queue time
         time_in = random.randint(300, 600)
-        queue_entry["time_in"] = datetime.now() - timedelta(seconds = time_in)
+        queue_entry["time_in"] = datetime.now() - timedelta(seconds=time_in)
 
         # get a random exit queue time
         time_out = random.randint(0, 300)
         if queue_entry["current_state"] == "done":
-            queue_entry["time_out"] = datetime.now() - timedelta(seconds = time_out)
+            queue_entry["time_out"] = datetime.now() - timedelta(seconds=time_out)
         else:
             queue_entry["time_out"] = None
 
@@ -159,7 +169,7 @@ def main():
         else:
             queue_entry["help_started_by"] = random.choice(all_grader_ids)
 
-        if queue_entry["removal_type"] == None:
+        if queue_entry["removal_type"] is None:
             queue_entry["removed_by"] = None
         elif queue_entry["removal_type"] == "helped":
             # usually the grader who started will finish helping
@@ -179,16 +189,19 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        res = conn.execute(f"SELECT max(time_in) FROM queue WHERE user_id = '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = UPPER(TRIM('{queue_entry['queue_code']}')) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
+        res = conn.execute(
+            f"SELECT max(time_in) FROM queue WHERE user_id = '{queue_entry['user_id']}' AND"
+            "UPPER(TRIM(queue_code)) = UPPER(TRIM('{queue_entry['queue_code']}')) AND"
+            "(removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
         queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
         res.close()
 
-        if queue_entry["help_started_by"] != None:
+        if queue_entry["help_started_by"] is not None:
             time_start = random.randint(time_out, time_in)
-            queue_entry["time_help_start"] = datetime.now() - timedelta(seconds = time_start)
+            queue_entry["time_help_start"] = datetime.now() - timedelta(seconds=time_start)
         else:
             queue_entry["time_help_start"] = None
-        
+
         # people usually won't be pausing
         if random.random() < 0.8:
             queue_entry["paused"] = False
@@ -200,7 +213,8 @@ def main():
             queue_entry["paused"] = random.choice([True, False])
             queue_entry["time_paused"] = random.choice([0, random.randint(0, time_in)])
             if queue_entry["paused"]:
-                queue_entry["time_paused_start"] = datetime.now() - timedelta(seconds = random.randint(0, queue_entry["time_paused"]))
+                queue_entry["time_paused_start"] = datetime.now() - timedelta(
+                    seconds=random.randint(0, queue_entry["time_paused"]))
             else:
                 queue_entry["time_paused_start"] = None
 
