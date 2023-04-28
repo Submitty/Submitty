@@ -794,7 +794,7 @@ class ElectronicGraderController extends AbstractController {
                         $sections[$key]['team'] = $team_users[$key];
                     }
                     if (isset($graded_components[$key])) {
-                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                        // Clamp to total components if unsubmitted assignment is graded for whatever reason
                         $sections[$key]['graded_components'] = $graded_components[$key];
                         $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                     }
@@ -806,7 +806,7 @@ class ElectronicGraderController extends AbstractController {
                             foreach ($graders[$key] as $valid_grader) {
                                 /* @var User $valid_grader */
                                 if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
-                                    $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                                    $valid_graders[] = $valid_grader->getDisplayedGivenName();
                                 }
                             }
                             $sections[$key]["valid_graders"] = $valid_graders;
@@ -862,7 +862,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails(string $gradeable_id, string $direction = "ASC") {
+    public function showDetails(string $gradeable_id) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -888,6 +888,7 @@ class ElectronicGraderController extends AbstractController {
         }
         $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
+        $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
@@ -929,7 +930,11 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $graded_gradeables = [];
-        $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
+        $user_ids = [];
+        if ($gradeable->isTeamAssignment()) {
+            $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable);
+            // Collect user ids so we know who isn't on a team
+        }
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
@@ -1248,7 +1253,7 @@ class ElectronicGraderController extends AbstractController {
                 unlink($csv_file);
             }
         );
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($contents === false) {
@@ -1343,13 +1348,13 @@ class ElectronicGraderController extends AbstractController {
 
         $all_teams = $gradeable->getTeams();
         $nl = "\n";
-        $csvdata = "First Name,Last Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
+        $csvdata = "Given Name,Family Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
                 foreach ($team->getMemberUsers() as $user) {
                     $csvdata .= implode(',', [
-                        $user->getDisplayedFirstName(),
-                        $user->getDisplayedLastName(),
+                        $user->getDisplayedGivenName(),
+                        $user->getDisplayedFamilyName(),
                         $user->getId(),
                         $team->getId(),
                         $team->getTeamName(),
@@ -1623,7 +1628,6 @@ class ElectronicGraderController extends AbstractController {
             }
 
             // Get the graded gradeable for the $from user
-            $from_graded_gradeable = false;
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from, $gradeable_id);
             if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
@@ -1788,7 +1792,7 @@ class ElectronicGraderController extends AbstractController {
             $late_days_user = $graded_gradeable->getSubmitter()->getUser();
         }
 
-        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+        $ldi = (new LateDays($this->core, $late_days_user, [$graded_gradeable]))->getLateDayInfoByGradeable($gradeable);
         if ($ldi === null) {
             $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
         }
@@ -1808,7 +1812,7 @@ class ElectronicGraderController extends AbstractController {
                 $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
                 $daysLate = $prevVersionInstance->getDaysLate();
 
-                // If this version is a good submission then it the rollback Submision
+                // If this version is a good submission then it the rollback Submission
                 if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
                     $rollbackSubmission = $previousVersion;
                     break;

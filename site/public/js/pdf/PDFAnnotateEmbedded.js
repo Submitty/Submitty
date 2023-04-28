@@ -271,7 +271,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
                                 if (initialPage.length) {
-                                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
+                                    $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
                                 }
                             }
                             document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
@@ -311,7 +311,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
 
 // TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 // the code below will remove the annotation info from local storage when a new window pops up
-// unload event should not be avioded as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
+// unload event should not be avoided as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
 /**
 $(window).on('unload', () => {
     for (let i = 0; i < localStorage.length; i++) {

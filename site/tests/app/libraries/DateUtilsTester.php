@@ -209,8 +209,9 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $core->setConfig(new Config($core));
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'test',
-            'user_lastname' => 'person',
+            'user_givenname' => 'test',
+            'user_familyname' => 'person',
+            'user_pronouns' => '',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
