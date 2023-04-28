@@ -489,6 +489,7 @@ function setupNumericTextCells() {
                 'old_scores': old_scores,
                 'scores': scores,
             },
+
             () => {
                 // Finds the element that stores the total and updates it to reflect increase
                 //eslint-disable-next-line eqeqeq
@@ -925,39 +926,8 @@ function setupSimpleGrading(action) {
         $(this).val('');
     });
 
-    // the offset of the search bar: used to lock the search bar on scroll
-    let sticky_offset = $('#checkpoint-sticky').offset();
-
-    // used to reposition the search field when the window scrolls
-    $(window).on('scroll', () => {
-        const sticky = $('#checkpoint-sticky');
-        if (sticky_offset.top < $(window).scrollTop()) {
-            sticky.addClass('sticky-top');
-        }
-        else {
-            sticky.removeClass('sticky-top');
-        }
-    });
-
-    // check if the search field needs to be repositioned when the page is loaded
-    if (sticky_offset.top < $(window).scrollTop()) {
-        const sticky = $('#checkpoint-sticky');
-        sticky.addClass('sticky-top');
-    }
-
-    // check if the search field needs to be repositioned when the page is resized
-    $(window).on('resize', () => {
-        const settings_btn_offset = $('#settings-btn').offset();
-        sticky_offset = {
-            top : settings_btn_offset.top,
-        };
-        if (sticky_offset.top < $(window).scrollTop()) {
-            const sticky = $('#checkpoint-sticky');
-            sticky.addClass('sticky-top');
-        }
-    });
-    // search bar code ends here
     initSocketClient();
+
 }
 
 function initSocketClient() {
