@@ -41,14 +41,14 @@
                 </button>
             {% endif %}
             
-                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+        <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (cookies["view"] is defined) and cookies["view"] == "month" %} selected {% endif %}>Month</option>
                     <option value="two_week" {% if (cookies["view"] is defined)  and cookies["view"] == "two_week" %} selected {% endif %}>Two Week</option>
                     <option value="one_week" {% if (cookies["view"] is defined)  and cookies["view"] == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
         </div>
 
-        <div class="calendar" style='margin-bottom: 20px; margin-top: 2px;' id="full-calendar">
+        <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
         </div>
     </div>
