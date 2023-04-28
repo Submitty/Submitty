@@ -13,8 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class CalendarItem {
     // Note the 'Important' type is also treated as regular text
-    const TEXT = 0;
     const ANNOUNCEMENT = 1;
+    const TEXT = 0;
 
     /**
      * @ORM\Id
@@ -82,13 +82,10 @@ class CalendarItem {
 
     public function setStringType(string $type): void {
         switch ($type) {
-            case 'note':
+            case 'text':
                 $this->type = self::TEXT;
                 break;
-            case 'important':
-                $this->type = self::TEXT;
-                break;
-            case 'announcement':
+            case 'ann':
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:

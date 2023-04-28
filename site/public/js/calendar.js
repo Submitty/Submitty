@@ -87,23 +87,16 @@ function generateCalendarItem(item) {
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
     let onclick = item['onclick'];
-    let inst = "";
+    let exists = false;
     if(!item['show_due']) {
-        let exists = false;
         for(let course = 0; course < instructor_courses.length; course++) {
             if(instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
                 exists = true;
             }
         }
-        if (exists) {
-            onclick = `editCalendarItemForm('${item['status']}', '${item['title']}', '${item['id']}', '${item['date']}')`;
-            inst = `-inst`; 
-        }
     }
     const icon = item['icon'];
     const element = document.createElement('a');
-    console.log(`cal-gradeable-status-${item['status']}${inst}`);
-    console.log(inst);
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
     if(item['show_due']) {
         element.style.setProperty('background-color', item['color']);
@@ -111,11 +104,19 @@ function generateCalendarItem(item) {
     if(item['status'] === "ann") {
         element.style.setProperty('border-color', item['color']);
     }
+    if(exists) {
+        element.style.setProperty('cursor','pointer')
+    }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
     }
     if (onclick !== '') {
+        if(!item['show_due']) {
+            element.addEventListener('click', function() {
+                editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
+            });
+        }
         element.onclick = onclick;
     }
     element.disabled = item['disabled'];
@@ -125,7 +126,6 @@ function generateCalendarItem(item) {
         element.appendChild(iconElement);
     }
     element.append(item['title']);
-    console.log(element);
     return element;
 }
 
@@ -138,11 +138,13 @@ function generateCalendarItem(item) {
  * @param date : string the item date
  * @returns {void} : only has to update existing variables
  */
-function editCalendarItemForm(itemType, itemText, itemId, date) {
-    $('#calendar-item-type-edit').val(itemType);
+function editCalendarItemForm(itemType, itemText, itemId, date, semester, course) {
+    $('#calendar-item-type-edit>option[value='+itemType+']').attr('selected', true);
     $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
     $('#calendar-item-id').val(itemId); 
+    $('#calendar-item-semester-edit').val(semester);
+    $('#calendar-item-course-edit').val(course);
 
     $('#edit-calendar-item-form').show();
 }
@@ -154,17 +156,22 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
  */
 function deleteCalendarItem() {
     const id = $('#calendar-item-id').val();
+    const course = $('#calendar-item-course-edit').val();
+    const semester = $('#calendar-item-semester-edit').val();
     if (id !== '') {
         const data = new FormData();
         data.append('id', id);
+        data.append('course', course);
+        data.append('semester', semester);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildCourseUrl(['calendar', 'deleteItem']),
+            url: buildUrl(['calendar', 'items','delete']),
             type: 'POST',
             processData: false,
             contentType: false,
             data: data,
             success: function (res) {
+                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     location.reload();

@@ -153,7 +153,8 @@ class CalendarInfo extends AbstractModel {
                     'status_note' => '',
                     'color' => $info->colors[$course->getSemester() . $course->getTitle()],
                     'type' => 'item',
-                    'date' => $date
+                    'date' => $date,
+                    'id' => $cal_item->getId()
                 ];
                 $info->items_by_date[$date][] = $curItem;
             }
