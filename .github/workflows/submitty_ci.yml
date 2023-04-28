@@ -1,6 +1,11 @@
 name: Submitty CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 env:
   PGPASSWORD: submitty_dbuser
@@ -15,6 +20,11 @@ env:
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
+concurrency:
+  # If this is a PR, cancel all previously running jobs on source branch
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
     css-lint:
         runs-on: ubuntu-20.04
@@ -22,7 +32,7 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
@@ -44,7 +54,7 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
@@ -68,7 +78,7 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
                 node-version: ${{ env.NODE_VERSION }}
@@ -82,7 +92,7 @@ jobs:
             - run: npm install
             - run: npm run test
             - name: Upload Coverage
-              uses: codecov/codecov-action@v1
+              uses: codecov/codecov-action@v3
               with:
                   files: site/tests/report/jest/clover.xml
                   flags: js
@@ -94,8 +104,8 @@ jobs:
             run:
                 working-directory: site
         steps:
-            - uses: actions/checkout@v2
-            - uses: shivammathur/setup-php@2.24.0
+            - uses: actions/checkout@v3
+            - uses: shivammathur/setup-php@2.25.1
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
@@ -129,8 +139,8 @@ jobs:
           run:
               working-directory: site
       steps:
-          - uses: actions/checkout@v2
-          - uses: shivammathur/setup-php@2.24.0
+          - uses: actions/checkout@v3
+          - uses: shivammathur/setup-php@2.25.1
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
@@ -150,7 +160,7 @@ jobs:
           - name: Run php unit tests
             run : php vendor/bin/phpunit
           - name: Upload Coverage
-            uses: codecov/codecov-action@v1
+            uses: codecov/codecov-action@v3
             with:
               files: site/tests/report/clover.xml
               flags: php
@@ -159,7 +169,7 @@ jobs:
     python-lint:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
@@ -181,7 +191,7 @@ jobs:
     python-unit:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
@@ -206,7 +216,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload submitty python utils Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: python_submitty_utils/coverage.xml
             flags: python_submitty_utils
@@ -218,7 +228,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload migrator Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: migration/coverage.xml
             flags: migrator
@@ -230,7 +240,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload autograder Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: autograder/coverage.xml
             flags: autograder
@@ -248,7 +258,7 @@ jobs:
             coverage xml -i
 
         - name: Upload submitty_daemon_jobs Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: sbin/submitty_daemon_jobs/coverage.xml
             flags: submitty_daemon_jobs
@@ -258,7 +268,7 @@ jobs:
       name: ShellCheck
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - name: install ShellCheck
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
@@ -292,16 +302,12 @@ jobs:
               - 5432:5432
 
         steps:
-          - name: Cancel Previous Runs
-            uses: styfle/cancel-workflow-action@0.11.0
-            with:
-              access_token: ${{ github.token }}
-          - uses: actions/checkout@v2
+          - uses: actions/checkout@v3
             with:
               path: SUBMITTY_CPY/
           - name: Copy Repo
             run: |
-              # have to copy first, absolute paths not supported by actions/checkout@v2
+              # have to copy first, absolute paths not supported by actions/checkout@v3
                 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
                 sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
@@ -310,7 +316,7 @@ jobs:
           - uses: actions/setup-python@v4
             with:
               python-version: ${{ env.PYTHON_VERSION }}
-          - uses: shivammathur/setup-php@2.24.0
+          - uses: shivammathur/setup-php@2.25.1
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick, ldap
@@ -509,7 +515,6 @@ jobs:
               config: baseUrl=http://localhost
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: run_area=CI
 
           - name: Stop autograding services
@@ -524,7 +529,6 @@ jobs:
               spec: cypress/e2e/autograding_status_1.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: autograding_shipper_off=True
 
           - name: Restart autograding shipper
@@ -538,7 +542,6 @@ jobs:
               spec: cypress/e2e/autograding_status_2.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
               env: autograding_shipper_off=True
 
           - name: Restart autograding worker
@@ -555,7 +558,6 @@ jobs:
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
           - name: Switch to LDAP auth
             run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
@@ -567,7 +569,6 @@ jobs:
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
           - name: Setup SAML
             run: |
@@ -584,14 +585,13 @@ jobs:
               spec: cypress/e2e/login.spec.js
               working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
               browser: chrome
-              headless: true
 
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-screenshots
               path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-          - uses: actions/upload-artifact@v2
+          - uses: actions/upload-artifact@v3
             if: failure()
             with:
               name: cypress-videos
