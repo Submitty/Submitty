@@ -171,7 +171,6 @@ function deleteCalendarItem() {
             contentType: false,
             data: data,
             success: function (res) {
-                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     location.reload();
