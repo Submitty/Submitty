@@ -594,7 +594,7 @@ function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let print_day = 0;
 
-    console.log(view_day, lastMonthEnd)
+    console.log(view_day)
     // Show days at the end of last month that belongs to the first week of current month
     if(view_day-currentDay <= 0 ){
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
