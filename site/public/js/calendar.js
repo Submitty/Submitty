@@ -44,7 +44,7 @@ function nextMonth(month, year, day) {
  * @param day : int the current day
  * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
  */
-function prevWeek(month, year, day, type) {
+function prevWeek(month, year, day) {
     const currentDay = new Date(year, month - 1, day);
     // Move the date back by 7 days
     currentDay.setDate(currentDay.getDate() - 7);
@@ -53,7 +53,7 @@ function prevWeek(month, year, day, type) {
     year = currentDay.getFullYear();
     day = currentDay.getDate();
 
-    return [month + 1, year, day, type];
+    return [month + 1, year, day];
 }
 
 /**
@@ -63,7 +63,7 @@ function prevWeek(month, year, day, type) {
  * @param day : int the current day
  * @returns {number[]} : array<int> {next_month, year_of_next_month}
  */
-function nextWeek(month, year, day, type) {
+function nextWeek(month, year, day) {
     const currentDay = new Date(year, month - 1, day);
     // Move the date forward by 7 days
     currentDay.setDate(currentDay.getDate() + 7);
@@ -71,7 +71,7 @@ function nextWeek(month, year, day, type) {
     month = currentDay.getMonth();
     year = currentDay.getFullYear();
     day = currentDay.getDate();
-    return [month + 1, year, day, type];
+    return [month + 1, year, day];
 }
 
 /**
@@ -310,7 +310,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         prev = prevMonth(view_month, view_year, view_day);
     }
     else {
-        prev = prevWeek(view_month, view_year, view_day, type);
+        prev = prevWeek(view_month, view_year, view_day);
+        prev.push(type);
     }
     a.onclick = () => loadCalendar.apply(this, prev);
     a.innerHTML = '&#60;';
@@ -349,7 +350,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         next = nextMonth(view_month, view_year, view_day);
     }
     else {
-        next = nextWeek(view_month, view_year, view_day, type);
+        next = nextWeek(view_month, view_year, view_day);
+        next.push(type);
     }
     a.onclick = () => loadCalendar.apply(this, next);
     a.innerHTML = '&#62;';
