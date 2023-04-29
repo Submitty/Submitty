@@ -41,7 +41,6 @@ with open(config_file, 'r') as file:
     data = json.load(file)
     install_dir = data['submitty_install_dir']
     data_dir = data['submitty_data_dir']
-    host_name = data['submission_url']
 
 # Collect user information from configuration file
 users_config_file = os.path.join(install_dir, 'config', 'submitty_users.json')
@@ -182,9 +181,7 @@ else:
     cmd = [
         '{}/sbin/generate_grade_summaries.py'.format(install_dir),
         semester,
-        course,
-        host_name,
-        creds['token']
+        course
     ]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
