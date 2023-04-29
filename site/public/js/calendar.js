@@ -113,11 +113,11 @@ function generateCalendarItem(item) {
     }
     if (onclick !== '') {
         if (!item['show_due']) {
-            element.addEventListener('click', function() {
-                editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
-            });
+            element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
-        element.onclick = onclick;
+        else {
+            element.onclick = onclick;
+        }
     }
     element.disabled = item['disabled'];
     if (icon !== '') {
