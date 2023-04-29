@@ -18,8 +18,9 @@ Difference::Difference() :
 
 
 void Difference::printJSON(std::ostream & file_out) {
-  std::string diff1_name = "line";
-  std::string diff2_name = "char";
+  std::string difference_1_name = "line";  
+  std::string difference_2_name = "char";
+  //Changed the Variable names from diff1_name and diff2_name to difference_1_name and difference_2_name respectively//
 
   nlohmann::json whole_file;
 
@@ -34,31 +35,31 @@ void Difference::printJSON(std::ostream & file_out) {
     student["start"] = changes[block].a_start;
     for (unsigned int line = 0; line < changes[block].a_changes.size(); line++) {
       nlohmann::json d1;
-      d1[diff1_name+"_number"] = changes[block].a_changes[line];
+      d1[difference_1_name+"_number"] = changes[block].a_changes[line];
       if (changes[block].a_characters.size() > line &&
           changes[block].a_characters[line].size() > 0) {
         nlohmann::json d2;
         for (unsigned int character=0; character< changes[block].a_characters[line].size(); character++) {
           d2.push_back(changes[block].a_characters[line][character]);
         }
-        d1[diff2_name+"_number"] = d2;
+        d1[difference_2_name+"_number"] = d2;
       }
-      student[diff1_name].push_back(d1);
+      student[difference_1_name].push_back(d1);
     }
 
     expected["start"] = changes[block].b_start;
     for (unsigned int line = 0; line < changes[block].b_changes.size(); line++) {
       nlohmann::json d1;
-      d1[diff1_name+"_number"] = changes[block].b_changes[line];
+      d1[difference_1_name+"_number"] = changes[block].b_changes[line];
       if (changes[block].b_characters.size() > line &&
           changes[block].b_characters[line].size() > 0) {
         nlohmann::json d2;
         for (unsigned int character=0; character< changes[block].b_characters[line].size(); character++) {
           d2.push_back(changes[block].b_characters[line][character]);
         }
-        d1[diff2_name+"_number"] = d2;
+        d1[difference_2_name+"_number"] = d2;
       }
-      expected[diff1_name].push_back(d1);
+      expected[difference_1_name].push_back(d1);
     }
 
     blob["actual"] = student;
