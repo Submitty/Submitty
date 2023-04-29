@@ -24,7 +24,6 @@
         else if(x.value === "one_week"){
             document.cookie = "view=one_week";
         }
-        console.log(x.value);
         loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
     }
 </script>
@@ -41,10 +40,10 @@
                 </button>
             {% endif %}
             
-        <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
-                    <option value="month" {% if (cookies["view"] is defined) and cookies["view"] == "month" %} selected {% endif %}>Month</option>
-                    <option value="two_week" {% if (cookies["view"] is defined)  and cookies["view"] == "two_week" %} selected {% endif %}>Two Week</option>
-                    <option value="one_week" {% if (cookies["view"] is defined)  and cookies["view"] == "one_week" %} selected {% endif %}>One Week</option>
+                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+                    <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
+                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
         </div>
 
