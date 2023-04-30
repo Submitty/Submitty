@@ -12,7 +12,7 @@
 opencv-python-headless==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2022.7.1 # Submitty-util specific.
+pytz==2023.3 # Submitty-util specific.
 
 # v2 crashes docker install
 urllib3==1.26.14
