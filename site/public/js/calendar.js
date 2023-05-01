@@ -1,11 +1,6 @@
-/* exported prevMonth */
-/* exported nextMonth */
-/* exported loadCalendar */
-/* exported loadFullCalendar */
-/* global curr_day */
-/* global curr_month */
-/* global curr_year */
-/* global gradeables_by_date */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
+/* global curr_day, curr_month, curr_year, gradeables_by_date */
+/* global csrfToken, buildCourseUrl */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -82,7 +77,7 @@ function generateCalendarItem(item) {
 
     // Put detail in the tooltip
     let tooltip = `Course: ${item['course']}&#10;` +
-                  `Title: ${item['title']}&#10;`;
+        `Title: ${item['title']}&#10;`;
     if (item['status_note'] !== '') {
         tooltip += `Status: ${item['status_note']}&#10;`;
     }
@@ -95,6 +90,12 @@ function generateCalendarItem(item) {
     const icon = item['icon'];
     const element = document.createElement('a');
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
+    if (item['show_due']) {
+        element.style.setProperty('background-color', item['color']);
+    }
+    if (item['status'] === 'ann') {
+        element.style.setProperty('border-color', item['color']);
+    }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
@@ -110,6 +111,54 @@ function generateCalendarItem(item) {
     }
     element.append(item['title']);
     return element;
+}
+
+/**
+ * The form for editing calendar items.
+ *
+ * @param itemType : string the calendar item type
+ * @param itemText : string the text the item shoukd contain
+ * @param itemId : (Not sure, possibly string or int) the item ID
+ * @param date : string the item date
+ * @returns {void} : only has to update existing variables
+ */
+function editCalendarItemForm(itemType, itemText, itemId, date) {
+    $('#calendar-item-type-edit').val(itemType);
+    $('#calendar-item-text-edit').val(itemText);
+    $('#edit-picker-edit').val(date);
+    $('#calendar-item-id').val(itemId);
+
+    $('#edit-calendar-item-form').show();
+}
+
+/**
+ * Deletes the selected calendar item.
+ *
+ * @returns {void} : Just deleting.
+ */
+function deleteCalendarItem() {
+    const id = $('#calendar-item-id').val();
+    if (id !== '') {
+        const data = new FormData();
+        data.append('id', id);
+        data.append('csrf_token', csrfToken);
+        $.ajax({
+            url: buildCourseUrl(['calendar', 'deleteItem']),
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    location.reload();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+        });
+    }
 }
 
 /**
@@ -429,4 +478,8 @@ function loadFullCalendar(start, end, semester_name) {
     const calendar = document.getElementById('full-calendar');
     calendar.innerHTML = '';
     calendar.appendChild(generateFullCalendar(start, end, semester_name));
+}
+
+function openNewItemModal() {
+    $('#new-calendar-item-form').css('display', 'block');
 }
