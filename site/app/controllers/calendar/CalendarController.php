@@ -83,7 +83,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setText($text);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("Text exceeds 255 characters which is not allowed");
+            $this->core->addErrorMessage("Text exceeds character limit, which is not allowed");
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
@@ -182,7 +182,13 @@ class CalendarController extends AbstractController {
                 if ($calendar_item === null) {
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
                 }
-                $calendar_item->setText($text);
+                try {
+                    $calendar_item->setText($text);
+                }
+                catch (\InvalidArgumentException $e) {
+                    $this->core->addErrorMessage("Text exceeds character limit, which is not allowed");
+                    return new RedirectResponse($this->core->buildUrl(['calendar']));
+                }                
                 $calendar_item->setDate(new \DateTime($date));
                 try {
                     $calendar_item->setStringType($type);
