@@ -24,6 +24,7 @@ tests/**/*.sh
 .setup/distro_setup/ubuntu/16.04/setup_distro.sh
 .setup/distro_setup/ubuntu/18.04/setup_distro.sh
 .setup/distro_setup/ubuntu/20.04/setup_distro.sh
+.setup/distro_setup/ubuntu/22.04/setup_distro.sh
 .setup/distro_setup/ubuntu/rpi.sh
 .setup/distro_setup/setup_distro.sh
 .setup/distro_setup/debian/8/setup_distro.sh
