@@ -2,7 +2,7 @@
   "name": "submitty/submitty",
   "config": {
     "platform": {
-      "php": "8.1"
+      "php": "7.4"
     },
     "sort-packages": true,
     "allow-plugins": {
@@ -23,7 +23,6 @@
     "aptoma/twig-markdown": "3.4.1",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
-    "doctrine/dbal": "2.13.9",
     "doctrine/orm": "2.12.3",
     "egulias/email-validator": "3.2.5",
     "lcobucci/jwt": "4.3.0",
@@ -32,7 +31,7 @@
     "onelogin/php-saml": "4.1.0",
     "php-ds/php-ds": "1.4.1",
     "ramsey/uuid": "4.2.3",
-    "symfony/cache": "5.4.22",
+    "symfony/cache": "5.4.23",
     "symfony/config": "5.4.21",
     "symfony/http-foundation": "5.4.22",
     "symfony/polyfill-php80": "1.27.0",
