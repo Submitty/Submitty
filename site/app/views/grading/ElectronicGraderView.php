@@ -727,7 +727,10 @@ HTML;
 
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
-            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
+            if ($a['title'] === 'NULL' || $b['title'] === 'NULL') {
+                return $a['title'] === 'NULL' ? 1 : -1;
+            }
+            return strnatcmp($a['title'], $b['title']); // use strnatcmp to sort 9 before 10
         });
 
 
@@ -1312,10 +1315,12 @@ HTML;
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    foreach (explode(",", $hidden_files) as $file_regex) {
-                        $file_regex = trim($file_regex);
-                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
-                            $skipping = true;
+                    if ($hidden_files !== null) {
+                        foreach (explode(",", $hidden_files) as $file_regex) {
+                            $file_regex = trim($file_regex);
+                            if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
+                                $skipping = true;
+                            }
                         }
                     }
                     if (!$skipping) {

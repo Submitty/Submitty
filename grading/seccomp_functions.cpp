@@ -186,6 +186,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("UNKNOWN");
   }
 
   // ---------------------------------------------------------------

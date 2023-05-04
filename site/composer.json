@@ -2,7 +2,7 @@
   "name": "submitty/submitty",
   "config": {
     "platform": {
-      "php": "7.4"
+      "php": "8.1"
     },
     "sort-packages": true,
     "allow-plugins": {
@@ -23,6 +23,7 @@
     "aptoma/twig-markdown": "3.4.1",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
+    "doctrine/dbal": "2.13.9",
     "doctrine/orm": "2.12.3",
     "egulias/email-validator": "3.2.5",
     "lcobucci/jwt": "4.3.0",
