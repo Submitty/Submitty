@@ -188,7 +188,7 @@ class CalendarController extends AbstractController {
                 catch (\InvalidArgumentException $e) {
                     $this->core->addErrorMessage("Text exceeds character limit, which is not allowed");
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
-                }                
+                }
                 $calendar_item->setDate(new \DateTime($date));
                 try {
                     $calendar_item->setStringType($type);
