@@ -46,7 +46,7 @@ class DatabaseUtils {
             elseif (!is_numeric($param)) {
                 $param = "'{$param}'";
             }
-            $sql = preg_replace('/\?/', $param, $sql, 1);
+            $sql = preg_replace('/\?/', strval($param), $sql, 1);
         }
         return $sql;
     }

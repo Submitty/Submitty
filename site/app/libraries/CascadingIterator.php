@@ -70,7 +70,7 @@ class CascadingIterator implements \Iterator {
      * @return mixed scalar on success, or null on failure.
      * @since 5.0.0
      */
-    public function key(): int {
+    public function key(): mixed {
         return $this->key;
     }
 

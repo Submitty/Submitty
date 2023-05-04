@@ -20,7 +20,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;18</span><span class='line_code'><span class='line_code_inner'>     Uvodni, Weevils), Aridians, Atraxi, Borusa, Bragen, Cult of Skaro (inc</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;19</span><span class='line_code'><span class='line_code_inner'>     Dalek Sec and three others), Cyber-leader, Cybermen, Dala, Dalek</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;20</span><span class='line_code'><span class='line_code_inner'>     &quot;puppet&quot;, Dalek Supreme (Supreme Dalek), inc Progenitor, Dalek prime</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;21</span><span class='line_code'><span class='line_code_inner'>     minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein's</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;21</span><span class='line_code'><span class='line_code_inner'>     minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein&#039;s</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;22</span><span class='line_code'><span class='line_code_inner'>     monster robot, Gantok, Grey Lady robot, Gubbage Cone, Hartman, Yvonne,</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;23</span><span class='line_code'><span class='line_code_inner'>     Hawthorne, Ice Warriors (inc benevolent appearances), Judoon,</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;24</span><span class='line_code'><span class='line_code_inner'>     Kovarian, Madame, Lytton, Commander Gustav, Master (the), Mavic Chen,</span></span></div>
@@ -33,7 +33,7 @@
 	<div class='bad'><span class='line_number'>&nbsp;31</span><span class='line_code'><span class='line_code_inner'>The stories that only features Daleks were:</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;32</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;33</span><span class='line_code'><span class='line_code_inner'>     Bad Wolf/The Parting of the Ways, Daleks in, Death to the Daleks,</span></span></div>
-	<div class='bad'><span class='line_number'>&nbsp;34</span><span class='line_code'><span class='line_code_inner'>     Journey's End, Manhattan/Evolution of the Daleks, Mission to the</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;34</span><span class='line_code'><span class='line_code_inner'>     Journey&#039;s End, Manhattan/Evolution of the Daleks, Mission to the</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;35</span><span class='line_code'><span class='line_code_inner'>     Unknown, The Big Bang, The Daleks</span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;36</span><span class='line_code'><span class='line_code_inner'></span></span></div>
 	<div class='bad'><span class='line_number'>&nbsp;37</span><span class='line_code'><span class='line_code_inner'>The doctors who fought Daleks were:</span></span></div>
