@@ -6508,7 +6508,8 @@ AND gc_id IN (
                 helper.user_email AS helper_email,
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
-                helper.user_group AS helper_group
+                helper.user_group AS helper_group,
+                helper.user_pronouns AS helper_pronouns
             FROM queue
             LEFT JOIN users helper on helper.user_id = queue.help_started_by
             WHERE current_state IN ('waiting','being_helped')
@@ -6532,6 +6533,7 @@ AND gc_id IN (
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
+                helper.user_pronouns AS helper_pronouns,
                 remover.user_givenname AS remover_givenname,
                 remover.user_preferred_givenname AS remover_preferred_givenname,
                 remover.user_familyname AS remover_familyname,
@@ -6540,7 +6542,8 @@ AND gc_id IN (
                 remover.user_email AS remover_email,
                 remover.user_email_secondary AS remover_email_secondary,
                 remover.user_email_secondary_notify AS remover_email_secondary_notify,
-                remover.user_group AS remover_group
+                remover.user_group AS remover_group,
+                remover.user_pronouns AS remover_pronouns
             FROM    queue
             LEFT JOIN users helper ON helper.user_id = queue.help_started_by
             LEFT JOIN users remover ON remover.user_id = queue.removed_by

@@ -264,6 +264,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         $user_info["user_email_secondary"] = $query_row["helper_email_secondary"];
         $user_info["user_email_secondary_notify"] = $query_row["helper_email_secondary_notify"];
         $user_info["user_group"] = $query_row["helper_group"];
+        $user_info["user_pronouns"] = $query_row["helper_pronouns"];
 
         $user = new User($this->core, $user_info);
 
@@ -298,6 +299,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         $user_info["user_email_secondary"] = $query_row["remover_email_secondary"];
         $user_info["user_email_secondary_notify"] = $query_row["remover_email_secondary_notify"];
         $user_info["user_group"] = $query_row["remover_group"];
+        $user_info["user_pronouns"] = $query_row["remover_pronouns"];
 
         $user = new User($this->core, $user_info);
 
