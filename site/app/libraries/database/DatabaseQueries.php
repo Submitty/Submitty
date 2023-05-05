@@ -2452,7 +2452,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach ($rows as $row) {
-            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id'] ?? '');
             $modified_rows[] = $row;
         }
         return $modified_rows;
