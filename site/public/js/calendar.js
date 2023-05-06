@@ -1,5 +1,5 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
-/* global curr_day, curr_month, curr_year, gradeables_by_date */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
@@ -139,7 +139,7 @@ function generateCalendarItem(item) {
  * @returns {void} : only has to update existing variables
  */
 function editCalendarItemForm(itemType, itemText, itemId, date, semester, course) {
-    $('#calendar-item-type-edit>option[value=' + itemType + ']').attr('selected', true);
+    $(`#calendar-item-type-edit>option[value=${itemType}]`).attr('selected', true);
     $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
     $('#calendar-item-id').val(itemId);

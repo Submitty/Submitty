@@ -42,7 +42,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("/items/new", methods={"POST"})
+     * @Route("/calendar/items/new", methods={"POST"})
      */
     public function createMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -75,7 +75,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setStringType($type);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("That is not a valid calendar item type");
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
         $calendar_item->setDate(new \DateTime($date));
@@ -83,7 +83,7 @@ class CalendarController extends AbstractController {
             $calendar_item->setText($text);
         }
         catch (\InvalidArgumentException $e) {
-            $this->core->addErrorMessage("Text exceeds character limit, which is not allowed");
+            $this->core->addErrorMessage($e->getMessage());
             return new RedirectResponse($this->core->buildUrl(['calendar']));
         }
 
@@ -119,7 +119,7 @@ class CalendarController extends AbstractController {
     }
 
     /**
-     * @Route("items/edit", methods={"POST"})
+     * @Route("/calendar/items/edit", methods={"POST"})
      */
     public function editMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not

@@ -4141,7 +4141,6 @@ SQL;
 
     /**
      * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
-     * @param string $user_id
      */
     public function getInstructorLevelUnarchivedCourses(string $user_id): array {
         $query = "
