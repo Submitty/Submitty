@@ -15,13 +15,13 @@
     });
 
     window.changeView = function(x){
-        if(x.value === "month"){
+        if (x.value === "month") {
             document.cookie = "view=month";
         }
-        else if(x.value === "two_week"){
+        else if (x.value === "two_week") {
             document.cookie = "view=two_week";
         }
-        else if(x.value === "one_week"){
+        else if (x.value === "one_week") {
             document.cookie = "view=one_week";
         }
         loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
