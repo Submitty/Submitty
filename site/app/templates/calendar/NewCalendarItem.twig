@@ -24,11 +24,11 @@
             <option value="important">Important</option>
         </select>
 
-        <label for="calendar-item-text">Message Text</label>
-        <textarea id="calendar-item-text" name="text" rows="5" cols="64"></textarea>
-
         <label for="edit-picker">Date</label>
         <input id="edit-picker" class="edit-picker" type="text" name="date">
+
+        <label for="calendar-item-text">Message Text</label>
+        <textarea id="calendar-item-text" name="text" rows="5" cols="64"></textarea>
     </div>
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
     <script>
