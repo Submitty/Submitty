@@ -361,6 +361,9 @@ class GradingQueue {
         array $open_autograding_workers_json,
         array &$course_info
     ): array {
+        if ($queue_or_grading_file === "/var/local/submitty/to_be_graded_queue/s23__sample__future_no_tas_homework__instructor__2") {
+            $thing = 2;
+        }
         $stale = false;
         $error = "";
         $regrade = false;
@@ -389,7 +392,7 @@ class GradingQueue {
                 }
             }
             $capability = "default";
-            if (in_array("required_capabilities", $entry->getQueueObj())) {
+            if (array_key_exists("required_capabilities", $entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 
