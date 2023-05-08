@@ -6,16 +6,6 @@
         Please select the type of item, when it should be, and the text it should display.
     </p>
 
-    <style>
-        div.calendar-submit {
-            display: grid;
-            grid-template-columns: max-content max-content;
-            grid-gap: 5px; 
-        }
-        div.calendar-submit label { text-align: "right"; }
-        div.calendar-subm1t label:after { content: ":"; }
-    </style>
-
     <div class="calendar-submit">
         <label for="calendar-item-type">Message Type</label>
         <select id="calendar-item-type" name="type">
@@ -30,6 +20,7 @@
         <label for="calendar-item-text">Message Text</label>
         <textarea id="calendar-item-text" name="text" rows="5" cols="64"></textarea>
     </div>
+    
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
     <script>
         flatpickr('.edit-picker', {
