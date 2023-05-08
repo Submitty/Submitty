@@ -15,7 +15,7 @@ opencv-python-headless==4.6.0.66
 pytz==2022.7.1 # Submitty-util specific.
 
 # v2 crashes docker install
-urllib3==1.26.14
+urllib3==2.0.2
 
 python-pam==2.0.2
 ruamel.yaml==0.17.21
