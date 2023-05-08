@@ -837,7 +837,7 @@ def checkout_vcs_repo(config, my_file):
 
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
-        sub_checkout_path = ""
+        sub_checkout_path = ''
         if vcs_subdirectory == '':
             with open(
                 os.path.join(submission_path, ".submit.VCS_CHECKOUT")
@@ -867,7 +867,7 @@ def checkout_vcs_repo(config, my_file):
 
         # warning: --depth is ignored in local clones; use file:// instead.
         if '://' not in vcs_path and '@' not in vcs_path:
-            vcs_path = "file:///" + vcs_path
+            vcs_path = 'file:///' + vcs_path
 
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
         checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
@@ -964,7 +964,7 @@ def checkout_vcs_repo(config, my_file):
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
                 # copy the subdirectory we want to the old checkout path and remove the rest
-                if sub_checkout_path != "":
+                if sub_checkout_path != '':
                     try:
                         os.chdir(sub_checkout_path)
                         if vcs_subdirectory[0] == '/':
@@ -983,12 +983,12 @@ def checkout_vcs_repo(config, my_file):
                     except BaseException as error:
                         shutil.rmtree(sub_checkout_path)
                         config.logger.log_message(
-                            f"ERROR: failed to find files in the {vcs_subdirectory} subdirectory",
+                            f'ERROR: failed to find files in the {vcs_subdirectory} subdirectory',
                             job_id=job_id
                         )
                         os.chdir(checkout_path)
                         error_path = os.path.join(
-                            checkout_path, "failed_subdirectory_empty.txt"
+                            checkout_path, 'failed_subdirectory_empty.txt'
                         )
                         with open(error_path, 'w') as f:
                             print(str(error), file=f)

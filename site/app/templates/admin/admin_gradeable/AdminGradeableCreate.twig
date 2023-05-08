@@ -263,7 +263,7 @@
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
                         {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
 			
-		    <div class="team_no">
+                    <div class="team_no">
                         <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
                             {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - single repository per user per course, assignments in subdirectories</label>
@@ -274,11 +274,10 @@
                                 <input style='width: 30%' type='text' name="vcs_url" id="vcs_self_url" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="" required />
                             {% else %}
-			        <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() }}</kbd>
+                                <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() }}</kbd>
                             {% endif %}
-			</div>						    
-		    </div>
-		    
+                        </div>	    					    
+                    </div>
                 </fieldset>
             </div>
         </div>
