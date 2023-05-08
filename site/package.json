@@ -22,7 +22,7 @@
     "@codemirror/view": "6.9.2",
     "@codemirror/language": "6.6.0",
     "@codemirror/autocomplete": "6.4.2",
-    "@codemirror/commands": "6.2.2",
+    "@codemirror/commands": "6.2.4",
     "@codemirror/lint": "6.2.0",
     "@codemirror/search": "6.2.3",
     "@codemirror/theme-one-dark": "6.1.1",
