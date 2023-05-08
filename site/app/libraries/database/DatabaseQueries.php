@@ -7359,7 +7359,7 @@ WHERE current_state IN
                       SELECT
                         json_agg(sections_registration_id) AS grading_registration_sections,
                         user_id
-                      FROM grading_registration
+                      FROM grading_registration 
                       GROUP BY user_id
                     ) AS sr ON u.user_id=sr.user_id
                     LEFT JOIN(
@@ -7376,6 +7376,13 @@ WHERE current_state IN
                   ) AS uv ON uv.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id, ug.g_id
               ) AS gcd ON gcd.gd_id=gd.gd_id AND gcd.g_id=g.g_id
+
+                /*
+                LEFT JOIN (
+                  SELECT course_section_id
+                  FROM sections_registration
+                ) AS csi ON csi.section_registration_id = g.grading_registration
+                */
 
               /* Join aggregate gradeable version data */
               LEFT JOIN (
