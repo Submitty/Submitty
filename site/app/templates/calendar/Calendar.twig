@@ -14,7 +14,7 @@
         loadCalendar(curr_month, curr_year, curr_day, type);
     });
 
-    window.changeView = function(x){
+    function changeView(x) {
         if (x.value === "month") {
             document.cookie = "view=month";
         }

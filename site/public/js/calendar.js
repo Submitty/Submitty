@@ -10,7 +10,7 @@ const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
  * Gets the previous month of a given month
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
- * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
+ * @returns {view_info[]} : array {previous_month, year_of_previous_month}
  */
 function prevMonth(month, year, day) {
     month = month - 1;
@@ -26,7 +26,7 @@ function prevMonth(month, year, day) {
  *
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
- * @returns {number[]} : array<int> {next_month, year_of_next_month}
+ * @returns {view_info[]} : array {next_month, year_of_next_month}
  */
 function nextMonth(month, year, day) {
     month = month + 1;
@@ -42,7 +42,7 @@ function nextMonth(month, year, day) {
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
  * @param day : int the current day
- * @returns {number[]} : array<int> {previous_month, year_of_previous_month}
+ * @returns {view_info[]} : array {previous_month, year_of_previous_month}
  */
 function prevWeek(month, year, day) {
     const currentDay = new Date(year, month - 1, day);
@@ -61,7 +61,7 @@ function prevWeek(month, year, day) {
  * @param month : int the current month (1 as January and 12 as December)
  * @param year : int the current year
  * @param day : int the current day
- * @returns {number[]} : array<int> {next_month, year_of_next_month}
+ * @returns {view_info[]} : array {next_month, year_of_next_month}
  */
 function nextWeek(month, year, day) {
     const currentDay = new Date(year, month - 1, day);
@@ -290,6 +290,7 @@ function generateCalendarHeader(title_area) {
  *
  * @param view_year : int the year currently in view
  * @param view_month : int the month currently in view
+ * @param view_day : int, the day currently in view
  * @returns {DocumentFragment} the HTML element containing the title/header
  */
 function buildSwitchingHeader(view_year, view_month, view_day, type) {
@@ -402,6 +403,7 @@ function buildSemesterHeader(semester_name) {
  *
  * @param view_year : int year that the calendar is viewing
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
+ * @param view_day : int, the day currently in view
  * @returns {HTMLElement} the HTML Element with the entire calendar
  */
 function generateCalendarOfMonth(view_year, view_month, view_day) {
@@ -460,7 +462,7 @@ function generateCalendarOfMonth(view_year, view_month, view_day) {
  * @param view_year : int year that the calendar is viewing
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
  * @param view_day : int day that the calendar is viewing
- * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ * @returns {HTMLElement} the HTML string contains the entire calendar table displaying view_month/view_year
  */
 function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Header area: two buttons to move, and month
@@ -517,7 +519,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
  * @param view_year : int year that the calendar is viewing
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
  * @param view_day : int day that the calendar is viewing
- * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
+ * @returns {HTMLElement} the HTML string contains the entire calendar table displaying view_month/view_year
  */
 function generateCalendarOfMonthTwoWeek(view_year, view_month, view_day) {
     // Header area: two buttons to move, and month
@@ -637,6 +639,8 @@ function generateFullCalendar(start, end, semester_name) {
  *
  * @param month_ : int month that the calendar will show (1 as January and 12 as December)
  * @param year_ : int year that the calendar will show
+ * @param view_day : int, the day currently in view
+ * @param type : string type of the calendar
  */
 function loadCalendar(month_, year_, day_, type) {
     const calendar = document.getElementById('full-calendar');
