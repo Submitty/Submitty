@@ -459,6 +459,7 @@ class HomeworkView extends AbstractView {
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_base_url' => $this->core->getConfig()->getVcsBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
