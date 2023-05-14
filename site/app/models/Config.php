@@ -513,7 +513,7 @@ class Config extends AbstractModel {
             $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
         }
 
-        $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
+        #$this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
 
         if (isset($this->course_json['hidden_details'])) {
             $this->hidden_details = $this->course_json['hidden_details'];

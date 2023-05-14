@@ -327,25 +327,27 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
         )
 
-    def test_deleted_subfolder_files(self):
+    def test_bad_subfolder_files(self):
         # """
         # This test is to verify the output when the shipper fails tries to clone a repository with an empty subdirectory.
         # """
-        
         paths = get_paths()
+        os.chdir(TEST_DATA_DIR)
         config_file_path = os.path.join(
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
         )
 
-        # Set the vcs_base_url to include .git for subdirectory grading.
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
-                    base_config_file.read().replace('subdirectory: \"?\"', 'subdirectory: /homework_01/non_existing_path')
+                    base_config_file.read().replace("subfolder", "bad_path")
                 )
+                
+        # Setup the new git repository in the test folder.
+        shutil.rmtree()
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
         )
         failed_file = (
@@ -364,15 +366,12 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
         )
 
-        # Set the vcs_base_url to include .git for subdirectory grading.
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
-                form_config_file.write(
-                    base_config_file.read().replace('subdirectory: \"?\"', 'subdirectory: /homework_01/subfolder')
-                )
+                form_config_file.write(base_config_file.read())
 
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
         )
