@@ -72,7 +72,7 @@ const NOTEBOOK_AUTOSAVE_KEY_SUFFIX = `${window.location.pathname}-notebook-autos
  * error since USER_ID is not yet defined.
  */
 function notebookAutosaveKey() {
-    return `${USER_ID}-${NOTEBOOK_AUTOSAVE_KEY_SUFFIX}`;
+    return `peteca-${NOTEBOOK_AUTOSAVE_KEY_SUFFIX}`;
 }
 
 /**
