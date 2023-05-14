@@ -855,8 +855,9 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            # If there are multiple forward slashes, this indicates subfolders. E.G. /week1/homework1
-            if len(vcs_subdirectory.split("/")) > 2 and not ':' in vcs_subdirectory:
+            # If there are multiple forward slashes,
+            # This indicates subfolders. E.G. /week1/homework1
+            if len(vcs_subdirectory.split("/")) > 2 and ':' not in vcs_subdirectory:
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
                 subfolder_grading = True
@@ -922,8 +923,9 @@ def checkout_vcs_repo(config, my_file):
         #
 
         if subfolder_grading:
-            clone_command = [ 
-                '/usr/bin/git', 'clone', vcs_path, sub_checkout_path, '--depth', '1', '-b', which_branch
+            clone_command = [
+                '/usr/bin/git', 'clone', vcs_path,
+                sub_checkout_path, '--depth', '1', '-b', which_branch
             ]
         else:
             clone_command = [
