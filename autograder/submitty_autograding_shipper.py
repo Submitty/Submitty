@@ -855,8 +855,8 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            ## Check if there are multiple slashes (indicating the use of subfolders)
-            if 'git' not in vcs_base_url:
+            # If there are multiple forward slashes, this indicates subfolders. E.G. /week1/homework1
+            if len(vcs_subdirectory.split("/")) > 2 and not ':' in vcs_subdirectory:
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
                 subfolder_grading = True
@@ -966,11 +966,11 @@ def checkout_vcs_repo(config, my_file):
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
                 # Copy the sub we want to the original checkout path and remove the extra files
-                if sub_checkout_path != '':
+                if subfolder_grading:
                     try:
-                        os.chdir(sub_checkout_path)
-                        if vcs_subdirectory[0] == '/':
-                            vcs_subdirectory = vcs_subdirectory[1:]
+                        # os.chdir(sub_checkout_path)
+                        # if vcs_subdirectory[0] == '/':
+                        vcs_subdirectory = vcs_subdirectory[1:]
                         files = os.listdir(os.path.join(sub_checkout_path, vcs_subdirectory))
                         if files:
                             for good_file in files:

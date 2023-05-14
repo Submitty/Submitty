@@ -331,42 +331,21 @@ class TestAutogradingShipper(unittest.TestCase):
         # """
         # This test is to verify the output when the shipper fails tries to clone a repository with an empty subdirectory.
         # """
+        
         paths = get_paths()
-        os.chdir(TEST_DATA_DIR)
-        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
         config_file_path = os.path.join(
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolders.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form.json'
         )
 
         # Set the vcs_base_url to include .git for subdirectory grading.
-        with open(
-            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
-        ) as config_file:
-            with open(course_config_file, 'w') as new_config_file:
-                new_config_file.write(
-                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + "/bad.git")
-                )
-
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
-                    base_config_file.read()
+                    base_config_file.read().replace('subdirectory: \"?\"', 'subdirectory: /homework_01/non_existing_path')
                 )
-                
-        # Setup the new git repository in the test folder.
-        setup = """
-        cd ./bad.git
-        git init;
-        git config user.email "test@email.com";
-        git config user.name "Test Shipper";
-        git add .
-        git commit -m \"test_subfolder\"
-        """
-        os.system(setup)
-
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
         )
         failed_file = (
@@ -381,40 +360,19 @@ class TestAutogradingShipper(unittest.TestCase):
         # This test is to verify the output when the shipper successfully tries to clone a repository with an empty subdirectory.
         # """
         paths = get_paths()
-        os.chdir(TEST_DATA_DIR)
-        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
         config_file_path = os.path.join(
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolders.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form.json'
         )
 
         # Set the vcs_base_url to include .git for subdirectory grading.
-        with open(
-            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
-        ) as config_file:
-            with open(course_config_file, 'w') as new_config_file:
-                new_config_file.write(
-                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + "/good.git")
-                )
-
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
-                    base_config_file.read()
+                    base_config_file.read().replace('subdirectory: \"?\"', 'subdirectory: /homework_01/subfolder')
                 )
-                
-        # Setup the new git repository in the test folder.
-        setup = """
-        cd ./good.git
-        git init;
-        git config user.email "test@email.com";
-        git config user.name "Test Shipper";
-        git add .
-        git commit -m \"test_subfolder\"
-        """
-        os.system(setup)
 
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
         )
