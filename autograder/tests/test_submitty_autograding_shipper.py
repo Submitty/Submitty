@@ -271,13 +271,13 @@ class TestAutogradingShipper(unittest.TestCase):
                     'Incorrect File Locations, {}',
                 )
 
-            # Confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = '{CHECKOUT_PATH}/subfolder:'.format(
+            # Confirm the subdirectory is cloned and is found at the correct path
+            expected_subdirectory = '{CHECKOUT_PATH}/subdirectory:'.format(
                 CHECKOUT_PATH=paths['checkout']
             )
             self.assertTrue(
-                expected_subfolder in actual_output,
-                'Subfolder not cloned/incorrect location',
+                expected_subdirectory in actual_output,
+                'subdirectory not cloned/incorrect location',
             )
 
     def test_failed_to_clone(self):
@@ -327,7 +327,7 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
         )
 
-    def test_invalid_subfolder_files(self):
+    def test_invalid_subdirectory_files(self):
         """
         This test is to verify the output when the shipper fails
         to clone a repository with an empty subdirectory.
@@ -338,7 +338,7 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
         with open(
@@ -355,7 +355,7 @@ class TestAutogradingShipper(unittest.TestCase):
                 )
 
         # Setup the new git repository in the test folder.
-        shutil.rmtree(os.path.join(TEST_DATA_DIR, 'homework_01/subfolder/homework_02'))
+        shutil.rmtree(os.path.join(TEST_DATA_DIR, 'homework_01/subdirectory/homework_02'))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         failed_file = (
             paths['checkout'] + '/failed_subdirectory_invalid.txt'
@@ -363,7 +363,7 @@ class TestAutogradingShipper(unittest.TestCase):
         self.assertTrue(
             os.path.isfile(failed_file), 'Failed test with no files in subdirectory')
 
-    def test_good_subfolder_files(self):
+    def test_good_subdirectory_files(self):
         """
         This test is to verify the output when the shipper
         successfully tries to clone a repository with the homework in
@@ -375,7 +375,7 @@ class TestAutogradingShipper(unittest.TestCase):
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
-            TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
         with open(
