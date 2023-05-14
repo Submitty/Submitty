@@ -123,6 +123,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
     ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: 6969, id: "ssh", host_ip: "0.0.0.0"
     ubuntu.vm.provision 'shell', inline: $script
   end
 

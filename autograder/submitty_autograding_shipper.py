@@ -855,8 +855,8 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            ## Check if there are multiple slashes (indicating the use of subfolders  )
-            if len(vcs_subdirectory.split('/')[1]) >=2:
+            ## Check if there are multiple slashes (indicating the use of subfolders)
+            if 'git' not in vcs_base_url:
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
                 subfolder_grading = True
