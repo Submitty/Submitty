@@ -838,6 +838,7 @@ def checkout_vcs_repo(config, my_file):
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
         sub_checkout_path = ''
+        subfolder_grading = False
         if vcs_subdirectory == '':
             with open(
                 os.path.join(submission_path, ".submit.VCS_CHECKOUT")
@@ -854,9 +855,11 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            if '.git' in vcs_base_url:
+            ## Check if there are multiple slashes (indicating the use of subfolders  )
+            if len(vcs_subdirectory.split('/')[1]) >=2:
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
+                subfolder_grading = True
             else:
                 vcs_path = vcs_subdirectory
         else:
@@ -918,10 +921,9 @@ def checkout_vcs_repo(config, my_file):
         #  So we choose this option!  (for now)
         #
 
-        if '.git' in vcs_base_url:
-            clone_command = [
-                '/usr/bin/git', 'clone', vcs_path,
-                sub_checkout_path, '--depth', '1', '-b', which_branch
+        if subfolder_grading:
+            clone_command = [ 
+                '/usr/bin/git', 'clone', vcs_path, sub_checkout_path, '--depth', '1', '-b', which_branch
             ]
         else:
             clone_command = [
@@ -940,7 +942,7 @@ def checkout_vcs_repo(config, my_file):
         # or because we don't have appropriate access credentials
         try:
             subprocess.check_call(clone_command)
-            if '.git' in vcs_base_url:
+            if subfolder_grading:
                 os.chdir(sub_checkout_path)
             else:
                 os.chdir(checkout_path)
@@ -963,7 +965,7 @@ def checkout_vcs_repo(config, my_file):
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
-                # copy the subdirectory we want to the old checkout path and remove the rest
+                # Copy the sub we want to the original checkout path and remove the extra files
                 if sub_checkout_path != '':
                     try:
                         os.chdir(sub_checkout_path)
@@ -971,12 +973,12 @@ def checkout_vcs_repo(config, my_file):
                             vcs_subdirectory = vcs_subdirectory[1:]
                         files = os.listdir(os.path.join(sub_checkout_path, vcs_subdirectory))
                         if files:
-                            for f in files:
+                            for good_file in files:
                                 shutil.move(
                                             os.path.join(
                                                         sub_checkout_path,
                                                         vcs_subdirectory,
-                                                        f),
+                                                        good_file),
                                             checkout_path)
                             shutil.rmtree(sub_checkout_path)
 
