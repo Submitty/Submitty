@@ -1424,7 +1424,7 @@ class SubmissionController extends AbstractController {
                 $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
                 $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
                 $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
-                $vcs_full_path = $vcs_base_url . '/' .$vcs_path;
+                $vcs_full_path = $vcs_base_url . $vcs_path;
             }
 
             // use entirely student input
