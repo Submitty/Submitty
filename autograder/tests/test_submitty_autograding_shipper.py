@@ -327,10 +327,11 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
         )
 
-    def test_bad_subfolder_files(self):
-        # """
-        # This test is to verify the output when the shipper fails tries to clone a repository with an empty subdirectory.
-        # """
+    def test_invalid_subfolder_files(self):
+        """
+        This test is to verify the output when the shipper fails
+        to clone a repository with an empty subdirectory.
+        """
         paths = get_paths()
         os.chdir(TEST_DATA_DIR)
         config_file_path = os.path.join(
@@ -339,42 +340,57 @@ class TestAutogradingShipper(unittest.TestCase):
         base_file_path = os.path.join(
             TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
         )
-
+        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
+        with open(
+            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
+        ) as config_file:
+            with open(course_config_file, 'w') as new_config_file:
+                new_config_file.write(
+                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
+                )
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
-                    base_config_file.read().replace("subfolder", "bad_path")
+                    base_config_file.read().replace("homework_02", "bad_path")
                 )
-                
+
         # Setup the new git repository in the test folder.
-        shutil.rmtree()
-        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
+        shutil.rmtree(os.path.join(TEST_DATA_DIR, 'homework_01/subfolder/homework_02'))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         failed_file = (
-            paths['checkout'] + '/failed_subdirectory_empty.txt'
+            paths['checkout'] + '/failed_subdirectory_invalid.txt'
         )
         self.assertTrue(
             os.path.isfile(failed_file), 'Failed test with no files in subdirectory')
 
-
     def test_good_subfolder_files(self):
-        # """
-        # This test is to verify the output when the shipper successfully tries to clone a repository with an empty subdirectory.
-        # """
+        """
+        This test is to verify the output when the shipper
+        successfully tries to clone a repository with the homework in
+        a subdirectory.
+        """
         paths = get_paths()
+        os.chdir(TEST_DATA_DIR)
         config_file_path = os.path.join(
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
         base_file_path = os.path.join(
             TEST_DATA_DIR, 'config_files', 'homework_form_subfolder.json'
         )
+        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
+        with open(
+            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
+        ) as config_file:
+            with open(course_config_file, 'w') as new_config_file:
+                new_config_file.write(
+                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
+                )
 
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(base_config_file.read())
 
-        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         failed_files = [
             file for file in os.listdir(paths['checkout']) if file.startswith('failed')
         ]
