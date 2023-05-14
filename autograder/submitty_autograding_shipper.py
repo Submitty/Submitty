@@ -967,7 +967,7 @@ def checkout_vcs_repo(config, my_file):
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
-                # copy the subdirectory we want to the 
+                # copy the subdirectory we want to the
                 # original checkout path and remove the extra files
                 if subdirectory_grading:
                     try:
