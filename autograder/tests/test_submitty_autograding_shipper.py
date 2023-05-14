@@ -330,7 +330,7 @@ class TestAutogradingShipper(unittest.TestCase):
     def test_invalid_subdirectory_files(self):
         """
         This test is to verify the output when the shipper fails
-        to clone a repository with an empty subdirectory.
+        to clone a repository with an empty/invalid subdirectory.
         """
         paths = get_paths()
         os.chdir(TEST_DATA_DIR)
