@@ -75,8 +75,8 @@ class UsersController extends AbstractController {
             $active_columns = $_COOKIE['active_columns'];
         } 
         else {
-            if (setcookie('active_columns', serialize(array_fill(0, 11, true)), time() + (10 * 365 * 24 * 60 * 60))){
-                $active_columns = serialize(array_fill(0, 11, true));
+            if (setcookie('active_columns', implode('-',array_fill(0, 11, true)), time() + (10 * 365 * 24 * 60 * 60))){
+                $active_columns = implode('-',array_fill(0, 11, true));
             }
         }
        

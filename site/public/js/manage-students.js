@@ -2,10 +2,15 @@
 
 //Data structure for active columns
 let activeColumns = new Array(11).fill(true);
+let checkboxes = []
 
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
     activeColumns = loadColumns();
+    console.log(activeColumns);
+
+    checkboxes = document.getElementsByClassName("toggle-columns-box");
+    console.log(checkboxes);
 
     var form = $("#toggle-columns-form");
     form.css("display", "block");
@@ -14,29 +19,57 @@ function toggleColumnsForm() {
 
 //checks proper tick marks in modal
 function checkProperTicks(form){
-    const checkboxes = document.getElementsByTagName("checkbox");
-    console.log(checkboxes[0]);
+    for (let i = 0; i<checkboxes.length; i++){
+      if (activeColumns[i] == 1){
+        checkboxes[i].checked = true;
+      }
+      else{
+        checkboxes[i].checked = false;
+      }
+    }
 }
 
 function updateManageStudentsColumns() {
+    getCheckboxValues();
     saveColumns();
-    alert("Update Columns");
 
     location.reload();
 }
 
+//Gets the values of all the checkboxes
+function getCheckboxValues(){
+    for (let i = 0; i<checkboxes.length; i++){
+      if (checkboxes[i].checked = true){
+        activeColumns[i] = 1;
+      }
+      else{
+        activeColumns[i] = 0;
+      }
+    }
+}
+
 //Cookies (loading and storing)
 function saveColumns() {
-    document.cookie = `active_columns=${encodeURIComponent(JSON.stringify(activeColumns))}`;
+    console.log(activeColumns.join('-'));
+    document.cookie = `active_columns=${activeColumns.join('-')}`;
 }
 
 function loadColumns() {
-    return getCookie('active_columns');
+    let cookie = getCookie('active_columns').split('-')
+    for (let i = 0; i< cookie.length; i++){
+      if (cookie[i] == '1'){
+        cookie[i] = 1;
+      }
+      else{
+        cookie[i] = 0;
+      }
+    }
+    return cookie;
 }
 
 function getCookie(cname) {
     let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
+    let decodedCookie = document.cookie;
     let ca = decodedCookie.split(';');
     for(let i = 0; i <ca.length; i++) {
       let c = ca[i];

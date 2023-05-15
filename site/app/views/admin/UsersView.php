@@ -40,7 +40,7 @@ class UsersView extends AbstractView {
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
             "semester" => $this->core->getConfig()->getSemester(),
-            "active_columns" => unserialize($active_columns)
+            "active_columns" => explode('-',$active_columns)
         ]);
     }
 
