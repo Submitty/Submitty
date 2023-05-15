@@ -286,7 +286,7 @@ class LateController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"GET"})
      * @return RedirectResponse|WebResponse
      **/
-    public function viewStudentLatedays(): WebResponse {
+    public function viewStudentLatedays() {
         if (!isset($_GET['student_id'])) {
             $this->core->addErrorMessage("No student ID provided");
             return new RedirectResponse($this->core->buildCourseUrl(['users']));
