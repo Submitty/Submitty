@@ -857,7 +857,7 @@ def checkout_vcs_repo(config, my_file):
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             # If there are multiple forward slashes,
             # This indicates subdirectories. E.G. /week1/homework1
-            if len(vcs_subdirectory.split("/")) > 2 and ':' not in vcs_subdirectory:
+            if len(vcs_subdirectory.split('/')) > 2 and ':' not in vcs_subdirectory:
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
                 subdirectory_grading = True
