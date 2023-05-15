@@ -39,7 +39,7 @@ function updateManageStudentsColumns() {
 //Gets the values of all the checkboxes
 function getCheckboxValues(){
     for (let i = 0; i<checkboxes.length; i++){
-      if (checkboxes[i].checked = true){
+      if (checkboxes[i].checked == true){
         activeColumns[i] = 1;
       }
       else{
