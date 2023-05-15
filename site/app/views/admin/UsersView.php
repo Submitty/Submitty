@@ -13,7 +13,7 @@ class UsersView extends AbstractView {
      * @param array  $download_info user information for downloading
      * @param array  $formatted_tzs array containing a formatted time zone string for each user
      * @param bool   $use_database
-     * @param array  $active_columns array of bools, columns that are visible
+     * @param string  $active_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
     public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_columns) {
@@ -40,7 +40,7 @@ class UsersView extends AbstractView {
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
             "semester" => $this->core->getConfig()->getSemester(),
-            "active_columns" => $active_columns
+            "active_columns" => unserialize($active_columns)
         ]);
     }
 

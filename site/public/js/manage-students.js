@@ -1,15 +1,21 @@
 
 
 //Data structure for active columns
-let activeColumns = new Array(10).fill(true);
+let activeColumns = new Array(11).fill(true);
 
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
     activeColumns = loadColumns();
-    alert(activeColumns);
 
     var form = $("#toggle-columns-form");
     form.css("display", "block");
+    checkProperTicks(form);
+}
+
+//checks proper tick marks in modal
+function checkProperTicks(form){
+    const checkboxes = document.getElementsByTagName("checkbox");
+    console.log(checkboxes[0]);
 }
 
 function updateManageStudentsColumns() {
