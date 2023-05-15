@@ -48,6 +48,12 @@ function getCheckboxValues(){
     }
 }
 
+function fillAllCheckboxes(val){
+    for (let i = 0; i<checkboxes.length; i++){
+      checkboxes[i].checked = val
+    }
+}
+
 //Cookies (loading and storing)
 function saveColumns() {
     console.log(activeColumns.join('-'));
