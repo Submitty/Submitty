@@ -144,7 +144,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser()->getDisplayedFirstName();
+                        return $a->getUser()->getDisplayedGivenName();
                     }
                 };
                 break;
@@ -154,7 +154,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser()->getDisplayedLastName();
+                        return $a->getUser()->getDisplayedFamilyName();
                     }
                 };
                 break;

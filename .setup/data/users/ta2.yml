@@ -1,7 +1,7 @@
-user_firstname: Jack
+user_givenname: Jack
 user_id: ta2
 anon_id: fSA23KLM45NKL45
-user_lastname: TA
+user_familyname: TA
 user_numeric_id: 189018772
 courses:
   sample:

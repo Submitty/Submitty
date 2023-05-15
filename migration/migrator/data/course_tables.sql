@@ -616,6 +616,38 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+-- Name: calendar_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.calendar_messages (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: calendar_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.calendar_messages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: calendar_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.calendar_messages_id_seq OWNED BY public.calendar_messages.id;
+
+
+--
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1317,12 +1349,32 @@ CREATE TABLE public.peer_feedback (
 --
 
 CREATE TABLE public.poll_options (
-    option_id integer NOT NULL,
     order_id integer NOT NULL,
     poll_id integer,
     response text NOT NULL,
-    correct boolean NOT NULL
+    correct boolean NOT NULL,
+    option_id integer NOT NULL
 );
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_options_option_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_options_option_id_seq OWNED BY public.poll_options.option_id;
 
 
 --
@@ -1332,8 +1384,29 @@ CREATE TABLE public.poll_options (
 CREATE TABLE public.poll_responses (
     poll_id integer NOT NULL,
     student_id text NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_responses_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_responses_id_seq OWNED BY public.poll_responses.id;
 
 
 --
@@ -1348,7 +1421,8 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) DEFAULT 'never'::character varying
+    release_histogram character varying(10) DEFAULT 'never'::character varying,
+    release_answer character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -1433,7 +1507,8 @@ CREATE TABLE public.queue (
     time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL,
     time_paused integer DEFAULT 0 NOT NULL,
-    time_paused_start timestamp with time zone
+    time_paused_start timestamp with time zone,
+    star_type character varying(16) DEFAULT 'none'::character varying
 );
 
 
@@ -1568,7 +1643,8 @@ ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.regrade_requests.i
 --
 
 CREATE TABLE public.sections_registration (
-    sections_registration_id character varying(255) NOT NULL
+    sections_registration_id character varying(255) NOT NULL,
+    course_section_id character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1707,10 +1783,10 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
     user_numeric_id character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
+    user_givenname character varying NOT NULL,
+    user_preferred_givenname character varying,
+    user_familyname character varying NOT NULL,
+    user_preferred_familyname character varying,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
@@ -1725,8 +1801,11 @@ CREATE TABLE public.users (
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
+    user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_last_initial_format integer DEFAULT 0 NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
+    CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
 
@@ -1739,6 +1818,13 @@ CREATE TABLE public.viewed_responses (
     user_id character varying NOT NULL,
     "timestamp" timestamp(0) with time zone NOT NULL
 );
+
+
+--
+-- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.calendar_messages ALTER COLUMN id SET DEFAULT nextval('public.calendar_messages_id_seq'::regclass);
 
 
 --
@@ -1816,6 +1902,20 @@ ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
+
+
+--
+-- Name: poll_options option_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options ALTER COLUMN option_id SET DEFAULT nextval('public.poll_options_option_id_seq'::regclass);
+
+
+--
+-- Name: poll_responses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses ALTER COLUMN id SET DEFAULT nextval('public.poll_responses_id_seq'::regclass);
 
 
 --
@@ -2187,6 +2287,22 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_pkey PRIMARY KEY (option_id);
+
+
+--
+-- Name: poll_responses poll_responses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses
+    ADD CONSTRAINT poll_responses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: polls polls_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2329,6 +2445,13 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
 -- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2340,6 +2463,20 @@ CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USIN
 --
 
 CREATE INDEX gradeable_component_data_no_grader_index ON public.gradeable_component_data USING btree (gc_id, gd_id);
+
+
+--
+-- Name: gradeable_component_mark_data_gcm_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_component_mark_data USING btree (gcm_id);
+
+
+--
+-- Name: gradeable_component_mark_data_gd_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gd_id_idx ON public.gradeable_component_mark_data USING btree (gd_id);
 
 
 --
@@ -2357,10 +2494,31 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree
 
 
 --
+-- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USING btree (user_id);
+
+
+--
+-- Name: grading_registration_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_index ON public.grading_registration USING btree (user_id);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
+
+
+--
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
 
 
 --

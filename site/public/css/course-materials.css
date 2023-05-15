@@ -40,3 +40,15 @@ a.popout-item > .fas:hover {
 .partial-checkbox:checked {
     background-color: var(--standard-medium-gray) !important;
 }
+
+#existing-names > li {
+    margin-left: 15px;
+}
+
+.delete-course-material-message {
+    font-weight: bold;
+}
+
+.view-row {
+    padding: 0.8px;
+}

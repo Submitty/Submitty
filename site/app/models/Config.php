@@ -47,7 +47,6 @@ use app\libraries\FileUtils;
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
  * @method string getCourseCodeRequirements()
- * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method string getForumCreateThreadMessage()
  * @method bool isRegradeEnabled()
