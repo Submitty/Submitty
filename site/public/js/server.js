@@ -1806,6 +1806,7 @@ function tzWarn() {
     }
 
     const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
     const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
     const elapsed = isNaN(last) ? Infinity : Date.now() - last;
     if (elapsed > THRESHOLD) {
