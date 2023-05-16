@@ -1,3 +1,5 @@
+/* global Cookies */
+
 //Used to reset users cookies
 let cookie_version = 1;
 
@@ -48,9 +50,9 @@ let settingsCallbacks = {
   "general-setting-arrow-function": changeStudentArrowTooltips,
   "general-setting-navigate-assigned-students-only": function(value) {
     if (value == 'true') {
-      document.cookie = "view=assigned; path=/;";
+      Cookies.set('view', 'assigned', { path: '/' });
     } else {
-      document.cookie = "view=all; path=/;";
+      Cookies.set('view', 'all', { path: '/' });
     }
   }
 }
@@ -514,15 +516,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  let silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
+  let silent_edit_enabled = Cookies.get('silent_edit_enabled');
 
-  let autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  let scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let autoscroll = Cookies.get('autoscroll');
+  let opened_mark = Cookies.get('opened_mark');
+  let scroll_pixel = Cookies.get('scroll_pixel');
 
-  let testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let testcases = Cookies.get('testcases');
 
-  let files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let files = Cookies.get('files');
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
@@ -572,9 +574,9 @@ function readCookies(){
 }
 
 function updateCookies(){
-  document.cookie = "silent_edit_enabled=" + isSilentEditModeEnabled() + "; path=/;";
+  Cookies.set('silent_edit_enabled', isSilentEditModeEnabled(), { path: '/' });
   let autoscroll = $('#autoscroll_id').is(":checked") ? "on" : "off";
-  document.cookie = "autoscroll=" + autoscroll + "; path=/;";
+  Cookies.set('autoscroll', autoscroll, { path: '/' });
 
   let files = [];
   $('#file-container').children().each(function() {
@@ -583,9 +585,9 @@ function updateCookies(){
     });
   });
   files = JSON.stringify(files);
-  document.cookie = "files=" + files + "; path=/;";
 
-  document.cookie = "cookie_version=" + cookie_version + "; path=/;";
+  Cookies.set('files', files, { path: '/' });
+  Cookies.set('cookie_version', cookie_version, { path: '/' });
 }
 
 //-----------------------------------------------------------------------------

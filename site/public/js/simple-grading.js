@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, Cookies */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function calcSimpleGraderStats(action) {
@@ -275,25 +275,19 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 }
 
 function getCheckpointHistory(g_id) {
-    const name = `${g_id}_history=`;
-    const cookies = decodeURIComponent(document.cookie).split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return JSON.parse(c.substring(name.length, c.length));
-        }
+    const history = Cookies.get(`${g_id}_history`);
+    try {
+        return JSON.parse(history) || [0];
     }
-    // if history is empty set pointer to 0
-    return [0];
+    catch (e) {
+        return [0];
+    }
 }
 
 function setCheckpointHistory(g_id, history) {
     const expiration_date = new Date(Date.now());
     expiration_date.setDate(expiration_date.getDate() + 1);
-    document.cookie = `${g_id}_history=${JSON.stringify(history)}; expires=${expiration_date.toUTCString()}`;
+    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date.toUTCString() });
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {

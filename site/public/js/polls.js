@@ -1,5 +1,5 @@
 /* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
-/* global csrfToken */
+/* global csrfToken, Cookies */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {
@@ -103,7 +103,7 @@ function updatePollVisible(pollid, base_url) {
 
 function updateDropdownStates(curr_state, cookie_key) {
     const expiration_string = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+7).toISOString();
-    document.cookie = `${cookie_key}=${!curr_state}; expires=${expiration_string}; path=/`;
+    Cookies.set(cookie_key, !curr_state, { expires: expiration_string, path: '/' });
 }
 
 function importPolls() {

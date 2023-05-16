@@ -1,15 +1,15 @@
-/* global courseUrl */
+/* global courseUrl, Cookies */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    const collapsedSections = document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    const collapsedSections = Cookies.get('collapsed_sections');
     if (collapsedSections === '') {
         collapseItems = new Set();
     }
     else {
-        collapseItems = new Set(JSON.parse(decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1'))));
+        collapseItems = new Set(JSON.parse(Cookies.get('collapsed_sections')));
     }
 
     // Attach the collapsible panel on details-table
@@ -93,7 +93,7 @@ function hideGradeableMessage() {
 }
 
 function updateCollapsedSections() {
-    document.cookie = `collapsed_sections=${encodeURIComponent(JSON.stringify([...collapseItems]))};path=${$('#details-table').attr('data-details-base-path')}`;
+    Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
 }
 
 function expandAllSections() {
