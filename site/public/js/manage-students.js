@@ -75,7 +75,7 @@ function loadColumns() {
 }
 
 function getCookie(cname) {
-    const name = cname + '=';
+    const name = `${cname}=`;
     const decodedCookie = document.cookie;
     const ca = decodedCookie.split(';');
     for (let i = 0; i <ca.length; i++) {
