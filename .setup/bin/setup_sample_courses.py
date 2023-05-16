@@ -33,6 +33,7 @@ import os.path
 import string
 import pdb
 import docker
+import random
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
@@ -173,7 +174,7 @@ def main():
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
-                              user_pronoun=generate_pronoun(),
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -186,7 +187,7 @@ def main():
                               user_familyname=user.familyname,
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
-                              user_pronoun=generate_pronoun(),
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
@@ -289,8 +290,8 @@ def generate_random_ta_note():
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
-def generate_pronoun():
-    pronoun_num = random()
+def generate_pronouns():
+    pronoun_num = random.random()
     if pronoun_num <= .05: 
         pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
         return random.choice(pronoun_list)
@@ -384,6 +385,7 @@ def generate_random_users(total, real_users):
                              "user_numeric_id": numeric_id,
                              "user_givenname": given_name,
                              "user_familyname": family_name,
+                             "user_pronouns": generate_pronouns(),
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -604,6 +606,7 @@ class User(object):
         password
         givenname
         familyname
+        pronouns
         email
         group
         preferred_givenname
@@ -619,8 +622,8 @@ class User(object):
         self.numeric_id = user['user_numeric_id']
         self.password = self.id
         self.givenname = user['user_givenname']
-        self.pronoun = user['user_pronoun']
         self.familyname = user['user_familyname']
+        self.pronouns = user['user_pronouns']
         self.email = self.id + "@example.com"
         self.group = 4
         self.preferred_givenname = None
