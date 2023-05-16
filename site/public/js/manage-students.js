@@ -13,13 +13,13 @@ function toggleColumnsForm() {
     checkboxes = document.getElementsByClassName('toggle-columns-box');
     console.log(checkboxes);
 
-    let form = $('#toggle-columns-form');
+    const form = $('#toggle-columns-form');
     form.css('display', 'block');
-    checkProperTicks(form);
+    checkProperTicks();
 }
 
 //checks proper tick marks in modal
-function checkProperTicks(form) {
+function checkProperTicks() {
     for (let i = 0; i<checkboxes.length; i++) {
         if (activeColumns[i] === 1) {
             checkboxes[i].checked = true;
@@ -65,23 +65,23 @@ function loadColumns() {
     const cookie = getCookie('active_columns').split('-');
     for (let i = 0; i< cookie.length; i++) {
         if (cookie[i] === '1') {
-           cookie[i] = 1;
+            cookie[i] = 1;
         }
         else {
-           cookie[i] = 0;
+            cookie[i] = 0;
         }
     }
     return cookie;
 }
 
 function getCookie(cname) {
-    let name = cname + '=';
-    let decodedCookie = document.cookie;
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
+    const name = cname + '=';
+    const decodedCookie = document.cookie;
+    const ca = decodedCookie.split(';');
+    for (let i = 0; i <ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) === ' ') {
-           c = c.substring(1);
+            c = c.substring(1);
         }
         if (c.indexOf(name) === 0) {
             return c.substring(name.length, c.length);
