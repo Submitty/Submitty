@@ -66,8 +66,8 @@ class CalendarItem {
     }
 
     public function setText(string $text): void {
-        if (strlen($text) > 255) {
-            throw new \InvalidArgumentException("Invalid text, may be too many characters.");
+        if (strlen($text) > 255 || strlen($text) <= 0) {
+            throw new \InvalidArgumentException("Invalid text.");
         }
         $this->text = $text;
     }
