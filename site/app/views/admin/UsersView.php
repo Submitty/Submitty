@@ -16,7 +16,7 @@ class UsersView extends AbstractView {
      * @param string  $active_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
-    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_columns) {
+    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_columns = '1-1-1-1-1-1-1-1-1-1-1') {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
@@ -40,7 +40,7 @@ class UsersView extends AbstractView {
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
             "semester" => $this->core->getConfig()->getSemester(),
-            "active_columns" => explode('-',$active_columns)
+            "active_columns" => explode('-', $active_columns)
         ]);
     }
 
