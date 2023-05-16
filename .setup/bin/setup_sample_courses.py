@@ -1104,7 +1104,7 @@ class Course(object):
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
                                                 # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
                                                 annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
-                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
+                                                create_pdf_annotations(annotation_file_name, anon_dst, annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
