@@ -944,6 +944,7 @@ def checkout_vcs_repo(config, my_file):
         # or because we don't have appropriate access credentials
         try:
             subprocess.check_call(clone_command)
+
             if subdirectory_grading:
                 os.chdir(sub_checkout_path)
             else:
@@ -983,7 +984,7 @@ def checkout_vcs_repo(config, my_file):
                                             checkout_path)
                             shutil.rmtree(sub_checkout_path)
 
-                    except BaseException as error:
+                    except Exception as error:
                         shutil.rmtree(sub_checkout_path)
                         config.logger.log_message(
                             f'ERROR: failed to find files in the {vcs_subdirectory} subdirectory',
