@@ -871,6 +871,7 @@ class AdminGradeableController extends AbstractController {
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
             $host_type = -1;
+            $vcs_path = '';
             $vcs_partial_path = '';
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {

@@ -5732,7 +5732,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
                 $gradeable->getVcsSubdirectory(),
-                $gradeable->getVcsPartialPath(),
+                $gradeable->getVcsPath(),
                 $gradeable->getVcsHostType(),
                 $gradeable->isTeamAssignment(),
                 $gradeable->getTeamSizeMax(),
