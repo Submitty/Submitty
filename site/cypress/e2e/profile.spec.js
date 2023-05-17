@@ -20,10 +20,12 @@ const pronouns = makeId();
 const email = `${makeId()}@example.com`;
 
 describe('Test cases revolving around user profile page', () => {
-    it('Should check the visibility of the rows and popups', () => {
+    beforeEach(() => {
         cy.visit('/user_profile');
         cy.login();
+    });
 
+    it('Should check the visibility of the rows and popups', () => {
         // fields should be visible
         cy.get('#username-row').should('be.visible');
         cy.get('#givenname-row').should('be.visible');
@@ -41,9 +43,6 @@ describe('Test cases revolving around user profile page', () => {
     });
 
     it('Should test every pop-up form', () => {
-        cy.visit('/user_profile');
-        cy.login();
-
         // check for edit buttons that open forms
         cy.get('.fa-pencil-alt').should('have.length', 5);
 
@@ -70,9 +69,6 @@ describe('Test cases revolving around user profile page', () => {
     });
 
     it('Should confirm that the database was updated', () => {
-        cy.visit('/user_profile');
-        cy.login();
-
         cy.get('#givenname-row > button').contains(givenName);
         cy.get('#familyname-row > button').contains(familyName);
         cy.get('#pronouns_val').contains(pronouns);
