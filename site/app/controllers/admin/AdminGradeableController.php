@@ -863,9 +863,9 @@ class AdminGradeableController extends AbstractController {
 
         $repo_name = '';
         $subdir = 'none';
-        if($details['subdir_yes_radio'] === 'true'){
+        if ($details['subdir_yes_radio'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
-        } 
+        }
         $vcs_partial_path = '';
         // VCS specific values
         if ($details['vcs'] === 'true') {
@@ -876,7 +876,6 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 0;
                 $repo_name = $details['id'];
                 $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
-               
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
