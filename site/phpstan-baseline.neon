@@ -837,12 +837,7 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Result of && is always false\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between bool and 'false' will always evaluate to false\\.$#"
+			message: "#^Offset int\\<1, max\\> does not exist on non\\-empty\\-array\\<0, mixed\\>\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
