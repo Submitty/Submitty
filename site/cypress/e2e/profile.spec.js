@@ -9,21 +9,15 @@ const form_visible = (button_id, form_id) => {
     }
 };
 
-const makeid = () => {
-    let result = '';
+const makeId = (length = 5) => {
     const characters = 'abcdefghijklmnopqrstuvwxyz';
-    let counter = 0;
-    while (counter < 5) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-        counter += 1;
-    }
-    return result;
+    return Array(length).fill().map(() => characters[Math.floor(Math.random() * characters.length)]).join('');
 };
 
-const givenName = makeid();
-const familyName = makeid();
-const pronouns = makeid();
-const email = `${makeid()}@rpi.edu`;
+const givenName = makeId();
+const familyName = makeId();
+const pronouns = makeId();
+const email = `${makeId()}@rpi.edu`;
 
 describe('Test cases revolving around user profile page', () => {
     it('Should check the visibility of the rows and popups', () => {
