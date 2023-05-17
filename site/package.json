@@ -33,7 +33,7 @@
     "@codemirror/lang-cpp": "6.0.2",
     "@codemirror/language-data" : "6.3.1",
     "flatpickr": "4.6.13",
-    "jquery": "3.6.4",
+    "jquery": "3.7.0",
     "jquery-ui-dist": "1.13.2",
     "jquery.are-you-sure": "1.9.0",
     "jspdf": "^2.5.1",
