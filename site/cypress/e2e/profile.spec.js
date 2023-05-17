@@ -50,9 +50,7 @@ describe('Test cases revolving around user profile page', () => {
         cy.login();
 
         // verify that every form can be intrigued
-        cy.get('.fa-pencil-alt').should(($icon) => {
-            expect($icon).to.have.length(5);
-        });
+        cy.get('.fa-pencil-alt').should('have.length', 5);
 
         // verify prederred name form
         form_visible(1, 0);
