@@ -837,6 +837,8 @@ def checkout_vcs_repo(config, my_file):
 
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
+        sub_checkout_path = ''
+        subdirectory_grading = False
         if vcs_subdirectory == '':
             with open(
                 os.path.join(submission_path, ".submit.VCS_CHECKOUT")
@@ -853,16 +855,25 @@ def checkout_vcs_repo(config, my_file):
 
         # is vcs_subdirectory standalone or should it be combined with base_url?
         elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            vcs_path = vcs_subdirectory
+            # If there are multiple forward slashes,
+            # This indicates subdirectories. E.G. /week1/homework1
+            if len(vcs_subdirectory.split('/')) > 2 and '://' not in vcs_subdirectory:
+                vcs_path = vcs_base_url
+                sub_checkout_path = os.path.join(checkout_path, "tmp")
+                subdirectory_grading = True
+            else:
+                vcs_path = vcs_subdirectory
         else:
             if '://' in vcs_base_url:
                 vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
             else:
                 vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
 
+
+# _________________________________________________________________________________________________________
         # warning: --depth is ignored in local clones; use file:// instead.
-        if '://' not in vcs_path:
-            vcs_path = "file:///" + vcs_path
+        if '://' not in vcs_path and '@' not in vcs_path:
+            vcs_path = 'file:///' + vcs_path
 
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
         checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
@@ -912,9 +923,16 @@ def checkout_vcs_repo(config, my_file):
         #
         #  So we choose this option!  (for now)
         #
-        clone_command = [
-            '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', which_branch
-        ]
+
+        if subdirectory_grading:
+            clone_command = [
+                '/usr/bin/git', 'clone', vcs_path,
+                sub_checkout_path, '--depth', '1', '-b', which_branch
+            ]
+        else:
+            clone_command = [
+                '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', which_branch
+            ]
 
         with open(checkout_log_file, 'a') as f:
             print("VCS CHECKOUT", file=f)
@@ -928,7 +946,11 @@ def checkout_vcs_repo(config, my_file):
         # or because we don't have appropriate access credentials
         try:
             subprocess.check_call(clone_command)
-            os.chdir(checkout_path)
+
+            if subdirectory_grading:
+                os.chdir(sub_checkout_path)
+            else:
+                os.chdir(checkout_path)
 
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
@@ -947,6 +969,39 @@ def checkout_vcs_repo(config, my_file):
                 # else:
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+
+                # copy the subdirectory we want to the
+                # original checkout path and remove the extra files
+                if subdirectory_grading:
+                    try:
+                        vcs_subdirectory = vcs_subdirectory[1:]
+                        files = os.listdir(os.path.join(sub_checkout_path, vcs_subdirectory))
+                        if files:
+                            for good_file in files:
+                                shutil.move(
+                                            os.path.join(
+                                                        sub_checkout_path,
+                                                        vcs_subdirectory,
+                                                        good_file),
+                                            checkout_path)
+                            shutil.rmtree(sub_checkout_path)
+
+                    except Exception as error:
+                        shutil.rmtree(sub_checkout_path)
+                        config.logger.log_message(
+                            f'ERROR: failed to find files in the {vcs_subdirectory} subdirectory',
+                            job_id=job_id
+                        )
+                        os.chdir(checkout_path)
+                        error_path = os.path.join(
+                            checkout_path, 'failed_subdirectory_invalid.txt'
+                        )
+                        with open(error_path, 'w') as f:
+                            print(str(error), file=f)
+                            print("\n", file=f)
+                            print("Check to be sure the subdirectory is not empty.\n", file=f)
+                            print("Check to be sure the repository has been committed with the " +
+                                  "subdirectory and relevant files present.\n", file=f)
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
