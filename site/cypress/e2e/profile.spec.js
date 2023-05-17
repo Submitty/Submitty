@@ -17,7 +17,7 @@ const makeId = (length = 5) => {
 const givenName = makeId();
 const familyName = makeId();
 const pronouns = makeId();
-const email = `${makeId()}@rpi.edu`;
+const email = `${makeId()}@example.com`;
 
 describe('Test cases revolving around user profile page', () => {
     it('Should check the visibility of the rows and popups', () => {
