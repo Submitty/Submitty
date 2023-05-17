@@ -469,6 +469,7 @@ class HomeworkView extends AbstractView {
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
+            'vcs_base_url' => $this->core->getConfig()->getVcsBaseUrl(),
             'github_user_id' => $github_user_id,
             'github_repo_id' => $github_repo_id,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
