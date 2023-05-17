@@ -20,11 +20,10 @@ const makeid = () => {
     return result;
 };
 
-const given = makeid();
-const family = makeid();
+const givenName = makeid();
+const familyName = makeid();
 const pronouns = makeid();
-var mail = makeid();
-mail += '@rpi.edu';
+const email = `${makeid()}@rpi.edu`;
 
 describe('Test cases revolving around user profile page', () => {
     it('Should verify the basic info column\'s visibility', () => {
@@ -54,11 +53,11 @@ describe('Test cases revolving around user profile page', () => {
 
         // verify prederred name form
         form_visible(1, 0);
-        cy.get('input[name=user_givenname_change]').clear().type(given);
-        cy.get('input[name=user_familyname_change]').clear().type(family);
+        cy.get('input[name=user_givenname_change]').clear().type(givenName);
+        cy.get('input[name=user_familyname_change]').clear().type(familyName);
         cy.get('.btn-primary').eq(1).click();
-        cy.get('#givenname-row > button').contains(given);
-        cy.get('#familyname-row > button').contains(family);
+        cy.get('#givenname-row > button').contains(givenName);
+        cy.get('#familyname-row > button').contains(familyName);
 
         // verify pronouns form
         form_visible(2, 3);
@@ -68,19 +67,19 @@ describe('Test cases revolving around user profile page', () => {
 
         // verify secondary_email form
         form_visible(3, 2);
-        cy.get('input[name=user_secondary_email_change]').clear().type(mail);
+        cy.get('input[name=user_secondary_email_change]').clear().type(email);
         cy.get('input[name=user_secondary_email_notify_change]').click();
         cy.get('.btn-primary').eq(3).click();
-        cy.get('#secondary-email-row > button').contains(mail);
+        cy.get('#secondary-email-row > button').contains(email);
     });
 
     // verify database was updated
     it('verify that database was updated', () => {
         cy.visit('/user_profile');
         cy.login();
-        cy.get('#givenname-row > button').contains(given);
-        cy.get('#familyname-row > button').contains(family);
+        cy.get('#givenname-row > button').contains(givenName);
+        cy.get('#familyname-row > button').contains(familyName);
         cy.get('#pronouns_val').contains(pronouns);
-        cy.get('#secondary-email-row > button').contains(mail);
+        cy.get('#secondary-email-row > button').contains(email);
     });
 });
