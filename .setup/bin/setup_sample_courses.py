@@ -26,7 +26,6 @@ import json
 import os
 import pwd
 import random
-from randomgen import Rand48
 import shutil
 import subprocess
 import uuid
@@ -64,8 +63,6 @@ NO_SUBMISSIONS = False
 NO_GRADING = False
 
 NOW = dateutils.get_current_time()
-
-gen = Rand48(1)
 
 
 def main():
@@ -147,10 +144,7 @@ def main():
                 courses[key].users.append(user)
 
     # To make Rainbow Grades testing possible, need to seed random to have the same users each time
-    seed = 10090542
-    random.seed(seed)
-                         # made second random function to handle adding pronouns
-    gen.srand(seed)    # Second function in order to not disrupt the order in students.txt and graders.txt
+    random.seed(10090542)
 
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
@@ -297,10 +291,10 @@ def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
 def generate_pronouns():
-    pronoun_num = gen.drand() #random.random()
+    pronoun_num = random.random()
     if pronoun_num <= .05: 
         pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
-        return pronoun_list[gen.lrand() % len(pronoun_list)]
+        return random.choice(pronoun_list)
     elif pronoun_num <= .30:
         return ""
     elif pronoun_num <= .60:
