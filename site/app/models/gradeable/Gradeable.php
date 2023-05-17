@@ -46,8 +46,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
- * @method void setVcsPartialPath($partial_path)
- * @method string getVcsPartialPath()
+ * @method void setVcsPath($vcs_path)
+ * @method string getVcsPath()
  * @method int getVcsHostType()
  * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
@@ -177,7 +177,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
     /** @prop @var string The path to the repository from the base url */
-    protected $vcs_partial_path = "";
+    protected $vcs_path = "";
     /** @prop @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
     protected $vcs_host_type = -1;
     /** @prop @var bool If the gradeable is a team assignment */
@@ -293,7 +293,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
-            $this->setVcsPartialPath($details['vcs_partial_path']);
+            $this->setVcsPath($details['vcs_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);

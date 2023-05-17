@@ -863,7 +863,7 @@ class AdminGradeableController extends AbstractController {
 
         $repo_name = '';
         $subdir = 'none';
-        if($details['subdir_yes_radio'] === 'true';){
+        if($details['subdir_yes_radio'] === 'true'){
             $subdir = $details['vcs_subdirectory'];
         } 
 
@@ -877,6 +877,7 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 0;
                 $repo_name = $details['id'];
                 $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+               
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
@@ -892,12 +893,12 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'self-hosted') {
                 $host_type = 4;
             }
-
+            $vcs_path = $this->core->getConfig()->getVcsBaseUrl() . $vcs_partial_path;
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => $host_type,
-                'vcs_partial_path' => $vcs_partial_path
+                'vcs_path' => $vcs_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
@@ -906,7 +907,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => -1,
-                'vcs_partial_path' => $vcs_partial_path
+                'vcs_path' => $vcs_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
@@ -1275,7 +1276,8 @@ class AdminGradeableController extends AbstractController {
             'config_path' => $gradeable->getAutogradingConfigPath(),
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
-            'partial_path' => $gradeable->getVcsPartialPath(),
+            'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_path' => $gradeable->getVcsPartialPath(),
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';

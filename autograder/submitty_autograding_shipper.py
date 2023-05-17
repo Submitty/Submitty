@@ -827,7 +827,7 @@ def checkout_vcs_repo(config, my_file):
         config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
-    is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = vcs_info
+    vcs_partial_path, is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = vcs_info
 
     # cleanup the previous checkout (if it exists)
     shutil.rmtree(checkout_path, ignore_errors=True)
@@ -835,39 +835,36 @@ def checkout_vcs_repo(config, my_file):
 
     job_id = "~VCS~"
 
-    try:
+    
         # If we are public or private github, we will have an empty vcs_subdirectory
+        
+        # if vcs_subdirectory == '':
+        #     with open(
+        #         os.path.join(submission_path, ".submit.VCS_CHECKOUT")
+        #     ) as submission_vcs_file:
+        #         VCS_JSON = json.load(submission_vcs_file)
+        #         git_user_id = VCS_JSON["git_user_id"]
+        #         git_repo_id = VCS_JSON["git_repo_id"]
+        #         if not valid_github_user_id(git_user_id):
+        #             raise Exception("Invalid GitHub user/organization name: '"+git_user_id+"'")
+        #         if not valid_github_repo_id(git_repo_id):
+        #             raise Exception("Invalid GitHub repository name: '"+git_repo_id+"'")
+        #         # construct path for GitHub
+        #         vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
+    try:
         sub_checkout_path = ''
         subdirectory_grading = False
-        if vcs_subdirectory == '':
-            with open(
-                os.path.join(submission_path, ".submit.VCS_CHECKOUT")
-            ) as submission_vcs_file:
-                VCS_JSON = json.load(submission_vcs_file)
-                git_user_id = VCS_JSON["git_user_id"]
-                git_repo_id = VCS_JSON["git_repo_id"]
-                if not valid_github_user_id(git_user_id):
-                    raise Exception("Invalid GitHub user/organization name: '"+git_user_id+"'")
-                if not valid_github_repo_id(git_repo_id):
-                    raise Exception("Invalid GitHub repository name: '"+git_repo_id+"'")
-                # construct path for GitHub
-                vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
-
-        # is vcs_subdirectory standalone or should it be combined with base_url?
-        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            # If there are multiple forward slashes,
-            # This indicates subdirectories. E.G. /week1/homework1
-            if len(vcs_subdirectory.split('/')) > 2 and '://' not in vcs_subdirectory:
+        if vcs_subdirectory != 'none':
                 vcs_path = vcs_base_url
                 sub_checkout_path = os.path.join(checkout_path, "tmp")
                 subdirectory_grading = True
-            else:
-                vcs_path = vcs_subdirectory
-        else:
+            
+        # is vcs_subdirectory standalone or should it be combined with base_url?
+        
             if '://' in vcs_base_url:
-                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
             else:
-                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+                vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
 
 
 # _________________________________________________________________________________________________________

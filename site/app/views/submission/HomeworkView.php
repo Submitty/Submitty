@@ -460,7 +460,7 @@ class HomeworkView extends AbstractView {
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_base_url' => rtrim($this->core->getConfig()->getVcsBaseUrl() , '/'),
-            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_path' => $gradeable->getVcsPath(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),

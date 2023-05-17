@@ -59,12 +59,13 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
     )
     vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
     vcs_base_url = vcs_base_url.replace('{$user_id}', userid)
+    vcs_path = form_json['vcs_path']
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
     vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
-    return is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
+    return vcs_path, is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
 
 
 def copytree_if_exists(config, job_id, source, target):
