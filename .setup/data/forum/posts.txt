@@ -9,24 +9,24 @@
   4 | -1 | aphacker | I can't seem to find the course syllabus. Can someone point me in the right direction?? | 2018-04-03 19:37:45.756451-04 | f | f | | f | 0 | f
   4 |  9 | ta | The course syllabus can be found [url=http://example.com]here.[/url] | 2018-04-03 19:39:14.84398-04  | f | f | | f | 0 | f
   4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | f
-  5 | -1 | kessll | Can anyone share few good links for `python` beginner? | 2018-05-23 10:55:22.192817-04 | f | f |  | f | 0 | f
-  5 | 12 | renneh | Try this for quick overview\n[url=https://developers.google.com/edu/python/introduction]https://developers.google.com/edu/python/introduction[/url]\n | 2018-05-23 11:01:11.483217-04 | f | f |  | f | 0 | f
-  5 | 12 | rueckm | Official documentation is better for methods specific search.\n[url=https://docs.python.org/3/contents.html]https://docs.python.org/3/contents.html[/url]\n | 2018-05-23 11:07:24.611849-04 | f | f |  | f | 0 | f
-  5 | 12 | vonruf | I tried [url=https://www.w3schools.com/python/]https://www.w3schools.com/python/[/url] | 2018-05-23 11:14:41.912376-04 | f | f |  | f | 0 | f
+  5 | -1 | huelsw | Can anyone share few good links for `python` beginner? | 2018-05-23 10:55:22.192817-04 | f | f |  | f | 0 | f
+  5 | 12 | schads | Try this for quick overview\n[url=https://developers.google.com/edu/python/introduction]https://developers.google.com/edu/python/introduction[/url]\n | 2018-05-23 11:01:11.483217-04 | f | f |  | f | 0 | f
+  5 | 12 | schaeb | Official documentation is better for methods specific search.\n[url=https://docs.python.org/3/contents.html]https://docs.python.org/3/contents.html[/url]\n | 2018-05-23 11:07:24.611849-04 | f | f |  | f | 0 | f
+  5 | 12 | gradyg | I tried [url=https://www.w3schools.com/python/]https://www.w3schools.com/python/[/url] | 2018-05-23 11:14:41.912376-04 | f | f |  | f | 0 | f
   6 | -1 | bitdiddle | Can someone share multithreading example snippets in C++ | 2018-05-23 11:45:24.049959-04 | f | f |  | f | 0 | f
-  6 | 16 | baliss | Sample code snippet\n[code]\n#include <iostream>\n#include <thread>\nvoid foo(std::string msg)\n{\n    std::cout<<msg<<std::endl;\n}\nint main() {\n   std::thread t1(foo, "Test 1");\n   std::thread t2(foo, "Test 2");\n   t1.join();\n   t2.join();\n   return 0;\n}\n[/code]\n | 2018-05-23 11:46:14.864177-04 | f | f |  | f | 0 | f
+  6 | 16 | haleyd | Sample code snippet\n[code]\n#include <iostream>\n#include <thread>\nvoid foo(std::string msg)\n{\n    std::cout<<msg<<std::endl;\n}\nint main() {\n   std::thread t1(foo, "Test 1");\n   std::thread t2(foo, "Test 2");\n   t1.join();\n   t2.join();\n   return 0;\n}\n[/code]\n | 2018-05-23 11:46:14.864177-04 | f | f |  | f | 0 | f
   6 | 17 | aphacker | While compiling with gcc use -pthread argument. | 2018-05-23 11:55:27.142647-04 | f | f |  | f | 0 | f
-  6 | 16 | willia | You can even try C style threading\n[code]\n#include <iostream>\n#include <pthread.h>\nusing namespace std;\n\nvoid *func(void *vargp)\n{\n    cout<<"Sample function\n";\n}\n  \nint main()\n{\n    pthread_t t1,t2;\n    pthread_create(&t1, NULL, func, NULL);\n    pthread_create(&t2, NULL, func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}\n[/code]\n\nAn use '-pthread' flag while compiling. | 2018-05-23 12:19:33.987203-04 | f | f |  | f | 0 | f
+  6 | 16 | robera | You can even try C style threading\n[code]\n#include <iostream>\n#include <pthread.h>\nusing namespace std;\n\nvoid *func(void *vargp)\n{\n    cout<<"Sample function\n";\n}\n  \nint main()\n{\n    pthread_t t1,t2;\n    pthread_create(&t1, NULL, func, NULL);\n    pthread_create(&t2, NULL, func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}\n[/code]\n\nAn use '-pthread' flag while compiling. | 2018-05-23 12:19:33.987203-04 | f | f |  | f | 0 | f
   7 | -1 | aphacker | Testing multiple levels and different display option's behavior. tree: 1, chrono: 1, alpha: 4| 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | f
-  7 | 20 | aufded | tree: 2, chrono: 2, alpha: 1| 2018-04-03 18:47:02.281828-04 | f | f | | f | 0 | f
-  7 | 21 | bartec | tree: 3, chrono: 3, alpha: 2 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 20 | efferm | tree: 2, chrono: 2, alpha: 1| 2018-04-03 18:47:02.281828-04 | f | f | | f | 0 | f
+  7 | 21 | conroe | tree: 3, chrono: 3, alpha: 2 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
   7 | 22 | bitdiddle | tree: 4, chrono: 4, alpha: 3 | 2018-04-03 19:46:02.281828-04 | t | f | | f | 0 | f
-  7 | 22 | keelia | tree: 11, chrono: 5, alpha: 8 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
-  7 | 23 | larkim | tree: 5, chrono: 6, alpha: 9 | 2018-04-03 20:46:02.281828-04 | f | f | | f | 0 | f
-  7 | 25 | larkim | tree: 6, chrono: 7, alpha: 10 | 2018-04-03 20:47:02.281828-04 | f | f | | f | 0 | f
+  7 | 22 | farred | tree: 11, chrono: 5, alpha: 8 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 23 | wisoza | tree: 5, chrono: 6, alpha: 9 | 2018-04-03 20:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 25 | wisoza | tree: 6, chrono: 7, alpha: 10 | 2018-04-03 20:47:02.281828-04 | f | f | | f | 0 | f
   7 | 26 | instructor | tree: 7, chrono: 8, alpha: 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
   7 | 26 | aphacker | tree: 8, chrono: 9, alpha: 5 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
-  7 | 28 | warde | tree: 9, chrono: 10, alpha: 11 | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
+  7 | 28 | dares | tree: 9, chrono: 10, alpha: 11 | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
   7 | 29 | aphacker | tree: 10, chrono: 11, alpha: 6 | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f
   8 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | Secret.png
   8 | 31 | bitdiddle | I think I know the answer | 2018-05-23 21:49:03.281828-04 | f | f | | f | 0 | Answer.png

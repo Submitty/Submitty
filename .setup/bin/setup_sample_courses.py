@@ -1955,7 +1955,8 @@ class Gradeable(object):
                 students = students.read().strip().split()
                 length = len(graders)
                 for i in range(length):
-                    conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
+                    #conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
+                    pass
 
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
