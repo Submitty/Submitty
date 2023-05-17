@@ -871,7 +871,6 @@ class AdminGradeableController extends AbstractController {
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
             $host_type = -1;
-            $vcs_path = '';
             $vcs_partial_path = '';
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
@@ -894,12 +893,11 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'self-hosted') {
                 $host_type = 4;
             }
-            $vcs_path = $this->core->getConfig()->getVcsBaseUrl() . $vcs_partial_path;
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => $host_type,
-                'vcs_path' => $vcs_path
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
@@ -908,7 +906,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => -1,
-                'vcs_path' => $vcs_path
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
@@ -965,7 +963,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
-                'vcs_path' => '',
+                'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
@@ -1279,7 +1277,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
-            'vcs_path' => $gradeable->getVcsPartialPath(),
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
