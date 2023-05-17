@@ -12,6 +12,22 @@ Usage: ./setup_sample_courses.py
 The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
+
+Note about editing:
+If you make changes that use/alter random number generation, you may need to 
+edit the following files:
+    Peer Review:
+        students.txt
+        graders.txt
+    Office Hours Queue:
+        queue_data.json
+    Discussion Forum:
+        threads.txt
+        posts.txt
+        
+These files are manually written for a given set of users (the set is predetermined due to 
+the random's seed staying the same). If you make any changes that affects the contents of the 
+set these files will be outdated and result in failure of recreate_sample_courses.
 """
 from __future__ import print_function, division
 import argparse
