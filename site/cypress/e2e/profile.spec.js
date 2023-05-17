@@ -55,14 +55,12 @@ describe('Test cases revolving around user profile page', () => {
         });
 
         // verify prederred name form
-        for (let i = 0; i < 1; i++) {
-            form_visible(i, 0);
-            cy.get('input[name=user_givenname_change]').clear().type(given);
-            cy.get('input[name=user_familyname_change]').clear().type(family);
-            cy.get('.btn-primary').eq(1).click();
-            cy.get('#givenname-row > button').contains(given);
-            cy.get('#familyname-row > button').contains(family);
-        }
+        form_visible(1, 0);
+        cy.get('input[name=user_givenname_change]').clear().type(given);
+        cy.get('input[name=user_familyname_change]').clear().type(family);
+        cy.get('.btn-primary').eq(1).click();
+        cy.get('#givenname-row > button').contains(given);
+        cy.get('#familyname-row > button').contains(family);
 
         // verify pronouns form
         form_visible(2, 3);
@@ -71,13 +69,11 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#pronouns_val').contains(pronouns);
 
         // verify secondary_email form
-        for (let i = 3; i < 4; i++) {
-            form_visible(i, 2);
-            cy.get('input[name=user_secondary_email_change]').clear().type(mail);
-            cy.get('input[name=user_secondary_email_notify_change]').click();
-            cy.get('.btn-primary').eq(3).click();
-            cy.get('#secondary-email-row > button').contains(mail);
-        }
+        form_visible(3, 2);
+        cy.get('input[name=user_secondary_email_change]').clear().type(mail);
+        cy.get('input[name=user_secondary_email_notify_change]').click();
+        cy.get('.btn-primary').eq(3).click();
+        cy.get('#secondary-email-row > button').contains(mail);
     });
 
     // verify database was updated
