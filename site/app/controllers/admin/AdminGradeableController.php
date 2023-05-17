@@ -964,6 +964,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'vcs_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
