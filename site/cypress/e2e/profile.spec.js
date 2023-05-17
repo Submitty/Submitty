@@ -26,9 +26,11 @@ const pronouns = makeid();
 const email = `${makeid()}@rpi.edu`;
 
 describe('Test cases revolving around user profile page', () => {
-    it('Should verify the basic info column\'s visibility', () => {
+    it('Should check the visibility of the rows and popups', () => {
         cy.visit('/user_profile');
         cy.login();
+
+        // fields should be visible
         cy.get('#username-row').should('be.visible');
         cy.get('#givenname-row').should('be.visible');
         cy.get('#familyname-row').should('be.visible');
@@ -36,22 +38,22 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#email-row').should('be.visible');
         cy.get('#secondary-email-row').should('be.visible');
         cy.get('#secondary-email-notify-row').should('be.visible');
-        // verify that every pop-up form's display originally is none
+
+        // popups should be hidden
         cy.get('#edit-username-form').should('not.be.visible');
         cy.get('#edit-pronouns-form').should('not.be.visible');
         cy.get('#edit-secondary-email-form').should('not.be.visible');
         cy.get('#edit-secondary-email-form').should('not.be.visible');
     });
 
-    //verify each input form
-    it('Verify every pop-up form', () => {
+    it('Should test every pop-up form', () => {
         cy.visit('/user_profile');
         cy.login();
 
-        // verify that every form can be intrigued
+        // check for edit buttons that open forms
         cy.get('.fa-pencil-alt').should('have.length', 5);
 
-        // verify prederred name form
+        // preferred name form
         form_visible(1, 0);
         cy.get('input[name=user_givenname_change]').clear().type(givenName);
         cy.get('input[name=user_familyname_change]').clear().type(familyName);
@@ -59,13 +61,13 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#givenname-row > button').contains(givenName);
         cy.get('#familyname-row > button').contains(familyName);
 
-        // verify pronouns form
+        // pronouns form
         form_visible(2, 3);
         cy.get('input[name=user_pronouns_change]').clear().type(pronouns);
         cy.get('.btn-primary').eq(4).click();
         cy.get('#pronouns_val').contains(pronouns);
 
-        // verify secondary_email form
+        // secondary email form
         form_visible(3, 2);
         cy.get('input[name=user_secondary_email_change]').clear().type(email);
         cy.get('input[name=user_secondary_email_notify_change]').click();
@@ -73,10 +75,10 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#secondary-email-row > button').contains(email);
     });
 
-    // verify database was updated
-    it('verify that database was updated', () => {
+    it('Should confirm that the database was updated', () => {
         cy.visit('/user_profile');
         cy.login();
+
         cy.get('#givenname-row > button').contains(givenName);
         cy.get('#familyname-row > button').contains(familyName);
         cy.get('#pronouns_val').contains(pronouns);
