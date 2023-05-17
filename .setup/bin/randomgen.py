@@ -24,4 +24,4 @@ class Rand48(object):
         n = self.next() >> 16
         if n & (1 << 31):
             n -= 1 << 32
-        return n  
+        return n
