@@ -712,8 +712,9 @@ class GradeableListTester extends BaseUnitTest {
         $core = new Core();
         $user = new User($core, [
             'user_id' => 'test',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -780,9 +781,9 @@ class GradeableListTester extends BaseUnitTest {
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => $ta_grading,
-            'scanned_exam' => false,
             'student_view' => true,
             'student_view_after_grades' => false,
+            'student_download' => true,
             'student_submit' => $student_submit,
             'has_due_date' => $has_due_date,
             'has_release_date' => $has_release_date,

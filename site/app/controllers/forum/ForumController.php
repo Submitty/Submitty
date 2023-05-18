@@ -451,7 +451,7 @@ class ForumController extends AbstractController {
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", ($markdown ? 1 : 0), time() + (86400 * 30), "/");
+        setcookie("markdown_enabled", strval($markdown ? 1 : 0), time() + (86400 * 30), "/");
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -467,7 +467,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
-        elseif ($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
+        elseif ($this->core->getQueries()->isThreadLocked(intval($thread_id)) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         }
@@ -494,7 +494,7 @@ class ForumController extends AbstractController {
                 }
 
                 $full_course_name = $this->core->getFullCourseName();
-                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
+                $thread_title = $this->core->getQueries()->getThread(intval($thread_id))['title'];
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
@@ -574,7 +574,10 @@ class ForumController extends AbstractController {
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if ($post['thread_id'] !== intval($_POST['thread_id'])) {
+        if (isset($_POST['thread_id']) && $post['thread_id'] !== intval($_POST['thread_id'])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
+        }
+        if (isset($_POST['edit_thread_id']) && $post['thread_id'] !== intval($_POST['edit_thread_id'])) {
             return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
         }
         if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {
@@ -1142,7 +1145,7 @@ class ForumController extends AbstractController {
         // Fetch additional information
         foreach ($output as &$_post) {
             $emptyUser = empty($_post['user']);
-            $_post['user_info'] = $emptyUser ? ['first_name' => 'Anonymous', 'last_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+            $_post['user_info'] = $emptyUser ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
             $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
         }
         return $this->core->getOutput()->renderJsonSuccess($output);
@@ -1201,8 +1204,8 @@ class ForumController extends AbstractController {
             if (!isset($users[$user])) {
                 $users[$user] = [];
                 $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
-                $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
+                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];

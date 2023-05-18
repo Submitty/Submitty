@@ -1,0 +1,9 @@
+test01: Compilation                                          0 / 25  
+test02: Preprocessing                                        0 /  0  
+test03: No malloc()                                                  
+test04: Only calloc() and realloc()                                  
+test05: No square brackets                                           
+test06: Run program                                          0 / 75  
+test07: Submission Limit                                             
+Automatic grading total:                                          0 /100
+Non-hidden automatic grading total:                               0 /100

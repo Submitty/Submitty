@@ -1,6 +1,6 @@
 
-<div id="queue_status">
 {% if viewer.inQueue() == 0 %}
+<div id="queue_status">
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -47,7 +47,7 @@
             }
         });
     </script>
-
+</div>
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
     {% if viewer.getQueueSocketMessage() %}
         <div class = "queue-message">
@@ -77,9 +77,9 @@
     </p>
 
     <p>
-      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+      {% if viewer.getCurrentStarType() == 'full' %}
         Because you have not yet been helped through this queue during the last week, you may be prioritized.
-      {% elseif viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+      {% elseif viewer.getCurrentStarType() == 'half' %}
         Because you have not yet been helped through this queue today, you may be prioritized.
       {% else %}
         However, because you have been helped through this queue today, you may be de-prioritized.
@@ -92,9 +92,9 @@
       {% set queue_text = 'in the queue who' %}
       {% set position_text = 'not yet been helped in the last week, and' %}
       {% set end_text = 'ahead of you in the queue who have not yet been helped today' %}
-      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+      {% if viewer.getCurrentStarType() == 'full' %}
           {% set queue_text = 'ahead of you in the queue who' %}
-      {% elseif not viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+      {% elseif viewer.getCurrentStarType() == 'half' %}
           {% set end_text = 'in the queue who have not yet been helped today' %}
       {% endif %}
       There {{plurality_picker(num_ahead_week, 'is', 'are')}} currently
@@ -123,10 +123,9 @@
       {% endif %}
       {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
-          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}"/>
-          <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+          <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}">
           <div class="form-group">
               <br>
               <h2>Switch My Queue</h2>
@@ -203,7 +202,7 @@
   </div>
 {% else %}
   <div id="queue_status">
-    <p>You are currently being helped</p>
+    <p>You are currently being helped by {{viewer.getHelperName()}}</p>
     <form
       method="post"
       id="finish_help"
@@ -216,28 +215,6 @@
     </form>
   </div>
 {% endif %}
-<br>
-<a id="view_queue_occupancy" onclick="toggleQueueOccupancy()"><button class="btn btn-primary">View Queue Occupancy</button></a>
-<a id="close_queue_occupancy" onclick="toggleQueueOccupancy()" style="display: none"><button class="btn btn-primary">Close Table</button></a>
-<br><br>
-<div class="container queue_occupancy" style="display: none">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Queue</th>
-                <th scope="col">People In Queue</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for name, number in viewer.getQueueOccupancy() %}
-            <tr>
-                <td>{{ name }}</td>
-                <td>{{ number }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
 <script>
 
     function queueMessage(message) {

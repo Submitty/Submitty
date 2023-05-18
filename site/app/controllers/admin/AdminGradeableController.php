@@ -47,7 +47,7 @@ class AdminGradeableController extends AbstractController {
         'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
-        'electronic_exam' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
+        'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
     ];
 
     /**
@@ -68,6 +68,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'bootstrap5-theme', 'select2-bootstrap-5-theme.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -152,13 +155,13 @@ class AdminGradeableController extends AbstractController {
             $repo_id_number++;
         }
         usort($all_repository_config_paths, function ($a, $b) {
-            return $a[0] > $b[0];
+            return strcmp($a[0], $b[0]);
         });
 
         $type_string = 'UNKNOWN';
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            if ($gradeable->isScannedExam()) {
-                $type_string = self::gradeable_type_strings['electronic_exam'];
+            if ($gradeable->isBulkUpload()) {
+                $type_string = self::gradeable_type_strings['electronic_bulk'];
             }
             elseif ($gradeable->isVcs()) {
                 $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
@@ -231,6 +234,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'bootstrap5-theme', 'select2-bootstrap-5-theme.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -283,7 +289,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
-            'is_exam' => $gradeable->isScannedExam()
+            'is_bulk_upload' => $gradeable->isBulkUpload(),
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -580,7 +586,7 @@ class AdminGradeableController extends AbstractController {
             $dir_queue = array_values($dir_queue);
 
             if (!file_exists($dir) || !is_dir($dir)) {
-                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occurred when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return [];
             }
 
@@ -588,7 +594,7 @@ class AdminGradeableController extends AbstractController {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
             }
             catch (\Exception $e) {
-                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occurred when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return [];
             }
 
@@ -807,6 +813,7 @@ class AdminGradeableController extends AbstractController {
             'autograding_config_path',
             'student_view',
             'student_view_after_grades',
+            'student_download',
             'student_submit',
             'late_days',
             'precision'
@@ -835,6 +842,7 @@ class AdminGradeableController extends AbstractController {
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'student_view' => true,
                 'student_view_after_grades' => false,
+                'student_download' => true,
                 'student_submit' => true,
                 'late_days' => $default_late_days,
                 'precision' => 0.5
@@ -921,7 +929,6 @@ class AdminGradeableController extends AbstractController {
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
-                'scanned_exam' => $details['scanned_exam'] === 'true',
                 'allow_custom_marks' => true,
 
                 //For discussion component
@@ -979,10 +986,12 @@ class AdminGradeableController extends AbstractController {
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Setup student permissions specially for scanned exams
-        if ($gradeable->isScannedExam()) {
+        if ($details['bulk_upload'] === 'true') {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
+            $gradeable->setStudentDownload(false);
+
             $gradeable->setAutogradingConfigPath(
                 FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
@@ -1050,9 +1059,9 @@ class AdminGradeableController extends AbstractController {
 
         $boolean_properties = [
             'ta_grading',
-            'scanned_exam',
             'student_view',
             'student_view_after_grades',
+            'student_download',
             'student_submit',
             'peer_grading',
             'late_submission_allowed',
@@ -1124,7 +1133,7 @@ class AdminGradeableController extends AbstractController {
                             $gradeable->setDependsOnPoints(0);
                         }
                         else {
-                            if ($depends_on_points < 0 || $depends_on_points > $temp_gradeable->getDependsOnPoints()) {
+                            if ($depends_on_points < 0 || ($depends_on_points > $temp_gradeable->getDependsOnPoints() && $temp_gradeable->getDependsOnPoints() !== null)) {
                                 $errors['depends_on_points'] = "Invalid depends on points!";
                             }
                         }
@@ -1295,7 +1304,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     public static function enqueueGenerateRepos($semester, $course, $g_id) {
-        // FIXME:  should use a variable intead of hardcoded top level path
+        // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
@@ -1336,14 +1345,12 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
     public function getBuildLogs(string $gradeable_id): JsonResponse {
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
-        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
-        $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output,$make_output]);
+        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output]);
     }
 
     /**

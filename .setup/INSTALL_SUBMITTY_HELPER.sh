@@ -32,12 +32,9 @@ if [ -d "${THIS_DIR}/../.vagrant" ]; then
     VAGRANT=1
 fi
 
-
-#
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-UTM_ARM=0
-if [[ "$(uname -m)" = "aarch64" ]] ; then
-    UTM_ARM=1
+UTM=0
+if [ -d "${THIS_DIR}/../.utm" ]; then
+    UTM=1
 fi
 
 
@@ -60,7 +57,7 @@ fi
 # FORCE CORRECT TIME SKEW
 # This may happen on a development virtual machine
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ ${UTM_ARM} == 1 ]; then
+if [ "${UTM}" == 1 ]; then
     sudo service ntp stop
     sudo ntpd -gq
     sudo service ntp start
@@ -185,7 +182,12 @@ popd > /dev/null
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${SUBMITTY_INSTALL_DIR}/config/submitty.json")
-COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+# Worker does not need course builders so just use root
+if [ "${WORKER}" == 0 ]; then
+    COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+else
+    COURSE_BUILDERS_GROUP=root
+fi
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
@@ -195,7 +197,12 @@ DAEMON_UID=$(jq -r '.daemon_uid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.
 DAEMON_GID=$(jq -r '.daemon_gid' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 PHP_USER=$(jq -r '.php_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 CGI_USER=$(jq -r '.cgi_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
-DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+# Worker does not have daemon PHP so just use daemon group
+if [ "${WORKER}" == 0 ]; then
+    DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+else
+    DAEMONPHP_GROUP="${DAEMON_GROUP}"
+fi
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
@@ -624,11 +631,6 @@ echo -e "Compile and install analysis tools"
 
 mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# HASKELL BINARY IS NOT AVAILABLE ARM64
-if [ "${UTM_ARM}" == 0 ]; then
-# END ARM64
-
 pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
@@ -638,13 +640,6 @@ if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     echo "${AnalysisTools_Version}" > VERSION
 fi
 popd > /dev/null
-
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# HASKELL BINARY IS NOT AVAILABLE ARM64
-else
-    echo "SKIPPING ANALYSIS TOOLS INSTALL ON UTM ARM 64"
-fi
-# END ARM64
 
 # change permissions
 chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
@@ -711,26 +706,10 @@ chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
 
 echo -e "Build and install analysis tools ts"
 
-mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-
 ANALYSIS_TOOLS_TS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/"
 
-# Copy cloned files to AnalysisToolsTS directory
-rsync -rtz "${ANALYSIS_TOOLS_TS_REPO}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-
-pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-
-# # change permissions
-chown -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-chmod -R 755 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisToolsTS"
-
-# # install npm packages
-su "${DAEMON_USER}" -c "npm install"
-
 # # build project
-su "${DAEMON_USER}" -c "npm run build"
-
-popd > /dev/null
+/bin/bash "${ANALYSIS_TOOLS_TS_REPO}/install_analysistoolsts.sh"
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
@@ -873,6 +852,25 @@ do
     chmod 770 "$mydir"
 done
 
+
+#############################################################################
+# Cleanup Old Email
+
+# Will scan the emails table in the main Submitty database for email
+# receipts that were successfully sent at least 360 days ago, with no
+# errors, and delete them from the table.  A maximum of 10,000 email
+# receipts will be deleted.
+if [ "${WORKER}" == 0 ]; then
+    "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
+fi
+
+#############################################################################
+# Delete expired sessions
+
+# Deletes all expired sessions from the main Submitty database
+if [ "${WORKER}" == 0 ]; then
+    "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
+fi
 
 #############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
