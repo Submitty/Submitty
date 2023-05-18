@@ -516,15 +516,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  let silent_edit_enabled = Cookies.get('silent_edit_enabled');
+  const silent_edit_enabled = Cookies.get('silent_edit_enabled');
 
-  let autoscroll = Cookies.get('autoscroll');
-  let opened_mark = Cookies.get('opened_mark');
-  let scroll_pixel = Cookies.get('scroll_pixel');
+  const autoscroll = Cookies.get('autoscroll');
+  const opened_mark = Cookies.get('opened_mark');
+  const scroll_pixel = Cookies.get('scroll_pixel');
 
-  let testcases = Cookies.get('testcases');
+  const testcases = Cookies.get('testcases');
 
-  let files = Cookies.get('files');
+  const files = Cookies.get('files');
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
