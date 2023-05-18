@@ -234,7 +234,7 @@
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id = "subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+                            {{ action != 'new' and (gradeable.isInSub() != 'none') ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
                     <input type="radio" id = "subdir_no_radio" name="subdirectory_gradeable" value ="false"
                             {{ action == 'new' and (gradeable.getVcsSubdirectory() == '') ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
