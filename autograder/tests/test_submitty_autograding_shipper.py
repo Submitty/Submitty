@@ -75,8 +75,8 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(WORKING_DIR)
+        # with contextlib.suppress(FileNotFoundError):
+        #     shutil.rmtree(WORKING_DIR)
 
     @classmethod
     def setUpClass(cls):
@@ -87,8 +87,8 @@ class TestAutogradingShipper(unittest.TestCase):
         global CONFIG
 
         # Remove the test environment if it is left over from a previous run.
-        with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(TEST_ENVIRONMENT)
+        # with contextlib.suppress(FileNotFoundError):
+        #     shutil.rmtree(TEST_ENVIRONMENT)
 
         # Make the working directory
         os.makedirs(WORKING_DIR, exist_ok=True)
@@ -182,7 +182,7 @@ class TestAutogradingShipper(unittest.TestCase):
         # Initialize git homework directory
         create_git_repository = """
         cd {}/homework_01;
-        git init --initial-branch "master";
+        git init;
         git config user.email "test@email.com";
         git config user.name "Test Shipper";
         git add -A;
@@ -313,7 +313,7 @@ class TestAutogradingShipper(unittest.TestCase):
             with open(base_file_path, 'r') as base_config_file:
                 # The subdirectory variable is changed to and empty string.
                 form_config_file.write(
-                    base_config_file.read().replace('homework_01', '')
+                    base_config_file.read().replace('homework_01', 'non_existant')
                 )
 
         shipper.checkout_vcs_repo(
@@ -341,13 +341,13 @@ class TestAutogradingShipper(unittest.TestCase):
             TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
-        with open(
-            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
-        ) as config_file:
-            with open(course_config_file, 'w') as new_config_file:
-                new_config_file.write(
-                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
-                )
+        # with open(
+        #     os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
+        # ) as config_file:
+        #     with open(course_config_file, 'w') as new_config_file:
+        #         new_config_file.write(
+        #             config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
+        #         )
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
@@ -378,13 +378,6 @@ class TestAutogradingShipper(unittest.TestCase):
             TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
         course_config_file = os.path.join(paths['course'], 'config', 'config.json')
-        with open(
-            os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
-        ) as config_file:
-            with open(course_config_file, 'w') as new_config_file:
-                new_config_file.write(
-                    config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
-                )
 
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
