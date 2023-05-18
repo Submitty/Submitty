@@ -14,12 +14,15 @@ opencv-python-headless==4.6.0.66
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2022.7.1 # Submitty-util specific.
 
+# v2 crashes docker install
+urllib3==1.26.14
+
 python-pam==2.0.2
 ruamel.yaml==0.17.21
-psycopg2-binary==2.9.5
+psycopg2-binary==2.9.6
 sqlalchemy==1.4.29
-pylint==2.13.9
-psutil==5.9.4
+pylint==2.17.2
+psutil==5.9.5
 python-dateutil==2.8.2
 watchdog==2.3.0
 xlsx2csv==0.8.1
@@ -44,5 +47,5 @@ pdf2image==1.16.3
 numpy==1.24.2
 
 # python libraries for OCR for digit recognition
-onnx==1.12.0
+onnx==1.14.0
 onnxruntime==1.11.1

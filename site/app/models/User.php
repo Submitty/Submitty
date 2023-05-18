@@ -26,6 +26,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method void setPronouns(string $pronouns)
+ * @method int getLastInitialFormat()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -77,6 +78,11 @@ class User extends AbstractModel {
     /** Profile image quota of 50 images exhausted */
     const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
+    /**
+     * Last initial display formats
+     */
+    const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -104,6 +110,8 @@ class User extends AbstractModel {
     protected $displayed_family_name;
     /** @prop @var string The pronouns of the user */
     protected $pronouns = "";
+    /** @prop @var int The display format for the last initial of the user */
+    protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */
     protected $email;
     /** @prop @var string The secondary email of the user */
@@ -195,6 +203,11 @@ class User extends AbstractModel {
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
+        }
+
+        $this->last_initial_format = isset($details['user_last_initial_format']) ? intval($details['user_last_initial_format']) : 0;
+        if ($this->last_initial_format < 0 || $this->last_initial_format > 3) {
+            $this->last_initial_format = 0;
         }
 
         $this->email = $details['user_email'];
@@ -416,6 +429,13 @@ class User extends AbstractModel {
         $this->setDisplayedFamilyName();
     }
 
+    public function setLastInitialFormat(int $format) {
+        if ($format < 0 || $format > 3) {
+            throw new \InvalidArgumentException("Invalid format value specified");
+        }
+        $this->last_initial_format = $format;
+    }
+
     public function getNotificationSettings() {
         return $this->notification_settings; //either receives it or not
     }
@@ -454,8 +474,46 @@ class User extends AbstractModel {
         return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
     }
 
-    public function getDisplayAbbreviatedName(): string {
-        return $this->getDisplayedGivenName() . ' ' . substr($this->getDisplayedFamilyName(), 0, 1) . '.';
+    public function getDisplayAbbreviatedName(int $last_initial_format = -1): string {
+        if ($last_initial_format < 0) {
+            $last_initial_format = $this->getLastInitialFormat();
+        }
+        $last_initial = ' ';
+        $family_name = $this->getDisplayedFamilyName();
+        $format_name = self::LAST_INITIAL_FORMATS[$last_initial_format];
+        switch ($format_name) {
+            case 'Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $last_initial .= $part[0] . '.';
+                }
+                break;
+            case 'Hyphen-Multi':
+                $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
+                foreach ($spaced as $part) {
+                    $dashed = explode('-', $part);
+                    $l = array_map(fn(string $part) => $part[0], $dashed);
+                    $last_initial .= implode('-', $l) . '.';
+                }
+                break;
+            case 'None':
+                $last_initial = '';
+                break;
+            default:
+                $last_initial .= $family_name[0] . '.';
+                break;
+        }
+        return $this->getDisplayedGivenName() . $last_initial;
+    }
+
+    public function getDisplayLastInitialFormat(int $format = -1): string {
+        if ($format < 0) {
+            $format = $this->last_initial_format;
+        }
+        if ($format < 0 || $format > count(self::LAST_INITIAL_FORMATS)) {
+            return '';
+        }
+        return self::LAST_INITIAL_FORMATS[$format];
     }
 
     public function setRegistrationSection($section) {
