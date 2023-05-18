@@ -16,7 +16,7 @@ const getVisibleData = () => {
     cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
     cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
     cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
-    cy.get('#secondary-email-row > button').invoke('text').then(text => data.email = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
 
     return data;
 };
@@ -42,7 +42,7 @@ const fillData = (data) => {
 
     testModification('#edit-secondary-email-form', () => {
         const e = cy.get('#user-secondary-email-change').clear();
-        data.email && e.type(data.email);
+        data.secondaryEmail && e.type(data.secondaryEmail);
     });
 };
 
@@ -50,7 +50,7 @@ const newUserData = {
     givenName: genAlpha(),
     familyName: genAlpha(),
     pronouns: genAlpha(),
-    email: `${genAlpha()}@example.com`,
+    secondaryEmail: `${genAlpha()}@example.com`,
 };
 
 let priorUserData = {};
