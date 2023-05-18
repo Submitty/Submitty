@@ -888,10 +888,6 @@ class AdminGradeableController extends AbstractController {
             }
             elseif ($host_button === 'self-hosted') {
                 $host_type = 4;
-                $subdir = $details['vcs_url'];
-                if ($subdir[0] != '/') {
-                    $subdir = '/' . $subdir;
-                }
             }
 
             $vcs_property_values = [
