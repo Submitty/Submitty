@@ -1726,7 +1726,7 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
