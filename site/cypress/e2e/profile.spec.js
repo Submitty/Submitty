@@ -21,26 +21,25 @@ const getVisibleData = () => {
     return data;
 };
 
-const testModification = (rowId, formId, cb) => {
+const testModification = (formId, cb) => {
     cy.get('.alert-success').invoke('hide').should('not.be.visible');
-    cy.get(`${rowId} > button.icon`).click();
-    cy.get(`.popup-form${formId}`).within(cb);
+    cy.get(`.popup-form${formId}`).invoke('show').within(cb);
     cy.get(`.popup-form${formId} .form-buttons input[type="submit"]`).click();
     cy.get(`.popup-form${formId}`).should('not.be.visible');
     cy.get('.alert-success', { timeout: 5000 }).should('be.visible');
 };
 
 const fillData = (data) => {
-    testModification('#givenname-row', '#edit-username-form', () => {
+    testModification('#edit-username-form', () => {
         cy.get('#user-givenname-change').clear().type(data.givenName);
         cy.get('#user-familyname-change').clear().type(data.familyName);
     });
 
-    testModification('#pronouns-row', '#edit-pronouns-form', () => {
+    testModification('#edit-pronouns-form', () => {
         cy.get('#user-pronouns-change').clear().type(data.pronouns);
     });
 
-    testModification('#secondary-email-row', '#edit-secondary-email-form', () => {
+    testModification('#edit-secondary-email-form', () => {
         cy.get('#user-secondary-email-change').clear().type(data.email);
     });
 };
