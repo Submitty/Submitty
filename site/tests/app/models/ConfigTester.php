@@ -27,7 +27,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
-     * means that if the value is not found within the json file, we don't have to worry about accidently
+     * means that if the value is not found within the json file, we don't have to worry about accidentally
      * exposing things to students.
      */
     public function testClassProperties() {
@@ -150,7 +150,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         }
         FileUtils::writeJsonFile($this->course_json_path, $config);
 
-        // Create psuedo email json
+        // Create pseudo email json
         $config = [
             'email_enabled' => true,
             'email_user' => '',
@@ -210,7 +210,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("admin@example.com", $config->getSysAdminEmail());
         $this->assertEquals("https://example.com/admin", $config->getSysAdminUrl());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
-        $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 

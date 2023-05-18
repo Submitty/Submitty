@@ -1,3 +1,6 @@
+/* global AbstractBuilder, SelectorWidget, FormOptionsWidget, builder_data */
+/* exported RootBuilder */
+
 /**
  * RootBuilder sits at the root of the notebook builder form and should probably only ever be instantiated a single
  * time.
@@ -9,7 +12,7 @@ class RootBuilder extends AbstractBuilder {
         const all_options = this.selector_options.concat(['Item']);
         this.main_selector = new SelectorWidget(all_options,  'Add New Notebook Cell');
 
-        this.itempool_selector = new SelectorWidget(['Itempool Item'], 'Add New Itempool Item')
+        this.itempool_selector = new SelectorWidget(['Itempool Item'], 'Add New Itempool Item');
         this.itempool_selector_elem = this.itempool_selector.render();
         this.itempool_selector_elem.classList.add('itempool-selector');
 

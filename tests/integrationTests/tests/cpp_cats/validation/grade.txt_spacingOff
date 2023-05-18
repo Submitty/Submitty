@@ -1,10 +1,10 @@
-test01: README                                               2 /  2
-test02: Compilation                                          3 /  3
-test03: Regular char by char comparision                     0 /  4
-test04: Test of by word comparison                           0 /  4
-test05: Test of by line comparison                           0 /  4
-test06: Test of by line without whitespace comparison        3 /  4
-test07: Regular char by char comparision NO PARTIAL CREDIT   0 /  4
+test01: README                                              2 /  2
+test02: Compilation                                         3 /  3
+test03: Regular char by char comparison                     0 /  4
+test04: Test of by word comparison                          0 /  4
+test05: Test of by line comparison                          0 /  4
+test06: Test of by line without whitespace comparison this assignment should take no longer than five hours. You will be given one week to complete the assignment, but if you find that you need extra time, please email the professor and you can turn in the assignment a few days late, no worries :) You can look at the requirements for this assignment in our syllabus which is conveniantly posted under the syllabus folder in Submitty. I hope you enjoy this assignment, and if you have any questions please feel free to contact the professor. This is supposed to be a fun assignment about cats, so let's make sure this assignment is fun :)   3 /  4
+test07: Regular char by char comparison NO PARTIAL CREDIT   0 /  4
 SubmissionLimit: Submission Limit
 Automatic grading total:                                          8 / 25
 Non-hidden automatic grading total:                               8 / 25

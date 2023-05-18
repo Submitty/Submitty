@@ -144,7 +144,7 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
 
     # rsync the file
     print(f"performing rsync to {worker}...")
-    # If this becomes too slow, we can exculde directories using --exclude.
+    # If this becomes too slow, we can exclude directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
     command = "rsync -a --exclude-from={3} --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
               local_directory, remote_host, foreign_directory, rsync_exclude).split()

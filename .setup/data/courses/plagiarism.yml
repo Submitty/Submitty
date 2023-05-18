@@ -341,7 +341,7 @@ gradeables:
 ########## LARGE -- 10+ submissions ############################################
 ########## stress-testing (probably challenging/impossible to debug) ###########
 - g_id: average_class_single_submission
-  g_title: Average Class Single Submission (Large) # 75 students, 1 submission per student, ~100-line files (3 codewars problems, seperate files, zipped into one file)
+  g_title: Average Class Single Submission (Large) # 75 students, 1 submission per student, ~100-line files (3 codewars problems, separate files, zipped into one file)
   gradeable_config: upload_only
   components:
   - gc_lower_clamp: 0
