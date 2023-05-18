@@ -1,25 +1,58 @@
-const form_visible = (button_id, form_id) => {
-    cy.get('.fa-pencil-alt').eq(button_id).click();
-    for (let i = 0; i < form_id; i++) {
-        cy.get('.popup-form').eq(i).should('not.be.visible');
-    }
-    cy.get('.popup-form').eq(form_id).should('be.visible');
-    for (let i = form_id + 1; i < 4; i++) {
-        cy.get('.popup-form').eq(i).should('not.be.visible');
-    }
-};
-
 const genAlpha = (length = 5) => {
     const characters = 'abcdefghijklmnopqrstuvwxyz';
     return Array(length).fill().map(() => characters[Math.floor(Math.random() * characters.length)]).join('');
 };
 
-const userData = {
+const testFormOpening = (rowId, formId) => {
+    cy.get(`${rowId} > button.icon`).click();
+    cy.get(formId).should('be.visible');
+    cy.get(`.popup-form${formId} .form-buttons .close-button`).click();
+    cy.get(`.popup-form${formId}`).should('not.be.visible');
+};
+
+const getVisibleData = () => {
+    const data = {};
+
+    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then(text => data.email = text.trim());
+
+    return data;
+};
+
+const testModification = (rowId, formId, cb) => {
+    cy.get('.alert-success').invoke('hide').should('not.be.visible');
+    cy.get(`${rowId} > button.icon`).click();
+    cy.get(`.popup-form${formId}`).within(cb);
+    cy.get(`.popup-form${formId} .form-buttons input[type="submit"]`).click();
+    cy.get(`.popup-form${formId}`).should('not.be.visible');
+    cy.get('.alert-success', { timeout: 5000 }).should('be.visible');
+};
+
+const fillData = (data) => {
+    testModification('#givenname-row', '#edit-username-form', () => {
+        cy.get('#user-givenname-change').clear().type(data.givenName);
+        cy.get('#user-familyname-change').clear().type(data.familyName);
+    });
+
+    testModification('#pronouns-row', '#edit-pronouns-form', () => {
+        cy.get('#user-pronouns-change').clear().type(data.pronouns);
+    });
+
+    testModification('#secondary-email-row', '#edit-secondary-email-form', () => {
+        cy.get('#user-secondary-email-change').clear().type(data.email);
+    });
+};
+
+const newUserData = {
     givenName: genAlpha(),
     familyName: genAlpha(),
     pronouns: genAlpha(),
     email: `${genAlpha()}@example.com`,
 };
+
+let priorUserData = {};
 
 describe('Test cases revolving around user profile page', () => {
     beforeEach(() => {
@@ -27,8 +60,7 @@ describe('Test cases revolving around user profile page', () => {
         cy.login();
     });
 
-    it('Should check the visibility of the rows and popups', () => {
-        // fields should be visible
+    it('Should show the information rows', () => {
         cy.get('#username-row').should('be.visible');
         cy.get('#givenname-row').should('be.visible');
         cy.get('#familyname-row').should('be.visible');
@@ -36,44 +68,43 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#email-row').should('be.visible');
         cy.get('#secondary-email-row').should('be.visible');
         cy.get('#secondary-email-notify-row').should('be.visible');
-
-        // popups should be hidden
-        cy.get('#edit-username-form').should('not.be.visible');
-        cy.get('#edit-pronouns-form').should('not.be.visible');
-        cy.get('#edit-secondary-email-form').should('not.be.visible');
-        cy.get('#edit-secondary-email-form').should('not.be.visible');
     });
 
-    it('Should test every pop-up form', () => {
-        // check for edit buttons that open forms
-        cy.get('.fa-pencil-alt').should('have.length', 5);
+    it('Should open and close the popups', () => {
+        cy.get('.popup-form').should('not.be.visible');
 
-        // preferred name form
-        form_visible(1, 0);
-        cy.get('input[name=user_givenname_change]').clear().type(userData.givenName);
-        cy.get('input[name=user_familyname_change]').clear().type(userData.familyName);
-        cy.get('.btn-primary').eq(1).click();
-        cy.get('#givenname-row > button').contains(userData.givenName);
-        cy.get('#familyname-row > button').contains(userData.familyName);
+        testFormOpening('#givenname-row', '#edit-username-form');
+        testFormOpening('#familyname-row', '#edit-username-form');
 
-        // pronouns form
-        form_visible(2, 3);
-        cy.get('input[name=user_pronouns_change]').clear().type(userData.pronouns);
-        cy.get('.btn-primary').eq(4).click();
-        cy.get('#pronouns_val').contains(userData.pronouns);
+        testFormOpening('#pronouns-row', '#edit-pronouns-form');
 
-        // secondary email form
-        form_visible(3, 2);
-        cy.get('input[name=user_secondary_email_change]').clear().type(userData.email);
-        cy.get('input[name=user_secondary_email_notify_change]').click();
-        cy.get('.btn-primary').eq(3).click();
-        cy.get('#secondary-email-row > button').contains(userData.email);
+        testFormOpening('#secondary-email-row', '#edit-secondary-email-form');
+        testFormOpening('#secondary-email-notify-row', '#edit-secondary-email-form');
+
+        cy.get('.popup-form').should('not.be.visible');
     });
 
-    it('Should confirm that the database was updated', () => {
-        cy.get('#givenname-row > button').contains(userData.givenName);
-        cy.get('#familyname-row > button').contains(userData.familyName);
-        cy.get('#pronouns_val').contains(userData.pronouns);
-        cy.get('#secondary-email-row > button').contains(userData.email);
+    it('Should test the modifying of the values', () => {
+        priorUserData = getVisibleData();
+
+        fillData(newUserData);
+
+        const updatedData = getVisibleData();
+        cy.wrap(updatedData).should('deep.equal', newUserData);
+    });
+
+    it('Should persist on refresh', () => {
+        const userData = getVisibleData();
+        cy.wrap(userData).should('deep.equal', newUserData);
+    });
+
+    after(() => {
+        cy.visit('/user_profile');
+        cy.login();
+
+        fillData(priorUserData);
+
+        const revertedData = getVisibleData();
+        cy.wrap(revertedData).should('deep.equal', priorUserData);
     });
 });
