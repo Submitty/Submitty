@@ -1072,8 +1072,8 @@ VALUES (?,?,?,?,?,?)",
      */
     public function updateUser(User $user, $semester = null, $course = null) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
-                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(), $user->getSecondaryEmail(),
-                       $this->submitty_db->convertBoolean($user->getEmailBoth()),
+                       $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getEmail(),
+                       $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
         $extra = "";
@@ -1094,7 +1094,7 @@ VALUES (?,?,?,?,?,?)",
 UPDATE users
 SET
   user_numeric_id=?, user_pronouns=?, user_givenname=?, user_preferred_givenname=?,
-  user_familyname=?, user_preferred_familyname=?,
+  user_familyname=?, user_preferred_familyname=?, user_last_initial_format=?,
   user_email=?, user_email_secondary=?, user_email_secondary_notify=?,
   user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
@@ -1953,9 +1953,9 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
   SELECT gcd_grader_id, gc_order,
-  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+  CASE WHEN (gc_default + sum_points + gcd_score) >= gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) <= gc_lower_clamp THEN gc_lower_clamp
+  ELSE (sum_points + gcd_score) END AS comp_score FROM(
     SELECT gcd_grader_id, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
     CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
@@ -6508,7 +6508,8 @@ AND gc_id IN (
                 helper.user_email AS helper_email,
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
-                helper.user_group AS helper_group
+                helper.user_group AS helper_group,
+                helper.user_pronouns AS helper_pronouns
             FROM queue
             LEFT JOIN users helper on helper.user_id = queue.help_started_by
             WHERE current_state IN ('waiting','being_helped')
@@ -6532,6 +6533,7 @@ AND gc_id IN (
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
+                helper.user_pronouns AS helper_pronouns,
                 remover.user_givenname AS remover_givenname,
                 remover.user_preferred_givenname AS remover_preferred_givenname,
                 remover.user_familyname AS remover_familyname,
@@ -6540,7 +6542,8 @@ AND gc_id IN (
                 remover.user_email AS remover_email,
                 remover.user_email_secondary AS remover_email_secondary,
                 remover.user_email_secondary_notify AS remover_email_secondary_notify,
-                remover.user_group AS remover_group
+                remover.user_group AS remover_group,
+                remover.user_pronouns AS remover_pronouns
             FROM    queue
             LEFT JOIN users helper ON helper.user_id = queue.help_started_by
             LEFT JOIN users remover ON remover.user_id = queue.removed_by
