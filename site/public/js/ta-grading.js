@@ -516,15 +516,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  const silent_edit_enabled = Cookies.get('silent_edit_enabled');
+  const silent_edit_enabled = Cookies.get('silent_edit_enabled') || '';
 
-  const autoscroll = Cookies.get('autoscroll');
-  const opened_mark = Cookies.get('opened_mark');
-  const scroll_pixel = Cookies.get('scroll_pixel');
+  const autoscroll = Cookies.get('autoscroll') || '';
+  const opened_mark = Cookies.get('opened_mark') || '';
+  const scroll_pixel = Cookies.get('scroll_pixel') || '';
 
-  const testcases = Cookies.get('testcases');
+  const testcases = Cookies.get('testcases') || '';
 
-  const files = Cookies.get('files');
+  const files = Cookies.get('files') || '';
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
