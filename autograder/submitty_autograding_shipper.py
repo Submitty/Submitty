@@ -807,7 +807,7 @@ def checkout_vcs_repo(config, my_file):
         obj["semester"],
         obj["course"]
     )
-    #submission_path = os.path.join(course_dir, "submissions", partial_path)
+    # submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
@@ -855,11 +855,9 @@ def checkout_vcs_repo(config, my_file):
             vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
         else:
             vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
-
         sub_checkout_path = ''
         subdirectory_grading = False
         if vcs_subdirectory != 'none':
-            vcs_path = vcs_base_url
             sub_checkout_path = os.path.join(checkout_path, "tmp")
             subdirectory_grading = True
 # _________________________________________________________________________________________________________

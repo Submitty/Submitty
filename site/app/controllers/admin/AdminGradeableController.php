@@ -904,7 +904,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => -1,
-                'vcs_partial_path' => $vcs_partial_path
+                'vcs_partial_path' => ''
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }

@@ -261,6 +261,7 @@
                             <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
                             <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+                            {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}
                         </div>
                     </div>
                     <div class="team_no">
@@ -275,7 +276,7 @@
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd>{{ gradeable.getVcsPartialPath() }}</kbd>
+                                <kbd> {{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }} {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}</kbd>
                             {% endif %}
                         </div>
                     </div>
@@ -297,7 +298,7 @@
                             {% if action == 'new' or action == 'template' %}
                                 <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
                             {% else %}
-                                <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() }}</kbd>
+                                <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}</kbd>
                             {% endif %}
                         </div>	    					    
                     </div>
