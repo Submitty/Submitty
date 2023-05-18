@@ -1063,28 +1063,6 @@ def checkout_vcs_repo(config, my_file):
     (checkout_size, checkout_included_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
 
     obj["checkout_total_size"] = checkout_size
-    try:
-        assert(checkout_size < 1)
-
-    except AssertionError:
-        for file in os.listdir(checkout_path):
-            shutil.rmtree(file, ignore_errors = True)
-        
-        config.logger.log_message(
-            f"ERROR: Submission file size exceeds maximum file size {error}",
-            job_id=job_id
-        )
-        os.chdir(checkout_path)
-        error_path = os.path.join(checkout_path, "failed_to_construct_valid_repository_url.txt")
-        with open(error_path, 'w') as f:
-            print(str(error), file=f)
-            print("\n", file=f)
-            print("Check to be sure the repository exists.\n", file=f)
-            print(
-                "And check to be sure the submitty_daemon user has appropriate access "
-                "credentials.\n",
-                file=f)
-
     obj["checkout_included_symlinks"] = checkout_included_symlinks
 
     return obj
