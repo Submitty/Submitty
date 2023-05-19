@@ -340,14 +340,6 @@ class TestAutogradingShipper(unittest.TestCase):
         base_file_path = os.path.join(
             TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
-        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
-        # with open(
-        #     os.path.join(TEST_DATA_DIR, 'config_files', 'config.json')
-        # ) as config_file:
-        #     with open(course_config_file, 'w') as new_config_file:
-        #         new_config_file.write(
-        #             config_file.read().replace('VCS_BASE_URL', TEST_DATA_DIR + '/homework_01')
-        #         )
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(
@@ -377,8 +369,6 @@ class TestAutogradingShipper(unittest.TestCase):
         base_file_path = os.path.join(
             TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
         )
-        course_config_file = os.path.join(paths['course'], 'config', 'config.json')
-
         with open(config_file_path, 'w+') as form_config_file:
             with open(base_file_path, 'r') as base_config_file:
                 form_config_file.write(base_config_file.read())
