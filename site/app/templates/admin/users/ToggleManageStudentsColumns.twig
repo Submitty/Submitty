@@ -3,48 +3,63 @@
 {% block title %}Toggle Columns{% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <p>
+    <p class="toggle-columns-instructions">
         Select which columns you would like to display.
     </p>
     <div class="toggle-columns-menu">
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Registration Section</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>User ID</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>First Name</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Last Name</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Pronouns</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Rotating Section</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>UTC Offset / Time Zone</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>View Grades</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Late Days</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Registration Type</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Edit Student</label>
-        <br>
-        <input type="checkbox" class="toggle-columns-box">
-        <label>Delete Student</label>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Registration Section</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>User ID</label>   
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>First Name</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Last Name</label> 
+        </div>
+        <div class="toggle-checkbox-area">   
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Pronouns</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Rotating Section</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>UTC Offset / Time Zone</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>View Grades</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Late Days</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Registration Type</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Edit Student</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Delete Student</label>
+        </div>
     </div>
-    <a href="javascript:fillAllCheckboxes(true)" class="btn btn-primary">All On</a>
-    <a href="javascript:fillAllCheckboxes(false)" class="btn btn-primary">All Off</a>
+    <div class="toggle-all-buttons">
+        <a href="javascript:fillAllCheckboxes(true)" class="btn btn-primary">All On</a>
+        <a href="javascript:fillAllCheckboxes(false)" class="btn btn-primary">All Off</a>
+    </div>
 {% endblock %}
 
 {% block buttons %}

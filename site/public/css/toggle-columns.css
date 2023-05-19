@@ -1,0 +1,18 @@
+
+.toggle-columns-menu{
+    display: grid;
+}
+
+.toggle-columns-instructions{
+    margin-bottom: 1vh;
+}
+
+.toggle-checkbox-area {
+    display: table-cell;
+    vertical-align: middle;
+    margin: 0vh;
+}
+
+.toggle-all-buttons {
+    margin-top: 1vh;
+}
