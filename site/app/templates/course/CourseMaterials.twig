@@ -215,7 +215,7 @@
 
     window.onload = function () {
         //determine if folders have been left open or closed
-        var folderCookie = Cookies.get('foldersOpen');
+        var folderCookie = Cookies.get('foldersOpen') || '';
         //if the cookie says it is open
         if(folderCookie == "open"){
             //open all the folders
@@ -223,7 +223,7 @@
             //
             {% for file in material_list %}
             //if one of the subdirs, check if it is closed post opening all
-            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
+            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
             if(subFolderCookie.indexOf("closed")==0){
                 //if closed. close it after it has been opened by the override above
                 closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
@@ -236,7 +236,7 @@
             //goes through all possible directories
             {% for file in material_list %}
             //get the cookie for each dir
-            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
+            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
             //if the folder is open
             if(subFolderCookie.indexOf("open")==0){
                 //check if the folder has been opened already (do it it again will close it)
@@ -258,7 +258,7 @@
             {% endfor %}
         }
         // loop thru each div_viewer_xxx
-        var jumpToScrollPosition = Cookies.get('jumpToScrollPosition');
+        var jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
         {% if user_group == 1 %}
             var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
             const partiallyHidden = 2;
