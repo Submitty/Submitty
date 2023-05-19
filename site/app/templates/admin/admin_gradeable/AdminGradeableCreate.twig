@@ -195,7 +195,6 @@
                 </div>
                 {# (VPAT) Closes fieldset for team assignment radio group #}
                 </fieldset>
-                </fieldset>
             </div>
 
             <!-- Team settings (read only in edit mode) -->
@@ -235,10 +234,10 @@
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}> <label for="subdir_yes_radio">Yes</label>
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
 
                     <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' ? 'checked' :  '' }}> <label for="subdir_no_radio">No</label>
+                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for subdirectory radio group #}
                 </fieldset>
@@ -258,14 +257,10 @@
                         <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
                             {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
-                        {% if action == 'new' or action == 'template' %}
                         <div id="vcs_submitty_url_content" style="margin-left: 5%">
                             <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
                             <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
-                        {% else %}
-                           <kbd>{{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
-                        {% endif %}
                         </div>
                     </div>
                     <div class="team_no">
