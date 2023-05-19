@@ -1527,7 +1527,7 @@ function getMarkIdFromOrder(component_id, mark_order) {
  * @return {int} Returns zero of no open component exists
  */
 function getOpenComponentIdFromCookie() {
-    const component_id = Number(Cookies.get('open_component_id'));
+    const component_id = parseInt(Cookies.get('open_component_id'));
     if(isNaN(component_id)) {
         return NO_COMPONENT_ID;
     }
