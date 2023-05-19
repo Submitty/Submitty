@@ -107,7 +107,7 @@
                                 </td>
                             {% endif %}
                             {% if active_columns[8] %}
-                                <td>
+                                <td id="td-late-days">
                                     <form method="get" action="{{ view_latedays_url }}">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                         <input type="hidden" name="student_id" value="{{ student.getId() }}"/>

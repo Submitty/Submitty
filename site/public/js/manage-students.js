@@ -2,7 +2,7 @@
 */
 
 //Data structure for active columns
-let activeColumns = new Array(11).fill(true);
+let activeColumns = new Array(12).fill(true);
 let checkboxes = [];
 
 //opens modal with initial settings for new student

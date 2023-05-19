@@ -12,6 +12,7 @@
 #student-table #td-rotating-section::before { content: "Rotating Section"; }
 #student-table #td-manual-registration::before { content: "Manual Registration"; }
 #student-table #td-view-grades::before { content: "View Grades"; }
+#student-table #td-late-days::before { content: "View Late Days"; }
 #student-table #td-registration-type::before { content: "Registration Type"; }
 #student-table #td-edit-student::before { content: "Edit Student"; }
 #student-table #td-delete-student::before { content: "Delete Student"; }

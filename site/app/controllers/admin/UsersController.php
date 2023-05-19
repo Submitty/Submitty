@@ -71,12 +71,12 @@ class UsersController extends AbstractController {
 
         //Get Active Columns
         $active_columns = '';
-        if (isset($_COOKIE['active_columns'])) {
+        if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
             $active_columns = $_COOKIE['active_columns'];
         }
         else {
-            if (setcookie('active_columns', implode('-', array_fill(0, 11, true)), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_columns = implode('-', array_fill(0, 11, true));
+            if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_columns = implode('-', array_fill(0, 12, true));
             }
         }
 
