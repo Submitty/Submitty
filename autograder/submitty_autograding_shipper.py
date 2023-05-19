@@ -989,7 +989,7 @@ def checkout_vcs_repo(config, my_file):
                         with open(error_path, 'w') as f:
                             print(str(error), file=f)
                             print("\n", file=f)
-                            print("Check to be sure the subdirectory is not empty.\n", file=f)
+                            print("Check to be sure the subdirectory exists and is not empty.\n", file=f)
                             print("Check to be sure the repository has been committed with the " +
                                   "subdirectory and relevant files present.\n", file=f)
 
