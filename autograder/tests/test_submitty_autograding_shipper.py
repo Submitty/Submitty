@@ -75,8 +75,8 @@ class TestAutogradingShipper(unittest.TestCase):
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
         # Remove the test environment.
-        with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(WORKING_DIR)
+        # with contextlib.suppress(FileNotFoundError):
+        #     shutil.rmtree(WORKING_DIR)
 
     @classmethod
     def setUpClass(cls):

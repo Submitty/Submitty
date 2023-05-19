@@ -956,7 +956,7 @@ def checkout_vcs_repo(config, my_file):
                     else:
                         file_path = os.path.join(sub_checkout_path)
 
-                    shutil.move(file_path, checkout_path)
+                    shutil.copytree(file_path, checkout_path, dirs_exist_ok = True)
                     shutil.rmtree(sub_checkout_path)
 
                 except Exception as error:
