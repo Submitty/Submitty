@@ -291,7 +291,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
-            $this->setVcs($details['vcs']);    
+            $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);

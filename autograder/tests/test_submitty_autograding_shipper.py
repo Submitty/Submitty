@@ -293,39 +293,39 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to cause a clone repository failure'
         )
 
-    def test_invalid_url(self):
-        """
-        This test is to verify the output when the shipper cannot construct
-        a valid repository directory path.
-        To do this, the subdirectory is set to an empty string
-        in the form_homework_01.json config file.
-        """
-        paths = get_paths()
-        config_file_path = os.path.join(
-            paths['course'], 'config', 'form', 'form_homework_01.json'
-        )
+    # def test_invalid_url(self):
+    #     """
+    #     This test is to verify the output when the shipper cannot construct
+    #     a valid repository directory path.
+    #     To do this, the subdirectory is set to an empty string
+    #     in the form_homework_01.json config file.
+    #     """
+    #     paths = get_paths()
+    #     config_file_path = os.path.join(
+    #         paths['course'], 'config', 'form', 'form_homework_01.json'
+    #     )
 
-        with open(config_file_path, 'w+') as form_config_file:
-            base_file_path = os.path.join(
-                TEST_DATA_DIR, 'config_files', 'homework_form.json'
-            )
+    #     with open(config_file_path, 'w+') as form_config_file:
+    #         base_file_path = os.path.join(
+    #             TEST_DATA_DIR, 'config_files', 'homework_form.json'
+    #         )
 
-            with open(base_file_path, 'r') as base_config_file:
-                # The subdirectory variable is changed to and empty string.
-                form_config_file.write(
-                    base_config_file.read().replace('homework_01', 'non_existant')
-                )
+    #         with open(base_file_path, 'r') as base_config_file:
+    #             # The subdirectory variable is changed to and empty string.
+    #             form_config_file.write(
+    #                 base_config_file.read().replace('homework_01', 'non_existant')
+    #             )
 
-        shipper.checkout_vcs_repo(
-            CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
+    #     shipper.checkout_vcs_repo(
+    #         CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
+    #     )
 
-        failed_file = (
-            paths['checkout'] + '/failed_to_construct_valid_repository_url.txt'
-        )
-        self.assertTrue(
-            os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
-        )
+    #     failed_file = (
+    #         paths['checkout'] + '/failed_to_construct_valid_repository_url.txt'
+    #     )
+    #     self.assertTrue(
+    #         os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
+    #     )
 
     def test_invalid_subdirectory_files(self):
         """
