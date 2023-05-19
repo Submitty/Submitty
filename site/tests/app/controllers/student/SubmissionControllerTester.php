@@ -159,6 +159,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
             'vcs_subdirectory' => '',
+            'is_subdirectory' => false,
             'vcs_partial_path' => '',
             'vcs_host_type' => -1,
             'team_assignment' => false,

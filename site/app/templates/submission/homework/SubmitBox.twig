@@ -145,6 +145,9 @@
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+            {% if vcs_subdirectory != 'none' %}
+            <samp></br>cd .{{ vcs_subdirectory }}
+            {% endif %}
             {# Below will get uncommented once SAML is active #}
             {# <p>You will need to use an Authentication Token.</p> #}
             <br><br>
@@ -175,7 +178,9 @@
             <h3>Repository to be graded:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
             <samp> git clone {{ vcs_base_url|replace({"{$user_id}":user_id}) }}<br>
-            vcs_subdirectory != 'none' ? cd .{{ vcs_subdirectory }} : ''
+            {% if vcs_subdirectory != 'none' %}
+            <samp></br>cd .{{ vcs_subdirectory }}
+            {% endif %}
             </samp>
         {% endif %}
 

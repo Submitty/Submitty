@@ -205,7 +205,7 @@
                            value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
                 {#Use teams from a previous gradeable:
-                <!-- Inherit teams from another gradeable? -->
+                <!-- Inherit teams from another gradable? -->
                 <br />
                     <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
                 {% if action == 'new' %}
@@ -230,14 +230,14 @@
                     <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
                 {% else %}
                     <fieldset><legend>Subdirectory Settings:
-                    {{ gradeable.isInSubdirectory() ? '' : ' This is an individual assignment' }}</legend>
+                    {{ gradeable.getVcsSubdirectory() }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                    <input type="radio" id = "subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.isInSub() != 'none') ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
-                    <input type="radio" id = "subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' and (gradeable.getVcsSubdirectory() == '') ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
+                            {{ action == 'new' ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for subdirectory radio group #}
                 </fieldset>
@@ -245,7 +245,7 @@
             <div class="subdirectory_yes" id="subdir_yes">
                 <label for="team_size_max">What is the path to the gradeable?</label>
                     <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_set_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }} required />
+                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
             </div>
 
 
@@ -256,12 +256,14 @@
                         <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
                             {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
-
+                        {% if action == 'new' or action == 'template' %}
                         <div id="vcs_submitty_url_content" style="margin-left: 5%">
                             <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
                             <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
-                            {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}
+                        {% else %}
+                            {{ gradeable.getVcsPartialPath() }}
+                        {% endif %}
                         </div>
                     </div>
                     <div class="team_no">
@@ -276,7 +278,7 @@
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd> {{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }} {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}</kbd>
+                                <kbd> {{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
                             {% endif %}
                         </div>
                     </div>
@@ -289,19 +291,7 @@
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
                         {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
 			
-                    <div class="team_no">
-                        <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
-                            {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
-                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - instructor set url</label>
-
-                        <div id="vcs_self_set_url_content" style="margin-left: 5%">
-                            {% if action == 'new' or action == 'template' %}
-                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
-                            {% else %}
-                                <kbd id="vcs_url">{{ vcs_base_url }} {{ gradeable.getVcsSubdirectory() != 'none' ? 'cd ./'gradeable.getVcsSubdirectory() : '' }}</kbd>
-                            {% endif %}
-                        </div>	    					    
-                    </div>
+                    
                 </fieldset>
             </div>
         </div>
@@ -456,12 +446,12 @@
 
     function onSubdirectoryChange() {
         if($('#subdir_yes_radio').is(':checked')) {
-            disableElementChildren('.subdir_yes', false);
-            disableElementChildren('.subdir_no', true);
+            disableElementChildren('.subdirectory_yes', false);
+            $('#vcs_subdirectory').prop('required', true);
         }
         else {
-            disableElementChildren('.subdir_yes', true);
-            disableElementChildren('.subdir_no', false);
+            disableElementChildren('.subdirectory_yes', true);
+            $('#vcs_subdirectory').prop('required', false);
         }
     }
 
@@ -510,18 +500,10 @@
 
         if($('#vcs_radio_submitty_hosted_set_url').is(':checked')) {
             disableElementChildren('#vcs_submitty_set_url_content', false);
-            $('#vcs_submitty_url').prop('required', true);
+            $('#vcs_path').prop('required', true);
         }
         else {
-            $('#vcs_submitty_url').prop('required', false);
-        }
-
-        if($('#vcs_radio_self_hosted_set_url').is(':checked')) {
-            disableElementChildren('#vcs_self_set_url_content', false);
-            $('#vcs_self_url').prop('required', true);
-        }
-        else {
-            $('#vcs_self_url').prop('required', false);
+            $('#vcs_path').prop('required', false);
         }
     }
 
@@ -628,7 +610,7 @@
 
         // Hide the subdirectory field if not selected
         onSubdirectoryChange();
-        $('[name="subdirectory_yes"]').change(onSubdirectoryChange);
+        $('[name="subdirectory_gradeable"]').change(onSubdirectoryChange);
 
         // Hide VCS settings depending on different radio buttons
         onVCSTypeChange();
@@ -638,6 +620,7 @@
         $('[name="discussion_based"]').change(onDiscussionChange);
 
         disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
+        disableElementChildren('#subdirectory-settings-container', $('input[name=vcs]').val() === 'false');
 
         // Update the electronic file subtype
         $('input[name=electronic_gradeable_presets]').change(function() {
@@ -648,6 +631,7 @@
 
             vcs.val('false');
             $('#repository').hide();
+            $('#subdirectory-settings-container').hide();
             if ($(this).val() === 'bulk_upload') {
                 bulkUpload.val('true');
             }
@@ -656,6 +640,7 @@
                 if ($(this).val() === 'vcs') {
                     vcs.val('true');
                     $('#repository').show();
+                    $('#subdirectory-settings-container').show();
                 }
                 else {
                 }

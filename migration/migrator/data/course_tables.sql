@@ -766,6 +766,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_partial_path character varying(1024) NOT NULL,
     eg_vcs_host_type integer DEFAULT 0 NOT NULL,
     eg_team_assignment boolean NOT NULL,
     eg_max_team_size integer NOT NULL,

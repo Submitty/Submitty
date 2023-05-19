@@ -277,8 +277,6 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
-        $this->setVcsSubdirectory($details['vcs_subdirectory']);
-        $this->setVcsPartialPath($details['vcs_partial_path']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
@@ -293,7 +291,9 @@ class Gradeable extends AbstractModel {
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
-            $this->setVcs($details['vcs']);
+            $this->setVcs($details['vcs']);    
+            $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
