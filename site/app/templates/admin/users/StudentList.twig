@@ -41,12 +41,15 @@
                         <th>View Grades</th>
                     {% endif %}
                     {% if active_columns[8] %}
-                        <th>Registration Type</th>
+                        <th>Late Days</th>
                     {% endif %}
                     {% if active_columns[9] %}
-                        <th>Edit Student</th>
+                        <th>Registration Type</th>
                     {% endif %}
                     {% if active_columns[10] %}
+                        <th>Edit Student</th>
+                    {% endif %}
+                    {% if active_columns[11] %}
                         <th>Delete Student</th>
                     {% endif %}
                 </tr>
@@ -55,7 +58,7 @@
                 <tbody id="section-{{ registration }}">
                     {% if active_columns[0] %}
                     <tr class="info">
-                        <th class="section-break" colspan="12">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="13">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% endif %}
                     {% for student in students %}
@@ -104,12 +107,21 @@
                                 </td>
                             {% endif %}
                             {% if active_columns[8] %}
-                                <td id="td-registration-type">{{ student.getRegistrationType() }}</td>
+                                <td>
+                                    <form method="get" action="{{ view_latedays_url }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                        <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                        <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
+                                    </form>
+                                </td>
                             {% endif %}
                             {% if active_columns[9] %}
-                                <td id="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td id="td-registration-type">{{ student.getRegistrationType() }}</td>
                             {% endif %}
                             {% if active_columns[10] %}
+                                <td id="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            {% endif %}
+                            {% if active_columns[11] %}
                                 <td id="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
                             {% endif %}
                         </tr>
