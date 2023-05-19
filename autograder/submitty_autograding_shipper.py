@@ -807,7 +807,6 @@ def checkout_vcs_repo(config, my_file):
         obj["semester"],
         obj["course"]
     )
-    # submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
@@ -835,21 +834,6 @@ def checkout_vcs_repo(config, my_file):
 
     job_id = "~VCS~"
 
-    # If we are public or private github, we will have an empty vcs_subdirectory
-
-    # if vcs_subdirectory == '':
-    #     with open(
-    #         os.path.join(submission_path, ".submit.VCS_CHECKOUT")
-    #     ) as submission_vcs_file:
-    #         VCS_JSON = json.load(submission_vcs_file)
-    #         git_user_id = VCS_JSON["git_user_id"]
-    #         git_repo_id = VCS_JSON["git_repo_id"]
-    #         if not valid_github_user_id(git_user_id):
-    #             raise Exception("Invalid GitHub user/organization name: '"+git_user_id+"'")
-    #         if not valid_github_repo_id(git_repo_id):
-    #             raise Exception("Invalid GitHub repository name: '"+git_repo_id+"'")
-    #         # construct path for GitHub
-    #         vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
     try:
         if '://' in vcs_base_url:
             vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)

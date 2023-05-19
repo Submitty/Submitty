@@ -224,33 +224,6 @@
                 #}
             </div>
 
-            <div id="subdirectory-settings-container">
-                {% if action == 'new' or action == 'template' %}
-                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
-                    <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
-                {% else %}
-                    <fieldset><legend>Gradeable Subdirectory:
-                    {{ gradeable.getVcsSubdirectory() }}</legend>
-                {% endif %}
-                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
-
-                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
-                </div>
-                {# (VPAT) Closes fieldset for subdirectory radio group #}
-                </fieldset>
-                </fieldset>
-            </div>
-            <div class="subdirectory_yes" id="subdir_yes">
-               {% if action == 'new' %}
-                <label for="vcs_subdirectory">What is the path to the gradeable?</label>
-                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
-                {% endif %}
-            </div>
-
             <div id="repository">
                 <fieldset>
                     <legend>VCS Repository Details (select one)</legend>
@@ -290,6 +263,33 @@
                         {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
 
                 </fieldset>
+
+            <div id="subdirectory-settings-container">
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
+                    <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
+                {% else %}
+                    <fieldset><legend>Gradeable Subdirectory:
+                    {{ gradeable.getVcsSubdirectory() }}</legend>
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+
+                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
+                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
+                </div>
+                {# (VPAT) Closes fieldset for subdirectory radio group #}
+                </fieldset>
+                </fieldset>
+            </div>
+            <div class="subdirectory_yes" id="subdir_yes">
+               {% if action == 'new' %}
+                <label for="vcs_subdirectory">What is the path to the gradeable?</label>
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
+                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
+                {% endif %}
+            </div>
             </div>
         </div>
     </div>
