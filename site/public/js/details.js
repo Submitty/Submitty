@@ -5,12 +5,7 @@ const MOBILE_BREAKPOINT = 951;
 let collapseItems;
 $(document).ready(() => {
     const collapsedSections = Cookies.get('collapsed_sections');
-    if (collapsedSections === '') {
-        collapseItems = new Set();
-    }
-    else {
-        collapseItems = new Set(JSON.parse(Cookies.get('collapsed_sections')));
-    }
+    collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
