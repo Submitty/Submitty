@@ -855,7 +855,6 @@ def checkout_vcs_repo(config, my_file):
             vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
         else:
             vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
-        sub_checkout_path = ''
         sub_checkout_path = os.path.join(checkout_path, "tmp")
 # _________________________________________________________________________________________________________
         # warning: --depth is ignored in local clones; use file:// instead.
@@ -929,7 +928,7 @@ def checkout_vcs_repo(config, my_file):
         try:
             subprocess.check_call(clone_command)
             os.chdir(sub_checkout_path)
-           
+
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
             try:
@@ -956,7 +955,7 @@ def checkout_vcs_repo(config, my_file):
                     else:
                         file_path = os.path.join(sub_checkout_path)
 
-                    shutil.copytree(file_path, checkout_path, dirs_exist_ok = True)
+                    shutil.copytree(file_path, checkout_path, dirs_exist_ok=True)
                     shutil.rmtree(sub_checkout_path)
 
                 except Exception as error:
@@ -973,9 +972,9 @@ def checkout_vcs_repo(config, my_file):
                         print(str(error), file=f)
                         print("\n", file=f)
                         print("Check to be sure the subdirectory exists " +
-                                "and is not empty.\n", file=f)
+                              "and is not empty.\n", file=f)
                         print("Check to be sure the repository has been committed with the " +
-                                "subdirectory and relevant files present.\n", file=f)
+                              "subdirectory and relevant files present.\n", file=f)
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
