@@ -71,6 +71,7 @@ class UsersController extends AbstractController {
 
         //Get Active Columns
         $active_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
         if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
             $active_columns = $_COOKIE['active_columns'];
         }
