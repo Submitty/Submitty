@@ -195,6 +195,7 @@
                 </div>
                 {# (VPAT) Closes fieldset for team assignment radio group #}
                 </fieldset>
+                </fieldset>
             </div>
 
             <!-- Team settings (read only in edit mode) -->
@@ -205,7 +206,7 @@
                            value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
                 {#Use teams from a previous gradeable:
-                <!-- Inherit teams from another gradable? -->
+                <!-- Inherit teams from another gradeable? -->
                 <br />
                     <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
                 {% if action == 'new' %}
@@ -229,25 +230,26 @@
                     {# (VPAT) fieldset/legend needed for subdirectory radio group #}
                     <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
                 {% else %}
-                    <fieldset><legend>Subdirectory Settings:
+                    <legend>Gradeable Subdirectory:
                     {{ gradeable.getVcsSubdirectory() }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}> <label for="subdir_yes_radio">Yes</label>
 
                     <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                            {{ action == 'new' ? 'checked' :  '' }}> <label for="subdir_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for subdirectory radio group #}
                 </fieldset>
             </div>
             <div class="subdirectory_yes" id="subdir_yes">
-                <label for="team_size_max">What is the path to the gradeable?</label>
-                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_set_subdirectory" class="required auto_save" placeholder="(Required)"
+               {% if action == 'new' %}
+                <label for="vcs_subdirectory">What is the path to the gradeable?</label>
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
+                {% endif %}
             </div>
-
 
             <div id="repository">
                 <fieldset>
@@ -262,7 +264,7 @@
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
                             <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
                         {% else %}
-                            {{ gradeable.getVcsPartialPath() }}
+                           <kbd>{{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
                         {% endif %}
                         </div>
                     </div>
@@ -278,20 +280,19 @@
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd> {{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
+                                <kbd>{{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
                             {% endif %}
                         </div>
                     </div>
 
                     <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Github hosted - public repository, students will provide URL</label> <br />
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Externally hosted - public repository, students will provide URL</label> <br />
 
                     <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
-			
-                    
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+
                 </fieldset>
             </div>
         </div>
@@ -492,7 +493,6 @@
     function onVCSTypeChange() {
         disableElementChildren('[id=vcs_submitty_set_url_content]', true);
         disableElementChildren('[id=vcs_submitty_url_content]', true);
-        disableElementChildren('[id=vcs_self_set_url_content]', true);
 
         if($('#vcs_radio_submitty_hosted').is(':checked')) {
             disableElementChildren('#vcs_submitty_url_content', false);
