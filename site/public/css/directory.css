@@ -25,20 +25,20 @@
 #grader-table td:nth-of-type(6)::before { content: "Registration Sections"; }
 #grader-table td:nth-of-type(7)::before { content: "Edit Student"; }
 
-.toggle-columns-menu{
+#toggle-columns-form .toggle-columns-menu{
     display: grid;
 }
 
-.toggle-columns-instructions{
+#toggle-columns-form .toggle-columns-instructions{
     margin-bottom: 1vh;
 }
 
-.toggle-checkbox-area {
+#toggle-columns-form .toggle-checkbox-area {
     display: table-cell;
     vertical-align: middle;
 }
 
-.toggle-all-buttons {
+#toggle-columns-form .toggle-all-buttons {
     margin-top: 1vh;
 }
 
