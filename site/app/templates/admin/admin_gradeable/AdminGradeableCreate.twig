@@ -229,7 +229,7 @@
                     {# (VPAT) fieldset/legend needed for subdirectory radio group #}
                     <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
                 {% else %}
-                    <legend>Gradeable Subdirectory:
+                    <fieldset><legend>Gradeable Subdirectory:
                     {{ gradeable.getVcsSubdirectory() }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
@@ -240,6 +240,7 @@
                             {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for subdirectory radio group #}
+                </fieldset>
                 </fieldset>
             </div>
             <div class="subdirectory_yes" id="subdir_yes">
