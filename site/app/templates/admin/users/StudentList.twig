@@ -56,11 +56,9 @@
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
-                    {% if active_columns[0] %}
                     <tr class="info">
                         <th class="section-break" colspan="13">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
-                    {% endif %}
                     {% for student in students %}
                         {% set class = "" %}
                         {% if student.accessGrading() %}

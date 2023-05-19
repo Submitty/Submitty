@@ -76,6 +76,7 @@ class UsersController extends AbstractController {
             $active_columns = $_COOKIE['active_columns'];
         }
         else {
+            //Expires 10 years from today (functionally indefinite)
             if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
                 $active_columns = implode('-', array_fill(0, 12, true));
             }
