@@ -2,17 +2,10 @@
 */
 
 //Data structure for active columns
-let activeColumns = new Array(12).fill(true);
-let checkboxes = [];
+const checkboxes = document.getElementsByClassName('toggle-columns-box');
 
 //opens modal with initial settings for new student
 function toggleColumnsForm() {
-    activeColumns = loadColumns();
-    console.log(activeColumns);
-
-    checkboxes = document.getElementsByClassName('toggle-columns-box');
-    console.log(checkboxes);
-
     const form = $('#toggle-columns-form');
     form.css('display', 'block');
     checkProperTicks();
@@ -20,8 +13,9 @@ function toggleColumnsForm() {
 
 //checks proper tick marks in modal
 function checkProperTicks() {
+    const selectedColumns = loadColumns();
     for (let i = 0; i<checkboxes.length; i++) {
-        if (activeColumns[i] === 1) {
+        if (selectedColumns[i] === 1) {
             checkboxes[i].checked = true;
         }
         else {
@@ -32,21 +26,21 @@ function checkProperTicks() {
 
 function updateManageStudentsColumns() {
     getCheckboxValues();
-    saveColumns();
-
     location.reload();
 }
 
 //Gets the values of all the checkboxes
 function getCheckboxValues() {
+    let selectedColumns = new Array(12).fill(1);
     for (let i = 0; i<checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
-            activeColumns[i] = 1;
+            selectedColumns[i] = 1;
         }
         else {
-            activeColumns[i] = 0;
+            selectedColumns[i] = 0;
         }
     }
+    saveColumns(selectedColumns);
 }
 
 function fillAllCheckboxes(val) {
@@ -56,9 +50,8 @@ function fillAllCheckboxes(val) {
 }
 
 //Cookies (loading and storing)
-function saveColumns() {
-    console.log(activeColumns.join('-'));
-    document.cookie = `active_columns=${activeColumns.join('-')}`;
+function saveColumns(selectedColumns) {
+    document.cookie = `active_columns=${selectedColumns.join('-')}`;
 }
 
 function loadColumns() {
