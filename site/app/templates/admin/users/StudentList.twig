@@ -15,12 +15,14 @@
                 <tr>
                     <th>#</th>
                     <th>Registration Section</th>
-                    <th>User ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th style="text-align:left;">User ID</th>
+                    <th style="text-align:left;">First Name</th>
+                    <th style="text-align:left;">Last Name</th>
+                    <th style="text-align:left;">Pronouns</th>
                     <th>Rotating Section</th>
                     <th>UTC Offset / Time Zone</th>
                     <th>View Grades</th>
+                    <th>Late Days</th>
                     <th>Registration Type</th>
                     <th>Edit Student</th>
                     <th>Delete Student</th>
@@ -29,7 +31,7 @@
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="11">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="13">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -50,6 +52,7 @@
                             <td class="align-left">{{ student.getId() }}</td>
                             <td class="align-left">{{ student.getDisplayedGivenName() }}</td>
                             <td class="align-left">{{ student.getDisplayedFamilyName() }}</td>
+                            <td class="align-left">{{ student.getPronouns() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ formatted_tzs[student.getId()] }}</td>
                             <td>
@@ -57,6 +60,13 @@
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
                                     <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
+                                </form>
+                            </td>
+                             <td>
+                                <form method="get" action="{{ view_latedays_url }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                    <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
                                 </form>
                             </td>
                             <td>{{ student.getRegistrationType() }}</td>
