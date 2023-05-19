@@ -267,7 +267,8 @@
             <div id="subdirectory-settings-container">
                 {% if action == 'new' or action == 'template' %}
                     {# (VPAT) fieldset/legend needed for subdirectory radio group #}
-                    <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
+                    <fieldset><legend>Are the student's files for this gradeable expected to 
+                    be in a specific subdirectory of their VCS repository?</legend>
                 {% else %}
                     <fieldset><legend>Gradeable Subdirectory:
                     {{ gradeable.getVcsSubdirectory() }}</legend>
@@ -285,7 +286,9 @@
             </div>
             <div class="subdirectory_yes" id="subdir_yes">
                {% if action == 'new' %}
-                <label for="vcs_subdirectory">What is the path to the gradeable?</label>
+                <label for="vcs_subdirectory">What is the subdirectory path for the 
+                    student's files within the VCS repository?<br />
+                    <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
                     <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
                 {% endif %}
