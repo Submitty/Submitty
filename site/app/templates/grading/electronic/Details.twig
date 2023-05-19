@@ -434,7 +434,10 @@
 {# Grading Button #}
 {% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
     {% set badge_count = 0 %}
-    {% if  graded_gradeable.getSubmitter().getId() in overrides %}
+    {% if info.late_day_info == true %}
+        {% set contents = "ssss" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif  graded_gradeable.getSubmitter().getId() in overrides %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
@@ -444,7 +447,8 @@
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
-        {% if graded_gradeable.getGradeable().isTeamAssignment() or info.late_day_info.isOnTimeSubmission() %}
+        {# or info.late_day_info.isOnTimeSubmission() #}
+        {% if graded_gradeable.getGradeable().isTeamAssignment() %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
         {% else %}
@@ -609,8 +613,9 @@
 {% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
     {% set box_background = "" %}
     
-    {# Add late red box if submission is bad (and not a team assignment #}
-    {% if not graded_gradeable.getGradeable().isTeamAssignment() and not info.late_day_info.isOnTimeSubmission() %}
+    {# Add late red box if submission is bad (and not a team assignment #} 
+    {# and not info.late_day_info.isOnTimeSubmission() #}
+    {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
         {% set box_background = "late-box" %}
     {% endif %}
 

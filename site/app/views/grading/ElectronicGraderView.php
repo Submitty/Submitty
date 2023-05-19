@@ -780,6 +780,9 @@ HTML;
             }
         }
 
+        //set late_day_info
+        $info['late_day_info'] = false;
+
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
             return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
