@@ -25,6 +25,23 @@
 #grader-table td:nth-of-type(6)::before { content: "Registration Sections"; }
 #grader-table td:nth-of-type(7)::before { content: "Edit Student"; }
 
+.toggle-columns-menu{
+    display: grid;
+}
+
+.toggle-columns-instructions{
+    margin-bottom: 1vh;
+}
+
+.toggle-checkbox-area {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.toggle-all-buttons {
+    margin-top: 1vh;
+}
+
 @media (min-width: 831px) {
     .directory-table tbody {
         counter-reset: student;
