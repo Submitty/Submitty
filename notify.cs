@@ -6,7 +6,26 @@ class Program
     static void Main()
     {
         // Set the directory path to monitor recursively
-        string directoryPath = @"/var/local/submitty/courses";
+        string directoryPath = @"C:\\Users\\Viane Matsibekker\\Submitty\\courses";
+        //directoryPath = "./var//local//submitty//courses";
+
+        try
+        {
+            // Check if the directory path is valid
+            if (Directory.Exists(directoryPath))
+            {
+                Console.WriteLine("Directory path" + directoryPath +" is valid.");
+            }
+            else
+            {
+                Console.WriteLine("Directory path" + directoryPath + " is not valid.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: " + ex.Message);
+        }
+
 
         // Create a new FileSystemWatcher instance
         FileSystemWatcher watcher = new FileSystemWatcher(directoryPath);
