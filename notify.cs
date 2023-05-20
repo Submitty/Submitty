@@ -40,6 +40,5 @@ class Program
     static void OnFileRenamed(object sender, RenamedEventArgs e)
     {
         Console.WriteLine("File renamed: " + e.OldFullPath + " to " + e.FullPath);
-
     }
 }
