@@ -20,6 +20,7 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
@@ -34,6 +35,7 @@ class UsersView extends AbstractView {
             "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
             "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             'view_grades_url' => $this->core->buildCourseUrl() . '/users/view_grades',
+            'view_latedays_url' => $this->core->buildCourseUrl(['users', 'view_latedays']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
