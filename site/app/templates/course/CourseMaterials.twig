@@ -336,6 +336,12 @@
                 }
             }
         {% endif %}
+
+        // set folder data for instructor
+        {% if user_group == 1 %}
+            $('[id^=div_viewer_]').each(function() { callFolderSetter(this) });
+        {% endif %}
+
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
             const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
             for (const cm_id of cm_ids) {
