@@ -1818,11 +1818,11 @@ function tzWarn() {
 
     const THRESHOLD = 60*60*1000; // will wait one hour after each warning
     // retrieve timestamp cookie
-    const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
+    const last = Number(Cookies.get("last_tz_warn_time"));
     const elapsed = isNaN(last) ? Infinity : Date.now() - last;
     if (elapsed > THRESHOLD) {
         displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
-        document.cookie = "last_tz_warn_time=" + Date.now() + ";path=/;";
+        Cookies.set("last_tz_warn_time", Date.now());
     }
 }
 document.addEventListener('DOMContentLoaded', tzWarn);
