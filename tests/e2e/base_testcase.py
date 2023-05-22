@@ -4,7 +4,7 @@ from datetime import date
 import os
 import unittest
 import json
-
+import time
 from urllib.parse import urlencode
 from urllib.parse import urlparse
 
@@ -143,6 +143,7 @@ class BaseTestCase(unittest.TestCase):
         # self.assertEqual("Logout "+user_name, self.driver.find_element(By.ID, "logout").get_attribute('innerText').strip(' \t\r\n'))
 
         # instead, just make sure this element exists
+        time.sleep(3)
         self.driver.find_element(By.ID, "logout")
 
         self.logged_in = True
