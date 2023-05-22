@@ -6,7 +6,7 @@ class Program
     static void Main()
     {
         // Set the directory path to monitor recursively
-        string directoryPath = @"C:\\Users\\Viane Matsibekker\\Submitty\\courses";
+        string directoryPath = @"C:\\Users\\Viane Matsibekker\\Submitty\\sample_files\\course_materials";
         //directoryPath = "./var//local//submitty//courses";
 
         try
