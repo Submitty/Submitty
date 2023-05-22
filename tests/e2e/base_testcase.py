@@ -143,7 +143,7 @@ class BaseTestCase(unittest.TestCase):
         # self.assertEqual("Logout "+user_name, self.driver.find_element(By.ID, "logout").get_attribute('innerText').strip(' \t\r\n'))
 
         # instead, just make sure this element exists
-        self.driver.find_element(By.ID, "logout")
+        self.driver.wait_for_element(By.ID, "logout")
 
         self.logged_in = True
 
