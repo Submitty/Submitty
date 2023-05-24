@@ -732,8 +732,8 @@ class Gradeable extends AbstractModel {
                 $result[] = 'grade_released_date';
             }
 
-            // Only add in grade inquiry dates if its allowed & enabled
-            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed() && !$regrade_modified) {
+            // Only add in grade inquiry dates if its allowed
+            if ($this->isTaGrading() && $this->isRegradeAllowed() && !$regrade_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
