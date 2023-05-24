@@ -21,7 +21,7 @@ def up(config, database, semester, course):
         ALTER TABLE electronic_gradeable
         RENAME COLUMN eg_subdirectory TO eg_vcs_partial_path;
         ALTER TABLE electronic_gradeable
-        ADD COLUMN IF NOT EXISTS eg_subdirectory varchar(255) DEFAULT '' NOT NULL;
+        ADD COLUMN IF NOT EXISTS eg_subdirectory varchar(1024) NOT NULL;
     """)
 
 
