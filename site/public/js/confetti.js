@@ -31,16 +31,13 @@ function addConfetti() {
     });
 
     canvas.width  = window.innerWidth;
-    const body = document.body;
-    const html = document.documentElement;
-    canvas.height = Math.max( body.scrollHeight, body.offsetHeight,
-        html.clientHeight, html.scrollHeight, html.offsetHeight );
+    canvas.height = document.body.clientHeight;
 
     canvas.style.display = 'block';
 
     const ctx = canvas.getContext('2d');
     const pieces = [];
-    const numberOfPieces = 2500;
+    const numberOfPieces = canvas.height;
     let lastUpdateTime = Date.now();
     const x_const = 0.25;
     const max_times = 250;
@@ -138,9 +135,9 @@ function addConfetti() {
 
         times_ran ++;
 
-        if (times_ran >= max_times * 10) {
+        if (pieces.length <= 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.style.display = '';
+            canvas.style.display = 'none';
             canvas.width = 0;
             canvas.height = 0;
         }
