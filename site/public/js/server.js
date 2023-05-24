@@ -178,6 +178,45 @@ function newDeleteCourseMaterialForm(id, file_name) {
     form.find('.form-body').scrollTop(0);
 }
 
+function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
+    const form = $('#overwrite-course-material-form');
+    form.css('display', 'block');
+    if (clashing_names.length === 1) {
+        const to_replace = [[' All', '']];
+        if (is_link) {
+            to_replace.push(['file', 'link']);
+        }
+        form.html((i, html) => {
+            to_replace.forEach((elem) => {
+                html = html.replaceAll(elem[0], elem[1]);
+            });
+            return html;
+        });
+    }
+    else {
+        const singular = ['Material', 'file', 'name', 'one'];
+        form.html((i, html) => {
+            singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
+                html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
+            });
+            return html;
+        });
+    }
+    const clash_list = $('#existing-names');
+    clash_list.html("");
+    clashing_names.forEach((elem) => {
+        clash_list.append($('<li>', {
+            text: elem
+        }));
+    });
+    captureTabInModal("overwrite-course-material-form");
+    if (is_edit_form) {
+        $('#overwrite-submit').attr('is-edit-form', 1);
+    }
+    form.find('.form-body').scrollTop(0);
+}
+
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
@@ -210,7 +249,7 @@ function newUploadCourseMaterialsForm() {
     captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
-
+    $('#overwrite-materials-flag').remove();
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -343,6 +382,7 @@ function newEditCourseMaterialsForm(tag) {
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
+    $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -803,13 +843,19 @@ function openAllDivForCourseMaterials() {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        }
         return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        }
         return 'open';
     }
     return false;
@@ -1094,6 +1140,12 @@ function enableTabsInTextArea(jQuerySelector) {
         }
         // No need to test for SHIFT+TAB as it is not being redefined.
     });
+}
+
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
+        location.href = redirect;
+    }
 }
 
 function updateGradeOverride(data) {
@@ -1732,3 +1784,34 @@ function addMarkdownCode(type){
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        document.cookie = "last_tz_warn_time=" + Date.now() + ";path=/;";
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);
