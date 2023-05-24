@@ -91,9 +91,9 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                         htmlExtract: error.extract.trim(),
                         type: error.type.trim()
                     });
-
-                    cy.wrap(foundErrors).expect.to.be.an('array').that.is.empty();
                 }
+
+                cy.wrap(foundErrors).expect.to.be.an('array').that.is.empty();
             });
         });
     }
