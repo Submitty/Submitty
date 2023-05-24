@@ -145,9 +145,6 @@
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
             <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-            {% if vcs_subdirectory != 'none' %}
-            <samp></br>cd .{{ vcs_subdirectory }} </samp>
-            {% endif %}
             {# Below will get uncommented once SAML is active #}
             {# <p>You will need to use an Authentication Token.</p> #}
             <br><br>
@@ -175,6 +172,9 @@
         {% endif %}
 
         <h3>Grade your repository:</h3>
+        {% if vcs_subdirectory != 'none' %}
+            <samp><em>Note: Only files located in {{ vcs_subdirectory }} will be submitted. If this subdirectory does not exist within your repository, you will have to create it. </em></samp>
+        {% endif %}
         <div class="upload-message">
             {% include "misc/Markdown.twig" with {
                 "content" : upload_message

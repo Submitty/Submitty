@@ -830,7 +830,6 @@ def checkout_vcs_repo(config, my_file):
 
     # cleanup the previous checkout (if it exists)
     shutil.rmtree(checkout_path, ignore_errors=True)
-    os.makedirs(checkout_path, exist_ok=True)
 
     job_id = "~VCS~"
 
@@ -840,6 +839,7 @@ def checkout_vcs_repo(config, my_file):
         else:
             vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
         sub_checkout_path = os.path.join(checkout_path, "tmp")
+        os.makedirs(sub_checkout_path, exist_ok=True)
 # _________________________________________________________________________________________________________
         # warning: --depth is ignored in local clones; use file:// instead.
         if '://' not in vcs_path and '@' not in vcs_path:

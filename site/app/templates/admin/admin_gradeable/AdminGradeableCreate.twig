@@ -287,10 +287,10 @@
             <div class="subdirectory_yes" id="subdir_yes">
                {% if action == 'new' %}
                 <label for="vcs_subdirectory">What is the subdirectory path for the 
-                    student's files within the VCS repository?<br />
-                    <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
+                    student's files within the VCS repository?
                     <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required />
+                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required /><br />
+                    <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
                 {% endif %}
             </div>
             </div>

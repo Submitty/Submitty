@@ -60,6 +60,10 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
     vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
     vcs_base_url = vcs_base_url.replace('{$user_id}', userid)
     vcs_partial_path = form_json['vcs_partial_path'] if is_vcs else ''
+    vcs_partial_path = vcs_partial_path.replace("{$vcs_type}", userid)
+    vcs_partial_path = vcs_partial_path.replace("{$gradeable_id}", gradeable)
+    vcs_partial_path = vcs_partial_path.replace("{$team_id}", teamid)
+    vcs_partial_path = vcs_partial_path.replace("{$user_id}", userid)
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
     vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
