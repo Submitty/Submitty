@@ -27,4 +27,21 @@ class LateDaysTableView extends AbstractView {
             'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
+
+    /**
+     * @param LateDays $late_days
+     * @return string
+     */
+    public function showLateTabletoInstructor(LateDays $late_days): string {
+        $manage_url = $this->core->buildCourseUrl(['users']);
+        $this->core->getOutput()->addBreadcrumb('Manage Students', $manage_url);
+        $this->core->getOutput()->addBreadcrumb($late_days->getUser()->getDisplayFullName());
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
+        $this->core->getOutput()->enableMobileViewport();
+        return $this->core->getOutput()->renderTwigTemplate('LateDaysTableGrader.twig', [
+            'late_days' => $late_days,
+            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
+        ]);
+    }
 }

@@ -291,7 +291,7 @@ function buildSwitchingHeader(view_year, view_month) {
     a.classList.add('cal-btn', 'cal-prev-btn');
     const prev = prevMonth(view_month, view_year);
     a.onclick = () => loadCalendar.apply(this, prev);
-    a.innerHTML = '&#60;';
+    a.innerHTML = '<i class="fas fa-angle-left"></i>';
     div.appendChild(a);
     th1.appendChild(div);
 
@@ -320,7 +320,7 @@ function buildSwitchingHeader(view_year, view_month) {
     a.classList.add('cal-btn', 'cal-next-btn');
     const next = nextMonth(view_month, view_year);
     a.onclick = () => loadCalendar.apply(this, next);
-    a.innerHTML = '&#62;';
+    a.innerHTML = '<i class="fas fa-angle-right"></i>';
     div.appendChild(a);
     th3.appendChild(div);
 
