@@ -49,6 +49,14 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="last-initial-format-row">
+                        <span class="label">
+                            Abbreviated Name:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
+                        </button>
+                    </div>
                     <div class="flex-row" id="pronouns-row">
                         <span class="label">
                             Pronouns:
@@ -157,6 +165,7 @@
     </div>
 </div>
 {% include 'EditNameForm.twig' %}
+{% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}
