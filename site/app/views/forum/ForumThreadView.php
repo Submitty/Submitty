@@ -89,6 +89,7 @@ class ForumThreadView extends AbstractView {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
+                $pronoun = trim($user_info["user_pronouns"]);
                 $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
 
                 if ($post["anonymous"]) {
@@ -844,15 +845,16 @@ class ForumThreadView extends AbstractView {
 
             if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
-                $email = trim($user_info['user_email']);
+                $email = trim($user_info["user_email"]);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
-
+                $pronoun = trim($user_info["user_pronouns"]);
                 $author_info = [
                     "user_id" => $first_post['author_user_id'],
                     "name" => $first_post['anonymous'] ? "Anonymous" : $given_name . " " . substr($family_name, 0, 1) . ".",
                     "email" => $email,
                     "full_name" => $given_name . " " . $family_name . " (" . $first_post['author_user_id'] . ")",
+                    "user_pronouns" => $pronoun,
                 ];
                 $thread_info = array_merge($thread_info, [
                     "post_id" => $first_post["id"],
@@ -948,6 +950,7 @@ class ForumThreadView extends AbstractView {
         $author_email = trim($user_info['user_email']);
         $given_name = trim($user_info["given_name"]);
         $family_name = trim($user_info["family_name"]);
+        $pronoun = trim($user_info["user_pronouns"]);
         $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
@@ -1300,6 +1303,7 @@ class ForumThreadView extends AbstractView {
         foreach ($users as $user => $details) {
             $given_name = $details["given_name"];
             $family_name = $details["family_name"];
+            $pronoun = $details["user_pronouns"];
             $post_count = count($details["posts"]);
             $posts = json_encode($details["posts"]);
             $ids = json_encode($details["id"]);
@@ -1312,6 +1316,7 @@ class ForumThreadView extends AbstractView {
                 "family_name" => $family_name,
                 "given_name" => $given_name,
                 "post_count" => $post_count,
+                "pronoun" =>$pronoun,
                 "details_total_threads" => $details["total_threads"],
                 "num_deleted" => $num_deleted,
                 "posts" => $posts,

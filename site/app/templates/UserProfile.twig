@@ -57,6 +57,14 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
+                    <div class="flex-row" id="show_pronuon">
+                        <label for="pronuon_display_select">Display pronouns in discussion forum?</label>
+                        <select id="pronoun_display_select" class="form-control" aria-label="display pronouns">
+                            <option value="false">Don't Display</option>
+                            <option value="true">Display</option>
+                        </select>
+                    </div>
+                    <span> {{dump(user)}}</span>
                     <div class="flex-row" id="email-row">
                         <span class="label">
                             Primary Email:

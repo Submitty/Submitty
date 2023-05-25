@@ -98,7 +98,8 @@
                                 ><i class="fas fa-edit"></i></span>
                             {% endif %}
                         {% endif %}
-                        <strong class="post_user_id">{{ thread.author_info.name }}</strong>
+                        <strong class="post_user_id">{{ thread.author_info.name}}
+                         {{"("}} {{thread.author_info.user_pronouns}} {{")"}}</strong>
                     </span>
                 </div>
             {% endif %}

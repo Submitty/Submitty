@@ -1427,7 +1427,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *  ]
      */
     public function getLateDayCache(): array {
-        $query = "SELECT * FROM 
+        $query = "SELECT * FROM
                     late_day_cache AS ldc
                     LEFT JOIN gradeable g ON g.g_id=ldc.g_id
                   ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
@@ -1535,9 +1535,9 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT (cache_row).* 
-                    FROM 
+        $query = "INSERT INTO late_day_cache
+                    (SELECT (cache_row).*
+                    FROM
                         (SELECT
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
@@ -1555,7 +1555,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
+        $query = "INSERT INTO late_day_cache
                     SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
 
         $this->course_db->query($query, $params);
@@ -4278,12 +4278,13 @@ AND gc_id IN (
     }
 
     public function getDisplayUserInfoFromUserId($user_id) {
-        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email FROM users WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_pronouns FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
         $ar = [];
         $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
         $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
+        $ar["user_pronouns"] = $name_rows["user_pronouns"];
         return $ar;
     }
 
@@ -7224,7 +7225,7 @@ WHERE current_state IN
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
-              
+
               /* Aggregate Gradeable Component Verifier Data */
               gcd.array_verifier_user_id,
               gcd.array_verifier_user_givenname,
