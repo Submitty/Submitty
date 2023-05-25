@@ -27,6 +27,8 @@ $("#edit-user-form").ready(function() {
 function newStudentForm() {
     $('[name="user_group"] option[value="4"]').prop('selected', true);
     $('#user-form-assigned-sections').hide();
+    $('[name="registration_type"]').show();
+    $('label[for="registration_type"]').show();
     $('#user-form-student-error-message').show();
     $("#new-student-modal-title").css('display','block');
     $("#new-grader-modal-title").css('display','none');
@@ -38,6 +40,8 @@ function newGraderForm() {
     $('[name="user_group"] option[value="3"]').prop('selected', true);
     $('#user-form-student-error-message').hide();
     $('#user-form-assigned-sections').show();
+    $('[name="registration_type"]').hide();
+    $('label[for="registration_type"]').hide();
     $("#new-student-modal-title").css('display','none');
     $("#new-grader-modal-title").css('display','block');
     newUserForm();
@@ -59,17 +63,21 @@ function newUserForm() {
     if ($("#user_id").val() == "") {
         $("#user_id")[0].setCustomValidity("user_id is required");
     }
-    if ($("#user_firstname").val() == "") {
-        $("#user_firstname")[0].setCustomValidity("user_firstname is required");
+    if ($("#user_givenname").val() == "") {
+        $("#user_givenname")[0].setCustomValidity("user_givenname is required");
     }
-    if ($("#user_lastname").val() == "") {
-        $("#user_lastname")[0].setCustomValidity("user_lastname is required");
+    if ($("#user_familyname").val() == "") {
+        $("#user_familyname")[0].setCustomValidity("user_familyname is required");
     }
     checkValidEntries();
     captureTabInModal("edit-user-form");
 }
 
-//opens modal with initial settings for edit user
+/**
+ * Opens modal with initial settings for edit user form.
+ * 
+ * @param {string} user_id
+ */
 function editUserForm(user_id) {
     var url = buildCourseUrl(['users', 'details']) + `?user_id=${user_id}`;
     $.ajax({
@@ -110,12 +118,21 @@ function editUserForm(user_id) {
     })
 }
 
-function deleteUserForm(user_id, firstname, lastname) {
+function deleteUserForm(user_id, givenname, familyname) {
     $('.popup-form').css('display', 'none');
     const form = $("#delete-user-form");
     $('[name="user_id"]', form).val(user_id);
-    $('[name="displayed_fullname"]', form).val(firstname + " " + lastname);
-    $('#user-fullname', form).html(firstname + " " + lastname);
+    $('[name="displayed_fullname"]', form).val(givenname + " " + familyname);
+    $('#user-fullname', form).text(givenname + " " + familyname);
+    form.css("display", "block");
+}
+
+function demoteGraderForm(user_id, givenname, familyname) {
+    $('.popup-form').css('display', 'none');
+    const form = $("#demote-grader-form");
+    $('[name="user_id"]', form).val(user_id);
+    $('[name="displayed_fullname"]', form).val(givenname + " " + familyname);
+    $('#grader-fullname', form).text(givenname + " " + familyname);
     form.css("display", "block");
 }
 
@@ -134,9 +151,13 @@ function userFormChange() {
     }
     if(is_student) {
         $("#user-form-assigned-sections").hide();
+        $('[name="registration_type"]').show();
+        $('label[for="registration_type"]').show();
     }
     else {
         $("#user-form-assigned-sections").show();
+        $('[name="registration_type"]').hide();
+        $('label[for="registration_type"]').hide();
     }
 }
 
@@ -158,8 +179,8 @@ function checkValidEntries() {
             break;
         case "user_numeric_id":
             break;
-        case "user_firstname":
-        case "user_lastname":
+        case "user_givenname":
+        case "user_familyname":
             if (input.val() == "") {
                 input[0].setCustomValidity(input.prop('id') + " is required");
                 break;
@@ -167,8 +188,8 @@ function checkValidEntries() {
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]*$/;
             setRedOrTransparent(input, valid_expression);
             break;
-        case "user_preferred_firstname":
-        case "user_preferred_lastname":
+        case "user_preferred_givenname":
+        case "user_preferred_familyname":
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]{0,30}$/;
             setRedOrTransparent(input, valid_expression);
             break;
@@ -220,18 +241,25 @@ function autoCompleteOnUserId(user_information) {
     }
 }
 
+/**
+ * Fill in the given user's information on the edit user modal initial display.
+ * 
+ * @param {array} user
+ */
 function completeUserFormInformation(user) {
     var form = $("#edit-user-form");
 
     $('[name="user_numeric_id"]', form).val(user['user_numeric_id']);
-    $('[name="user_firstname"]', form).val(user['user_firstname']);
-    $('[name="user_firstname"]').change();
-    $('[name="user_preferred_firstname"]', form).val(user['user_preferred_firstname']);
-    $('[name="user_preferred_firstname"]').change();
-    $('[name="user_lastname"]', form).val(user['user_lastname']);
-    $('[name="user_lastname"]').change();
-    $('[name="user_preferred_lastname"]', form).val(user['user_preferred_lastname']);
-    $('[name="user_preferred_lastname"]').change();
+    $('[name="user_givenname"]', form).val(user['user_givenname']);
+    $('[name="user_givenname"]').change();
+    $('[name="user_preferred_givenname"]', form).val(user['user_preferred_givenname']);
+    $('[name="user_preferred_givenname"]').change();
+    $('[name="user_pronouns"]', form).val(user['user_pronouns']);
+    $('[name="user_pronouns"]').change();
+    $('[name="user_familyname"]', form).val(user['user_familyname']);
+    $('[name="user_familyname"]').change();
+    $('[name="user_preferred_familyname"]', form).val(user['user_preferred_familyname']);
+    $('[name="user_preferred_familyname"]').change();
     $('[name="user_email"]', form).val(user['user_email']);
     $('[name="user_email_secondary"]', form).val(user['user_email_secondary']);
     $('[name="user_email"]').change();
@@ -272,9 +300,14 @@ function completeUserFormInformation(user) {
     }
     if ($('[name="user_group"] option[value="4"]', form).prop('selected')) {
         $('#user-form-assigned-sections').hide();
+        $('[name="registration_type"]').show();
+        $('label[for="registration_type"]').show();
+        $('[name="registration_type"] option[value="' + (user['registration_type'] ?? 'graded') + '"]', form).prop('selected', true);
     }
     else {
         $('#user-form-assigned-sections').show();
+        $('[name="registration_type"]').hide();
+        $('label[for="registration_type"]').hide();
     }
 }
 
@@ -316,10 +349,10 @@ function isUserFormEdited() {
 
   return (
     $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id'] ||
-    $('[name="user_firstname"]', form).val() !== user['user_firstname'] ||
-    $('[name="user_lastname"]', form).val() !== user['user_lastname'] ||
-    $('[name="user_preferred_firstname"]', form).val() !== user['user_preferred_firstname'] ||
-    $('[name="user_preferred_lastname"]', form).val() !== user['user_preferred_lastname'] ||
+    $('[name="user_givenname"]', form).val() !== user['user_givenname'] ||
+    $('[name="user_familyname"]', form).val() !== user['user_familyname'] ||
+    $('[name="user_preferred_givenname"]', form).val() !== user['user_preferred_givenname'] ||
+    $('[name="user_preferred_familyname"]', form).val() !== user['user_preferred_familyname'] ||
     $('[name="user_email"]', form).val() !== user['user_email'] ||
     ! $('[name="user_group"]  option[value="' + user['user_group'] + '"]').prop('selected')  ||
     $('[name="manual_registration"]', form).prop('checked') !==  user['manual_registration'] ||

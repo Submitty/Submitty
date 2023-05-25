@@ -19,7 +19,7 @@
                 {% if message.info.remaining == 0 %}
                     have no remaining late days.
                 {% else %}
-                    only have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }}.
+                    only have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for this assignment.
                 {% endif %}
             {% elseif message.type == 'too_many_used' %}
                 {# BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT #}
@@ -40,7 +40,7 @@
                 {% if message.info.remaining == 0 %}
                     You have no late days remaining for future assignments.
                 {% else %}
-                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} to use on future assignments.
+                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for this assignment.
                 {% endif %}
             {% elseif message.type == 'getting_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}

@@ -3,7 +3,7 @@
 {% block title %}Upload Classlist{% endblock %}
 {% block body %}
     <p>
-        Format your student data as an .xlsx or .csv file with {{ use_database ? 6 : 5 }}-{{ use_database ? 8 : 7 }} columns and no header row:
+        Format your student data as an .xlsx or .csv file with {{ use_database ? 6 : 5 }}-{{ use_database ? 9 : 8 }} columns and no header row:
     </p>
     <ol class="full-list">
         <li>username</li>
@@ -16,6 +16,7 @@
         {% endif %}
         <li>preferred first name (optional)</li>
         <li>preferred last name (optional)</li>
+        <li>registration type (optional)</li>
     </ol>
     <p>
         For more formatting information, see

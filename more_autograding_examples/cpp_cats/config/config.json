@@ -29,7 +29,7 @@
 
         // *************** TEST CASES *****************
         {
-            "title" : "Regular char by char comparision",
+            "title" : "Regular char by char comparison",
             "details" : "./byChar.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
@@ -44,7 +44,7 @@
         },
         {
             "title" : "Test of by word comparison",
-            "details" : "./byWord.exe input.txt output.txt",
+            "details" : "./byWord.exe input.txt output.txt There are a few facts about cats to keep in mind when submitting this file. So, take out your notebooks because this is the time to write down some detailed paragraphs on the greatest animal in existance. One, CAT'S ARE THE CUTEST ANIMALS EVER. Their paws, their eyes, their little meows when they wake you up in the morning to find a fresh hairball. But seriously, they are ten out of ten adorable. Now lets learn some fun facts! Cats are the only animal that can't taste sweet things. That is so sad! But maybe this lead to them having a healthier diet. Another fact is that that cats can jump up to six times their length. No wonder they have nine lives!",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
             "validation" : [
@@ -58,7 +58,7 @@
         },
         {
             "title" : "Test of by line comparison",
-            "details" : "./byLine.exe input.txt output.txt",
+            "details" : "./byLine.exe input.txt output.txt IReallyLoveCatsSoMuchThatIForgotHowToUseCommasLolAnywayThereAreAFewMoreDetailsAboutCatsToKeepInMindWhenSubmittingThisFileCatsAreAllNearsidedAndCatsHaveMoreBonesThanHumansAsCatsHaveTwoHundredThirtyBonesAndHumansOnlyHaveTwoHundredAndSixCatsAlsoHaveOneExtraOrganWhatDoesThisOrganDoYouMightAskWellIllTellYouItAllowsCatsToTasteSmellsThisFactMakesMeBelieveThatThereAreSomeSuperorPowersThatAreBetterNotToHave",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
             "validation" : [
@@ -71,7 +71,7 @@
             ]
         },
         {
-            "title" : "Test of by line without whitespace comparison",
+            "title" : "Test of by line without whitespace comparison this assignment should take no longer than five hours. You will be given one week to complete the assignment, but if you find that you need extra time, please email the professor and you can turn in the assignment a few days late, no worries :) You can look at the requirements for this assignment in our syllabus which is conveniantly posted under the syllabus folder in Submitty. I hope you enjoy this assignment, and if you have any questions please feel free to contact the professor. This is supposed to be a fun assignment about cats, so let's make sure this assignment is fun :)",
             "details" : "./byLineNoWhite.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
@@ -86,7 +86,7 @@
             ]
         },
         {
-            "title" : "Regular char by char comparision NO PARTIAL CREDIT",
+            "title" : "Regular char by char comparison NO PARTIAL CREDIT",
             "details" : "./byChar.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "partial_credit" : false,

@@ -9,6 +9,8 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\FileUtils;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -38,7 +40,6 @@ class UserProfileController extends AbstractController {
                 ['UserProfile'],
                 'showUserProfile',
                 $this->core->getUser(),
-                $this->core->getConfig()->getUsernameChangeText(),
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
                 $this->core->getCsrfToken()
             )
@@ -99,27 +100,53 @@ class UserProfileController extends AbstractController {
 
 
     /**
+     * @Route("/user_profile/change_pronouns", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changePronouns() {
+        $user = $this->core->getUser();
+        if (isset($_POST['pronouns'])) {
+            $newPronouns = trim($_POST['pronouns']);
+            //validPronouns() checks for valid option
+            if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+                $user->setPronouns($newPronouns);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Pronouns updated successfully",
+                    'pronouns' => $newPronouns
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Pronouns are not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Pronouns does not exist");
+        }
+    }
+
+    /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_firstname_change']) && empty($_POST['user_lastname_change'])) {
-            $newFirstName = trim($_POST['first_name']);
-            $newLastName = trim($_POST['last_name']);
+        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
+            $newGivenName = trim($_POST['given_name']);
+            $newFamilyName = trim($_POST['family_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
-            if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-                $user->setPreferredFirstName($newFirstName);
-                $user->setPreferredLastName($newLastName);
+            if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
+                $user->setPreferredGivenName($newGivenName);
+                $user->setPreferredFamilyName($newFamilyName);
                 //User updated flag tells auto feed to not clobber some of the user's data.
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
-                    'first_name' => $newFirstName,
-                    'last_name' => $newLastName
+                    'given_name' => $newGivenName,
+                    'family_name' => $newFamilyName
                 ]);
             }
             else {
@@ -129,6 +156,34 @@ class UserProfileController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse('Preferred names cannot be empty!');
         }
+    }
+
+    /**
+     * @Route("/user_profile/update_last_initial_format", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateLastInitialFormat() {
+        $user = $this->core->getUser();
+        if (isset($_POST['format'])) {
+            $newVal = intval($_POST['format']);
+            // Handle the case where intval returns zero due to an invalid string
+            if ($newVal !== 0 || $_POST['format'] === '0' || $_POST['format'] === 0) {
+                try {
+                    $user->setLastInitialFormat($newVal);
+                    $user->setUserUpdated(true);
+                    $this->core->getQueries()->updateUser($user);
+                    return JsonResponse::getSuccessResponse([
+                        'message' => "Last initial format successfully updated!",
+                        'format' => $user->getLastInitialFormat(),
+                        'display_format' => $user->getDisplayLastInitialFormat(),
+                        'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
+                    ]);
+                }
+                catch (\InvalidArgumentException $e) {
+                }
+            }
+        }
+        return JsonResponse::getErrorResponse("Invalid option for last initial format!");
     }
 
     /**
@@ -143,23 +198,28 @@ class UserProfileController extends AbstractController {
             return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
         }
         else {
-            $meta = explode('.', $_FILES['user_image']['name']);
-            $extension = $meta[1];
+            preg_match("/^.*\.(jpg|jpeg|png|gif)$/i", $_FILES['user_image']['name'], $extension);
+            if (!(FileUtils::isValidImage($_FILES['user_image']['tmp_name']) && FileUtils::validateUploadedFiles($_FILES['user_image'])[0]['success'] && (count($extension) >= 2) && $_FILES['user_image']['size'] <= 5 * 1048576)) {
+                return JsonResponse::getErrorResponse("Something's wrong with the uploaded file.");
+            }
 
             // Save image for user
-            $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
+            $result = $user->setDisplayImage($extension[1], $_FILES['user_image']['tmp_name']);
             $display_image = $user->getDisplayImage();
+            if ($result === User::PROFILE_IMG_QUOTA_EXHAUSTED) {
+                return JsonResponse::getErrorResponse('You have exhausted the quota for number of profile photos, kindly contact the system administrator to resolve this.');
+            }
 
-            if (!$result) {
+            if ($result === User::PROFILE_IMG_SET_FAILURE) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
-                // image_data and mime_type will be set but be sure that code doesnt break check for null exception
+                // image_data and mime_type will be set but be sure that code doesn't break check for null exception
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Profile photo updated successfully!',
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
                     'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
-                    'image_alt_data' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                    'image_alt_data' => $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName(),
                     'image_flagged_state' => $user->getDisplayImageState(),
                 ]);
             }
@@ -176,8 +236,7 @@ class UserProfileController extends AbstractController {
         if (isset($_POST['secondary_email']) && isset($_POST['secondary_email_notify'])) {
             $secondaryEmail = trim($_POST['secondary_email']);
             $secondaryEmailNotify = trim($_POST['secondary_email_notify']) === "true";
-
-            if ((!$secondaryEmailNotify && $secondaryEmail == "") || $user->validateUserData('user_email_secondary', $secondaryEmail) === true) {
+            if ((!$secondaryEmailNotify && $secondaryEmail === "") || (($secondaryEmail !== "") && $user->validateUserData('user_email_secondary', $secondaryEmail) === true)) {
                 $user->setSecondaryEmail($secondaryEmail);
                 $user->setEmailBoth($secondaryEmailNotify);
                 $this->core->getQueries()->updateUser($user);
@@ -188,6 +247,9 @@ class UserProfileController extends AbstractController {
                 ]);
             }
             else {
+                if ($secondaryEmail === "") {
+                    return JsonResponse::getErrorResponse("Secondary email can't be empty if secondary email notify is true");
+                }
                 return JsonResponse::getErrorResponse("Secondary email address must be a valid email");
             }
         }
