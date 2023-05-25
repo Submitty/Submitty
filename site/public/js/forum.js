@@ -2,7 +2,6 @@
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
-    document.getElementById("new_post").style.color = "red";
     $('#ui-category-list').sortable({
         items : '.category-sortable',
         handle: '.handle',
@@ -275,15 +274,16 @@ function publishPost(e) {
 }
 
 function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit=false) {
+    displayMessage("attempting to make a new post");
     $.ajax({
         type: 'POST',
         // eslint-disable-next-line no-undef
         url: buildCourseUrl(['forum', 'posts', 'single']),
         data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
+        
         success: function (response) {
             try {
                 const new_post = JSON.parse(response).data;
-                //document.getElementById("new_post").style.color = "orange";
                 const forum_display_setting = getCookie('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
