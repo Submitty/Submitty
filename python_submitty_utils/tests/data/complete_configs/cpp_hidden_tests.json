@@ -117,8 +117,7 @@
         "EXTRA_CREDIT_POINTS": 4,
         "PENALTY_POINTS": 0
     },
-    "hide_submitted_files": false,
-    "hide_version_and_test_details": false,
+    "hide_test_details": false,
     "id": "cpp_hidden_tests",
     "item_pool": [],
     "load_gradeable_message": {

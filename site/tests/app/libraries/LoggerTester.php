@@ -44,32 +44,32 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testLoggerDebug() {
-        $this->assertFileNotExists($this->error);
+        $this->assertFileDoesNotExist($this->error);
         Logger::debug("Debug Message");
         $this->assertFileExists($this->error);
         $this->assertMessage("DEBUG", "Debug Message");
     }
 
     public function testLoggerInfo() {
-        $this->assertFileNotExists($this->error);
+        $this->assertFileDoesNotExist($this->error);
         Logger::info("Info Message");
         $this->assertMessage("INFO", "Info Message");
     }
 
     public function testLoggerWarn() {
-        $this->assertFileNotExists($this->error);
+        $this->assertFileDoesNotExist($this->error);
         Logger::warn("Warn Message");
         $this->assertMessage("WARN", "Warn Message");
     }
 
     public function testLoggerError() {
-        $this->assertFileNotExists($this->error);
+        $this->assertFileDoesNotExist($this->error);
         Logger::error("Error Message");
         $this->assertMessage("ERROR", "Error Message");
     }
 
     public function testLoggerFatalError() {
-        $this->assertFileNotExists($this->error);
+        $this->assertFileDoesNotExist($this->error);
         Logger::fatal("Fatal Message");
         $this->assertMessage("FATAL ERROR", "Fatal Message");
     }

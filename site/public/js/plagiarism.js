@@ -32,6 +32,15 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     editor1.setSize('100%', '100%');
     editor2.setSize('100%', '100%');
 
+    const default_highlighting_colors =  {
+        'common-code': '#d3d3d3',
+        'provided-code': '#ccebc5',
+        'match': '#ffffb3',
+        'specific-match': '#fdb462',
+        'selected-red': '#fb8072',
+        'selected-blue': '#b3cde3',
+    };
+
     // this is the global state for the entire program.  All functions will read and modify this object.
     const state = {
         'gradeable_id': gradeable_id,
@@ -65,7 +74,56 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
             'end_char': -1,
         },
         'anon_mode_enabled': localStorage.getItem('plagiarism-anon-mode-enabled') === 'true',
+        'highlighting_colors': JSON.parse(JSON.stringify(default_highlighting_colors)), // a crude way to copy the object
     };
+
+    // Highlighting setup
+    const highlighting_init = (localstorage_name, id) => {
+        if (localStorage.getItem(localstorage_name) !== null) {
+            $(`#${id}`).val(localStorage.getItem(localstorage_name));
+            state.highlighting_colors[id] = localStorage.getItem(localstorage_name);
+        }
+        else {
+            $(`#${id}`).val(default_highlighting_colors[id]);
+        }
+
+        $(`#${id}`).on('input', () => {
+            localStorage.setItem(localstorage_name, $(`#${id}`).val());
+            state.highlighting_colors[id] = $(`#${id}`).val();
+            refreshColorInfo(state);
+        });
+    };
+
+    [
+        ['plagiarism-common-code-color', 'common-code'],
+        ['plagiarism-provided-code-color', 'provided-code'],
+        ['plagiarism-match-color', 'match'],
+        ['plagiarism-match-color', 'specific-match'],
+        ['plagiarism-selected-red-color', 'selected-red'],
+        ['plagiarism-selected-blue-color', 'selected-blue'],
+    ].forEach((x) => {
+        highlighting_init(x[0], x[1]);
+    });
+
+    $('#reset-colors').click(() => {
+        localStorage.removeItem('plagiarism-common-code-color');
+        localStorage.removeItem('plagiarism-provided-code-color');
+        localStorage.removeItem('plagiarism-match-color');
+        localStorage.removeItem('plagiarism-specific-match-color');
+        localStorage.removeItem('plagiarism-selected-red-color');
+        localStorage.removeItem('plagiarism-selected-blue-color');
+
+        $('#common-code').val(default_highlighting_colors['common-code']);
+        $('#provided-code').val(default_highlighting_colors['provided-code']);
+        $('#match').val(default_highlighting_colors['match']);
+        $('#specific-match').val(default_highlighting_colors['specific-match']);
+        $('#selected-red').val(default_highlighting_colors['selected-red']);
+        $('#selected-blue').val(default_highlighting_colors['selected-blue']);
+
+        state.highlighting_colors = JSON.parse(JSON.stringify(default_highlighting_colors)); // a crude way to copy the object
+        refreshColorInfo(state);
+    });
+    // End highlighting setup
 
     if (state.anon_mode_enabled) {
         $('#toggle-anon-mode-btn').text('Exit Anonymous Mode');
@@ -192,7 +250,7 @@ function loadUser1VersionDropdownList(state) {
 
         refreshUser1VersionDropdown(state);
 
-        // reload conents of panel 1 (async)
+        // reload contents of panel 1 (async)
         loadConcatenatedFileForEditor(state, 1);
 
         // update user 2 dropdown, will call other functions to update panel 2 (async)
@@ -206,9 +264,13 @@ function loadUser2DropdownList(state) {
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'match'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}`;
     requestAjaxData(url, (data) => {
-
         state.user_2_dropdown_list = data;
         state.user_2_selected = data[0];
+
+        // No matches for this user+version pair
+        if (data.length === 0) {
+            state.user_2_selected = [];
+        }
 
         refreshUser2Dropdown(state);
         loadConcatenatedFileForEditor(state, 2);
@@ -228,7 +290,12 @@ function loadConcatenatedFileForEditor(state, editor) {
         // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
     }
-    else {
+    else { // editor 2
+        if (state.user_2_selected.length === 0) {
+            state.editor2.getDoc().setValue('No matches for this submission');
+            state.editor2.refresh();
+            return;
+        }
         // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_2_selected.user_id}&version=${state.user_2_selected.version}&source_gradeable=${state.user_2_selected.source_gradeable}`;
     }
@@ -263,6 +330,12 @@ function colorRefreshAfterConcatLoad(state) {
 
 
 function loadColorInfo(state) {
+    if (state.user_2_selected.length === 0) {
+        state.color_info = [];
+        colorRefreshAfterConcatLoad(state);
+        return;
+    }
+
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {
@@ -283,7 +356,14 @@ function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
         success: function(data) {
-            data = JSON.parse(data);
+            try {
+                data = JSON.parse(data);
+            }
+            catch (e) {
+                console.log(url);
+                console.log(data);
+                throw e;
+            }
             if (data.status !== 'success') {
                 alert(data.message);
                 return;
@@ -292,7 +372,7 @@ function requestAjaxData(url, f, es) {
             f(data.data, es);
         },
         error: function() {
-            alert('Error occured when requesting via ajax. Please refresh the page and try again.');
+            alert('Error occurred when requesting via ajax. Please refresh the page and try again.');
         },
     });
 }
@@ -388,16 +468,16 @@ function refreshColorInfo(state) {
             $.each(state.color_info, (i, interval) => {
                 let color = '';
                 if (interval.type === 'match') {
-                    color = 'match-style';
+                    color = 'match';
                 }
                 else if (interval.type === 'specific-match') {
-                    color = 'specific-match-style';
+                    color = 'specific-match';
                 }
                 else if (interval.type === 'provided') {
-                    color = 'provided-code-style';
+                    color = 'provided-code';
                 }
                 else if (interval.type === 'common') {
-                    color = 'common-code-style';
+                    color = 'common-code';
                 }
                 else {
                     color = '';
@@ -408,7 +488,6 @@ function refreshColorInfo(state) {
                 const wasPreviousSelection = interval.start_line - 1 === state.previous_selection.start_line && interval.end_line - 1 === state.previous_selection.end_line && interval.start_char - 1 === state.previous_selection.start_char && interval.end_char - 1 === state.previous_selection.end_char;
 
                 $.each(interval.matching_positions, (i, mp) => {
-                    const color2 = 'specific-match-style';
                     mp_text_marks[i] = state.editor2.markText(
                         { // start position
                             line: mp.start_line - 1,
@@ -420,13 +499,14 @@ function refreshColorInfo(state) {
                         },
                         {
                             attributes: {
-                                'original_color': color2,
+                                'original_color': 'specific-match',
                                 'start_line': mp.start_line - 1,
                                 'end_line': mp.end_line - 1,
                                 'start_char': mp.start_char - 1,
                                 'end_char': mp.end_char - 1,
                             },
-                            className: color2,
+                            className: 'specific-match-style',
+                            css: `background-color: ${state.highlighting_colors['specific-match']};`,
                         },
                     );
                 });
@@ -452,7 +532,8 @@ function refreshColorInfo(state) {
                             'start_char': interval.start_char - 1,
                             'end_char': interval.end_char - 1,
                         },
-                        className: wasPreviousSelection ? 'selected-style-red' : color,
+                        className: wasPreviousSelection ? 'selected-style-red' : `${color}-style`,
+                        css: `background-color: ${wasPreviousSelection ? state.highlighting_colors['selected-red'] : state.highlighting_colors[color]};`,
                     },
                 );
                 if (wasPreviousSelection) {
@@ -477,11 +558,13 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
     if (clickedMark.attributes.type === 'specific-match' && !clickedMark.attributes.selected) {
         clickedMark.attributes.selected = true;
         clickedMark.className = 'selected-style-red';
+        clickedMark.css = `background-color: ${state.highlighting_colors['selected-red']};`;
 
         // highlight the matching regions on the right side
         state.editor2.operation(() => {
             $.each(clickedMark.attributes.matching_positions, (i, mp) => {
                 mp.className = 'selected-style-red';
+                mp.css = `background-color: ${state.highlighting_colors['selected-red']};`;
             });
             state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
         });
@@ -496,6 +579,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 ) {
                     mark.attributes.selected = true;
                     mark.className = 'selected-style-red';
+                    mark.css = `background-color: ${state.highlighting_colors['selected-red']};`;
                 }
             });
         });
@@ -503,8 +587,9 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
     else if (clickedMark.attributes.type === 'match' || (clickedMark.attributes.type === 'specific-match' && clickedMark.attributes.selected)) {
         clickedMark.attributes.selected = true;
         clickedMark.className = 'selected-style-blue';
+        clickedMark.css = `background-color: ${state.highlighting_colors['selected-blue']};`;
 
-        $('#popup-to-show-matches-id').css('left', `${e.clientX}px`);
+        $('#popup-to-show-matches-id').css('left', `${e.clientX + 2}px`);
         $('#popup-to-show-matches-id').css('top', `${e.clientY}px`);
         $('#popup-to-show-matches-id').empty();
 
@@ -526,7 +611,8 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 // hiding the popup and resetting the text color immediately makes the page feel faster
                 $('#popup-to-show-matches-id').css('display', 'none');
                 showLoadingIndicatorRight();
-                clickedMark.className = clickedMark.attributes.original_color;
+                clickedMark.className = `${clickedMark.attributes.original_color}-style`;
+                clickedMark.css = `background-color: ${state.highlighting_colors[clickedMark.attributes.original_color]};`;
                 state.editor2.getDoc().setValue('');
                 state.editor2.refresh();
                 state.editor1.refresh();
@@ -535,7 +621,6 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 $.each(state.user_2_dropdown_list, (i, item) => {
                     if (item.user_id === other.user_id && item.version === other.version && item.source_gradeable === other.source_gradeable) {
                         state.user_2_selected = item;
-
                         state.previous_selection.start_line = clickedMark.attributes.start_line;
                         state.previous_selection.end_line = clickedMark.attributes.end_line;
                         state.previous_selection.start_char = clickedMark.attributes.start_char;
@@ -560,6 +645,7 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
 
 function handleClickedMark_editor2(state, clickedMark) {
     clickedMark.className = 'selected-style-red';
+    clickedMark.css = `background-color: ${state.highlighting_colors['selected-red']};`;
     state.editor1.operation(() => {
         let first_mark = true;
         state.editor1.getAllMarks().forEach(mark => {
@@ -576,8 +662,10 @@ function handleClickedMark_editor2(state, clickedMark) {
             if (mark_does_contain_mp) {
                 mark.attributes.selected = true;
                 mark.className = 'selected-style-red';
+                mark.css = `background-color: ${state.highlighting_colors['selected-red']};`;
                 $.each(mark.attributes.matching_positions, (i, mp) => {
                     mp.className = 'selected-style-red';
+                    mp.css = `background-color: ${state.highlighting_colors['selected-red']};`;
                     if (first_mark) {
                         state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
                         first_mark = false;
@@ -596,7 +684,7 @@ function handleClickedMark_editor2(state, clickedMark) {
 function handleClickedMarks(state) {
     state.editor1.getWrapperElement().onmouseup = function(e) {
         const lineCh = state.editor1.coordsChar({ left: e.clientX, top: e.clientY });
-        const markers = state.editor1.findMarksAt(lineCh);
+        let markers = state.editor1.findMarksAt(lineCh);
 
 
         // hide the "others" popup in case it was visible
@@ -611,8 +699,14 @@ function handleClickedMarks(state) {
         const marks_editor1 = state.editor1.getAllMarks();
         state.editor1.operation(() => {
             marks_editor1.forEach(mark => {
+                // If this mark is already blue, it's like we didn't click any mark
+                if (mark.className === 'selected-style-blue') {
+                    markers = [];
+                }
+
                 if (markers.length === 0 || mark !== clickedMark) {
-                    mark.className = mark.attributes.original_color;
+                    mark.className = `${mark.attributes.original_color}-style`;
+                    mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
                     mark.attributes.selected = false;
                 }
             });
@@ -620,7 +714,8 @@ function handleClickedMarks(state) {
         const marks_editor2 = state.editor2.getAllMarks();
         state.editor2.operation(() => {
             marks_editor2.forEach(mark => {
-                mark.className = mark.attributes.original_color;
+                mark.className = `${mark.attributes.original_color}-style`;
+                mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
             });
         });
 
@@ -653,6 +748,7 @@ function handleClickedMarks(state) {
             marks_editor1.forEach(mark => {
                 if (markers.length === 0 || mark !== clickedMark) {
                     mark.className = mark.attributes.original_color;
+                    mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
                     mark.attributes.selected = false;
                 }
             });
@@ -661,6 +757,7 @@ function handleClickedMarks(state) {
         state.editor2.operation(() => {
             marks_editor2.forEach(mark => {
                 mark.className = mark.attributes.original_color;
+                mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
             });
         });
 

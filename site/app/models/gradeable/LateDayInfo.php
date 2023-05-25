@@ -120,6 +120,14 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Get g_id for the late day event
+     * @return string|null
+     */
+    public function getGradeableId(): ?string {
+        return $this->isLateDayUpdate() ? null : $this->graded_gradeable->getGradeableId();
+    }
+
+    /**
      * Gets the time the late day event took place
      * @return \DateTime
      */
@@ -285,7 +293,10 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isRegradeAllowed() {
-        return $this->graded_gradeable->getGradeable()->isRegradeAllowed() ?? false;
+        if ($this->graded_gradeable === null) {
+            return false;
+        }
+        return $this->graded_gradeable->getGradeable()->isRegradeAllowed();
     }
 
     /**

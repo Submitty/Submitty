@@ -18,7 +18,8 @@ class PDFView extends AbstractView {
         array $annotation_jsons,
         bool $is_student,
         ?int $page_num,
-        bool $jquery = false
+        bool $jquery = false,
+        bool $is_peer_grader = false
     ): void {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
@@ -53,7 +54,7 @@ class PDFView extends AbstractView {
             'file_path' => $file_path,
             'annotation_jsons' => json_encode($annotation_jsons),
             'student_popup' => $is_student,
-            'can_download' => !$is_student,
+            'can_download' => !$is_peer_grader,
             'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,

@@ -50,6 +50,12 @@ function fix_permissions {
     fi
     if [ -d "$hw_build_path/test_output/" ]; then
 	rsync -ruz --delete "$hw_build_path/test_output/"  "$course_dir/test_output/$assignment/"
+    else
+        # if there is no test_output provided in the config, create an empty directory to give support for expected_string output
+        if [ -d $course_dir/test_output/$assignment ]; then
+            rm -rf $course_dir/test_output/$assignment
+        fi
+        mkdir $course_dir/test_output/$assignment
     fi
     if [ -d "$hw_build_path/custom_validation_code/" ]; then
 	rsync -ruz --delete "$hw_build_path/custom_validation_code/"    "$course_dir/custom_validation_code/$assignment/"
@@ -112,7 +118,6 @@ function build_homework {
 
     course_dir="$SUBMITTY_DATA_DIR/courses/$semester/$course"
     GRADINGCODE="${SUBMITTY_INSTALL_DIR}/src/grading"
-    JSONCODE="${SUBMITTY_INSTALL_DIR}/vendor/include"
 
     # check that the user executing this script is in the course group
     course_group=`stat -c "%G" "$course_dir"`
@@ -183,18 +188,7 @@ function build_homework {
         exit 1
     fi
 
-    # Create the complete/build config using main_configure
-    g++ "${GRADINGCODE}/main_configure.cpp" "${GRADINGCODE}/load_config_json.cpp" "${GRADINGCODE}/execute.cpp" \
-        "${GRADINGCODE}/TestCase.cpp" "${GRADINGCODE}/error_message.cpp" "${GRADINGCODE}/window_utils.cpp" \
-        "${GRADINGCODE}/dispatch.cpp" "${GRADINGCODE}/change.cpp" "${GRADINGCODE}/difference.cpp" \
-        "${GRADINGCODE}/tokenSearch.cpp" "${GRADINGCODE}/tokens.cpp" "${GRADINGCODE}/clean.cpp" \
-        "${GRADINGCODE}/execute_limits.cpp" "${GRADINGCODE}/seccomp_functions.cpp" \
-        "${GRADINGCODE}/empty_custom_function.cpp" \
-        -I${JSONCODE} \
-        -pthread -g -std=c++11 -lseccomp -o configure.out
-
-
-    ./configure.out complete_config.json "${course_dir}/config/build/build_${assignment}.json" "$assignment"
+    "${SUBMITTY_INSTALL_DIR}/bin/configure.out" complete_config.json "${course_dir}/config/build/build_${assignment}.json" "$assignment"
     configure_res="$?"
 
     if (( "$configure_res" != 0 )); then
@@ -228,12 +222,10 @@ function build_homework {
 
     # capture exit code of make
     make_res="$?"
-    chmod -f 660 "$hw_build_path/log_make_output.txt"
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
     if (( "$make_res" != 0 )); then
-        echo -e "\nMAKE ERROR\nlogfile: $hw_build_path/log_make_output.txt\n\n"
-        cat "$hw_build_path/log_make_output.txt"
+        echo -e "\nMAKE ERROR\n\n"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
         popd > /dev/null
         exit 1

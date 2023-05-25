@@ -27,7 +27,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
-     * means that if the value is not found within the json file, we don't have to worry about accidently
+     * means that if the value is not found within the json file, we don't have to worry about accidentally
      * exposing things to students.
      */
     public function testClassProperties() {
@@ -55,7 +55,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = [
             "authentication_method" => "PamAuthentication",
-            "ldap_options" => []
+            "ldap_options" => [],
+            "saml_options" => []
         ];
         $config = array_merge($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "authentication.json"), $config);
@@ -65,6 +66,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "database_port" => 5432,
             "database_user" => "submitty_dbuser",
             "database_password" => "submitty_dbpass",
+            "database_course_user" => "submitty_course_dbuser",
+            "database_course_password" => "submitty_course_dbpass",
             "debugging_enabled" => false,
         ];
         $config = array_replace($config, $extra);
@@ -147,7 +150,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         }
         FileUtils::writeJsonFile($this->course_json_path, $config);
 
-        // Create psuedo email json
+        // Create pseudo email json
         $config = [
             'email_enabled' => true,
             'email_user' => '',
@@ -207,11 +210,18 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("admin@example.com", $config->getSysAdminEmail());
         $this->assertEquals("https://example.com/admin", $config->getSysAdminUrl());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
-        $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
-        $this->assertEquals(array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']), $config->getCourseDatabaseParams());
+        $course_db_params = [
+            'dbname' => 'submitty',
+            'host' => '/var/run/postgresql',
+            'port' => 5432,
+            'username' => 'submitty_course_dbuser',
+            'password' => 'submitty_course_dbpass'
+        ];
+
+        $this->assertEquals(array_merge($course_db_params, ['dbname' => 'submitty_s17_csci0000']), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(0, $config->getDefaultHwLateDays());
@@ -244,12 +254,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
-            'course_database_params' => array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']),
+            'course_database_params' => array_merge($course_db_params, ['dbname' => 'submitty_s17_csci0000']),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'ldap_options' => [],
+            'saml_options' => [],
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
             'default_hw_late_days' => 0,

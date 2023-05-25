@@ -318,6 +318,12 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     public function addNewTerm() {
+        if (!$this->core->getUser()->isSuperUser()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
         $response = new MultiResponse();
         if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
             $term_id = $_POST['term_id'];

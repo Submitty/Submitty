@@ -25,7 +25,7 @@
 
 import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
-//These functions can be called like "cy.login(...)" and will yeild a result
+//These functions can be called like "cy.login(...)" and will yield a result
 
 /**
 * Log into Submitty, assumes no one is logged in already and at login page
@@ -33,12 +33,24 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username='instructor') => {
-    cy.url().should('contain', '/authentication/login');
-    cy.get('input[name=user_id]').type(username, {force: true});
-    cy.get('input[name=password]').type(username, {force: true});
-    cy.waitPageChange(() => {
-        cy.get('input[name=login]').click();
-    });
+    cy.get('body')
+        .then(body => {
+            if (body.find('input[name=user_id]').length > 0) {
+                cy.get('input[name=user_id]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('input[name=login]').click();
+                });
+            }
+            else {
+                cy.get('#saml-login').click();
+                cy.get('input[name=username]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('#submit > td:nth-child(3) > button').click();
+                });
+            }
+        });
 });
 
 /**
@@ -87,10 +99,10 @@ Cypress.Commands.add('waitPageChange', (fn) => {
 Cypress.Commands.overwrite('visit', (originalFn, options) => {
     let url = '';
 
-    if (Array.isArray(options)){
+    if (Array.isArray(options)) {
         url = buildUrl(options);
     }
-    else if ((typeof options) === 'string'){
+    else if ((typeof options) === 'string') {
         url = options;
     }
     else {
@@ -106,4 +118,23 @@ Cypress.Commands.overwrite('visit', (originalFn, options) => {
  */
 Cypress.Commands.add('checkLogoutInAfterEach', () => {
     cy.wrap(true).as('checkLogout');
+});
+
+/**
+ * Wait and reload until
+ * @param {} condition
+ * @param {int} timeout
+ * @param {int} wait
+ */
+Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait=100) => {
+    cy.wait(wait);
+    cy.reload();
+    cy.then(() => {
+        return condition().then((result) => {
+            if (result || timeout <= 0) {
+                return result;
+            }
+            return cy.waitAndReloadUntil(condition, timeout - wait, wait);
+        });
+    });
 });

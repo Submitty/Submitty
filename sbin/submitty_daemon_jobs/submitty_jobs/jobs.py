@@ -52,6 +52,7 @@ class AbstractJob(ABC):
     def run_job(self):
         pass
 
+    @abstractmethod
     def cleanup_job(self):
         pass
 
@@ -79,6 +80,9 @@ class CourseJob(AbstractJob):
                 return False
         test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
         return test_path.exists()
+
+    def cleanup_job(self):
+        pass
 
 
 # pylint: disable=abstract-method
@@ -124,12 +128,18 @@ class BuildConfig(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = os.path.join(DATA_DIR, 'courses', semester, course, 'BUILD_{}.sh'.format(course))
-        build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
+        build_script = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, f'BUILD_{course}.sh')
+        build_output = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, 'build', gradeable,
+                                    'build_script_output.txt')
 
         try:
+            res = subprocess.run([build_script, gradeable, "--clean"],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
             with open(build_output, "w") as output_file:
-                subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
+                output_file.write(res.stdout.decode("ascii"))
         except PermissionError:
             print("error, could not open "+output_file+" for writing")
 
@@ -187,7 +197,7 @@ class RunLichen(CourseGradeableJob):
             json.dump(config_data, file, indent=4)
 
         # run Lichen
-        subprocess.call(['/usr/local/submitty/Lichen/bin/process_all.sh', config_path, data_path])
+        subprocess.call(['/usr/local/submitty/Lichen/bin/run_lichen.sh', config_path, data_path])
 
 
 class DeleteLichenResult(CourseGradeableJob):
@@ -359,6 +369,9 @@ class CreateCourse(AbstractJob):
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
 
+    def cleanup_job(self):
+        pass
+
 
 class UpdateDockerImages(AbstractJob):
     def run_job(self):
@@ -375,3 +388,6 @@ class UpdateDockerImages(AbstractJob):
 
         log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
         logger.write_to_log(log_file_path, log_msg)
+
+    def cleanup_job(self):
+        pass

@@ -57,7 +57,7 @@ class Email extends AbstractModel {
     private function formatBody(string $body, ?string $relevant_url, bool $author): string {
         $extra = [];
         if (!(isset($_POST["Anon"]) && $_POST["Anon"] === "Anon") && $author) {
-            $extra[] = "Author: " . $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()[0] . ".";
+            $extra[] = "Author: " . $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName()[0] . ".";
         }
         if (!is_null($relevant_url)) {
             $extra[] = "Click here for more info: " . $relevant_url;
