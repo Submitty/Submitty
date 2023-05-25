@@ -352,6 +352,7 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .post_reply_form {
     margin-right: 17px;
+    color: orange;
 }
 
 .height-auto {

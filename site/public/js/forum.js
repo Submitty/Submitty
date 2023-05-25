@@ -283,7 +283,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         success: function (response) {
             try {
                 const new_post = JSON.parse(response).data;
-                document.getElementById("new_post").style.color = "orange";
+                //document.getElementById("new_post").style.color = "orange";
                 const forum_display_setting = getCookie('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
