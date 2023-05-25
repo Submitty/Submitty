@@ -5,7 +5,6 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\User;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -80,18 +79,6 @@ class ForumThreadView extends AbstractView {
 
         $thread_list = [];
 
-        $is_instructor_full_access = [];
-
-        $posts_in_threads = $this->core->getQueries()->getPostsInThreads(array_keys($threadArray));
-        $author_user_ids = array_map(function ($post) {
-            return $post["author_user_id"];
-        }, $posts_in_threads);
-        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
-
-        foreach ($author_user_groups as $author) {
-            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
-        }
-
         foreach ($threadArray as $thread_id => $data) {
             $thread_title = $fromIdtoTitle[$thread_id];
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
@@ -103,10 +90,6 @@ class ForumThreadView extends AbstractView {
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
                 $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
-
-                if ($is_instructor_full_access[$post["p_author"]]) {
-                    $visible_username = $given_name . " " . $family_name;
-                }
 
                 if ($post["anonymous"]) {
                     $visible_username = 'Anonymous';
@@ -449,18 +432,6 @@ class ForumThreadView extends AbstractView {
         $totalAttachments = 0;
         $GLOBALS['totalAttachments'] = 0;
 
-        $author_user_groups_map = [];
-
-        $author_user_ids = array_map(function ($post) {
-            return $post["author_user_id"];
-        }, $posts);
-
-        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
-
-        foreach ($author_user_groups as $author) {
-            $author_user_groups_map[$author["user_id"]] = $author["user_group"];
-        }
-
         if ($display_option == "tree") {
             $order_array = [];
             $reply_level_array = [];
@@ -500,8 +471,6 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
-
                         $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, false, $thread_announced);
 
                         break;
@@ -520,8 +489,6 @@ class ForumThreadView extends AbstractView {
                 }
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-
-                $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
 
                 $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, false, $thread_announced);
 
@@ -744,16 +711,6 @@ class ForumThreadView extends AbstractView {
 
         $thread_content = [];
 
-        $is_instructor_full_access = [];
-        $author_user_ids = array_map(function ($thread) {
-            return $thread["created_by"];
-        }, $threads);
-        $author_user_groups = $this->core->getQueries()->getAuthorUserGroups($author_user_ids);
-
-        foreach ($author_user_groups as $author) {
-            $is_instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
-        }
-
         foreach ($threads as $thread) {
             // Checks if thread ID is empty. If so, skip this threads.
             if (empty($thread["id"])) {
@@ -890,15 +847,10 @@ class ForumThreadView extends AbstractView {
                 $email = trim($user_info['user_email']);
                 $given_name = trim($user_info["given_name"]);
                 $family_name = trim($user_info["family_name"]);
-                $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
-
-                if ($is_instructor_full_access[$first_post["author_user_id"]]) {
-                    $visible_username = $given_name . " " . $family_name;
-                }
 
                 $author_info = [
                     "user_id" => $first_post['author_user_id'],
-                    "name" => $first_post['anonymous'] ? "Anonymous" : $visible_username,
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $given_name . " " . substr($family_name, 0, 1) . ".",
                     "email" => $email,
                     "full_name" => $given_name . " " . $family_name . " (" . $first_post['author_user_id'] . ")",
                 ];
@@ -1001,10 +953,6 @@ class ForumThreadView extends AbstractView {
 
         if ($display_option != 'tree') {
             $reply_level = 1;
-        }
-
-        if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
-            $visible_username = $given_name . " " . $family_name;
         }
 
         if ($post["anonymous"]) {
