@@ -7,7 +7,6 @@ namespace tests\app\libraries\plagiarism;
 use app\libraries\plagiarism\Interval;
 
 class IntervalTester extends \PHPUnit\Framework\TestCase {
-
     private $my_interval;
 
     public function setUp(): void {

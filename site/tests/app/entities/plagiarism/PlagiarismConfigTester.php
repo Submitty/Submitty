@@ -11,7 +11,6 @@ use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
 class PlagiarismConfigTester extends BaseUnitTest {
-
     private $my_config;
 
     public function setUp(): void {
