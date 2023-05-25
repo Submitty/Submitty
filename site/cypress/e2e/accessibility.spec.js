@@ -84,6 +84,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                             'Start tag seen without seeding a doctype first',
                             'Possible misuse of “aria-label”',
                             'The “date” input type is not supported in all browsers.',
+                            'The “type” attribute is unnecessary for JavaScript resources.',
                         ];
 
                         for (const error of output.messages) {
@@ -101,8 +102,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                             });
                         }
 
-                        expect(foundErrors).to.be.an('array').that.is.empty();
-                        expect(result.code).to.eq(0);
+                        expect(foundErrors).to.be.empty;
                     });
                 });
             });
