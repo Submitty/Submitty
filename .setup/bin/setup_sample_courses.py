@@ -1822,8 +1822,8 @@ class Gradeable(object):
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
-            if self.is_repository and 'eg_subdirectory' in gradeable:
-                self.subdirectory = gradeable['eg_subdirectory']
+            if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
+                self.subdirectory = gradeable['eg_vcs_subdirectory']
                 self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
                 self.peer_grading = gradeable['eg_peer_grading']
@@ -1945,7 +1945,7 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, 
-                         eg_subdirectory=self.subdirectory,
+                         eg_vcs_subdirectory=self.subdirectory,
                          eg_vcs_partial_path=self.vcs_partial_path,
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,

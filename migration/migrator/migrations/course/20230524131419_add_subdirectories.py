@@ -21,7 +21,7 @@ def up(config, database, semester, course):
         ALTER TABLE electronic_gradeable
         RENAME COLUMN eg_subdirectory TO eg_vcs_partial_path;
         ALTER TABLE electronic_gradeable
-        ADD COLUMN IF NOT EXISTS eg_subdirectory varchar(1024) NOT NULL;
+        ADD COLUMN IF NOT EXISTS eg_vcs_subdirectory varchar(1024) DEFAULT '' NOT NULL;
     """)
 
 
@@ -43,7 +43,7 @@ def down(config, database, semester, course):
     # and reset the eg_vcs_partial_path column to be eg_subdirectory
     database.execute("""
         ALTER TABLE electronic_gradeable
-        DROP COLUMN IF EXISTS eg_subdirectory;
+        DROP COLUMN IF EXISTS eg_vcs_subdirectory;
         ALTER TABLE electronic_gradeable
         RENAME COLUMN eg_vcs_partial_path TO eg_subdirectory;
     """)
