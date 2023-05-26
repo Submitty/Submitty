@@ -865,6 +865,9 @@ class AdminGradeableController extends AbstractController {
         $subdir = '';
         if ($details['subdirectory_gradeable'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
+            if ($subdir[0] != '/') {
+                $subdir = '/' . $subdir;
+            }
         }
         $vcs_partial_path = '';
         // VCS specific values

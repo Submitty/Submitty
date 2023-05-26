@@ -249,7 +249,7 @@
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd>{{ vcs_base_url }}/{{ gradeable.getVcsPartialPath() }}</kbd>
+                                <kbd>{{ vcs_base_url }}{{ gradeable.getVcsPartialPath() }}</kbd>
                             {% endif %}
                         </div>
                     </div>
