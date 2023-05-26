@@ -289,11 +289,17 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
 
-                    const grand_parent_id = $($(parent_pose)[0]).attr('data-parent_id');
-                    const grand_parent_post = $(`#${grand_parent_id}`);
+                    //parent_post.setProperty('background-color', 'blue', 'important');
 
-                    if (parent_post.hasClass('first_post') || grand_parent_post.hasClass('first_post')) {
-                        if (forum_display_setting === 'reverse-tree') {
+                    //$(new_post).style.marginLeft = 0;
+
+                    //const grand_parent_id = $($(parent_pose)[0]).attr('data-parent_id');
+                    //const grand_parent_post = $(`#${grand_parent_id}`);
+                    displayMessage("bro");
+                    if (parent_post.hasClass('first_post')) {
+                        displayMessage("Parent is!!! first post");
+                        if (forum_display_setting === 'reverse-time') {
+                            parent_post.setAttribute('id', 'reverse-time');
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
                         else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
@@ -305,6 +311,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         }
                     }
                     else {
+                        displayMessage("Parent is not first post");
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
                         if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
