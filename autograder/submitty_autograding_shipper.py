@@ -934,7 +934,7 @@ def checkout_vcs_repo(config, my_file):
                 # copy the subdirectory we want to the
                 # original checkout path and remove the extra files
                 try:
-                    if vcs_subdirectory != 'none':
+                    if vcs_subdirectory != '':
                         file_path = os.path.join(sub_checkout_path, vcs_subdirectory[1:])
                     else:
                         file_path = os.path.join(sub_checkout_path)

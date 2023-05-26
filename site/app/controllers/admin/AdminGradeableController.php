@@ -862,14 +862,11 @@ class AdminGradeableController extends AbstractController {
         }
 
         $repo_name = '';
-        $subdir = 'none';
+        $subdir = '';
         if ($details['subdirectory_gradeable'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
-            if ($subdir[0] != '/') {
-                $subdir = '/' . $subdir;
-            }
         }
-        $vcs_partial_path = 'none';
+        $vcs_partial_path = '';
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];

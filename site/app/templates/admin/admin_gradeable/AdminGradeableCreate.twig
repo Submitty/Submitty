@@ -270,19 +270,20 @@
                     <fieldset><legend>Are the student's files for this gradeable expected to 
                     be in a specific subdirectory of their VCS repository?</legend>
                 {% else %}
-                    <fieldset><legend>Gradeable Subdirectory:
-                    {{ gradeable.getVcsSubdirectory() }}</legend>
+                    {% if gradeable.getVcsSubdirectory() != '' %}
+                    Path to students files within the repository: {{ gradeable.getVcsSubdirectory() }}
+                    {% endif %}
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != 'none') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
 
                     <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
                             {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for subdirectory radio group #}
                 </fieldset>
-                </fieldset>
+                
             </div>
             <div class="subdirectory_yes" id="subdir_yes">
                {% if action == 'new' %}
