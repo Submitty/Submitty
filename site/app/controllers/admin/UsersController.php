@@ -57,6 +57,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $student->getDisplayedGivenName(),
                 'family_name' => $student->getDisplayedFamilyName(),
+                'pronouns' => $student->getPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -66,6 +67,19 @@ class UsersController extends AbstractController {
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
+        }
+
+        //Get Active Columns
+        $active_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
+            $active_columns = $_COOKIE['active_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_columns = implode('-', array_fill(0, 12, true));
+            }
         }
 
         return new MultiResponse(
@@ -78,7 +92,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
                 $formatted_tzs,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_columns
             )
         );
     }
@@ -124,6 +139,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
+                'pronouns' => $grader->getPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -191,6 +207,7 @@ class UsersController extends AbstractController {
             'user_familyname' => $user->getLegalFamilyName(),
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
+            'user_pronouns' => $user->getPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
@@ -224,6 +241,7 @@ class UsersController extends AbstractController {
                 'user_familyname' => $user->getLegalFamilyName(),
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
+                'user_pronouns' => $user->getPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
@@ -264,6 +282,8 @@ class UsersController extends AbstractController {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
+        //Pronouns must be less than 12 characters.
+        $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "" : "Error in pronouns: \"" . strip_tags($_POST['user_pronouns']) . "\"<br>";
         //Given and Family name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
         $error_message .= User::validateUserData('user_legal_familyname', trim($_POST['user_familyname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_familyname']) . "\"<br>";
@@ -311,6 +331,8 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_preferred_familyname'])) {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
+
+        $user->setPronouns(trim($_POST['user_pronouns']));
 
         $user->setEmail(trim($_POST['user_email']));
 

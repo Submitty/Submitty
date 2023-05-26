@@ -65,6 +65,7 @@ base_boxes = Hash[]
 base_boxes.default         = "bento/ubuntu-20.04"
 base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2004"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -73,13 +74,13 @@ def mount_folders(config, mount_options)
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
 
   optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
     end
   }
 end
@@ -91,9 +92,15 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = ENV.fetch('VAGRANT_BOX', base_boxes.default)
 
+  arch = `uname -m`.chomp
+  arm = arch == 'arm64' || arch == 'aarch64'
+  apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
+  
+  custom_box = ENV.has_key?('VAGRANT_BOX')
+
   mount_options = []
 
-  # The time in seconds that Vagrant will wait for the machine to boot and be accessible. 
+  # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
   # Specify the various machines that we might develop on. After defining a name, we
@@ -104,7 +111,7 @@ Vagrant.configure(2) do |config|
   config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
-    ubuntu.vm.network "private_network", ip: "172.18.2.8"
+    ubuntu.vm.network "private_network", ip: "192.168.56.21"
     ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
@@ -159,9 +166,8 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "parallels" do |prl, override|
-    unless ENV.has_key?('VAGRANT_BOX')
-      arch = `uname -m`.chomp
-      if (arch == 'arm64' || arch == 'aarch64')
+    unless custom_box
+      if (arm || apple_silicon)
         override.vm.box = base_boxes[:arm_parallels]
       end
     end
@@ -178,18 +184,32 @@ Vagrant.configure(2) do |config|
 
     mount_folders(override, [])
   end
-
+  
   config.vm.provider "libvirt" do |libvirt, override|
-      unless ENV.has_key?('VAGRANT_BOX')
-        override.vm.box = base_boxes[:libvirt]
+    unless custom_box
+      override.vm.box = base_boxes[:libvirt]
+    end
+
+    libvirt.memory = 2048
+    libvirt.cpus = 2
+
+    libvirt.forward_ssh_port = true
+
+    mount_folders(override, [])
+  end
+
+  config.vm.provider "qemu" do |qe, override|
+    unless custom_box
+      if apple_silicon
+        override.vm.box = base_boxes[:arm_mac_qemu]
       end
+    end
 
-      libvirt.memory = 2048
-      libvirt.cpus = 2
+    qe.memory = "2G"
+    qe.smp = 2
+    qe.ssh_port = 2222
 
-      libvirt.forward_ssh_port = true
-
-      mount_folders(override, [])
+    mount_folders(override, [])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
