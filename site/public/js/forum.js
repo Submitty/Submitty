@@ -288,11 +288,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
-
-                    const grand_parent_id = $($(parent_pose)[0]).attr('data-parent_id');
-                    const grand_parent_post = $(`#${grand_parent_id}`);
-
-                    if (parent_post.hasClass('first_post') || grand_parent_post.hasClass('first_post')) {
+                    if (parent_post.hasClass('first_post')) {
                         if (forum_display_setting === 'reverse-tree') {
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
