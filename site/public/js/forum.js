@@ -283,8 +283,8 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
             let start_parse_index;
             try {
                 start_parse_index = response.indexOf('"status": "success"');
-                if (start_parse_index !==-1) { 
-                    response = '{\n\t' + response.substring(start_parse_index);
+                if (start_parse_index !==-1) {
+                    response = `{\n\t ${response.substring(start_parse_index)}`;
                 }
                 const new_post = JSON.parse(response).data;
                 const forum_display_setting = getCookie('forum_display_option');
