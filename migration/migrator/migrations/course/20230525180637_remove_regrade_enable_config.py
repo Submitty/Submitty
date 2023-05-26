@@ -28,21 +28,21 @@ def up(config, database, semester, course):
     :type course: str
     """
     pass
-    # path = course_config_location(semester, course)
-    # if os.path.getsize(path) == 0: # Empty file
-    #     return
+    path = course_config_location(semester, course)
+    if os.path.getsize(path) == 0: # Empty file
+        return
 
-    # with open(path, "r") as config_file:
-    #     # Get regrade_enabled setting
-    #     course_config = json.load(config_file)
-    #     was_regrade_enabled = course_config["course_details"]["regrade_enabled"]
+    with open(path, "r") as config_file:
+        # Get regrade_enabled setting
+        course_config = json.load(config_file)
+        was_regrade_enabled = course_config["course_details"]["regrade_enabled"]
 
-    # # If course did not have inquiries, then the gradeables each don't want them
-    # if was_regrade_enabled == False:
-    #     database.execute("""
-    #         UPDATE electronic_gradeable
-    #         SET eg_regrade_allowed = 'false'
-    #     """)
+    # If course did not have inquiries, then the gradeables each don't want them
+    if was_regrade_enabled == False:
+        database.execute("""
+            UPDATE electronic_gradeable
+            SET eg_regrade_allowed = 'false'
+        """)
 
 
 def down(config, database, semester, course):
