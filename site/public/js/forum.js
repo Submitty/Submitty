@@ -2,7 +2,6 @@
 
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
-    document.getElementById("new_post").style.color = "red";
     $('#ui-category-list').sortable({
         items : '.category-sortable',
         handle: '.handle',
@@ -172,7 +171,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
 }
 
-function publishFormWithAttachments(form, test_category, error_message, is_thread) { //this is where the issue probably occurs
+function publishFormWithAttachments(form, test_category, error_message, is_thread) {
     if (!form[0].checkValidity()) {
         form[0].reportValidity();
         return false;
