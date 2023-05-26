@@ -29,7 +29,7 @@ def up(config, database, semester, course):
     """
     pass
     path = course_config_location(semester, course)
-    if os.path.getsize(path) == 0: # Empty file
+    if not os.path.is_file(path) or getsize(path) == 0: # Empty file
         return
 
     with open(path, "r") as config_file:
@@ -60,7 +60,7 @@ def down(config, database, semester, course):
     """
 
     path = course_config_location(semester, course)
-    if os.path.getsize(path) == 0: # Empty file
+    if not os.path.is_file(path) or getsize(path) == 0: # Empty file
         return
 
 
