@@ -602,10 +602,8 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system('git push')
     os.chdir(my_cwd)
 
-def mimic_checkout(repo_path, submission_path, current_time_string):
+def mimic_checkout(repo_path, submission_path):
     os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {submission_path} -b main')
-    # with open(os.path.join(submission_path, ".submit.timestamp"), "w") as open_file:
-    #                                 open_file.write(current_time_string + "\n")
 
 class User(object):
     """
@@ -1145,12 +1143,12 @@ class Course(object):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # To mimic a 'checkout', the VCS gradeable files are moved to the submissions folder
+                                            # To mimic a 'checkout', the VCS gradeable files are checked out to the user_checkout folder
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
                                                 commit_submission_to_repo(user.id, src, repo_path)
-                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), current_time_string)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)))
                                             else:
                                                 create_gradeable_submission(src, dst)
                                     else:
@@ -1161,7 +1159,7 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # To mimic a 'checkout', the VCS gradeable files are moved to the submissions folder
+                                            # To mimic a 'checkout', the VCS gradeable files are checked out to the user_checkout folder
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
