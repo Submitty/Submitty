@@ -71,4 +71,4 @@ def down(config, database, semester, course):
     course_config["course_details"]["regrade_enabled"] = True
 
     with open(path, "w") as config_file: # Separate read and write to avoid appending at end of file
-        json.dump(course_config, config_file, indent=2)
+        json.dump(course_config, config_file, indent=4)
