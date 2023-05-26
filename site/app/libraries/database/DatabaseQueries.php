@@ -767,6 +767,15 @@ SQL;
         return $this->course_db->rows();
     }
 
+    public function getPostsInThreads($thread_ids) {
+        if (count($thread_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($thread_ids));
+        $this->course_db->query("SELECT * FROM posts where deleted = false and thread_id in {$placeholders} ORDER BY timestamp ASC", $thread_ids);
+        return $this->course_db->rows();
+    }
+
     public function getPostHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", [$post_id]);
         return $this->course_db->rows();
@@ -816,6 +825,15 @@ SQL;
     public function isStaffPost($author_id) {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
+    }
+
+    public function getAuthorUserGroups($author_ids) {
+        if (count($author_ids) === 0) {
+            return [];
+        }
+        $placeholders = $this->createParameterList(count($author_ids));
+        $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
+        return $this->course_db->rows();
     }
 
     public function postHasHistory($post_id) {
