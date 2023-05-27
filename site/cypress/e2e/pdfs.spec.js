@@ -14,17 +14,16 @@ function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name, versi
     cy.login(user_id)
     cy.visit(`/courses/${getCurrentSemester()}/sample`);
     cy.get(`a[href*="/sample/gradeable/${gradeable_id}/grading/details"]`).click();
-    cy.get("#gradeable-message-popup").then(($element) =>{
-        if (user_id == "ta" && $element.css("display") === "block") {
-            cy.get("#agree-button").click();
-        }
-    });
-    cy.get("#gradeable-message-popup").should('not.be.visible');
+    cy.get("#agree-button").click({ force: true });
     cy.get(`a[href*="/sample/gradeable/${gradeable_id}/grading/status"]`).click();
 
     cy.contains("Grading Index").should("be.visible").click();
     cy.get("#details-table").should("be.visible");
-    cy.get('button[onclick="changeSections()"]').contains("View All").should("be.visible").click();
+    cy.get(".markers-container .btn-default").each(($el) => {
+        if ($el.text().trim() == "View All") {
+            cy.wrap($el).click();
+        }
+    });
     cy.get(`#details-table > tbody.details-content.panel-content-active > tr:nth-child(${tr_number}) > td:nth-child(${td_number}) > a`).eq(0).click();
     cy.get("span.grade-panel:not(.active)#submission_browser_btn").click();
     cy.get("#submission_browser").should("be.visible");
@@ -43,7 +42,7 @@ describe("Test cases for PDFs access", () => {
     });
     
     it("users should have access to basic pdfs", () => {
-        // pdf_access("instructor", "3", "8" ,"grading_homework_pdf", "words_1463.pdf", "2")
+        pdf_access("instructor", "3", "8" ,"grading_homework_pdf", "words_1463.pdf", "2")
         pdf_access("ta", "3", "8", "grading_homework_pdf", "words_1463.pdf", "2")
         pdf_access("grader", "2", "8", "grading_homework_pdf", "words_249.pdf", "1")
     });
