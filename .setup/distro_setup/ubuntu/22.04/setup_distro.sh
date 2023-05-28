@@ -18,7 +18,7 @@ fi
 #################
 
 # Need to change this otherwise it will hang the script in interactive mode
-sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" needrestart.conf
+sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 
 apt-get -qqy update
 
