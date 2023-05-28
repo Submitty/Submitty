@@ -24,7 +24,7 @@ class GlobalView extends AbstractView {
         elseif ($this->core->getConfig()->isCourseLoaded()) {
             $course_name = ucwords(strtolower($this->core->getFullCourseName()));
             // We assume that if there is no page breadcrumb (only course), we are on gradeables
-            if ($course_name == ucwords(strtolower($page_name))) {
+            if ($course_name === ucwords(strtolower($page_name))) {
                 $page_name = "Gradeables";
             }
             $page_title = $page_name . " - " . $course_name;
