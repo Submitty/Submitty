@@ -737,8 +737,8 @@ class Gradeable extends AbstractModel {
                 $result[] = 'grade_released_date';
             }
 
-            // Only add in grade inquiry dates if its allowed & enabled
-            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed() && !$regrade_modified) {
+            // Only add in grade inquiry dates if its allowed
+            if ($this->isTaGrading() && $this->isRegradeAllowed() && !$regrade_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
@@ -2065,7 +2065,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -2075,7 +2075,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryYetToStart() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -2086,7 +2086,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryEnded() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
