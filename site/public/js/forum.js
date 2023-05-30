@@ -1,4 +1,3 @@
-/* global Cookies */
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({

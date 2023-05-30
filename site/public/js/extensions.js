@@ -1,4 +1,4 @@
-/* global buildCourseUrl, Cookies */
+/* global buildCourseUrl */
 /* exported confirmExtension, clearDate, deleteHomeworkExtension, setLateDays */
 
 $(document).ready(() => {

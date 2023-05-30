@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, Cookies */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function calcSimpleGraderStats(action) {

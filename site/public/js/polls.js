@@ -1,5 +1,5 @@
 /* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls */
-/* global csrfToken, Cookies */
+/* global csrfToken */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function() {

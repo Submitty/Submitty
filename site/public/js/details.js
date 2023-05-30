@@ -1,4 +1,4 @@
-/* global courseUrl, Cookies */
+/* global courseUrl */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
 const MOBILE_BREAKPOINT = 951;
 

@@ -1,5 +1,3 @@
-/* global Cookies */
-
 //Used to reset users cookies
 let cookie_version = 1;
 

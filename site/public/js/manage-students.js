@@ -1,4 +1,3 @@
-/* global Cookies */
 /* exported toggleColumnsForm, updateManageStudentsColumns, fillAllCheckboxes
 */
 
