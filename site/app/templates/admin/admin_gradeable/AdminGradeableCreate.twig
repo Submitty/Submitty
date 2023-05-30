@@ -271,7 +271,8 @@
                     be in a specific subdirectory of their VCS repository?</legend>
                 {% else %}
                     {% if gradeable.getVcsSubdirectory() != '' %}
-                    Path to students files within the repository: {{ gradeable.getVcsSubdirectory() }}
+                    Path to students files within the repository: <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="auto_save"
+                                    aria-label="repository name" value="{{ gradeable.getVcsSubdirectory() }}" /><br />
                     {% endif %}
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
@@ -290,7 +291,7 @@
                 <label for="vcs_subdirectory">What is the subdirectory path for the 
                     student's files within the VCS repository?
                     <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory : '' }}" required /><br />
+                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" required /><br />
                     <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
                 {% endif %}
             </div>
