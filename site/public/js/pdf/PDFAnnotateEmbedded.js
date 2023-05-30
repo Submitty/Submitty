@@ -201,6 +201,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
+        updateAnnotations();
         let currentTool;
         let NUM_PAGES = 0;
 
@@ -305,6 +306,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         // ignore the identifier error
     }
     repairPDF();
+    updateAnnotations();
 }
 
 
@@ -377,6 +379,36 @@ function toggleOtherAnnotations(hide_others) {
         }
     }
     render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+}
+
+function updateAnnotations() {
+    const elements = document.querySelectorAll('path, g');
+
+    elements.forEach((element) => {
+        let transform = element.getAttribute('transform');
+        let hasTranslate = false;
+
+        if (transform) {
+            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
+                hasTranslate = true;
+
+                x = x !== undefined ? parseFloat(x) : 0;
+                y = y !== undefined ? parseFloat(y) : 0;
+
+                return `translate(${x}, ${y})`;
+            });
+
+            transform = updatedTransform;
+        }
+
+        // Add translate(0, 0) if there's no translate transformation
+        if (!hasTranslate) {
+            transform = transform ? `${transform.trim()} translate(0, 0)` : 'translate(0, 0)';
+        }
+
+        // Update the transform attribute of the element, removing unnecessary spaces
+        element.setAttribute('transform', transform.replace(/\s+/g, ' '));
+    });
 }
 
 function repairPDF() {
