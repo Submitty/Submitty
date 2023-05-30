@@ -74,14 +74,14 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDependsOn($depends_on)
  * @method int getDependsOnPoints()
  * @method void setDependsOnPoints($depends_on_points)
- * @method bool isRegradeAllowed()
+ * @method bool isGradeInquiryAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
  * @method string  getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
- * @method int getActiveRegradeRequestCount()
+ * @method int getActiveGradeInquiryCount()
  * @method void setHasDueDate($has_due_date)
  * @method void setHasReleaseDate($has_release_date)
  * @method object[] getPeerGradingPairs()
@@ -134,7 +134,7 @@ class Gradeable extends AbstractModel {
     private $db_components = [];
 
     /** @prop @var bool If any submitters have active grade inquiries */
-    protected $active_regrade_request_count = 0;
+    protected $active_grade_inquiry_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
@@ -239,7 +239,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var \DateTime The deadline for submitting a grade inquiry */
     protected $grade_inquiry_due_date = null;
     /** @prop @var bool are grade inquiries enabled for this assignment*/
-    protected $regrade_allowed = true;
+    protected $grade_inquiry_allowed = true;
     /** @prop @var bool are grade inquiries for specific components enabled for this assignment*/
     protected $grade_inquiry_per_component_allowed = false;
     /** @prop @var bool does this assignment have a discussion component*/
@@ -301,7 +301,7 @@ class Gradeable extends AbstractModel {
             $this->setHasReleaseDate($details['has_release_date']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setGradeInquiryAllowedInternal($details['grade_inquiry_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
@@ -314,7 +314,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
+        $this->setActiveGradeInquiryCount($details['active_grade_inquiry_count'] ?? 0);
 
         // Set dates last
         $this->setDates($details);
@@ -705,7 +705,7 @@ class Gradeable extends AbstractModel {
      * Gets the dates that require validation for the gradeable's current configuration.
      * @return string[] array of date property names that need validation
      */
-    private function getDateValidationSet(bool $regrade_modified = false) {
+    private function getDateValidationSet(bool $grade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
@@ -733,7 +733,7 @@ class Gradeable extends AbstractModel {
             }
 
             // Only add in grade inquiry dates if its allowed
-            if ($this->isTaGrading() && $this->isRegradeAllowed() && !$regrade_modified) {
+            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$grade_inquiry_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
@@ -773,7 +773,7 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $dates Array of dates, indexed by property name
      * @return \DateTime[] Array of dates, indexed by property name
      */
-    private function coerceDates(array $dates, bool $regrade_modified = false) {
+    private function coerceDates(array $dates, bool $grade_inquiry_modified = false) {
         // Takes an array of date properties (in order) and date values (indexed by property)
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
@@ -816,7 +816,7 @@ class Gradeable extends AbstractModel {
         };
 
         // Don't coerce the dates checked by validation
-        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        $skip_coercion_dates = $this->getDateValidationSet($grade_inquiry_modified);
         if ($this->isTeamAssignment()) {
             $skip_coercion_dates[] = "team_lock_date";
         }
@@ -844,7 +844,7 @@ class Gradeable extends AbstractModel {
      * @param array $dates An array of dates/date strings indexed by property name
      * @throws ValidationException With all messages for each invalid property
      */
-    public function setDates(array $dates, bool $regrade_modified = false) {
+    public function setDates(array $dates, bool $grade_inquiry_modified = false) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
 
@@ -853,7 +853,7 @@ class Gradeable extends AbstractModel {
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
-        $dates = $this->coerceDates($dates, $regrade_modified);
+        $dates = $this->coerceDates($dates, $grade_inquiry_modified);
 
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings
@@ -1024,8 +1024,8 @@ class Gradeable extends AbstractModel {
      * @param int $count
      * @internal
      */
-    public function setActiveRegradeRequestCount(int $count) {
-        $this->active_regrade_request_count = $count;
+    public function setActiveGradeInquiryCount(int $count) {
+        $this->active_grade_inquiry_count = $count;
     }
 
     /**
@@ -1483,13 +1483,13 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Sets whether regrades are allowed for this gradeable
-     * @param bool $regrade_allowed
+     * Sets whether grade inquiries are allowed for this gradeable
+     * @param bool $grade_inquiry_allowed
      * @throws ValidationException If date validation fails in this new grade inquiry configuration
      */
-    public function setRegradeAllowed(bool $regrade_allowed) {
-        $old = $this->regrade_allowed;
-        $this->regrade_allowed = $regrade_allowed;
+    public function setGradeInquiryAllowed(bool $grade_inquiry_allowed) {
+        $old = $this->grade_inquiry_allowed;
+        $this->grade_inquiry_allowed = $grade_inquiry_allowed;
 
         try {
             // Asserts that this date information is valid after changing this property
@@ -1497,23 +1497,23 @@ class Gradeable extends AbstractModel {
         }
         catch (ValidationException $e) {
             // Reset to the old value if validation fails
-            $this->regrade_allowed = $old;
+            $this->grade_inquiry_allowed = $old;
 
             // This line brings me great pain
             throw $e;
         }
-        // make sure grade_inquiry_per_component_allowed is false when regrade allowed is false
-        if (!$regrade_allowed) {
+        // make sure grade_inquiry_per_component_allowed is false when grade_inquiry_allowed is false
+        if (!$grade_inquiry_allowed) {
             $this->grade_inquiry_per_component_allowed = false;
         }
     }
 
     /**
-     * @param bool $regrade_allowed
+     * @param bool $grade_inquiry_allowed
      * @internal
      */
-    private function setRegradeAllowedInternal(bool $regrade_allowed) {
-        $this->regrade_allowed = $regrade_allowed;
+    private function setGradeInquiryInternal(bool $grade_inquiry_allowed) {
+        $this->grade_inquiry_allowed = $grade_inquiry_allowed;
     }
 
     /**
@@ -1561,8 +1561,8 @@ class Gradeable extends AbstractModel {
      * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
-    public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
+    public function anyActiveGradeInquiries() {
+        return $this->active_grade_inquiry_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**
@@ -2056,11 +2056,11 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * return true if students can currently submit regrades for this assignment, false otherwise
+     * return true if students can currently submit grade inquiries for this assignment, false otherwise
      * @return bool
      */
-    public function isRegradeOpen() {
-        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+    public function isGradeInquiryOpen() {
+        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->grade_inquiry_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -2070,7 +2070,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryYetToStart() {
-        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -2081,7 +2081,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryEnded() {
-        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
             return true;
         }
         return false;

@@ -651,10 +651,10 @@ class NavigationView extends AbstractView {
                 ]);
             }
 
-            if ($gradeable->anyActiveRegradeRequests()) {
+            if ($gradeable->anyActiveGradeInquiries()) {
                 //Open grade inquiries
                 return new Button($this->core, [
-                    "title" => "REGRADE",
+                    "title" => "GRADE INQUIRY",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
                     "href" => $href
                 ]);
@@ -705,7 +705,7 @@ class NavigationView extends AbstractView {
                 $date_time = $grades_released;
             }
             else {
-                $title = 'REGRADE';
+                $title = 'GRADE INQUIRY';
             }
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -713,9 +713,9 @@ class NavigationView extends AbstractView {
                     $TA_percent = $gradeable->getGradingProgress($this->core->getUser());
 
                     if ($TA_percent === 1) {
-                        //If they're done, change the text to REGRADE
+                        //If they're done, change the text to GRADE INQUIRY
                         $class = 'btn-default';
-                        $title = 'REGRADE';
+                        $title = 'GRADE INQUIRY';
                     }
                     else {
                         if (!is_nan($TA_percent) && $list_section === GradeableList::GRADED) {
