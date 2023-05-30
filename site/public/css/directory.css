@@ -42,7 +42,7 @@
     margin-top: 1vh;
 }
 
-@media (min-width: 831px) {
+@media (width >= 831px) {
     .directory-table tbody {
         counter-reset: student;
     }
