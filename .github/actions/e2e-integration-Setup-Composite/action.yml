@@ -66,26 +66,6 @@ runs:
         # Install globally
         sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
       shell: bash
-    - name: Get composer cache dir
-      id: composer-cache
-      run: |
-        cd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      shell: bash
-    - name: Install composer Cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-composer-
-
-    - name: Install PHP dependencies
-      run: |
-        cd  ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty/site
-        composer install --prefer-dist
-      shell: bash
-
     - name: Install Submitty python utils
       run: |
         cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
@@ -95,14 +75,6 @@ runs:
         sudo -H pip3 install .
         sudo pip3 show submitty_utils
       shell: bash
-
-    - name: Create Database and default users
-      run: |
-        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U postgres -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
-        PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-      shell: bash
-
     - name: Install apt-get packages
       run: |
         sudo apt-get update
@@ -135,17 +107,6 @@ runs:
         sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty_users.json
         sudo chmod 440 /usr/local/submitty/config/submitty_users.json
       shell: bash
-
-    - name: Setup ldap
-      run: |
-        cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/setup_ldap.sh
-      shell: bash
-
-    - name: Set up sample course
-      run:  sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
-      shell: bash
-
     - name: Set up test suite
       run: |
         cd $SUBMITTY_REPOSITORY
