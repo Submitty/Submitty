@@ -206,8 +206,10 @@ abstract class AbstractDatabase {
      * @throws \app\exceptions\DatabaseException
      */
     public function queryIterator(string $query, array $parameters = [], $callback = null) {
+        echo "\n\n\nqueryIterator\n\n\n\n\n";
         $lower = trim(strtolower($query));
         if (!str_starts_with($lower, "select")) {
+            echo "+SECOND+";
             return $this->query($query, $parameters);
         }
         try {
@@ -216,7 +218,10 @@ abstract class AbstractDatabase {
             $statement = $this->link->prepare($query);
             $statement->execute($parameters);
             $this->row_count = null;
+            echo "+FIRST+";
+
             return new DatabaseRowIterator($statement, $this, $callback);
+
         }
         catch (\PDOException $exception) {
             throw new DatabaseException($exception->getMessage(), $query, $parameters);

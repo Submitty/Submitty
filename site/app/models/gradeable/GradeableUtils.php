@@ -17,6 +17,7 @@ class GradeableUtils {
      */
     public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
+        echo "\n\nhelloIamAccessingAllTheGradeablesForACourse\n\n"
         $gradeables = [];
         /** @var Gradeable[] $visible_gradeables */
         $visible_gradeables = [];

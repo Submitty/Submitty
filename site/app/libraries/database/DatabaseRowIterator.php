@@ -30,32 +30,44 @@ class DatabaseRowIterator implements \Iterator {
      * @param null|callable    $callback
      */
     public function __construct(\PDOStatement $statement, $database, $callback = null) {
+        echo "_construct";
         $this->statement = $statement;
         $this->database = $database;
         $this->columns = $this->database->getColumnData($this->statement);
         $this->callback = $callback;
+        echo "#how_many_repeatsssssss#";
         $this->next();
     }
+
 
     public function current() {
         return $this->result;
     }
 
     public function next() {
+        echo "#next#";
         if (!$this->valid()) {
+            echo "wasn't valid";
             return;
         }
         $this->key++;
         $this->result = $this->statement->fetch(\PDO::FETCH_ASSOC);
+        // echo "fetch was false";
         if ($this->result === false) {
+            echo "#fetch was false#";
             $this->valid = false;
             return;
         }
+
         $this->result = $this->database->transformResult($this->result, $this->columns);
+        //print_r($this->result);
         if ($this->callback !== null) {
             /** @var mixed $this->result */
+            echo "#about to call_user_func#";
             $this->result = call_user_func($this->callback, $this->result);
+            echo "done";
         }
+        return;
     }
 
     public function key() {

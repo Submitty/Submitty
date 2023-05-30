@@ -177,6 +177,7 @@ class WebRouter {
      * @throws \ReflectionException|\Exception
      */
     public static function getWebResponse(Request $request, Core $core) {
+        echo "getWebResponse";
         $logged_in = false;
         try {
             $router = new self($request, $core);
@@ -241,6 +242,7 @@ class WebRouter {
     }
 
     private function run() {
+        echo "webRouter run";
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);

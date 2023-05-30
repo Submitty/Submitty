@@ -265,6 +265,10 @@ class Gradeable extends AbstractModel {
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
 
+        echo $details['id'];
+        // $caller = debug_backtrace()[1];
+        // echo 'Called by: ' . $caller['function'];
+
         $this->setIdInternal($details['id']);
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
@@ -474,6 +478,9 @@ class Gradeable extends AbstractModel {
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
 
+        echo "\n\n\n";
+        echo $this->id;
+        echo "\n\n\n";
         try {
             $details = FileUtils::readJsonFile(FileUtils::joinPaths(
                 $course_path,

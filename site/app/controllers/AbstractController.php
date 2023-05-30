@@ -35,6 +35,7 @@ abstract class AbstractController {
      * @return Gradeable|bool false in the fail/error case
      */
     protected function tryGetGradeable(string $gradeable_id, bool $render_json = true) {
+        echo "yes";
         if ($gradeable_id === '') {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
