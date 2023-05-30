@@ -263,6 +263,8 @@ class Gradeable extends AbstractModel {
      * @throws ValidationException If any of the dates are incompatible or invalid
      */
     public function __construct(Core $core, array $details) {
+        echo "whyyyyyyyyyyyyyyyyyyyyyyyyyy\n";
+        print_r($details);
         parent::__construct($core);
 
         $this->setIdInternal($details['id']);
