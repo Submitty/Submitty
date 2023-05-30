@@ -288,7 +288,7 @@
             </div>
             <div class="subdirectory_yes" id="subdir_yes">
                {% if action == 'new' %}
-                <label for="vcs_subdirectory">What is the subdirectory path for the 
+                <label for="vcs_subdirectory">What is the path to the 
                     student's files within the VCS repository?
                     <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" required /><br />
