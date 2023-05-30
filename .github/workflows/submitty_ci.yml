@@ -93,7 +93,7 @@ jobs:
             - run: npm install
             - run: npm run test
             - name: Upload Coverage
-              uses: codecov/codecov-action@v1
+              uses: codecov/codecov-action@v3
               with:
                   files: site/tests/report/jest/clover.xml
                   flags: js
@@ -106,7 +106,7 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v3
-            - uses: shivammathur/setup-php@2.24.0
+            - uses: shivammathur/setup-php@2.25.1
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
               working-directory: site
       steps:
           - uses: actions/checkout@v3
-          - uses: shivammathur/setup-php@2.24.0
+          - uses: shivammathur/setup-php@2.25.1
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
@@ -161,7 +161,7 @@ jobs:
           - name: Run php unit tests
             run : php vendor/bin/phpunit
           - name: Upload Coverage
-            uses: codecov/codecov-action@v1
+            uses: codecov/codecov-action@v3
             with:
               files: site/tests/report/clover.xml
               flags: php
@@ -217,7 +217,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload submitty python utils Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: python_submitty_utils/coverage.xml
             flags: python_submitty_utils
@@ -229,7 +229,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload migrator Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: migration/coverage.xml
             flags: migrator
@@ -241,7 +241,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload autograder Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: autograder/coverage.xml
             flags: autograder
@@ -259,7 +259,7 @@ jobs:
             coverage xml -i
 
         - name: Upload submitty_daemon_jobs Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: sbin/submitty_daemon_jobs/coverage.xml
             flags: submitty_daemon_jobs
@@ -294,6 +294,7 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - uses: ./.github/actions/e2e-Setup-Composite
+          
           - name: Install accessibility checker
             run: |
               wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
