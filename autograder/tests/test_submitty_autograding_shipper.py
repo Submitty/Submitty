@@ -316,7 +316,7 @@ class TestAutogradingShipper(unittest.TestCase):
         shutil.rmtree(os.path.join(TEST_DATA_DIR, 'homework_01/subdirectory/homework_02'))
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         failed_file = (
-            paths['checkout'] + '/failed_subdirectory_invalid.txt'
+            paths['checkout'] + '/failed_subdirectory_invalid_or_empty.txt'
         )
         self.assertTrue(
             os.path.isfile(failed_file), 'Failed test with no files in subdirectory')
