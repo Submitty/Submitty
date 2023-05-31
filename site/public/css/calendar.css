@@ -268,7 +268,7 @@ div.calendar-submit {
     grid-gap: 5px; 
 }
 div.calendar-submit label { text-align: "right"; }
-div.calendar-submit label::after { content: ":"; }
+div.calendar-subm1t label:after { content: ":"; }
 
 @media (max-width: 800px) {
     #calendar-list {
