@@ -118,11 +118,11 @@ Vagrant.configure(2) do |config|
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
-    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
+    ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
 
@@ -207,7 +207,8 @@ Vagrant.configure(2) do |config|
 
     qe.memory = "2G"
     qe.smp = 2
-    qe.ssh_port = 2222
+
+    qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
 
     mount_folders(override, [])
   end
