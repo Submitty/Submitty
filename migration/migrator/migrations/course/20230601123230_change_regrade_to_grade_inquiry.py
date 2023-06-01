@@ -47,10 +47,10 @@ def down(config, database, semester, course):
     :type course: str
     """
     # Revert table names
-    # database.execute("""
-    #     ALTER TABLE grade_inquiry_discussion
-    #         RENAME TO regrade_discussion;
-
+    database.execute("""
+        ALTER TABLE grade_inquiry_discussion
+            RENAME TO regrade_discussion;
+    """)
     #     ALTER TABLE grade_inquiries
     #         RENAME TO regrade_requests;
     # """)
