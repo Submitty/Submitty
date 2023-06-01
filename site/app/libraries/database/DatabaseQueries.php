@@ -15,7 +15,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
-use app\models\gradeable\RegradeRequest;
+use app\models\gradeable\GradeInquiry;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
@@ -4865,7 +4865,7 @@ AND gc_id IN (
         $ungraded_query = "";
         if ($ungraded_only) {
             $ungraded_query = "AND status = ? ";
-            $parameters[] = RegradeRequest::STATUS_ACTIVE;
+            $parameters[] = GradeInquiry::STATUS_ACTIVE;
         }
         $component_query = "";
         if ($component_id !== -1) {
@@ -4883,7 +4883,7 @@ AND gc_id IN (
      * @return string the id of the first new post inserted of the new grade inquiry
      */
     public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id): string {
-        $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id];
+        $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), GradeInquiry::STATUS_ACTIVE, $gc_id];
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO grade_inquiries(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
@@ -4950,11 +4950,11 @@ AND gc_id IN (
         return $this->course_db->row();
     }
 
-    public function saveRegradeRequest(RegradeRequest $regrade_request) {
+    public function saveRegradeRequest(GradeInquiry $regrade_request) {
         $this->course_db->query("UPDATE grade_inquiries SET timestamp = current_timestamp, status = ? WHERE id = ?", [$regrade_request->getStatus(), $regrade_request->getId()]);
     }
 
-    public function deleteRegradeRequest(RegradeRequest $regrade_request) {
+    public function deleteRegradeRequest(GradeInquiry $regrade_request) {
         $regrade_id = $regrade_request->getId();
         $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$regrade_id]);
         $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$regrade_id]);
@@ -7551,7 +7551,7 @@ WHERE current_state IN
                 $grade_inquiries = json_decode($row['array_grade_inquiries'], true);
                 $grade_inquiries_arr = [];
                 foreach ($grade_inquiries as $grade_inquiry) {
-                    $grade_inquiries_arr[] = new RegradeRequest($this->core, $grade_inquiry);
+                    $grade_inquiries_arr[] = new GradeInquiry($this->core, $grade_inquiry);
                 }
 
                 $graded_gradeable->setRegradeRequests($grade_inquiries_arr);

@@ -154,12 +154,12 @@ class GradedGradeable extends AbstractModel {
      */
     public function hasActiveRegradeRequest() {
         return $this->hasRegradeRequest() &&
-            array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
+            array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
                 if ($this->gradeable->isGradeInquiryPerComponentAllowed()) {
-                    $carry = $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE || $carry;
+                    $carry = $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE || $carry;
                 }
                 else {
-                    $carry = $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && is_null($grade_inquiry->getGcId()) || $carry;
+                    $carry = $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE && is_null($grade_inquiry->getGcId()) || $carry;
                 }
 
                 return $carry;
@@ -185,12 +185,12 @@ class GradedGradeable extends AbstractModel {
      */
     public function getActiveGradeInquiryCount() {
         if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
-            return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
-                return $carry + (is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0);
+            return array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
+                return $carry + (is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE ? 1 : 0);
             });
         }
-        return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
-            return $carry + ($grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0);
+        return array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
+            return $carry + ($grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE ? 1 : 0);
         });
     }
 

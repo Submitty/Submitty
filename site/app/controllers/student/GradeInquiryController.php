@@ -196,7 +196,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         $new_post = $this->core->getQueries()->getRegradePost($post_id);
-        if ($new_post === null || $new_post['regrade_id'] !== $grade_inquiry->getId()) {
+        if ($new_post === null || $new_post['grade_inquiry_id'] !== $grade_inquiry->getId()) {
             return "";
         }
 
