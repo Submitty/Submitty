@@ -173,7 +173,7 @@
 
         <h3>Grade your repository:</h3>
         {% if vcs_subdirectory != '' %}
-        <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
+        <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
         {% endif %}
         <div class="upload-message">
             {% include "misc/Markdown.twig" with {
