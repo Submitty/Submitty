@@ -4887,8 +4887,8 @@ AND gc_id IN (
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO grade_inquiries(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
-            $regrade_id = $this->course_db->getLastInsertId();
-            return $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
+            $grade_inquiry_id = $this->course_db->getLastInsertId();
+            return $this->insertNewGradeInquiryPost($grade_inquiry_id, $sender->getId(), $initial_message, $gc_id);
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
@@ -4936,7 +4936,7 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id) {
+    public function insertNewGradeInquiryPost($regrade_id, $user_id, $content, $gc_id) {
         $params = [$regrade_id, $user_id, $content, $gc_id];
         $this->course_db->query("INSERT INTO grade_inquiry_discussion(grade_inquiry_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
