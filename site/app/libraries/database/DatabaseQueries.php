@@ -1926,7 +1926,7 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
 )AS comp
 LEFT JOIN (
 	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
-	FROM regrade_requests AS rr
+	FROM grade_inquiries AS rr
 	WHERE rr.g_id=? AND rr.status=-1
 	GROUP BY rr.gc_id
 ) AS rr ON rr.gc_id=comp.gc_id
@@ -4855,7 +4855,7 @@ AND gc_id IN (
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
-        $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
+        $this->course_db->query("SELECT * FROM grade_inquiries WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
 
@@ -4873,7 +4873,7 @@ AND gc_id IN (
             $parameters[] = $component_id;
         }
 
-        $this->course_db->query("SELECT user_id FROM regrade_requests WHERE g_id = ? " . $ungraded_query . $component_query, $parameters);
+        $this->course_db->query("SELECT user_id FROM grade_inquiries WHERE g_id = ? " . $ungraded_query . $component_query, $parameters);
         return $this->rowsToArray($this->course_db->rows());
     }
 
@@ -4886,7 +4886,7 @@ AND gc_id IN (
         $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id];
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
-            $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
+            $this->course_db->query("INSERT INTO grade_inquiries(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
             return $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
         }
@@ -4900,7 +4900,7 @@ AND gc_id IN (
 
     public function getNumberGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
         return ($this->course_db->row()['cnt']);
     }
 
@@ -4909,7 +4909,7 @@ AND gc_id IN (
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
-        $this->course_db->query("UPDATE regrade_requests SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM regrade_requests ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+        $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
     }
 
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
@@ -4951,13 +4951,13 @@ AND gc_id IN (
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
-        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", [$regrade_request->getStatus(), $regrade_request->getId()]);
+        $this->course_db->query("UPDATE grade_inquiries SET timestamp = current_timestamp, status = ? WHERE id = ?", [$regrade_request->getStatus(), $regrade_request->getId()]);
     }
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
         $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE regrade_id = ?", [$regrade_id]);
-        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$regrade_id]);
     }
 
     public function deleteGradeable($g_id) {
@@ -5028,7 +5028,7 @@ AND gc_id IN (
               eg.*,
               gamo.*,
               gc.*,
-              (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
+              (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -7468,7 +7468,7 @@ WHERE current_state IN
               /* Join grade inquiry */
               LEFT JOIN (
   				SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
-  				FROM regrade_requests AS rr
+  				FROM grade_inquiries AS rr
   				GROUP BY rr.user_id, rr.team_id, rr.g_id
   			  ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
             WHERE $selector

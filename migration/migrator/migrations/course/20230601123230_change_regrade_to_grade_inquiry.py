@@ -18,10 +18,10 @@ def up(config, database, semester, course):
     database.execute("""
         ALTER TABLE regrade_discussion
             RENAME TO grade_inquiry_discussion;
+
+        ALTER TABLE regrade_requests
+            RENAME TO grade_inquiries;
     """)
-    #   ALTER TABLE regrade_requests
-    #       RENAME TO grade_inquiries;
-    # """)
 
     # Rename columns
     # database.execute("""
@@ -50,10 +50,10 @@ def down(config, database, semester, course):
     database.execute("""
         ALTER TABLE grade_inquiry_discussion
             RENAME TO regrade_discussion;
+        
+        ALTER TABLE grade_inquiries
+            RENAME TO regrade_requests;
     """)
-    #     ALTER TABLE grade_inquiries
-    #         RENAME TO regrade_requests;
-    # """)
 
     # # Rename column names
     # database.execute("""
