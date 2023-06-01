@@ -53,7 +53,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         try {
-            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
+            $this->core->getQueries()->insertNewGradeInquiry($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
             $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 

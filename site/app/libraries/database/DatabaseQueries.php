@@ -4854,7 +4854,7 @@ AND gc_id IN (
             $this->submitty_db->row()['is_instructor'];
     }
 
-    public function getRegradeRequestStatus($user_id, $gradeable_id) {
+    public function getGradeInquiryStatus($user_id, $gradeable_id) {
         $this->course_db->query("SELECT * FROM grade_inquiries WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
@@ -4882,7 +4882,7 @@ AND gc_id IN (
      * insert a new grade inquiry for a submitter
      * @return string the id of the first new post inserted of the new grade inquiry
      */
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id): string {
+    public function insertNewGradeInquiry(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id): string {
         $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), GradeInquiry::STATUS_ACTIVE, $gc_id];
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
