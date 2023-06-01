@@ -467,7 +467,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveGradeInquiryRequest() %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
@@ -517,7 +517,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveGradeInquiryRequest() %}
+    {% if graded_gradeable.hasActiveRegradeRequest() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
