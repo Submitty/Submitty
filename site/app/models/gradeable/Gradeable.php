@@ -1512,7 +1512,7 @@ class Gradeable extends AbstractModel {
      * @param bool $grade_inquiry_allowed
      * @internal
      */
-    private function setGradeInquiryAllowedInternal(bool $grade_inquiry_allowed) {
+    private function setGradeInquiryInternal(bool $grade_inquiry_allowed) {
         $this->grade_inquiry_allowed = $grade_inquiry_allowed;
     }
 
