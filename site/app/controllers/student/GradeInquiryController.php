@@ -261,7 +261,7 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $grade_inquiry->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
+            $this->core->getQueries()->saveGradeInquiry($grade_inquiry);
             if ($content != "") {
                 $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }

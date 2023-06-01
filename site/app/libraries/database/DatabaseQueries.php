@@ -4950,14 +4950,14 @@ AND gc_id IN (
         return $this->course_db->row();
     }
 
-    public function saveRegradeRequest(GradeInquiry $regrade_request) {
-        $this->course_db->query("UPDATE grade_inquiries SET timestamp = current_timestamp, status = ? WHERE id = ?", [$regrade_request->getStatus(), $regrade_request->getId()]);
+    public function saveGradeInquiry(GradeInquiry $grade_inquiry) {
+        $this->course_db->query("UPDATE grade_inquiries SET timestamp = current_timestamp, status = ? WHERE id = ?", [$grade_inquiry->getStatus(), $grade_inquiry->getId()]);
     }
 
-    public function deleteRegradeRequest(GradeInquiry $regrade_request) {
-        $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$regrade_id]);
-        $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$regrade_id]);
+    public function deleteGradeInquiry(GradeInquiry $grade_inquiry) {
+        $grade_inquiry_id = $grade_inquiry->getId();
+        $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$grade_inquiry_id]);
+        $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$grade_inquiry_id]);
     }
 
     public function deleteGradeable($g_id) {
