@@ -81,7 +81,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionBased($discussion_based)
  * @method string  getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
- * @method int getActiveRegradeRequestCount()
+ * @method int getActiveGradeInquiriesCount()
  * @method void setHasDueDate($has_due_date)
  * @method void setHasReleaseDate($has_release_date)
  * @method object[] getPeerGradingPairs()
@@ -134,7 +134,7 @@ class Gradeable extends AbstractModel {
     private $db_components = [];
 
     /** @prop @var bool If any submitters have active grade inquiries */
-    protected $active_regrade_request_count = 0;
+    protected $active_grade_inquiries_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
@@ -314,7 +314,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
+        $this->setActiveGradeInquiriesCount($details['active_grade_inquiries_count'] ?? 0);
 
         // Set dates last
         $this->setDates($details);
@@ -1024,8 +1024,8 @@ class Gradeable extends AbstractModel {
      * @param int $count
      * @internal
      */
-    public function setActiveRegradeRequestCount(int $count) {
-        $this->active_regrade_request_count = $count;
+    public function setActiveGradeInquiriesCount(int $count) {
+        $this->active_grade_inquiries_count = $count;
     }
 
     /**
@@ -1483,7 +1483,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Sets whether regrades are allowed for this gradeable
+     * Sets whether grade inquiries are allowed for this gradeable
      * @param bool $grade_inquiry_allowed
      * @throws ValidationException If date validation fails in this new grade inquiry configuration
      */
@@ -1502,7 +1502,7 @@ class Gradeable extends AbstractModel {
             // This line brings me great pain
             throw $e;
         }
-        // make sure grade_inquiry_per_component_allowed is false when regrade allowed is false
+        // make sure grade_inquiry_per_component_allowed is false when grade_inquiries_allowed is false
         if (!$grade_inquiry_allowed) {
             $this->grade_inquiry_per_component_allowed = false;
         }
@@ -1561,8 +1561,8 @@ class Gradeable extends AbstractModel {
      * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
-    public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
+    public function anyActiveGradeInquiries() {
+        return $this->active_grade_inquiries_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**
@@ -2056,7 +2056,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * return true if students can currently submit regrades for this assignment, false otherwise
+     * return true if students can currently submit grade inquiries for this assignment, false otherwise
      * @return bool
      */
     public function isRegradeOpen() {
