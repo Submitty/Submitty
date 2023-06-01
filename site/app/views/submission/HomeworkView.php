@@ -1144,7 +1144,7 @@ class HomeworkView extends AbstractView {
      * @param bool $can_inquiry
      * @return string
      */
-    public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+    public function showGradeInquiryDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
@@ -1174,7 +1174,7 @@ class HomeworkView extends AbstractView {
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
-            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+            $grade_inquiry_posts = $this->core->getQueries()->getGradeInquiryDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';

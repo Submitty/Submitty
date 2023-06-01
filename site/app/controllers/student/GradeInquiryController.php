@@ -55,7 +55,7 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
@@ -265,7 +265,7 @@ class GradeInquiryController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return JsonResponse::getSuccessResponse(
@@ -299,7 +299,7 @@ class GradeInquiryController extends AbstractController {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['submission', 'Homework'],
-                'showRegradeDiscussion',
+                'showGradeInquiryDiscussion',
                 $graded_gradeable,
                 true
             )
