@@ -74,11 +74,11 @@ bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 
 #python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
 
-# bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
-# systemctl start submitty_autograding_shipper
-# systemctl start submitty_autograding_worker
-# systemctl start submitty_websocket_server
-# systemctl start submitty_daemon_jobs_handler
+systemctl start submitty_autograding_shipper
+systemctl start submitty_autograding_worker
+systemctl start submitty_websocket_server
+systemctl start submitty_daemon_jobs_handler
 
 echo 'Finished setup.'
