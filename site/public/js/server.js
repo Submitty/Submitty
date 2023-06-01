@@ -1797,3 +1797,34 @@ function addMarkdownCode(type){
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        document.cookie = "last_tz_warn_time=" + Date.now() + ";path=/;";
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);

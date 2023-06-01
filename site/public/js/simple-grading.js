@@ -872,6 +872,20 @@ function setupSimpleGrading(action) {
         registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: {score: null} }, keySetCurrentRow);
     }
 
+    // make sure to show focused cell when covered by student info
+    $('.scrollable-table td[class^="option-"] > .cell-grade').on('focus', function() {
+        const lastInfoBox = $(this).parent().parent().children('td:not([class^="option-"])').last();
+        const boxRect = lastInfoBox[0].getBoundingClientRect();
+        const inputRect = $(this).parent()[0].getBoundingClientRect();
+
+        const diff = boxRect.right - inputRect.left;
+        if (diff < 0) {
+            return;
+        }
+
+        $('.scrollable-table')[0].scrollLeft -= diff;
+    });
+
     // when pressing enter in the search bar, go to the corresponding element
     $('#student-search-input').on('keyup', function(event) {
         if (event.code === 'Enter') { // Enter
