@@ -4859,7 +4859,7 @@ AND gc_id IN (
         return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
 
-    public function getRegradeRequestsUsers(string $gradeable_id, bool $ungraded_only = false, int $component_id = -1) {
+    public function getGradeInquiriesUsers(string $gradeable_id, bool $ungraded_only = false, int $component_id = -1) {
         $parameters = [];
         $parameters[] = $gradeable_id;
         $ungraded_query = "";
