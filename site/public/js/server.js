@@ -184,7 +184,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`
         cm_message += ` (<em>contains <b>${num_of_files}</b> file${file_s}` + num_links_txt;
     }
-    $('.delete-course-material-message', form).text(cm_message);
+    $('.delete-course-material-message', form).html(cm_message);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
