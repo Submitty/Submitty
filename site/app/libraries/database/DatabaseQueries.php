@@ -4923,13 +4923,13 @@ AND gc_id IN (
             },
             $grade_inquiries
         );
-        $this->course_db->query("SELECT * FROM grade_inquiry_discussion WHERE regrade_id IN $grade_inquiry_ids AND deleted=false ORDER BY timestamp ASC ", $params);
+        $this->course_db->query("SELECT * FROM grade_inquiry_discussion WHERE grade_inquiry_id IN $grade_inquiry_ids AND deleted=false ORDER BY timestamp ASC ", $params);
         $result = [];
         foreach ($params as $id) {
             $result[$id] = array_filter(
                 $this->course_db->rows(),
                 function ($v) use ($id) {
-                    return $v['regrade_id'] == $id;
+                    return $v['grade_inquiry_id'] == $id;
                 }
             );
         }
@@ -4938,7 +4938,7 @@ AND gc_id IN (
 
     public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id) {
         $params = [$regrade_id, $user_id, $content, $gc_id];
-        $this->course_db->query("INSERT INTO grade_inquiry_discussion(regrade_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
+        $this->course_db->query("INSERT INTO grade_inquiry_discussion(grade_inquiry_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
     }
 
@@ -4956,7 +4956,7 @@ AND gc_id IN (
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {
         $regrade_id = $regrade_request->getId();
-        $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE regrade_id = ?", [$regrade_id]);
+        $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$regrade_id]);
         $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$regrade_id]);
     }
 
