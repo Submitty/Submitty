@@ -142,21 +142,23 @@
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
 
-            <fieldset id="regrade_request_enable_container">
-                <legend>Should grade inquiries be enabled for this assignment?</legend>
-                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
-                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
-            </fieldset>
+            {% if regrade_enabled %}
+                <fieldset id="regrade_request_enable_container">
+                    <legend>Should grade inquiries be enabled for this assignment?</legend>
+                    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
+                    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
+                </fieldset>
 
-            <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
-                <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
-                <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
-                        {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
-                <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
-                        {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
-            </fieldset>
+                <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
+                    <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
+                    <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
+                            {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
+                    <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
+                            {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
+                </fieldset>
+            {% endif %}
 
             {% if forum_enabled %}
                 <div>
@@ -255,11 +257,25 @@
 
                     <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Github hosted - public repository, students will provide URL</label> <br />
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Externally hosted - public repository, students will provide URL</label> <br />
 
                     <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+                
+                    <div class="team_no">
+                        <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
+                            {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - private repository, instructor set URL</label>
+
+                        <div id="vcs_self_set_url_content" style="margin-left: 5%">
+                            {% if action == 'new' or action == 'template' %}
+                            {% else %}
+                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                            {% endif %}  
+                        </div>	    					    
+                    </div>
+
                 </fieldset>
             </div>
         </div>
@@ -449,6 +465,7 @@
     function onVCSTypeChange() {
         disableElementChildren('[id=vcs_submitty_set_url_content]', true);
         disableElementChildren('[id=vcs_submitty_url_content]', true);
+        disableElementChildren('[id=vcs_self_set_url_content]', true);
 
         if($('#vcs_radio_submitty_hosted').is(':checked')) {
             disableElementChildren('#vcs_submitty_url_content', false);
@@ -460,6 +477,14 @@
         }
         else {
             $('#vcs_submitty_url').prop('required', false);
+        }
+        
+        if($('#vcs_radio_self_hosted_set_url').is(':checked')) {
+            disableElementChildren('#vcs_self_set_url_content', false);
+            $('#vcs_self_url').prop('required', true);
+        }
+        else {
+            $('#vcs_self_url').prop('required', false);
         }
     }
 
