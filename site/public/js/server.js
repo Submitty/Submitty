@@ -174,14 +174,14 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     $('.delete-course-material-message', form).html('');
     let cm_message = '<b>'+file_name+'</b>';
     if (str_id !== null) {
-        let files_or_links = $(`[id^=file_viewer_${str_id}]`);
-        let num_of_links = files_or_links.filter(function () {
+        const files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        const num_of_links = files_or_links.filter(function () {
             return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
         }).length;
-        let num_of_files = files_or_links.length - num_of_links;
-        let file_s = (num_of_files > 1) ? 's' : '';
-        let link_s = (num_of_links > 1) ? 's' : '';
-        let num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`
+        const num_of_files = files_or_links.length - num_of_links;
+        const file_s = (num_of_files > 1) ? 's' : '';
+        const link_s = (num_of_links > 1) ? 's' : '';
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`
         cm_message += ` (<em>contains <b>${num_of_files}</b> file${file_s}` + num_links_txt;
     }
     $('.delete-course-material-message', form).text(cm_message);
