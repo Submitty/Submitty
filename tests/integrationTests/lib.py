@@ -38,6 +38,20 @@ BUILD_MAIN_CONFIGUE_PATH = os.path.join(
     'build_main_configure.sh'
 )
 
+
+config_dir = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+submitty_json_path = os.path.join(config_dir, 'submitty.json')
+
+# Create the config directory if it doesn't exist
+if not os.path.exists(config_dir):
+    os.makedirs(config_dir)
+
+# Create the submitty.json file if it doesn't exist
+if not os.path.exists(submitty_json_path):
+    with open(submitty_json_path, 'w') as f:
+        json.dump({}, f)
+
+
 # Verify that this has been installed by just checking that this file is located in
 # a directory next to the config directory which has submitty.json in it
 if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
