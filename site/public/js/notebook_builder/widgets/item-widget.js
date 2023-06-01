@@ -1,3 +1,6 @@
+/* global Widget */
+/* exported ItemWidget */
+
 class ItemWidget extends Widget {
     constructor() {
         super();
@@ -6,17 +9,14 @@ class ItemWidget extends Widget {
 
         this.state = {
             'type': 'item',
-            'from_pool': []
-        }
+            'from_pool': [],
+        };
     }
 
     render() {
         // Setup container
         const container = this.getContainer('Item');
         container.classList.add('item-widget');
-
-        // Setup interactive area
-        const interactive_area = container.querySelector('.interactive-container');
 
         this.dom_pointer = container;
         return container;
@@ -130,6 +130,6 @@ class ItemWidget extends Widget {
      * @returns {string}
      */
     getBlockedTemplate() {
-        return `<p>To setup this item, ensure there is at least one itempool item, and all itempool items have unique and non-blank item names.</p>`;
+        return '<p>To setup this item, ensure there is at least one itempool item, and all itempool items have unique and non-blank item names.</p>';
     }
 }
