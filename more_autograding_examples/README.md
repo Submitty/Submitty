@@ -11,7 +11,7 @@ then that gradeable will be skipped for fake submissions.
   
 a) No, there is no submissions.yml file  
 
-Every invididual file and directory in the sample_submissions folder for a given gradeable is considered a valid 
+Every individual file and directory in the sample_submissions folder for a given gradeable is considered a valid 
 submission. This is best when all files are standalone and there is no junk files in a directory.
 
 

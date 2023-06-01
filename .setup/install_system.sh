@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--utm] [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,6 +59,8 @@ source ${CURRENT_DIR}/bin/versions.sh
 # PROVISION SETUP
 #################
 
+export DEV_VM=0
+export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
@@ -69,8 +71,13 @@ export WORKER_PAIR=0
 # don't recognize as a flag
 while :; do
     case $1 in
+        --utm)
+            export UTM=1
+            export DEV_VM=1
+            ;;
         --vagrant)
             export VAGRANT=1
+            export DEV_VM=1
             ;;
         --worker)
             export WORKER=1
@@ -90,22 +97,20 @@ while :; do
     shift
 done
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-export UTM_ARM=0
-if [[ "$(uname -m)" = "aarch64" ]] ; then
-    export UTM_ARM=1
-fi
-
 if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
     export DEBIAN_FRONTEND=noninteractive
 fi
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${UTM} == 1 ]; then
+    mkdir ${SUBMITTY_REPOSITORY}/.utm
+fi
+
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
     # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-    if [ ${UTM_ARM} == 0 ]; then
+    if [ ${UTM} == 0 ]; then
 	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
     fi
 
@@ -218,14 +223,10 @@ bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 # STACK SETUP
 #################
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-#if [ ${VAGRANT} == 1] && [ ${UTM_ARM} == 0]; then
-# stack is not available for non-x86_64 systems
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
-    # We only might build analysis tools from source while using vagrant
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+    # We only might build analysis tools from source on a development machine
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
-    # NOTE: currently only 64-bit (x86_64) Linux binary is available
 fi
 
 #################################################################
@@ -267,17 +268,17 @@ else
 fi
 
 # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON ARM64 / UTM_ARM MAC M1
+# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON UTM
 if getent passwd vagrant > /dev/null; then
     # Already exists
     echo 're-running install submitty'
-elif [ ${UTM_ARM} == 1 ]; then
+elif [ ${UTM} == 1 ]; then
     useradd -m vagrant
 fi
-# END ARM64
+# END UTM
 
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -319,7 +320,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@172.18.2.8"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.56.21"
     fi
 fi
 
@@ -509,7 +510,7 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
     fi
 
@@ -544,7 +545,7 @@ EOF
     DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
     DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
 
-    if [ ${VAGRANT} != 1 ]; then
+    if [ ${DEV_VM} != 1 ]; then
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
@@ -575,7 +576,7 @@ if [ ${WORKER} == 0 ]; then
         PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
     fi
 
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
         echo "Creating PostgreSQL users"
@@ -650,13 +651,13 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     fi
 else
-    if [ ${VAGRANT} == 1 ]; then
+    if [ ${DEV_VM} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
         # in case it is not, default to our primary URL
         if [ -z "${SUBMISSION_URL}" ]; then
@@ -766,7 +767,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [ ${WORKER} == 0 ]; then
-    if [[ ${VAGRANT} == 1 ]]; then
+    if [[ ${DEV_VM} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
@@ -782,7 +783,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -793,31 +794,6 @@ if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     systemctl enable nullsmtpd
 fi
 
-# Setup preferred_name_logging
-echo -e "Setup preferred name logging."
-
-# Copy preferred_name_logging.php to sbin
-rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
-chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
-chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
-
-# Backup and adjust/overwrite Postgresql's configuration
-if [ ${WORKER} == 0 ]; then
-    cp -a /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
-    sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
-            s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
-	    s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[^][(){}<>|:;&#=!'?\*\~\$\"\` tab]\+'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
-	    s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'~;
-            s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9]\+~log_file_mode = 0640~;
-            s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_age = 1d~;
-            s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9]\+~log_rotation_size = 0~;
-            s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = warning~;
-            s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = -1~;
-            s~^#*[ tab]*log_statement[ tab]*=[ tab]*'[a-z]\+'~log_statement = 'ddl'~;
-            s~^#*[ tab]*log_error_verbosity[ tab]*=[ tab]*[a-z]\+~log_error_verbosity = default~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
-fi
-
-echo -e "Finished preferred_name_logging setup."
 
 #################################################################
 # DOCKER SETUP
@@ -826,7 +802,7 @@ echo -e "Finished preferred_name_logging setup."
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""
@@ -872,5 +848,23 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 
-echo "Done."
+echo "
+#####################################################################
+
+                     INSTALLATION SUCCESS!
+
+                        .GGQGGGSlu
+                      .GGGGGGGGGGGS
+                 :llUGGGGGGGGGGGGGGGG
+                 'GGGGGGGGGGGGGGGGGGb        .
+                    %GGGGGGGGGGGGGGG~   ..GSGGG
+                       GGGGGGGGGGGGGGSGGGGGGGGGG[
+                     ;GGGGGGGGGGGGp\ \ \GGGGGGGGL
+                    !GGGGGGGGGGGGGGS\ \ \GGGGGG
+                    GGGGGGGGGGGGGGGGG\ \ \9GGGG
+                    %GGGGGGGGGGGGGGGS/ / /.GGG
+                     %GGGGGGGGGGGGGS/ / /GGG
+                      '%NNNNNNNNNNNNNNNNNN
+#####################################################################
+"
 exit 0

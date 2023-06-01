@@ -36,7 +36,7 @@
     </div>
     <div class="row mt-3">
         <div class="col-md-12 pl-0">
-            Enter any file wildcards that should not be viewable by students. Seperate wildcards with commas
+            Enter any file wildcards that should not be viewable by students. Separate wildcards with commas
             <div><input type="text" id="hidden_files" name = "hidden_files" class="auto_save" placeholder="" value = "{{hidden_files}}"></div>
         </div>
     </div>
@@ -185,15 +185,15 @@
     }
 
     function checkNewStudentsValid(grader_id, user_input, valid_students, new_grader) {
-        // check if the newly inputed student is a valid student in the database
+        // check if the newly inputted student is a valid student in the database
         const student_autofill = JSON.parse($('#student-autofill').val());
         const valid_user_ids = student_autofill.map(tmp => tmp['value']);
         const valid_entry = valid_user_ids.includes(user_input.val());
-        // check if the newly inputed student is already a student for grader
+        // check if the newly inputted student is already a student for grader
         // this is automatically false when adding a new grader
         const student_pairs = JSON.parse($('#peer-grader-pairs').val());
         const already_exists = !new_grader && student_pairs[grader_id].includes(user_input.val());
-        // the newly inputed student cannot be the grader themself
+        // the newly inputted student cannot be the grader themself
         self_grading = grader_id === user_input.val();
         // if all 3 above conditions are met, allow user to press submit
         const index = Number(user_input.attr('name').substr(12));

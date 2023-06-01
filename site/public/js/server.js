@@ -171,11 +171,49 @@ function newDeleteCourseMaterialForm(id, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).text(file_name);
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
+}
+
+function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
+    const form = $('#overwrite-course-material-form');
+    form.css('display', 'block');
+    if (clashing_names.length === 1) {
+        const to_replace = [[' All', '']];
+        if (is_link) {
+            to_replace.push(['file', 'link']);
+        }
+        form.html((i, html) => {
+            to_replace.forEach((elem) => {
+                html = html.replaceAll(elem[0], elem[1]);
+            });
+            return html;
+        });
+    }
+    else {
+        const singular = ['Material', 'file', 'name', 'one'];
+        form.html((i, html) => {
+            singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
+                html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
+            });
+            return html;
+        });
+    }
+    const clash_list = $('#existing-names');
+    clash_list.html("");
+    clashing_names.forEach((elem) => {
+        clash_list.append($('<li>', {
+            text: elem
+        }));
+    });
+    captureTabInModal("overwrite-course-material-form");
+    if (is_edit_form) {
+        $('#overwrite-submit').attr('is-edit-form', 1);
+    }
     form.find('.form-body').scrollTop(0);
 }
 
@@ -211,7 +249,7 @@ function newUploadCourseMaterialsForm() {
     captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
-
+    $('#overwrite-materials-flag').remove();
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -321,11 +359,9 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
+    const title_label = $("#edit-url-title-label", form);
+    const url_label = $("#edit-url-url-label", form);
     if (is_link === 1) {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
@@ -335,9 +371,18 @@ function newEditCourseMaterialsForm(tag) {
         url.prop('disabled', false);
         url.val(link_url);
     }
+    else {
+        if (title_label.css('display') !== 'none') {
+            title_label.css('display', 'none');
+        }
+        if (url_label.css('display') !== 'none') {
+            url_label.css('display', 'none');
+        }
+    }
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
+    $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -473,7 +518,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -483,7 +528,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -491,7 +536,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -499,7 +544,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -508,17 +553,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -568,7 +613,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
   function c(a, b) {
     const c = document.createElement("textarea");
     c.name = a;
@@ -798,13 +843,19 @@ function openAllDivForCourseMaterials() {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        }
         return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        }
         return 'open';
     }
     return false;
@@ -1091,6 +1142,12 @@ function enableTabsInTextArea(jQuerySelector) {
     });
 }
 
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
+        location.href = redirect;
+    }
+}
+
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
     var url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);
@@ -1161,7 +1218,7 @@ function refreshOnResponseOverriddenGrades(json) {
     else {
         json['data']['users'].forEach(function(elem){
             let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
       $("#load-overridden-grades").removeClass('d-none');
@@ -1555,7 +1612,7 @@ function flagUserImage(user_id, flag) {
                 let new_content;
                 if (data.image_data && data.image_mime_type) {
                     new_content = document.createElement('img');
-                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('alt', data.given_family_username);
                     new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
                 }
                 else {
@@ -1727,3 +1784,34 @@ function addMarkdownCode(type){
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        document.cookie = "last_tz_warn_time=" + Date.now() + ";path=/;";
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);
