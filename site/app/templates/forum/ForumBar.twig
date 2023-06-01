@@ -68,7 +68,7 @@
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					More
 				</button>
-				<div class="dropdown-menu">
+				<div class="dropdown-menu dropdown-menu-right">
 					{% for more in more_data|slice(1) %}
 						{% if user_group <= more.required_rank %}
 							{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
