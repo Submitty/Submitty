@@ -14,30 +14,45 @@ from submitty_utils import submitty_schema_validator
 
 # global variable available to be used by the test suite modules
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
-SUBMITTY_INSTALL_DIR = os.path.realpath(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
-)
+try:
+    SUBMITTY_INSTALL_DIR = os.path.realpath(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+    )
+except:
+    print("SUBMITTY_INSTALL_DIR don't work")
 
-INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
-    SUBMITTY_INSTALL_DIR,
-    "./test_suite/integrationTests/"
-)
+try:    
+    INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
+        SUBMITTY_INSTALL_DIR,
+        "./test_suite/integrationTests/"
+    )
+except:
+    print("INTEGRATION_TEST_ROOT_FOLDER don't work")
 
-COMPILE_CONFIGURE_BIN_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    'compile_configure_bin.sh'
-)
 
-CONFIGURE_BIN_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    "configure.bin"
-)
+try:   
+    COMPILE_CONFIGURE_BIN_PATH = os.path.join(
+        INTEGRATION_TEST_ROOT_FOLDER,
+        'compile_configure_bin.sh'
+    )
+except:
+    print("INTEGRATION_TEST_ROOT_FOLDER don't work")
 
-BUILD_MAIN_CONFIGUE_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    'build_main_configure.sh'
-)
+try:
+    CONFIGURE_BIN_PATH = os.path.join(
+        INTEGRATION_TEST_ROOT_FOLDER,
+        "configure.bin"
+    )
+except:
+    print("CONFIGURE_BIN_PATH don't work")
 
+try:    
+    BUILD_MAIN_CONFIGUE_PATH = os.path.join(
+        INTEGRATION_TEST_ROOT_FOLDER,
+        'build_main_configure.sh'
+    )
+except: 
+    print("BUILD_MAIN_CONFIGUE_PATH don't work")
 
 config_dir = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 submitty_json_path = os.path.join(config_dir, 'submitty.json')
