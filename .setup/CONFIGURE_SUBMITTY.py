@@ -224,165 +224,6 @@ if os.path.isfile(AUTHENTICATION_JSON):
     with open(AUTHENTICATION_JSON) as authentication_file:
         loaded_defaults.update(json.load(authentication_file))
 
-# no need to authenticate on a worker machine (no website)
-if not args.worker:
-    if 'authentication_method' in loaded_defaults:
-        loaded_defaults['authentication_method'] = authentication_methods.index(loaded_defaults['authentication_method']) + 1
-
-# grab anything not loaded in (useful for backwards compatibility if a new default is added that
-# is not in an existing config file.)
-for key in defaults.keys():
-    if key not in loaded_defaults:
-        loaded_defaults[key] = defaults[key]
-defaults = loaded_defaults
-
-print("\nWelcome to the Submitty Homework Submission Server Configuration\n")
-DEBUGGING_ENABLED = args.debug is True
-
-if DEBUGGING_ENABLED:
-    print('!! DEBUG MODE ENABLED !!')
-    print()
-
-if args.worker:
-    print("CONFIGURING SUBMITTY AS A WORKER !!")
-
-print('Hit enter to use default in []')
-print()
-
-if args.worker:
-    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
-    print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER))
-else:
-    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
-    print()
-
-    if not os.path.isdir(DATABASE_HOST):
-        DATABASE_PORT = int(get_input('What is the database port?', defaults['database_port']))
-        print()
-    else:
-        DATABASE_PORT = defaults['database_port']
-
-    DATABASE_USER = get_input('What is the global database user/role?', defaults['database_user'])
-    print()
-
-    default = ''
-    if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
-        default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the global database user/role {}? {}'.format(DATABASE_USER, default))
-    if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
-        DATABASE_PASS = defaults['database_password']
-    print()
-
-    DATABASE_COURSE_USER = get_input('What is the course database user/role?', defaults['database_course_user'])
-    print()
-
-    default = ''
-    if 'database_course_password' in defaults and DATABASE_COURSE_USER == defaults['database_course_user']:
-        default = '(Leave blank to use same password)'
-    DATABASE_COURSE_PASSWORD = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_COURSE_USER, default))
-    if DATABASE_COURSE_PASSWORD == '' and DATABASE_COURSE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
-        DATABASE_COURSE_PASSWORD = defaults['database_course_password']
-    print()
-
-    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
-    print()
-
-    SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
-                               'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
-    print()
-
-    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url']).rstrip('/')
-    print()
-
-    INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
-                             defaults['institution_name'])
-    print()
-
-    if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
-        INSTITUTION_HOMEPAGE = ''
-    else:
-        INSTITUTION_HOMEPAGE = get_input("What is the url of your institution\'s homepage? "
-                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'])
-        if INSTITUTION_HOMEPAGE.lower() == "none":
-            INSTITUTION_HOMEPAGE = ''
-        print()
-
-
-    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
-    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
-
-    print('What authentication method to use:')
-    for i in range(len(authentication_methods)):
-        print(f"{i + 1}. {authentication_methods[i]}")
-
-    while True:
-        try:
-            auth = int(get_input('Enter number?', defaults['authentication_method'])) - 1
-        except ValueError:
-            auth = -1
-        if auth in range(len(authentication_methods)):
-            break
-        print(f'Number must in between 1 - {len(authentication_methods)} (inclusive)!')
-    print()
-
-    AUTHENTICATION_METHOD = authentication_methods[auth]
-
-    default_auth_options = defaults.get('ldap_options', dict())
-    LDAP_OPTIONS = {
-        'url': default_auth_options.get('url', ''),
-        'uid': default_auth_options.get('uid', ''),
-        'bind_dn': default_auth_options.get('bind_dn', '')
-    }
-
-    if AUTHENTICATION_METHOD == 'LdapAuthentication':
-        LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
-        LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
-        LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'])
-
-    default_auth_options = defaults.get('saml_options', dict())
-    SAML_OPTIONS = {
-        'name': default_auth_options.get('name', ''),
-        'username_attribute': default_auth_options.get('username_attribute', '')
-    }
-
-    if AUTHENTICATION_METHOD == 'SamlAuthentication':
-        SAML_OPTIONS['name'] = get_input('Enter name you would like shown to user for authentication?', SAML_OPTIONS['name'])
-        SAML_OPTIONS['username_attribute'] = get_input('Enter SAML username attribute?', SAML_OPTIONS['username_attribute'])
-
-
-    CGI_URL = SUBMISSION_URL + '/cgi-bin'
-
-    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
-
-    while True:
-        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
-        if (is_email_enabled.lower() in ['yes', 'y']):
-            EMAIL_ENABLED = True
-            EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
-            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
-            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
-            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
-            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
-            try:
-                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
-            except ValueError:
-                EMAIL_SERVER_PORT = defaults['email_server_port']
-            EMAIL_INTERNAL_DOMAIN = get_input("What is the internal email address format?", defaults['email_internal_domain'])
-            break
-
-        elif (is_email_enabled.lower() in ['no', 'n']):
-            EMAIL_ENABLED = False
-            EMAIL_USER = defaults['email_user']
-            EMAIL_PASSWORD = defaults['email_password']
-            EMAIL_SENDER = defaults['email_sender']
-            EMAIL_REPLY_TO = defaults['email_reply_to']
-            EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
-            EMAIL_SERVER_PORT = defaults['email_server_port']
-            EMAIL_INTERNAL_DOMAIN = defaults['email_internal_domain']
-            break
-    print()
-
-
 
 ##############################################################################
 # make the installation setup directory
@@ -425,28 +266,11 @@ else:
     config['php_uid'] = PHP_UID
     config['php_gid'] = PHP_GID
 
-    config['database_host'] = DATABASE_HOST
-    config['database_port'] = DATABASE_PORT
-    config['database_user'] = DATABASE_USER
-    config['database_password'] = DATABASE_PASS
-    config['database_course_user'] = DATABASE_COURSE_USER
-    config['database_course_password'] = DATABASE_COURSE_PASSWORD
     config['timezone'] = TIMEZONE
 
-    config['authentication_method'] = AUTHENTICATION_METHOD
-    config['vcs_url'] = VCS_URL
-    config['submission_url'] = SUBMISSION_URL
-    config['cgi_url'] = CGI_URL
-    config['websocket_port'] = WEBSOCKET_PORT
-
-    config['institution_name'] = INSTITUTION_NAME
-    config['institution_homepage'] = INSTITUTION_HOMEPAGE
-    config['debugging_enabled'] = DEBUGGING_ENABLED
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
-config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-
 if args.worker:
     config['worker'] = 1
 else:
@@ -517,96 +341,96 @@ os.removedirs(tmp_folder)
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/config
 
-if not args.worker:
-    if not os.path.isfile(WORKERS_JSON):
-        worker_dict = {
-            "primary": {
-                "capabilities": ["default"],
-                "address": "localhost",
-                "username": "",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                "enabled" : True
-            }
-        }
+# if not args.worker:
+#     if not os.path.isfile(WORKERS_JSON):
+#         worker_dict = {
+#             "primary": {
+#                 "capabilities": ["default"],
+#                 "address": "localhost",
+#                 "username": "",
+#                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+#                 "enabled" : True
+#             }
+#         }
 
-        if args.worker_pair:
-            worker_dict["submitty-worker"] = {
-                "capabilities": ['default'],
-                "address": "192.168.56.21",
-                "username": "submitty",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                "enabled": True
-            }
-            if args.setup_for_sample_courses:
-                worker_dict['submitty-worker']['capabilities'].extend([
-                    'cpp',
-                    'python',
-                    'et-cetera',
-                    'notebook',
-                ])
+#         if args.worker_pair:
+#             worker_dict["submitty-worker"] = {
+#                 "capabilities": ['default'],
+#                 "address": "192.168.56.21",
+#                 "username": "submitty",
+#                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+#                 "enabled": True
+#             }
+#             if args.setup_for_sample_courses:
+#                 worker_dict['submitty-worker']['capabilities'].extend([
+#                     'cpp',
+#                     'python',
+#                     'et-cetera',
+#                     'notebook',
+#                 ])
 
-        if args.setup_for_sample_courses:
-            worker_dict['primary']['capabilities'].extend([
-                'cpp',
-                'python',
-                'et-cetera',
-                'notebook',
-            ])
+#         if args.setup_for_sample_courses:
+#             worker_dict['primary']['capabilities'].extend([
+#                 'cpp',
+#                 'python',
+#                 'et-cetera',
+#                 'notebook',
+#             ])
 
-        with open(WORKERS_JSON, 'w') as workers_file:
-            json.dump(worker_dict, workers_file, indent=4)
+#         with open(WORKERS_JSON, 'w') as workers_file:
+#             json.dump(worker_dict, workers_file, indent=4)
 
-    if not os.path.isfile(CONTAINERS_JSON):
-        container_dict = {
-            "default": [
-                          "submitty/clang:6.0",
-                          "submitty/autograding-default:latest",
-                          "submitty/java:11",
-                          "submitty/python:3.6",
-                          "submittyrpi/csci1200:default"
-                       ]
-        }
+#     if not os.path.isfile(CONTAINERS_JSON):
+#         container_dict = {
+#             "default": [
+#                           "submitty/clang:6.0",
+#                           "submitty/autograding-default:latest",
+#                           "submitty/java:11",
+#                           "submitty/python:3.6",
+#                           "submittyrpi/csci1200:default"
+#                        ]
+#         }
 
-        with open(CONTAINERS_JSON, 'w') as container_file:
-            json.dump(container_dict, container_file, indent=4)
+#         with open(CONTAINERS_JSON, 'w') as container_file:
+#             json.dump(container_dict, container_file, indent=4)
 
-    for file in [WORKERS_JSON, CONTAINERS_JSON]:
-      os.chmod(file, 0o660)
+#     for file in [WORKERS_JSON, CONTAINERS_JSON]:
+#       os.chmod(file, 0o660)
 
-    shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
-    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
+#     shutil.chown(WORKERS_JSON, PHP_USER, DAEMON_GID)
+#     shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
-##############################################################################
-# Write database json
+# ##############################################################################
+# # Write database json
 
-if not args.worker:
-    config = OrderedDict()
-    config['authentication_method'] = AUTHENTICATION_METHOD
-    config['database_host'] = DATABASE_HOST
-    config['database_port'] = DATABASE_PORT
-    config['database_user'] = DATABASE_USER
-    config['database_password'] = DATABASE_PASS
-    config['database_course_user'] = DATABASE_COURSE_USER
-    config['database_course_password'] = DATABASE_COURSE_PASSWORD
-    config['debugging_enabled'] = DEBUGGING_ENABLED
+# if not args.worker:
+#     config = OrderedDict()
+#     config['authentication_method'] = AUTHENTICATION_METHOD
+#     config['database_host'] = DATABASE_HOST
+#     config['database_port'] = DATABASE_PORT
+#     config['database_user'] = DATABASE_USER
+#     config['database_password'] = DATABASE_PASS
+#     config['database_course_user'] = DATABASE_COURSE_USER
+#     config['database_course_password'] = DATABASE_COURSE_PASSWORD
+#     config['debugging_enabled'] = DEBUGGING_ENABLED
 
-    with open(DATABASE_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
-    os.chmod(DATABASE_JSON, 0o440)
+#     with open(DATABASE_JSON, 'w') as json_file:
+#         json.dump(config, json_file, indent=2)
+#     shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
+#     os.chmod(DATABASE_JSON, 0o440)
 
-##############################################################################
-# Write authentication json
-if not args.worker:
-    config = OrderedDict()
-    config['authentication_method'] = AUTHENTICATION_METHOD
-    config['ldap_options'] = LDAP_OPTIONS
-    config['saml_options'] = SAML_OPTIONS
+# ##############################################################################
+# # Write authentication json
+# if not args.worker:
+#     config = OrderedDict()
+#     config['authentication_method'] = AUTHENTICATION_METHOD
+#     config['ldap_options'] = LDAP_OPTIONS
+#     config['saml_options'] = SAML_OPTIONS
 
-    with open(AUTHENTICATION_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=4)
-    shutil.chown(AUTHENTICATION_JSON, 'root', DAEMONPHP_GROUP)
-    os.chmod(AUTHENTICATION_JSON, 0o440)
+#     with open(AUTHENTICATION_JSON, 'w') as json_file:
+#         json.dump(config, json_file, indent=4)
+#     shutil.chown(AUTHENTICATION_JSON, 'root', DAEMONPHP_GROUP)
+#     os.chmod(AUTHENTICATION_JSON, 0o440)
 
 ##############################################################################
 # Write submitty json
