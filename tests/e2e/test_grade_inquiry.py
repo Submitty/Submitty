@@ -17,9 +17,9 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//*[contains(@class, 'fa-pencil-alt')]").click()
 
         if allowed:
-            self.driver.find_element(By.ID, "yes_regrade_allowed").click()
+            self.driver.find_element(By.ID, "yes_grade_inquiry_allowed").click()
         else:
-            self.driver.find_element(By.ID, "no_regrade_allowed").click()
+            self.driver.find_element(By.ID, "no_grade_inquiry_allowed").click()
 
         # set deadline
         if date is not None:

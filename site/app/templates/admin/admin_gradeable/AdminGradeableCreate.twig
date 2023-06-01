@@ -144,10 +144,10 @@
 
             <fieldset id="regrade_request_enable_container">
                 <legend>Should grade inquiries be enabled for this assignment?</legend>
-                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
-                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
+                <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.isGradeInquiryAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_allowed">Yes</label>
+                <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.isGradeInquiryAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_allowed">No</label>
             </fieldset>
 
             <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
@@ -330,12 +330,12 @@
             $('#date_team_lock').prop('disabled', {{ gradeable is not null and gradeable.isTeamAssignment() ? 'false' : 'true' }});
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
-            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if grade inquiries are not enabled #}
+            {# Use this 'each' trick since 'no_grade_inquiry_allowed' may not be defined if grade inquiries are not enabled #}
             const [gradeInqOpenDate, gradeInqDueDate] = [$('#date_grade_inquiry_start'), $('#date_grade_inquiry_due')];
 
             gradeInqOpenDate.prop('disabled', true);
             gradeInqDueDate.prop('disabled', true);
-            $('#no_regrade_allowed').each(function () {
+            $('#no_grade_inquiry_allowed').each(function () {
                 gradeInqOpenDate.prop('disabled', $(this).is(':checked'));
                 gradeInqDueDate.prop('disabled', $(this).is(':checked'));
             });
@@ -463,8 +463,8 @@
         }
     }
 
-    function onIsRegradeAllowedChange() {
-        if ($('#yes_regrade_allowed').is(':checked')) {
+    function onIsGradeInquiryAllowedChange() {
+        if ($('#yes_grade_inquiry_allowed').is(':checked')) {
             disableElementChildren('.grade_inquiry_date', false);
             disableElementChildren('.grade_inquiry_per_component_allowed', false);
         }
@@ -599,8 +599,8 @@
         });
 
         //Hide Grade Inquiry Date if Grade Inquiries are not enabled
-        onIsRegradeAllowedChange();
-        $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
+        onIsGradeInquiryAllowedChange();
+        $('[name="grade_inquiry_allowed"]').change(onIsGradeInquiryAllowedChange);
         $('[name="grade_inquiry_per_component_allowed"]').click(function() {
             if ($('#no_grade_inquiry_per_component_allowed').prop('checked') && !confirm('* WARNING *\nThere are already grade inquiries, continuing with this action will permanently convert all component inquiries to general inquiries.  Do you want to proceed?')) {
                 return false;
