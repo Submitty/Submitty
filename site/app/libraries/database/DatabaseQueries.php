@@ -4936,13 +4936,13 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewGradeInquiryPost($regrade_id, $user_id, $content, $gc_id) {
-        $params = [$regrade_id, $user_id, $content, $gc_id];
+    public function insertNewGradeInquiryPost($grade_inquiry_id, $user_id, $content, $gc_id) {
+        $params = [$grade_inquiry_id, $user_id, $content, $gc_id];
         $this->course_db->query("INSERT INTO grade_inquiry_discussion(grade_inquiry_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
     }
 
-    public function getRegradePost($post_id) {
+    public function getGradeInquiryPost($post_id) {
         $this->course_db->query(
             "SELECT * FROM grade_inquiry_discussion WHERE id = ?",
             [$post_id]

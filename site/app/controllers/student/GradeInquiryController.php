@@ -126,7 +126,7 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $regrade_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
-            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
+            $regrade_post = $this->core->getQueries()->getGradeInquiryPost($regrade_post_id);
             $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
@@ -195,7 +195,7 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        $new_post = $this->core->getQueries()->getRegradePost($post_id);
+        $new_post = $this->core->getQueries()->getGradeInquiryPost($post_id);
         if ($new_post === null || $new_post['grade_inquiry_id'] !== $grade_inquiry->getId()) {
             return "";
         }
