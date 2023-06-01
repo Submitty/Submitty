@@ -74,6 +74,8 @@ LOG_DIR = os.path.join(
 )
 
 
+sys.stdout.write("we finished this part onto next");
+
 def print(*args, **kwargs):
     global LOG_FILE
     if "sep" not in kwargs:
