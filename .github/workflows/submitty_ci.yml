@@ -640,7 +640,7 @@ jobs:
       steps:
         - name: Checkout repository
           uses: actions/checkout@v3
-        - uses: ./.github/actions/e2e-integration-Setup-Composite
+        - uses: ./.github/actions/e2e-Setup-Composite
         - name: Cache Node Modules
           uses: actions/cache@v3
           with:
