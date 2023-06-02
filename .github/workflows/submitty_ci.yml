@@ -106,7 +106,7 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v3
-            - uses: shivammathur/setup-php@2.25.2
+            - uses: shivammathur/setup-php@2.25.1
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
               working-directory: site
       steps:
           - uses: actions/checkout@v3
-          - uses: shivammathur/setup-php@2.25.2
+          - uses: shivammathur/setup-php@2.25.1
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
@@ -596,6 +596,14 @@ jobs:
     #         run: |
     #           cd $SUBMITTY_REPOSITORY
     #           sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
+
+    #       - name: Run git tests #prob just selenium
+    #         run: |
+    #           cd $SUBMITTY_REPOSITORY
+    #           SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+    #           sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+    #           bash tests/git_test.sh
+
     #       - name: Run integration tests
     #         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
@@ -604,6 +612,15 @@ jobs:
 
 
     e2eIntegrationTests:
+      needs:
+        - js-lint
+        - js-unit
+        - php-lint
+        - php-unit
+        - python-lint
+        - python-unit
+        - css-lint
+        - shellcheck
       runs-on: ubuntu-20.04
       services:
         postgres:
@@ -623,7 +640,7 @@ jobs:
       steps:
         - name: Checkout repository
           uses: actions/checkout@v3
-        - uses: ./.github/actions/e2e-integration-Setup-Composite
+        - uses: ./.github/actions/e2e-Setup-Composite
         - name: Cache Node Modules
           uses: actions/cache@v3
           with:
@@ -647,5 +664,21 @@ jobs:
         - name: Restart autograding worker
           run: |
             sudo systemctl restart submitty_autograding_worker
+
+        - name: Switch to database auth
+          run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        - name: Switch to LDAP auth
+          run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        - name: Setup SAML
+          run: |
+            cd $SUBMITTY_REPOSITORY
+            sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+
+        - name: Switch to SAML auth
+          run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        - name: Check for site errors
+          working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+          run: sudo bash tests/test_site_error_log.sh
+
         - name: Run integration tests
           run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
