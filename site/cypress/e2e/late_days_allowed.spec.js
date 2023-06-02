@@ -80,8 +80,6 @@ describe('Test cases involving the late days allowed page', () => {
             catch(error){
                 console.log("Second Part not working=========================");
             }
-
-
             try{
                 // login as bitdiddle and check that they have proper number of late days
                 cy.logout();
@@ -90,7 +88,7 @@ describe('Test cases involving the late days allowed page', () => {
                 cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
                 console.log("Third Part works!!!!!!!!!!!!!!!!!!!!!!");
             }
-            catche(error){
+            catch(error){
                 console.log("Third Part not working=========================");
             }
 
