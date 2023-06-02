@@ -1,4 +1,6 @@
-if (!Cypress.env('CI')) { // Cannot run in CI.
+import skipOn from '@cypress/skip-test';
+
+skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Grading stats as an instructor', () => {
         beforeEach(() => {
             cy.login('instructor');
@@ -106,4 +108,4 @@ if (!Cypress.env('CI')) { // Cannot run in CI.
             text.contains('Number of students who have viewed their grade: 10 / 13 (76.9%)');
         });
     });
-}
+});
