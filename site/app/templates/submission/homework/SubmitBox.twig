@@ -174,7 +174,7 @@
         {% if vcs_host_type == 4 %}
             <h3>Repository to be graded:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
-            <samp> git clone {{ vcs_base_url|replace({"{$user_id}":user_id}) }}</samp>
+            {{ vcs_base_url|replace({"{$user_id}":user_id})|replace({"{$gradeable_id}":gradeable_id}) }}
         {% endif %}
         
         <h3>Grade your repository:</h3>
