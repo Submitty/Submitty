@@ -142,22 +142,21 @@
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
 
-            {% if regrade_enabled %}
-                <fieldset id="regrade_request_enable_container">
-                    <legend>Should grade inquiries be enabled for this assignment?</legend>
-                    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
-                    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
-                </fieldset>
+            <fieldset id="regrade_request_enable_container">
+                <legend>Should grade inquiries be enabled for this assignment?</legend>
+                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
+                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
+            </fieldset>
 
                 <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
-                    <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
-                    <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
-                            {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
-                    <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
-                            {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
-                </fieldset>
+                <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
+                <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
+                        {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
+                <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
+                        {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
+            </fieldset>
             {% endif %}
 
             {% if forum_enabled %}
