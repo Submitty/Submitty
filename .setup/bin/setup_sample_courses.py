@@ -584,7 +584,7 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     with open(os.path.join(dst, file_name), 'w') as f:
         json.dump(annotation_json, f, indent = 2)
 
-def commit_submission_to_repo(user_id, src_file, repo_path):
+def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory):
     # a function to commit and push a file to a user's submitty-hosted repository
     my_cwd = os.getcwd()
     with TemporaryDirectory() as temp_dir:
@@ -594,7 +594,11 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system('git checkout main')
         os.system('git pull')
         # use the above function to copy the files into the git repo for us
-        create_gradeable_submission(src_file, os.getcwd())
+        dst = os.getcwd()
+        if vcs_subdirectory != '':
+            dst = os.path.join(dst, vcs_subdirectory)
+        
+        create_gradeable_submission(src_file, dst)
         os.system('git add --all')
         os.system(f"git config user.email '{user_id}@example.com'")
         os.system(f"git config user.name '{user_id}'")
@@ -602,18 +606,17 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system('git push')
     os.chdir(my_cwd)
 
-def mimic_checkout(repo_path, submission_path, vcs_subdirectory, current_time_string):
-    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {submission_path}/tmp -b main')
-    
+def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
+    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main')
     if vcs_subdirectory != '':
         if vcs_subdirectory[0] == '/':
             vcs_subdirectory = vcs_subdirectory[1:]
-        file_path = os.path.join(f'{submission_path}/tmp', vcs_subdirectory)
+        file_path = os.path.join(f'{checkout_path}/tmp', vcs_subdirectory)
     else:
-        file_path = os.path.join(f'{submission_path}/tmp')
+        file_path = os.path.join(f'{checkout_path}/tmp')
 
-    shutil.copytree(file_path, f'{submission_path}', dirs_exist_ok=True)
-    shutil.rmtree(f'{submission_path}/tmp')
+    shutil.copytree(file_path, f'{checkout_path}', dirs_exist_ok=True)
+    shutil.rmtree(f'{checkout_path}/tmp')
 
 class User(object):
     """
@@ -1157,8 +1160,8 @@ class Course(object):
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src,  repo_path)
-                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory , current_time_string)
+                                                commit_submission_to_repo(user.id, src, repo_path,gradeable.subdirectory )
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
                                             else:
                                                 create_gradeable_submission(src, dst)
                                     else:
@@ -1173,8 +1176,8 @@ class Course(object):
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src, repo_path)
-                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory, current_time_string)
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
                                             else:
                                                 dst = os.path.join(submission_path, str(version))
                                                 create_gradeable_submission(src, dst)
