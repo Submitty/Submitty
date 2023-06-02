@@ -136,8 +136,8 @@ class GradedGradeable extends AbstractModel {
      * Sets the grade inquiry for this graded gradeable
      * @param array $regrade_requests
      */
-    public function setRegradeRequests(array $regrade_requests) {
-        $this->regrade_requests = $regrade_requests;
+    public function setGradeInquiries(array $grade_inquiries) {
+        $this->regrade_requests = $grade_inquiries;
     }
 
     /**

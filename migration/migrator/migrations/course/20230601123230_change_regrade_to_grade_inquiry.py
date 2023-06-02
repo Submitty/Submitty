@@ -32,6 +32,11 @@ def up(config, database, semester, course):
             RENAME COLUMN regrade_id TO grade_inquiry_id;
     """)
 
+    # Rename Constraints
+    database.execute("""
+
+    """)
+
 
 def down(config, database, semester, course):
     """

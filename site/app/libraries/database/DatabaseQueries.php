@@ -7559,7 +7559,7 @@ WHERE current_state IN
                     $grade_inquiries_arr[] = new GradeInquiry($this->core, $grade_inquiry);
                 }
 
-                $graded_gradeable->setRegradeRequests($grade_inquiries_arr);
+                $graded_gradeable->setGradeInquiries($grade_inquiries_arr);
             }
 
             $graded_components_by_id = [];

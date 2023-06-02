@@ -781,7 +781,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_late_days integer DEFAULT '-1'::integer NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_precision numeric NOT NULL,
-    eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_grade_inquiry_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
@@ -796,7 +796,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
+    CONSTRAINT eg_regrade_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
@@ -845,6 +845,36 @@ CREATE TABLE public.forum_posts_history (
     edit_author character varying NOT NULL,
     content text NOT NULL,
     edit_timestamp timestamp(0) with time zone NOT NULL
+);
+
+
+--
+-- Name: grade_inquiries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grade_inquiries (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    status integer DEFAULT 0 NOT NULL,
+    gc_id integer
+);
+
+
+--
+-- Name: grade_inquiry_discussion; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grade_inquiry_discussion (
+    id integer NOT NULL,
+    grade_inquiry_id integer NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    user_id character varying(255) NOT NULL,
+    content text,
+    deleted boolean DEFAULT false NOT NULL,
+    gc_id integer
 );
 
 
@@ -1570,21 +1600,6 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 
 
 --
--- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.regrade_discussion (
-    id integer NOT NULL,
-    regrade_id integer NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL,
-    user_id character varying(255) NOT NULL,
-    content text,
-    deleted boolean DEFAULT false NOT NULL,
-    gc_id integer
-);
-
-
---
 -- Name: regrade_discussion_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1601,22 +1616,7 @@ CREATE SEQUENCE public.regrade_discussion_id_seq
 -- Name: regrade_discussion_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.regrade_discussion.id;
-
-
---
--- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.regrade_requests (
-    id integer NOT NULL,
-    g_id character varying(255) NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL,
-    user_id character varying(255),
-    team_id character varying(255),
-    status integer DEFAULT 0 NOT NULL,
-    gc_id integer
-);
+ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.grade_inquiry_discussion.id;
 
 
 --
@@ -1636,7 +1636,7 @@ CREATE SEQUENCE public.regrade_requests_id_seq
 -- Name: regrade_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.regrade_requests.id;
+ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.grade_inquiries.id;
 
 
 --
@@ -1850,6 +1850,20 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 
 
 --
+-- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries ALTER COLUMN id SET DEFAULT nextval('public.regrade_requests_id_seq'::regclass);
+
+
+--
+-- Name: grade_inquiry_discussion id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion ALTER COLUMN id SET DEFAULT nextval('public.regrade_discussion_id_seq'::regclass);
+
+
+--
 -- Name: gradeable_access id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1945,20 +1959,6 @@ ALTER TABLE ONLY public.queue ALTER COLUMN entry_id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.queue_settings ALTER COLUMN id SET DEFAULT nextval('public.queue_settings_id_seq'::regclass);
-
-
---
--- Name: regrade_discussion id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion ALTER COLUMN id SET DEFAULT nextval('public.regrade_discussion_id_seq'::regclass);
-
-
---
--- Name: regrade_requests id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests ALTER COLUMN id SET DEFAULT nextval('public.regrade_requests_id_seq'::regclass);
 
 
 --
@@ -2144,10 +2144,10 @@ ALTER TABLE ONLY public.gradeable
 
 
 --
--- Name: regrade_requests gradeable_team_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries gradeable_team_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
 
@@ -2168,10 +2168,10 @@ ALTER TABLE ONLY public.gradeable_data
 
 
 --
--- Name: regrade_requests gradeable_user_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries gradeable_user_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
 
 
@@ -2336,18 +2336,18 @@ ALTER TABLE ONLY public.queue_settings
 
 
 --
--- Name: regrade_discussion regrade_discussion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiry_discussion regrade_discussion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_discussion
+ALTER TABLE ONLY public.grade_inquiry_discussion
     ADD CONSTRAINT regrade_discussion_pkey PRIMARY KEY (id);
 
 
 --
--- Name: regrade_requests regrade_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries regrade_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT regrade_requests_pkey PRIMARY KEY (id);
 
 
@@ -2484,14 +2484,14 @@ CREATE INDEX gradeable_component_mark_data_gd_id_idx ON public.gradeable_compone
 -- Name: gradeable_team_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree (team_id, g_id) WHERE (gc_id IS NULL);
+CREATE UNIQUE INDEX gradeable_team_unique ON public.grade_inquiries USING btree (team_id, g_id) WHERE (gc_id IS NULL);
 
 
 --
 -- Name: gradeable_user_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+CREATE UNIQUE INDEX gradeable_user_unique ON public.grade_inquiries USING btree (user_id, g_id) WHERE (gc_id IS NULL);
 
 
 --
@@ -3156,58 +3156,58 @@ ALTER TABLE ONLY public.queue
 
 
 --
--- Name: regrade_discussion regrade_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiry_discussion regrade_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id);
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id);
 
 
 --
--- Name: regrade_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiry_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_discussion
+ALTER TABLE ONLY public.grade_inquiry_discussion
     ADD CONSTRAINT regrade_discussion_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
--- Name: regrade_discussion regrade_discussion_regrade_requests_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiry_discussion regrade_discussion_regrade_requests_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id) ON UPDATE CASCADE;
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id) ON UPDATE CASCADE;
 
 
 --
--- Name: regrade_requests regrade_requests_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries regrade_requests_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT regrade_requests_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
 
 
 --
--- Name: regrade_requests regrade_requests_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries regrade_requests_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT regrade_requests_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
--- Name: regrade_requests regrade_requests_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries regrade_requests_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT regrade_requests_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
 
 
 --
--- Name: regrade_requests regrade_requests_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries regrade_requests_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT regrade_requests_fk3 FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
 
 
