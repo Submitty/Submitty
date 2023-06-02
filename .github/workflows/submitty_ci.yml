@@ -612,7 +612,31 @@ jobs:
 
 
     e2eIntegrationTests:
+      needs:
+        - js-lint
+        - js-unit
+        - php-lint
+        - php-unit
+        - python-lint
+        - python-unit
+        - css-lint
+        - shellcheck
       runs-on: ubuntu-20.04
+      services:
+        postgres:
+          image: postgres
+          env:
+            POSTGRES_PASSWORD: submitty_dbuser
+            POSTGRES_USER: postgres
+            TZ: America/New_York
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+          ports:
+            - 5432:5432
+
       steps:
         - name: Checkout repository
           uses: actions/checkout@v3
