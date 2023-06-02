@@ -14,7 +14,7 @@ def up(config, database):
     database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name_order character varying(255) NOT NULL DEFAULT 'GIVEN_F';")
 
     # update user trigger
-    sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
+    sync_user_sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         DECLARE
@@ -51,11 +51,9 @@ def up(config, database):
             RETURN NULL;
         END;
         $$;"""
-    database.execute(sql)
-
 
     # update courses_user trigger
-    sql = """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
+    course_user_sql = """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
     DECLARE
@@ -91,6 +89,7 @@ def up(config, database):
         RETURN NULL;
     END;
     $$;"""
+    sql = sync_user_sql + course_user_sql
     database.execute(sql)
     pass
 
@@ -105,7 +104,7 @@ def down(config, database):
     :type database: migrator.db.Database
     """
     # update user trigger
-    sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
+    sync_user_sql = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         DECLARE
@@ -142,10 +141,9 @@ def down(config, database):
             RETURN NULL;
         END;
         $$;"""
-    database.execute(sql)
 
     # update courses_user trigger
-    sql = """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
+    course_user_sql = """CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
     DECLARE
@@ -181,6 +179,7 @@ def down(config, database):
         RETURN NULL;
     END;
     $$;"""
+    sql = sync_user_sql + course_user_sql
     database.execute(sql)
 
     pass
