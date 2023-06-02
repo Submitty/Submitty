@@ -261,7 +261,7 @@ a.cal-gradeable-status-link:focus {
     color: var(--text-black)!important;
 }
 
-@media (max-width: 800px) {
+@media (width <= 800px) {
     #calendar-list {
         margin: 0;
     }

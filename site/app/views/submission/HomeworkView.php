@@ -125,8 +125,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        $regrade_available = $this->core->getConfig()->isRegradeEnabled()
-            && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
+        $regrade_available = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
@@ -458,6 +457,9 @@ class HomeworkView extends AbstractView {
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_base_url' => rtrim($this->core->getConfig()->getVcsBaseUrl(), '/'),
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),

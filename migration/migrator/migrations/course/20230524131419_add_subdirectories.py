@@ -15,10 +15,13 @@ def up(config, database, semester, course):
     :type course: str
     """
     
+    # Rename eg_subdirectory to eg_vcs_partial_path, and
+    # create a new column for subdirectories, defaulted to '' and not nullable.
     database.execute("""
-ALTER TABLE users ADD COLUMN IF NOT EXISTS user_last_initial_format integer DEFAULT 0 NOT NULL;
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
-ALTER TABLE users ADD CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)));
+        ALTER TABLE electronic_gradeable
+        RENAME COLUMN eg_subdirectory TO eg_vcs_partial_path;
+        ALTER TABLE electronic_gradeable
+        ADD COLUMN IF NOT EXISTS eg_vcs_subdirectory varchar(1024) DEFAULT '' NOT NULL;
     """)
 
 
@@ -36,7 +39,11 @@ def down(config, database, semester, course):
     :type course: str
     """
 
+    # Remove the subdirectory column,
+    # and reset the eg_vcs_partial_path column to be eg_subdirectory
     database.execute("""
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_user_last_initial_format_check;
-ALTER TABLE users DROP COLUMN IF EXISTS user_last_initial_format;
+        ALTER TABLE electronic_gradeable
+        DROP COLUMN IF EXISTS eg_vcs_subdirectory;
+        ALTER TABLE electronic_gradeable
+        RENAME COLUMN eg_vcs_partial_path TO eg_subdirectory;
     """)

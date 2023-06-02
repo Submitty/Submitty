@@ -315,7 +315,7 @@ class ElectronicGraderView extends AbstractView {
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "regrade_allowed" => false,
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
@@ -896,9 +896,7 @@ HTML;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
-        if ($this->core->getConfig()->isRegradeEnabled()) {
-            $isRegradePanel = true;
-        }
+        $isRegradePanel = true;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
@@ -1102,7 +1100,7 @@ HTML;
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
-        if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
+        if ($this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
 
@@ -1150,7 +1148,7 @@ HTML;
             "prev_student_url" => $prev_student_url,
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
-            'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
+            'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
