@@ -155,19 +155,30 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
 function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
-    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+    Cookies.set('jumpToScrollPosition', current_y_offset);
+
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
 
     $('[id^=div_viewer_]').each(function() {
-        var number = this.id.replace('div_viewer_', '').trim();
+        const cm_id = this.id.replace('div_viewer_', '').trim();
+        const elem = $('#div_viewer_' + cm_id);
+        if (!cm_id.length || !elem) {
+            return;
+        }
 
-        var elem = $('#div_viewer_' + number);
         if (elem.hasClass('open')) {
-            document.cookie = "cm_" +number+ "=1;";
+            if (!cm_ids.includes(cm_id)) {
+                cm_ids.push(cm_id);
+            }
         }
         else {
-            document.cookie = "cm_" +number+ "=0;";
+            if (cm_ids.includes(cm_id)) {
+                cm_ids.splice(cm_ids.indexOf(cm_id, 1));
+            }
         }
     });
+    
+    Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
@@ -1374,11 +1385,11 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     if ($(document.body).width() < 1150) {
-        document.cookie = "collapse_sidebar=true;path=/";
+        Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;path=/";
+        Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1427,7 +1438,7 @@ function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
+    Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1820,11 +1831,11 @@ function tzWarn() {
 
     const THRESHOLD = 60*60*1000; // will wait one hour after each warning
     // retrieve timestamp cookie
-    const last = Number(document.cookie.replace(/(?:(?:^|.*;\s*)last_tz_warn_time\s*\=\s*([^;]*).*$)|^.*$/, "$1"));
+    const last = Number(Cookies.get("last_tz_warn_time"));
     const elapsed = isNaN(last) ? Infinity : Date.now() - last;
     if (elapsed > THRESHOLD) {
         displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
-        document.cookie = "last_tz_warn_time=" + Date.now() + ";path=/;";
+        Cookies.set("last_tz_warn_time", Date.now());
     }
 }
 document.addEventListener('DOMContentLoaded', tzWarn);
