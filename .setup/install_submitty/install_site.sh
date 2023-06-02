@@ -306,10 +306,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
-
+    # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-
     # pdf-annotate.js
     cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
@@ -322,6 +321,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # highlight.js
     mkdir ${VENDOR_FOLDER}/highlight.js
     cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/
+    # js-cookie
+    mkdir ${VENDOR_FOLDER}/js-cookie
+    cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
