@@ -81,7 +81,6 @@
           {% endif %}
 
           <td>{{ entry['helped_today'] }}</td>
-
           <td>{{ entry['queue_code'] }}</td>
           <td>
             <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">

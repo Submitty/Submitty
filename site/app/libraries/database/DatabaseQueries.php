@@ -6497,9 +6497,8 @@ AND gc_id IN (
 
     public function getCurrentQueue() {
         $query = "
-
-        SELECT ROW_NUMBER()
-            OVER (order by time_in ASC),
+        SELECT ROW_NUMBER() 
+            OVER (ORDER BY time_in ASC), 
                 queue.*,
                 helper.user_givenname AS helper_givenname,
                 helper.user_preferred_givenname AS helper_preferred_givenname,
@@ -6520,15 +6519,14 @@ AND gc_id IN (
           AS h1
           ON user_id = h1.uid AND queue_code = h1.qc
           WHERE current_state IN ('waiting','being_helped')
-          ORDER BY ROW_NUMBER
+          ORDER BY ROW_NUMBER 
         ";
-        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
         $query = "
-
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
                 queue.*,
@@ -6571,7 +6569,7 @@ AND gc_id IN (
             WHERE time_in > ? AND current_state IN ('done')
             ORDER BY row_number
         ";
-        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
         $this->course_db->query($query, [$current_date, $current_date, $current_date]);
         return $this->course_db->rows();
     }
