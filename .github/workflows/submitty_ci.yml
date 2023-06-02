@@ -612,6 +612,15 @@ jobs:
 
 
     e2eIntegrationTests:
+      needs:
+        - js-lint
+        - js-unit
+        - php-lint
+        - php-unit
+        - python-lint
+        - python-unit
+        - css-lint
+        - shellcheck
       runs-on: ubuntu-20.04
       services:
         postgres:
