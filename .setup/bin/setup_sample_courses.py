@@ -2037,8 +2037,8 @@ class Gradeable(object):
         if self.is_repository:
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['upload_type'] = 'repository'
-           # form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}' #UNCOMMENT WHEN #9317 IS MERGED
-            form_json['subdirectory'] = '{$gradeable_id}/{$user_id}' ## CHANGE TO '' WHEN #9317 IS MERGED
+            form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}'
+            form_json['subdirectory'] = ''
             return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
