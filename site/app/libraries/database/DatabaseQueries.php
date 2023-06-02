@@ -6514,15 +6514,17 @@ AND gc_id IN (
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
-                helper.user_pronouns AS helper_pronouns
+                helper.user_pronouns AS helper_pronouns,
+                h1.helped_today
             FROM queue
+            LEFT JOIN users helper on helper.user_id = queue.help_started_by
             LEFT JOIN (
             SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
             FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
             GROUP BY user_id, queue_code
           )
           AS h1
-          ON user_id = h1.uid AND queue_code = h1.qc
+          ON queue.user_id = h1.uid AND queue_code = h1.qc
           WHERE current_state IN ('waiting','being_helped')
           ORDER BY ROW_NUMBER 
         ";
@@ -6531,6 +6533,7 @@ AND gc_id IN (
     }
 
     public function getPastQueue() {
+
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -6554,8 +6557,12 @@ AND gc_id IN (
                 remover.user_email_secondary AS remover_email_secondary,
                 remover.user_email_secondary_notify AS remover_email_secondary_notify,
                 remover.user_group AS remover_group,
-                remover.user_pronouns AS remover_pronouns
-            FROM    queue
+                remover.user_pronouns AS remover_pronouns,
+                h1.helped_today,
+                h.times_helped
+            FROM    queue 
+            LEFT JOIN users helper ON helper.user_id = queue.help_started_by
+            LEFT JOIN users remover ON remover.user_id = queue.removed_by
             LEFT JOIN (
               SELECT user_id as uid, COUNT(user_id) AS times_helped
               FROM queue
@@ -6563,14 +6570,14 @@ AND gc_id IN (
               GROUP BY user_id
             )
             AS h
-            ON q.user_id = h.uid
+            ON queue.user_id = h.uid
             LEFT JOIN (
               SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
               FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
               GROUP BY user_id, queue_code
             )
             AS h1
-            ON q.user_id = h1.uid AND q.queue_code = h1.qc
+            ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
             WHERE time_in > ? AND current_state IN ('done')
             ORDER BY row_number
         ";

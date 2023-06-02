@@ -61,15 +61,8 @@
 
             <td>{{ entry['helped_today'] }}</td>
             <td>{{ entry['times_helped'] }}</td>
-            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+            <td class="mobile-hide">{{ entry['help_started_by'] }}</td> 
 
-
-
-            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
-              <td class="mobile-hide">{{ viewer.getHelperName(entry) }}</td>
-            {% else %}
-              <td class="mobile-hide"></td>
-            {% endif %}
 
             {% if entry['removal_type'] == 'self' %}
               <td class="mobile-hide"></td>
