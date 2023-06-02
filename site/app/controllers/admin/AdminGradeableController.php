@@ -860,23 +860,25 @@ class AdminGradeableController extends AbstractController {
         }
 
         $repo_name = '';
-
+        $subdir = '';
+        if ($details['subdirectory_gradeable'] === 'true') {
+            $subdir = $details['vcs_subdirectory'];
+        }
+        $vcs_partial_path = '';
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
-            $subdir = '';
-
             $host_type = -1;
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
                 $repo_name = $details['id'];
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+                $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
-                $repo_name = $details['vcs_url'];
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
+                $repo_name = $details['vcs_path'];
+                $vcs_partial_path = $details['vcs_path'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -884,19 +886,20 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
-
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
-                'vcs_host_type' => $host_type
+                'vcs_host_type' => $host_type,
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
         else {
             $non_vcs_property_values = [
                 'vcs' => false,
-                'vcs_subdirectory' => '',
-                'vcs_host_type' => -1
+                'vcs_subdirectory' => $subdir,
+                'vcs_host_type' => -1,
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
@@ -953,6 +956,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
@@ -1266,6 +1270,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
