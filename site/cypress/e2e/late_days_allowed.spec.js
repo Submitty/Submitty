@@ -62,10 +62,10 @@ describe('Test cases involving the late days allowed page', () => {
                 cy.get('#late_days').type('3');
                 cy.get('input[type=submit]').click();
                 cy.wait(1000); // make sure the late day registered
-                console.log("First Part works!!!!!!!!!!!!!!!!!!!!!!");
+                cy.log("First Part works!!!!!!!!!!!!!!!!!!!!!!");
             }
             catch(error){
-                console.log("First Part not working===========================");
+                cy.log("First Part not working===========================");
             }
 
             try{
@@ -75,10 +75,10 @@ describe('Test cases involving the late days allowed page', () => {
                 cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
                 cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('3');
                 cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('01/01/2021');
-                console.log("Second Part works!!!!!!!!!!!!!!!!!!!!!!");
+                cy.log("Second Part works!!!!!!!!!!!!!!!!!!!!!!");
             }
             catch(error){
-                console.log("Second Part not working=========================");
+                cy.log("Second Part not working=========================");
             }
             try{
                 // login as bitdiddle and check that they have proper number of late days
@@ -86,13 +86,13 @@ describe('Test cases involving the late days allowed page', () => {
                 cy.login('bitdiddle');
                 cy.visit(['sample', 'late_table']);
                 cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
-                console.log("Third Part works!!!!!!!!!!!!!!!!!!!!!!");
+                cy.log("Third Part works!!!!!!!!!!!!!!!!!!!!!!");
             }
             catch(error){
-                console.log("Third Part not working=========================");
+                cy.log("Third Part not working=========================");
             }
 
-            console.log(cy.get('#late-day-table > tbody > tr > :nth-child(7)'));
+            cy.log(cy.get('#late-day-table > tbody > tr > :nth-child(7)'));
             cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+3');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
 
