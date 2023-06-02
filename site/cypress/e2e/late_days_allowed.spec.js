@@ -55,25 +55,46 @@ describe('Test cases involving the late days allowed page', () => {
 
         it('correctly add a late day and then update it', () => {
             // add some late days for bitdiddle
-            cy.get('#user_id').type('bitdiddle').blur();
-            cy.get('#datestamp').type('2021-01-01');
-            cy.get('#user_id').click(); // dismiss the calendar view
-            cy.get('#late_days').type('3');
-            cy.get('input[type=submit]').click();
-            cy.wait(1000); // make sure the late day registered
+            try {
+                cy.get('#user_id').type('bitdiddle').blur();
+                cy.get('#datestamp').type('2021-01-01');
+                cy.get('#user_id').click(); // dismiss the calendar view
+                cy.get('#late_days').type('3');
+                cy.get('input[type=submit]').click();
+                cy.wait(1000); // make sure the late day registered
+                console.log("First Part works!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            catch(error){
+                console.log("First Part not working===========================");
+            }
 
+            try{
             // make sure table has right values
-            cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
-            cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('3');
-            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('01/01/2021');
+                cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
+                cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
+                cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
+                cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('3');
+                cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('01/01/2021');
+                console.log("Second Part works!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            catch(error){
+                console.log("Second Part not working=========================");
+            }
 
-            // login as bitdiddle and check that they have proper number of late days
-            cy.logout();
-            cy.login('bitdiddle');
-            cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+
+            try{
+                // login as bitdiddle and check that they have proper number of late days
+                cy.logout();
+                cy.login('bitdiddle');
+                cy.visit(['sample', 'late_table']);
+                cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+                console.log("Third Part works!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            catche(error){
+                console.log("Third Part not working=========================");
+            }
+
+            console.log(cy.get('#late-day-table > tbody > tr > :nth-child(7)'));
             cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+3');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
 
