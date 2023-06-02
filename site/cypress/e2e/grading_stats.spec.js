@@ -1,4 +1,4 @@
-import skipOn from '@cypress/skip-test';
+import { skipOn } from '@cypress/skip-test';
 
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Grading stats as an instructor', () => {
