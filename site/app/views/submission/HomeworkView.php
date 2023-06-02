@@ -125,7 +125,8 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        $regrade_available = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
+        $regrade_available = $this->core->getConfig()->isRegradeEnabled()
+            && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
