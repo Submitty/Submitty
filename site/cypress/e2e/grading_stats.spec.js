@@ -1,4 +1,4 @@
-if (!process.env.CI) { // Cannot run in CI.
+if (!Cypress.env('CI')) { // Cannot run in CI.
     describe('Grading stats as an instructor', () => {
         beforeEach(() => {
             cy.login('instructor');
