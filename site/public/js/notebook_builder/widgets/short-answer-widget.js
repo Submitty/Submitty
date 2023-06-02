@@ -1,3 +1,6 @@
+/* global Widget, getSmallCodeMirror, getLargeCodeMirror, builder_data, rowsToPixels */
+/* exported ShortAnswerWidget */
+
 class ShortAnswerWidget extends Widget {
     constructor() {
         super();
@@ -6,7 +9,7 @@ class ShortAnswerWidget extends Widget {
 
         this.state = {
             type: 'short_answer',
-            filename: 'default.txt'
+            filename: 'default.txt',
         };
 
         this.codebox_pointer;
@@ -81,7 +84,7 @@ class ShortAnswerWidget extends Widget {
             const codebox_config = {
                 value: this.state.initial_value ? this.state.initial_value : '',
                 theme: localStorage.theme ? (localStorage.theme === 'light' ? 'eclipse' : 'monokai') : 'eclipse',
-                lineWrapping: answer_type_selector.value === 'Default' && this.state.rows
+                lineWrapping: answer_type_selector.value === 'Default' && this.state.rows,
             };
 
             if (answer_type_selector.value !== 'Default') {
@@ -98,19 +101,19 @@ class ShortAnswerWidget extends Widget {
             else {
                 this.codebox_pointer = getSmallCodeMirror(initial_value_div, codebox_config);
             }
-        }
+        };
 
         rows_selector.onchange = () => {
             generateInputBox();
-        }
+        };
 
         rows_selector.onkeyup = () => {
-            generateInputBox()
-        }
+            generateInputBox();
+        };
 
         answer_type_selector.onchange = () => {
             generateInputBox();
-        }
+        };
 
         // Manually fire off a change event to setup the input boxes on initial load
         answer_type_selector.dispatchEvent(new Event('change'));
