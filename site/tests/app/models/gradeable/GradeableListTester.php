@@ -777,6 +777,7 @@ class GradeableListTester extends BaseUnitTest {
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
             'vcs_subdirectory' => '',
+            'vcs_partial_path' => '',
             'vcs_host_type' => -1,
             'team_assignment' => false,
             'team_size_max' => 1,
