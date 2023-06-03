@@ -448,6 +448,9 @@ jobs:
 
     e2eIntegrationTests:
       runs-on: ubuntu-20.04
+      #Postgres should not be needed for the integration tests. 
+      #But unfortunately Configure test suite seems to use it at the moment, and 
+      #Configure test suite seems to be necessary for the Integration tests
       services:
         postgres:
           image: postgres
