@@ -106,7 +106,7 @@ jobs:
                 working-directory: site
         steps:
             - uses: actions/checkout@v3
-            - uses: shivammathur/setup-php@2.25.1
+            - uses: shivammathur/setup-php@2.25.2
               with:
                 php-version: ${{ env.PHP_VER }}
             - name: Cache Composer
@@ -141,7 +141,7 @@ jobs:
               working-directory: site
       steps:
           - uses: actions/checkout@v3
-          - uses: shivammathur/setup-php@2.25.1
+          - uses: shivammathur/setup-php@2.25.2
             with:
               php-version: ${{ env.PHP_VER }}
               extensions: imagick
@@ -274,6 +274,7 @@ jobs:
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
           run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
     e2eSelenium:
       runs-on: ubuntu-20.04
       services:
