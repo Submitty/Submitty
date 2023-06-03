@@ -274,7 +274,7 @@ jobs:
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
           run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
-    e2e:
+    e2eSelenium:
       runs-on: ubuntu-20.04
       services:
         postgres:
@@ -293,8 +293,7 @@ jobs:
       steps:
         - name: Checkout repository
           uses: actions/checkout@v3
-        - uses: ./.github/actions/e2e-Setup-Composite
-        
+        - uses: ./.github/actions/e2e-Setup-Composite      
         - name: Install accessibility checker
           run: |
             wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
@@ -306,8 +305,11 @@ jobs:
             echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
             TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
             sudo bash tests/test_site_error_log.sh
+        - name: Check for site errors
+          working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+          run: sudo bash tests/test_site_error_log.sh
 
-    e2eCypressOne:
+    e2eCypress:
       runs-on: ubuntu-20.04
       services:
         postgres:
@@ -328,7 +330,7 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v3
         - uses: ./.github/actions/e2e-Setup-Composite
-
+        # TODO: Remove this block after upgrading jsPDF
         - name: Cache Node Modules
           uses: actions/cache@v3
           with:
@@ -387,67 +389,7 @@ jobs:
         - name: Restart autograding worker
           run: |
             sudo systemctl restart submitty_autograding_worker
-    e2eCypressTwo:
-      runs-on: ubuntu-20.04
-      services:
-        postgres:
-          image: postgres
-          env:
-            POSTGRES_PASSWORD: submitty_dbuser
-            POSTGRES_USER: postgres
-            TZ: America/New_York
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports:
-            - 5432:5432
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
-        - uses: ./.github/actions/e2e-Setup-Composite
-
-        - name: Cache Node Modules
-          uses: actions/cache@v3
-          with:
-            path: ~/.npm
-            key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-               ${{ runner.os }}-cache-node-modules-dev
-
-        - name: Install node dependencies
-          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          run: |
-            npm install file-saver --save
-            npm install --production=false
-
-        - name: Run API tests
-          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          run: npm run test:api
-          env:
-            BASE_URL: http://localhost
-        - name: Stop autograding services
-          run: |
-            sudo systemctl stop submitty_autograding_worker
-            sudo systemctl stop submitty_autograding_shipper
-
-        - name: Run autograding status test
-          uses: cypress-io/github-action@v5
-          with:
-            config: baseUrl=http://localhost
-            spec: cypress/e2e/autograding_status_1.spec.js
-            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-            browser: chrome
-            env: autograding_shipper_off=True
-
-        - name: Restart autograding shipper
-          run: |
-            sudo systemctl restart submitty_autograding_shipper
-        - name: Restart autograding worker
-          run: |
-            sudo systemctl restart submitty_autograding_worker
         - name: Switch to database auth
           run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
@@ -469,6 +411,7 @@ jobs:
             spec: cypress/e2e/login.spec.js
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             browser: chrome
+
         - name: Setup SAML
           run: |
             cd $SUBMITTY_REPOSITORY
@@ -499,6 +442,8 @@ jobs:
         - name: Check for site errors
           working-directory: ${{ env.SUBMITTY_REPOSITORY }}
           run: sudo bash tests/test_site_error_log.sh
+
+
 
     e2eIntegrationTests:
       runs-on: ubuntu-20.04
