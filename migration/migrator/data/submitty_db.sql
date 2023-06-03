@@ -506,7 +506,7 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
-    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
+    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
