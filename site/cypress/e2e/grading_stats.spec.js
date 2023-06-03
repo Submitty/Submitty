@@ -10,7 +10,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_team_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students on a team: 101/101 (100%)');
@@ -19,7 +19,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 5 / 5 (100.0%)');
         });
         it('should be accurate for grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 66 / 101 (65.3%)');
@@ -27,7 +27,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 2 / 7 (28.6%)');
         });
         it('should be accurate for released grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grades_released_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 73 / 101 (72.3%)');
@@ -46,7 +46,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_team_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students on a team: 101/101 (100%)');
@@ -55,7 +55,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 5 / 5 (100.0%)');
         });
         it('should be accurate for grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 66 / 101 (65.3%)');
@@ -63,7 +63,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 2 / 7 (28.6%)');
         });
         it('should be accurate for released grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grades_released_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 73 / 101 (72.3%)');
@@ -82,7 +82,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_team_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students on a team: 20/20 (100%)');
@@ -91,7 +91,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 4: 3 / 3 (100.0%)');
         });
         it('should be accurate for grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grading_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 10 / 20 (50%)');
@@ -99,7 +99,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 4: 4 / 6 (66.7%)');
         });
         it('should be accurate for released grades.', () => {
-            cy.get('a[href~="/sample/gradeable/grades_released_homework/grading/status"]').click();
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
             text.contains('Students who have submitted: 13 / 20 (65%)');
