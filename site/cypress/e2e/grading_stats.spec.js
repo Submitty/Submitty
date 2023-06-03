@@ -3,8 +3,8 @@ import { skipOn } from '@cypress/skip-test';
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Grading stats as an instructor', () => {
         beforeEach(() => {
-            cy.login('instructor');
             cy.visit(['sample']);
+            cy.login('instructor');
         });
         afterEach(() => {
             cy.logout();
