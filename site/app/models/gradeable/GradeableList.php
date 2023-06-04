@@ -73,8 +73,6 @@ class GradeableList extends AbstractModel {
      * @throws \Exception if a Gradeable failed to load from the database
      */
     public function __construct(Core $core, User $user = null, ?array $gradeables = null) {
-
-        echo "hiiiiiiiiiiiiiiiiiiiiiii";
         parent::__construct($core);
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if ($gradeables === null) {
