@@ -4976,13 +4976,7 @@ AND gc_id IN (
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfig($id) {
-        echo "getGradeableConfigs";
-
-        echo "######";
-        echo $id;
-        echo "######";
         foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
-            echo "IDDDDDDDD";
             return $gradeable;
         }
         throw new \InvalidArgumentException('Gradeable does not exist!');
@@ -4998,14 +4992,6 @@ AND gc_id IN (
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfigs($ids, $sort_keys = ['id']) {
-        echo "getGradeableConfigs2\n\n\n\n";
-        print_r($ids);
-        if ($ids === NULL){
-            echo "NULL";
-        }
-
-        echo "###x####";
-
         if ($ids === []) {
             return new \EmptyIterator();
         }
@@ -5015,15 +5001,11 @@ AND gc_id IN (
 
         // Generate the selector statement
         $selector = '';
-
-        echo count($ids);
         if (count($ids) > 0) {
             $place_holders = implode(',', array_fill(0, count($ids), '?'));
-                    echo $place_holders;
-                    
             $selector = "WHERE g.g_id IN ($place_holders)";
         }
-        echo "###j####";
+
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
 
@@ -5143,7 +5125,7 @@ AND gc_id IN (
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
             }
-            echo "Database_queries";
+
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
             $overrides = [];

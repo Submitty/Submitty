@@ -41,7 +41,6 @@ class SubmissionController extends AbstractController {
      * @return Gradeable|null
      */
     public function tryGetElectronicGradeable($gradeable_id) {
-        echo "hellloooooooooooo";
         if ($gradeable_id === null || $gradeable_id === '') {
             return null;
         }
@@ -55,7 +54,7 @@ class SubmissionController extends AbstractController {
                 && (
                     $this->core->getUser()->accessAdmin()
                     || $gradeable->getTaViewStartDate() <= $now
-                    && True
+                    && $this->core->getUser()->accessGrading()
                     || $gradeable->getSubmissionOpenDate() <= $now
                 )
             ) {
@@ -103,7 +102,6 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
-        echo "showHomeworkPage";
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -111,12 +109,10 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        /*
         $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
         }
-        */
 
         if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
             $this->core->addErrorMessage('You have not unlocked this gradeable yet');
@@ -709,7 +705,8 @@ class SubmissionController extends AbstractController {
             $gradeable->getId(),
             $timestamp
         );
-        if (isEmptyDir($timestamp_path)) {
+        $files = FileUtils::getAllFiles($timestamp_path);
+        if (count($files) == 0) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }

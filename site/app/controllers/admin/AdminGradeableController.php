@@ -554,7 +554,6 @@ class AdminGradeableController extends AbstractController {
             if ($file_iter->current()->getFilename() == 'config.json') {
                 return true;
             }
-            echo "#adminGradeableController1#";
             $file_iter->next();
         }
         return false;
@@ -608,7 +607,6 @@ class AdminGradeableController extends AbstractController {
                     if ($file->isDir()) {
                         $dir_queue[] = $file->getPathname();
                     }
-                    echo "#adminGradeableController2#";
                     $iter->next();
                 }
             }

@@ -27,8 +27,6 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false) {
-        echo "showing gradeable";
-
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -1303,7 +1301,5 @@ class HomeworkView extends AbstractView {
                 'id' => $gc_id
             ]
         ]);
-
-        echo "the end";
     }
 }

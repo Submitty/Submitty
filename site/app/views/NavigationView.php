@@ -83,7 +83,6 @@ class NavigationView extends AbstractView {
         // note: in the future this could be extended to take other options, but right now it's
         //       for displaying a link to provided materials
         // ======================================================================================
-        echo "prob not";
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
         $message_file_details = null;
         //Course settings have enabled displaying custom (banner) message
