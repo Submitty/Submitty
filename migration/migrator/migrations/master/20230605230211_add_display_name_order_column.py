@@ -10,7 +10,7 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     # add column
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name_order character varying(255) NOT NULL DEFAULT 'GIVEN F';")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name_order character varying(255) NOT NULL DEFAULT 'GIVEN_F';")
 
     # update user trigger
     sql1 = """CREATE OR REPLACE FUNCTION public.sync_user() RETURNS trigger
