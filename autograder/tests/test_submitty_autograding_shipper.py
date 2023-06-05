@@ -271,13 +271,13 @@ class TestAutogradingShipper(unittest.TestCase):
                     'Incorrect File Locations, {}',
                 )
 
-            # Confirm the subfolder is cloned and is found at the correct path
-            expected_subfolder = '{CHECKOUT_PATH}/subfolder:'.format(
+            # Confirm the subdirectory is cloned and is found at the correct path
+            expected_subdirectory = '{CHECKOUT_PATH}/subdirectory:'.format(
                 CHECKOUT_PATH=paths['checkout']
             )
             self.assertTrue(
-                expected_subfolder in actual_output,
-                'Subfolder not cloned/incorrect location',
+                expected_subdirectory in actual_output,
+                'subdirectory not cloned/incorrect location',
             )
 
     def test_failed_to_clone(self):
@@ -293,36 +293,54 @@ class TestAutogradingShipper(unittest.TestCase):
             os.path.isfile(failed_file), 'Failed to cause a clone repository failure'
         )
 
-    def test_invalid_url(self):
+    def test_invalid_subdirectory_files(self):
         """
-        This test is to verify the output when the shipper cannot construct
-        a valid repository directory path.
-        To do this, the subdirectory is set to an empty string
-        in the form_homework_01.json config file.
+        This test is to verify the output when the shipper fails
+        to clone a repository with an empty/invalid subdirectory.
         """
         paths = get_paths()
+        os.chdir(TEST_DATA_DIR)
         config_file_path = os.path.join(
             paths['course'], 'config', 'form', 'form_homework_01.json'
         )
-
+        base_file_path = os.path.join(
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
+        )
         with open(config_file_path, 'w+') as form_config_file:
-            base_file_path = os.path.join(
-                TEST_DATA_DIR, 'config_files', 'homework_form.json'
-            )
-
             with open(base_file_path, 'r') as base_config_file:
-                # The subdirectory variable is changed to and empty string.
                 form_config_file.write(
-                    base_config_file.read().replace('homework_01', '')
+                    base_config_file.read().replace("homework_02", "bad_path")
                 )
 
-        shipper.checkout_vcs_repo(
-            CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json')
-        )
-
+        # Setup the new git repository in the test folder.
+        shutil.rmtree(os.path.join(TEST_DATA_DIR, 'homework_01/subdirectory/homework_02'))
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
         failed_file = (
-            paths['checkout'] + '/failed_to_construct_valid_repository_url.txt'
+            paths['checkout'] + '/failed_subdirectory_invalid_or_empty.txt'
         )
         self.assertTrue(
-            os.path.isfile(failed_file), 'Failed to induce an invalid repository url'
+            os.path.isfile(failed_file), 'Failed test with no files in subdirectory')
+
+    def test_good_subdirectory_files(self):
+        """
+        This test is to verify the output when the shipper
+        successfully tries to clone a repository with the homework in
+        a subdirectory.
+        """
+        paths = get_paths()
+        os.chdir(TEST_DATA_DIR)
+        config_file_path = os.path.join(
+            paths['course'], 'config', 'form', 'form_homework_01.json'
         )
+        base_file_path = os.path.join(
+            TEST_DATA_DIR, 'config_files', 'homework_form_subdirectory.json'
+        )
+        with open(config_file_path, 'w+') as form_config_file:
+            with open(base_file_path, 'r') as base_config_file:
+                form_config_file.write(base_config_file.read())
+
+        shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, 'shipper_config.json'))
+        failed_files = [
+            file for file in os.listdir(paths['checkout']) if file.startswith('failed')
+        ]
+        self.assertTrue(len(failed_files) == 0)
