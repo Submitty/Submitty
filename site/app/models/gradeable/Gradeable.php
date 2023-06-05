@@ -2064,7 +2064,7 @@ class Gradeable extends AbstractModel {
      * return true if students can currently submit grade inquiries for this assignment, false otherwise
      * @return bool
      */
-    public function isRegradeOpen() {
+    public function isGradeInquiryOpen() {
         if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->grade_inquiry_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }

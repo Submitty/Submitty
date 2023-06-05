@@ -129,7 +129,7 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
-            && $gradeable->isRegradeOpen()
+            && $gradeable->isGradeInquiryOpen()
             && $submission_count !== 0;
 
         if (
@@ -1149,7 +1149,7 @@ class HomeworkView extends AbstractView {
      */
     public function showGradeInquiryDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
-        $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
+        $is_inquiry_open = $graded_gradeable->getGradeable()->isGradeInquiryOpen();
         $grade_inquiry_message = $this->core->getConfig()->getGradeInquiryMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
             'gradeable',

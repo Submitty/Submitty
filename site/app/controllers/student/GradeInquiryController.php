@@ -34,7 +34,7 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("Could not find gradeable associated with " . $gradeable_id);
         }
 
-        if (!$gradeable->isRegradeOpen()) {
+        if (!$gradeable->isGradeInquiryOpen()) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Grade inquiries are not enabled for this gradeable')
             );
