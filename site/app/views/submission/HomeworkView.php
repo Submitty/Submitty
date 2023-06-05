@@ -1151,7 +1151,7 @@ class HomeworkView extends AbstractView {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $is_inquiry_open = $graded_gradeable->getGradeable()->isGradeInquiryOpen();
         $grade_inquiry_message = $this->core->getConfig()->getGradeInquiryMessage();
-        $request_regrade_url = $this->core->buildCourseUrl([
+        $request_grade_inquiry_url = $this->core->buildCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry',
@@ -1250,7 +1250,7 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'grade_inquiries' => $grade_inquiries_twig_array,
-            'request_regrade_url' => $request_regrade_url,
+            'request_grade_inquiry_url' => $request_grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
             'make_request_post_url' => $make_regrade_post_url,
             'has_submission' => $graded_gradeable->hasSubmission(),
