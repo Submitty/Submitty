@@ -38,11 +38,36 @@ def up(config, database, semester, course):
         ALTER TABLE electronic_gradeable
             RENAME CONSTRAINT eg_regrade_allowed_true TO eg_grade_inquiry_allowed_true;
 
+
+        -- grade_inquiry_discussion:
         ALTER TABLE grade_inquiry_discussion
             RENAME CONSTRAINT regrade_discussion_pkey TO grade_inquiry_discussion_pkey;
 
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT regrade_discussion_fk0 TO grade_inquiry_discussion_fk0;
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT regrade_discussion_fk1 TO grade_inquiry_discussion_fk1;
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT regrade_discussion_regrade_requests_id_fk TO grade_inquiry_discussion_grade_inquiries_id_fk;
+
+
+         -- grade_inquiries:
         ALTER TABLE grade_inquiries
             RENAME CONSTRAINT regrade_requests_pkey TO grade_inquiries_pkey;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT regrade_requests_fk0 TO grade_inquiries_fk0;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT regrade_requests_fk1 TO grade_inquiries_fk1;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT regrade_requests_fk2 TO grade_inquiries_fk2;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT regrade_requests_fk3 TO grade_inquiries_fk3;
     """)
 
     # Rename Sequences
@@ -79,11 +104,36 @@ def down(config, database, semester, course):
         ALTER TABLE electronic_gradeable
             RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
 
+
+        -- grade_inquiry_discussion:
         ALTER TABLE grade_inquiry_discussion
             RENAME CONSTRAINT grade_inquiry_discussion_pkey TO regrade_discussion_pkey;
-        
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT grade_inquiry_discussion_fk0 TO regrade_discussion_fk0;
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT grade_inquiry_discussion_fk1 TO regrade_discussion_fk1;
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT grade_inquiry_discussion_grade_inquiries_id_fk TO regrade_discussion_regrade_requests_id_fk;
+
+
+        -- grade_inquiries:
         ALTER TABLE grade_inquiries
             RENAME CONSTRAINT grade_inquiries_pkey TO regrade_requests_pkey;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT grade_inquiries_fk0 TO regrade_requests_fk0;
+
+         ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT grade_inquiries_fk1 TO regrade_requests_fk1;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT grade_inquiries_fk2 TO regrade_requests_fk2;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT grade_inquiries_fk3 TO regrade_requests_fk3;
      """)
 
     # Revert column names

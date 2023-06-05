@@ -2716,6 +2716,62 @@ ALTER TABLE ONLY public.forum_posts_history
 
 
 --
+-- Name: grade_inquiries grade_inquiries_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk3 FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_fk0 FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_grade_inquiries_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_grade_inquiries_id_fk FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: grade_override grade_override_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3153,62 +3209,6 @@ ALTER TABLE ONLY public.queue
 
 ALTER TABLE ONLY public.queue
     ADD CONSTRAINT queue_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: grade_inquiry_discussion regrade_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiry_discussion
-    ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id);
-
-
---
--- Name: grade_inquiry_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiry_discussion
-    ADD CONSTRAINT regrade_discussion_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: grade_inquiry_discussion regrade_discussion_regrade_requests_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiry_discussion
-    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id) ON UPDATE CASCADE;
-
-
---
--- Name: grade_inquiries regrade_requests_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiries
-    ADD CONSTRAINT regrade_requests_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
-
-
---
--- Name: grade_inquiries regrade_requests_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiries
-    ADD CONSTRAINT regrade_requests_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: grade_inquiries regrade_requests_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiries
-    ADD CONSTRAINT regrade_requests_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
-
-
---
--- Name: grade_inquiries regrade_requests_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiries
-    ADD CONSTRAINT regrade_requests_fk3 FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
 
 
 --
