@@ -182,8 +182,12 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    let cm_message = '<b>'+file_name+'</b>';
+    var deleteMessageElement = form.find('.delete-course-material-message')[0];
+    deleteMessageElement.innerHTML = '';
+
+    var cm_message = document.createElement('b');
+    cm_message.textContent = file_name;
+
     if (str_id !== null) {
         const files_or_links = $(`[id^=file_viewer_${str_id}]`);
         const num_of_links = files_or_links.filter(function () {
@@ -192,10 +196,16 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_of_files = files_or_links.length - num_of_links;
         const file_s = (num_of_files > 1) ? 's' : '';
         const link_s = (num_of_links > 1) ? 's' : '';
-        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`
-        cm_message += ` (<em>contains <b>${num_of_files}</b> file${file_s}` + num_links_txt;
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
+
+        const emElement = document.createElement('em');
+        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}` + num_links_txt;
+
+        cm_message.appendChild(emElement);
     }
-    $('.delete-course-material-message', form).html(cm_message);
+
+    deleteMessageElement.appendChild(cm_message);
+
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
