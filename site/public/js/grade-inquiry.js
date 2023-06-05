@@ -220,14 +220,14 @@ function gradeInquiryDiscussionHandler(submitter_id) {
 }
 
 function newDiscussionRender(discussion) {
-    // save the selected component before updating regrade discussion
+    // save the selected component before updating grade inquiry discussion
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
     localStorage.setItem('selected_tab',`.component-${component_id}`);
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {
-        $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
+        $('#grade_inquiry_inner_info').children().html(discussion).hide().fadeIn('slow');
     }
     // student
     else {
