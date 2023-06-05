@@ -79,7 +79,7 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.XPATH, "//a[contains(@href,'grading/grade?who_id=lakinh')]").click()
 
         try:
-           self.driver.find_element(By.XPATH, "//div[@id='regrade_info']//*[text()='No Submission']")
+           self.driver.find_element(By.XPATH, "//div[@id='grade_inquiry_info']//*[text()='No Submission']")
         except NoSuchElementException:
            assert False
         assert True
