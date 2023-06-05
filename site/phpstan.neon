@@ -13,3 +13,4 @@ services:
     - class: tests\phpstan\ModelClassExtension
       tags:
         - phpstan.broker.methodsClassReflectionExtension
+
