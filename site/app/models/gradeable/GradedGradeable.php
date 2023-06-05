@@ -144,7 +144,7 @@ class GradedGradeable extends AbstractModel {
      * Gets if the submitter has a grade inquiry
      * @return bool
      */
-    public function hasRegradeRequest() {
+    public function hasGradeInquiry() {
         return $this->regrade_requests !== null && count($this->regrade_requests) > 0;
     }
 
@@ -152,8 +152,8 @@ class GradedGradeable extends AbstractModel {
      * Gets if the submitter has an active grade inquiry
      * @return bool
      */
-    public function hasActiveRegradeRequest() {
-        return $this->hasRegradeRequest() &&
+    public function hasActiveGradeInquiry() {
+        return $this->hasGradeInquiry() &&
             array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
                 if ($this->gradeable->isGradeInquiryPerComponentAllowed()) {
                     $carry = $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE || $carry;

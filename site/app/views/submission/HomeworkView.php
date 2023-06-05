@@ -144,7 +144,7 @@ class HomeworkView extends AbstractView {
                 $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
             }
         }
-        if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
+        if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasGradeInquiry()) {
             $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
         }
         return $return;

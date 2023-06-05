@@ -432,8 +432,8 @@ class ReportController extends AbstractController {
 
         if ($g->isGradeInquiryAllowed()) {
             // Export the grade inquiry status
-            if ($gg->hasRegradeRequest()) {
-                if ($gg->hasActiveRegradeRequest()) {
+            if ($gg->hasGradeInquiry()) {
+                if ($gg->hasActiveGradeInquiry()) {
                     $entry['inquiry'] = 'Open';
                 }
                 else {

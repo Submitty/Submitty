@@ -100,7 +100,7 @@ class GradeInquiryController extends AbstractController {
             return null;
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Submitter has not made a grade inquiry')
             );
@@ -172,7 +172,7 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return "";
         }
 
@@ -230,7 +230,7 @@ class GradeInquiryController extends AbstractController {
             return null;
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return JsonResponse::getFailResponse('Submitter has not made a grade inquiry');
         }
 

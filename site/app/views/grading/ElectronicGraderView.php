@@ -1149,7 +1149,7 @@ HTML;
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
-            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
+            'grade_inquiry_pending' => $graded_gradeable->hasActiveGradeInquiry(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
             'team_assignment' => $gradeable->isTeamAssignment(),
