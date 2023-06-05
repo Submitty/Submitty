@@ -165,7 +165,7 @@ class ElectronicGraderView extends AbstractView {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $submitted_percentage_peer = round((($total_students_submitted) / $total_submissions) * 100, 1);
                         $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
-                        $entire_peer_total =  floor(($sections['peer_stu_grad']['total_who_submitted']));
+                        $entire_peer_total =  floor(($sections['peer_stu_grad']['view_peer_components']));
                         $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
                     }
                     if ($entire_peer_total > 0) {
@@ -315,7 +315,7 @@ class ElectronicGraderView extends AbstractView {
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "regrade_allowed" => false,
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
@@ -896,9 +896,7 @@ HTML;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
-        if ($this->core->getConfig()->isRegradeEnabled()) {
-            $isRegradePanel = true;
-        }
+        $isRegradePanel = true;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
@@ -1102,7 +1100,7 @@ HTML;
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
-        if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
+        if ($this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
 
@@ -1150,7 +1148,7 @@ HTML;
             "prev_student_url" => $prev_student_url,
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
-            'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
+            'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
@@ -1174,14 +1172,14 @@ HTML;
 
     /**
      * Render the Autograding Testcases panel
-     * @param AutoGradedVersion $version_instance
+     * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden_cases
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
 
 
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
+    public function renderAutogradingPanel(?AutoGradedVersion $version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
@@ -1194,6 +1192,17 @@ HTML;
             $id = $graded_gradeable->getSubmitter()->getId();
         }
 
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function (AutoGradedVersion $version) {
+            return [
+                'points' => $version->getNonHiddenPoints(),
+            ];
+        }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
+
+        //sort array by version number after values have been mapped
+        ksort($version_data);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -1202,6 +1211,9 @@ HTML;
             "is_vcs" => $gradeable->isVcs(),
             "gradeable_id" => $gradeable->getId(),
             "user_id" => $id,
+            "active_version" => $active_version,
+            "versions" => $version_data,
+            'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "ta_grading" => $ta_grading
         ]);
