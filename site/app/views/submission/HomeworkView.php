@@ -125,7 +125,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        $regrade_available = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
+        $grade_inquiry_available = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
@@ -138,13 +138,13 @@ class HomeworkView extends AbstractView {
             && $submission_count !== 0
             && $active_version !== 0
         ) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $grade_inquiry_available);
 
             if ($gradeable->hasPeerComponent()) {
-                $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
+                $return .= $this->renderPeerResultsBox($graded_gradeable, $grade_inquiry_available);
             }
         }
-        if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasGradeInquiry()) {
+        if ($grade_inquiry_available || $graded_gradeable !== null && $graded_gradeable->hasGradeInquiry()) {
             $return .= $this->renderGradeInquiryBox($graded_gradeable, $can_inquiry);
         }
         return $return;
@@ -1081,10 +1081,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $grade_inquiry_available): string {
 
         $rendered_ta_results = '';
         $been_ta_graded = false;
@@ -1094,7 +1094,7 @@ class HomeworkView extends AbstractView {
                 'AutoGrading',
                 'showTAResults',
                 $graded_gradeable->getTaGradedGradeable(),
-                $regrade_available,
+                $grade_inquiry_available,
                 $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
             );
         }
@@ -1106,10 +1106,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @return string
      */
-    private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+    private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $grade_inquiry_available): string {
 
         $rendered_peer_results = '';
         $been_peer_graded = false;
@@ -1120,7 +1120,7 @@ class HomeworkView extends AbstractView {
                 'AutoGrading',
                 'showPeerResults',
                 $graded_gradeable->getTaGradedGradeable(),
-                $regrade_available,
+                $grade_inquiry_available,
                 $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
             );
         }
