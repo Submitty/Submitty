@@ -121,8 +121,6 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
         RETURN NULL;
     END;
     $$;
-
-
 --
 -- Name: sync_delete_registration_section(); Type: FUNCTION; Schema: public; Owner: -
 --
