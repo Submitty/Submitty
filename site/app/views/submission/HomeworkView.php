@@ -1150,7 +1150,7 @@ class HomeworkView extends AbstractView {
     public function showGradeInquiryDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
-        $regrade_message = $this->core->getConfig()->getRegradeMessage();
+        $grade_inquiry_message = $this->core->getConfig()->getGradeInquiryMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
@@ -1256,7 +1256,7 @@ class HomeworkView extends AbstractView {
             'has_submission' => $graded_gradeable->hasSubmission(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'g_id' => $graded_gradeable->getGradeable()->getId(),
-            'regrade_message' => $regrade_message,
+            'grade_inquiry_message' => $grade_inquiry_message,
             'can_inquiry' => $can_inquiry,
             'is_inquiry_yet_to_start' => $graded_gradeable->getGradeable()->isGradeInquiryYetToStart(),
             'is_inquiry_open' => $is_inquiry_open,

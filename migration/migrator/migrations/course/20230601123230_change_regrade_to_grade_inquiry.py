@@ -1,4 +1,18 @@
 """Migration for a given Submitty course database."""
+import os
+import json
+
+def course_config_location(semester, course):
+    """
+    Returns path to course config file for a given semester and course.
+    
+    :param semester: Semester of the course being migrated
+    :type semester: str
+    :param course: Code of course being migrated
+    :type course: str
+    """
+    return f"/var/local/submitty/courses/{semester}/{course}/config/config.json"
+
 
 
 def up(config, database, semester, course):
@@ -15,7 +29,7 @@ def up(config, database, semester, course):
     :type course: str
     """
 
-    # Rename tables
+    # Rename Tables
     database.execute("""
         ALTER TABLE regrade_discussion
             RENAME TO grade_inquiry_discussion;
@@ -24,7 +38,7 @@ def up(config, database, semester, course):
             RENAME TO grade_inquiries;
     """)
 
-    # Rename columns
+    # Rename Columns
     database.execute("""
         ALTER TABLE electronic_gradeable
             RENAME COLUMN eg_regrade_allowed TO eg_grade_inquiry_allowed;
@@ -77,6 +91,24 @@ def up(config, database, semester, course):
         ALTER SEQUENCE regrade_requests_id_seq RENAME TO grade_inquiries_id_seq;
     """)
 
+    # Update Course Config
+    path = course_config_location(semester, course)
+    if not os.path.isfile(path) or os.path.getsize(path) == 0: # Empty file
+        return
+
+    with open(path, "r") as config_file:
+        # Get regrade_message
+        course_config = json.load(config_file)
+    
+    # Rename key
+    grade_inquiry_message = course_config["course_details"].pop("regrade_message")
+    course_config["course_details"]["grade_inquiry_message"] = grade_inquiry_message
+
+    with open(path, "w") as config_file:
+        json.dump(course_config, config_file, indent=4)
+
+
+
 
 def down(config, database, semester, course):
     """
@@ -99,7 +131,7 @@ def down(config, database, semester, course):
         ALTER SEQUENCE grade_inquiries_id_seq RENAME TO regrade_requests_id_seq;
     """)
 
-    # Revert Constraints
+    # Revert Cconstraints
     database.execute("""
         ALTER TABLE electronic_gradeable
             RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
@@ -136,7 +168,7 @@ def down(config, database, semester, course):
             RENAME CONSTRAINT grade_inquiries_fk3 TO regrade_requests_fk3;
      """)
 
-    # Revert column names
+    # Revert Column Names
     database.execute("""
         ALTER TABLE electronic_gradeable
             RENAME COLUMN eg_grade_inquiry_allowed TO eg_regrade_allowed;
@@ -145,7 +177,7 @@ def down(config, database, semester, course):
             RENAME COLUMN grade_inquiry_id TO regrade_id;
     """)
 
-    # Revert table names
+    # Revert Table Names
     database.execute("""
         ALTER TABLE grade_inquiry_discussion
             RENAME TO regrade_discussion;
@@ -153,3 +185,19 @@ def down(config, database, semester, course):
         ALTER TABLE grade_inquiries
             RENAME TO regrade_requests;
     """)
+
+    # Update Course Config
+    path = course_config_location(semester, course)
+    if not os.path.isfile(path) or os.path.getsize(path) == 0: # Empty file
+        return
+
+    with open(path, "r") as config_file:
+        # Get regrade_message
+        course_config = json.load(config_file)
+    
+    # Rename key
+    regrade_message = course_config["course_details"].pop("grade_inquiry_message")
+    course_config["course_details"]["regrade_message"] = regrade_message
+
+    with open(path, "w") as config_file:
+        json.dump(course_config, config_file, indent=4)
