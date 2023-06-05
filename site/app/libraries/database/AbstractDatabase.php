@@ -355,14 +355,6 @@ abstract class AbstractDatabase {
         return $print;
     }
 
-    public function hasDuplicateQueries(): bool {
-        $queries = [];
-        foreach ($this->all_queries as $query) {
-            $queries[] = $query[0];
-        }
-        return count($queries) !== count(array_unique($queries));
-    }
-
     /**
      * @return bool
      */

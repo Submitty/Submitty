@@ -10,7 +10,7 @@ function validate_navigation_page_sections(sections) {
 }
 
 describe('navigation page', () => {
-    beforeEach(() => {
+    before(() => {
         cy.visit('/');
         cy.wait(500);
         cy.viewport(1920,1200);
@@ -21,7 +21,7 @@ describe('navigation page', () => {
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
         const sections = {
-            future: 5,
+            future: 4,
             beta: 3,
             open: 5,
             closed: 3,

@@ -13,12 +13,14 @@ use app\models\User;
 class UserProfileView extends AbstractView {
     /**
      * @param User $user
+     * @param string $change_name_text
      * @param bool $database_authentication
      * @param string $csrf_token
      * @return string
      */
     public function showUserProfile(
         User $user,
+        string $change_name_text,
         bool $database_authentication,
         string $csrf_token
     ) {
@@ -47,7 +49,6 @@ class UserProfileView extends AbstractView {
             "user_given" => $autofill_preferred_name[0],
             "user_family" => $autofill_preferred_name[1],
             "change_name_text" => $change_name_text,
-            "user_pronouns" => $user->getPronouns(),
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,
             "access_level" => Access::ACCESS_LEVELS[$user->getAccessLevel()],

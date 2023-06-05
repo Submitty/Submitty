@@ -1,6 +1,11 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
-/* global curr_day, curr_month, curr_year, gradeables_by_date */
-/* global csrfToken, buildCourseUrl */
+/* exported prevMonth */
+/* exported nextMonth */
+/* exported loadCalendar */
+/* exported loadFullCalendar */
+/* global curr_day */
+/* global curr_month */
+/* global curr_year */
+/* global gradeables_by_date */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -65,7 +70,7 @@ function dateToStr(year, month, day) {
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
- * @returns {HTMLElement} the HTML Element for the calendar item
+ * @returns {string} the HTML string containing the calendar item
  */
 function generateCalendarItem(item) {
     // When hovering over an item, shows the name and due date
@@ -77,7 +82,7 @@ function generateCalendarItem(item) {
 
     // Put detail in the tooltip
     let tooltip = `Course: ${item['course']}&#10;` +
-        `Title: ${item['title']}&#10;`;
+                  `Title: ${item['title']}&#10;`;
     if (item['status_note'] !== '') {
         tooltip += `Status: ${item['status_note']}&#10;`;
     }
@@ -88,77 +93,15 @@ function generateCalendarItem(item) {
     const link = (!item['disabled']) ? item['url'] : '';
     const onclick = item['onclick'];
     const icon = item['icon'];
-    const element = document.createElement('a');
-    element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
-    if (item['show_due']) {
-        element.style.setProperty('background-color', item['color']);
-    }
-    if (item['status'] === 'ann') {
-        element.style.setProperty('border-color', item['color']);
-    }
-    element.title = tooltip;
-    if (link !== '') {
-        element.href = link;
-    }
-    if (onclick !== '') {
-        element.onclick = onclick;
-    }
-    element.disabled = item['disabled'];
-    if (icon !== '') {
-        const iconElement = document.createElement('i');
-        iconElement.classList.add('fas', icon, 'cal-icon');
-        element.appendChild(iconElement);
-    }
-    element.append(item['title']);
-    return element;
-}
-
-/**
- * The form for editing calendar items.
- *
- * @param itemType : string the calendar item type
- * @param itemText : string the text the item shoukd contain
- * @param itemId : (Not sure, possibly string or int) the item ID
- * @param date : string the item date
- * @returns {void} : only has to update existing variables
- */
-function editCalendarItemForm(itemType, itemText, itemId, date) {
-    $('#calendar-item-type-edit').val(itemType);
-    $('#calendar-item-text-edit').val(itemText);
-    $('#edit-picker-edit').val(date);
-    $('#calendar-item-id').val(itemId);
-
-    $('#edit-calendar-item-form').show();
-}
-
-/**
- * Deletes the selected calendar item.
- *
- * @returns {void} : Just deleting.
- */
-function deleteCalendarItem() {
-    const id = $('#calendar-item-id').val();
-    if (id !== '') {
-        const data = new FormData();
-        data.append('id', id);
-        data.append('csrf_token', csrfToken);
-        $.ajax({
-            url: buildCourseUrl(['calendar', 'deleteItem']),
-            type: 'POST',
-            processData: false,
-            contentType: false,
-            data: data,
-            success: function (res) {
-                const response = JSON.parse(res);
-                if (response.status === 'success') {
-                    location.reload();
-                }
-                else {
-                    alert(response.message);
-                }
-            },
-        });
-    }
+    const disabled = item['disabled'] ? 'disabled' : '';
+    return `<a class="btn ${item['class']} cal-gradeable-status-${item['status']} cal-gradeable-item"
+           title="${tooltip}" 
+           ${(link !== '') ? `href="${link}"` : ''} 
+           ${(onclick !== '') ? `onclick="${onclick}"` : ''} 
+           ${disabled}>
+          ${(icon !== '') ? `<i class="fas ${icon} cal-icon"></i>` : ''} 
+          ${item['title']}
+        </a>`;
 }
 
 /**
@@ -169,50 +112,50 @@ function deleteCalendarItem() {
  * @param day : int the date of the date (1 - 31)
  * @param curr_view_month : int the current month that the calendar is viewing
  * @param view_semester : boolean if the calendar is viewing the entire semester. If so, the day cell would show both the month and date
- * @returns {HTMLElement} the HTML Element containing the cell
+ * @returns {string} the HTML string containing the cell
  */
 function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
     const cell_date_str = dateToStr(year, month ,day);
-
-    const content = document.createElement('td');
-    content.classList.add('cal-day-cell');
-    content.id = `cell-${cell_date_str}`;
+    let content;
     if (view_semester) {
-        content.classList.add('cal-cell-expand');
-    }
-    const div = document.createElement('div');
-    div.classList.add('cal-cell-title-panel');
-    const span = document.createElement('span');
-    span.classList.add('cal-day-title');
-    if (view_semester) {
-        span.classList.add('cal-curr-month-date');
-        span.textContent = `${monthNamesShort[month]} ${day}`;
-    }
-    else if (month === curr_view_month) {
-        span.classList.add('cal-curr-month-date');
-        if (day === curr_day && month === curr_month && year === curr_year) {
-            span.classList.add('cal-today-title');
-        }
-        span.textContent = `${day}`;
+        content = `<td class="cal-day-cell cal-cell-expand" id="cell-${cell_date_str}">`;
     }
     else {
-        span.classList.add('cal-next-month-date');
+        content = `<td class="cal-day-cell" id="cell-${cell_date_str}">`;
+    }
+    // Title of the day cell
+    content += '<div class="cal-cell-title-panel">';
+    if (view_semester) {
+        content += `<span class="cal-curr-month-date cal-day-title">${monthNamesShort[month]} ${day},</span>`;
+    }
+    else if (month === curr_view_month) {
+        if (day === curr_day && month === curr_month && year === curr_year) {
+            content += `<span class="cal-curr-month-date cal-day-title cal-today-title">${day}</span>`;
+        }
+        else {
+            content += `<span class="cal-curr-month-date cal-day-title">${day}</span>`;
+        }
+    }
+    else {
         if (month > 12) {
             month = month % 12;
         }
         else if (month <= 0) {
             month = month + 12;
         }
-        span.textContent = `${month}/${day}`;
+        content += `<span class="cal-next-month-date cal-day-title">${month}/${day}</span>`;
     }
-    div.appendChild(span);
-    content.appendChild(div);
-    const itemList = document.createElement('div');
-    itemList.classList.add('cal-cell-items-panel');
+    content += '</div>';
+
+    // List all gradeables of other items
+    content += '<div class="cal-cell-items-panel">';
     for (const i in gradeables_by_date[cell_date_str]) {
-        itemList.appendChild(generateCalendarItem(gradeables_by_date[cell_date_str][i]));
+        content += generateCalendarItem(gradeables_by_date[cell_date_str][i]);
     }
-    content.appendChild(itemList);
+    content += `
+      </div>
+</td>
+    `;
     return content;
 }
 
@@ -220,123 +163,27 @@ function generateDayCell(year, month, day, curr_view_month, view_semester=false)
  * Generates the title area for the calendar.
  *
  * @param title_area the title of the calendar (month+year/semester/...)
- * @returns {HTMLElement} the HTML Element for the table with the header filled in
+ * @returns {string} the HTML code for the title area
  */
 function generateCalendarHeader(title_area) {
-    const table = document.createElement('table');
-    table.classList.add('table', 'table-striped', 'table-bordered', 'persist-area', 'table-calendar');
-    const tableHead = document.createElement('thead');
-    const navRow = document.createElement('tr');
-    navRow.classList.add('cal-navigation');
-
-    navRow.appendChild(title_area);
-
-    const weekTitleRow = document.createElement('tr');
-    weekTitleRow.classList.add('cal-week-title-row');
-    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const shortDaysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat'];
-    for (let i = 0; i < daysOfWeek.length; i++) {
-        const th = document.createElement('th');
-        th.classList.add('cal-week-title', `cal-week-title-${shortDaysOfWeek[i]}`);
-        th.textContent = daysOfWeek[i];
-        weekTitleRow.appendChild(th);
-    }
-
-    tableHead.appendChild(navRow);
-    tableHead.appendChild(weekTitleRow);
-
-    table.appendChild(tableHead);
-    return table;
-}
-
-/**
- * Builds the title/header for a regular month switching calendar
- *
- * @param view_year : int the year currently in view
- * @param view_month : int the month currently in view
- * @returns {DocumentFragment} the HTML element containing the title/header
- */
-function buildSwitchingHeader(view_year, view_month) {
-    const fragment = document.createDocumentFragment();
-
-    // Build first header
-    const th1 = document.createElement('th');
-    th1.colSpan = 3;
-    let div = document.createElement('div');
-    div.classList.add('cal-switch');
-    div.id = 'prev-month-switch';
-    let a = document.createElement('a');
-    a.classList.add('cal-btn', 'cal-prev-btn');
-    const prev = prevMonth(view_month, view_year);
-    a.onclick = () => loadCalendar.apply(this, prev);
-    a.innerHTML = '<i class="fas fa-angle-left"></i>';
-    div.appendChild(a);
-    th1.appendChild(div);
-
-    // Build second header
-    const th2 = document.createElement('th');
-    th2.colSpan = 1;
-    div = document.createElement('div');
-    div.classList.add('cal-title');
-    const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = monthNames[view_month];
-    div.appendChild(h2);
-    const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = `${view_year}`;
-    div.appendChild(h3);
-    th2.appendChild(div);
-
-    // Build third header
-    const th3 = document.createElement('th');
-    th3.colSpan = 3;
-    div = document.createElement('div');
-    div.classList.add('cal-switch');
-    div.id = 'next-month-switch';
-    a = document.createElement('a');
-    a.classList.add('cal-btn', 'cal-next-btn');
-    const next = nextMonth(view_month, view_year);
-    a.onclick = () => loadCalendar.apply(this, next);
-    a.innerHTML = '<i class="fas fa-angle-right"></i>';
-    div.appendChild(a);
-    th3.appendChild(div);
-
-    fragment.appendChild(th1);
-    fragment.appendChild(th2);
-    fragment.appendChild(th3);
-    return fragment;
-}
-
-/**
- * Builds a title/header for semester calendar
- *
- * @param semester_name the name of the semester
- * @returns {DocumentFragment} the HTML element containing the title/header
- */
-function buildSemesterHeader(semester_name) {
-    const fragment = document.createDocumentFragment();
-    const th1 = document.createElement('th');
-    th1.colSpan = 3;
-    const th2 = document.createElement('th');
-    th2.colSpan = 1;
-    const div = document.createElement('div');
-    div.classList.add('cal-title');
-    const h2 = document.createElement('h2');
-    h2.classList.add('cal-month-title');
-    h2.textContent = semester_name.split(' ')[0];
-    div.appendChild(h2);
-    const h3 = document.createElement('h3');
-    h3.classList.add('cal-year-title');
-    h3.textContent = semester_name.split(' ')[1];
-    const th3 = document.createElement('th');
-    th3.colSpan = 3;
-    div.appendChild(h3);
-    th2.appendChild(div);
-    fragment.appendChild(th1);
-    fragment.appendChild(th2);
-    fragment.appendChild(th3);
-    return fragment;
+    return `<table class='table table-striped table-bordered persist-area table-calendar'>
+        <thead>
+        
+        <tr class="cal-navigation">
+            ${title_area}
+        </tr>
+        <tr class='cal-week-title-row'>
+            <th class="cal-week-title cal-week-title-sun">Sunday</th>
+            <th class="cal-week-title cal-week-title-mon">Monday</th>
+            <th class="cal-week-title cal-week-title-tue">Tuesday</th>
+            <th class="cal-week-title cal-week-title-wed">Wednesday</th>
+            <th class="cal-week-title cal-week-title-thr">Thursday</th>
+            <th class="cal-week-title cal-week-title-fri">Friday</th>
+            <th class="cal-week-title cal-week-title-sat">Saturday</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>`;
 }
 
 /**
@@ -344,21 +191,35 @@ function buildSemesterHeader(semester_name) {
  *
  * @param view_year : int year that the calendar is viewing
  * @param view_month : int month that the calendar is viewing (1 as January and 12 as December)
- * @returns {HTMLElement} the HTML Element with the entire calendar
+ * @returns {string} the HTML string contains the entire calendar table displaying view_month/view_year
  */
 function generateCalendarOfMonth(view_year, view_month) {
     const startWeekday = new Date(view_year, view_month - 1, 1).getDay();
-    const title = buildSwitchingHeader(view_year, view_month);
-    const table = generateCalendarHeader(title);
-    const tableBody = document.createElement('tbody');
-    let curRow = document.createElement('tr');
+    // Header area: two buttons to move, and month
+    let content = generateCalendarHeader(
+        `<th colspan="3">
+                <div class="cal-switch" id="prev-month-switch">
+                    <a class="cal-btn cal-prev-btn" onclick="loadCalendar.apply(this, prevMonth(${view_month}, ${view_year}))">&#60;</a>
+                </div>            
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <h2 class="cal-month-title" >${monthNames[view_month]}</h2>
+                    <h3 class="cal-year-title" >${view_year}</h3>
+                </div>
+            </th>
+            <th colspan="3">
+                <div class="cal-switch" id="next-month-switch">
+                    <a class="cal-btn cal-next-btn" onclick="loadCalendar.apply(this, nextMonth(${view_month}, ${view_year}))">&#62;</a>
+                </div>            
+            </th>`);
 
     // Show days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
         const lastMonthEnd = new Date(view_year, view_month - 1, 0).getDate();
         const lastMonthStart = lastMonthEnd + 1 - startWeekday;
         for (let day = lastMonthStart; day <= lastMonthEnd; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month - 1, day, view_month));
+            content += generateDayCell(view_year, view_month - 1, day, view_month);
         }
     }
 
@@ -366,12 +227,11 @@ function generateCalendarOfMonth(view_year, view_month) {
     const daysInMonth = new Date(view_year, view_month, 0).getDate();
     let weekday = startWeekday;
     for (let day = 1; day <= daysInMonth; day++) {
-        curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
+        content += generateDayCell(view_year, view_month, day, view_month);
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
-            tableBody.appendChild(curRow);
-            curRow = document.createElement('tr');
+            content += '</tr><tr>';
         }
         else {
             weekday = weekday + 1;
@@ -382,7 +242,7 @@ function generateCalendarOfMonth(view_year, view_month) {
     if (weekday !== 0) {
         const remain = 7 - weekday;
         for (let day = 1; day <= remain; day++) {
-            curRow.appendChild(generateDayCell(view_year, view_month + 1, day, view_month));
+            content += generateDayCell(view_year, view_month + 1, day, view_month);
             if (weekday === 6) {
                 weekday = 0;
             }
@@ -391,9 +251,12 @@ function generateCalendarOfMonth(view_year, view_month) {
             }
         }
     }
-    tableBody.appendChild(curRow);
-    table.appendChild(tableBody);
-    return table;
+    content += `
+        </tr>
+        </tbody>
+    </table> 
+    `;
+    return content;
 }
 
 /**
@@ -402,12 +265,21 @@ function generateCalendarOfMonth(view_year, view_month) {
  * @param start the start date of the semester in the format of YYYY-mm-dd
  * @param end the end date of the semester in the format of YYYY-mm-dd
  * @param semester_name the name of the semester
- * @returns {HTMLElement} the HTML Element containing the calendar
+ * @returns {string} the HTML string containing the cell
  */
 function generateFullCalendar(start, end, semester_name) {
     // Header area: two buttons to move, and month
-    const table = generateCalendarHeader(buildSemesterHeader(semester_name));
-    const tableBody = document.createElement('tbody');
+    let content = generateCalendarHeader(
+        `<th colspan="3">    
+            </th>
+            <th colspan="1">
+                <div class="cal-title">
+                    <h2 class="cal-month-title" >${semester_name.split(' ')[0]}</h2>
+                    <h3 class="cal-year-title" >${semester_name.split(' ')[1]}</h3>
+                </div>
+            </th>
+            <th colspan="3">          
+            </th>`);
 
     const startDate = parseDate(start);
     const endDate = parseDate(end);
@@ -417,23 +289,17 @@ function generateFullCalendar(start, end, semester_name) {
     const startWeekday = startDate.getDay();
     // Skip days at the end of last month that belongs to the first week of current month
     if (startWeekday !== 0) {
-        const td = document.createElement('td');
-        td.classList.add('cal-day-cell');
-        td.colSpan = startWeekday;
-        tableBody.appendChild(td);
+        content += `<td class="cal-day-cell" colspan="${startWeekday}"></td>`;
     }
-
-    let curRow = document.createElement('tr');
 
     let weekday = startWeekday;
     while ((endDate.getTime() - startDate.getTime()) >= 0) {
         // Shows each day of current month
-        curRow.appendChild(generateDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true));
+        content += generateDayCell(currDate.getFullYear(), currDate.getMonth()+1, currDate.getDate(), 0, true);
         if (weekday === 6) {
             weekday = 0;
             // Next week should show on next line
-            tableBody.appendChild(curRow);
-            curRow = document.createElement('tr');
+            content += '</tr><tr>';
         }
         else {
             weekday = weekday + 1;
@@ -441,18 +307,18 @@ function generateFullCalendar(start, end, semester_name) {
 
         currDate.setDate(currDate.getDate() + 1);
     }
-    tableBody.appendChild(curRow);
 
     if (weekday !== 0) {
         const remain = 7 - weekday;
-        const td = document.createElement('td');
-        td.classList.add('cal-day-cell');
-        td.colSpan = remain;
-        tableBody.appendChild(td);
+        content += `<td class="cal-day-cell" colspan="${remain}"></td>`;
     }
-    table.appendChild(tableBody);
 
-    return table;
+    content += `
+        </tr>
+        </tbody>
+    </table> 
+    `;
+    return content;
 }
 
 /**
@@ -462,9 +328,7 @@ function generateFullCalendar(start, end, semester_name) {
  * @param year_ : int year that the calendar will show
  */
 function loadCalendar(month_, year_) {
-    const calendar = document.getElementById('full-calendar');
-    calendar.innerHTML = '';
-    calendar.appendChild(generateCalendarOfMonth(year_, month_));
+    $('#full-calendar').html(generateCalendarOfMonth(year_, month_));
 }
 
 /**
@@ -475,11 +339,5 @@ function loadCalendar(month_, year_) {
  * @param semester_name the name of the semester
  */
 function loadFullCalendar(start, end, semester_name) {
-    const calendar = document.getElementById('full-calendar');
-    calendar.innerHTML = '';
-    calendar.appendChild(generateFullCalendar(start, end, semester_name));
-}
-
-function openNewItemModal() {
-    $('#new-calendar-item-form').css('display', 'block');
+    $('#full-calendar').html(generateFullCalendar(start, end, semester_name));
 }

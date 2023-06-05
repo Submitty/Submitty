@@ -346,7 +346,7 @@ class GradedComponent extends AbstractModel {
 
     /**
      * Sets the time for when this component was verified
-     * @param string|null $verify_time
+     * @param string $verify_time
      */
     public function setVerifyTime($verify_time) {
         if ($verify_time === null) {

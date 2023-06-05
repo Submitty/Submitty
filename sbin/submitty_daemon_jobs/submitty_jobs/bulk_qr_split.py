@@ -120,8 +120,7 @@ def main(args):
                     cover_writer.write(out)
 
                 # save cover image
-                page.save('{}.jpg'.format(cover_filename[:-4]),
-                          "JPEG", quality=20, optimize=True)
+                page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=100)
 
                 id_index += 1
                 page_count = 1
@@ -129,7 +128,7 @@ def main(args):
 
                 # save page as image, start indexing at 1
                 page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
+                          "JPEG", quality=100)
 
             else:
                 # the first pdf page doesn't have a qr code
@@ -150,15 +149,14 @@ def main(args):
                         cover_writer.write(out)
 
                     # save cover image
-                    page.save('{}.jpg'.format(cover_filename[:-4]),
-                              "JPEG", quality=20, optimize=True)
+                    page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=100)
 
                 # add pages to current split_pdf
                 page_count += 1
                 pdf_writer.add_page(pdfPages.pages[i])
                 # save page as image, start indexing at 1
                 page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
+                          "JPEG", quality=100)
 
             i += 1
 

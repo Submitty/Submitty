@@ -50,20 +50,20 @@ class CourseMaterialsView extends AbstractView {
             $dir_count_a = substr_count($rel_path_a, "/");
             $dir_count_b = substr_count($rel_path_b, "/");
             if ($dir_count_a > $dir_count_b) {
-                return 1;
+                return true;
             }
             elseif ($dir_count_a < $dir_count_b) {
-                return -1;
+                return false;
             }
             else {
                 if ($a->getPriority() > $b->getPriority()) {
-                    return 1;
+                    return true;
                 }
                 elseif ($a->getPriority() < $b->getPriority()) {
-                    return -1;
+                    return false;
                 }
                 else {
-                    return $a->getPath() > $b->getPath() ? 1 : -1;
+                    return $a->getPath() > $b->getPath();
                 }
             }
         };

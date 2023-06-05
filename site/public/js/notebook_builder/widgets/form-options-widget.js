@@ -1,6 +1,3 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames */
-/* exported FormOptionsWidget */
-
 class FormOptionsWidget extends Widget {
     constructor() {
         super();
@@ -22,9 +19,9 @@ class FormOptionsWidget extends Widget {
         container.appendChild(interactive_container);
 
         const save_button = container.querySelector('.save-button');
-        save_button.addEventListener('click', () => {
+        save_button.addEventListener('click', event => {
             this.saveButtonAction();
-        });
+        })
 
         return container;
     }
@@ -52,11 +49,11 @@ class FormOptionsWidget extends Widget {
         this.resetInputColors();
 
         // Only continue if validation passed
-        if (!this.validate()) {
+        if(!this.validate()) {
             return;
         }
 
-        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: 'text/plain'});
+        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
@@ -144,7 +141,7 @@ class FormOptionsWidget extends Widget {
         const bad_item_names = getBadItemNames();
         bad_item_names.forEach(bad_item_name => {
             if (bad_item_name === '') {
-                this.appendStatusMessage('An itempool item name was found to be blank.  Ensure all item names are non-blank.');
+                this.appendStatusMessage(`An itempool item name was found to be blank.  Ensure all item names are non-blank.`);
             }
             else {
                 this.appendStatusMessage(`Itempool item name '${bad_item_name}' was found to be duplicated.  Ensure all item names are unique.`);

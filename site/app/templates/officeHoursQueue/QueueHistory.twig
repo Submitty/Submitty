@@ -56,15 +56,16 @@
             {% else %}
               <td>Not in queue</td>
             {% endif %}
-            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
-              <td class="mobile-hide">{{ viewer.getHelperName(entry) }}</td>
-            {% else %}
-              <td class="mobile-hide"></td>
-            {% endif %}
+
+            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
             {% if entry['removal_type'] == 'self' %}
-              <td class="mobile-hide"></td>
+              <td class="mobile-hide">
+                <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
             {% else %}
-              <td class="mobile-hide">{{ viewer.getRemoverName(entry) }}</td>
+              <td class="mobile-hide">{{ entry['removed_by'] }}</td>
             {% endif %}
             {% if viewer.isGrader() %}
               <td>

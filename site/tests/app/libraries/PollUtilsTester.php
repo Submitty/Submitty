@@ -2,16 +2,17 @@
 
 namespace tests\app\libraries;
 
-use app\entities\poll\Option;
-use app\entities\poll\Poll;
+use app\libraries\Core;
 use app\libraries\PollUtils;
-use DateTime;
-use ReflectionProperty;
+use app\models\PollModel;
 
 class PollUtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;
 
+    private $core;
+
     public function setUp(): void {
+        $this->core = new Core();
     }
 
     public function tearDown(): void {
@@ -26,76 +27,10 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testExportDataWithNonEmptyPolls() {
         $polls = [
-            new Poll(
-                "Poll #1",
-                "Is this the first poll?",
-                "single-response",
-                new DateTime("2020-01-11"),
-                "never",
-                "never",
-                "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
-            ),
-            new Poll(
-                "Poll #2",
-                "Is this the second poll?",
-                "single-response",
-                new DateTime("2020-01-12"),
-                "always",
-                "always"
-            ),
-            new Poll(
-                "Poll #3",
-                "Is this the fourth poll?",
-                "multiple-response",
-                new DateTime("2020-01-13"),
-                "when_ended",
-                "when_ended"
-            ),
+            new PollModel($this->core, 0, "Poll #1", "Is this the first poll?", "single-response", ["Yes", "No", "Maybe"], [0, 2], "closed", ["bitdiddle" => 0, "aphacker" => 1], "2020-01-11", null, "never"),
+            new PollModel($this->core, 1, "Poll #2", "Is this the second poll?", "single-response", ["Yes", "No", "Definitely not"], [0], "open", ["bitdiddle" => 2, "aphacker" => 0], "2020-01-12", null, "always"),
+            new PollModel($this->core, 2, "Poll #3", "Is this the fourth poll?", "multilple-response", ["Yes", "No", "Maybe"], [1], "ended", ["bitdiddle" => 1, "aphacker" => 2], "2020-01-13", null, "when_ended"),
         ];
-
-        $polls[1]->setOpen();
-        $polls[2]->setEnded();
-
-        $poll_property = new ReflectionProperty("app\\entities\\poll\\Poll", "id");
-        $poll_property->setAccessible(true);
-
-        $poll_property->setValue($polls[0], 0);
-        $poll_property->setValue($polls[1], 1);
-        $poll_property->setValue($polls[2], 2);
-
-        $option_property = new ReflectionProperty("app\\entities\\poll\\Option", "id");
-        $option_property->setAccessible(true);
-
-        $option0 = new Option(0, "Yes", true);
-        $option1 = new Option(1, "No", false);
-        $option2 = new Option(2, "Maybe", true);
-        $option_property->setValue($option0, 0);
-        $option_property->setValue($option1, 1);
-        $option_property->setValue($option2, 2);
-        $polls[0]->addOption($option0);
-        $polls[0]->addOption($option1);
-        $polls[0]->addOption($option2);
-
-        $option3 = new Option(0, "Yes", true);
-        $option4 = new Option(1, "No", false);
-        $option5 = new Option(2, "Definitely Not", false);
-        $option_property->setValue($option3, 3);
-        $option_property->setValue($option4, 4);
-        $option_property->setValue($option5, 5);
-        $polls[1]->addOption($option3);
-        $polls[1]->addOption($option4);
-        $polls[1]->addOption($option5);
-
-        $option6 = new Option(0, "Yes", false);
-        $option7 = new Option(1, "No", true);
-        $option8 = new Option(2, "Maybe", false);
-        $option_property->setValue($option6, 6);
-        $option_property->setValue($option7, 7);
-        $option_property->setValue($option8, 8);
-        $polls[2]->addOption($option6);
-        $polls[2]->addOption($option7);
-        $polls[2]->addOption($option8);
-
         $expected_data = [
             [
                 "id" => 0,
@@ -106,38 +41,35 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0, 2],
                 "release_date" => "2020-01-11",
                 "status" => "closed",
-                "release_histogram" => "never",
-                "release_answer" => "never",
-                "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
+                "image_path" => null,
+                "release_histogram" => "never"
             ],
             [
                 "id" => 1,
                 "name" => "Poll #2",
                 "question" => "Is this the second poll?",
                 "question_type" => "single-response",
-                "responses" => ["Yes", "No", "Definitely Not"],
+                "responses" => ["Yes", "No", "Definitely not"],
                 "correct_responses" => [0],
                 "release_date" => "2020-01-12",
                 "status" => "open",
-                "release_histogram" => "always",
-                "release_answer" => "always",
-                "image_path" => null
+                "image_path" => null,
+                "release_histogram" => "always"
             ],
             [
                 "id" => 2,
                 "name" => "Poll #3",
                 "question" => "Is this the fourth poll?",
-                "question_type" => "multiple-response",
+                "question_type" => "multilple-response",
                 "responses" => ["Yes", "No", "Maybe"],
                 "correct_responses" => [1],
                 "release_date" => "2020-01-13",
                 "status" => "ended",
-                "release_histogram" => "when_ended",
-                "release_answer" => "when_ended",
-                "image_path" => null
+                "image_path" => null,
+                "release_histogram" => "when_ended"
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);
-        $this->assertSame($expected_data, $actual_data);
+        $this->assertSame($actual_data, $expected_data);
     }
 }

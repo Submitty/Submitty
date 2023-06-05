@@ -38,16 +38,7 @@ function syncWithServer(criticalSync) {
         contentType: false,
         success: function(res) {
             lastTime = Date.now();
-            let response = {};
-
-            try {
-                response = JSON.parse(res);
-            }
-            catch (err) {
-                handleSyncError(err);
-                return;
-            }
-
+            const response = JSON.parse(res);
             ticks_till_update = 600000;
             if (response.status === 'success') {
                 const { data } = response;
@@ -74,28 +65,24 @@ function syncWithServer(criticalSync) {
                 displayErrorMessage('Something went wrong while starting the timer');
             }
         },
-        error: (err) => {
-            handleSyncError(err);
-        },
-    });
-
-    function handleSyncError(err) {
-        ticks_till_update = 600000;
-        console.log(err);
-        if (!criticalSync) {
-            updateTime();
-        }
-        else {
-            if (document.getElementById('gradeable-time-remaining-text') !== null) {
-                document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+        error: function (err) {
+            ticks_till_update = 600000;
+            console.log(err);
+            if (!criticalSync) {
+                updateTime();
             }
-            if (user_deadline !== 0) {
-                if (document.getElementById('time-remaining-text') !== null) {
-                    document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+            else {
+                if (document.getElementById('gradeable-time-remaining-text') !== null) {
+                    document.getElementById('gradeable-time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                }
+                if (user_deadline !== 0) {
+                    if (document.getElementById('time-remaining-text') !== null) {
+                        document.getElementById('time-remaining-text').textContent = 'Timer Error. Please refresh to restart.';
+                    }
                 }
             }
-        }
-    }
+        },
+    });
 }
 
 function updateTime() {

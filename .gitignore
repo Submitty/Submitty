@@ -43,5 +43,3 @@ composer.phar
 Pipfile
 Pipfile.lock
 .phpunit.result.cache
-
-.env

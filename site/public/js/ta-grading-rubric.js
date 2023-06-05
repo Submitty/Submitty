@@ -1527,7 +1527,8 @@ function getMarkIdFromOrder(component_id, mark_order) {
  * @return {int} Returns zero of no open component exists
  */
 function getOpenComponentIdFromCookie() {
-    const component_id = parseInt(Cookies.get('open_component_id'));
+    let component_id = document.cookie.replace(/(?:(?:^|.*;\s*)open_component_id\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    component_id = parseInt(component_id);
     if(isNaN(component_id)) {
         return NO_COMPONENT_ID;
     }
@@ -1538,7 +1539,7 @@ function getOpenComponentIdFromCookie() {
  * Updates the open component in the cookie
  */
 function updateCookieComponent() {
-    Cookies.set('open_component_id', getFirstOpenComponentId(), { path: '/' });
+    document.cookie = "open_component_id=" + getFirstOpenComponentId() + "; path=/;";
 }
 
 /**

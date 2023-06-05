@@ -14,34 +14,18 @@ class PDFController extends AbstractController {
         parent::__construct($core);
     }
 
-    /**
-     * returns the path contains the anonymous id given the gradeable id if $real is false
-     * returns the path for the submitted file given the user id if $real is true
-     */
-    public function getPath(string $file_path, string $id, bool $real): string {
-        $path = "";
+    public function getRealPath(string $file_path, string $id): string {
+        $real_path = "";
         $file_path_parts = explode("/", $file_path);
-
-        if ($real && str_contains($file_path, "..")) {
-            return "INVALID FILE PATH";
-        }
-
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index === 9) {
-                if ($real) {
-                    $path .= "/" . $id;
-                }
-                else {
-                    $user_id = $file_path_parts[$index];
-                    $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $id);
-                    $path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
-                }
+                $real_path .= "/" . $id;
             }
             else {
-                $path = $path . "/" . $file_path_parts[$index];
+                $real_path = $real_path . "/" . $file_path_parts[$index];
             }
         }
-        return $path;
+        return $real_path;
     }
 
     /**
@@ -76,7 +60,7 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $anon_path, null, $annotation_jsons, true, 1, true);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, null, null, $annotation_jsons, true, 1, true);
     }
 
     /**
@@ -95,7 +79,7 @@ class PDFController extends AbstractController {
             $id = $student_id;
         }
 
-        $real_path = $this->getPath($anon_path, $id, true);
+        $real_path = $this->getRealPath($anon_path, $id);
         if (!file_exists($real_path)) {
             $this->core->getOutput()->renderJsonFail('The PDF file could not be found');
             return;
@@ -207,18 +191,14 @@ class PDFController extends AbstractController {
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = $is_anon ? "" : $file_path;
-        $anon_path = $is_anon ? $file_path : "";
+        $real_path = $is_anon ? "" : urldecode($_POST['file_path']);
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-            $real_path = $this->getPath($file_path, $id, true);
+            $real_path = $this->getRealPath($file_path, $id);
             if (!file_exists($real_path)) {
                 return JsonResponse::getErrorResponse('The PDF file could not be found');
             }
-        }
-        else {
-            $anon_path = $this->getPath($file_path, $gradeable_id, false);
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -257,6 +237,6 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $real_path, $file_path, $file_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
 }

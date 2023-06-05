@@ -31,14 +31,12 @@
 #thread_list {
     padding-right: 0;
     overflow-y: auto;
-    height: 100%;
-    max-height: 81vh;
+    height: 81vh;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #posts_list {
     overflow-y: auto;
-    max-height: 81vh;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -447,7 +445,7 @@
 
 #thread-container {
     position: relative;
-    height: 81vh;
+    height: 100%;
     overflow-y: hidden;
 }
 
@@ -697,12 +695,6 @@
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: var(--deleted-discussion-post-grey);
-    color: var(--deleted-color);
-}
-
-.deleted-unviewed {
-    background-color: var(--deleted-and-unviewed-thread) !important;
-    color: var(--deleted-color) !important;
 }
 
 .deleted.active {

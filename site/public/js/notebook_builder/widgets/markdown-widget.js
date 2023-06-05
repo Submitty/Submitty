@@ -1,6 +1,3 @@
-/* global Widget, NUM_MARKDOWN, buildUrl, csrfToken, displayErrorMessage */
-/* exported MarkdownWidget */
-
 class MarkdownWidget extends Widget {
     constructor() {
         super();
@@ -9,7 +6,7 @@ class MarkdownWidget extends Widget {
 
         this.state = {
             type: 'markdown',
-            markdown_string: '',
+            markdown_string: ''
         };
     }
 
@@ -23,7 +20,6 @@ class MarkdownWidget extends Widget {
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
         label.style.display = 'none';
         label.innerHTML =  `Markdown Input #${NUM_MARKDOWN}`;
-        // eslint-disable-next-line no-global-assign
         NUM_MARKDOWN++;
 
         // Setup interactive area
@@ -32,7 +28,7 @@ class MarkdownWidget extends Widget {
 
         $.ajax({
             url: buildUrl(['markdown', 'area']),
-            type: 'POST',
+            type: "POST",
             data: {
                 data: {
                     markdown_area_id : `notebook-builder-markdown-${NUM_MARKDOWN}`,
@@ -44,16 +40,16 @@ class MarkdownWidget extends Widget {
                     preview_div_name : `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
                     preview_button_id : `notebook-builder-preview-button-${NUM_MARKDOWN}`,
                     render_header : true,
-                    min_height : '100px',
+                    min_height : "100px",
                 },
-                csrf_token: csrfToken,
+                csrf_token: csrfToken
             },
             success: function(data) {
                 $(interactive_area).append(data);
             },
             error: function() {
                 displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-            },
+            }
         });
 
         this.dom_pointer = container;

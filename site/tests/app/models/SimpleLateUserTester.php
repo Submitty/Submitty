@@ -26,7 +26,6 @@ class SimpleLateUserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => 'test_user',
             'user_givenname' => 'Tester',
             'user_familyname' => 'Test',
-            'user_pronouns' => '',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -41,7 +40,6 @@ class SimpleLateUserTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'Alexander',
             'user_preferred_given' => '',
             'user_familyname' => 'Johnson',
-            'user_pronouns' => '',
             'allowed_late_days' => '2',
             'since_timestamp' => $sinceTimestamp,
             'late_day_exceptions' => '5'
