@@ -7,8 +7,8 @@ const content3 = 'E2E Content 3 E2E';
 const reply1 = 'E2E Reply 1 E2E';
 const reply2 = 'E2E Reply 2 E2E';
 const reply3 = 'E2E Reply 3 E2E';
-const merged1 = 'Merged Thread Title: ' + title3 + '\n\n' + content3;
-const merged2 = 'Merged Thread Title: ' + title2 + '\n\n' + content2;
+const merged1 = 'Merged Thread Title: '.concat(title3,'\n\n',content3);
+const merged2 = 'Merged Thread Title: '.concat(title2,'\n\n',content2);
 
 describe('Test cases revolving around initializating, modifying, and merging discussion forum threads', () => {
 
@@ -35,7 +35,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('.cat-buttons').contains('Comment ').click();
             cy.get('[name="post"]').click();
             cy.get('#thread_box_link_9 > .thread_box > .flex-row > .thread-left-cont > .thread-content').should('have.text', content1);
-    
+
             // Question
             cy.get('[title="Create Thread"]').click();
             cy.get('#title').type(title2);
@@ -45,7 +45,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('[name="post"]').click();
             cy.get('#thread_box_link_10 > .thread_box > .flex-row > .thread-left-cont > .thread-content').should('have.text', content2);
 
-            // Tutorials 
+            // Tutorials
             cy.get('[title="Create Thread"]').click();
             cy.get('#title').type(title3);
             cy.get('.thread_post_content').type(content3);
