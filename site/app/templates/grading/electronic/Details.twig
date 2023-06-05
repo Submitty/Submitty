@@ -706,10 +706,10 @@
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
-            document.cookie = 'view=assigned; path=/;';
+            Cookies.set('view', 'assigned', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
         } else {
-            document.cookie = 'view=all; path=/;';
+            Cookies.set('view', 'all', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
         }
         location.reload();
@@ -718,27 +718,27 @@
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
-            document.cookie = 'anon_mode=off;';
+            Cookies.set('anon_mode', 'off');
         }
         else {
-            document.cookie = 'anon_mode=on;';
+            Cookies.set('anon_mode', 'on');
         }
         location.reload();
     }
 
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
-            document.cookie = 'sort=id;';
+            Cookies.set('sort', 'id');
         }
         else {
-            document.cookie = 'sort=random;';
+            Cookies.set('sort', 'random');
         }
         location.reload();
     }
 
     function sortTableByColumn(sort_type = 'id', direction) {
-        document.cookie = `sort=${sort_type}`;
-        document.cookie = `direction=${direction}`;
+        Cookies.set('sort', sort_type);
+        Cookies.set('direction', direction);
         location.reload();
     }
 

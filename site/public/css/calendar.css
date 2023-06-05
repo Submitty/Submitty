@@ -261,7 +261,16 @@ a.cal-gradeable-status-link:focus {
     color: var(--text-black)!important;
 }
 
-@media (max-width: 800px) {
+/* creating/editing calendar event */
+div.calendar-submit {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-gap: 5px; 
+}
+div.calendar-submit label { text-align: "right"; }
+div.calendar-submit label::after { content: ":"; }
+
+@media (width <= 800px) {
     #calendar-list {
         margin: 0;
     }
