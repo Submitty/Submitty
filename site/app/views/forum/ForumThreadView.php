@@ -162,7 +162,7 @@ class ForumThreadView extends AbstractView {
         $currentCategoriesIds = [];
         $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
-        $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
+        $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && !empty($_COOKIE['unread_select_value']) && $_COOKIE['unread_select_value'] === 'false');
 
         if (!$ajax) {
             $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
@@ -476,7 +476,7 @@ class ForumThreadView extends AbstractView {
                     $place = array_search($post["parent_id"], $order_array);
                     $tmp_array = [$post["id"]];
                     $parent_reply_level = $reply_level_array[$place];
-                    while ($place && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
+                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
                         $place++;
                     }
                     array_splice($order_array, $place + 1, 0, $tmp_array);

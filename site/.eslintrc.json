@@ -8,7 +8,8 @@
     "extends": "eslint:recommended",
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
+        "Cookies": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2017,
@@ -35,7 +36,14 @@
         "quotes": ["error", "single", {"avoidEscape": true}],
         "semi": ["error", "always"],
         "semi-style": ["error", "last"],
-        "template-curly-spacing": ["error", "never"]
+        "template-curly-spacing": ["error", "never"],
+        "no-restricted-syntax": [
+            "error",
+            {
+                "message": "Direct use of `document.cookie` is not allowed. Consider using `Cookies.get` or `Cookies.set`.",
+                "selector": "MemberExpression[object.name=\"document\"][property.name=\"cookie\"]"
+            }
+        ]
     },
     "overrides": [
         {
