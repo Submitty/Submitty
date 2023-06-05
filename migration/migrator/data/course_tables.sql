@@ -765,7 +765,7 @@ CREATE TABLE public.electronic_gradeable (
     g_id character varying(255) NOT NULL,
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
-    eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_partial_path character varying(1024) NOT NULL,
     eg_vcs_host_type integer DEFAULT 0 NOT NULL,
     eg_team_assignment boolean NOT NULL,
     eg_max_team_size integer NOT NULL,
@@ -793,6 +793,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_depends_on character varying(255) DEFAULT NULL::character varying,
     eg_depends_on_points integer,
     eg_has_release_date boolean DEFAULT true NOT NULL,
+    eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -1802,8 +1803,10 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_last_initial_format integer DEFAULT 0 NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
+    CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
 
