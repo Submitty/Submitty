@@ -153,8 +153,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
-    var current_y_offset = window.pageYOffset;
+    const url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
+    const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
     const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
@@ -181,11 +181,11 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
     Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
-    var form = $("#delete-course-material-form");
-    var deleteMessageElement = form.find('.delete-course-material-message')[0];
+    const form = $("#delete-course-material-form");
+    const deleteMessageElement = form.find('.delete-course-material-message')[0];
     deleteMessageElement.innerHTML = '';
 
-    var cm_message = document.createElement('b');
+    const cm_message = document.createElement('b');
     cm_message.textContent = file_name;
 
     if (str_id !== null) {
