@@ -98,7 +98,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
         IF (TG_OP = 'INSERT') THEN
             -- FULL data sync on INSERT of a new user record.
             SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-            query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_last_initial_format, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration, display_name_order) ' ||
+            query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_last_initial_format, user_email, user_updated, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration, display_name_order) ' ||
                     'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_pronouns) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
                     '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_last_initial_format) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_email_secondary) || ', ' || quote_literal(user_row.user_email_secondary_notify) ||  ', ' || quote_literal(user_row.user_updated) || ', ' || quote_literal(user_row.instructor_updated) || ', ' ||
                     '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ', ' || quote_literal(user_row.display_name_order) || ')';
@@ -506,7 +506,7 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
-    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
+    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
