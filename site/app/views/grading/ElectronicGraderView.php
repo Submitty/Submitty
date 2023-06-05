@@ -877,7 +877,7 @@ HTML;
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
-        $isRegradePanel = false;
+        $isGradeInquiryPanel = false;
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -896,7 +896,7 @@ HTML;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
-        $isRegradePanel = true;
+        $isGradeInquiryPanel = true;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
@@ -995,7 +995,7 @@ HTML;
                 $isPeerPanel,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
-                $isRegradePanel,
+                $isGradeInquiryPanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
                 $error_message['message']
@@ -1101,7 +1101,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getUser()->getGroup() < 4) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradeInquiryPanel', $graded_gradeable, $can_inquiry);
         }
 
         return $return . <<<HTML
@@ -1157,12 +1157,12 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
-            'isRegradePanel' => $isRegradePanel,
+            'isGradeInquiryPanel' => $isGradeInquiryPanel,
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
             "error_color" => $error_color,
@@ -1657,7 +1657,7 @@ HTML;
      * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
+    public function renderGradeInquiryPanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradeInquiryPanel.twig", [
             "graded_gradeable" => $graded_gradeable,
             "can_inquiry" => $can_inquiry
