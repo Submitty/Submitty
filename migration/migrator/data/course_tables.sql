@@ -2048,6 +2048,14 @@ ALTER TABLE ONLY public.gradeable_data
 
 
 --
+-- Name: grade_inquiries grade_inquiries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: grade_inquiry_discussion grade_inquiry_discussion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2341,14 +2349,6 @@ ALTER TABLE ONLY public.queue
 
 ALTER TABLE ONLY public.queue_settings
     ADD CONSTRAINT queue_settings_pkey PRIMARY KEY (id);
-
-
---
--- Name: grade_inquiries regrade_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grade_inquiries
-    ADD CONSTRAINT regrade_requests_pkey PRIMARY KEY (id);
 
 
 --

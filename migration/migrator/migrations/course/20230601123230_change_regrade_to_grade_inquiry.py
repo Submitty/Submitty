@@ -14,6 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+
     # Rename tables
     database.execute("""
         ALTER TABLE regrade_discussion
@@ -39,6 +40,9 @@ def up(config, database, semester, course):
 
         ALTER TABLE grade_inquiry_discussion
             RENAME CONSTRAINT regrade_discussion_pkey TO grade_inquiry_discussion_pkey;
+
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT regrade_requests_pkey TO grade_inquiries_pkey;
     """)
 
     # Rename Sequences
@@ -62,6 +66,35 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+
+    # Revert Sequences
+    database.execute("""
+        ALTER SEQUENCE grade_inquiry_discussion_id_seq RENAME TO regrade_discussion_id_seq;
+
+        ALTER SEQUENCE grade_inquiries_id_seq RENAME TO regrade_requests_id_seq;
+    """)
+
+    # Revert Constraints
+    database.execute("""
+        ALTER TABLE electronic_gradeable
+            RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
+
+        ALTER TABLE grade_inquiry_discussion
+            RENAME CONSTRAINT grade_inquiry_discussion_pkey TO regrade_discussion_pkey;
+        
+        ALTER TABLE grade_inquiries
+            RENAME CONSTRAINT grade_inquiries_pkey TO regrade_requests_pkey;
+     """)
+
+    # Revert column names
+    database.execute("""
+        ALTER TABLE electronic_gradeable
+            RENAME COLUMN eg_grade_inquiry_allowed TO eg_regrade_allowed;
+    
+        ALTER TABLE grade_inquiry_discussion
+            RENAME COLUMN grade_inquiry_id TO regrade_id;
+    """)
+
     # Revert table names
     database.execute("""
         ALTER TABLE grade_inquiry_discussion
@@ -69,29 +102,4 @@ def down(config, database, semester, course):
 
         ALTER TABLE grade_inquiries
             RENAME TO regrade_requests;
-    """)
-
-    # Revert column names
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-            RENAME COLUMN eg_grade_inquiry_allowed TO eg_regrade_allowed;
-    
-        ALTER TABLE regrade_discussion
-            RENAME COLUMN grade_inquiry_id TO regrade_id;
-    """)
-
-    # Rename Constraints
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-            RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
-
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT grade_inquiry_discussion_pkey TO regrade_discussion_pkey;
-    """)
-
-    # Rename Sequences
-    database.execute("""
-        ALTER SEQUENCE grade_inquiry_discussion_id_seq RENAME TO regrade_discussion_id_seq;
-
-        ALTER SEQUENCE grade_inquiries_id_seq RENAME TO regrade_requests_id_seq;
     """)
