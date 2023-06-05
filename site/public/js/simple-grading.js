@@ -275,25 +275,19 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 }
 
 function getCheckpointHistory(g_id) {
-    const name = `${g_id}_history=`;
-    const cookies = decodeURIComponent(document.cookie).split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return JSON.parse(c.substring(name.length, c.length));
-        }
+    const history = Cookies.get(`${g_id}_history`);
+    try {
+        return JSON.parse(history) || [0];
     }
-    // if history is empty set pointer to 0
-    return [0];
+    catch (e) {
+        return [0];
+    }
 }
 
 function setCheckpointHistory(g_id, history) {
-    const expiration_date = new Date(Date.now());
+    const expiration_date = new Date();
     expiration_date.setDate(expiration_date.getDate() + 1);
-    document.cookie = `${g_id}_history=${JSON.stringify(history)}; expires=${expiration_date.toUTCString()}`;
+    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date });
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
@@ -489,6 +483,7 @@ function setupNumericTextCells() {
                 'old_scores': old_scores,
                 'scores': scores,
             },
+
             () => {
                 // Finds the element that stores the total and updates it to reflect increase
                 //eslint-disable-next-line eqeqeq
@@ -871,6 +866,20 @@ function setupSimpleGrading(action) {
         registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: {score: null} }, keySetCurrentRow);
     }
 
+    // make sure to show focused cell when covered by student info
+    $('.scrollable-table td[class^="option-"] > .cell-grade').on('focus', function() {
+        const lastInfoBox = $(this).parent().parent().children('td:not([class^="option-"])').last();
+        const boxRect = lastInfoBox[0].getBoundingClientRect();
+        const inputRect = $(this).parent()[0].getBoundingClientRect();
+
+        const diff = boxRect.right - inputRect.left;
+        if (diff < 0) {
+            return;
+        }
+
+        $('.scrollable-table')[0].scrollLeft -= diff;
+    });
+
     // when pressing enter in the search bar, go to the corresponding element
     $('#student-search-input').on('keyup', function(event) {
         if (event.code === 'Enter') { // Enter
@@ -925,39 +934,8 @@ function setupSimpleGrading(action) {
         $(this).val('');
     });
 
-    // the offset of the search bar: used to lock the search bar on scroll
-    let sticky_offset = $('#checkpoint-sticky').offset();
-
-    // used to reposition the search field when the window scrolls
-    $(window).on('scroll', () => {
-        const sticky = $('#checkpoint-sticky');
-        if (sticky_offset.top < $(window).scrollTop()) {
-            sticky.addClass('sticky-top');
-        }
-        else {
-            sticky.removeClass('sticky-top');
-        }
-    });
-
-    // check if the search field needs to be repositioned when the page is loaded
-    if (sticky_offset.top < $(window).scrollTop()) {
-        const sticky = $('#checkpoint-sticky');
-        sticky.addClass('sticky-top');
-    }
-
-    // check if the search field needs to be repositioned when the page is resized
-    $(window).on('resize', () => {
-        const settings_btn_offset = $('#settings-btn').offset();
-        sticky_offset = {
-            top : settings_btn_offset.top,
-        };
-        if (sticky_offset.top < $(window).scrollTop()) {
-            const sticky = $('#checkpoint-sticky');
-            sticky.addClass('sticky-top');
-        }
-    });
-    // search bar code ends here
     initSocketClient();
+
 }
 
 function initSocketClient() {
