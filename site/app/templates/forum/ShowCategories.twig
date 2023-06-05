@@ -40,7 +40,7 @@
                 >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
-                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }} {{ category.visible_date }}</span>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }}</span>
                             <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit category-button edit-category-desc-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
@@ -49,6 +49,7 @@
                             <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-desc-button"></i></a>
                         </span>
                     <div style="float: right;width: auto;">
+                        <span class="categorylistitem-desc-text" style="word-wrap: break-word;"> {{ category.visible_date }}</span>
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
                             {% for color_name, color_code in category_colors %}
                                 <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
