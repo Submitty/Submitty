@@ -577,7 +577,7 @@ progress::-webkit-progress-value {
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#regrade_inner_info .inner-container {
+#grade_inquiry_inner_info .inner-container {
     padding: 20px;
 }
 

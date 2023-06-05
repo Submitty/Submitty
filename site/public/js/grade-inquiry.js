@@ -227,7 +227,7 @@ function newDiscussionRender(discussion) {
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {
-        $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
+        $('#grade_inquiry_inner_info').children().html(discussion).hide().fadeIn('slow');
     }
     // student
     else {
