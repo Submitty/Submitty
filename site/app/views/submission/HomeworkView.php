@@ -145,7 +145,7 @@ class HomeworkView extends AbstractView {
             }
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasGradeInquiry()) {
-            $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
+            $return .= $this->renderGradeInquiryBox($graded_gradeable, $can_inquiry);
         }
         return $return;
     }
@@ -1135,8 +1135,8 @@ class HomeworkView extends AbstractView {
      * @param bool $can_inquiry
      * @return string
      */
-    private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/RegradeBox.twig', [
+    private function renderGradeInquiryBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/GradeInquiryBox.twig', [
             'graded_gradeable' => $graded_gradeable,
             'can_inquiry' => $can_inquiry
         ]);

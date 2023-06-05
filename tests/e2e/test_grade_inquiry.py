@@ -128,7 +128,7 @@ class TestGradeInquiry(BaseTestCase):
 
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(text(),'VIEW GRADE')]").click()
 
-        assert not self.driver.find_element(By.ID, "regradeBoxSection").is_displayed()
+        assert not self.driver.find_element(By.ID, "gradeInquiryBoxSection").is_displayed()
         open_grade_inquiry_button = self.driver.find_element(By.XPATH, "//button[contains(text(),'Open Grade Inquiry')]")
         open_grade_inquiry_button.click()
         assert not open_grade_inquiry_button.is_displayed()

@@ -6,7 +6,7 @@
 $( document ).ready(function() {
     var numPosts = $('.post_box').length;
     if (numPosts > 0) {
-        $("#regradeBoxSection").show();
+        $("#gradeInquiryBoxSection").show();
         $("#ShowRegradeRequestButton").hide();
     }
 });
@@ -110,7 +110,7 @@ $( document ).ready(function() {
     {% elseif regrade_available %}
         <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
         <div id="ShowRegradeRequestButton">
-            <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#regradeBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
+            <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
         </div>
     {% elseif is_grade_inquiry_ended %}
         <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>

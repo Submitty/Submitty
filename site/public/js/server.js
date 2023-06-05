@@ -1266,7 +1266,7 @@ function deleteOverriddenGrades(user_id, g_id) {
 }
 
 function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
+    var element = document.getElementById("gradeInquiryBoxSection");
     if (element.style.display === 'block') {
         element.style.display = 'none';
     }
