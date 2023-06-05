@@ -864,6 +864,26 @@ CREATE TABLE public.grade_inquiries (
 
 
 --
+-- Name: grade_inquiries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grade_inquiries_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grade_inquiries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grade_inquiries_id_seq OWNED BY public.grade_inquiries.id;
+
+
+--
 -- Name: grade_inquiry_discussion; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -876,6 +896,26 @@ CREATE TABLE public.grade_inquiry_discussion (
     deleted boolean DEFAULT false NOT NULL,
     gc_id integer
 );
+
+
+--
+-- Name: grade_inquiry_discussion_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grade_inquiry_discussion_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grade_inquiry_discussion_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grade_inquiry_discussion_id_seq OWNED BY public.grade_inquiry_discussion.id;
 
 
 --
@@ -1600,46 +1640,6 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 
 
 --
--- Name: regrade_discussion_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.regrade_discussion_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: regrade_discussion_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.grade_inquiry_discussion.id;
-
-
---
--- Name: regrade_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.regrade_requests_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: regrade_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.grade_inquiries.id;
-
-
---
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1853,14 +1853,14 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 -- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.grade_inquiries ALTER COLUMN id SET DEFAULT nextval('public.regrade_requests_id_seq'::regclass);
+ALTER TABLE ONLY public.grade_inquiries ALTER COLUMN id SET DEFAULT nextval('public.grade_inquiries_id_seq'::regclass);
 
 
 --
 -- Name: grade_inquiry_discussion id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.grade_inquiry_discussion ALTER COLUMN id SET DEFAULT nextval('public.regrade_discussion_id_seq'::regclass);
+ALTER TABLE ONLY public.grade_inquiry_discussion ALTER COLUMN id SET DEFAULT nextval('public.grade_inquiry_discussion_id_seq'::regclass);
 
 
 --

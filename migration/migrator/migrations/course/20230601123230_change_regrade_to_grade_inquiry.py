@@ -38,6 +38,13 @@ def up(config, database, semester, course):
             RENAME CONSTRAINT eg_regrade_allowed_true TO eg_grade_inquiry_allowed_true
     """)
 
+    # Rename Sequences
+    database.execute("""
+        ALTER SEQUENCE regrade_discussion_id_seq RENAME TO grade_inquiry_discussion_id_seq;
+
+        ALTER SEQUENCE regrade_requests_id_seq RENAME TO grade_inquiries_id_seq;
+    """)
+
 
 def down(config, database, semester, course):
     """
@@ -74,4 +81,11 @@ def down(config, database, semester, course):
     database.execute("""
         ALTER TABLE electronic_gradeable
             RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true
+    """)
+
+    # Rename Sequences
+    database.execute("""
+        ALTER SEQUENCE grade_inquiry_discussion_id_seq RENAME TO regrade_discussion_id_seq;
+
+        ALTER SEQUENCE grade_inquiries_id_seq RENAME TO regrade_requests_id_seq;
     """)
