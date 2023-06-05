@@ -655,7 +655,8 @@ CREATE TABLE public.categories_list (
     category_id integer NOT NULL,
     category_desc character varying NOT NULL,
     rank integer,
-    color character varying DEFAULT '#000080'::character varying NOT NULL
+    color character varying DEFAULT '#000080'::character varying NOT NULL,
+    visible_date date
 );
 
 
@@ -1802,8 +1803,8 @@ CREATE TABLE public.users (
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
     registration_type character varying(255) DEFAULT 'graded'::character varying,
-    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     user_pronouns character varying(255) DEFAULT ''::character varying,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
