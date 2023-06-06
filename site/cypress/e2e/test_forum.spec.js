@@ -1,12 +1,12 @@
-const title1 = 'E2E Test 1 E2E';
-const title2 = 'E2E Test 2 E2E';
-const title3 = 'E2E Test 3 E2E';
-const content1 = 'E2E Content 1 E2E';
-const content2 = 'E2E Content 2 E2E';
-const content3 = 'E2E Content 3 E2E';
-const reply1 = 'E2E Reply 1 E2E';
-const reply2 = 'E2E Reply 2 E2E';
-const reply3 = 'E2E Reply 3 E2E';
+const title1 = 'Cypress Title 1 Cypress';
+const title2 = 'Cypress Title 2 Cypress';
+const title3 = 'Cypress Title 3 Cypress';
+const content1 = 'Cypress Content 1 Cypress';
+const content2 = 'Cypress Content 2 Cypress';
+const content3 = 'Cypress Content 3 Cypress';
+const reply1 = 'Cypress Reply 1 Cypress';
+const reply2 = 'Cypress Reply 2 Cypress';
+const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3,'\n\n',content3);
 const merged2 = 'Merged Thread Title: '.concat(title2,'\n\n',content2);
 
