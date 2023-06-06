@@ -315,7 +315,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         prev.push(type);
     }
     a.onclick = () => loadCalendar.apply(this, prev);
-    a.innerHTML = '&#60;';
+    a.innerHTML = '<i class="fas fa-angle-left"></i>';
 
     // Append to header
     div.appendChild(a);
@@ -355,7 +355,7 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
         next.push(type);
     }
     a.onclick = () => loadCalendar.apply(this, next);
-    a.innerHTML = '&#62;';
+    a.innerHTML = '<i class="fas fa-angle-right"></i>';
 
     // Append to header
     div.appendChild(a);
@@ -500,7 +500,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
         curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
-        print_day++;
+        print_da
     }
 
     // Makes any days that spill into the next month
