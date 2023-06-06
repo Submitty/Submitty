@@ -1248,7 +1248,7 @@ class HomeworkView extends AbstractView {
         }
         $components_twig_array[] = ['id' => 0, 'title' => 'All'];
 
-        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Discussion.twig', [
             'grade_inquiries' => $grade_inquiries_twig_array,
             'grade_inquiry_url' => $grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
@@ -1288,7 +1288,7 @@ class HomeworkView extends AbstractView {
             $gc_title = $gradeable_component->getTitle();
         }
 
-        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Post.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Post.twig', [
             'post' => [
                 'is_staff' => $is_staff,
                 'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),

@@ -16,7 +16,7 @@
 {% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
-        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
+        {%  include "submission/grade_inquiry/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
     {% endif %}
     <div class='grade-inquiries'>
         {% for component in gradeable_components %}
@@ -41,7 +41,7 @@
                 </div>
                 {% if grade_inquiries[component.id] is defined and not grade_inquiries[component.id].posts is empty %}
                     {% for post in grade_inquiries[component.id].posts %}
-                        {% include "submission/regrade/Post.twig" with {"post": post} %}
+                        {% include "submission/grade_inquiry/Post.twig" with {"post": post} %}
                     {% endfor %}
                 {% elseif component.id == 0 %}
                     <p class="yellow-message no-post-warning" >No posts!</p>
