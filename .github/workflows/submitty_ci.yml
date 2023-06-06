@@ -295,11 +295,6 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v3
         - uses: ./.github/actions/e2e-Setup-Composite      
-        - name: Install accessibility checker
-          run: |
-            wget https://github.com/validator/validator/releases/download/20.3.16/vnu.jar_20.3.16.zip
-            unzip vnu.jar_20.3.16.zip
-            sudo mv dist/vnu.jar /usr/bin/
         - name: Run selenium e2e tests with pam auth
           run: |
             pushd ${SUBMITTY_REPOSITORY}
