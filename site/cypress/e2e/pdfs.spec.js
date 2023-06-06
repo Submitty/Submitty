@@ -5,9 +5,9 @@ function switch_settings(setting, pdf_type) {
     cy.visit(`/courses/${getCurrentSemester()}/sample`);
     cy.get(`a[href*="/sample/gradeable/${pdf_type}/update"]`).click();
     cy.get('#page_3_nav').click();
-    cy.get("#minimum_grading_group").find("option").contains(setting)
+    cy.get('#minimum_grading_group').find('option').contains(setting)
         .then(($option) => {
-            cy.get("#minimum_grading_group").select($option.val());
+            cy.get('#minimum_grading_group').select($option.val());
         });
     cy.get('#minimum_grading_group').find('option:selected').should('have.text', setting);
     cy.get('input[name="grader_assignment_method"][value="1"]').check();
@@ -46,9 +46,10 @@ function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name) {
 }
 
 describe('Test cases for PDFs access', () => {
-    var pdf_type 
+    let pdf_type;
+
     beforeEach(() => {
-        cy.visit('/')
+        cy.visit('/');
     });
 
     it('users should have access to basic pdfs', () => {
@@ -70,7 +71,7 @@ describe('Test cases for PDFs access', () => {
         cy.logout();
         pdf_access('ta', '3', '9', pdf_type, 'words_1463.pdf');
         cy.logout();
-        pdf_access('grader','1', '7', pdf_type, 'words_881.pdf')
+        pdf_access('grader','1', '7', pdf_type, 'words_881.pdf');
     });
 
     it('users should have access to peer pdfs', () => {
