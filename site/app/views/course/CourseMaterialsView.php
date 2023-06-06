@@ -23,7 +23,6 @@ class CourseMaterialsView extends AbstractView {
         $directory_priorities = [];
         $seen = [];
         $folder_ids = [];
-        $folder_info = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
 
@@ -34,7 +33,6 @@ class CourseMaterialsView extends AbstractView {
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
-                $folder_info[$course_material->getPath()] = ["is_hidden" => $course_material->isHiddenFromStudents()];
             }
             else {
                 $path_parts = explode("/", $rel_path);
@@ -52,20 +50,20 @@ class CourseMaterialsView extends AbstractView {
             $dir_count_a = substr_count($rel_path_a, "/");
             $dir_count_b = substr_count($rel_path_b, "/");
             if ($dir_count_a > $dir_count_b) {
-                return true;
+                return 1;
             }
             elseif ($dir_count_a < $dir_count_b) {
-                return false;
+                return -1;
             }
             else {
                 if ($a->getPriority() > $b->getPriority()) {
-                    return true;
+                    return 1;
                 }
                 elseif ($a->getPriority() < $b->getPriority()) {
-                    return false;
+                    return -1;
                 }
                 else {
-                    return $a->getPath() > $b->getPath();
+                    return $a->getPath() > $b->getPath() ? 1 : -1;
                 }
             }
         };
@@ -151,7 +149,6 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
-            "folder_info" => $folder_info,
             "links" => $links
         ]);
     }

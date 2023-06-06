@@ -46,20 +46,21 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method void setVcsPartialPath($vcs_partial_path)
+ * @method string getVcsPartialPath()
  * @method int getVcsHostType()
  * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method bool isScannedExam()
- * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentViewAfterGrades()
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
+ * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -88,7 +89,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
- * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
@@ -176,6 +176,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @prop @var string The path to the repository from the base url */
+    protected $vcs_partial_path = "";
     /** @prop @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
     protected $vcs_host_type = -1;
     /** @prop @var bool If the gradeable is a team assignment */
@@ -184,13 +186,13 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
     protected $ta_grading = true;
-    /** @prop @var bool If the gradeable is a 'scanned exam' */
-    protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
     protected $student_view = false;
     /** @prop @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
-    /** @prop @var bool If students can make submissions */
+    /** @prop @var bool If students can download submission files */
+    protected $student_download = false;
+    /** @prop @var bool If students can make submissions and view other versions */
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
@@ -291,13 +293,14 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
-            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
+            $this->setStudentDownload($details['student_download']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
             $this->setHasReleaseDate($details['has_release_date']);
@@ -637,7 +640,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
-        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $this->getId());
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
         if ($feedback == 'thanks') {
             return 'Thank you!';
@@ -734,8 +737,8 @@ class Gradeable extends AbstractModel {
                 $result[] = 'grade_released_date';
             }
 
-            // Only add in grade inquiry dates if its allowed & enabled
-            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed() && !$regrade_modified) {
+            // Only add in grade inquiry dates if its allowed
+            if ($this->isTaGrading() && $this->isRegradeAllowed() && !$regrade_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
@@ -916,6 +919,23 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if the submitted files for this gradeable can be downloaded by students
+     * @return bool
+     */
+    public function canStudentDownload() {
+        return $this->student_download;
+    }
+
+    /**
+     * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
+     * grades are released)
+     * @return bool
+     */
+    public function isBulkUpload() {
+        return $this->isStudentView() && $this->isStudentViewAfterGrades();
+    }
+
+    /**
      * Gets if this gradeable has a due date or not for electronic gradeables
      * @return bool
      */
@@ -1020,7 +1040,7 @@ class Gradeable extends AbstractModel {
     private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
+            throw new \InvalidArgumentException('Gradeable id must be alphanumeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -1128,7 +1148,7 @@ class Gradeable extends AbstractModel {
         $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
+                throw new \InvalidArgumentException('Object in components array was not a component');
             }
         }
 
@@ -1764,7 +1784,7 @@ class Gradeable extends AbstractModel {
                     'graded_components' => 0,
                 ];
                 if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                 }
             }
@@ -2045,7 +2065,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -2055,7 +2075,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryYetToStart() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -2066,7 +2086,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryEnded() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -2153,15 +2173,15 @@ class Gradeable extends AbstractModel {
     }
 
     public function getRepositoryPath(User $user, Team $team = null) {
-        if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
-            $vcs_path = $this->getVcsSubdirectory();
+        if (strpos($this->getVcsPartialPath(), '://') !== false || substr($this->getVcsPartialPath(), 0, 1) === '/') {
+            $vcs_path = $this->getVcsPartialPath();
         }
         else {
             if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
-                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsPartialPath();
             }
             else {
-                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsPartialPath());
             }
         }
         $repo = $vcs_path;

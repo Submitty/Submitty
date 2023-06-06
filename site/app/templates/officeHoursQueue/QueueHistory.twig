@@ -20,6 +20,8 @@
         <th scope="col">Time Entered</th>
         <th scope="col">Time In Queue</th>
         <th scope="col">Time Helped</th>
+        <th scope="col">Times Helped Today</th>
+        <th scope="col">Times Helped this week</th>
         <th scope="col" class="mobile-hide">Helped Started By</th>
         <th scope="col" class="mobile-hide">Removed By</th>
         {% if viewer.isGrader() %}
@@ -57,15 +59,15 @@
               <td>Not in queue</td>
             {% endif %}
 
-            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+            <td>{{ entry['helped_today'] }}</td>
+            <td>{{ entry['times_helped'] }}</td>
+            <td class="mobile-hide">{{ entry['help_started_by'] }}</td> 
+
+
             {% if entry['removal_type'] == 'self' %}
-              <td class="mobile-hide">
-                <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
-                  <i class="fas fa-eye"></i>
-                </a>
-              </td>
+              <td class="mobile-hide"></td>
             {% else %}
-              <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+              <td class="mobile-hide">{{ viewer.getRemoverName(entry) }}</td>
             {% endif %}
             {% if viewer.isGrader() %}
               <td>

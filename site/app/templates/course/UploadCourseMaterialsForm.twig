@@ -42,12 +42,12 @@
             {% endfor %}
             </div>
         </fieldset>
-        <label id="upload_dt">
+        <label id="upload_dt" style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/><br>
-            <span>(Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time)</span>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
+            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
             <span>
@@ -56,18 +56,10 @@
             <input id="upload_sort" value="0.0" type="text" size="26"/>
         </label>
         <label>
-            <input id="hide-materials-checkbox" type="checkbox" value="off" onchange="toggleHideMaterialsWarning()"/>
+            <input id="hide-materials-checkbox" type="checkbox" value="off">
             Hide from Students<br>
             <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
-            <span id="upload-form-hide-warning" class="red-message full-width" style="display: none;">
-                Warning: Students can view the hidden course material by guessing the corresponding course material ID (a simple number).  It is recommended to instead use the release date feature if it is necessary to prevent students from accessing course materials.
-            </span>
         </label>
-        <script>
-            function toggleHideMaterialsWarning() {
-                $('#hide-materials-checkbox:visible ~ #upload-form-hide-warning').toggle();
-            }
-        </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
             <legend class="black-message">
@@ -116,8 +108,8 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -150,7 +142,9 @@
                     const cmPath = document.getElementById('cm_path').innerHTML;
                     const requestedPath = document.getElementById("input-provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
+                    const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
+                    overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
                 }
                 else {
                     alert("Select at least one section");
@@ -158,7 +152,7 @@
                 e.stopPropagation();
             });
         });
-        flatpickr('#upload_picker', {
+        const upload_fp = flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -196,6 +190,7 @@
                             }
                         }
                     )],
+                    appendTo: document.getElementById('upload-course-materials-form'),
                     allowInput: true,
                     enableTime: true,
                     enableSeconds: true,
@@ -206,6 +201,9 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
+    $('.form-body').on('scroll', function() {
+        upload_fp._positionCalendar();
+    });
     </script>
     <script>
         createArray(1);

@@ -97,8 +97,8 @@ class Submitter extends AbstractModel {
      * Gets the anonymous id of the user/team
      * @return string The anonymous id of the submitter
      */
-    public function getAnonId() {
-        return $this->team_or_user->getAnonId();
+    public function getAnonId($g_id) {
+        return ($this->isTeam() ? $this->getTeam()->getAnonId() : $this->getUser()->getAnonId($g_id));
     }
 
     /**
