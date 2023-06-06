@@ -99,7 +99,10 @@
                             {% endif %}
                         {% endif %}
                         <strong class="post_user_id">{{ thread.author_info.name}}
-                         {{"("}} {{thread.author_info.user_pronouns}} {{")"}}</strong>
+                        {% if thread.author_info.user_pronouns != "" %}
+                            {{"("}} {{thread.author_info.user_pronouns}} {{")"}}
+                        {% endif %}
+                        </strong>
                     </span>
                 </div>
             {% endif %}

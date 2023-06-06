@@ -1369,7 +1369,7 @@ class ForumThreadView extends AbstractView {
                 "family_name" => $family_name,
                 "given_name" => $given_name,
                 "post_count" => $post_count,
-                "pronoun" =>$pronoun,
+                "pronoun" => $pronoun,
                 "details_total_threads" => $details["total_threads"],
                 "num_deleted" => $num_deleted,
                 "posts" => $posts,
