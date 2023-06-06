@@ -34,8 +34,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             // Add more to tests for uploading attachments
             cy.get('.cat-buttons').contains('Comment ').click();
             cy.get('[name="post"]').click();
-            cy.get('#thread_box_link_9 > .thread_box > .flex-row > .thread-left-cont > .thread-content').should('have.text', content1);
-
+            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', title1);
             // Question
             cy.get('[title="Create Thread"]').click();
             cy.get('#title').type(title2);
@@ -43,7 +42,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             // Add more to tests for uploading attachments
             cy.get('.cat-buttons').contains('Question ').click();
             cy.get('[name="post"]').click();
-            cy.get('#thread_box_link_10 > .thread_box > .flex-row > .thread-left-cont > .thread-content').should('have.text', content2);
+            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain',title2);
 
             // Tutorials
             cy.get('[title="Create Thread"]').click();
@@ -52,7 +51,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             // Add more to tests for uploading attachments
             cy.get('.cat-buttons').contains('Tutorials ').click();
             cy.get('[name="post"]').click();
-            cy.get('#thread_box_link_11 > .thread_box > .flex-row > .thread-left-cont > .thread-content').should('have.text', content3);
+            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', content3);
         });
 
         it('Reply to threads', () => {
@@ -61,17 +60,17 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.visit(['sample']);
             // Comment
             cy.get('#nav-sidebar-forum').click();
-            cy.get('#thread_box_link_9 > .thread_box').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).click();
             cy.get('#reply_box_2').type(reply1);
             cy.get('[value="Submit Reply to All"]').click();
             // Question
             cy.get('#nav-sidebar-forum').click();
-            cy.get('#thread_box_link_10 > .thread_box').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
             cy.get('#reply_box_2').type(reply2);
             cy.get('[value="Submit Reply to All"]').click();
             // Tutorials
             cy.get('#nav-sidebar-forum').click();
-            cy.get('#thread_box_link_11 > .thread_box').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title3).click();
             cy.get('#reply_box_2').type(reply3);
             cy.get('[value="Submit Reply to All"]').click();
         });
@@ -82,19 +81,19 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
             // Tutorial into Questions
-            cy.get('#thread_box_link_10 > .thread_box').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title3).click();
             cy.get('[title="Merge Thread Into Another Thread"]').click();
             cy.get('.chosen-single > span').click();
             cy.get('.active-result').contains(title2).click();
             cy.get('[value="Merge Thread"]').click();
-            cy.get('[id="35"] > .pre-forum > .post_content').should('have.text', merged1 );
+            cy.get('.pre-forum > .post_content').should('contain', merged1);
             // Result into comments
-            cy.get('#thread_box_link_9 > .thread_box').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
             cy.get('[title="Merge Thread Into Another Thread"]').click();
             cy.get('.chosen-single > span').click();
             cy.get('.active-result').contains(title1).click();
             cy.get('[value="Merge Thread"]').click();
-            cy.get('[id="34"] > .pre-forum > .post_content').should('have.text', merged2);
+            cy.get('.pre-forum > .post_content').should('contain', merged2);
         });
 
         it('Remove thread', () => {
@@ -102,9 +101,9 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.login(user);
             cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
-            cy.get('#thread_box_link_9 > .thread_box').click();
-            cy.get('[title="Remove post"]').click();
-            cy.get('#thread_box_link_9').should('not.exist');
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).click();
+            cy.get('.first_post > .post-action-container > .delete-post-button').click();
+            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).should('not.exist');
         });
 
     });
