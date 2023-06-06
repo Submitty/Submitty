@@ -936,7 +936,7 @@ tr.is_publish {
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#regrade_request_box.rubric_panel {
+#grade_inquiry_box.rubric_panel {
     border: 5px solid #f47a42;
 }
 
