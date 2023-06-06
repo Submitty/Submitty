@@ -500,7 +500,7 @@ function generateCalendarOfMonthWeek(view_year, view_month, view_day) {
     // Make the "current" day, and the days after in the month
     for (let day = view_day; print_day <= 6 && day <= daysInMonth; day++) {
         curRow.appendChild(generateDayCell(view_year, view_month, day, view_month));
-        print_da
+        print_day++;
     }
 
     // Makes any days that spill into the next month
