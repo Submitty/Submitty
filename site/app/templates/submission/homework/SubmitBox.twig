@@ -140,6 +140,15 @@
     {% endif %}
     {# /Admin submission type selector #}
 
+    <div id ="error-message">
+    <h2> <b>ERROR </b> </h2>
+    {% if vcs_subdirectory != '' %}
+    <b> The subdirectory {{ vcs_subdirectory }} is empty. Make sure your files are within that subdirectory. If you have made changes, make sure to commit and push them.\n</b>
+    {% else %}
+    <b> Your repository is empty. If you have made changes, make sure to commit and push them.</b>
+    {% endif %}
+    </div>
+
     {% if is_vcs %}
         {% if vcs_host_type == 0 or vcs_host_type == 1 %}
             <h3>To access your Repository:</h3>

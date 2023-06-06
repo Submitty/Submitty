@@ -12,6 +12,13 @@
     text-align: right;
     margin-left: auto;
 }
+#error-message {
+    text-align: center;
+    margin-left: 50%;
+}
+#error-message > h2 {
+    color: red;
+}
 
 #submission-form > * {
     margin: 1.5em 0;
