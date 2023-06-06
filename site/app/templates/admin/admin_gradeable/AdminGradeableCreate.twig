@@ -142,7 +142,7 @@
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
 
-            <fieldset id="regrade_request_enable_container">
+            <fieldset id="grade_inquiry_enable_container">
                 <legend>Should grade inquiries be enabled for this assignment?</legend>
                 <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related"
                         {{ action != 'new' and gradeable.isGradeInquiryAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_allowed">Yes</label>
@@ -471,7 +471,7 @@
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
             disableElementChildren('.no_manual_grading', true);
-            $('#regrade_request_enable_container').show();
+            $('#grade_inquiry_enable_container').show();
             $('#discussion_grading_enable_container').show();
         }
         else {
@@ -480,7 +480,7 @@
             disableElementChildren('.no_manual_grading', false);
             $("#yes_discussion").prop('checked', false);
             $("#no_discussion").prop('checked', true);
-            $('#regrade_request_enable_container').hide();
+            $('#grade_inquiry_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
             {% if forum_enabled %}
             document.getElementById("no_discussion").checked = true;
