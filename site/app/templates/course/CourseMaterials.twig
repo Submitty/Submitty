@@ -182,7 +182,7 @@
 
 <script>
     function folderopencookie(){
-        var fileNames = [];
+        const fileNames = [];
         {% for file in material_list %}
         fileNames.push("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
         {% endfor %}
