@@ -7,8 +7,8 @@ const content3 = 'Cypress Content 3 Cypress';
 const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
-const merged1 = 'Merged Thread Title: '.concat(title3,'\n\n',content3);
-const merged2 = 'Merged Thread Title: '.concat(title2,'\n\n',content2);
+const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
+const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 
 describe('Test cases revolving around initializating, modifying, and merging discussion forum threads', () => {
 
@@ -42,7 +42,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             // Add more to tests for uploading attachments
             cy.get('.cat-buttons').contains('Question ').click();
             cy.get('[name="post"]').click();
-            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain',title2);
+            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', title2);
 
             // Tutorials
             cy.get('[title="Create Thread"]').click();
@@ -54,7 +54,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', content3);
         });
 
-        it('Reply to threads', () => {
+        it('Reply to comment thread', () => {
             // Add more to tests for uploading attachments
             cy.login(user);
             cy.visit(['sample']);
@@ -63,11 +63,21 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).click();
             cy.get('#reply_box_2').type(reply1);
             cy.get('[value="Submit Reply to All"]').click();
+        });
+        it('Reply to question thread', () => {
+            // Add more to tests for uploading attachments
+            cy.login(user);
+            cy.visit(['sample']);
             // Question
             cy.get('#nav-sidebar-forum').click();
             cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
             cy.get('#reply_box_2').type(reply2);
             cy.get('[value="Submit Reply to All"]').click();
+        });
+        it('Reply to tutorial thread', () => {
+            // Add more to tests for uploading attachments
+            cy.login(user);
+            cy.visit(['sample']);
             // Tutorials
             cy.get('#nav-sidebar-forum').click();
             cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title3).click();
@@ -75,7 +85,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('[value="Submit Reply to All"]').click();
         });
 
-        it('Merge threads', () => {
+        it('Merge tutorial thread into question thread', () => {
             // Add more to tests for uploading attachments
             cy.login(user);
             cy.visit(['sample']);
@@ -87,6 +97,11 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.get('.active-result').contains(title2).click();
             cy.get('[value="Merge Thread"]').click();
             cy.get('.pre-forum > .post_content').should('contain', merged1);
+        });
+        it('Merge resulting thread into comment thread', () => {
+            cy.login(user);
+            cy.visit(['sample']);
+            cy.get('#nav-sidebar-forum').click();
             // Result into comments
             cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
             cy.get('[title="Merge Thread Into Another Thread"]').click();
@@ -97,7 +112,7 @@ describe('Test cases revolving around initializating, modifying, and merging dis
         });
 
         it('Remove thread', () => {
-        //     // Add more to tests for uploading attachments
+            // Add more to tests for uploading attachments
             cy.login(user);
             cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
