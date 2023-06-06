@@ -710,7 +710,7 @@ class Gradeable extends AbstractModel {
      * Gets the dates that require validation for the gradeable's current configuration.
      * @return string[] array of date property names that need validation
      */
-    private function getDateValidationSet(bool $regrade_modified = false) {
+    private function getDateValidationSet(bool $rgrade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
@@ -738,7 +738,7 @@ class Gradeable extends AbstractModel {
             }
 
             // Only add in grade inquiry dates if its allowed
-            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$regrade_modified) {
+            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$rgrade_inquiry_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
@@ -778,7 +778,7 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $dates Array of dates, indexed by property name
      * @return \DateTime[] Array of dates, indexed by property name
      */
-    private function coerceDates(array $dates, bool $regrade_modified = false) {
+    private function coerceDates(array $dates, bool $rgrade_inquiry_modified = false) {
         // Takes an array of date properties (in order) and date values (indexed by property)
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
@@ -821,7 +821,7 @@ class Gradeable extends AbstractModel {
         };
 
         // Don't coerce the dates checked by validation
-        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        $skip_coercion_dates = $this->getDateValidationSet($rgrade_inquiry_modified);
         if ($this->isTeamAssignment()) {
             $skip_coercion_dates[] = "team_lock_date";
         }
@@ -849,7 +849,7 @@ class Gradeable extends AbstractModel {
      * @param array $dates An array of dates/date strings indexed by property name
      * @throws ValidationException With all messages for each invalid property
      */
-    public function setDates(array $dates, bool $regrade_modified = false) {
+    public function setDates(array $dates, bool $rgrade_inquiry_modified = false) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
 
@@ -858,7 +858,7 @@ class Gradeable extends AbstractModel {
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
-        $dates = $this->coerceDates($dates, $regrade_modified);
+        $dates = $this->coerceDates($dates, $rgrade_inquiry_modified);
 
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings

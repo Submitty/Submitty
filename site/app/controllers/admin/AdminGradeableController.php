@@ -1106,7 +1106,7 @@ class AdminGradeableController extends AbstractController {
         $late_day_status = null;
 
         // Set default value which may be set in loop below
-        $regrade_modified = false;
+        $rgrade_inquiry_modified = false;
 
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
@@ -1165,7 +1165,7 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_allowed') {
                 if ($post_val !== $gradeable->isGradeInquiryAllowed()) {
-                    $regrade_modified = true;
+                    $rgrade_inquiry_modified = true;
                 }
             }
 
@@ -1199,7 +1199,7 @@ class AdminGradeableController extends AbstractController {
         //  affect date validation
         if ($date_set) {
             try {
-                $gradeable->setDates($dates, $regrade_modified);
+                $gradeable->setDates($dates, $rgrade_inquiry_modified);
                 $updated_properties = $gradeable->getDateStrings(false);
             }
             catch (ValidationException $e) {
