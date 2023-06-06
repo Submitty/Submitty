@@ -101,8 +101,9 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
-            $graded += $section['graded_components'];
-            $total += $section['total_components'];
+
+            $graded += $section['non_late_graded_components'];
+            $total += $section['non_late_total_components'];
             $non_late_graded += $section['non_late_graded_components'];
             $non_late_total += $section['non_late_total_components'];
             if ($gradeable->isTeamAssignment()) {
@@ -134,6 +135,7 @@ class ElectronicGraderView extends AbstractView {
             $non_late_submitted_total = $num_components > 0 ? $non_late_total : 0;
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
             $non_late_graded_total = $num_components > 0 ? round($non_late_graded / $num_components, 2) : 0;
+            $graded_total = $non_late_graded_total ; 
             if ($submitted_total > 0) {
                 $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
             }
@@ -295,7 +297,7 @@ class ElectronicGraderView extends AbstractView {
         // (filter_id => [filter_title, default])
         $filters = [
             "grade_overriddes" => ["Grade Overrides", false],
-            "late_submissions" => ["Bad Late Submissions", false]
+            "late_submissions" => ["Bad Late Submissions", true]
         ];
 
         // (filter_id => [title => filter_title, default => boolean, enabled => boolean])
