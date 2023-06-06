@@ -105,7 +105,7 @@
     right: 2rem;
 }
 
-@media (max-width: 401px) {
+@media (width <= 401px) {
     .grade-results {
         display: flex;
         flex-direction: column;
@@ -125,7 +125,7 @@
     }
 }
 
-@media (max-width: 541px) {
+@media (width <= 541px) {
     #gradeable-info h1 {
         font-size: 1.3rem;
         font-weight: initial;
@@ -178,7 +178,7 @@
     }
 }
 
-@media (max-width: 950px) {
+@media (width <= 950px) {
     #submission-version-select {
         width: 100%;
     }

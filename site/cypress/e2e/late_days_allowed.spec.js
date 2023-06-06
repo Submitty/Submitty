@@ -74,7 +74,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
             cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
-            cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+3');
+            cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+3');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
 
             // logout and log back in as the instructor
@@ -103,7 +103,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
             cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
-            cy.get('#late-day-table > tbody > tr > :nth-child(7)').contains('+5');
+            cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+5');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('5');
 
             // logout and log back in as the instructor

@@ -44,13 +44,13 @@ textarea,
 #grade-override-table td:nth-of-type(5)::before { content: "Comments"; }
 #grade-override-table td:nth-of-type(6)::before { content: "Delete"; }
 
-@media (min-width: 541px) {
+@media (width >= 541px) {
     h1 {
         font-weight: bold;
     }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
     .single-student label {
         flex: 0 0 0;
         width: 420px;
@@ -75,7 +75,7 @@ textarea,
     /* stylelint-enable selector-id-pattern, no-descending-specificity */
 }
 
-@media (min-width: 830px) {
+@media (width >= 830px) {
     #grade-override-table {
         text-align: left;
     }
