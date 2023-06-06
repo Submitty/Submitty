@@ -1163,14 +1163,14 @@ class HomeworkView extends AbstractView {
             'grade_inquiry',
             'toggle_status'
         ]);
-        $make_regrade_post_url = $this->core->buildCourseUrl([
+        $make_grade_inquiry_post_url = $this->core->buildCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry',
             'post'
         ]);
 
-        $grade_inquiries = $graded_gradeable->getRegradeRequests();
+        $grade_inquiries = $graded_gradeable->getGradeInquiries();
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
 
         // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
@@ -1252,7 +1252,7 @@ class HomeworkView extends AbstractView {
             'grade_inquiries' => $grade_inquiries_twig_array,
             'grade_inquiry_url' => $grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
-            'make_request_post_url' => $make_regrade_post_url,
+            'make_request_post_url' => $make_grade_inquiry_post_url,
             'has_submission' => $graded_gradeable->hasSubmission(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'g_id' => $graded_gradeable->getGradeable()->getId(),

@@ -48,7 +48,7 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Insufficient permissions to request regrade')
+                JsonResponse::getFailResponse('Insufficient permissions to create grade inquiry')
             );
         }
 
@@ -125,13 +125,13 @@ class GradeInquiryController extends AbstractController {
         $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
-            $regrade_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
-            $regrade_post = $this->core->getQueries()->getGradeInquiryPost($regrade_post_id);
-            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
+            $grade_inquiry_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
+            $grade_inquiry_post = $this->core->getQueries()->getGradeInquiryPost($grade_inquiry_post_id);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $grade_inquiry_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id, 'new_post' => $new_post])
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $grade_inquiry_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {

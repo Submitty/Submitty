@@ -13,7 +13,7 @@ use app\models\User;
  * @method string getGradeableId()
  * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
- * @method array|null getRegradeRequests()
+ * @method array|null getGradeInquiries()
  * @method Submitter getSubmitter()
  * @method array getLateDayExceptions()
  */
@@ -30,7 +30,7 @@ class GradedGradeable extends AbstractModel {
     /** @prop @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
     /** @prop @var array The grade inquiries for this submitter/gradeable  */
-    protected $regrade_requests = [];
+    protected $grade_inquiries = [];
 
     /** @prop @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
@@ -134,10 +134,10 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Sets the grade inquiry for this graded gradeable
-     * @param array $regrade_requests
+     * @param array $grade_inquiries
      */
     public function setGradeInquiries(array $grade_inquiries) {
-        $this->regrade_requests = $grade_inquiries;
+        $this->grade_inquiries = $grade_inquiries;
     }
 
     /**
@@ -145,7 +145,7 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function hasGradeInquiry() {
-        return $this->regrade_requests !== null && count($this->regrade_requests) > 0;
+        return $this->grade_inquiries !== null && count($this->grade_inquiries) > 0;
     }
 
     /**
@@ -154,7 +154,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function hasActiveGradeInquiry() {
         return $this->hasGradeInquiry() &&
-            array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
+            array_reduce($this->grade_inquiries, function ($carry, GradeInquiry $grade_inquiry) {
                 if ($this->gradeable->isGradeInquiryPerComponentAllowed()) {
                     $carry = $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE || $carry;
                 }
@@ -171,7 +171,7 @@ class GradedGradeable extends AbstractModel {
      * @param int $gc_id Gradeable Component id
      */
     public function getGradeInquiryByGcId($gc_id) {
-        foreach ($this->regrade_requests as $grade_inquiry) {
+        foreach ($this->grade_inquiries as $grade_inquiry) {
             if ($grade_inquiry->getGcId() == $gc_id) {
                 return $grade_inquiry;
             }
@@ -185,11 +185,11 @@ class GradedGradeable extends AbstractModel {
      */
     public function getActiveGradeInquiryCount() {
         if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
-            return array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
+            return array_reduce($this->grade_inquiries, function ($carry, GradeInquiry $grade_inquiry) {
                 return $carry + (is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE ? 1 : 0);
             });
         }
-        return array_reduce($this->regrade_requests, function ($carry, GradeInquiry $grade_inquiry) {
+        return array_reduce($this->grade_inquiries, function ($carry, GradeInquiry $grade_inquiry) {
             return $carry + ($grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE ? 1 : 0);
         });
     }
@@ -199,7 +199,7 @@ class GradedGradeable extends AbstractModel {
      * @return int
      */
     public function getGradeInquiryCount() {
-        return count($this->regrade_requests);
+        return count($this->grade_inquiries);
     }
 
     /**
