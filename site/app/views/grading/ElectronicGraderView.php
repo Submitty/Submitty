@@ -295,7 +295,7 @@ class ElectronicGraderView extends AbstractView {
         // (filter_id => [filter_title, default])
         $filters = [
             "grade_overriddes" => ["Grade Overrides", false],
-            "late_submissions" => ["Bad Late Submissions", true]
+            "late_submissions" => ["Bad Late Submissions", false]
         ];
 
         // (filter_id => [title => filter_title, default => boolean, enabled => boolean])
