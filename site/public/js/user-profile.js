@@ -94,8 +94,9 @@ function clearPronounsBox() {
 function updateUserPronouns(e) {
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
+    const forumDisplay = $('#pronouns-forum-display');
     pronounsLastVal = pronouns.val();
-    if (pronouns.data('current-pronouns') === pronouns.val()) {
+    if (pronouns.data('current-pronouns') === pronouns.val() && pronouns.data('pronouns-forum-display') === forumDisplay.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
         $('#edit-pronouns-form').hide();
@@ -105,6 +106,7 @@ function updateUserPronouns(e) {
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
+        data.append('pronouns-forum-display', forumDisplay.val());
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
