@@ -187,31 +187,10 @@
         fileNames.push("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
         {% endfor %}
         fileNames.forEach(function(fileName) {
-            setCookie(fileName, openAllDivForCourseMaterials());
-            });
-        setCookie("foldersOpen", openAllDivForCourseMaterials());   
+            Cookies.set(fileName, openAllDivForCourseMaterials());
+        });
+        Cookies.set("foldersOpen", openAllDivForCourseMaterials());   
     }
-    //set cookie for open adapted from w3schools
-    function setCookie(cName,cVal){
-        document.cookie = cName+'='+cVal;
-    }
-    //get the value for the cookie with this name
-    function getCookie(cName) {
-        var name = cName+'=';
-        var decodedCookie = decodeURIComponent(document.cookie);
-        var ca = decodedCookie.split(';');
-        for(var i = 0; i <ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
     {% if user_group == 1 %}
 
         function handleHideMaterialsCheckboxChange(clicked) {
