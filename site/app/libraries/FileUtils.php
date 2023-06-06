@@ -176,10 +176,8 @@ class FileUtils {
 
     /**
      * checks to see if directory is empty, if so return true
-     *
-     * @param string $dir
      */
-    public static function isEmptyDir($dir) {
+    public static function isEmptyDir(string $dir): bool {
         if ($handle = opendir($dir)) {
             while (false !== ($file = readdir($handle))) {
                 if ($file != '.' && $file != '..') {
