@@ -328,9 +328,9 @@ ORDER BY {$orderBy}"
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-    SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-    FROM grading_registration
-    GROUP BY user_id
+	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+	FROM grading_registration
+	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_group < 4
 ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id"
@@ -1925,10 +1925,10 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
   )AS parts_of_comp
 )AS comp
 LEFT JOIN (
-    SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
-    FROM regrade_requests AS rr
-    WHERE rr.g_id=? AND rr.status=-1
-    GROUP BY rr.gc_id
+	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+	FROM regrade_requests AS rr
+	WHERE rr.g_id=? AND rr.status=-1
+	GROUP BY rr.gc_id
 ) AS rr ON rr.gc_id=comp.gc_id
 GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
@@ -7056,12 +7056,12 @@ WHERE current_state IN
     public function getQueueDataByWeekNumber() {
         $this->course_db->query("SELECT
               weeknum,
-                  min(yearnum) as yearnum,"
+      			  min(yearnum) as yearnum,"
               . $this->getInnerQueueSelect() .
            "FROM (SELECT
               *,
               extract(WEEK from time_in) AS weeknum,
-                    extract(YEAR from time_in) AS yearnum
+			        extract(YEAR from time_in) AS yearnum
             FROM queue) AS weeknum_queue
             GROUP BY weeknum
             ORDER BY weeknum");
@@ -7499,10 +7499,10 @@ WHERE current_state IN
 
               /* Join grade inquiry */
               LEFT JOIN (
-                SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
-                FROM regrade_requests AS rr
-                GROUP BY rr.user_id, rr.team_id, rr.g_id
-              ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
+  				SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
+  				FROM regrade_requests AS rr
+  				GROUP BY rr.user_id, rr.team_id, rr.g_id
+  			  ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
             WHERE $selector
             $order";
 
