@@ -3,8 +3,8 @@ user_givenname: Tim
 user_id: grader
 anon_id: GFJ45AER76NJU89
 user_familyname: Grader
-user_pronouns: He/Him
 user_numeric_id: 010306042
+user_pronouns: He/Him
 courses:
   sample:
     user_group: 3
