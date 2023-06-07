@@ -277,9 +277,9 @@ GROUP BY user_id", [$user_id]);
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-    SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-    FROM grading_registration
-    GROUP BY user_id
+	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+	FROM grading_registration
+	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 ORDER BY {$orderBy}"
         );
