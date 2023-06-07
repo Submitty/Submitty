@@ -102,7 +102,7 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
         foreach ($instructor_courses as $course) {
-            if ($set_course === $course['semester'] && $set_course === $course['course']) {
+            if ($set_course === ($course['semester'] . ' ' . $course['course'])) {
                 $this->core->loadCourseConfig($course['semester'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $this->core->getCourseEntityManager()->persist($calendar_item);
