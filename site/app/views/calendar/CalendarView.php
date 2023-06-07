@@ -6,6 +6,7 @@ namespace app\views\calendar;
 
 use app\libraries\FileUtils;
 use app\models\CalendarInfo;
+use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
 
@@ -43,7 +44,7 @@ class CalendarView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
-
+        $this->core->getOutput()->addBreadcrumb($in_course ? "Course Calendar" : "Calendar");
         return $this->core->getOutput()->renderTwigTemplate("calendar/Calendar.twig", [
             "show_table" => $show_table,
             "view_year" => $year,          // the year that the calendar is viewing
