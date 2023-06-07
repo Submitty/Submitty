@@ -18,9 +18,8 @@ describe('Test cases revolving around initializating, modifying, and merging dis
             cy.login(user);
             cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
-            
         });
-        
+
         it('Create threads', () => {
             // Comment
             cy.get('[title="Create Thread"]').click();
