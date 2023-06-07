@@ -4,6 +4,7 @@
   "/courses/<semester>/<course>/autograding_config",
   "/courses/<semester>/<course>/gradeable/<gradeable>",
   "/courses/<semester>/<course>/gradeable/<gradeable>/encode_pdf",
+  "/courses/<semester>/<course>/gradeable/<gradeable>/rubric",
   "/courses/<semester>/<course>/gradeable/<gradeable>/[0-9]+",
   "/courses/<semester>/<course>/gradeable/<gradeable>/grading",
   "/courses/<semester>/<course>/gradeable/<gradeable>/grading/details",
