@@ -6,10 +6,20 @@ const docker_ui_path = '/admin/docker';
  *
  * To revert the states:
  *  - pushd /usr/local/submitty/config
- *  - rm /var/local/submitty/logs/docker/*.txt
  *  - jq '{default: .default}' autograding_containers.json | sponge autograding_containers.json
  *  - chown submitty_php:submitty_daemonphp autograding_containers.json
  *  - popd
+ *
+ * If `sponge' command is missing, install `moreutils' package, or edit the file manually:
+ * {
+ *     "default": [
+ *         "submitty/clang:6.0",
+ *         "submitty/autograding-default:latest",
+ *         "submitty/java:11",
+ *         "submitty/python:3.6",
+ *         "submittyrpi/csci1200:default"
+ *     ]
+ * }
  */
 
 describe('Docker UI Test', () => {
@@ -19,16 +29,17 @@ describe('Docker UI Test', () => {
         cy.visit(docker_ui_path);
     });
 
-    it('Should be the first update', () => {
-        // No info update should be made before this test...
-        // Check if the update time is "Unknown"
-        cy.get(':nth-child(1) > p')
-            .should('contain.text', 'Unknown');
-        // Check if the OS info is empty
-        cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
-            .invoke('text')
-            .should('match', /[\n ]*/);
-    });
+    //!DEPRECATED: Installer will also update the docker info
+    // it('Should be the first update', () => {
+    //     // No info update should be made before this test...
+    //     // Check if the update time is "Unknown"
+    //     cy.get(':nth-child(1) > p')
+    //         .should('contain.text', 'Unknown');
+    //     // Check if the OS info is empty
+    //     cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
+    //         .invoke('text')
+    //         .should('match', /[\n ]*/);
+    // });
 
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
