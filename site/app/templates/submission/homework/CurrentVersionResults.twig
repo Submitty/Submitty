@@ -10,26 +10,22 @@
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
         {% set failed = false %}
-        {% if file_length == 0 and not incomplete_autograding %}
+        {% if (file_length == 0 and not incomplete_autograding) or (not failed_file == '') %}
             <div id ="error-message">
                 <h1> <b>ERROR </b> </h1>   
-                <b> Your repository is empty. If you have made changes, make sure to commit and push them.</b>
-            </div>
-        {% endif %}
-        {% if failed_file != '' %}
-            {% set failed = true %}
-            <div id ="error-message">
-                <h1> <b>ERROR </b> </h1>
                 {% if vcs_subdirectory != '' %}
-                    <b> The subdirectory '{{ vcs_subdirectory }}' is empty.</b><br /><br />
+                    <b> The subdirectory '{{ vcs_subdirectory }}' is empty. <br/> <br/>If you have made changes, be sure to commit and push them.</b> <br/><br/>
                 {% else %}
-                    <b> Your repository is empty.</b><br /><br />
+                    <b> The repository is empty. If you have made changes, be sure to commit and push them. </b>
                 {% endif %}
-                <b>{{ failed_file|nl2br }}</b>
+                {% if failed_file != '' %}
+                    <b>{{ failed_file|nl2br }}</b>
+                {% endif %}
             </div>
+            {% set failed = true %}
         {% endif %}
 
-            {% if file_length > 0 and not failed %}
+        {% if file_length > 0 and not failed %}
             {% for file in files %}
                 <div class="flex-row">
                     <span>
@@ -55,7 +51,7 @@
                         <i class="fas fa-download" title="Download zip of all files"></i></button> 
                 </div>
             {% endif %}
-            {% endif %}
+        {% endif %}
         </div>
         <div class="box col-md-6 submission-details">
             {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
