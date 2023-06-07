@@ -1302,8 +1302,37 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
-        $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+    $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+    $instructor_full_access = [];
+    $limited_access_grader = [];
+    $grade_inquiries = $graded_gradeable->getRegradeRequests();
 
+    $queries = $this->core->getQueries();
+
+    $grade_inquiry_posts = $queries->getRegradeDiscussions($grade_inquiries);
+
+    $grade_inquiry_posts_for_id = $grade_inquiry_posts[0]->getId();
+    $author_user_ids = array_map(function ($post) {
+        return $post["user_id"];
+    }, $grade_inquiry_posts_for_id);
+    $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
+
+    foreach ($author_user_groups as $author) {
+        $limited_access_grader[$author["user_id"]] = $author["user_group"] === User::GROUP_LIMITED_ACCESS_GRADER;
+        $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+    }
+
+    $is_limited_access_grader = $limited_access_grader[$post['user_id']];
+    $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
+    $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+    $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
+    $name = $given_name;
+    if ($is_limited_access_grader) {
+        $name = $given_name . " " . substr($family_name, 0, 1) . ".";
+    }
+    if ($is_instructor_or_full_access_grader) {
+        $name = $given_name . ' ' . $family_name;
+    }
         $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
         $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
