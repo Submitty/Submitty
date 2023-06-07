@@ -184,16 +184,10 @@ class CalendarController extends AbstractController {
                 }
                 try {
                     $calendar_item->setText($text);
-                }
-                catch (\InvalidArgumentException $e) {
-                    $this->core->addErrorMessage($e->getMessage());
-                    return new RedirectResponse($this->core->buildUrl(['calendar']));
-                }
-                $calendar_item->setDate(new \DateTime($date));
-                try {
+                    $calendar_item->setDate(new \DateTime($date));
                     $calendar_item->setStringType($type);
                 }
-                catch (\InvalidArgumentException  $e) {
+                catch (\InvalidArgumentException $e) {
                     $this->core->addErrorMessage($e->getMessage());
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
                 }
