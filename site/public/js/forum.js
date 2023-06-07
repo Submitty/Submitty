@@ -287,7 +287,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     response = `{\n\t ${response.substring(start_parse_index)}`;
                 }
                 const new_post = JSON.parse(response).data;
-                const forum_display_setting = getCookie('forum_display_option');
+                const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
@@ -2524,19 +2524,4 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
-}
-function getCookie(cname) {
-    const name = `${cname}=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
 }
