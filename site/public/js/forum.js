@@ -308,7 +308,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         if (forum_display_setting === 'reverse-time') {
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
-                        else if (forum_display_setting === 'time'){
+                        else if (forum_display_setting === 'time') {
                             $(new_post).insertBefore('#post-hr').hide().fadeIn();
                         }
                         if (sibling_posts.length !== 0) {
