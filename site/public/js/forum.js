@@ -304,9 +304,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         }
                     }
                     else {
-                        console.log(forum_display_setting);
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
-                        console.log(sibling_posts.length);
+                        if (forum_display_setting === 'reverse-time') {
+                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
+                        }
+                        else if (forum_display_setting === 'time'){
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                        }
                         if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
                                 return $(this).attr('data-reply_level') <= $(`#${parent_id}`).attr('data-reply_level') ? this : null;
@@ -315,24 +319,9 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
                                 displaySuccessMessage('Refresh for correct ordering');
                             }
-                            else {
-                                if (forum_display_setting === 'reverse-time') {
-                                    $(new_post).insertAfter('#current-thread').hide().fadeIn();
-                                }
-                                else {
-                                    $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                                }
-                            }
-                        }
-                        if (forum_display_setting === 'reverse-time') {
-                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
-                        }
-                        else if (forum_display_setting === 'time'){
-                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
                         }
 
                         else {
-                            console.log('1');
                             $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
                         }
                     }
