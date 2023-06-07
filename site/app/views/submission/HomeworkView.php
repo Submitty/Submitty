@@ -1032,8 +1032,8 @@ class HomeworkView extends AbstractView {
 
         $failed_file = '';
         // See if the grade has succeeded or failed
-        foreach ($param['files'] as $file){
-            if (str_contains($file['relative_name'], 'failed')){
+        foreach ($param['files'] as $file) {
+            if (str_contains($file['relative_name'], 'failed')) {
                 $failed_file = file_get_contents($file['path']);
             // Exclude the Exception error message
                 $failed_file = substr(strstr($failed_file, "\n"), 3);
