@@ -28,68 +28,67 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-
-    # Rename Tables
     database.execute("""
         ALTER TABLE regrade_discussion
             RENAME TO grade_inquiry_discussion;
+        -- Rename Tables
 
         ALTER TABLE regrade_requests
             RENAME TO grade_inquiries;
-    """)
+   
 
-    # Rename Columns
-    database.execute("""
+    -- Rename Columns
         ALTER TABLE electronic_gradeable
             RENAME COLUMN eg_regrade_allowed TO eg_grade_inquiry_allowed;
 
         ALTER TABLE grade_inquiry_discussion
             RENAME COLUMN regrade_id TO grade_inquiry_id;
-    """)
+    
 
-    # Rename Constraints
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-            RENAME CONSTRAINT eg_regrade_allowed_true TO eg_grade_inquiry_allowed_true;
+    -- Rename Constraints
+        -- electronic_gradeable:
+            ALTER TABLE electronic_gradeable
+                RENAME CONSTRAINT eg_regrade_allowed_true TO eg_grade_inquiry_allowed_true;
 
 
         -- grade_inquiry_discussion:
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT regrade_discussion_pkey TO grade_inquiry_discussion_pkey;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT regrade_discussion_pkey TO grade_inquiry_discussion_pkey;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT regrade_discussion_fk0 TO grade_inquiry_discussion_fk0;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT regrade_discussion_fk0 TO grade_inquiry_discussion_fk0;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT regrade_discussion_fk1 TO grade_inquiry_discussion_fk1;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT regrade_discussion_fk1 TO grade_inquiry_discussion_fk1;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT regrade_discussion_regrade_requests_id_fk TO grade_inquiry_discussion_grade_inquiries_id_fk;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT regrade_discussion_regrade_requests_id_fk TO
+                grade_inquiry_discussion_grade_inquiries_id_fk;
 
 
          -- grade_inquiries:
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT regrade_requests_pkey TO grade_inquiries_pkey;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT regrade_requests_pkey TO grade_inquiries_pkey;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT regrade_requests_fk0 TO grade_inquiries_fk0;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT regrade_requests_fk0 TO grade_inquiries_fk0;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT regrade_requests_fk1 TO grade_inquiries_fk1;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT regrade_requests_fk1 TO grade_inquiries_fk1;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT regrade_requests_fk2 TO grade_inquiries_fk2;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT regrade_requests_fk2 TO grade_inquiries_fk2;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT regrade_requests_fk3 TO grade_inquiries_fk3;
-    """)
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT regrade_requests_fk3 TO grade_inquiries_fk3;
 
-    # Rename Sequences
-    database.execute("""
+
+    -- Rename Sequences
         ALTER SEQUENCE regrade_discussion_id_seq RENAME TO grade_inquiry_discussion_id_seq;
 
         ALTER SEQUENCE regrade_requests_id_seq RENAME TO grade_inquiries_id_seq;
     """)
+
 
     # Update Course Config
     path = course_config_location(semester, course)
@@ -124,67 +123,67 @@ def down(config, database, semester, course):
     :type course: str
     """
 
-    # Revert Sequences
+    
     database.execute("""
         ALTER SEQUENCE grade_inquiry_discussion_id_seq RENAME TO regrade_discussion_id_seq;
+        -- Revert Sequences
 
         ALTER SEQUENCE grade_inquiries_id_seq RENAME TO regrade_requests_id_seq;
-    """)
 
-    # Revert Cconstraints
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-            RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
+
+    -- Revert Cconstraints
+        -- electronic_gradeable:
+            ALTER TABLE electronic_gradeable
+                RENAME CONSTRAINT eg_grade_inquiry_allowed_true TO eg_regrade_allowed_true;
 
 
         -- grade_inquiry_discussion:
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT grade_inquiry_discussion_pkey TO regrade_discussion_pkey;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT grade_inquiry_discussion_pkey TO regrade_discussion_pkey;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT grade_inquiry_discussion_fk0 TO regrade_discussion_fk0;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT grade_inquiry_discussion_fk0 TO regrade_discussion_fk0;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT grade_inquiry_discussion_fk1 TO regrade_discussion_fk1;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT grade_inquiry_discussion_fk1 TO regrade_discussion_fk1;
 
-        ALTER TABLE grade_inquiry_discussion
-            RENAME CONSTRAINT grade_inquiry_discussion_grade_inquiries_id_fk TO regrade_discussion_regrade_requests_id_fk;
+            ALTER TABLE grade_inquiry_discussion
+                RENAME CONSTRAINT grade_inquiry_discussion_grade_inquiries_id_fk TO
+                regrade_discussion_regrade_requests_id_fk;
 
 
         -- grade_inquiries:
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT grade_inquiries_pkey TO regrade_requests_pkey;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT grade_inquiries_pkey TO regrade_requests_pkey;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT grade_inquiries_fk0 TO regrade_requests_fk0;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT grade_inquiries_fk0 TO regrade_requests_fk0;
 
-         ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT grade_inquiries_fk1 TO regrade_requests_fk1;
+             ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT grade_inquiries_fk1 TO regrade_requests_fk1;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT grade_inquiries_fk2 TO regrade_requests_fk2;
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT grade_inquiries_fk2 TO regrade_requests_fk2;
 
-        ALTER TABLE grade_inquiries
-            RENAME CONSTRAINT grade_inquiries_fk3 TO regrade_requests_fk3;
-     """)
+            ALTER TABLE grade_inquiries
+                RENAME CONSTRAINT grade_inquiries_fk3 TO regrade_requests_fk3;
 
-    # Revert Column Names
-    database.execute("""
+
+    -- Revert Column Names
         ALTER TABLE electronic_gradeable
             RENAME COLUMN eg_grade_inquiry_allowed TO eg_regrade_allowed;
     
         ALTER TABLE grade_inquiry_discussion
             RENAME COLUMN grade_inquiry_id TO regrade_id;
-    """)
 
-    # Revert Table Names
-    database.execute("""
+    -- Revert Table Names
         ALTER TABLE grade_inquiry_discussion
             RENAME TO regrade_discussion;
 
         ALTER TABLE grade_inquiries
             RENAME TO regrade_requests;
     """)
+
 
     # Update Course Config
     path = course_config_location(semester, course)
