@@ -4309,7 +4309,7 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category, $rank, $visibleDate) {
+    public function addNewCategory($category, $rank, $visibleDate = null) {
         //Can't get "RETURNING category_id" syntax to work
         $this->course_db->query("INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank, $visibleDate]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
