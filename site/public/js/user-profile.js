@@ -1,14 +1,41 @@
-// eslint-disable-next-line no-unused-vars
+/* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
+showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
+changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
+ */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl */
+
+//This variable is to store changes to the pronouns form that have not been submitted
+let pronounsLastVal = null;
+
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-username-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
     $('[name="user_name_change"]', form).val('');
-    $('#user-firstname-change').focus();
+    $('#user-givenname-change').focus();
 }
 
-// eslint-disable-next-line no-unused-vars
+function showUpdateLastInitialFormatForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-last-initial-format-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    const dropdown = $('#user-last-initial-format-change');
+    dropdown.val(dropdown.data().default || 0);
+}
+
+function showUpdatePronounsForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-pronouns-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
+        document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
+}
+
 function showUpdatePasswordForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#change-password-form');
@@ -19,7 +46,6 @@ function showUpdatePasswordForm() {
     $('#new_password').focus();
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateProfilePhotoForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-profile-photo-form');
@@ -27,7 +53,6 @@ function showUpdateProfilePhotoForm() {
     form.find('.form-body').scrollTop(0);
 }
 
-// eslint-disable-next-line no-unused-vars
 function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
@@ -58,12 +83,67 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
-// eslint-disable-next-line no-unused-vars
+function clearPronounsBox() {
+    const pronounsInput = document.getElementById('user-pronouns-change');
+    if (pronounsLastVal === null || pronounsLastVal !== pronounsInput.value) {
+        pronounsLastVal = pronounsInput.value;
+    }
+    pronounsInput.value = '';
+}
+
+function updateUserPronouns(e) {
+    e.preventDefault();
+    const pronouns = $('#user-pronouns-change');
+    pronounsLastVal = pronouns.val();
+    if (pronouns.data('current-pronouns') === pronouns.val()) {
+        // eslint-disable-next-line no-undef
+        displayErrorMessage('No changes detected to update pronouns!');
+        $('#edit-pronouns-form').hide();
+    }
+    else {
+        const data = new FormData();
+        // eslint-disable-next-line no-undef
+        data.append('csrf_token', csrfToken);
+        data.append('pronouns', pronouns.val());
+        // eslint-disable-next-line no-undef
+        const url = buildUrl(['user_profile', 'change_pronouns']);
+        $.ajax({
+            url,
+            type: 'POST',
+            data,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                const response = JSON.parse(res);
+                if (response.status === 'success') {
+                    const {data} = response;
+                    // eslint-disable-next-line no-undef
+                    displaySuccessMessage(data.message);
+                    const icon = '<i class="fas fa-pencil-alt"></i>';
+                    // update the pronouns
+                    $('#pronouns_val').html(`${icon} ${data.pronouns}`);
+                    // update the data attributes
+                    pronouns.data('current-pronouns', data.pronouns);
+                    $('#edit-pronouns-form').hide();
+                }
+                else {
+                    // eslint-disable-next-line no-undef
+                    displayErrorMessage(response.message);
+                }
+            },
+            error: function() {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage('Some went wrong while updating pronouns!');
+            },
+        });
+    }
+}
+
 function updateUserPreferredNames () {
-    const first_name_field = $('#user-firstname-change');
-    const last_name_field = $('#user-lastname-change');
+    const given_name_field = $('#user-givenname-change');
+    const family_name_field = $('#user-familyname-change');
     // If the names are not updated just display an error message and return without making any API call
-    if (first_name_field.data('current-name') === first_name_field.val() && last_name_field.data('current-name') === last_name_field.val()) {
+    if (given_name_field.data('current-name') === given_name_field.val() && family_name_field.data('current-name') === family_name_field.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
@@ -71,8 +151,8 @@ function updateUserPreferredNames () {
         const data = new FormData();
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
-        data.append('first_name', first_name_field.val());
-        data.append('last_name', last_name_field.val());
+        data.append('given_name', given_name_field.val());
+        data.append('family_name', family_name_field.val());
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_preferred_names']);
         $.ajax({
@@ -89,11 +169,11 @@ function updateUserPreferredNames () {
                     displaySuccessMessage(data.message);
                     //update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
-                    $('#firstname-row .icon').html(`${icon} ${data.first_name}`);
-                    $('#lastname-row .icon').html(`${icon} ${data.last_name}`);
+                    $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
+                    $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
                     //update the data attributes
-                    first_name_field.data('current-name', data.first_name);
-                    last_name_field.data('current-name', data.last_name);
+                    given_name_field.data('current-name', data.given_name);
+                    family_name_field.data('current-name', data.family_name);
                 }
                 else {
                     // eslint-disable-next-line no-undef
@@ -112,7 +192,43 @@ function updateUserPreferredNames () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
+function updateUserLastInitialFormat() {
+    const newVal = Number($('#user-last-initial-format-change').val());
+    if (isNaN(newVal)) {
+        return displayErrorMessage('Invalid option for last initial format!');
+    }
+    const data = new FormData();
+    data.append('csrf_token', $('#user-last-initial-format-csrf').val());
+    data.append('format', newVal);
+    const url = buildUrl(['user_profile', 'update_last_initial_format']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
+                $('#user-last-initial-format-change').data('default', data.format);
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
 function updateUserProfilePhoto () {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
@@ -162,7 +278,6 @@ function updateUserProfilePhoto () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUserSecondaryEmail () {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
@@ -218,7 +333,6 @@ function updateUserSecondaryEmail () {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function changeSecondaryEmail() {
     const email = $('#user-secondary-email-change').val();
     const checkbox = $('#user-secondary-email-notify-change');
@@ -230,6 +344,13 @@ function changeSecondaryEmail() {
         checkbox.prop('disabled', true);
         checkbox.prop('checked', false);
     }
+}
+
+function previewUserLastInitialFormat() {
+    const format = Number($('#user-last-initial-format-change').val());
+    const preview = $('#user-last-initial-format-preview');
+    const options = preview.data('options').split('|');
+    preview.text(options[format]);
 }
 
 $(document).ready(() => {

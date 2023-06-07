@@ -1,5 +1,6 @@
 [
   "/courses/<semester>/<course>",
+  "/courses/<semester>/<course>/download",
   "/courses/<semester>/<course>/autograding_config",
   "/courses/<semester>/<course>/gradeable/<gradeable>",
   "/courses/<semester>/<course>/gradeable/<gradeable>/[0-9]+",
@@ -27,7 +28,7 @@
   "/courses/<semester>/<course>/course_materials/delete",
   "/courses/<semester>/<course>/course_materials/modify_timestamp",
   "/courses/<semester>/<course>/course_materials/edit",
-  "/courses/<semester>/<course>/polls",
   "/courses/<semester>/<course>/polls/newPoll",
-  "/courses/<semester>/<course>/polls/editPoll/submitEdits"
+  "/courses/<semester>/<course>/polls/editPoll/submitEdits",
+  "/courses/<semester>/<course>/polls/deletePoll"
 ]

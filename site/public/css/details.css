@@ -17,7 +17,6 @@
 
 .expand-icon,
 .collapse-icon {
-    display: none;
     position: absolute;
     transform: translate(50%, -50%);
     font-size: 1rem;
@@ -105,7 +104,18 @@
     color: var(--text-black);
 }
 
-@media (max-width: 950px) {
+.panel-head-active .expand-icon,
+.collapse-icon {
+    display: inline;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.panel-head-active .collapse-icon,
+.expand-icon {
+    display: none;
+}
+
+@media (width <= 950px) {
     table.table,
     .table thead,
     .table tbody,
@@ -149,17 +159,6 @@
     #details-table tbody.panel-head-active {
         background: var(--submitty-logo-blue);
         color: white;
-    }
-
-    .panel-head-active .expand-icon,
-    .collapse-icon {
-        display: inline;
-    }
-
-    /* stylelint-disable-next-line no-descending-specificity */
-    .panel-head-active .collapse-icon,
-    .expand-icon {
-        display: none;
     }
 
     #details-table .details-content td:nth-of-type(1) { display: none; }
@@ -226,7 +225,7 @@
     }
 }
 
-@media (min-width: 401px) {
+@media (width >= 401px) {
     .content {
         padding: 30px;
     }
@@ -251,7 +250,7 @@
     }
 }
 
-@media (min-width: 660px) {
+@media (width >= 660px) {
     .markers-container {
         width: unset;
     }
@@ -276,7 +275,7 @@
     }
 }
 
-@media (min-width: 780px) {
+@media (width >= 780px) {
     #details-table tbody.details-info-header .info td {
         padding: 0;
     }
@@ -290,7 +289,7 @@
     }
 }
 
-@media (min-width: 951px) {
+@media (width >= 951px) {
     .details-action-box > * {
         margin-right: 5px;
     }
@@ -305,8 +304,13 @@
 
     #details-table td:nth-of-type(1) { display: table-cell; }
 
-    #details-table tbody.details-content {
-        display: contents !important;
+    #details-table .details-info-header {
+        cursor: pointer;
+        position: relative;
+    }
+
+    #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
+        border-bottom: 1px solid var(--standard-hover-light-gray);
     }
 }
 

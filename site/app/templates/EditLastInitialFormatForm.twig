@@ -1,0 +1,28 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-last-initial-format-form{% endblock %}
+{% block title %}Edit Abbreviated Name Format{% endblock %}
+{% block body %}
+    <div class="flex-col" id="user_settings_modal">
+        <input id="user-last-initial-format-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <p class="std-margin">Individuals with more complex surnames may prefer a specific
+        format for displaying their abbreviated name on Submitty. For example, the name "John Smith-Warren Jones" can be abbreviated as "John S.", "John S.J.", or "John S-W.J."</p>
+        <div class="edit_user_row">
+            <label for="user-last-initial-format-change">Display Format:&emsp;</label>
+            <select id="user-last-initial-format-change" data-default="{{ user.getLastInitialFormat() }}" onchange="previewUserLastInitialFormat()">
+                {% for i in 0..3 %}
+                    <option value="{{ i }}">{{ user.getDisplayLastInitialFormat(i) }}</option>
+                {% endfor %}
+            </select>
+            <span id="user-last-initial-format-preview" style="margin-left: 10px; font-weight: bold;" data-options="{{ (0..3)|map(i => user.getDisplayAbbreviatedName(i))|join('|') }}">{{ user.getDisplayAbbreviatedName() }}</span>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserLastInitialFormat()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

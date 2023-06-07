@@ -71,8 +71,9 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -158,6 +159,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
             'vcs_subdirectory' => '',
+            'vcs_partial_path' => '',
             'vcs_host_type' => -1,
             'team_assignment' => false,
             'team_size_max' => 1,

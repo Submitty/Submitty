@@ -185,7 +185,6 @@ defaults = {
     'vcs_url': '',
     'authentication_method': 0,
     'institution_name' : '',
-    'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
     'institution_homepage' : '',
     'timezone' : tzlocal.get_localzone().zone,
     'submitty_admin_username': '',
@@ -311,8 +310,6 @@ else:
 
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
-
-    USERNAME_TEXT = defaults['username_change_text']
 
     print('What authentication method to use:')
     for i in range(len(authentication_methods)):
@@ -443,7 +440,6 @@ else:
     config['websocket_port'] = WEBSOCKET_PORT
 
     config['institution_name'] = INSTITUTION_NAME
-    config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
@@ -536,7 +532,7 @@ if not args.worker:
         if args.worker_pair:
             worker_dict["submitty-worker"] = {
                 "capabilities": ['default'],
-                "address": "172.18.2.8",
+                "address": "192.168.56.21",
                 "username": "submitty",
                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
                 "enabled": True
@@ -632,7 +628,6 @@ if not args.worker:
     config['cgi_url'] = CGI_URL
     config['websocket_port'] = WEBSOCKET_PORT
     config['institution_name'] = INSTITUTION_NAME
-    config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['timezone'] = TIMEZONE
     config['duck_special_effects'] = False

@@ -40,7 +40,6 @@ class UserProfileController extends AbstractController {
                 ['UserProfile'],
                 'showUserProfile',
                 $this->core->getUser(),
-                $this->core->getConfig()->getUsernameChangeText(),
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
                 $this->core->getCsrfToken()
             )
@@ -101,27 +100,53 @@ class UserProfileController extends AbstractController {
 
 
     /**
+     * @Route("/user_profile/change_pronouns", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changePronouns() {
+        $user = $this->core->getUser();
+        if (isset($_POST['pronouns'])) {
+            $newPronouns = trim($_POST['pronouns']);
+            //validPronouns() checks for valid option
+            if ($user->validateUserData('user_pronouns', $newPronouns) === true) {
+                $user->setPronouns($newPronouns);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Pronouns updated successfully",
+                    'pronouns' => $newPronouns
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Pronouns are not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Pronouns does not exist");
+        }
+    }
+
+    /**
      * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
-     * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (empty($_POST['user_firstname_change']) && empty($_POST['user_lastname_change'])) {
-            $newFirstName = trim($_POST['first_name']);
-            $newLastName = trim($_POST['last_name']);
+        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
+            $newGivenName = trim($_POST['given_name']);
+            $newFamilyName = trim($_POST['family_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
-            if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-                $user->setPreferredFirstName($newFirstName);
-                $user->setPreferredLastName($newLastName);
+            if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
+                $user->setPreferredGivenName($newGivenName);
+                $user->setPreferredFamilyName($newFamilyName);
                 //User updated flag tells auto feed to not clobber some of the user's data.
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
-                    'first_name' => $newFirstName,
-                    'last_name' => $newLastName
+                    'given_name' => $newGivenName,
+                    'family_name' => $newFamilyName
                 ]);
             }
             else {
@@ -131,6 +156,34 @@ class UserProfileController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse('Preferred names cannot be empty!');
         }
+    }
+
+    /**
+     * @Route("/user_profile/update_last_initial_format", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateLastInitialFormat() {
+        $user = $this->core->getUser();
+        if (isset($_POST['format'])) {
+            $newVal = intval($_POST['format']);
+            // Handle the case where intval returns zero due to an invalid string
+            if ($newVal !== 0 || $_POST['format'] === '0' || $_POST['format'] === 0) {
+                try {
+                    $user->setLastInitialFormat($newVal);
+                    $user->setUserUpdated(true);
+                    $this->core->getQueries()->updateUser($user);
+                    return JsonResponse::getSuccessResponse([
+                        'message' => "Last initial format successfully updated!",
+                        'format' => $user->getLastInitialFormat(),
+                        'display_format' => $user->getDisplayLastInitialFormat(),
+                        'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
+                    ]);
+                }
+                catch (\InvalidArgumentException $e) {
+                }
+            }
+        }
+        return JsonResponse::getErrorResponse("Invalid option for last initial format!");
     }
 
     /**
@@ -166,7 +219,7 @@ class UserProfileController extends AbstractController {
                     'message' => 'Profile photo updated successfully!',
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
                     'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
-                    'image_alt_data' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                    'image_alt_data' => $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName(),
                     'image_flagged_state' => $user->getDisplayImageState(),
                 ]);
             }

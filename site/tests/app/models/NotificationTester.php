@@ -23,8 +23,9 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $config->setCourse('sample');
         $user = new User($this->core, [
             'user_id' => 'test_user',
-            'user_firstname' => 'Tester',
-            'user_lastname' => 'Test',
+            'user_givenname' => 'Tester',
+            'user_familyname' => 'Test',
+            'user_pronouns' => '',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
