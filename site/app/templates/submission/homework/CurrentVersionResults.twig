@@ -14,7 +14,7 @@
             <div id ="error-message">
                 <h1> <b>ERROR </b> </h1>   
                 {% if vcs_subdirectory != '' %}
-                    <b> The subdirectory '{{ vcs_subdirectory }}' is empty. <br/> <br/>If you have made changes, be sure to commit and push them.</b> <br/><br/>
+                    <b> The subdirectory '{{ vcs_subdirectory }}' is empty or does not exist. <br/> <br/>If you have made changes, be sure to commit and push them.</b> <br/><br/>
                 {% else %}
                     <b> The repository is empty. If you have made changes, be sure to commit and push them. </b>
                 {% endif %}
