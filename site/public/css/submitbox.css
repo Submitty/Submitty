@@ -12,10 +12,12 @@
     text-align: right;
     margin-left: auto;
 }
+
 #error-message {
     text-align: center;
     margin-left: auto;
 }
+
 #error-message > h1 {
     color: red;
 }
