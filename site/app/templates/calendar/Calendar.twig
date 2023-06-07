@@ -8,10 +8,24 @@
     const isGlobal = {% if not in_course %}true{% else %}false{% endif %};
     const isInstructor = {% if is_instructor %}true{% else %}false{% endif %};
 
-    window.addEventListener("load", function () {
-        loadCalendar({{ view_month }}, {{ view_year }});
+    $( document ).ready(function() {
+        // Get value of the type dropdown
+        const type = $("#calendar-item-type-edit").val();
+        loadCalendar(curr_month, curr_year, curr_day, type);
     });
 
+    function changeView(x) {
+        if (x.value === "month") {
+            document.cookie = "view=month";
+        }
+        else if (x.value === "two_week") {
+            document.cookie = "view=two_week";
+        }
+        else if (x.value === "one_week") {
+            document.cookie = "view=one_week";
+        }
+        loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
+    }
 </script>
 
 
@@ -25,9 +39,15 @@
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
+            
+                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+                    <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
+                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
+                </select>
         </div>
 
-        <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
+        <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
         </div>
     </div>
