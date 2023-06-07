@@ -55,8 +55,11 @@ class CalendarView extends AbstractView {
             "gradeables_by_date" => $info->getItemsByDate(),
             "gradeables_by_section" => $info->getItemsBySections(),
             "empty_message" => $info->getEmptyMessage(),
+            "in_course" => $in_course,
+            "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
-            "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId())
+            "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
+            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month"
         ]);
     }
 }
