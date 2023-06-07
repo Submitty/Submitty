@@ -171,9 +171,9 @@ class ForumController extends AbstractController {
      */
     public function addNewCategory($category = []) {
         $result = [];
-        if (!empty($_POST["newCategory"]) && !empty($_POST["visibleDate"])) {
+        if (!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessAdmin() && !empty($_POST["visibleDate"])) {
                 $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
             }
             else {
