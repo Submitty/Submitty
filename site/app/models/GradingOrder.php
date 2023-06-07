@@ -144,7 +144,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser()->getDisplayedFirstName();
+                        return $a->getUser()->getDisplayedGivenName();
                     }
                 };
                 break;
@@ -154,7 +154,7 @@ class GradingOrder extends AbstractModel {
                         return $a->getId();
                     }
                     else {
-                        return $a->getUser()->getDisplayedLastName();
+                        return $a->getUser()->getDisplayedFamilyName();
                     }
                 };
                 break;
@@ -269,22 +269,18 @@ class GradingOrder extends AbstractModel {
             return $this->getFilterFunction($submitter, $component_id, 'ungraded');
         }
         elseif ($filter === 'inquiry') {
-            if ($this->core->getConfig()->isRegradeEnabled()) {
-                $this->initUsersGradeInquiry(false, $component_id);
+            $this->initUsersGradeInquiry(false, $component_id);
 
-                return function (Submitter $sub) {
-                    return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
-                };
-            }
+            return function (Submitter $sub) {
+                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+            };
         }
         elseif ($filter === 'active-inquiry') {
-            if ($this->core->getConfig()->isRegradeEnabled()) {
-                $this->initUsersGradeInquiry(true, $component_id);
+            $this->initUsersGradeInquiry(true, $component_id);
 
-                return function (Submitter $sub) {
-                    return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
-                };
-            }
+            return function (Submitter $sub) {
+                return in_array($sub->getId(), $this->grade_inquiry_users) && $this->getHasSubmission($sub);
+            };
         }
         return function (Submitter $sub) {
             return $this->getHasSubmission($sub);

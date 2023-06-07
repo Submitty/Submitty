@@ -13,7 +13,7 @@ class Config:
     Class to hold the config details for Submitty to use within the migrator.
 
     It dynamically loads the JSON files in the config directory into a dictionary
-    with the maching name accessible at Config.<name> (e.g. Config.database).
+    with the matching name accessible at Config.<name> (e.g. Config.database).
     """
 
     def __init__(self, config_path):

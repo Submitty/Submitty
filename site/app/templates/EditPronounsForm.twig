@@ -1,0 +1,42 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-pronouns-form{% endblock %}
+{% block title %}Edit Pronouns{% endblock %}
+{% block body %}
+    <p class="std-margin">{{ "Pronouns are the part of speech used to refer to someone in the third person. We want to know how to respectfully refer to you!
+    Pronouns you specify will be visible to all members of the teaching staff." }}</p>
+    <p class="std-margin">
+        Your instructor and the system administrators reserve the right to remove
+        pronouns if they contain inappropriate or offensive language.
+    </p>
+    <div class="flex-col" id="user_settings_modal">
+        <input id="user-pronouns-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>My Pronouns</h2>
+        <div class="edit_user_row ui-front">
+            <label for="user-pronouns-change">Pronouns:&emsp;</label>
+            <input type="text"
+                   name="user_pronouns_change"
+                   value="{{ user_pronouns }}"
+                   id="user-pronouns-change"
+                   list="default_pronouns_list"
+                   placeholder="Type Or Select"
+                   size="30">
+                <datalist id="default_pronouns_list">
+                    <option value="He/Him"></option>
+                    <option value="She/Her"></option>
+                    <option value="They/Them"></option>
+                    <option value="(Type Custom Here)"></option>
+                </datalist>
+            </input>
+            <button aria-label="Clear pronoun input" type="button" style="background: none;border:none;" onclick="clearPronounsBox();"><i class="fas fa-trash" style="padding:0.5rem;" title="Clear pronouns field"></i></button>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserPronouns(event)">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

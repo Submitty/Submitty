@@ -65,11 +65,11 @@ def main(args):
                 # save pdfs as images (start indexing at one)
                 # open the file after writing it
                 with open(output_filename, 'rb') as out:
-                    pdf_images = convert_from_bytes(out.read())
+                    pdf_images = convert_from_bytes(out.read(), dpi=200)
                     for k in range(len(pdf_images)):
                         pdf_images[k].save(output_filename[:-4] +
                                            '_' + str(k + 1).zfill(3) + '.jpg',
-                                           "JPEG", quality=100)
+                                           "JPEG", quality=20, optimize=True)
 
                 with open(cover_filename, 'wb') as out:
                     cover_writer.write(out)
@@ -78,9 +78,9 @@ def main(args):
 
                 with open(cover_filename, 'rb') as out:
                     # save cover as image
-                    pdf_images = convert_from_bytes(out.read())
+                    pdf_images = convert_from_bytes(out.read(), dpi=200)
                     pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
-                                       "JPEG", quality=100)
+                                       "JPEG", quality=20, optimize=True)
 
             buff += "Finished splitting into " + str(int(total_pages/num)) + " files"
             logger.write_to_log(log_file_path, buff)

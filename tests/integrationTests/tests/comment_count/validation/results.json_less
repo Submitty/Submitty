@@ -1,0 +1,26 @@
+{
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "Number of comments",
+                    "messages": [
+                        {
+                            "message": "Include comments in the submission.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Comment counting"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
