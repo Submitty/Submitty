@@ -277,9 +277,9 @@ GROUP BY user_id", [$user_id]);
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
+    SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+    FROM grading_registration
+    GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 ORDER BY {$orderBy}"
         );
@@ -328,9 +328,9 @@ ORDER BY {$orderBy}"
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
+    SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+    FROM grading_registration
+    GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_group < 4
 ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id"
@@ -1445,7 +1445,7 @@ WHERE semester=? AND course=? AND user_id=?",
      *  ]
      */
     public function getLateDayCache(): array {
-        $query = "SELECT * FROM 
+        $query = "SELECT * FROM
                     late_day_cache AS ldc
                     LEFT JOIN gradeable g ON g.g_id=ldc.g_id
                   ORDER BY late_day_date NULLS LAST, g.g_id NULLS FIRST";
@@ -1553,9 +1553,9 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT (cache_row).* 
-                    FROM 
+        $query = "INSERT INTO late_day_cache
+                    (SELECT (cache_row).*
+                    FROM
                         (SELECT
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
@@ -1573,7 +1573,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$user_id, $default_late_days];
 
-        $query = "INSERT INTO late_day_cache 
+        $query = "INSERT INTO late_day_cache
                     SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
 
         $this->course_db->query($query, $params);
@@ -1925,10 +1925,10 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
   )AS parts_of_comp
 )AS comp
 LEFT JOIN (
-	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
-	FROM regrade_requests AS rr
-	WHERE rr.g_id=? AND rr.status=-1
-	GROUP BY rr.gc_id
+    SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+    FROM regrade_requests AS rr
+    WHERE rr.g_id=? AND rr.status=-1
+    GROUP BY rr.gc_id
 ) AS rr ON rr.gc_id=comp.gc_id
 GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
@@ -6502,8 +6502,8 @@ AND gc_id IN (
 
     public function getCurrentQueue() {
         $query = "
-        SELECT ROW_NUMBER()
-            OVER (order by time_in ASC),
+        SELECT ROW_NUMBER() 
+            OVER (ORDER BY time_in ASC), 
                 queue.*,
                 helper.user_givenname AS helper_givenname,
                 helper.user_preferred_givenname AS helper_preferred_givenname,
@@ -6514,17 +6514,26 @@ AND gc_id IN (
                 helper.user_email_secondary AS helper_email_secondary,
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
-                helper.user_pronouns AS helper_pronouns
+                helper.user_pronouns AS helper_pronouns,
+                h1.helped_today
             FROM queue
             LEFT JOIN users helper on helper.user_id = queue.help_started_by
-            WHERE current_state IN ('waiting','being_helped')
-            ORDER BY ROW_NUMBER
+            LEFT JOIN (
+            SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+            FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+            GROUP BY user_id, queue_code
+          )
+          AS h1
+          ON queue.user_id = h1.uid AND queue_code = h1.qc
+          WHERE current_state IN ('waiting','being_helped')
+          ORDER BY ROW_NUMBER 
         ";
-        $this->course_db->query($query);
+        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d')]);
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
+
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -6548,14 +6557,32 @@ AND gc_id IN (
                 remover.user_email_secondary AS remover_email_secondary,
                 remover.user_email_secondary_notify AS remover_email_secondary_notify,
                 remover.user_group AS remover_group,
-                remover.user_pronouns AS remover_pronouns
-            FROM    queue
+                remover.user_pronouns AS remover_pronouns,
+                h1.helped_today,
+                h.times_helped
+            FROM    queue 
             LEFT JOIN users helper ON helper.user_id = queue.help_started_by
             LEFT JOIN users remover ON remover.user_id = queue.removed_by
-            WHERE   time_in > ? AND current_state IN ( 'done' )
+            LEFT JOIN (
+              SELECT user_id as uid, COUNT(user_id) AS times_helped
+              FROM queue
+              WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE) AND (removal_type = 'helped' OR removal_type = 'self_helped')
+              GROUP BY user_id
+            )
+            AS h
+            ON queue.user_id = h.uid
+            LEFT JOIN (
+              SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
+              FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
+              GROUP BY user_id, queue_code
+            )
+            AS h1
+            ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
+            WHERE time_in > ? AND current_state IN ('done')
             ORDER BY row_number
         ";
-        $this->course_db->query($query, [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
+        $this->course_db->query($query, [$current_date, $current_date, $current_date]);
         return $this->course_db->rows();
     }
 
@@ -7029,12 +7056,12 @@ WHERE current_state IN
     public function getQueueDataByWeekNumber() {
         $this->course_db->query("SELECT
               weeknum,
-      			  min(yearnum) as yearnum,"
+                  min(yearnum) as yearnum,"
               . $this->getInnerQueueSelect() .
            "FROM (SELECT
               *,
               extract(WEEK from time_in) AS weeknum,
-			        extract(YEAR from time_in) AS yearnum
+                    extract(YEAR from time_in) AS yearnum
             FROM queue) AS weeknum_queue
             GROUP BY weeknum
             ORDER BY weeknum");
@@ -7303,7 +7330,7 @@ WHERE current_state IN
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
-              
+
               /* Aggregate Gradeable Component Verifier Data */
               gcd.array_verifier_user_id,
               gcd.array_verifier_user_givenname,
@@ -7472,10 +7499,10 @@ WHERE current_state IN
 
               /* Join grade inquiry */
               LEFT JOIN (
-  				SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
-  				FROM regrade_requests AS rr
-  				GROUP BY rr.user_id, rr.team_id, rr.g_id
-  			  ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
+                SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
+                FROM regrade_requests AS rr
+                GROUP BY rr.user_id, rr.team_id, rr.g_id
+              ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
             WHERE $selector
             $order";
 
