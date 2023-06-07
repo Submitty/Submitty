@@ -1,0 +1,1 @@
+This file is to make the git repository not 'empty' for use with the subfolder grading tests.
