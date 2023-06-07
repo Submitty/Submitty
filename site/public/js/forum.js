@@ -289,6 +289,30 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 const new_post = JSON.parse(response).data;
                 const forum_display_setting = getCookie('forum_display_option');
                 if (!edit) {
+                    let new_alpha = $(new_post).find('.post_user_id').text().trim().toLowerCase();
+                    if (forum_display_setting === 'alpha'){
+                        let allPosts = [];
+                        data.forEach((post) => {
+                          allPosts.push(post);
+                        });
+                        allPosts.forEach(post_){
+                            let currentAlpha = $(post_).find('.post_user_id').text().trim().toLowerCase();
+                            let allGood = false;
+                            while (new_alpha < current_Alpha){
+                                $(new_post).insertBefore($post_).hide().fadeIn();
+                                allGood = true;
+                            }
+                            if (!allGood){
+                                $(new_post).insertAfter($post_).hide().fadeIn();
+                            }
+                        }
+                    }
+
+
+
+
+
+
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
                     if (parent_post.hasClass('first_post')) {
