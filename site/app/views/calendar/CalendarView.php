@@ -59,7 +59,8 @@ class CalendarView extends AbstractView {
             "empty_message" => $info->getEmptyMessage(),
             "in_course" => $in_course,
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
-            "colors" => $info->getColors()
+            "colors" => $info->getColors(),
+            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month"
         ]);
     }
 }
