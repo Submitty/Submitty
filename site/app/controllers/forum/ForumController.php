@@ -173,7 +173,6 @@ class ForumController extends AbstractController {
         $result = [];
         if (!empty($_POST["newCategory"]) && !empty($_POST["visibleDate"])) {
             $category = trim($_POST["newCategory"]);
-            $visibleDate;
             if ($this->core->getUser()->accessAdmin()) {
                 $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
             }
