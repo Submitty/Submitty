@@ -1029,7 +1029,15 @@ class HomeworkView extends AbstractView {
                 ]);
             }
         }
-
+        $failed_file = '';
+        // See if the grade has succeeded or failed
+        foreach ($param['files'] as $file){
+            if (str_contains($file['relative_name'], 'failed')){
+            $failed_file = file_get_contents($file['path']);
+            $failed_file = substr(strstr($failed_file, "\n"), 3);
+            }
+        }
+        $file_length = count($param['files']);
         // If its not git checkout
         $can_download = !$gradeable->isVcs();
 
@@ -1045,6 +1053,8 @@ class HomeworkView extends AbstractView {
         $view_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
         $param = array_merge($param, [
+            'failed_file' => $failed_file,
+            'file_length' => $file_length,
             'gradeable_id' => $gradeable->getId(),
             'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
@@ -1058,6 +1068,7 @@ class HomeworkView extends AbstractView {
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'change_version_url' => $change_version_url,
             'view_version_url' => $view_version_url,
             'versions' => $version_data,
