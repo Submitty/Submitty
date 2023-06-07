@@ -320,7 +320,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                                 displaySuccessMessage('Refresh for correct ordering');
                             }
                         }
-
                         else {
                             $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
                         }
