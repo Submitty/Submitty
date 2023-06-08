@@ -65,7 +65,7 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
     if is_vcs:
         if 'vcs_partial_path' in form_json:
             vcs_partial_path = form_json['vcs_partial_path']
-            vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
+            vcs_subdirectory = form_json["subdirectory"]
         else:
             # for backwards compatibility - if gradeable was built before
             # version v23.06.00 was installed
