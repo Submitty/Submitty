@@ -459,9 +459,6 @@ class HomeworkView extends AbstractView {
         $vcs_base_url = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_base_url);
         $vcs_base_url = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_base_url);
         $vcs_base_url = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_base_url);
-        if ($gradeable->isTeamAssignment()) {
-            $vcs_base_url = str_replace('{$team_id}', $gradeable->getSubmitter()->getTeam()->getTeamName(), $vcs_base_url);
-        }
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
