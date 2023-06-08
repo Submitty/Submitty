@@ -290,4 +290,16 @@ for log in logs:
         yellow = True
     elif log == "red" :
         red = True
-    elif log == "green"
+    elif log == "green":
+        green = True  
+    elif yellow:
+        print_yellow(log)
+        yellow = False
+    elif red:
+        print_red(log)
+        red = False
+    elif green:
+        print_green(log)
+        green = False
+    else:
+        print(log)
