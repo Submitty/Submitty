@@ -203,7 +203,7 @@ done
 
 if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
-    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader --no-suggest"
+    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
@@ -262,6 +262,18 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
+    #codemirror6
+    mkdir ${VENDOR_FOLDER}/codemirror6
+    mkdir ${VENDOR_FOLDER}/codemirror6/view
+    mkdir ${VENDOR_FOLDER}/codemirror6/state
+    mkdir ${VENDOR_FOLDER}/codemirror6/commands
+    mkdir ${VENDOR_FOLDER}/codemirror6/language
+    mkdir ${VENDOR_FOLDER}/codemirror6/autocomplete
+    cp -R ${NODE_FOLDER}/@codemirror/view/dist ${VENDOR_FOLDER}/codemirror6/view
+    cp -R ${NODE_FOLDER}/@codemirror/state/dist ${VENDOR_FOLDER}/codemirror6/state
+    cp -R ${NODE_FOLDER}/@codemirror/commands/dist ${VENDOR_FOLDER}/codemirror6/commands
+    cp -R ${NODE_FOLDER}/@codemirror/language/dist ${VENDOR_FOLDER}/codemirror6/language
+    cp -R ${NODE_FOLDER}/@codemirror/autocomplete/dist ${VENDOR_FOLDER}/codemirror6/autocomplete
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
@@ -294,10 +306,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
-
+    # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-
     # pdf-annotate.js
     cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
@@ -307,6 +318,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jspdf
     cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
     cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
+    # highlight.js
+    mkdir ${VENDOR_FOLDER}/highlight.js
+    cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/
+    # js-cookie
+    mkdir ${VENDOR_FOLDER}/js-cookie
+    cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

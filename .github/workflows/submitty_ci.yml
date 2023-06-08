@@ -1,6 +1,11 @@
 name: Submitty CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 env:
   PGPASSWORD: submitty_dbuser
@@ -14,6 +19,11 @@ env:
   PHP_VER: 7.4
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
+
+concurrency:
+  # If this is a PR, cancel all previously running jobs on source branch
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   css-lint:
@@ -159,8 +169,8 @@ jobs:
     python-lint:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -181,8 +191,8 @@ jobs:
     python-unit:
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Cache Pip
@@ -206,7 +216,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload submitty python utils Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: python_submitty_utils/coverage.xml
             flags: python_submitty_utils
@@ -218,7 +228,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload migrator Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: migration/coverage.xml
             flags: migrator
@@ -230,7 +240,7 @@ jobs:
             coverage run -m unittest discover
             coverage xml
         - name: Upload autograder Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: autograder/coverage.xml
             flags: autograder
@@ -248,7 +258,7 @@ jobs:
             coverage xml -i
 
         - name: Upload submitty_daemon_jobs Coverage
-          uses: codecov/codecov-action@v1
+          uses: codecov/codecov-action@v3
           with:
             files: sbin/submitty_daemon_jobs/coverage.xml
             flags: submitty_daemon_jobs
@@ -258,7 +268,7 @@ jobs:
       name: ShellCheck
       runs-on: ubuntu-20.04
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - name: install ShellCheck
           run: sudo apt-get install -y shellcheck
         - name: Run ShellCheck
@@ -553,21 +563,26 @@ jobs:
             headless: true
             env: autograding_shipper_off=True
 
-        - name: Restart autograding worker
-          run: |
-            sudo systemctl restart submitty_autograding_worker
+          - name: Run autograding status test
+            uses: cypress-io/github-action@v5
+            with:
+              config: baseUrl=http://localhost
+              spec: cypress/e2e/autograding_status_1.spec.js
+              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+              browser: chrome
+              env: autograding_shipper_off=True
 
         - name: Switch to database auth
           run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-        - name: Run cypress e2e login tests with database auth
-          uses: cypress-io/github-action@v4
+        - name: Run autograding status test
+          uses: cypress-io/github-action@v5
           with:
             config: baseUrl=http://localhost
-            spec: cypress/e2e/login.spec.js
+            spec: cypress/e2e/autograding_status_2.spec.js
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             browser: chrome
-            headless: true
+            env: autograding_shipper_off=True
 
         - name: Switch to LDAP auth
           run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
@@ -581,22 +596,24 @@ jobs:
             browser: chrome
             headless: true
 
-        - name: Setup SAML
-          run: |
-            cd $SUBMITTY_REPOSITORY
-            sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+        - name: Run cypress e2e login tests with database auth
+          uses: cypress-io/github-action@v5
+          with:
+            config: baseUrl=http://localhost
+            spec: cypress/e2e/login.spec.js
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            browser: chrome
 
         - name: Switch to SAML auth
           run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
-        - name: Run cypress e2e login tests with SAML auth
-          uses: cypress-io/github-action@v4
+        - name: Run cypress e2e login tests with LDAP auth
+          uses: cypress-io/github-action@v5
           with:
-            config: baseUrl=http://localhost,chromeWebSecurity=false
+            config: baseUrl=http://localhost
             spec: cypress/e2e/login.spec.js
             working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
             browser: chrome
-            headless: true
 
         - uses: actions/upload-artifact@v2
           if: failure()
@@ -604,6 +621,29 @@ jobs:
             name: cypress-screenshots
             path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
         - uses: actions/upload-artifact@v2
+          if: failure()
+          with:
+            name: cypress-videos
+            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+        - name: Check for site errors
+          working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+          run: sudo bash tests/test_site_error_log.sh
+
+        - name: Run cypress e2e login tests with SAML auth
+          uses: cypress-io/github-action@v5
+          with:
+            config: baseUrl=http://localhost,chromeWebSecurity=false
+            spec: cypress/e2e/login.spec.js
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            browser: chrome
+
+        - uses: actions/upload-artifact@v3
+          if: failure()
+          with:
+            name: cypress-screenshots
+            path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+        - uses: actions/upload-artifact@v3
           if: failure()
           with:
             name: cypress-videos
