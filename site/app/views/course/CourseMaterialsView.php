@@ -199,11 +199,11 @@ class CourseMaterialsView extends AbstractView {
 
     /**
      * Recurses through folders and decides whether they should appear to students.
-     * 
-     * Param course_materials - dictionary: path name => CourseMaterial.
-     * Param folder_visibilities - dictionary: path name => bool. True if visible to students, false if not.
-    */
-    private function setFolderVisibilities(array $course_materials, array & $folder_visibilities): void {
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities -  Dictionary: path name => bool. True if visible to students, false if not.
+     */
+    private function setFolderVisibilities(array $course_materials, array &$folder_visibilities): void {
         foreach ($course_materials as $path => $course_material) {
             if (is_array($course_material)) {
                 // Found root-level folder; this folder could be invisible
@@ -214,12 +214,12 @@ class CourseMaterialsView extends AbstractView {
 
     /**
      * Recurses through folders and decides whether they should appear to students.
-     * 
-     * Param course_materials - dictionary: path name => CourseMaterial.
-     * Param folder_visibilities - dictionary: path name => bool. True if visible to students, false if not.
-     * Param cur_path - string: Path to the folder that $course_materials represents.
-    */
-    private function setFolderVisibilitiesR(array $course_materials, array & $folder_visibilities, string $cur_path): void {
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
+     * @param string $cur_path - Path to the folder that $course_materials represents.
+     */
+    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $cur_path): void {
         $cur_visibility = false;
         foreach ($course_materials as $path => $course_material) {
             if (is_array($course_material)) {
@@ -238,9 +238,7 @@ class CourseMaterialsView extends AbstractView {
                 }
             }
         }
-        
+
         $folder_visibilities[$cur_path] = $cur_visibility;
     }
 }
-
-?>
