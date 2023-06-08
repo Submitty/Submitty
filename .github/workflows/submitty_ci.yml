@@ -563,14 +563,14 @@ jobs:
             headless: true
             env: autograding_shipper_off=True
 
-          - name: Run autograding status test
-            uses: cypress-io/github-action@v5
-            with:
-              config: baseUrl=http://localhost
-              spec: cypress/e2e/autograding_status_1.spec.js
-              working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-              browser: chrome
-              env: autograding_shipper_off=True
+        - name: Run autograding status test
+          uses: cypress-io/github-action@v5
+          with:
+            config: baseUrl=http://localhost
+            spec: cypress/e2e/autograding_status_1.spec.js
+            working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+            browser: chrome
+            env: autograding_shipper_off=True
 
         - name: Switch to database auth
           run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
