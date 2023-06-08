@@ -333,12 +333,12 @@ class CourseMaterialsController extends AbstractController {
         foreach ($course_materials as $course_material) {
             $course_material_path = $course_material->getPath();
             $course_material_dir = pathinfo($course_material->getPath(), PATHINFO_DIRNAME);
-            
+
             $same_start = str_starts_with($course_material_dir, $main_path);
             $not_same_file = $course_material_path != $main_path;
 
             // Third condition prevents cases where two folders are "name" and "name_plus_more_text".
-            if ($same_start and $not_same_file and $course_material_path[strlen($main_path)] == '/') {
+            if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] == '/') {
                 if ($course_material->isDir()) {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
