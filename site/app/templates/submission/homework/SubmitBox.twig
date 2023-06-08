@@ -172,10 +172,12 @@
         {% endif %}
 
         {% if vcs_host_type == 4 %}
-            <h3>Repository to be graded:</h3>
+            <h3>To access your Repository:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
-            {{ vcs_base_url|replace({"{$user_id}":user_id})|replace({"{$gradeable_id}":gradeable_id}) }}
+            <samp> git clone {{ vcs_base_url }} SPECIFY_TARGET_DIRECTORY  </samp>
+            <br><br>
         {% endif %}
+        
         
         <h3>Grade your repository:</h3>
         {% if vcs_subdirectory != '' %}

@@ -150,7 +150,7 @@
                         {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
             </fieldset>
 
-                <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
+            <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
                 <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
                 <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
                         {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
