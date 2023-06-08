@@ -18,15 +18,15 @@ const createThread = (title, content, category) => {
     cy.get('.cat-buttons').contains(category).click();
     cy.get('[name="post"]').click();
     cy.get('.flex-row > .thread-left-cont').should('contain', title);
-}
+};
 
-const replyToThread = (title, reply, oldTitle) => {
+const replyToThread = (title, reply) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.create-post-head').should('contain', title);
     cy.get('#reply_box_2').type(reply);
     cy.get('[value="Submit Reply to All"]').click();
     cy.get('#posts_list').should('contain', reply);
-}
+};
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
@@ -34,17 +34,17 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
     cy.wait(200);
-    cy.get('.active-result').contains(toThread).click( {force : true});
-    cy.get('#merge-threads > form > .popup-box > .popup-window > .form-body > .form-buttons > .form-button-container > .btn-primary').click({force: true});
+    cy.get('.active-result').contains(toThread).click({ force: true });
+    cy.get('#merge-threads > form > .popup-box > .popup-window > .form-body > .form-buttons > .form-button-container > .btn-primary').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
-}
+};
 
 const removeThread = (title) => {
     cy.get('#nav-sidebar-forum').click();
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.first_post > .post-action-container > .delete-post-button').click();
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
-}
+};
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
@@ -52,10 +52,10 @@ describe('Test cases revolving around creating, replying to, merging, and removi
         beforeEach(() => {
             cy.visit('/');
             cy.login(user);
-            cy.visit(['sample']); 
+            cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
             cy.get('#nav-sidebar-collapse-sidebar').click();
-            
+
         });
 
         it('Create, reply to, merge, and delete threads', () => {
@@ -67,18 +67,18 @@ describe('Test cases revolving around creating, replying to, merging, and removi
             createThread(title3, content3, 'Tutorials ');
 
             // Comment
-            replyToThread(title1, reply1, title2);
+            replyToThread(title1, reply1);
             // Question
-            replyToThread(title2, reply2, title2);
+            replyToThread(title2, reply2);
             // Tutorial
-            replyToThread(title3, reply3, title2);
-            
+            replyToThread(title3, reply3);
+
             // Tutorial into Questions
             mergeThreads(title3, title2, merged1);
-            
+
             // Resulting thread into comment
             mergeThreads(title2, title1, merged2);
-     
+
             // Remove threads
             removeThread(title1);
         });
