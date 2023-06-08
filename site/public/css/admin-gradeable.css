@@ -205,10 +205,9 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container, #subdirectory-settings-container {
+#team-settings-container {
     margin-top: 10px;
 }
-
 
 #rebuild-status-panel {
     display: inline-block;

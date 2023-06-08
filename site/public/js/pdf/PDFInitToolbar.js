@@ -90,7 +90,7 @@ function renderPDFToolbar() {
                     rotate(90);
                     break;
                 case 'rotate-left':
-                    rotate(270);
+                    rotate(-90);
                     break;
                 case 'text':
                     // eslint-disable-next-line no-undef

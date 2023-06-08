@@ -152,16 +152,15 @@
     </div>
     <script>
         var textarea = document.querySelector('textarea');
-        if (textarea) {
-            textarea.addEventListener('keydown', autosize);
+        textarea.addEventListener('keydown', autosize);
 
-            function autosize(){
-                var el = this;
-                setTimeout(function(){
-                    el.style.height = el.scrollHeight + 'px';
-                },0);
-            }
+        function autosize(){
+            var el = this;
+            setTimeout(function(){
+                el.style.height = el.scrollHeight + 'px';
+            },0);
         }
+
     </script>
 {% endif %}
 {# /Edit/create team box #}

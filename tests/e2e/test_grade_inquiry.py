@@ -12,6 +12,18 @@ class TestGradeInquiry(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
+    def set_grade_inquiries_for_course(self, allowed):
+        # ensure that grade inquiries are enabled for the course
+        self.driver.find_element(By.ID, "nav-sidebar-course-settings").click()
+        regrade_enabled_checkbox = self.driver.find_element(By.ID, "regrade-enabled")
+
+        if not regrade_enabled_checkbox.is_selected() and allowed:
+            regrade_enabled_checkbox.click()
+        elif regrade_enabled_checkbox.is_selected() and not allowed:
+            regrade_enabled_checkbox.click()
+        # navigate back to gradeable page
+        self.driver.find_element(By.ID, 'nav-sidebar-submitty').click()
+
     def set_grade_inquiries_for_gradeable(self, gradeable_id, date=None, allowed=True):
         # ensure that grade inquiries are enabled for grades_released_homework gradeable
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//*[contains(@class, 'fa-pencil-alt')]").click()
@@ -49,6 +61,7 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
+        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id, date=grade_inquiry_deadline_date, allowed=True)
 
         # navigate to TA grading interface of student with normal submission
@@ -71,6 +84,7 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
+        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         # navigate to TA grading interface of student with no submission
@@ -96,6 +110,7 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
+        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         # navigate to TA grading interface of student with no inquiry
@@ -120,6 +135,7 @@ class TestGradeInquiry(BaseTestCase):
 
         self.log_in(user_id='instructor')
         self.click_class('sample')
+        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         self.log_out()

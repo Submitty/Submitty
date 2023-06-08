@@ -4,8 +4,13 @@ const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    const collapsedSections = Cookies.get('collapsed_sections');
-    collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
+    const collapsedSections = document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    if (collapsedSections === '') {
+        collapseItems = new Set();
+    }
+    else {
+        collapseItems = new Set(JSON.parse(decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)collapsed_sections\s*=\s*([^;]*).*$)|^.*$/, '$1'))));
+    }
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
@@ -88,7 +93,7 @@ function hideGradeableMessage() {
 }
 
 function updateCollapsedSections() {
-    Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
+    document.cookie = `collapsed_sections=${encodeURIComponent(JSON.stringify([...collapseItems]))};path=${$('#details-table').attr('data-details-base-path')}`;
 }
 
 function expandAllSections() {
