@@ -10,6 +10,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -19,6 +20,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 5 / 5 (100.0%)');
         });
         it('should be accurate for grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -27,6 +29,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 2 / 7 (28.6%)');
         });
         it('should be accurate for released grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -39,13 +42,14 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
     describe('Grading stats as a ta', () => {
         beforeEach(() => {
-            cy.login('ta');
             cy.visit(['sample']);
+            cy.login('ta');
         });
         afterEach(() => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -55,6 +59,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 5 / 5 (100.0%)');
         });
         it('should be accurate for grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -63,6 +68,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 1: 2 / 7 (28.6%)');
         });
         it('should be accurate for released grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -75,13 +81,14 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
     describe('Grading stats as a grader', () => {
         beforeEach(() => {
-            cy.login('grader');
             cy.visit(['sample']);
+            cy.login('grader');
         });
         afterEach(() => {
             cy.logout();
         });
         it('should be accurate for teams.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -91,6 +98,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 4: 3 / 3 (100.0%)');
         });
         it('should be accurate for grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grading_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
@@ -99,6 +107,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             text.contains('Section 4: 4 / 6 (66.7%)');
         });
         it('should be accurate for released grades.', () => {
+            cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/details"]').click();
             cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#numerical-data');
