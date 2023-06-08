@@ -276,10 +276,10 @@ jobs:
 
 
   yamllint:
-    name: YAMLLint
+    name: yaml-lint
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -296,7 +296,7 @@ jobs:
       - python-unit
       - css-lint
       - shellcheck
-      - yamllint
+      - yaml-lint
     runs-on: ubuntu-20.04
     services:
       postgres:
