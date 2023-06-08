@@ -287,7 +287,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     response = `{\n\t ${response.substring(start_parse_index)}`;
                 }
                 const new_post = JSON.parse(response).data;
-                const forum_display_setting = getCookie('forum_display_option');
+                const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
                     let new_alpha = $(new_post).find('.post_user_id').text().trim().toLowerCase();
                     if (forum_display_setting === 'alpha'){
@@ -344,7 +344,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                                 displaySuccessMessage('Refresh for correct ordering');
                             }
                         }
-
                         else {
                             $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
                         }
@@ -2548,19 +2547,4 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
-}
-function getCookie(cname) {
-    const name = `${cname}=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
 }
