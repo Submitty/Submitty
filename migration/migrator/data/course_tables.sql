@@ -1791,6 +1791,7 @@ CREATE TABLE public.users (
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
+    course_section_id character varying(255),
     rotating_section integer,
     user_updated boolean DEFAULT false NOT NULL,
     instructor_updated boolean DEFAULT false NOT NULL,
