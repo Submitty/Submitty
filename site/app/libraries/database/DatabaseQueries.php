@@ -839,7 +839,7 @@ SQL;
     public function getAuthorUserGroup($author_id) {
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id = ?", [$author_id]);
         return $this->course_db->row();
-    }   
+    }
 
     public function postHasHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", [$post_id]);

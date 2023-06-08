@@ -1173,7 +1173,6 @@ class HomeworkView extends AbstractView {
 
         $grade_inquiries = $graded_gradeable->getRegradeRequests();
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
- 
         // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
@@ -1303,18 +1302,17 @@ class HomeworkView extends AbstractView {
      * @return string
      */
 
-        public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
+    public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
 
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $queries = $this->core->getQueries();
-        
         $author_user_id = $post["user_id"];
         $author_user_group = $queries->getAuthorUserGroup($author_user_id);
         $limited_access_grader = $author_user_group['user_group'] === User::GROUP_LIMITED_ACCESS_GRADER;
         $instructor_full_access = $author_user_group['user_group'] <= User::GROUP_FULL_ACCESS_GRADER;
         $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
         $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
-        $name  = $given_name ; 
+        $name  = $given_name;
         if ($limited_access_grader) {
             $name = $given_name . " " . substr($family_name, 0, 1) . ".";
         }
@@ -1349,6 +1347,7 @@ class HomeworkView extends AbstractView {
                 'id' => $gc_id
             ]
         ]);
-    }
+        }
+
 
 }
