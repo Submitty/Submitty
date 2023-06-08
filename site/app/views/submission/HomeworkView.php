@@ -1307,19 +1307,14 @@ class HomeworkView extends AbstractView {
 
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $queries = $this->core->getQueries();
-
-        $grade_inquiry = $graded_gradeable->getRegradeRequests()[0]->getId();   
-        $grade_inquiry_post= $queries->getRegradePost($grade_inquiry);
-        $author_user_id = $grade_inquiry_post["user_id"];
+        
+        $author_user_id = $post["user_id"];
         $author_user_group = $queries->getAuthorUserGroup($author_user_id);
-
         $limited_access_grader = $author_user_group['user_group'] === User::GROUP_LIMITED_ACCESS_GRADER;
         $instructor_full_access = $author_user_group['user_group'] <= User::GROUP_FULL_ACCESS_GRADER;
-
         $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
         $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
-        $name  = $given_name; 
-
+        $name  = $given_name ; 
         if ($limited_access_grader) {
             $name = $given_name . " " . substr($family_name, 0, 1) . ".";
         }
