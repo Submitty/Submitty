@@ -287,7 +287,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     response = `{\n\t ${response.substring(start_parse_index)}`;
                 }
                 const new_post = JSON.parse(response).data;
-                const forum_display_setting = getCookie('forum_display_option');
+                const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
@@ -304,9 +304,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                         }
                     }
                     else {
-                        console.log(forum_display_setting);
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
-                        console.log(sibling_posts.length);
+                        if (forum_display_setting === 'reverse-time') {
+                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
+                        }
+                        else if (forum_display_setting === 'time') {
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                        }
                         if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
                                 return $(this).attr('data-reply_level') <= $(`#${parent_id}`).attr('data-reply_level') ? this : null;
@@ -315,24 +319,8 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
                                 displaySuccessMessage('Refresh for correct ordering');
                             }
-                            else {
-                                if (forum_display_setting === 'reverse-time') {
-                                    $(new_post).insertAfter('#current-thread').hide().fadeIn();
-                                }
-                                else {
-                                    $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                                }
-                            }
                         }
-                        if (forum_display_setting === 'reverse-time') {
-                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
-                        }
-                        else if (forum_display_setting === 'time'){
-                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                        }
-
                         else {
-                            console.log('1');
                             $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
                         }
                     }
@@ -2535,19 +2523,4 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
-}
-function getCookie(cname) {
-    const name = `${cname}=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
 }
