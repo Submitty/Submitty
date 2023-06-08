@@ -16,10 +16,7 @@
 #error-message {
     text-align: center;
     margin-left: auto;
-}
-
-#error-message > h1 {
-    color: red;
+    margin-right: 50%;
 }
 
 #submission-form > * {

@@ -9,23 +9,6 @@
     <h4>Submitted Files</h4>
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
-        {% set failed = false %}
-        {% if (file_length == 0 and not incomplete_autograding) or (not failed_file == '') %}
-            <div id ="error-message">
-                <h1> <b>ERROR </b> </h1>   
-                {% if vcs_subdirectory != '' %}
-                    <b> The subdirectory '{{ vcs_subdirectory }}' is empty or does not exist. <br/> <br/>If you have made changes, be sure to commit and push them.</b> <br/><br/>
-                {% else %}
-                    <b> The repository is empty. If you have made changes, be sure to commit and push them. </b>
-                {% endif %}
-                {% if failed_file != '' %}
-                    <b>{{ failed_file|nl2br }}</b>
-                {% endif %}
-            </div>
-            {% set failed = true %}
-        {% endif %}
-
-        {% if file_length > 0 and not failed %}
             {% for file in files %}
                 <div class="flex-row">
                     <span>
@@ -51,7 +34,6 @@
                         <i class="fas fa-download" title="Download zip of all files"></i></button> 
                 </div>
             {% endif %}
-        {% endif %}
         </div>
         <div class="box col-md-6 submission-details">
             {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
