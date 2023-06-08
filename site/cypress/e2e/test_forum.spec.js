@@ -10,92 +10,77 @@ const reply3 = 'Cypress Reply 3 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 
-describe('Test cases revolving around initializating, modifying, and merging discussion forum threads', () => {
+const createThread = (title, content, category) => {
+    // Add more to tests for uploading attachments
+    cy.get('[title="Create Thread"]').click();
+    cy.get('#title').type(title);
+    cy.get('.thread_post_content').type(content);
+    cy.get('.cat-buttons').contains(category).click();
+    cy.get('[name="post"]').click();
+    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+}
+
+const replyToThread = (title, reply, oldTitle) => {
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('.create-post-head').should('contain', title);
+    cy.get('#reply_box_2').type(reply);
+    cy.get('[value="Submit Reply to All"]').click();
+    cy.get('#posts_list').should('contain', reply);
+}
+
+const mergeThreads = (fromThread, toThread, mergedContent) => {
+    // Add more to tests for uploading attachments
+    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click();
+    cy.get('[title="Merge Thread Into Another Thread"]').click();
+    cy.get('.chosen-single > span').click();
+    cy.wait(200);
+    cy.get('.active-result').contains(toThread).click( {force : true});
+    cy.get('#merge-threads > form > .popup-box > .popup-window > .form-body > .form-buttons > .form-button-container > .btn-primary').click({force: true});
+    cy.get('.pre-forum > .post_content').should('contain', mergedContent);
+}
+
+const removeThread = (title) => {
+    cy.get('#nav-sidebar-forum').click();
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
+    cy.get('.first_post > .post-action-container > .delete-post-button').click();
+    cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
+}
+
+describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     ['instructor'].forEach((user) => {
         beforeEach(() => {
             cy.visit('/');
             cy.login(user);
-            cy.visit(['sample']);
+            cy.visit(['sample']); 
             cy.get('#nav-sidebar-forum').click();
+            cy.get('#nav-sidebar-collapse-sidebar').click();
+            
         });
 
-        it('Create threads', () => {
+        it('Create, reply to, merge, and delete threads', () => {
             // Comment
-            cy.get('[title="Create Thread"]').click();
-            cy.get('#title').type(title1);
-            cy.get('.thread_post_content').type(content1);
-            // Add more to tests for uploading attachments
-            cy.get('.cat-buttons').contains('Comment ').click();
-            cy.get('[name="post"]').click();
-            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', title1);
+            createThread(title1, content1, 'Comment ');
             // Question
-            cy.get('[title="Create Thread"]').click();
-            cy.get('#title').type(title2);
-            cy.get('.thread_post_content').type(content2);
-            // Add more to tests for uploading attachments
-            cy.get('.cat-buttons').contains('Question ').click();
-            cy.get('[name="post"]').click();
-            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', title2);
+            createThread(title2, content2, 'Question ');
             // Tutorials
-            cy.get('[title="Create Thread"]').click();
-            cy.get('#title').type(title3);
-            cy.get('.thread_post_content').type(content3);
-            // Add more to tests for uploading attachments
-            cy.get('.cat-buttons').contains('Tutorials ').click();
-            cy.get('[name="post"]').click();
-            cy.get('.thread_box > .flex-row > .thread-left-cont').should('contain', content3);
-        });
+            createThread(title3, content3, 'Tutorials ');
 
-        it('Reply to comment thread', () => {
-            // Add more to tests for uploading attachments
             // Comment
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).click();
-            cy.get('#reply_box_2').type(reply1);
-            cy.get('[value="Submit Reply to All"]').click();
-        });
-        it('Reply to question thread', () => {
-            // Add more to tests for uploading attachments
+            replyToThread(title1, reply1, title2);
             // Question
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
-            cy.get('#reply_box_2').type(reply2);
-            cy.get('[value="Submit Reply to All"]').click();
-        });
-        it('Reply to tutorial thread', () => {
-            // Add more to tests for uploading attachments
-            // Tutorials
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title3).click();
-            cy.get('#reply_box_2').type(reply3);
-            cy.get('[value="Submit Reply to All"]').click();
-        });
-
-        it('Merge tutorial thread into question thread', () => {
-            // Add more to tests for uploading attachments
+            replyToThread(title2, reply2, title2);
+            // Tutorial
+            replyToThread(title3, reply3, title2);
+            
             // Tutorial into Questions
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title3).click();
-            cy.get('[title="Merge Thread Into Another Thread"]').click();
-            cy.get('.chosen-single > span').click();
-            cy.get('.active-result').contains(title2).click();
-            cy.get('[value="Merge Thread"]').click();
-            cy.get('.pre-forum > .post_content').should('contain', merged1);
+            mergeThreads(title3, title2, merged1);
+            
+            // Resulting thread into comment
+            mergeThreads(title2, title1, merged2);
+     
+            // Remove threads
+            removeThread(title1);
         });
-        it('Merge resulting thread into comment thread', () => {
-            // Add more to tests for uploading attachments
-            // Result into comments
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title2).click();
-            cy.get('[title="Merge Thread Into Another Thread"]').click();
-            cy.get('.chosen-single > span').click();
-            cy.get('.active-result').contains(title1).click();
-            cy.get('[value="Merge Thread"]').click();
-            cy.get('.pre-forum > .post_content').should('contain', merged2);
-        });
-
-        it('Remove thread', () => {
-            // Add more to tests for uploading attachments
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).click();
-            cy.get('.first_post > .post-action-container > .delete-post-button').click();
-            cy.get('.thread_box > .flex-row > .thread-left-cont > .thread-list-item').contains(title1).should('not.exist');
-        });
-
     });
 });
