@@ -275,7 +275,7 @@ jobs:
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
 
-  yamllint:
+  yaml-lint:
     name: yaml-lint
     runs-on: ubuntu-20.04
     steps:
