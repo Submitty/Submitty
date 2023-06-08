@@ -1347,7 +1347,5 @@ class HomeworkView extends AbstractView {
                 'id' => $gc_id
             ]
         ]);
-        }
-
-
+    }
 }
