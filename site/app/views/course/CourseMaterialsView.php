@@ -61,7 +61,7 @@ class CourseMaterialsView extends AbstractView {
                     return 1;
                 }
                 elseif ($a->getPriority() < $b->getPriority()) {
-                    return -1;
+                    return -1;m
                 }
                 else {
                     return $a->getPath() > $b->getPath() ? 1 : -1;
