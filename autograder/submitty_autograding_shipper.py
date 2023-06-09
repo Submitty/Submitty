@@ -958,9 +958,9 @@ def checkout_vcs_repo(config, my_file):
                         print(str(error), file=f)
                         print("\n", file=f)
                         print("Check to be sure the subdirectory exists " +
-                              "and is not empty.\n", file=f)
+                              "and is not empty.", file=f)
                         print("Check to be sure the repository has been committed with the " +
-                              "subdirectory and relevant files present.\n", file=f)
+                              "subdirectory and relevant files present.", file=f)
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
@@ -981,12 +981,12 @@ def checkout_vcs_repo(config, my_file):
                 with open(error_path, 'w') as f:
                     print(str(error), file=f)
                     print("\n", file=f)
-                    print("Check to be sure the repository is not empty.\n", file=f)
+                    print("Check to be sure the repository is not empty.", file=f)
                     print("Check to be sure the repository has a " + which_branch +
-                          " branch.\n", file=f)
+                          " branch.", file=f)
                     print(
                         "And check to be sure the timestamps on the " + which_branch +
-                        " branch are reasonable.\n",
+                        " branch are reasonable.",
                         file=f
                     )
 
@@ -998,10 +998,10 @@ def checkout_vcs_repo(config, my_file):
             with open(error_path, 'w') as f:
                 print(str(error), file=f)
                 print("\n", file=f)
-                print("Check to be sure the repository exists.\n", file=f)
+                print("Check to be sure the repository exists.", file=f)
                 print(
                     "And check to be sure the submitty_daemon user has appropriate access "
-                    "credentials.\n",
+                    "credentials.",
                     file=f
                 )
 
@@ -1016,10 +1016,10 @@ def checkout_vcs_repo(config, my_file):
         with open(error_path, 'w') as f:
             print(str(error), file=f)
             print("\n", file=f)
-            print("Check to be sure the repository exists.\n", file=f)
+            print("Check to be sure the repository exists.", file=f)
             print(
                 "And check to be sure the submitty_daemon user has appropriate access "
-                "credentials.\n",
+                "credentials.",
                 file=f)
 
     # remove the .git directory (storing full history and metafiles)

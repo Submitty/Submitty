@@ -101,9 +101,9 @@
         <div id="error-message" class="red-message">
                 <h3> <b>Warning</b> </h3>   
                 {% if vcs_subdirectory != '' %}
-                    <b> The submitted subdirectory '{{ vcs_subdirectory }}' is empty or does not exist.</b> <br/><br/>
+                    <b> The submitted subdirectory '{{ vcs_subdirectory }}' is empty or does not exist.</b> <br/>
                 {% else %}
-                    <b> The submitted repository is empty. If you have made changes, be sure to commit and push them. </b> <br/> <br/>
+                    <b> The submitted repository is empty. If you have made changes, be sure to commit and push them.</b> <br/>
                 {% endif %}
                 {% if failed_file != '' %}
                     <b>{{ failed_file|nl2br }}</b>
