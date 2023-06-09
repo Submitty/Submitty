@@ -40,7 +40,7 @@ class Locale extends AbstractModel {
         return $this->lang_data;
     }
 
-    public function fetchKey(string $key): ?string {
+    public function fetchKey(string $key, array $vals = []): ?string {
         preg_match_all('/\w+/', $key, $parts, PREG_PATTERN_ORDER);
 
         $val = $this->lang_data;
@@ -57,6 +57,6 @@ class Locale extends AbstractModel {
             return null;
         }
 
-        return $val;
+        return msgfmt_format_message($this->name, $val, $vals);
     }
 }

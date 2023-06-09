@@ -115,12 +115,12 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("text", function ($key, $default) {
+        $this->twig->addFunction(new \Twig\TwigFunction("text", function ($key, $default, $vals = []) {
             $config = $this->core->getConfig();
             if ($config) {
                 $locale = $config->getLocale();
                 if ($locale) {
-                    $val = $locale->fetchKey($key);
+                    $val = $locale->fetchKey($key, $vals);
                     if ($val) {
                         return $val;
                     }
