@@ -264,7 +264,7 @@ jobs:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
 
-  
+
   yaml-lint:
     name: yaml-lint
     runs-on: ubuntu-20.04
@@ -304,7 +304,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - uses: ./.github/actions/e2e-Setup-Composite      
+      - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run selenium e2e tests with pam auth
         run: |
           pushd ${SUBMITTY_REPOSITORY}
@@ -397,7 +397,7 @@ jobs:
           sudo systemctl restart submitty_autograding_worker
 
       - name: Switch to database auth
-        run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with database auth
         uses: cypress-io/github-action@v5
@@ -408,7 +408,7 @@ jobs:
           browser: chrome
 
       - name: Switch to LDAP auth
-        run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with LDAP auth
         uses: cypress-io/github-action@v5
@@ -424,7 +424,7 @@ jobs:
           sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
 
       - name: Switch to SAML auth
-        run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with SAML auth
         uses: cypress-io/github-action@v5
@@ -450,12 +450,11 @@ jobs:
         run: sudo bash tests/test_site_error_log.sh
 
 
-
   e2eIntegrationTests:
     runs-on: ubuntu-20.04
-    #Postgres should not be needed for the integration tests. 
-    #But unfortunately Configure test suite seems to use it at the moment, and 
-    #Configure test suite seems to be necessary for the Integration tests
+    # Postgres should not be needed for the integration tests.
+    # But unfortunately Configure test suite seems to use it at the moment, and
+    # Configure test suite seems to be necessary for the Integration tests
     services:
       postgres:
         image: postgres
