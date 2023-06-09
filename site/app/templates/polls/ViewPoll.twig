@@ -70,7 +70,10 @@
                                 "style": "display: inline"
                             } only %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
-                                <i class="fa-solid fa-square-check fa-lg correct-tag"></i>
+                                <span class="fa-stack fa-2xs correct-tag">
+                                    <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
+                                    <i class="fa fa-check fa-stack-1x fa-xl correct-tag-checkmark"></i>
+                                </span>
                             {% endif %}                                
                             </td>                       
                         </tr>

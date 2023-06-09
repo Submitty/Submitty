@@ -44,7 +44,7 @@ class Locale extends AbstractModel {
         preg_match_all('/\w+/', $key, $parts, PREG_PATTERN_ORDER);
 
         $val = $this->lang_data;
-        
+
         foreach ($parts[0] as $part) {
             if (gettype($val) !== "array") {
                 break;
