@@ -291,7 +291,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
-                    if (parent_post.hasClass('first_post')) {
+                    if (forum_display_setting === 'reverse-time') {
+                        $(new_post).insertAfter('#currents-thread').hide().fadeIn();
+                    }
+                    else if (forum_display_setting === 'time') {
+                        $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                    }
+                    else if (parent_post.hasClass('first_post')) {
                         if (forum_display_setting === 'reverse-tree') {
                             $(new_post).insertAfter('#current-thread').hide().fadeIn();
                         }
@@ -305,12 +311,6 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                     }
                     else {
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
-                        if (forum_display_setting === 'reverse-time') {
-                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
-                        }
-                        else if (forum_display_setting === 'time') {
-                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
-                        }
                         if (sibling_posts.length !== 0) {
                             const parent_sibling_posts = $(`#${parent_id} ~ .post_box`).map(function() {
                                 return $(this).attr('data-reply_level') <= $(`#${parent_id}`).attr('data-reply_level') ? this : null;
