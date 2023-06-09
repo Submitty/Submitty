@@ -7,7 +7,7 @@ import subprocess
 import docker
 import traceback
 import argparse
-import get_sysinfo
+import get_docker_info
 from submitty_utils import ssh_proxy_jump
 import platform
 import threading
@@ -26,12 +26,6 @@ with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
 SUBMITTY_INSTALL_DIR = SUBMITTY_CONFIG['submitty_install_dir']
 
 SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
-
-
-lock = threading.Lock()
-
-logs = []
-
 
 # Functions to highlight important part of the output
 def print_red(msg):
@@ -54,32 +48,37 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     worker_requirements = autograding_workers[worker]['capabilities']
 
     success = True
-    logs.append(f'{worker}: download/update docker images')
+    print(f'{worker}: download/update docker images')
 
     for requirement, images in autograding_containers.items():
         if requirement in worker_requirements:
             images_to_update.update(set(images))
 
     images_str = ", ".join(str(e) for e in images_to_update)
-    logs.append(f'{host} needs {images_str}')
+    print(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        get_sysinfo.print_distribution(logs)
+        res = subprocess.run(['lsb_release', '-a'], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=True, universal_newlines=True)
+        if res.returncode != 0:
+            print("Error in {}: returned {}.\n {}", res.args, res.returncode, res.stderr)
+        else:
+            print(res.stdout)
         client = docker.from_env()
         for image in images_to_update:
-            logs.append(f"{worker}: locally pulling the image '{image}'")
+            print(f"{worker}: locally pulling the image '{image}'")
             try:
                 repo, tag = image.split(':')
                 client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-              logs.append(f"{worker}: ERROR: Could not pull {image}")
-              logs.append(traceback.format_exc())
+              print(f"{worker}: ERROR: Could not pull {image}")
+              traceback.print_exc()
 
               # check for machine
               if platform.machine() == "aarch64":
                   # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
                   # docker pull often fails on ARM installation
-                  logs.append(f"{worker}: WARNING: SKIPPING DOCKER PULL ERROR")
+                  print(f"{worker}: WARNING: SKIPPING DOCKER PULL ERROR")
               else:
                   # normal case
                   success = False
@@ -87,15 +86,15 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         docker_info = client.info()
         docker_images_obj = client.images.list()
         #print the details of the image
-        get_sysinfo.print_docker_info()
+        get_docker_info.printDockerInfo()
     else:
-        shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
         commands = list()
-        script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
+        commands.append('lsb_release -a')
+        script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
-        commands.append(f"python3 {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
-        success = run_commands_on_worker(user, host, commands, operation='docker image update')
+        commands.append(f"python3 {os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'get_docker_info.py')}")
+        success = run_commands_on_worker(user, host, machine, commands, operation='docker image update')
 
     return success
 
@@ -111,26 +110,22 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
              intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
         except Exception as e:
             if str(e) == "timed out":
-                logs.append("yellow")
-                logs.append(f"WARNING: Timed out when trying to ssh to {user}@{host}\nskipping {host} machine {machine}...")
+                print_yellow(f"WARNING: Timed out when trying to ssh to {user}@{host}\nskipping {host} machine {machine}...")
             else:
-                logs.append("yellow")
-                logs.append(f"ERROR: could not ssh to {user}@{host} (machine {machine}) due to following error: {str(e)}")
+                print_yellow(f"ERROR: could not ssh to {user}@{host} (machine {machine}) due to following error: {str(e)}")
             return False
         try:
             success = True
             for command in commands:
-                logs.append(f'{machine}: performing {command}')
+                print(f'{machine}: performing {command}')
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
                 #print(stdout.read().decode('ascii'))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
-                    logs.append("red")
-                    logs.append(f"ERROR: Failure performing {operation} on {user}@{host}")
+                    print_red(f"ERROR: Failure performing {operation} on {user}@{host}")
                     success = False
         except Exception as e:
-            logs.append("red")
-            logs.append(f"ERROR: Failure performing {operation} on {host} due to error {str(e)}")
+            print_red(f"ERROR: Failure performing {operation} on {host} due to error {str(e)}")
             success = False
         finally:
             target_connection.close()
@@ -142,14 +137,12 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
 def copy_code_to_worker(worker, user, host, submitty_repository):
     exit_code = run_systemctl_command(worker, 'status', False)
     if exit_code == 1:
-        logs.append("yellow")
-        logs.append(f"ERROR: {worker}'s worker daemon was active when before rsyncing began. Attempting to turn off.")
+        print_yellow(f"ERROR: {worker}'s worker daemon was active when before rsyncing began. Attempting to turn off.")
         exit_code = run_systemctl_command(worker, 'stop', False)
         if exit_code != 0:
-            logs.append(f"Could not turn off {worker}'s daemon. Please allow rsyncing to continue and then attempt another install.")
+            print(f"Could not turn off {worker}'s daemon. Please allow rsyncing to continue and then attempt another install.")
     elif exit_code == 4:
-        logs.append("yellow")
-        logs.append(f"WARNING: Connection to machine {worker} timed out. Skipping code copying...")
+        print_yellow(f"WARNING: Connection to machine {worker} timed out. Skipping code copying...")
         return True
 
     local_directory = submitty_repository
@@ -158,7 +151,7 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
     rsync_exclude = os.path.join(submitty_repository, ".setup", "worker_rsync_exclude.txt")
 
     # rsync the file
-    logs.append(f"{worker}: performing rsync to {worker}...")
+    print(f"{worker}: performing rsync to {worker}...")
     # If this becomes too slow, we can exclude directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
     command = "rsync -a --exclude-from={3} --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
@@ -166,9 +159,9 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
     res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          check=True, universal_newlines=True)
     if res.returncode != 0:
-        logs.append(f"rsync ended in error with code {res.returncode}\n {res.stderr}")
+        print(f"rsync ended in error with code {res.returncode}\n {res.stderr}")
     else:
-        logs.append(res.stdout)
+        print(res.stdout)
 
 def run_systemctl_command(machine, command, is_primary):
     command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
@@ -185,7 +178,7 @@ def parse_arguments():
 
 
 def update_machine(machine,stats,args):
-    logs.append(f"UPDATE MACHINE: {machine}")
+    print(f"UPDATE MACHINE: {machine}")
 
     user = stats['username']
     host = stats['address']
@@ -193,23 +186,20 @@ def update_machine(machine,stats,args):
     primary = machine == 'primary' or host == 'localhost'
 
     if not enabled:
-        logs.append("yellow")
-        logs.append(f"Skipping update of {machine} because it is not enabled.")
+        print_yellow(f"Skipping update of {machine} because it is not enabled.")
         return False
 
     # We don't have to update the code for the primary machine or if docker_images is specified.
     if not primary and not args.docker_images:
-        logs.append(f"{machine}: copy Submitty source code...")
+        print(f"{machine}: copy Submitty source code...")
         timed_out = copy_code_to_worker(machine, user, host, submitty_repository)
         if timed_out == True:
-            logs.append("yellow")
-            logs.append(f"WARNING: Connection to machine {machine} timed out. Skipping Submitty installation...")
+            print_yellow(f"WARNING: Connection to machine {machine} timed out. Skipping Submitty installation...")
             return True
-        logs.append(f"{machine}: beginning installation...")
+        print(f"{machine}: beginning installation...")
         success = install_worker(user, host, machine)
         if success == False:
-            logs.append("red")
-            logs.append(f"ERROR: Failed to install Submitty software update on {machine}")
+            print_red(f"ERROR: Failed to install Submitty software update on {machine}")
             return False
 
     # Install/update docker containers
@@ -228,15 +218,12 @@ class MachineUpdateThread(threading.Thread):
         self.stats = stats
         self.args = args
     def run(self):
-        with lock:
-            success = update_machine(self.machine,self.stats,self.args)
-            if success == False:
-                logs.append("red")
-                logs.append(f"FAILURE TO UPDATE MACHINE {self.machine}")
-                raise SystemExit("ERROR: FAILURE TO UPDATE ONE OR MORE MACHINES")
-            else:
-                logs.append("green")
-                logs.append(f"SUCCESS UPDATING MACHINE {self.machine}")
+        success = update_machine(self.machine,self.stats,self.args)
+        if success == False:
+            print_red(f"FAILURE TO UPDATE MACHINE {self.machine}")
+            raise SystemExit("ERROR: FAILURE TO UPDATE ONE OR MORE MACHINES")
+        else:
+            print_green(f"SUCCESS UPDATING MACHINE {self.machine}")
 
 if __name__ == "__main__":
 
@@ -275,26 +262,3 @@ if __name__ == "__main__":
     
     for thread in threads:
         thread.join()
-
-yellow = False
-green = False
-red = False
-
-for log in logs:
-    if log == "yellow":
-        yellow = True
-    elif log == "red" :
-        red = True
-    elif log == "green":
-        green = True  
-    elif yellow:
-        print_yellow(log)
-        yellow = False
-    elif red:
-        print_red(log)
-        red = False
-    elif green:
-        print_green(log)
-        green = False
-    else:
-        print(log)
