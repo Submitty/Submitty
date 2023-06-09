@@ -335,7 +335,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material_dir = pathinfo($course_material->getPath(), PATHINFO_DIRNAME);
 
             $same_start = str_starts_with($course_material_dir, $main_path);
-            $not_same_file = $course_material_path != $main_path;
+            $not_same_file = $course_material_path !== $main_path;
 
             // Third condition prevents cases where two folders are "name" and "name_plus_more_text".
             if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] == '/') {
