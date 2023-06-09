@@ -338,7 +338,7 @@ class CourseMaterialsController extends AbstractController {
             $not_same_file = $course_material_path !== $main_path;
 
             // Third condition prevents cases where two folders are "name" and "name_plus_more_text".
-            if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] == '/') {
+            if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] === '/') {
                 if ($course_material->isDir()) {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
