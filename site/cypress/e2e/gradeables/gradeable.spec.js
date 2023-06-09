@@ -18,7 +18,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                 cy.get('#gradeable-submission-cont > a').click();
             }
             */
-           
+
             //Makes sure the clear button is not disabled by adding a file
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
             cy.get('#startnew').click();
