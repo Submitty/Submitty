@@ -7192,7 +7192,6 @@ WHERE current_state IN
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.course_section_id,
                team.rotating_section,
                team.team_name';
 
@@ -7200,7 +7199,6 @@ WHERE current_state IN
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
-                  gt.course_section_id,
                   gt.rotating_section,
                   gt.team_name,
                   json_agg(tu) AS array_team_users
@@ -7256,7 +7254,7 @@ WHERE current_state IN
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
-                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections
+                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections, sec_reg.course_section_id
                 FROM users u
                 LEFT JOIN gradeable_anon ga
                 ON u.user_id=ga.user_id
@@ -7267,7 +7265,13 @@ WHERE current_state IN
                     FROM grading_registration
                     GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
-            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u.g_id=g.g_id
+                LEFT JOIN (
+                    SELECT
+                        sections_registration_id,
+                        course_section_id
+                    FROM sections_registration
+                ) AS sec_reg ON sec_reg.sections_registration_id=u.registration_section
+            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
             LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
@@ -7330,7 +7334,6 @@ WHERE current_state IN
               gcd.array_grader_manual_registration,
               gcd.array_grader_last_updated,
               gcd.array_grader_registration_section,
-              gcd.array_grader_course_section_id,
               gcd.array_grader_rotating_section,
               gcd.array_grader_registration_type,
               gcd.array_grader_grading_registration_sections,
@@ -7348,7 +7351,6 @@ WHERE current_state IN
               gcd.array_verifier_manual_registration,
               gcd.array_verifier_last_updated,
               gcd.array_verifier_registration_section,
-              gcd.array_verifier_course_section_id,
               gcd.array_verifier_rotating_section,
               gcd.array_verifier_registration_type,
 
@@ -7427,7 +7429,6 @@ WHERE current_state IN
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.registration_type) AS array_grader_registration_type,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
-                  json_agg(ug.course_section_id) AS array_grader_course_section_id,
                   json_agg(uv.user_id) AS array_verifier_user_id,
                   json_agg(uv.user_givenname) AS array_verifier_user_givenname,
                   json_agg(uv.user_preferred_givenname) AS array_verifier_user_preferred_givenname,
@@ -7440,7 +7441,6 @@ WHERE current_state IN
                   json_agg(uv.manual_registration) AS array_verifier_manual_registration,
                   json_agg(uv.last_updated) AS array_verifier_last_updated,
                   json_agg(uv.registration_section) AS array_verifier_registration_section,
-                  json_agg(uv.course_section_id) AS array_verifier_course_section_id,
                   json_agg(uv.rotating_section) AS array_verifier_rotating_section,
                   json_agg(uv.registration_type) AS array_verifier_registration_type,
                   in_gcd.gd_id,
@@ -7465,7 +7465,7 @@ WHERE current_state IN
                       SELECT
                         json_agg(sections_registration_id) AS grading_registration_sections,
                         user_id
-                      FROM grading_registration 
+                      FROM grading_registration
                       GROUP BY user_id
                     ) AS sr ON u.user_id=sr.user_id
                     LEFT JOIN(
@@ -7482,13 +7482,6 @@ WHERE current_state IN
                   ) AS uv ON uv.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id, ug.g_id
               ) AS gcd ON gcd.gd_id=gd.gd_id AND gcd.g_id=g.g_id
-
-                /*
-                LEFT JOIN (
-                  SELECT course_section_id
-                  FROM sections_registration
-                ) AS csi ON csi.section_registration_id = g.grading_registration
-                */
 
               /* Join aggregate gradeable version data */
               LEFT JOIN (
@@ -7623,7 +7616,6 @@ WHERE current_state IN
                 'manual_registration',
                 'last_updated',
                 'registration_section',
-                'course_section_id',
                 'rotating_section',
                 'registration_type',
                 'grading_registration_sections'
