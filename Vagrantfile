@@ -98,6 +98,14 @@ Vagrant.configure(2) do |config|
   
   custom_box = ENV.has_key?('VAGRANT_BOX')
 
+  ports = Hash[]
+  ports[:site]       = ENV.fetch('VM_PORT_SITE', 1511)
+  ports[:ws]         = ENV.fetch('VM_PORT_WS', 8443)
+  ports[:db]         = ENV.fetch('VM_PORT_DB', 16442)
+  ports[:saml]       = ENV.fetch('VM_PORT_SAML', 7000)
+  ports[:ssh]        = ENV.fetch('VM_PORT_SSH', 2222)
+  ports[:worker_ssh] = ENV.fetch('VM_PORT_WORKER_SSH', 2220)
+
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
@@ -112,18 +120,26 @@ Vagrant.configure(2) do |config|
     # If this IP address changes, it must be changed in install_system.sh and
     # CONFIGURE_SUBMITTY.py to allow the ssh connection
     ubuntu.vm.network "private_network", ip: "192.168.56.21"
-    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
+    ubuntu.vm.network 'forwarded_port', guest: 22, host: ports[:worker_ssh], id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $worker_script
+
+    ubuntu.vm.provider "qemu" do |qe|
+      qe.ssh_port = ports[:worker_ssh]
+    end
   end
 
   # Our primary development target, RPI uses it as of Fall 2021
   config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
-    ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ports[:site]
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ports[:ws]
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ports[:db]
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ports[:saml]
+    ubuntu.vm.network 'forwarded_port', guest:   22, host: ports[:ssh], id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
+
+    ubuntu.vm.provider "qemu" do |qe|
+      qe.ssh_port = ports[:ssh]
+    end
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
@@ -207,8 +223,6 @@ Vagrant.configure(2) do |config|
 
     qe.memory = "2G"
     qe.smp = 2
-
-    qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
 
     mount_folders(override, [])
   end
