@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-          working-directory: site
+        working-directory: site
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -40,10 +40,10 @@ jobs:
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
-            path: ~/.npm
-            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-                  ${{ runner.os }}-cache-node-modules-
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
       - run: npm install
       - name: Run stylelint
         run: npm run css-stylelint
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-          working-directory: site
+        working-directory: site
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -62,10 +62,10 @@ jobs:
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
-            path: ~/.npm
-            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-                  ${{ runner.os }}-cache-node-modules-
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
       - run: npm install
       - name: Run eslint
         run: npm run eslint
@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-          working-directory: site
+        working-directory: site
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-          working-directory: site
+        working-directory: site
     steps:
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@2.25.2
@@ -115,10 +115,10 @@ jobs:
       - name: Install Composer
         uses: actions/cache@v3
         with:
-            path: ${{ steps.composer-cache.outputs.dir }}
-            key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-            restore-keys: |
-                ${{ runner.os }}-composer-
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: composer install --prefer-dist --dev
@@ -138,7 +138,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-          working-directory: site
+        working-directory: site
     steps:
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@2.25.2
@@ -152,14 +152,14 @@ jobs:
       - name: Install Composer
         uses: actions/cache@v3
         with:
-            path: ${{ steps.composer-cache.outputs.dir }}
-            key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-            restore-keys: |
-                ${{ runner.os }}-composer-
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist --dev
       - name: Run php unit tests
-        run : php vendor/bin/phpunit
+        run: php vendor/bin/phpunit
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:
@@ -182,7 +182,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run : |
+        run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install flake8 flake8-bugbear
       - name: Run python linting
@@ -204,7 +204,7 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run : |
+        run: |
           python3 -m pip install -r .setup/pip/system_requirements.txt
           python3 -m pip install coverage # Testing util.
 
@@ -212,7 +212,7 @@ jobs:
       # testing as auto grader depends on submitty utils to function.
       - name: Run python_submitty_utils python unit tests
         working-directory: python_submitty_utils
-        run : |
+        run: |
           pip3 install .
           coverage run -m unittest discover
           coverage xml
@@ -225,7 +225,7 @@ jobs:
       # Migrator unit test
       - name: Run migrator python unit tests
         working-directory: migration
-        run : |
+        run: |
           coverage run -m unittest discover
           coverage xml
       - name: Upload migrator Coverage
@@ -237,7 +237,7 @@ jobs:
       # Auto grader unit test
       - name: Run autograder python unit tests
         working-directory: autograder
-        run : |
+        run: |
           coverage run -m unittest discover
           coverage xml
       - name: Upload autograder Coverage
@@ -246,7 +246,7 @@ jobs:
           files: autograder/coverage.xml
           flags: autograder
 
-      #submitty_daemon_jobs unit tests
+      #  submitty_daemon_jobs unit tests
       - name: Install bulk upload dependencies
         run: |
           sudo apt-get install -y poppler-utils
@@ -254,7 +254,7 @@ jobs:
 
       - name: Run bulk upload unit tests
         working-directory: sbin/submitty_daemon_jobs
-        run : |
+        run: |
           coverage run -m unittest discover tests -t .
           coverage xml -i
 
@@ -304,7 +304,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - uses: ./.github/actions/e2e-Setup-Composite      
+      - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run selenium e2e tests with pam auth
         run: |
           pushd ${SUBMITTY_REPOSITORY}
@@ -397,7 +397,7 @@ jobs:
           sudo systemctl restart submitty_autograding_worker
 
       - name: Switch to database auth
-        run:  sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with database auth
         uses: cypress-io/github-action@v5
@@ -408,7 +408,7 @@ jobs:
           browser: chrome
 
       - name: Switch to LDAP auth
-        run:  sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with LDAP auth
         uses: cypress-io/github-action@v5
@@ -424,7 +424,7 @@ jobs:
           sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
 
       - name: Switch to SAML auth
-        run:  sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+        run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with SAML auth
         uses: cypress-io/github-action@v5
@@ -450,12 +450,11 @@ jobs:
         run: sudo bash tests/test_site_error_log.sh
 
 
-
   e2eIntegrationTests:
     runs-on: ubuntu-20.04
-    #Postgres should not be needed for the integration tests. 
-    #But unfortunately Configure test suite seems to use it at the moment, and 
-    #Configure test suite seems to be necessary for the Integration tests
+    # Postgres should not be needed for the integration tests. 
+    # But unfortunately Configure test suite seems to use it at the moment, and
+    # Configure test suite seems to be necessary for the Integration tests
     services:
       postgres:
         image: postgres
