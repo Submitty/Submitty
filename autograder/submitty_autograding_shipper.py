@@ -959,7 +959,8 @@ def checkout_vcs_repo(config, my_file):
                         print("\n", file=f)
                         print(f"Check to be sure the subdirectory '{vcs_subdirectory}'" +
                               " exists and all relevant files are present.", file=f)
-                        print("If you have made changes, make sure you commit and push them.", file=f)
+                        print("If you have made changes, " +
+                              "make sure you commit and push them.", file=f)
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
