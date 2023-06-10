@@ -30,17 +30,16 @@ const replyToThread = (title, reply) => {
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click();
+    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({force: true});
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
-    cy.wait(200);
+    cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
     cy.get('#merge-threads > form > .popup-box > .popup-window > .form-body > .form-buttons > .form-button-container > .btn-primary').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
 const removeThread = (title) => {
-    cy.get('#nav-sidebar-forum').click();
     cy.get('.thread-left-cont > .thread-list-item').contains(title).click();
     cy.get('.first_post > .post-action-container > .delete-post-button').click();
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
