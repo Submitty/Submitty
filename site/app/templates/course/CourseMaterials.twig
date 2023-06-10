@@ -8,7 +8,7 @@
 
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         {# button to open all of the subfolders and cookie it#}            
-        <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
+        <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
         {% if user_group == 1 %}
             {# button to set the release dates of all files in the page/course materials #}
             <a
@@ -159,14 +159,14 @@
     {% else %}
         <div class="folder-container">
             <div class="div-viewer view-row">
-                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setCookie('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
+                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="Cookies.set('{{ folder_path }}',toggleCMFolder('{{ id }}')+'{{ id }}')" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </a>
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}", "{{ id }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
                 {% if not seen[folder_path] %}
@@ -181,27 +181,12 @@
 {% endmacro %}
 
 <script>
-    //set cookie for open adapted from w3schools
-    function setCookie(cName,cVal){
-        document.cookie = cName+'='+cVal;
+    function toggleFoldersOpen(){
+        {% for file in material_list %}
+        Cookies.remove("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
+        {% endfor %}
+        Cookies.set("foldersOpen", toggleCMFolders());
     }
-    //get the value for the cookie with this name
-    function getCookie(cName) {
-        var name = cName+'=';
-        var decodedCookie = decodeURIComponent(document.cookie);
-        var ca = decodedCookie.split(';');
-        for(var i = 0; i <ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
     {% if user_group == 1 %}
 
         function handleHideMaterialsCheckboxChange(clicked) {
@@ -236,50 +221,49 @@
 
     window.onload = function () {
         //determine if folders have been left open or closed
-        var folderCookie = getCookie('foldersOpen');
+        const folderCookie = Cookies.get('foldersOpen');
         //if the cookie says it is open
-        if(folderCookie == "open"){
+        if(folderCookie === 'open'){
             //open all the folders
-            openAllDivForCourseMaterials();
-            //
-            {% for file in material_list %}
-            //if one of the subdirs, check if it is closed post opening all
-            var subFolderCookie = getCookie("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
-            if(subFolderCookie.indexOf("closed")==0){
-                //if closed. close it after it has been opened by the override above
-                closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-            }
-            {% endfor %}
+            toggleCMFolders(true);
+            {% for file in material_list %}{
+                //if one of the subdirs, check if it is closed post opening all
+                const subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
+                if(subFolderCookie.startsWith('closed')){
+                    //if closed. close it after it has been opened by the override above
+                    closeCMFolder(subFolderCookie.substr(6));
+                }
+            }{% endfor %}
         }
         else{
             //makes sure that opened folders don't get opened multiple times
             let trackOpens = new Map();
             //goes through all possible directories
-            {% for file in material_list %}
-            //get the cookie for each dir
-            var subFolderCookie = getCookie("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
-            //if the folder is open
-            if(subFolderCookie.indexOf("open")==0){
-                //check if the folder has been opened already (do it it again will close it)
-                if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
-                    //undefined means it has not been opened
-                    //set the value as open so it will not be reopened
-                    trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
-                    //open the folder
-                    openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
+            {% for file in material_list %}{
+                //get the cookie for each dir
+                const subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
+                //if the folder is open
+                if(subFolderCookie.startsWith('open')){
+                    //check if the folder has been opened already (do it it again will close it)
+                    if(trackOpens.get(subFolderCookie.substr(4)) === undefined){
+                        //undefined means it has not been opened
+                        //set the value as open so it will not be reopened
+                        trackOpens.set(subFolderCookie.substr(4),"released");
+                        //open the folder
+                        openCMFolder(subFolderCookie.substr(4));
+                    }
                 }
-            }
-            else{
-                if(subFolderCookie.indexOf("closed")==0){
-                    //if the folder should be closed, close it
-                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-                    //there's no way to open it in that function
+                else{
+                    if(subFolderCookie.startsWith('closed')){
+                        //if the folder should be closed, close it
+                        closeCMFolder(subFolderCookie.substr(6));
+                        //there's no way to open it in that function
+                    }
                 }
-            }
-            {% endfor %}
+            }{% endfor %}
         }
         // loop thru each div_viewer_xxx
-        var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        var jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
         {% if user_group == 1 %}
             var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
             const partiallyHidden = 2;
@@ -357,46 +341,25 @@
                 }
             }
         {% endif %}
+
+        // set folder data for instructor
+        {% if user_group == 1 %}
+            $('[id^=div_viewer_]').each(function() { callFolderSetter(this) });
+        {% endif %}
+
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
-
-            $('[id^=div_viewer_]').each(function() {
-                {% if user_group == 1 %}
-                    callFolderSetter(this);
-                {% endif %}
-                var number = this.id.replace('div_viewer_', '').trim();
-                var keyValuePairs = document.cookie.split(';');
-
-                for(var i = 0; i < keyValuePairs.length; i++) {
-                    var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
-                    var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
-                    if (name === 'cm_'+number && value === '1') {
-                        openDivForCourseMaterials(number);
-                        document.cookie = 'cm_' + number + '='; // clean up cookie since we don't need this anymore
-                    }
-                }
-            });
+            const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
+            for (const cm_id of cm_ids) {
+                toggleCMFolder(cm_id);
+            }
             // jump to last location if scroll is enabled.
             window.scrollTo(0, jumpToScrollPosition);
-            document.cookie = 'jumpToScrollPosition=-1';
-
+            Cookies.set('jumpToScrollPosition', -1);
         }
-        else {
-            // clean up all cookies which are stated with "cm_";
-            $('[id^=div_viewer_]').each(function() {
-                {% if user_group == 1 %}
-                    callFolderSetter(this);
-                {% endif %}
-                var number = this.id.replace('div_viewer_', '').trim();
-                var keyValuePairs = document.cookie.split(';');
 
-                for(var i = 0; i < keyValuePairs.length; i++) {
-                    var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
-                    if (name === 'cm_'+number) {
-                        document.cookie = 'cm_' + number + '=';
-                    }
-                }
-            });
-        }
+        // clean up cm data cookie
+        Cookies.remove('cm_data');
+
         {% if user_group == 1 %}
 
             $('#hide-materials-checkbox').on('change', handleHideMaterialsCheckboxChange);

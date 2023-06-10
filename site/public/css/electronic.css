@@ -1524,7 +1524,7 @@ input[type="radio"][disabled=""]:checked::before {
 }
 
 /* Media queries */
-@media (max-width: 540px) {
+@media (width <= 540px) {
     #electronic-gradeable-container {
         margin: 0;
     }
