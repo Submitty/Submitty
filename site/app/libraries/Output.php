@@ -115,7 +115,7 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("text", function ($key, $default, $vals = []) {
+        $this->twig->addFunction(new \Twig\TwigFunction("localize", function ($key, $default, $vals = []) {
             $config = $this->core->getConfig();
             if ($config) {
                 $locale = $config->getLocale();
