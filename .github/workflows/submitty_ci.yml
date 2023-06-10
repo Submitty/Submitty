@@ -30,141 +30,141 @@ jobs:
   css-lint:
     runs-on: ubuntu-20.04
     defaults:
-        run:
-            working-directory: site
+      run:
+          working-directory: site
     steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-node@v3
-          with:
-            node-version: ${{ env.NODE_VERSION }}
-        - name: Cache Node Modules
-          uses: actions/cache@v3
-          with:
-              path: ~/.npm
-              key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-              restore-keys: |
-                    ${{ runner.os }}-cache-node-modules-
-        - run: npm install
-        - name: Run stylelint
-          run: npm run css-stylelint
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+            path: ~/.npm
+            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+                  ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - name: Run stylelint
+        run: npm run css-stylelint
 
 
   js-lint:
     runs-on: ubuntu-20.04
     defaults:
-        run:
-            working-directory: site
+      run:
+          working-directory: site
     steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-node@v3
-          with:
-            node-version: ${{ env.NODE_VERSION }}
-        - name: Cache Node Modules
-          uses: actions/cache@v3
-          with:
-              path: ~/.npm
-              key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-              restore-keys: |
-                    ${{ runner.os }}-cache-node-modules-
-        - run: npm install
-        - name: Run eslint
-          run: npm run eslint
-        - name: Run npm build (tsc and esbuild)
-          run: npm run build
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+            path: ~/.npm
+            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+                  ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - name: Run eslint
+        run: npm run eslint
+      - name: Run npm build (tsc and esbuild)
+        run: npm run build
 
 
   js-unit:
     runs-on: ubuntu-20.04
     defaults:
-        run:
-            working-directory: site
+      run:
+          working-directory: site
     steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-node@v3
-          with:
-            node-version: ${{ env.NODE_VERSION }}
-        - name: Cache Node Modules
-          uses: actions/cache@v3
-          with:
-              path: ~/.npm
-              key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-              restore-keys: |
-                  ${{ runner.os }}-cache-node-modules-
-        - run: npm install
-        - run: npm run test
-        - name: Upload Coverage
-          uses: codecov/codecov-action@v3
-          with:
-              files: site/tests/report/jest/clover.xml
-              flags: js
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+            path: ~/.npm
+            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm install
+      - run: npm run test
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+            files: site/tests/report/jest/clover.xml
+            flags: js
 
 
   php-lint:
     runs-on: ubuntu-20.04
     defaults:
-        run:
-            working-directory: site
+      run:
+          working-directory: site
     steps:
-        - uses: actions/checkout@v3
-        - uses: shivammathur/setup-php@2.25.2
-          with:
-            php-version: ${{ env.PHP_VER }}
-        - name: Cache Composer
-          id: composer-cache
-          run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        - name: Install Composer
-          uses: actions/cache@v3
-          with:
-              path: ${{ steps.composer-cache.outputs.dir }}
-              key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-              restore-keys: |
-                  ${{ runner.os }}-composer-
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@2.25.2
+        with:
+          php-version: ${{ env.PHP_VER }}
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v3
+        with:
+            path: ${{ steps.composer-cache.outputs.dir }}
+            key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-composer-
 
-        - name: Install dependencies
-          run: composer install --prefer-dist --dev
-        - name: Check syntax
-          run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-        - name: Lint PHP code
-          run: |
-              php vendor/bin/phpcs --version
-              php vendor/bin/phpcs
-        - name: Static analysis
-          run: |
-              php vendor/bin/phpstan  --version
-              php vendor/bin/phpstan analyze app public/index.php socket/index.php
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Check syntax
+        run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+      - name: Lint PHP code
+        run: |
+            php vendor/bin/phpcs --version
+            php vendor/bin/phpcs
+      - name: Static analysis
+        run: |
+            php vendor/bin/phpstan  --version
+            php vendor/bin/phpstan analyze app public/index.php socket/index.php
 
 
   php-unit:
     runs-on: ubuntu-20.04
     defaults:
-        run:
-            working-directory: site
+      run:
+          working-directory: site
     steps:
-        - uses: actions/checkout@v3
-        - uses: shivammathur/setup-php@2.25.2
-          with:
-            php-version: ${{ env.PHP_VER }}
-            extensions: imagick
-            coverage: pcov
-        - name: Cache Composer
-          id: composer-cache
-          run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        - name: Install Composer
-          uses: actions/cache@v3
-          with:
-              path: ${{ steps.composer-cache.outputs.dir }}
-              key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-              restore-keys: |
-                  ${{ runner.os }}-composer-
-        - name: Install dependencies
-          run: composer install --prefer-dist --dev
-        - name: Run php unit tests
-          run : php vendor/bin/phpunit
-        - name: Upload Coverage
-          uses: codecov/codecov-action@v3
-          with:
-            files: site/tests/report/clover.xml
-            flags: php
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@2.25.2
+        with:
+          php-version: ${{ env.PHP_VER }}
+          extensions: imagick
+          coverage: pcov
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v3
+        with:
+            path: ${{ steps.composer-cache.outputs.dir }}
+            key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-composer-
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Run php unit tests
+        run : php vendor/bin/phpunit
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: site/tests/report/clover.xml
+          flags: php
 
 
   python-lint:
