@@ -86,17 +86,17 @@ jobs:
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
-            path: ~/.npm
-            key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-                ${{ runner.os }}-cache-node-modules-
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-
       - run: npm install
       - run: npm run test
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:
-            files: site/tests/report/jest/clover.xml
-            flags: js
+          files: site/tests/report/jest/clover.xml
+          flags: js
 
 
   php-lint:
@@ -186,7 +186,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install flake8 flake8-bugbear
       - name: Run python linting
-        run : python3 -m flake8
+        run: python3 -m flake8
 
 
   python-unit:
@@ -452,7 +452,7 @@ jobs:
 
   e2eIntegrationTests:
     runs-on: ubuntu-20.04
-    # Postgres should not be needed for the integration tests. 
+    # Postgres should not be needed for the integration tests.
     # But unfortunately Configure test suite seems to use it at the moment, and
     # Configure test suite seems to be necessary for the Integration tests
     services:
