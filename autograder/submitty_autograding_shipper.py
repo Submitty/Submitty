@@ -889,7 +889,7 @@ def checkout_vcs_repo(config, my_file):
         #
         #  NOTE: If the server is busy, it might take seconds or
         #     minutes for an available shipper to process the git
-        #     clone, and thethe timestamp might be slightly late)
+        #     clone, and the timestamp might be slightly late)
         #
         #  So we choose this option!  (for now)
         #
@@ -939,7 +939,7 @@ def checkout_vcs_repo(config, my_file):
                             vcs_subdirectory = vcs_subdirectory[1:]
                         file_path = os.path.join(sub_checkout_path, vcs_subdirectory)
                     else:
-                        file_path = os.path.join(sub_checkout_path)
+                        file_path = sub_checkout_path
 
                     shutil.copytree(file_path, checkout_path, dirs_exist_ok=True)
                     shutil.rmtree(sub_checkout_path)
@@ -957,10 +957,9 @@ def checkout_vcs_repo(config, my_file):
                     with open(error_path, 'w') as f:
                         print(str(error), file=f)
                         print("\n", file=f)
-                        print("Check to be sure the subdirectory exists " +
-                              "and is not empty.", file=f)
-                        print("Check to be sure the repository has been committed with the " +
-                              "subdirectory and relevant files present.", file=f)
+                        print(f"Check to be sure the subdirectory '{vcs_subdirectory}'" +
+                              " exists and all relevant files are present.", file=f)
+                        print("If you have made changes, make sure you commit and push them.", file=f)
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
@@ -984,11 +983,8 @@ def checkout_vcs_repo(config, my_file):
                     print("Check to be sure the repository is not empty.", file=f)
                     print("Check to be sure the repository has a " + which_branch +
                           " branch.", file=f)
-                    print(
-                        "And check to be sure the timestamps on the " + which_branch +
-                        " branch are reasonable.",
-                        file=f
-                    )
+                    print("And check to be sure the timestamps on the " + which_branch +
+                          " branch are reasonable.", file=f)
 
         # exception on git clone
         except subprocess.CalledProcessError as error:
@@ -999,11 +995,10 @@ def checkout_vcs_repo(config, my_file):
                 print(str(error), file=f)
                 print("\n", file=f)
                 print("Check to be sure the repository exists.", file=f)
+                print("If you have made changes, make sure you commit and push them. ", file=f)
                 print(
                     "And check to be sure the submitty_daemon user has appropriate access "
-                    "credentials.",
-                    file=f
-                )
+                    "credentials.", file=f)
 
     # exception in constructing full git repository url/path
     except Exception as error:
