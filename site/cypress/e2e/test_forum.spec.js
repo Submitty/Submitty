@@ -60,20 +60,14 @@ const cleanUp = () => {
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     ['instructor'].forEach((user) => {
-        afterEach(() => {
-        cleanUp();
-        });
-
         beforeEach(() => {
+            cleanUp();
             cy.visit('/');
             cy.login(user);
             cy.visit(['sample']);
             cy.get('#nav-sidebar-forum').click();
             cy.get('#nav-sidebar-collapse-sidebar').click();
-
         });
-
-        
 
         it('Create, reply to, merge, and delete threads', () => {
             // Comment
