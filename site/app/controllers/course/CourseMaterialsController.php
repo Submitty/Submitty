@@ -663,10 +663,10 @@ class CourseMaterialsController extends AbstractController {
                                 foreach ($dirs as $dir) {
                                     for ($i = $count; $i < $j + $count; $i++) {
                                         if (!isset($dirs_to_make[$i])) {
-                                            $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                                            $dirs_to_make[$i] = FileUtils::joinPaths($upload_path, $dir);
                                         }
                                         else {
-                                            $dirs_to_make[$i] .= '/' . $dir;
+                                            $dirs_to_make[$i] = FileUtils::joinPaths($dirs_to_make[$i], $dir);
                                         }
                                     }
                                     $j--;
