@@ -10,11 +10,11 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
             cy.visit(['sample','gradeable','open_homework']);
 
-            if (user === 'grader') {
+            if (user === 'instructor') {
                 cy.get('#submit').should('be.disabled');
                 //clicks on useMostRecentSubmission
                 //When the element useMostRecentSubmission changes to button change this to a button
-                //cy.get('#gradeable-submission-cont > a').click();
+                cy.get('#gradeable-submission-cont > a').click();
             }
 
             //Makes sure the clear button is not disabled by adding a file
