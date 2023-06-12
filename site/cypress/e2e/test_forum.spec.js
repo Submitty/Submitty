@@ -45,9 +45,25 @@ const removeThread = (title) => {
     cy.get('.thread-left-cont > .thread-list-item').contains(title).should('not.exist');
 };
 
+const cleanUp = () => {
+    cy.get('#nav-sidebar-forum').click();
+            if(cy.get('.thread-left-cont > .thread-list-item').contains(title1).exists()){
+                removeThread(title1);
+            }
+            if(cy.get('.thread-left-cont > .thread-list-item').contains(title2).exists()){
+                removeThread(title2);
+            }
+            if(cy.get('.thread-left-cont > .thread-list-item').contains(title3).exists()){
+                removeThread(title3);
+            }
+}
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     ['instructor'].forEach((user) => {
+        afterEach(() => {
+        cleanUp();
+        });
+
         beforeEach(() => {
             cy.visit('/');
             cy.login(user);
@@ -56,6 +72,8 @@ describe('Test cases revolving around creating, replying to, merging, and removi
             cy.get('#nav-sidebar-collapse-sidebar').click();
 
         });
+
+        
 
         it('Create, reply to, merge, and delete threads', () => {
             // Comment
