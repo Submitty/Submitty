@@ -30,7 +30,7 @@ const replyToThread = (title, reply) => {
 
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
-    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({force: true});
+    cy.get('.thread-left-cont > .thread-list-item').contains(fromThread).click({ force: true });
     cy.get('[title="Merge Thread Into Another Thread"]').click();
     cy.get('.chosen-single > span').click();
     cy.wait(500);
@@ -47,16 +47,17 @@ const removeThread = (title) => {
 
 const cleanUp = () => {
     cy.get('#nav-sidebar-forum').click();
-            if(cy.get('.thread-left-cont > .thread-list-item').contains(title1).exists()){
-                removeThread(title1);
-            }
-            if(cy.get('.thread-left-cont > .thread-list-item').contains(title2).exists()){
-                removeThread(title2);
-            }
-            if(cy.get('.thread-left-cont > .thread-list-item').contains(title3).exists()){
-                removeThread(title3);
-            }
-}
+    if (cy.get('.thread-left-cont > .thread-list-item').contains(title1).exists()) {
+        removeThread(title1);
+    }
+    if (cy.get('.thread-left-cont > .thread-list-item').contains(title2).exists()) {
+        removeThread(title2);
+    }
+    if (cy.get('.thread-left-cont > .thread-list-item').contains(title3).exists()) {
+        removeThread(title3);
+    }
+};
+
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
     ['instructor'].forEach((user) => {
