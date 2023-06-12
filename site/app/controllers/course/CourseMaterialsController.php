@@ -399,12 +399,8 @@ class CourseMaterialsController extends AbstractController {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
-            $new_path = $upload_path . "/" . $requested_path;
+            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
             if ($course_material->isFile() && $path !== $new_path) {
-                if (!$this->checkValidPath($requested_path, $upload_path)) {
-                    return JsonResponse::getErrorResponse("Invalid requested path");
-                }
-                $new_path = FileUtils::joinPaths($upload_path, $requested_path);
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
