@@ -75,6 +75,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
+            'vcs_subdirectory' => '',
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
@@ -259,6 +260,7 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
@@ -862,7 +864,7 @@ class AdminGradeableController extends AbstractController {
         $repo_name = '';
         $subdir = '';
         if ($details['subdirectory_gradeable'] === 'true') {
-            $subdir = $details['vcs_subdirectory'];
+            $subdir = $details['vcs_subdirectory_input'];
         }
         $vcs_partial_path = '';
         // VCS specific values
