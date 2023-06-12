@@ -17,9 +17,9 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//*[contains(@class, 'fa-pencil-alt')]").click()
 
         if allowed:
-            self.driver.find_element(By.ID, "yes_regrade_allowed").click()
+            self.driver.find_element(By.ID, "yes_grade_inquiry_allowed").click()
         else:
-            self.driver.find_element(By.ID, "no_regrade_allowed").click()
+            self.driver.find_element(By.ID, "no_grade_inquiry_allowed").click()
 
         # set deadline
         if date is not None:
@@ -79,7 +79,7 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.XPATH, "//a[contains(@href,'grading/grade?who_id=lakinh')]").click()
 
         try:
-           self.driver.find_element(By.XPATH, "//div[@id='regrade_info']//*[text()='No Submission']")
+           self.driver.find_element(By.XPATH, "//div[@id='grade_inquiry_info']//*[text()='No Submission']")
         except NoSuchElementException:
            assert False
         assert True
@@ -128,7 +128,7 @@ class TestGradeInquiry(BaseTestCase):
 
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(text(),'VIEW GRADE')]").click()
 
-        assert not self.driver.find_element(By.ID, "regradeBoxSection").is_displayed()
+        assert not self.driver.find_element(By.ID, "gradeInquiryBoxSection").is_displayed()
         open_grade_inquiry_button = self.driver.find_element(By.XPATH, "//button[contains(text(),'Open Grade Inquiry')]")
         open_grade_inquiry_button.click()
         assert not open_grade_inquiry_button.is_displayed()
