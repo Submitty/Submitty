@@ -1178,7 +1178,7 @@ class HomeworkView extends AbstractView {
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
             $queries = $this->core->getQueries();
-            $grade_inquiry_posts = $queries->getRegradeDiscussions($grade_inquiries);
+            $grade_inquiry_posts = $queries->getGradeInquiryDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
