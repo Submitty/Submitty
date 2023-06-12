@@ -456,9 +456,6 @@ class CourseMaterialsController extends AbstractController {
         $requested_path = "";
         if (!empty($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
-            if (!$this->checkValidPath($_POST['requested_path'], $upload_path)) {
-                return JsonResponse::getErrorResponse("Invalid requested path");
-            }
         }
 
         $details['path'][0] = $requested_path;
@@ -750,14 +747,4 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    private function checkValidPath(string $requested_path, string $upload_path): bool {
-        $tmp_path = $upload_path . "/" . $requested_path;
-        $dirs = explode("/", $tmp_path);
-        for ($i = 1; $i < count($dirs); $i++) {
-            if ($dirs[$i] === "") {
-                return false;
-            }
-        }
-        return true;
-    }
 }
