@@ -45,7 +45,7 @@ COURSE.electronic_gradeable - gradeable parameters - DO NOT NEED TO MODIFY
     eg_use_ta_grading,eg_student_download,eg_student_view,
     eg_student_view_after_grades,eg_student_submit,eg_submission_open_date,
     eg_submission_due_date,eg_has_due_date,eg_late_days,
-    eg_allow_late_submission,eg_precision,eg_regrade_allowed,
+    eg_allow_late_submission,eg_precision,eg_grade_inquiry_allowed,
     eg_grade_inquiry_per_component_allowed,eg_grade_inquiry_due_date,
     eg_thread_ids,eg_has_discussion,eg_limited_access_blind,eg_peer_blind,
     eg_grade_inquiry_start_date,eg_hidden_files,eg_depends_on,
