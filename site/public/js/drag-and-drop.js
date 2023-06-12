@@ -11,10 +11,6 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 
 // INITIALIZATION
 //========================================================================================
-import { isValidFileName } from 'site/ts/twig/courseMaterials/upload.ts';
-import { shouldReplaceFileIfDup } from 'site/ts/twig/courseMaterials/upload.ts';
-
-
 var file_array = [];        // contains files uploaded for this submission
 var previous_files = [];    // contains names of files selected from previous submission
 var label_array = [];
