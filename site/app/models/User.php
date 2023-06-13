@@ -241,6 +241,7 @@ class User extends AbstractModel {
 
         if (isset($details['user_preferred_locale'])) {
             $this->preferred_locale = $details['user_preferred_locale'];
+            $this->core->getConfig()->setLocale($this->preferred_locale);
         }
 
         if (isset($details['registration_subsection'])) {

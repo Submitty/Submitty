@@ -662,4 +662,8 @@ class Config extends AbstractModel {
     public function getLocale(): Locale {
         return $this->locale;
     }
+
+    public function setLocale(string $locale) {
+        $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $locale);
+    }
 }
