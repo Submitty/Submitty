@@ -346,10 +346,10 @@
         var status = '{{ include_overridden }}';
 
         if (status == 'omit') {
-            document.cookie = "include_overridden=include;";
+            Cookies.set('include_overridden', 'include');
         }
         else {
-            document.cookie = "include_overridden=omit;";
+            Cookies.set('include_overridden', 'omit');
         }
         location.reload();
     }
