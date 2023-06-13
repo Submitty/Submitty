@@ -1545,7 +1545,7 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 
 // eslint-disable-next-line no-unused-vars
 function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
-    if (category_desc === null && category_color === null) {
+    if (category_desc === null && category_color === null && category_date === null) {
         return;
     }
     const data = {category_id: category_id, csrf_token: csrf_token};
