@@ -9,6 +9,25 @@
         "show_more": false
     } %}
 
+
+
+    {% set all_categories_future = true %}
+
+    {% for category in categories %}
+        {% if category.visible_date is null or category.diff > 0 %}
+            {% set all_categories_future = false %}
+        {% endif %}
+    {% endfor %}
+
+    {% if all_categories_future == true %}
+        <p id="empty-table" class="warning">All Categories are set to release in the future</p>
+    {% endif %}
+
+
+
+
+
+
     <div id="manage-categories-view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
         <h3 style="margin-bottom:10px;"> Manage Categories </h3>
         <div>
