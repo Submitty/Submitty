@@ -259,9 +259,12 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
-        if (!empty($_POST["visibleDate"])) {
-            $category_visible_date = $_POST["visibleDate"];
+        if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
+            $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
             //ASSUME NO ISSUES
+        }
+        else{
+            $category_visible_date = null;
         }
 
         $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color, $category_visible_date);
