@@ -42,6 +42,10 @@ class UserProfileView extends AbstractView {
 
         $this->core->getOutput()->addInternalModuleJs('user-profile.js');
 
+        $supported_locales = $this->core->getSupportedLocales() ?? [];
+        $locale_names = array_map(fn(string $locale): string => \Locale::getDisplayName($locale), $supported_locales);
+        $supported_locales = array_combine($supported_locales, $locale_names);
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_given" => $autofill_preferred_name[0],
@@ -54,7 +58,8 @@ class UserProfileView extends AbstractView {
             "change_password_url" => $this->output->buildUrl(['user_profile', 'change_password']),
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
             'user_time_zone_with_offset' => $user_time_zone_with_offset,
-            'user_utc_offset' => $user_utc_offset
+            'user_utc_offset' => $user_utc_offset,
+            'supported_locales' => $supported_locales
         ]);
     }
 }

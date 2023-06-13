@@ -133,6 +133,22 @@
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
+                    <span>Preferred Locale:</span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="pref_locale_select">Choose a locale:</label>
+                        <select id="pref_locale_select">
+                            <option></option>
+                            {% for locale, locale_name in supported_locales %}
+                            <option value="{{ locale }}" {% if locale == core.config.locale.name %}selected{% endif %}>{{ locale_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
                     <span>Color Theme:</span>
                 </div>
                 <div class="user-info">

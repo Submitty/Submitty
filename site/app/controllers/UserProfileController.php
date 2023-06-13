@@ -76,6 +76,23 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/set_pref_locale", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function setPrefLocale() {
+        if (isset($_POST['locale'])) {
+            $user = $this->core->getUser();
+            $success = $user->setPreferredLocale($_POST['locale']);
+
+            if ($success) {
+                return JsonResponse::getSuccessResponse([ 'locale' => $user->getPreferredLocale() ]);
+            }
+        }
+
+        return JsonResponse::getFailResponse('Failed to update user locale.');
+    }
+
+    /**
      * @Route("/user_profile/change_password", methods={"POST"})
      * @return MultiResponse
      */

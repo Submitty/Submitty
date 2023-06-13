@@ -888,4 +888,19 @@ class Core {
         }
         return null;
     }
+
+    /**
+     * Gets a list of supported locales.
+     * 
+     * @return array|null
+     */
+    public function getSupportedLocales() {
+        if ($this->config !== null) {
+            FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
+            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_map(fn(string $file): string => substr(@end(explode(DIRECTORY_SEPARATOR, $file)), 0, -4), $files);
+            return $files;
+        }
+        return null;
+    }
 }
