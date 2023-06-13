@@ -37,9 +37,18 @@
                 <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
 
                 
-                <input class="date_picker" placeholder="Visible Date" name="category_date" id="category_visible_date" type="date">
+                <input class="date_picker flatpickr-input active" placeholder=" mm / dd / yyyy " name="category_date" id="category_visible_date" type="text">
+                <script>
 
-
+                    flatpickr('.date_picker', {
+                        allowInput: true,
+                        dateFormat: "Y-m-d",
+                        onReady: (a, b, fp) => {
+                            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                        }
+                    });
+            
+                </script>
 
                 <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
