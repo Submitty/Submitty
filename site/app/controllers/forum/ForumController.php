@@ -242,6 +242,7 @@ class ForumController extends AbstractController {
         $category_id = $_POST["category_id"];
         $category_desc = null;
         $category_color = null;
+        $category_visible_date = null;
 
         if (!empty($_POST["category_desc"])) {
             $category_desc = trim($_POST["category_desc"]);
@@ -258,8 +259,12 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
+        if (!empty($_POST["visible_date"])) {
+            $category_visible_date = $_POST["visible_date"];
+            //ASSUME NO ISSUES
+        }
 
-        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color, $category_visible_date);
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
