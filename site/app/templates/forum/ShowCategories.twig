@@ -163,8 +163,9 @@
             const visible_date_original = item.data('visible_date');
             const visible_date = item.find(".edit-category-date-input").val().trim();
             item.data('visible_date', visible_date);
+            const category_desc = item.data('category_desc');
             if(visible_date != visible_date_original) {
-                editCategory(category_id, null, null, visible_date, 'date', '{{ csrf_token }}');
+                editCategory(category_id, category_desc, null, visible_date, 'date', '{{ csrf_token }}');
             }
             item.find(".categorylistitemdate-editdesc").hide();
             item.find(".categorylistitemdate-desc").show();

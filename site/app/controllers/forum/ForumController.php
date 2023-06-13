@@ -260,8 +260,13 @@ class ForumController extends AbstractController {
             }
         }
         if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
-            $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
-            //ASSUME NO ISSUES
+            if ($_POST["visibleDate"] === "    ") {
+                $category_visible_date = "";
+            }
+            else{
+                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                //ASSUME NO ISSUE
+            }
         }
         else{
             $category_visible_date = null;

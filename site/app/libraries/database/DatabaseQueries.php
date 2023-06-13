@@ -4337,8 +4337,13 @@ AND gc_id IN (
             $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", [$category_color, $category_id]);
         }
         if (!is_null($visible_date)) {
+            if ($visible_date === ""){
+                $visible_date = null;
+            }
+
             $this->course_db->query("UPDATE categories_list SET visible_date = ? WHERE category_id = ?", [$visible_date, $category_id]);
         }
+
         $this->course_db->commit();
     }
 

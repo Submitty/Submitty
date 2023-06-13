@@ -1556,6 +1556,11 @@ function editCategory(category_id, category_desc, category_color, category_date,
         data['category_color'] = category_color;
     }
     if (category_date !== null && changed === 'date') {
+
+        if (category_date.trim() === ""){
+            category_date = "    "
+        }
+
         data['visibleDate'] = category_date;
     }
     // eslint-disable-next-line no-undef
