@@ -217,7 +217,7 @@ class CourseMaterialsView extends AbstractView {
      *
      * @param array $course_materials - Dictionary: path name => CourseMaterial.
      * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
-     * @param string $cur_path - Path to the folder that $course_materials represents.
+     * @param string $current_path - Path to the folder that $course_materials represents.
      */
     private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $current_path): void {
         $cur_visibility = false;
