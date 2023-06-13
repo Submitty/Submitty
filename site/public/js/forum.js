@@ -1544,7 +1544,7 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
+function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
     if (category_desc === null && category_color === null) {
         return;
     }
@@ -1554,6 +1554,9 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
     }
     if (category_color !== null && changed === 'color') {
         data['category_color'] = category_color;
+    }
+    if (category_date !== null && changed === 'date') {
+        data['visibleDate'] = category_date;
     }
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'edit']);
@@ -1588,6 +1591,10 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
+            if (category_date !== null){
+                $(`#categorylistitem-${category_id}`).find('.categorylistitemdate-desc span').text(category_date);
+            }
+
             refreshCategories();
         },
         error: function() {
@@ -1595,6 +1602,7 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
         },
     });
 }
+
 
 function refreshCategories() {
     if ($('#ui-category-list').length) {
