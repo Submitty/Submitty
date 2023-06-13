@@ -2002,7 +2002,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         $params = [$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParameterList(count($sections));
+            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(

@@ -110,6 +110,7 @@ class ElectronicGraderView extends AbstractView {
                 $team_total += $section['team'];
             }
         }
+
         if ($total === 0 && $no_team_total === 0) {
             $graded_percentage = -1;
         }
@@ -293,22 +294,7 @@ class ElectronicGraderView extends AbstractView {
         }
 
         // (filter_id => [filter_title, default])
-        $filters = [
-            "grade_overriddes" => ["Grade Overrides", false],
-            "late_submissions" => ["Bad Late Submissions", true]
-        ];
-
-        // (filter_id => [title => filter_title, default => boolean, enabled => boolean])
-        // Note: cookie will be names "include_" + filter_id
-        $f = array_map(function ($filter) use ($filters) {
-            $cookie_name = "include_" . $filter;
-            return [
-                'title' => $filters[$filter][0],
-                'enabled' => array_key_exists($cookie_name, $_COOKIE) ? $_COOKIE[$cookie_name] === 'true' : $filters[$filter][1]
-            ];
-        }, array_keys($filters));
-        $filters = array_combine(array_keys($filters), $f);
-
+     
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
@@ -369,7 +355,6 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
-            "filters" => $filters,
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
