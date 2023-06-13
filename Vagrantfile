@@ -65,7 +65,7 @@ base_boxes = Hash[]
 base_boxes.default         = "bento/ubuntu-22.04"
 base_boxes[:arm_parallels] = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-22.04-arm64"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
