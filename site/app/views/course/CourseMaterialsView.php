@@ -207,7 +207,7 @@ class CourseMaterialsView extends AbstractView {
         foreach ($course_materials as $path => $course_material) {
             if (is_array($course_material)) {
                 // Found root-level folder; this folder could be invisible
-                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $path);
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, "root/$path");
             }
         }
     }
@@ -219,15 +219,17 @@ class CourseMaterialsView extends AbstractView {
      * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
      * @param string $cur_path - Path to the folder that $course_materials represents.
      */
-    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $cur_path): void {
+    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $current_path): void {
         $cur_visibility = false;
-        foreach ($course_materials as $path => $course_material) {
+        foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
                 // Material is actually folder
-                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $path);
+                $sub_path = "$current_path/$name";
+
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $sub_path);
 
                 // At least one file visible in this folder
-                if ($folder_visibilities[$path]) {
+                if ($folder_visibilities[$sub_path]) {
                     $cur_visibility = true;
                 }
             }
@@ -239,6 +241,6 @@ class CourseMaterialsView extends AbstractView {
             }
         }
 
-        $folder_visibilities[$cur_path] = $cur_visibility;
+        $folder_visibilities[$current_path] = $cur_visibility;
     }
 }
