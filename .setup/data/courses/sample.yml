@@ -613,7 +613,7 @@ gradeables:
     g_title: Subdirectory VCS Homework
     gradeable_config: vcs_submissions
     g_bucket: homework
-    
+
   - g_id: grading_team_homework
     components:
       - gc_lower_clamp: 0
