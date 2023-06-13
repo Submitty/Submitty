@@ -1,0 +1,10 @@
+extends: default
+
+rules:
+  line-length: disable
+  truthy: disable
+  document-start: disable
+
+ignore: |
+  site/node_modules/*
+  site/vendor/*
