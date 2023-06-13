@@ -4328,7 +4328,7 @@ AND gc_id IN (
         }
     }
 
-    public function editCategory($category_id, $category_desc, $visible_date, $category_color) {
+    public function editCategory($category_id, $category_desc, $category_color, $visible_date) {
         $this->course_db->beginTransaction();
         if (!is_null($category_desc)) {
             $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", [$category_desc, $category_id]);

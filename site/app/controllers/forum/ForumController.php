@@ -259,8 +259,8 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
-        if (!empty($_POST["visible_date"])) {
-            $category_visible_date = $_POST["visible_date"];
+        if (!empty($_POST["visibleDate"])) {
+            $category_visible_date = $_POST["visibleDate"];
             //ASSUME NO ISSUES
         }
 
