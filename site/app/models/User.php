@@ -125,7 +125,7 @@ class User extends AbstractModel {
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @prop @var string Unique id for course section(ex: CRN at RPI) */
-    protected $course_section_id = "";
+    protected $course_section_id = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
