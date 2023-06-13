@@ -10,7 +10,6 @@ class LateDaysTableView extends AbstractView {
         $preferred_name = $late_days->getUser()->getDisplayFullName();
         $table_data = $this->core->getOutput()->renderTwigTemplate('LateDaysTablePlugin.twig', [
             'late_days' => $late_days,
-            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'highlight_gradeable' => $hightlight_gradeable,
         ]);
         $table_data = "<hr><h2>Late Day Usage by " . $preferred_name . " (" . $late_days->getUser()->getId() . ")</h2><br>" . $table_data;
@@ -24,7 +23,6 @@ class LateDaysTableView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate('LateDaysTable.twig', [
             'late_days' => $late_days,
-            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 
@@ -41,7 +39,6 @@ class LateDaysTableView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate('LateDaysTableGrader.twig', [
             'late_days' => $late_days,
-            'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 }
