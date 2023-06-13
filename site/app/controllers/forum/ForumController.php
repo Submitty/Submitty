@@ -268,7 +268,7 @@ class ForumController extends AbstractController {
                 //ASSUME NO ISSUE
             }
         }
-        else{
+        else {
             $category_visible_date = null;
         }
 
