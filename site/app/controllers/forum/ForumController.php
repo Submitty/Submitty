@@ -263,7 +263,7 @@ class ForumController extends AbstractController {
             if ($_POST["visibleDate"] === "    ") {
                 $category_visible_date = "";
             }
-            else{
+            else {
                 $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
                 //ASSUME NO ISSUE
             }

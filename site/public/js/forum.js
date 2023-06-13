@@ -1557,8 +1557,8 @@ function editCategory(category_id, category_desc, category_color, category_date,
     }
     if (category_date !== null && changed === 'date') {
 
-        if (category_date.trim() === ""){
-            category_date = "    "
+        if (category_date.trim() === '') {
+            category_date = '    ';
         }
 
         data['visibleDate'] = category_date;
@@ -1596,7 +1596,7 @@ function editCategory(category_id, category_desc, category_color, category_date,
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
-            if (category_date !== null){
+            if (category_date !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitemdate-desc span').text(category_date);
             }
 
