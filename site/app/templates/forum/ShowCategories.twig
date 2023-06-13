@@ -166,8 +166,8 @@
             if(visible_date != visible_date_original) {
                 editCategory(category_id, category_desc, null, 'desc', '{{ csrf_token }}');
             }
-            item.find(".categorylistitem-editdesc").hide();
-            item.find(".categorylistitem-desc").show();
+            item.find(".categorylistitemdate-editdesc").hide();
+            item.find(".categorylistitemdate-desc").show();
         });
 
         $(".cancel-date-button").click(function() {
