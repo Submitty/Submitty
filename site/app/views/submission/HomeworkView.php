@@ -1033,7 +1033,7 @@ class HomeworkView extends AbstractView {
 
         $failed_file = '';
         // See if the grade has succeeded or failed
-        if(count($param['files']) === 1){
+        if (count($param['files']) === 1) {
             foreach ($param['files'] as $file) {
                 if (str_contains($file['relative_name'], 'failed')) {
                     $failed_file = file_get_contents($file['path']);
@@ -1043,7 +1043,7 @@ class HomeworkView extends AbstractView {
             }
             // Arbitrary size, currently bigger than all of the failed files, but
             // could be increased if the failed files need more tips/messages
-           $failed_file = (strlen($failed_file) > 250) ? substr($failed_file, 0, 250) : $failed_file;
+            $failed_file = (strlen($failed_file) > 250) ? substr($failed_file, 0, 250) : $failed_file;
         }
 
         // If its not git checkout
