@@ -32,8 +32,9 @@
 
     // Submitty Analysis Tools
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
-    "commonast": 		       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
-
+    "commonast": 	       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
+    "comment_count":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/bin/comment_count.py" },
+    
     // Submitty Analysis ToolsTS
     "submitty_count_ts":       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_count_ts"},
     "submitty_diagnostics_ts": { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts" },
@@ -46,10 +47,12 @@
     "python3.5":               { "path": "/usr/bin/python3.5" },
     "python3.6":               { "path": "/usr/bin/python3.6" },
     "pylint":                  { "path": "/usr/local/bin/pylint" },
+    "pytest":                  { "path": "/usr/local/bin/pytest" },
 
     // for Data Structures
     "g++":                     { "path": "/usr/bin/g++" },
     "clang++":                 { "path": "/usr/bin/clang++" },
+    "clang-format":            { "path": "/usr/bin/clang-format" },
     "drmemory":                { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/drmemory/bin64/drmemory" },
     "valgrind":                { "path": "/usr/bin/valgrind" },
 

@@ -57,11 +57,15 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 {
   // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
   // ignore_comment flag set in parse function to ignore comments
-  nlohmann::json allowed_autograding_commands = nlohmann::json::parse(GLOBAL_allowed_autograding_commands_default_string, nullptr, true, true);
+  nlohmann::json allowed_autograding_commands =
+    nlohmann::json::parse(GLOBAL_allowed_autograding_commands_default_string, nullptr, true, true);
+
   if (!GLOBAL_allowed_autograding_commands_custom_string.empty()) {
-    nlohmann::json allowed_autograding_commands_custom = nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
+    nlohmann::json allowed_autograding_commands_custom =
+      nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
     allowed_autograding_commands.update(allowed_autograding_commands_custom);
   }
+  
   if (program.length() > 0 && program[0] == '/') {
     for (auto& entry : allowed_autograding_commands.items()) {
       nlohmann::json program_obj = entry.value();
