@@ -82,7 +82,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $config = new Config($this->core);
         $config->setDebug(true);
-        $config->setSemester($this->config['semester']);
+        $config->setTerm($this->config['semester']);
         $config->setCourse($this->config['course']);
         $config->setCoursePath($this->config['course_path']);
         $config->setSubmittyPath($this->config['tmp_path']);
