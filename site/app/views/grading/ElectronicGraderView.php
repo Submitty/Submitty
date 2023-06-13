@@ -31,6 +31,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $regrade_requests
+     * @param int regrade_graders
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
@@ -54,6 +55,7 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
+        array $regrade_graders,
         bool $show_warnings,
         int $submissions_in_queue
     ) {
@@ -311,6 +313,7 @@ class ElectronicGraderView extends AbstractView {
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests,
+            "regrade_graders" => $regrade_graders,
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,

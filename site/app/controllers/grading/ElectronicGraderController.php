@@ -581,8 +581,12 @@ class ElectronicGraderController extends AbstractController {
         $peer_graded_components = 0;
         $peer_components = 0;
         $total_users_who_submitted = [];
+        
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+        $regrade_graders = $this->core->getQueries()->getGradersWithGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+        echo "Result: " . $regrade_requests . " " . print_r($regrade_graders, true);
+        
         if ($isPeerGradeable) {
             $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
@@ -856,8 +860,10 @@ class ElectronicGraderController extends AbstractController {
             $viewed_grade,
             $section_key,
             $regrade_requests,
+            $regrade_graders,
             $show_warnings,
-            $submissions_in_queue
+            $submissions_in_queue,
+            $regrade_graders
         );
     }
 

@@ -4904,6 +4904,20 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+    public function getGradersWithGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true)
+    {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("SELECT gcd.gcd_grader_id FROM gradeable_component AS gc JOIN gradeable_component_data AS gcd ON gc.gc_id = gcd.gc_id JOIN regrade_requests AS rr ON gc.gc_id = rr.gc_id;");
+
+        //$this->course_db->query("SELECT gcd_grader_id FROM public.gradeable_component_data;");
+        //$this->course_db->query("SELECT user_id from users");
+        //$this->course_db->query("SELECT gcd_grader_id FROM public.gradeable_component_data AS gcd JOIN public.regrade_requests AS rr ON rr.gc_id = gcd.gc_id;");
+
+        
+        return $this->course_db->row();
+
+    }
+
     /*
      * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
@@ -7587,6 +7601,7 @@ WHERE current_state IN
                 }
 
                 $graded_gradeable->setRegradeRequests($grade_inquiries_arr);
+                // $graded_gradeable -> set
             }
 
             $graded_components_by_id = [];

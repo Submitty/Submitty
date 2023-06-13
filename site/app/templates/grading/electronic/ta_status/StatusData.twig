@@ -91,16 +91,28 @@
                 {% endif %}
             {% endif %}
 
-            {% if regrade_allowed and not peer %}
+            {% if not peer %}
                 <br/>
                 <br/>
                 <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
                 {% if grade_inquiry_per_component_allowed %}
-                    {% for component in component_averages %}
+                    {% for component in component_averages %} 
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
                     {% endfor %}
                 {% endif %}
             {% endif %}
+
+            {% if not peer %}
+                <br/>
+                <br/>
+                <p><b>Graders with unresolved grade inquiries:</b></p>
+                {% for sec in regrade_graders %}
+                    <p>Section {{ sec }}: {{ regrade_graders[sec] }}</p>
+                {% endfor %}
+            {% endif %}
+
+   
+           
             {# LEFT CHUNK #}
         </div>
         <div class = "box col-md-6">
