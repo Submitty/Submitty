@@ -84,7 +84,7 @@
     background: var(--standard-focus-cornflowe-blue);
 }
 
-@media (width <= 401px) {
+@media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {
         font-size: 16px;
@@ -96,7 +96,7 @@
     }
 }
 
-@media (width <= 950px) {
+@media (max-width: 950px) {
     .course-section-heading {
         margin: 10px 0;
         font-weight: 400;
@@ -136,7 +136,7 @@
     }
 }
 
-@media (width >= 950px) {
+@media (min-width: 950px) {
     #gradeables {
         display: table;
         width: 100%;
