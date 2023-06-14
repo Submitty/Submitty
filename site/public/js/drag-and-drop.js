@@ -925,10 +925,10 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param merge_previous
  */
 function handleSubmission(days_late, days_to_be_charged,late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
-    $("#submit").prop("disabled", true);
+    $('#submit').prop('disabled', true)
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
-    let message = "";
+    let message = '';
     // check versions used
     if (versions_used >= versions_allowed) {
         message = `You have already made ${versions_used} submissions.  You are allowed ${versions_allowed} submissions before a small point penalty will be applied. Are you sure you want to continue?`;
@@ -938,7 +938,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, min_t
         }
     }
 
-    var late_warning_seen = false;
+    let late_warning_seen = false;
     // check due date
     if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = `Your submission will be ${days_late} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
@@ -955,10 +955,9 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, min_t
             return;
         }
     }
-    
     // check team date
     if (!late_warning_seen && min_team_would_be_late_days_remaining < 0) {
-        message = `There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?`;
+        message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
         if (!confirm(message)) {
             return;
         }
