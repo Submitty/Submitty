@@ -1052,8 +1052,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        // If its not git checkout
-        $can_download = !$gradeable->isVcs();
+        // If its not git checkout and student can download
+        $can_download = !$gradeable->isVcs() && $gradeable->canStudentDownload();
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
