@@ -6,6 +6,7 @@ h1 {
     font-weight: 500;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #gradeOverrideForm label {
     display: flex;
     flex: 1 0 auto;
@@ -14,6 +15,7 @@ h1 {
     margin: 0.5em 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #g_id {
     width: 100%;
     margin-top: 10px;
@@ -24,12 +26,14 @@ textarea {
     resize: vertical;
 }
 
+/* stylelint-disable selector-id-pattern */
 .single-student input,
 textarea,
 #gradeOverrideForm button,
 #gradeOverrideForm input {
     width: 100%;
 }
+/* stylelint-enable selector-id-pattern */
 
 /* Adding Content for the 'before' pseudo element */
 
@@ -40,34 +44,38 @@ textarea,
 #grade-override-table td:nth-of-type(5)::before { content: "Comments"; }
 #grade-override-table td:nth-of-type(6)::before { content: "Delete"; }
 
-@media (min-width: 541px) {
+@media (width >= 541px) {
     h1 {
         font-weight: bold;
     }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
     .single-student label {
         flex: 0 0 0;
         width: 420px;
         justify-content: space-between;
     }
 
+    /* stylelint-disable selector-id-pattern */
     #gradeOverrideForm label span,
     #gradeOverrideForm label input,
     #gradeOverrideForm label textarea {
         flex: 1;
     }
+    /* stylelint-enable selector-id-pattern */
 
+    /* stylelint-disable selector-id-pattern, no-descending-specificity */
     .single-student input,
     textarea,
     #gradeOverrideForm button,
     #gradeOverrideForm input {
         width: auto;
     }
+    /* stylelint-enable selector-id-pattern, no-descending-specificity */
 }
 
-@media (min-width: 830px) {
+@media (width >= 830px) {
     #grade-override-table {
         text-align: left;
     }

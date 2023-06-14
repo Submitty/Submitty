@@ -80,11 +80,11 @@
 }
 
 .seating-chart-table {
-    border:2px solid black;
+    border: 2px solid black;
     background: var(--standard-focus-cornflowe-blue);
 }
 
-@media (max-width: 401px) {
+@media (width <= 401px) {
     .course-section-heading,
     .course-main .course-title {
         font-size: 16px;
@@ -96,7 +96,7 @@
     }
 }
 
-@media (max-width: 950px) {
+@media (width <= 950px) {
     .course-section-heading {
         margin: 10px 0;
         font-weight: 400;
@@ -125,6 +125,7 @@
         display: inline;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .panel-head-active .collapse-icon,
     .expand-icon {
         display: none;
@@ -135,7 +136,7 @@
     }
 }
 
-@media (min-width: 950px) {
+@media (width >= 950px) {
     #gradeables {
         display: table;
         width: 100%;
@@ -201,6 +202,7 @@
         width: 33px;
     }
 
+    /* stylelint-disable-next-line no-duplicate-selectors */
     .course-button {
         max-width: 95%;
         margin: auto;

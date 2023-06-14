@@ -1,8 +1,8 @@
 registration_section: 1
 user_email: bitdiddle@example.com
-user_firstname: Ben
+user_givenname: Ben
 user_group: 4
 user_id: bitdiddle
 anon_id: DF654J745QER34t
-user_lastname: Bitdiddle
+user_familyname: Bitdiddle
 user_numeric_id: 141574736

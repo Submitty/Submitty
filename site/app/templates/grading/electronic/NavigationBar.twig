@@ -5,11 +5,11 @@
                     {% set team_members = submitter.getTeam().getMemberUsers() %}
                     Team {% if submitter.getTeam().getTeamName() is not null %} {{ submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
                     {% for team_member in team_members %}
-                        &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
+                        &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
                     {% endfor %}
                 {% else %}
                     Student:<br/>
-                    {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
+                    {{ submitter.getUser().getDisplayedGivenName() }} {{ submitter.getUser().getDisplayedFamilyName() }} ({{ submitter.getId() }})
                     <br/>
                 {% endif %}
             {% endif %}
@@ -20,6 +20,7 @@
             {# Back to list button #}
             <span class="ta-navlink-cont">
                 <a href="javascript:gotoMainPage();"
+                   class="btn-block"
                    data-href="{{ home_url }}"
                    id="main-page"
                    aria-label="Main Page"
@@ -31,6 +32,7 @@
             {# Nav buttons (Prev + Next)#}
             <span class="ta-navlink-cont" id="prev-student-navlink">
                 <a href="javascript:gotoPrevStudent();"
+                   class="btn-block"
                    data-href="{{ prev_student_url }}"
                    id="prev-student"
                    aria-label="Previous Student"
@@ -40,6 +42,7 @@
             </span>
             <span class="ta-navlink-cont" id="next-student-navlink">
                 <a href="javascript:gotoNextStudent();"
+                   class="btn-block"
                    data-href="{{ next_student_url }}"
                    id="next-student"
                    aria-label="Next Student"

@@ -34,7 +34,7 @@
     padding: 0.5em 1em;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
     #login-box {
         margin: 30px auto;
         min-width: 450px;
@@ -45,4 +45,8 @@
     #login input[type="submit"] {
         width: auto;
     }
+}
+
+#saml-login {
+    color: var(--btn-text-white);
 }

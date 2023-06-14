@@ -90,8 +90,7 @@
         "test_cases": []
     },
     "gradeable_message": "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
-    "hide_submitted_files": false,
-    "hide_version_and_test_details": false,
+    "hide_test_details": false,
     "id": "choice_of_language",
     "item_pool": [],
     "load_gradeable_message": {

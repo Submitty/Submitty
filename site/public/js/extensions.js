@@ -4,9 +4,9 @@
 $(document).ready(() => {
     $('#gradeable-select').change(() => {
         const g_id = $('#gradeable-select').val();
-        const expiration_date = new Date(Date.now());
+        const expiration_date = new Date();
         expiration_date.setDate(expiration_date.getDate() + 1);
-        document.cookie = `exception_gid=${g_id}; expires=${expiration_date.toUTCString()}`;
+        Cookies.set('exception_gid', g_id, { expires: expiration_date });
         // eslint-disable-next-line no-self-assign
         window.location = window.location; // pseudo post/redirect/get pattern
     });
@@ -63,14 +63,14 @@ function setLateDays() {
     }
 }
 
-function confirmExtension(option){
+function confirmExtension(option) {
     $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
     updateHomeworkExtension();
     $('input[name="option"]').val(-1);
 }
 
-function extensionPopup(json){
+function extensionPopup(json) {
     $('.popup-form').css('display', 'none');
     const form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];

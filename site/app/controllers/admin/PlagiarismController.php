@@ -253,7 +253,9 @@ class PlagiarismController extends AbstractController {
         $ranking = preg_split('/\R/', $content);
         $ranking_array = [];
         foreach ($ranking as $row) {
-            $ranking_array[] = preg_split('/\s+/', $row);
+            if (strlen(trim($row)) !== 0) { // filter out whitespace-only rows
+                $ranking_array[] = preg_split('/\s+/', $row);
+            }
         }
         return $ranking_array;
     }
@@ -286,7 +288,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $target_dir = FileUtils::joinPaths($this->getConfigDirectoryPath($gradeable_id, $config_id), "provided_code", "files");
-        FileUtils::createDir($target_dir, "true", 0770); // creates dir if not yet exists
+        FileUtils::createDir($target_dir, true, 0770); // creates dir if not yet exists
 
         if (mime_content_type($temporary_file_path) == "application/zip") {
             $zip = new \ZipArchive();
@@ -453,14 +455,18 @@ class PlagiarismController extends AbstractController {
             $all_configurations[] = $configuration;
         }
 
-        usort($all_configurations, function ($a, $b) {
-            if ($a['due_date'] == null) {
-                return false;
+        usort($all_configurations, function ($a, $b): int {
+            if ($a['due_date'] === null) {
+                return -1;
+            }
+
+            if ($a["due_date"] === $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] === $b["g_config_version"]) {
+                return 0;
             }
 
             return $a['due_date'] > $b['due_date']
-                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] > $b["g_title"])
-                   || ($a["due_date"] == $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]);
+                   || ($a["due_date"] === $b["due_date"] && $a["g_title"] > $b["g_title"])
+                   || ($a["due_date"] === $b["due_date"] && $a["g_title"] === $b["g_title"] && $a["g_config_version"] > $b["g_config_version"]) ? 1 : -1;
         });
 
         // TODO: return to this and enable later
@@ -645,7 +651,7 @@ class PlagiarismController extends AbstractController {
         foreach ($rankings_data as $item) {
             $display_name = "";
             if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[2],
@@ -874,7 +880,7 @@ class PlagiarismController extends AbstractController {
                     }
                 }
 
-                if (isset($_POST["other-gradeable-paths"])) {
+                if (isset($_POST["other-gradeable-paths"]) && $_POST["other-gradeable-paths"] !== "") {
                     $paths = explode(",", $_POST["other-gradeable-paths"]);
                     $other_gradeable_paths = [];
                     foreach ($paths as $path) {
@@ -960,7 +966,7 @@ class PlagiarismController extends AbstractController {
 
         // Create directory structure //////////////////////////////////////////
         if (!is_dir($this->getConfigDirectoryPath($gradeable_id, $config_id))) {
-            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), "true", 0770);
+            FileUtils::createDir($this->getConfigDirectoryPath($gradeable_id, $config_id), true, 0770);
         }
 
         // Upload instructor provided code /////////////////////////////////////
@@ -1030,7 +1036,15 @@ class PlagiarismController extends AbstractController {
                 return false;
             }
 
-            return new DateTime($a['due_date']) > new DateTime($b['due_date']);
+            if (new DateTime($a['due_date']) > new DateTime($b['due_date'])) {
+                return 1;
+            }
+            elseif (new DateTime($a['due_date']) < new DateTime($b['due_date'])) {
+                return -1;
+            }
+            else {
+                return 0;
+            }
         });
 
         $em = $this->core->getCourseEntityManager();
@@ -1587,6 +1601,11 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse($e->getMessage());
         }
 
+        // If there were no matches for this version, show nothing in the right dropdown
+        if (count($ranking) === 0) {
+            return JsonResponse::getSuccessResponse([]);
+        }
+
         $is_team_assignment = $this->core->getQueries()->getGradeableConfig($gradeable_id)->isTeamAssignment();
 
         $user_ids_and_names = [];
@@ -1606,8 +1625,8 @@ class PlagiarismController extends AbstractController {
         $return = [];
         foreach ($ranking as $item) {
             $display_name = "";
-            if (!$is_team_assignment) {
-                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedFirstName()} {$user_ids_and_names[$item[0]]->getDisplayedLastName()}";
+            if (!$is_team_assignment && array_key_exists($item[0], $user_ids_and_names)) {
+                $display_name = "{$user_ids_and_names[$item[0]]->getDisplayedGivenName()} {$user_ids_and_names[$item[0]]->getDisplayedFamilyName()}";
             }
             $temp = [
                 "percent" => $item[3],
