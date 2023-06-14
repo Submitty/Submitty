@@ -4139,6 +4139,22 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    /**
+     * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
+     */
+    public function getInstructorLevelUnarchivedCourses(string $user_id): array {
+        $query = "
+        SELECT t.name AS term_name, c.semester, c.course
+        FROM courses AS c
+        INNER JOIN terms AS t ON c.semester=t.term_id
+        INNER JOIN courses_users AS cu ON c.course=cu.course AND c.semester=cu.semester
+        WHERE c.status = 1 AND cu.user_id = ? AND cu.user_group = 1
+        ORDER BY t.start_date DESC, c.course ASC
+        ";
+        $this->submitty_db->query($query, [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
