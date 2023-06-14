@@ -925,7 +925,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param merge_previous
  */
 function handleSubmission(days_late, days_to_be_charged,late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
-    $('#submit').prop('disabled', true)
+    $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
     let message = '';
