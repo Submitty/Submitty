@@ -2002,7 +2002,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         $params = [$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $where = "WHERE {$section_key} IN " . $this->createParameterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2025,9 +2025,10 @@ ORDER BY {$u_or_t}.{$section_key}",
             ON 
             eg.g_id=egv.g_id
             AND eg.eg_submission_due_date IS NOT NULL
-            INNER JOIN late_day_cache AS ldc
+        /*found problem here */    
+        INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=eg.g_id
-            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}  
             AND ldc.late_day_status=3
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
