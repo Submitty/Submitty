@@ -12,6 +12,22 @@ Usage: ./setup_sample_courses.py
 The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
+
+Note about editing:
+If you make changes that use/alter random number generation, you may need to 
+edit the following files:
+    Peer Review:
+        students.txt
+        graders.txt
+    Office Hours Queue:
+        queue_data.json
+    Discussion Forum:
+        threads.txt
+        posts.txt
+        
+These files are manually written for a given set of users (the set is predetermined due to 
+the random's seed staying the same). If you make any changes that affects the contents of the 
+set these files will be outdated and result in failure of recreate_sample_courses.
 """
 from __future__ import print_function, division
 import argparse
@@ -33,6 +49,7 @@ import os.path
 import string
 import pdb
 import docker
+import random
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
@@ -173,6 +190,7 @@ def main():
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -185,6 +203,7 @@ def main():
                               user_familyname=user.familyname,
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
@@ -287,6 +306,19 @@ def generate_random_ta_note():
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
+def generate_pronouns():
+    pronoun_num = random.random()
+    if pronoun_num <= .05: 
+        pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+        return random.choice(pronoun_list)
+    elif pronoun_num <= .30:
+        return ""
+    elif pronoun_num <= .60:
+        return "She/Her"
+    elif pronoun_num <= .70:
+        return "They/Them"
+    else: return "He/Him"
+
 
 def generate_random_marks(default_value, max_value):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
@@ -369,6 +401,7 @@ def generate_random_users(total, real_users):
                              "user_numeric_id": numeric_id,
                              "user_givenname": given_name,
                              "user_familyname": family_name,
+                             "user_pronouns": generate_pronouns(),
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -589,6 +622,7 @@ class User(object):
         password
         givenname
         familyname
+        pronouns
         email
         group
         preferred_givenname
@@ -605,6 +639,7 @@ class User(object):
         self.password = self.id
         self.givenname = user['user_givenname']
         self.familyname = user['user_familyname']
+        self.pronouns = user['user_pronouns']
         self.email = self.id + "@example.com"
         self.group = 4
         self.preferred_givenname = None
