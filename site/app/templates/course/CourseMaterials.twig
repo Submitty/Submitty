@@ -162,7 +162,7 @@
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
-                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="Cookies.set('{{ folder_path }}',toggleCMFolder('{{ id }}')+'{{ id }}')" tabindex="0">
+                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setFolderCookie('{{ folder_path }}', '{{ id }}', toggleCMFolder('{{ id }}'))" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </a>
@@ -185,10 +185,14 @@
 {% endmacro %}
 
 <script>
+    function setFolderCookie(folderPath, id, open) {
+        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+        folderData[folderPath] = { id, open };
+        Cookies.set('cm_folder_data', JSON.stringify(folderData));
+    }
+
     function toggleFoldersOpen(){
-        {% for file in material_list %}
-        Cookies.remove("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/")));
-        {% endfor %}
+        Cookies.remove('cm_folder_data');
         Cookies.set("foldersOpen", toggleCMFolders());
     }
     {% if user_group == 1 %}
@@ -225,46 +229,14 @@
 
     window.onload = function () {
         //determine if folders have been left open or closed
-        const folderCookie = Cookies.get('foldersOpen');
-        //if the cookie says it is open
-        if(folderCookie === 'open'){
-            //open all the folders
-            toggleCMFolders(true);
-            {% for file in material_list %}{
-                //if one of the subdirs, check if it is closed post opening all
-                const subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
-                if(subFolderCookie.startsWith('closed')){
-                    //if closed. close it after it has been opened by the override above
-                    closeCMFolder(subFolderCookie.substr(6));
-                }
-            }{% endfor %}
-        }
-        else{
-            //makes sure that opened folders don't get opened multiple times
-            let trackOpens = new Map();
-            //goes through all possible directories
-            {% for file in material_list %}{
-                //get the cookie for each dir
-                const subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
-                //if the folder is open
-                if(subFolderCookie.startsWith('open')){
-                    //check if the folder has been opened already (do it it again will close it)
-                    if(trackOpens.get(subFolderCookie.substr(4)) === undefined){
-                        //undefined means it has not been opened
-                        //set the value as open so it will not be reopened
-                        trackOpens.set(subFolderCookie.substr(4),"released");
-                        //open the folder
-                        openCMFolder(subFolderCookie.substr(4));
-                    }
-                }
-                else{
-                    if(subFolderCookie.startsWith('closed')){
-                        //if the folder should be closed, close it
-                        closeCMFolder(subFolderCookie.substr(6));
-                        //there's no way to open it in that function
-                    }
-                }
-            }{% endfor %}
+        const foldersOpen = Boolean(JSON.parse(Cookies.get('foldersOpen') || 'false'));
+        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+        //open/close folders on screen as directed
+        toggleCMFolders(foldersOpen);
+        for (const data of Object.values(folderData)) {
+            if (!data.open === foldersOpen) {
+                toggleCMFolder(data.id, !foldersOpen);
+            }
         }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
