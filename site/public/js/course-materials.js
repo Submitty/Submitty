@@ -14,7 +14,11 @@ function toggleFoldersOpen() {
 }
 
 function handleHideMaterialsCheckboxChange(clicked) {
-    const warningIds = {'hide-materials-checkbox': 'upload-form', 'hide-materials-checkbox-edit': 'edit-form', 'hide-folder-materials-checkbox-edit': 'edit-folder-form'};
+    const warningIds = {
+        'hide-materials-checkbox': 'upload-form',
+        'hide-materials-checkbox-edit': 'edit-form',
+        'hide-folder-materials-checkbox-edit': 'edit-folder-form'
+    };
     const callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
     const caller = $(`#${callerId}`);
     const warningMessage = $(`#${callerId} ~ #${warningIds[callerId]}-hide-warning`);
