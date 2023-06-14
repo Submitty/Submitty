@@ -86,9 +86,9 @@ class User extends AbstractModel {
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop @var string The id of this user which should be a unique identifier */
     protected $id;
-    /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    /** @prop @var string Alternate ID for a user, such as a campus assigned ID */
     protected $numeric_id = null;
     /**
      * @prop
@@ -124,7 +124,8 @@ class User extends AbstractModel {
     protected $access_level;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @prop @var string Unique id for course section(ex: CRN at RPI) */
+    /** @prop @var string Unique id for course section
+    */
     protected $course_section_id = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
