@@ -152,9 +152,9 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(id, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
-    var current_y_offset = window.pageYOffset;
+function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
+    const url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
+    const current_y_offset = window.pageYOffset;
     Cookies.set('jumpToScrollPosition', current_y_offset);
 
     const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
@@ -181,8 +181,31 @@ function newDeleteCourseMaterialForm(id, file_name) {
     Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
-    var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).text(file_name);
+    const form = $("#delete-course-material-form");
+    const deleteMessageElement = form.find('.delete-course-material-message')[0];
+    deleteMessageElement.innerHTML = '';
+
+    const cm_message = document.createElement('b');
+    cm_message.textContent = file_name;
+
+    if (str_id !== null) {
+        const files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        const num_of_links = files_or_links.filter(function () {
+            return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
+        }).length;
+        const num_of_files = files_or_links.length - num_of_links;
+        const file_s = (num_of_files > 1) ? 's' : '';
+        const link_s = (num_of_links > 1) ? 's' : '';
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
+
+        const emElement = document.createElement('em');
+        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}` + num_links_txt;
+
+        cm_message.appendChild(emElement);
+    }
+
+    deleteMessageElement.appendChild(cm_message);
+
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -810,23 +833,6 @@ function openDiv(id) {
     return false;
 }
 
-function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
-}
-
 function markViewed(ids, redirect) {
     let data = new FormData();
     data.append("ids", ids);
@@ -840,36 +846,39 @@ function markViewed(ids, redirect) {
     });
 }
 
-function closeDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-
-
-}
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
         elem.hide();
         elem.removeClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        }
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
+}
+
+function toggleCMFolders(open) {
+    const elem = $('[id^="div_viewer_"]');
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        }
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
-    return false;
+    return open;
 }
 
 function openUrl(url) {
@@ -1265,16 +1274,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */

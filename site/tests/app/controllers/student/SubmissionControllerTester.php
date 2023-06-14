@@ -175,7 +175,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
             'precision' => 0.5,
-            'regrade_allowed' => true,
+            'grade_inquiry_allowed' => true,
             'grade_inquiry_per_component_allowed' => true,
             'discussion_based' => false,
             'discussion_thread_ids' => '',
