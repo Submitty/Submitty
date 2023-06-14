@@ -1,8 +1,33 @@
-/* global attachCollapsiblePanel, courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage */
+/* global courseUrl */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
+const MOBILE_BREAKPOINT = 951;
+
+let collapseItems;
 $(document).ready(() => {
+    const collapsedSections = Cookies.get('collapsed_sections');
+    collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
+
     // Attach the collapsible panel on details-table
-    attachCollapsiblePanel('#details-table .details-info-header', 951, 'panel-head-active');
+    const ANIMATION_DURATION = 600;
+    $('#details-table .details-info-header').click(function() {
+        $(this).toggleClass('panel-head-active');
+        const id = $(this).attr('data-section-id');
+        if (collapseItems.has(id)) {
+            collapseItems.delete(id);
+        }
+        else {
+            collapseItems.add(id);
+        }
+        updateCollapsedSections();
+        if (window.innerWidth < MOBILE_BREAKPOINT) {
+            $(this).next().slideToggle({
+                duration: ANIMATION_DURATION,
+            });
+        }
+        else {
+            $(this).next().toggle();
+        }
+    });
 
     // Creating and adding style for the pseudo selector in the details-table
     const style = document.createElement('style');
@@ -60,4 +85,27 @@ function showGradeableMessage() {
 function hideGradeableMessage() {
     const message = $('#gradeable-message-popup');
     message.css('display', 'none');
+}
+
+function updateCollapsedSections() {
+    Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
+}
+
+function expandAllSections() {
+    $('#details-table .details-info-header').each(function() {
+        $(this).addClass('panel-head-active');
+        $(this).next().show();
+    });
+    collapseItems.clear();
+    updateCollapsedSections();
+}
+
+function collapseAllSections() {
+    collapseItems.clear();
+    $('#details-table .details-info-header').each(function() {
+        $(this).removeClass('panel-head-active');
+        $(this).next().hide();
+        collapseItems.add($(this).attr('data-section-id'));
+    });
+    updateCollapsedSections();
 }

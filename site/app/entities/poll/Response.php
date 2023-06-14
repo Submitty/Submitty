@@ -7,12 +7,12 @@ namespace app\entities\poll;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="app\repositories\poll\ResponseRepository")
+ * @ORM\Entity
  * @ORM\Table(name="poll_responses")
  */
 class Response {
     /**
-     * @ORM\ID
+     * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(name="id",type="integer")
      * @var int

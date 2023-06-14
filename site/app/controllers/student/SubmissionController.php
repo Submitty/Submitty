@@ -116,7 +116,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if ($gradeable->isLocked($this->core->getUser()->getId())) {
+        if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
             $this->core->addErrorMessage('You have not unlocked this gradeable yet');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'You have not completed the pre-requisite gradeable'];
@@ -1071,7 +1071,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if ($gradeable->isLocked($user_id)) {
+        if ($gradeable->isLocked($user_id) && !$this->core->getUser()->accessGrading()) {
             return $this->uploadResult("Gradeable is locked for you.", false);
         }
 
@@ -1420,9 +1420,9 @@ class SubmissionController extends AbstractController {
         }
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-            $vcs_path = $gradeable->getVcsSubdirectory();
+            $vcs_path = $gradeable->getVcsPartialPath();
 
-            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+            if ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1) {
                 $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
                 $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
                 $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);

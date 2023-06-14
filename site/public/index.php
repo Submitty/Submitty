@@ -26,7 +26,7 @@ session_start();
  * line
  */
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 
 $loader = require_once(__DIR__ . '/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
@@ -107,7 +107,7 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 header('X-Frame-Options: SAMEORIGIN');
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 }

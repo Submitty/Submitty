@@ -402,7 +402,7 @@ class ReportController extends AbstractController {
                 if (!array_key_exists($response->getStudentId(), $responses)) {
                     $responses[$response->getStudentId()] = [];
                 }
-                $responses[$response->getStudentId()][] = $response->getOption()->getId();
+                $responses[$response->getStudentId()][] = $response->getOption()->getOrderId();
             }
 
             $polls_data[] = [
@@ -429,6 +429,21 @@ class ReportController extends AbstractController {
             'gradeable_type' => GradeableType::typeToString($g->getType()),
             'grade_released_date' => $g->hasReleaseDate() ? $g->getGradeReleasedDate()->format('Y-m-d H:i:s O') : $g->getSubmissionOpenDate()->format('Y-m-d H:i:s O'),
         ];
+
+        if ($g->isGradeInquiryAllowed()) {
+            // Export the grade inquiry status
+            if ($gg->hasGradeInquiry()) {
+                if ($gg->hasActiveGradeInquiry()) {
+                    $entry['inquiry'] = 'Open';
+                }
+                else {
+                    $entry['inquiry'] = 'Resolved';
+                }
+            }
+            else {
+                $entry['inquiry'] = 'None';
+            }
+        }
 
         // Add team members to output
         if ($g->isTeamAssignment()) {
