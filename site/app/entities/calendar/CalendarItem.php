@@ -12,7 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="calendar_messages")
  */
 class CalendarItem {
-    // Note the 'Important' type is also treated as regular text
     const TEXT = 0;
     const ANNOUNCEMENT = 1;
 
@@ -67,8 +66,8 @@ class CalendarItem {
     }
 
     public function setText(string $text): void {
-        if (strlen($text) > 255) {
-            throw new \InvalidArgumentException("Invalid text, may be too many characters.");
+        if (strlen($text) > 255 || strlen($text) <= 0) {
+            throw new \InvalidArgumentException("Invalid text.");
         }
         $this->text = $text;
     }
@@ -82,13 +81,10 @@ class CalendarItem {
 
     public function setStringType(string $type): void {
         switch ($type) {
-            case 'note':
+            case 'text':
                 $this->type = self::TEXT;
                 break;
-            case 'important':
-                $this->type = self::TEXT;
-                break;
-            case 'announcement':
+            case 'ann':
                 $this->type = self::ANNOUNCEMENT;
                 break;
             default:
@@ -107,6 +103,6 @@ class CalendarItem {
             case self::ANNOUNCEMENT:
                 return 'ann';
         }
-        throw new \RuntimeException("This type is not a text or announcement.");
+        throw new \RuntimeException();
     }
 }
