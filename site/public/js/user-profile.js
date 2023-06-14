@@ -131,10 +131,10 @@ function updateUserPronouns(e) {
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
 
-                    if(isForumDisplayChecked){
+                    if (isForumDisplayChecked) {
                         forumDisplay.data('current-pronouns-forum-display',true);
                     }
-                    else{
+                    else {
                         forumDisplay.data('current-pronouns-forum-display',false);
                     }
                     $('#edit-pronouns-form').hide();
