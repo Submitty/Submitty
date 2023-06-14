@@ -2,14 +2,14 @@
     "required_capabilities": "python",
     "autograding": {
         "submission_to_compilation" : [ "*.pdf" ],
-        "submission_to_runner" : [ "*.pdf" ],
+        "submission_to_runner" : [ "**/*.py", "*.pdf" ],
         "submission_to_validation" : [ "*.pdf" ]
     },
     "testcases" : [
         {
             "title": "Python test",
-            "details": "python *.py",
-            "command": "python *.py",
+            "details": "python3 *.py",
+            "command": "python3 *.py",
             "points": 5,
             "validation" : [
                 {
