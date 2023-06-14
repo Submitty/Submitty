@@ -842,7 +842,7 @@ def checkout_vcs_repo(config, my_file):
                 vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
         else:
             vcs_path = vcs_partial_path
-            
+
         sub_checkout_path = os.path.join(checkout_path, "tmp")
         os.makedirs(sub_checkout_path, exist_ok=True)
 # _________________________________________________________________________________________________________
