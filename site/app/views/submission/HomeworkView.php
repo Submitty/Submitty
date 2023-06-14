@@ -1089,7 +1089,7 @@ class HomeworkView extends AbstractView {
             'is_vcs' => $gradeable->isVcs(),
             'can_download' => $can_download,
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+            'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
