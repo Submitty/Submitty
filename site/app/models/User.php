@@ -124,8 +124,7 @@ class User extends AbstractModel {
     protected $access_level;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @prop @var string Unique id for course section
-    */
+    /** @prop @var string Unique id for course section */
     protected $course_section_id = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
