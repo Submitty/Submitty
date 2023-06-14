@@ -47,38 +47,36 @@ const removeThread = (title) => {
 
 describe('Test cases revolving around creating, replying to, merging, and removing discussion forum threads', () => {
 
-    ['instructor'].forEach((user) => {
-        beforeEach(() => {
-            cy.visit('/');
-            cy.login(user);
-            cy.visit(['sample']);
-            cy.get('#nav-sidebar-forum').click();
-            cy.get('#nav-sidebar-collapse-sidebar').click();
-        });
+    beforeEach(() => {
+        cy.visit('/');
+        cy.login('instructor');
+        cy.visit(['sample']);
+        cy.get('#nav-sidebar-forum').click();
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
 
-        it('Create, reply to, merge, and delete threads', () => {
-            // Comment
-            createThread(title1, content1, 'Comment ');
-            // Question
-            createThread(title2, content2, 'Question ');
-            // Tutorials
-            createThread(title3, content3, 'Tutorials ');
+    it('Create, reply to, merge, and delete threads', () => {
+        // Comment
+        createThread(title1, content1, 'Comment ');
+        // Question
+        createThread(title2, content2, 'Question ');
+        // Tutorials
+        createThread(title3, content3, 'Tutorials ');
 
-            // Comment
-            replyToThread(title1, reply1);
-            // Question
-            replyToThread(title2, reply2);
-            // Tutorial
-            replyToThread(title3, reply3);
+        // Comment
+        replyToThread(title1, reply1);
+        // Question
+        replyToThread(title2, reply2);
+        // Tutorial
+        replyToThread(title3, reply3);
 
-            // Tutorial into Questions
-            mergeThreads(title3, title2, merged1);
+        // Tutorial into Questions
+        mergeThreads(title3, title2, merged1);
 
-            // Resulting thread into comment
-            mergeThreads(title2, title1, merged2);
+        // Resulting thread into comment
+        mergeThreads(title2, title1, merged2);
 
-            // Remove threads
-            removeThread(title1);
-        });
+        // Remove threads
+        removeThread(title1);
     });
 });
