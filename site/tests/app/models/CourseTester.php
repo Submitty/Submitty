@@ -16,12 +16,12 @@ class CourseTester extends BaseUnitTest {
             'user_group' => 1
         ];
         $course = new Course($this->createMockCore(), $details);
-        $this->assertEquals('s18', $course->getSemester());
-        $this->assertEquals('Spring 2018', $course->getLongSemester());
+        $this->assertEquals('s18', $course->getTerm());
+        $this->assertEquals('Spring 2018', $course->getLongTerm());
         $this->assertEquals('csci1000', $course->getTitle());
         $this->assertEquals('CSCI1000', $course->getCapitalizedTitle());
         $this->assertEquals('', $course->getDisplayName());
-        $this->assertEquals('Spring 2018', $course->getSemesterName());
+        $this->assertEquals('Spring 2018', $course->getTermName());
 
         $array = [
             'semester' => 's18',
