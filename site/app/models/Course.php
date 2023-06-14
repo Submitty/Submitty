@@ -8,15 +8,15 @@ use app\libraries\FileUtils;
 /**
  * Class Course
  * Holds basic information about courses. Used on homepage.
- * @method string getSemester()
+ * @method string getTerm()
  * @method string getSemesterName()
  * @method string getTitle()
  * @method string getDisplayName()
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-    /** @property string $semester the semester (or term) code in which the course is taking place. */
-    protected $semester;
+    /** @property string $term the term's code in which the course is taking place. */
+    protected $term;
     /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
     protected $semester_name;
     /** @property string $title the proper title of the course. */

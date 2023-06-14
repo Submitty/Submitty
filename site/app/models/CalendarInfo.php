@@ -75,7 +75,7 @@ class CalendarInfo extends AbstractModel {
         $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            $info->colors[$course->getSemester() . $course->getTitle()] = "var(--category-color-$i)";
+            $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
             if ($i < 21) {
                 $i++;
             }
@@ -150,7 +150,7 @@ class CalendarInfo extends AbstractModel {
                     'show_due' => false,
                     'submission' => '',
                     'status_note' => '',
-                    'color' => $info->colors[$course->getSemester() . $course->getTitle()],
+                    'color' => $info->colors[$course->getTerm() . $course->getTitle()],
                     'type' => 'item'
                 ];
                 $info->items_by_date[$date][] = $curItem;
