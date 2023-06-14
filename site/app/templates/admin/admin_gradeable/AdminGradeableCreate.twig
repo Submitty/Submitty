@@ -267,10 +267,13 @@
 
                         <div id="vcs_self_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
+                                <label for="external_repo">What is the URL to the repository? </label>
+                            <input style='width: 30%' type='text' name="external_repo" id="external_repo" class="required auto_save"
+                                    aria-label="repository name" value="{{ vcs_partial_path == '' ? vcs_base_url : vcs_partial_path }}" required/><br />
                             {% else %}
-                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                                <kbd id="vcs_url">{{ vcs_partial_path }}</kbd>
                             {% endif %}  
-                        </div>	    					    
+                        </div>	     					    
                     </div>
 
                 </fieldset>

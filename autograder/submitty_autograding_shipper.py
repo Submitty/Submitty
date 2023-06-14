@@ -834,10 +834,15 @@ def checkout_vcs_repo(config, my_file):
     job_id = "~VCS~"
 
     try:
-        if '://' in vcs_base_url:
-            vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
+        # This is for external, instructor specified repositories
+        if '://' not in vcs_partial_path and '@' not in vcs_partial_path:
+            if '://' in vcs_base_url:
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
+            else:
+                vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
         else:
-            vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
+            vcs_path = vcs_partial_path
+            
         sub_checkout_path = os.path.join(checkout_path, "tmp")
         os.makedirs(sub_checkout_path, exist_ok=True)
 # _________________________________________________________________________________________________________

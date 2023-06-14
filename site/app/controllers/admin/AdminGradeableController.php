@@ -79,6 +79,7 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken()
@@ -259,6 +260,7 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
@@ -888,6 +890,7 @@ class AdminGradeableController extends AbstractController {
             }
             elseif ($host_button === 'self-hosted') {
                 $host_type = 4;
+                $vcs_partial_path = $details['external_repo'];
             }
 
             $vcs_property_values = [
