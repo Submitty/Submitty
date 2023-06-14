@@ -141,7 +141,7 @@ class UsersController extends AbstractController {
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
                 'pronouns' => $grader->getPronouns(),
-                'display_pronouns'=> $grader->getDisplayPronouns(),
+                'display_pronouns' => $grader->getDisplayPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
