@@ -1053,9 +1053,6 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        // If its not git checkout and student can download
-        $can_download = !$gradeable->isVcs() && $gradeable->canStudentDownload();
-
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
             if ($graded_gradeable->hasTaGradingInfo() && $graded_gradeable->isTaGradingComplete()) {
@@ -1069,7 +1066,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => $gradeable->canStudentDownload(),
+            'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1088,7 +1085,6 @@ class HomeworkView extends AbstractView {
             'allowed_late_days' => $gradeable->getLateDays(),
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
             'is_vcs' => $gradeable->isVcs(),
-            'can_download' => $can_download,
             'can_change_submissions' => $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
