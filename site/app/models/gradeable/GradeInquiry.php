@@ -7,14 +7,14 @@ use app\libraries\DateUtils;
 use app\models\AbstractModel;
 
 /**
- * Class RegradeRequest
+ * Class GradeInquiry
  * @package app\models\gradeable
  *
  * @method \DateTime getTimestamp()
  * @method int getStatus()
  * @method int getGcId()
  */
-class RegradeRequest extends AbstractModel {
+class GradeInquiry extends AbstractModel {
     const STATUS_RESOLVED = 0;
     const STATUS_ACTIVE = -1;
 
