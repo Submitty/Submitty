@@ -63,6 +63,7 @@ class TeamControllerTester extends BaseUnitTest {
                     'user_givenname' => 'User',
                     'user_familyname' => 'One',
                     'user_pronouns' => '',
+                    'display_pronouns' => false,
                     'user_email' => 'user1@example.com',
                     'user_email_secondary' => null,
                     'user_email_secondary_notify' => false
