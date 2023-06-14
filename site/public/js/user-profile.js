@@ -91,20 +91,25 @@ function clearPronounsBox() {
     pronounsInput.value = '';
 }
 
+//update user pronouns and display pronouns option
 function updateUserPronouns(e) {
+    //update user pronouns
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
+    const forumDisplay = $('#pronouns-forum-display');
     pronounsLastVal = pronouns.val();
-    if (pronouns.data('current-pronouns') === pronouns.val()) {
+    if (pronouns.data('current-pronouns') === pronouns.val() && pronouns.data('pronouns-forum-display') === forumDisplay.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
         $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();
+        const isForumDisplayChecked = forumDisplay.prop('checked');
         // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
+        data.append('pronouns-forum-display', isForumDisplayChecked);
         // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
@@ -114,6 +119,7 @@ function updateUserPronouns(e) {
             processData: false,
             contentType: false,
             success: function(res) {
+                console.log(res);
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const {data} = response;
@@ -124,6 +130,13 @@ function updateUserPronouns(e) {
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
+
+                    if(isForumDisplayChecked){
+                        forumDisplay.data('current-pronouns-forum-display',true);
+                    }
+                    else{
+                        forumDisplay.data('current-pronouns-forum-display',false);
+                    }
                     $('#edit-pronouns-form').hide();
                 }
                 else {
@@ -137,6 +150,7 @@ function updateUserPronouns(e) {
             },
         });
     }
+
 }
 
 function updateUserPreferredNames () {
