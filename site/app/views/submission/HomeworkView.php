@@ -1043,7 +1043,7 @@ class HomeworkView extends AbstractView {
             }
             // Arbitrary size, currently bigger than all of the failed files, but
             // could be increased if the failed files need more tips/messages
-            $failed_file = (strlen($failed_file) > 250) ? substr($failed_file, 0, 250) : $failed_file;
+            $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
         }
 
         // If its not git checkout
