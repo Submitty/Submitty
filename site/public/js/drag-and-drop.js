@@ -1320,11 +1320,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (hide_from_students !== null) {
         formData.append('hide_from_students', hide_from_students);
     }
-    if (link_url !== null) {
-        formData.append('link_url', link_url);
+    if (file_path !== null) {
+        formData.append('file_path', file_path);
     }
-    if (link_title !== null) {
-        formData.append('link_title', link_title);
+    if (display_name !== null) {
+        formData.append('display_name', display_name);
     }
     if (overwrite !== null) {
         formData.append('overwrite', overwrite);

@@ -361,7 +361,7 @@ function newEditCourseMaterialsForm(tag) {
     let link_title = $(tag).data('link-title');
     let link_url = $(tag).data('link-url');
     let file_path = $(tag).data('path');
-    let dispaly_name = $(tag).data('display-name');
+    let display_name = $(tag).data('display-name');
 
     let form = $("#edit-course-materials-form");
 
