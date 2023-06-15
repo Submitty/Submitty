@@ -44,7 +44,7 @@ class AdminGradeableController extends AbstractController {
 
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
-        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
         'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
@@ -81,6 +81,7 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken()
@@ -892,6 +893,11 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
+            elseif ($host_button === 'self-hosted') {
+                $host_type = 4;
+                $vcs_partial_path = $details['external_repo'];
+            }
+
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
