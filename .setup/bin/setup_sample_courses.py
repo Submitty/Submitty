@@ -1823,6 +1823,7 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
+        self.using_subdirectory = ""
         self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
