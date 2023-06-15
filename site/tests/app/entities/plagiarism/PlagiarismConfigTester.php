@@ -108,26 +108,23 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
     * @dataProvider provideData
     */
     public function testExceptions($data) {
-        $this->expectException(ValidationException::class);
-        $data['command'];
-        $data['assertion'];
+        $data['function'];
     }
 
     
-    public function provideData() : array    
+    public function provideData() : array   
     {
         $data = [
-            'setVersionStatus' =>
-            [
+            'setVersionStatus' => [
                 [
-                'command' => 
-                    $this->my_config->setVersionStatus("latest_version"),
-                'assertion' => $this->assertEquals($this->my_config->getVersionStatus(), "active_version")
+                    'function' => function() {
+                        $this->expectException(ValidationException::class);
+                        $this->my_config->setVersionStatus("latest_version");
+                        $this->assertEquals($this->my_config->getVersionStatus(), "active_version")
+                    }
                 ]
             ]
-            
-            ];
-        
+        ];
         
 
         
