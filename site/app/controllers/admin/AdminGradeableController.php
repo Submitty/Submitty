@@ -44,7 +44,7 @@ class AdminGradeableController extends AbstractController {
 
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
-        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
         'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
