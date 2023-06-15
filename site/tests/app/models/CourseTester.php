@@ -24,8 +24,8 @@ class CourseTester extends BaseUnitTest {
         $this->assertEquals('Spring 2018', $course->getTermName());
 
         $array = [
-            'semester' => 's18',
-            'semester_name' => 'Spring 2018',
+            'term' => 's18',
+            'term_name' => 'Spring 2018',
             'title' => 'csci1000',
             'display_name' => '',
             'user_group' => 1,
@@ -51,8 +51,8 @@ class CourseTester extends BaseUnitTest {
             $this->assertTrue($course->loadDisplayName());
             $this->assertEquals('Test Course', $course->getDisplayName());
             $array = [
-                'semester' => 's18',
-                'semester_name' => 'Spring 2018',
+                'term' => 's18',
+                'ter,_name' => 'Spring 2018',
                 'title' => 'csci1000',
                 'display_name' => 'Test Course',
                 'user_group' => 3,
