@@ -117,10 +117,10 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $data = [
             'setVersionStatus' => [
                 [
-                    'function' => function() {
+                   function() {
                         $this->expectException(ValidationException::class);
                         $this->my_config->setVersionStatus("latest_version");
-                        $this->assertEquals($this->my_config->getVersionStatus(), "active_version")
+                        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
                     }
                 ]
             ]
