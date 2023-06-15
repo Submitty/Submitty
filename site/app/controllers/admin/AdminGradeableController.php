@@ -1279,7 +1279,7 @@ class AdminGradeableController extends AbstractController {
             'config_path' => $gradeable->getAutogradingConfigPath(),
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
-            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'subdirectory' => $gradeable->getVcsSubdirectory(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];

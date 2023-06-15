@@ -442,9 +442,11 @@
     function onSubdirectoryChange() {
         if($('#subdir_yes_radio').is(':checked')) {
             disableElementChildren('.subdirectory_yes', false);
+            $('#vcs_subdirectory_input').prop('required', true);
         }
         else {
             disableElementChildren('.subdirectory_yes', true);
+            $('#vcs_subdirectory_input').prop('required', false);
         }
     }
 
