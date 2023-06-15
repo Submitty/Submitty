@@ -269,9 +269,9 @@
                         be in a specific subdirectory of their VCS repository?</legend>
                         
                             <input type="radio" id="subdir_yes_radio" name="using_subdirectory" value="true" class="bool_val auto_save" 
-                                    {{ action != 'new' and gradeable.isUsingSubdirectory() ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+                                    {{ action != 'new' and using_subdirectory ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
                             <input type="radio" id="subdir_no_radio" name="using_subdirectory" value="false" class="bool_val auto_save" 
-                                    {{ action == 'new' or (action == 'edit' and  not gradeable.isUsingSubdirectory()) ? 'checked' :  '' }} /> <label for="subdir_no_radio">No</label>
+                                    {{ action == 'new' or (action == 'edit' and  not using_subdirectory) ? 'checked' :  '' }} /> <label for="subdir_no_radio">No</label>
                         {# (VPAT) Closes fieldset for subdirectory radio group #}
                         </fieldset>    
                     </div>

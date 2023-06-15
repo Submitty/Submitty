@@ -262,7 +262,7 @@ class AdminGradeableController extends AbstractController {
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
-            'using_subdirectory' => $gradeable->isUsingSubdirectory() ? 'true' : 'false',
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
