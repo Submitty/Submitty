@@ -103,43 +103,25 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $this->my_config->setIgnoredSubmissions([]);
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), []);
     }
-
-    /**
-    * @dataProvider provideData
-    */
-    public function testExceptions($data) {
-        $data['function'];
+    
+    public function exceptionSetVersionStatus() {
+        $this->expectException(ValidationException::class);
+        $this->my_config->setVersionStatus("latest_version");
+        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
     }
 
-    
-    public function provideData() : array   
-    {
-        $data = [
-            'setVersionStatus' => [
-                [
-                   function() {
-                        $this->expectException(ValidationException::class);
-                        $this->my_config->setVersionStatus("latest_version");
-                        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
-                    }
-                ]
-            ]
-        ];
+    public function exceptionSetRegexArray() {
+        $this->expectException(ValidationException::class);
+        $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
+        $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
+    }
         
-
+    public function exceptionSetLanguage() {
+        $this->expectException(ValidationException::class);
+        $this->my_config->setLanguage("swift");
+        $this->assertEquals($this->my_config->getLanguage(), "python");
+    }
         
-
-        // $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
-
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-
-        // $this->my_config->setLanguage("swift");
-
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getLanguage(), "python");
 
         // $this->my_config->setThreshold(-5);
         
