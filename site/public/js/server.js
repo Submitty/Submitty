@@ -846,31 +846,21 @@ function markViewed(ids, redirect) {
     });
 }
 
-function openCMFolder(num) {
-    const elem = $('#div_viewer_' + num);
-    elem.show();
-    elem.addClass('open');
-    elem.parent().find('.div-viewer .open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
-    return 'open';
-}
-
-function closeCMFolder(num) {
-    const elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    elem.parent().find('.div-viewer .open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-}
-
-function toggleCMFolder(num) {
-    const elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        closeCMFolder(num);
-        return 'closed';
-    } else {
-        openCMFolder(num);
-        return 'open';
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
     }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
 }
 
 function toggleCMFolders(open) {
@@ -881,19 +871,14 @@ function toggleCMFolders(open) {
     if (!open) {
         elem.hide();
         elem.removeClass('open');
-        elem.map(function() {
-            $(this).parent().find('.div-viewer .open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
-        });
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        elem.map(function() {
-            $(this).parent().find('.div-viewer .open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
-        });
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
+    return open;
 }
 
 function openUrl(url) {
@@ -1289,16 +1274,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */

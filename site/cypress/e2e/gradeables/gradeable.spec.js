@@ -10,12 +10,13 @@ describe('Tests cases revolving around gradeable access and submition', () => {
 
             cy.visit(['sample','gradeable','open_homework']);
 
-            if (user === 'grader') {
+            if (user === 'instructor') {
                 cy.get('#submit').should('be.disabled');
                 //clicks on useMostRecentSubmission
                 //When the element useMostRecentSubmission changes to button change this to a button
                 cy.get('#gradeable-submission-cont > a').click();
             }
+
             //Makes sure the clear button is not disabled by adding a file
             cy.get('#upload1').selectFile(testfile1,{action: 'drag-drop'});
             cy.get('#startnew').click();
@@ -33,6 +34,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             cy.get('#upload1').selectFile([testfile1,testfile2],{action: 'drag-drop'});
 
             cy.waitPageChange(() => {
+                cy.get('.alert-success > a').click(); //Dismiss successful upload message
                 cy.get('#submit').click();
             });
 
