@@ -262,31 +262,32 @@
 
                 </fieldset>
 
-            <div id="subdirectory-settings-container">
-                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
-                <div>
-                    <fieldset><legend>Are the student's files for this gradeable expected to 
-                    be in a specific subdirectory of their VCS repository?</legend>
-                        <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true" class="bool_val auto_save" 
-                                {{ action != 'new' and (vcs_subdirectory != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+                <div id="subdirectory-settings-container">
+                        {# (VPAT) fieldset/legend needed for subdirectory radio group #}
+                    <div>
+                        <fieldset><legend>Are the student's files for this gradeable expected to 
+                        be in a specific subdirectory of their VCS repository?</legend>
+                            <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true" class="bool_val auto_save" 
+                                    {{ action != 'new' and (vcs_subdirectory != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
 
-                        <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false" class="bool_val auto_save" 
-                                {{ (action == 'new' or (action == 'edit' and vcs_subdirectory == '')) ? 'checked' :  '' }} /> <label for="subdir_no_radio">No</label>
+                            <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false" class="bool_val auto_save" 
+                                    {{ action == 'new' or (action == 'edit' and vcs_subdirectory == '') ? 'checked' :  '' }} onclick="{{ action== 'edit' ? removeSubdirectory() : '' }}"/> <label for="subdir_no_radio">No</label>
+                        {# (VPAT) Closes fieldset for subdirectory radio group #}
+                        </fieldset>    
+                    </div>
+                       
                 </div>
-                {# (VPAT) Closes fieldset for subdirectory radio group #}
-                </fieldset>    
-            </div>
 
-            <div class="subdirectory_yes" id="subdir_yes">
-                {% if action == 'new' or action == 'template' %}
-                What is the path to students files within the VCS repository:
-                {% else %}
-                Path to students files within the VCS repository:
-                {% endif %}
-                <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory_input" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? vcs_subdirectory : '' }}" required /><br />
-                <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
-            </div>
+                <div class="subdirectory_yes" id="subdir_yes">
+                    {% if action == 'new' or action == 'template' %}
+                    What is the path to students files within the VCS repository:
+                    {% else %}
+                    Path to students files within the VCS repository:
+                    {% endif %}
+                    <input style='width: 30%' type='text' name="vcs_subdirectory_input" id="vcs_subdirectory_input" class="required auto_save" placeholder="(Required)"
+                                        aria-label="repository name" value="{{ action != 'new' ? vcs_subdirectory : '' }}" required /><br />
+                    <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
+                </div>
             </div>
         </div>
     </div>
@@ -444,10 +445,8 @@
             $('#vcs_subdirectory_input').prop('required', true);
         }
         else if($('#subdir_no_radio').is(':checked')) {
-            var subdirectory = document.getElementById('vcs_subdirectory_input');
             disableElementChildren('.subdirectory_yes', true);
-            subdirectory.prop('required', false);
-            subdirectory.value = "";
+            $('#vcs_subdirectory_input').prop('false', true);
         }
     }
 

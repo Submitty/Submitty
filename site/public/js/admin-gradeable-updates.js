@@ -853,3 +853,7 @@ function hideBuildLog() {
     $('#open-build-log').show();
     $('#close-build-log').hide();
 }
+
+function removeSubdirectory(gradeable){
+    gradeable.setVcsSubdirectory('');
+}
