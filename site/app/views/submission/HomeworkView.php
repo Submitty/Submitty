@@ -463,18 +463,17 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
-
-        $vcs_base_url = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/');
-        $vcs_base_url = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_base_url);
-        $vcs_base_url = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_base_url);
-        $vcs_base_url = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_base_url);
+        $vcs_partial_path = '';
+        $vcs_partial_path = $gradeable->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
-            'vcs_base_url' => $vcs_base_url,
-            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_partial_path' => $vcs_partial_path ,
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
