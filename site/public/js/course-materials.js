@@ -1,13 +1,13 @@
 /* global IS_INSTRUCTOR, toggleCMFolders, toggleCMFolder */
+/* exported setFolderCookie, toggleFoldersOpen */
 
-// eslint-disable-next-line no-unused-vars
+
 function setFolderCookie(folderPath, id, open) {
     const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
     folderData[folderPath] = { id, open };
     Cookies.set('cm_folder_data', JSON.stringify(folderData));
 }
 
-// eslint-disable-next-line no-unused-vars
 function toggleFoldersOpen() {
     Cookies.remove('cm_folder_data');
     Cookies.set('foldersOpen', toggleCMFolders());
