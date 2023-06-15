@@ -104,19 +104,19 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), []);
     }
     
-    public function exceptionSetVersionStatus() {
+    public function testExceptionSetVersionStatus() {
         $this->expectException(ValidationException::class);
         $this->my_config->setVersionStatus("latest_version");
         $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
     }
 
-    public function exceptionSetRegexArray() {
+    public function testExceptionSetRegexArray() {
         $this->expectException(ValidationException::class);
         $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
         $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
     }
         
-    public function exceptionSetLanguage() {
+    public function testExceptionSetLanguage() {
         $this->expectException(ValidationException::class);
         $this->my_config->setLanguage("swift");
         $this->assertEquals($this->my_config->getLanguage(), "python");
