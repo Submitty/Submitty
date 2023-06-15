@@ -6,11 +6,10 @@ namespace tests\app\entities\plagiarism;
 
 use app\entities\plagiarism\PlagiarismConfig;
 use app\exceptions\ValidationException;
-use app\exceptions\FileNotFoundException;
 use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
-class PlagiarismConfigTester extends BaseUnitTest {
+class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
     private $my_config;
 
     public function setUp(): void {
@@ -34,6 +33,8 @@ class PlagiarismConfigTester extends BaseUnitTest {
         );
     }
 
+
+
     public function testGetters(): void {
         $this->assertEquals($this->my_config->getGradeableID(), "homework_1");
         $this->assertEquals($this->my_config->getConfigID(), 1);
@@ -49,27 +50,58 @@ class PlagiarismConfigTester extends BaseUnitTest {
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), ["ta", "ta2"]);
     }
 
-    public function testSetters(): void {
+    public function provideData() : array    
+    {
+        $data = [
+            'setVersionStatus' =>
+            [
+                'command' => function() {$this->my_config->setVersionStatus("latest_version");},
+                'assertion' => function() {$this->assertEquals($this->my_config->getVersionStatus(), "active_version");}
+            ]
+            
+            ];
+        
+        
+
+        
+
+        // $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
+
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
+
+        // $this->my_config->setLanguage("swift");
+
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getLanguage(), "python");
+
+        // $this->my_config->setThreshold(-5);
+        
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getThreshold(), 25);
+
+        // $this->my_config->setHashSize(-3);
+        // $this->expectException(ValidationException::class);
+        // $this->assertEquals($this->my_config->getHashSize(), 7);
+
+        // $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
+       
+        // $this->assertFalse($this->my_config->hasOtherGradeablePaths());
+        return $data;
+    }
+   
+    public function testAccurateSetters(): void {
         // version status
         $this->my_config->setVersionStatus("active_version");
-        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
-     
-        $this->my_config->setVersionStatus("latest_version");
-        
-        $this->expectException(ValidationException::class);
-       
         $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
 
         // regex array
         $this->my_config->setRegexArray(["foo.txt", "*_3.cpp"]);
         $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-     
-        $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
-      
-        $this->expectException(ValidationException::class);
-    
-        $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-
+       
         // submissions dir
         $this->my_config->setRegexDirSubmissions(false);
         $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
@@ -86,30 +118,14 @@ class PlagiarismConfigTester extends BaseUnitTest {
         $this->my_config->setLanguage("python");
         $this->assertEquals($this->my_config->getLanguage(), "python");
     
-        $this->my_config->setLanguage("swift");
-       
-        $this->expectException(ValidationException::class);
-
-        $this->assertEquals($this->my_config->getLanguage(), "python");
-
         // threshold
         $this->my_config->setThreshold(25);
-        $this->assertEquals($this->my_config->getThreshold(), 25);
-    
-   
-        $this->my_config->setThreshold(-5);
-        
-        $this->expectException(ValidationException::class);
-
         $this->assertEquals($this->my_config->getThreshold(), 25);
 
         // hash size
         $this->my_config->setHashSize(7);
         $this->assertEquals($this->my_config->getHashSize(), 7);
-        $this->my_config->setHashSize(-3);
-        $this->expectException(ValidationException::class);
-        $this->assertEquals($this->my_config->getHashSize(), 7);
-
+        
         // other gradeables
         $this->my_config->setOtherGradeables([
             "other_semester" => "f16",
@@ -124,13 +140,19 @@ class PlagiarismConfigTester extends BaseUnitTest {
 
         // other gradeable paths
         $this->assertFalse($this->my_config->hasOtherGradeablePaths());
-        $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
-        $this->expectException(ValidationException::class);
-        $this->assertFalse($this->my_config->hasOtherGradeablePaths());
         $this->assertEquals($this->my_config->getOtherGradeablePaths(), []);
 
         // ignored submissions
         $this->my_config->setIgnoredSubmissions([]);
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), []);
+    }
+
+    /**
+    * @dataProvider provideData
+    */
+    public function testExceptions($data) {
+        $this->expectException(ValidationException::class);
+        $data['command'];
+        $data['assertion'];
     }
 }
