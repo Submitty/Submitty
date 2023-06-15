@@ -136,7 +136,7 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         // $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
        
         // $this->assertFalse($this->my_config->hasOtherGradeablePaths());
-        return $data;
-    }
+    //     return $data;
+    // }
    
 }
