@@ -24,7 +24,7 @@
             <label>Last Name</label> 
         </div>
         <div class="toggle-checkbox-area">   
-            <input type="checkbox" class="toggle-columns-box">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-pronouns">
             <label>Pronouns</label>
         </div>
         <div class="toggle-checkbox-area">
@@ -64,6 +64,6 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageStudentsColumns()"/>
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageStudentsColumns()" id="toggle-columns-submit"/>
 
 {% endblock %}
