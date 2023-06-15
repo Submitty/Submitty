@@ -76,7 +76,7 @@
     margin: 5px;
 }
 
-@media (width >= 768px) {
+@media (min-width: 768px) {
     #notification-header {
         display: table-row;
     }
