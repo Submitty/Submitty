@@ -6,6 +6,7 @@ namespace tests\app\entities\plagiarism;
 
 use app\entities\plagiarism\PlagiarismConfig;
 use app\exceptions\ValidationException;
+use app\exceptions\FileNotFoundException;
 use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
@@ -50,40 +51,56 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), ["ta", "ta2"]);
     }
 
-    public function testAccurateSetters(): void {
-        // version status
+    public function testSetVersionStatus() {
+        // Accurate
         $this->my_config->setVersionStatus("active_version");
         $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
+        // Exception
+        $this->expectException(ValidationException::class);
+        $this->my_config->setVersionStatus("latest_version");
+        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
+    }
 
-        // regex array
+    public function testSetRegexArray() {
+        // Accurate
         $this->my_config->setRegexArray(["foo.txt", "*_3.cpp"]);
         $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-       
-        // submissions dir
-        $this->my_config->setRegexDirSubmissions(false);
-        $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
+        // Exception
+        $this->expectException(ValidationException::class);
+        $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
+        $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
+    }
 
-        // results dir
-        $this->my_config->setRegexDirResults(true);
-        $this->assertTrue($this->my_config->isRegexDirResultsSelected());
-
-        // checkout dir
-        $this->my_config->setRegexDirCheckout(true);
-        $this->assertTrue($this->my_config->isRegexDirCheckoutSelected());
-
-        // language
+    public function testSetLanguage() {
+        // Accurate
         $this->my_config->setLanguage("python");
         $this->assertEquals($this->my_config->getLanguage(), "python");
-    
-        // threshold
+        // Exception
+        $this->expectException(ValidationException::class);
+        $this->my_config->setLanguage("swift");
+        $this->assertEquals($this->my_config->getLanguage(), "python");
+    }
+
+    public function testSetThreshhold() {
+        // Accurate
         $this->my_config->setThreshold(25);
         $this->assertEquals($this->my_config->getThreshold(), 25);
+        // Exception
+        $this->expectException(ValidationException::class);
+        $this->my_config->setThreshold(-5);
+        $this->assertEquals($this->my_config->getThreshold(), 25);
+    }
 
-        // hash size
+    public function testSetHashSize() {
         $this->my_config->setHashSize(7);
         $this->assertEquals($this->my_config->getHashSize(), 7);
-        
-        // other gradeables
+        // Exception
+        $this->expectException(ValidationException::class);
+        $this->my_config->setHashSize(-3);
+        $this->assertEquals($this->my_config->getHashSize(), 7);
+    }
+
+    public function testSetOtherGradeables() {
         $this->my_config->setOtherGradeables([
             "other_semester" => "f16",
             "other_course" => "sample",
@@ -94,49 +111,35 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
             "other_course" => "sample",
             "other_gradeable" => "example_gradeable"
         ]);
+    }
 
-        // other gradeable paths
+    public function testSetOtherGradeablePaths() {
+        // Accurate
+        $this->assertFalse($this->my_config->hasOtherGradeablePaths());
+        // Exception
+        $this->expectException(FileNotFoundException::class);
+        $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
         $this->assertFalse($this->my_config->hasOtherGradeablePaths());
         $this->assertEquals($this->my_config->getOtherGradeablePaths(), []);
+    }
 
-        // ignored submissions
+    public function testSetRegexDirs() {
+         // submissions dir
+         $this->my_config->setRegexDirSubmissions(false);
+         $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
+ 
+         // results dir
+         $this->my_config->setRegexDirResults(true);
+         $this->assertTrue($this->my_config->isRegexDirResultsSelected());
+ 
+         // checkout dir
+         $this->my_config->setRegexDirCheckout(true);
+         $this->assertTrue($this->my_config->isRegexDirCheckoutSelected());
+    }
+
+    public function testSetIgnoredPermissions() {
         $this->my_config->setIgnoredSubmissions([]);
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), []);
     }
-    
-    public function testExceptionSetVersionStatus() {
-        $this->expectException(ValidationException::class);
-        $this->my_config->setVersionStatus("latest_version");
-        $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
-    }
 
-    public function testExceptionSetRegexArray() {
-        $this->expectException(ValidationException::class);
-        $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
-        $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-    }
-        
-    public function testExceptionSetLanguage() {
-        $this->expectException(ValidationException::class);
-        $this->my_config->setLanguage("swift");
-        $this->assertEquals($this->my_config->getLanguage(), "python");
-    }
-        
-
-        // $this->my_config->setThreshold(-5);
-        
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getThreshold(), 25);
-
-        // $this->my_config->setHashSize(-3);
-        // $this->expectException(ValidationException::class);
-        // $this->assertEquals($this->my_config->getHashSize(), 7);
-
-        // $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
-       
-        // $this->assertFalse($this->my_config->hasOtherGradeablePaths());
-    //     return $data;
-    // }
-   
 }
