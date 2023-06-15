@@ -1823,7 +1823,7 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
-        self.using_subdirectory = ""
+        self.using_subdirectory = False
         self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
@@ -2093,6 +2093,7 @@ class Gradeable(object):
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['upload_type'] = 'repository'
             form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}'
+            form_json['using_subdirectory'] = False
             form_json['subdirectory'] = ''
             return form_json
         form_json['gradeable_title'] = self.title
