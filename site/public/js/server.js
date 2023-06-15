@@ -293,6 +293,12 @@ function newEditCourseMaterialsFolderForm(tag) {
     let partial_sections = $(tag).data('partial-sections');
     let release_time =  $(tag).data('release-time');
     let is_hidden = $(tag).data('hidden-state');
+
+    let file_path = $(tag).data('path');
+    let display_name = $(tag).data('display-name')
+
+
+
     const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
 
@@ -395,6 +401,15 @@ function newEditCourseMaterialsForm(tag) {
     }
     const title_label = $("#edit-url-title-label", form);
     const url_label = $("#edit-url-url-label", form);
+
+
+
+    const path = $("#new-file-name");
+    path.val(file_path);
+    const displayName = $("#display-name");
+    displayName.val(display_name);
+
+
     if (is_link === 1) {
         title_label.css('display', 'block');
         url_label.css('display', 'block');
@@ -413,6 +428,11 @@ function newEditCourseMaterialsForm(tag) {
             url_label.css('display', 'none');
         }
     }
+
+    path.val(link_url);
+    displayName.val(link_title);
+
+
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);

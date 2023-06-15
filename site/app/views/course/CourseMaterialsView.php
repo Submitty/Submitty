@@ -95,7 +95,7 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode("/", $rel_path);
             $file_name = array_pop($dirs);
             if ($course_material->isLink()) {
-                $file_name = $course_material->getUrlTitle() . $course_material->getPath();
+                $file_name = $course_material->getDisplayName() . $course_material->getPath();
             }
             $path_to_place = &$final_structure;
             $path = "";
@@ -143,7 +143,7 @@ class CourseMaterialsView extends AbstractView {
             "user_section" => $this->core->getUser()->getRegistrationSection(),
             "reg_sections" => $this->core->getQueries()->getRegistrationSections(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "display_file_url" => $this->core->buildCourseUrl(['display_file']),
+            "display_name" => $this->core->buildCourseUrl(['display_file']),
             "seen" => $seen,
             "folder_visibilities" => $folder_visibilities,
             "base_course_material_path" => $base_course_material_path,

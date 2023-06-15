@@ -1274,7 +1274,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite, file_path, display_name) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1324,6 +1324,14 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (sectionsEdit !== null) {
         formData.append('sections', sectionsEdit);
     }
+
+    if(file_path !== null && file_path !== ""){
+        formData.append('file_path', file_path);
+    }
+
+    // if(display_name !== null) {
+
+    // }
 
     $.ajax({
         url: edit_url,
