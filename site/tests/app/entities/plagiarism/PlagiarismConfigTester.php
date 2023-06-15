@@ -53,27 +53,21 @@ class PlagiarismConfigTester extends BaseUnitTest {
         // version status
         $this->my_config->setVersionStatus("active_version");
         $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
-        $exception_thrown = false;
-        try {
-            $this->my_config->setVersionStatus("latest_version");
-        }
-        catch (ValidationException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+     
+        $this->my_config->setVersionStatus("latest_version");
+        
+        $this->expectException(ValidationException::class);
+       
         $this->assertEquals($this->my_config->getVersionStatus(), "active_version");
 
         // regex array
         $this->my_config->setRegexArray(["foo.txt", "*_3.cpp"]);
         $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-        $exception_thrown = false;
-        try {
-            $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
-        }
-        catch (ValidationException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+     
+        $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
+      
+        $this->expectException(ValidationException::class);
+    
         $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
 
         // submissions dir
@@ -91,40 +85,29 @@ class PlagiarismConfigTester extends BaseUnitTest {
         // language
         $this->my_config->setLanguage("python");
         $this->assertEquals($this->my_config->getLanguage(), "python");
-        $exception_thrown = false;
-        try {
-            $this->my_config->setLanguage("swift");
-        }
-        catch (ValidationException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+    
+        $this->my_config->setLanguage("swift");
+       
+        $this->expectException(ValidationException::class);
+
         $this->assertEquals($this->my_config->getLanguage(), "python");
 
         // threshold
         $this->my_config->setThreshold(25);
         $this->assertEquals($this->my_config->getThreshold(), 25);
-        $exception_thrown = false;
-        try {
-            $this->my_config->setThreshold(-5);
-        }
-        catch (ValidationException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+    
+   
+        $this->my_config->setThreshold(-5);
+        
+        $this->expectException(ValidationException::class);
+
         $this->assertEquals($this->my_config->getThreshold(), 25);
 
         // hash size
         $this->my_config->setHashSize(7);
         $this->assertEquals($this->my_config->getHashSize(), 7);
-        $exception_thrown = false;
-        try {
-            $this->my_config->setHashSize(-3);
-        }
-        catch (ValidationException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+        $this->my_config->setHashSize(-3);
+        $this->expectException(ValidationException::class);
         $this->assertEquals($this->my_config->getHashSize(), 7);
 
         // other gradeables
@@ -141,14 +124,8 @@ class PlagiarismConfigTester extends BaseUnitTest {
 
         // other gradeable paths
         $this->assertFalse($this->my_config->hasOtherGradeablePaths());
-        $exception_thrown = false;
-        try {
-            $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
-        }
-        catch (FileNotFoundException $e) {
-            $exception_thrown = true;
-        }
-        $this->assertTrue($exception_thrown);
+        $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
+        $this->expectException(ValidationException::class);
         $this->assertFalse($this->my_config->hasOtherGradeablePaths());
         $this->assertEquals($this->my_config->getOtherGradeablePaths(), []);
 
