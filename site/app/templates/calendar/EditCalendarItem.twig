@@ -5,20 +5,18 @@
     <p class="std-margin">
         Edit or delete this calendar item.
     </p>
-    <div class="calendar-submit">
-        <label for="calendar-item-type-edit">Message Type</label>
-        <select id="calendar-item-type-edit" name="type">
-            <option value="note">Note</option>
-            <option value="announcement">Announcement</option>
-            <option value="important">Important</option>
-        </select>
-
-        <label for="edit-picker-edit">Date</label>
-        <input id="edit-picker-edit" class="edit-picker" type="text" name="date">
-
-        <label for="calendar-item-text-edit">Message Text</label>
-        <textarea id="calendar-item-text-edit" name="text" rows="5" cols="64"></textarea>
-    </div>
+    <label for="calendar-item-course-edit">
+    <input type="hidden" id="calendar-item-semester-edit" name="semester">
+    <input type="hidden" id="calendar-item-course-edit" name="course">
+    <label for="calendar-item-type-edit">Message Type</label>
+    <select id="calendar-item-type-edit" name="type">
+        <option value="text">Note</option>
+        <option value="ann">Announcement</option>
+    </select><br>
+    <label for="calendar-item-text-edit">Message Text</label>
+    <input type="text" id="calendar-item-text-edit" name="text"><br>
+    <label for="edit-picker-edit">Date</label>
+    <input id="edit-picker-edit" class="edit-picker" type="text" name="date">
     <input hidden name="csrf_token" value="{{ core.getCsrfToken() }}">
     <input hidden id="calendar-item-id" name="id">
     <script>
@@ -51,7 +49,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/items/{id}/edit">
+    <form method="post" action="/calendar/items/edit">
         {{ parent() }}
     </form>
 {% endblock %}
