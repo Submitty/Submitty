@@ -449,7 +449,7 @@ class HomeworkView extends AbstractView {
             $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
             return $ldi->getLateDaysRemaining() - $days_to_be_charged;
         }, $team_ldi)) : 0;
-        $has_late_days = false;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
@@ -497,7 +497,6 @@ class HomeworkView extends AbstractView {
             'allowed_late_days' => $gradeable->getLateDays(),
             'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
-            'has_late_days' => $has_late_days,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
