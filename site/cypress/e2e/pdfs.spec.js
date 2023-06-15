@@ -1,8 +1,8 @@
 import {getCurrentSemester} from '../support/utils.js';
 
 function switch_settings(setting, pdf_type) {
-    cy.login('instructor');
     cy.visit(`/courses/${getCurrentSemester()}/sample`);
+    cy.login('instructor');
     cy.get(`a[href*="/sample/gradeable/${pdf_type}/update"]`).click();
     cy.get('#page_3_nav').click();
     cy.get('#minimum_grading_group').find('option').contains(setting)
@@ -15,8 +15,8 @@ function switch_settings(setting, pdf_type) {
 }
 
 function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name) {
-    cy.login(user_id);
     cy.visit(`/courses/${getCurrentSemester()}/sample`);
+    cy.login(user_id);
     cy.get(`a[href*="/sample/gradeable/${gradeable_id}/grading/details"]`).click();
     cy.get('#agree-button').click({ force: true });
     if (user_id !== 'student') {
@@ -43,59 +43,48 @@ function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name) {
     cy.get('#div_viewer_sd1').find(`a[file-url*='${pdf_name}']`).click();
     cy.get('#pageContainer1').should('be.visible');
     cy.get('a[onclick*="collapseFile"]').click();
+    cy.logout();
 }
 
 describe('Test cases for PDFs access', () => {
-    let pdf_type;
-
     beforeEach(() => {
-        cy.visit('/');
+        cy.checkLogoutInAfterEach();
     });
 
     it('users should have access to basic pdfs', () => {
-        pdf_type = 'grading_homework_pdf';
+        const pdf_type = 'grading_homework_pdf';
         switch_settings('Limited Access Grader', pdf_type);
 
         pdf_access('instructor', '3', '8' ,pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('ta', '3', '8', pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('grader', '4', '8', pdf_type, 'words_881.pdf');
     });
 
     it('users should have access to team pdfs', () => {
-        pdf_type = 'grading_homework_team_pdf';
+        const pdf_type = 'grading_homework_team_pdf';
         switch_settings('Limited Access Grader', pdf_type);
 
         pdf_access('instructor', '3', '9', pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('ta', '3', '9', pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('grader','1', '7', pdf_type, 'words_881.pdf');
     });
 
     it('users should have access to peer pdfs', () => {
-        pdf_type = 'grading_pdf_peer_homework';
+        const pdf_type = 'grading_pdf_peer_homework';
         switch_settings('Limited Access Grader', pdf_type);
 
         pdf_access('instructor', '3', '8', pdf_type, 'words_249.pdf');
-        cy.logout();
         pdf_access('ta', '3', '8', pdf_type, 'words_249.pdf');
-        cy.logout();
         pdf_access('grader','2', '8', pdf_type, 'words_249.pdf');
-        cy.logout();
         pdf_access('student','9', '5', pdf_type, 'words_881.pdf');
     });
 
     it('users should have access to peer team pdfs', () => {
-        pdf_type = 'grading_pdf_peer_team_homework';
+        const pdf_type = 'grading_pdf_peer_team_homework';
         switch_settings('Limited Access Grader', pdf_type);
 
         pdf_access('instructor', '2', '9', pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('ta', '2', '9', pdf_type, 'words_1463.pdf');
-        cy.logout();
         pdf_access('grader', '4', '7', pdf_type, 'words_1463.pdf');
     });
-
 });
