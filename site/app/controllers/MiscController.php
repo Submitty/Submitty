@@ -272,7 +272,7 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        if ($display_name !== null && $display_name !== ""){
+        if ($display_name !== null && $display_name !== "") {
             $filename = $display_name;
         } else {
             $filename = pathinfo($path, PATHINFO_BASENAME);
