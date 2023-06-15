@@ -373,6 +373,7 @@ class ReportController extends AbstractController {
         $user_data['legal_family_name'] = $user->getLegalFamilyName();
         $user_data['preferred_family_name'] = $user->getPreferredFamilyName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();

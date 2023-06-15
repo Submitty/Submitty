@@ -11,6 +11,8 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\LateDayInfo;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -441,6 +443,13 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
 
+        // Grab all team member late day information
+        $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
+        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+            $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
+            return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+        }, $team_ldi)) : 0;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
@@ -491,6 +500,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
+            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -1035,6 +1045,21 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        $failed_file = '';
+        // See if the grade has succeeded or failed
+        if (count($param['files']) === 1) {
+            foreach ($param['files'] as $file) {
+                if (str_contains($file['relative_name'], 'failed')) {
+                    $failed_file = file_get_contents($file['path']);
+                // Exclude the Exception error message
+                    $failed_file = substr(strstr($failed_file, "\n"), 3);
+                }
+            }
+            // Arbitrary size, currently bigger than all of the failed files, but
+            // could be increased if the failed files need more tips/messages
+            $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
+        }
+
         // If its not git checkout
         $can_download = !$gradeable->isVcs();
 
@@ -1050,6 +1075,8 @@ class HomeworkView extends AbstractView {
         $view_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
         $param = array_merge($param, [
+            'failed_file' => $failed_file,
+            'file_length' => count($param['files']),
             'gradeable_id' => $gradeable->getId(),
             'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
@@ -1063,6 +1090,7 @@ class HomeworkView extends AbstractView {
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'change_version_url' => $change_version_url,
             'view_version_url' => $view_version_url,
             'versions' => $version_data,
@@ -1177,12 +1205,12 @@ class HomeworkView extends AbstractView {
 
         $grade_inquiries = $graded_gradeable->getGradeInquiries();
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
-
         // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
-            $grade_inquiry_posts = $this->core->getQueries()->getGradeInquiryDiscussions($grade_inquiries);
+            $queries = $this->core->getQueries();
+            $grade_inquiry_posts = $queries->getGradeInquiryDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
@@ -1191,14 +1219,41 @@ class HomeworkView extends AbstractView {
                     $gc_title = $component->getTitle();
                 }
 
+
+                $grade_inquiry_posts_for_id = $grade_inquiry_posts[$grade_inquiry->getId()];
+                $author_user_ids = array_map(function ($post) {
+                    return $post["user_id"];
+                }, $grade_inquiry_posts_for_id);
+                $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
+
+                $instructor_full_access = [];
+                $limited_access_grader = [];
+
+                foreach ($author_user_groups as $author) {
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] === User::GROUP_LIMITED_ACCESS_GRADER;
+                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+                }
+
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
                     if (empty($post)) {
                         break;
                     }
-                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $is_staff = $queries->isStaffPost($post['user_id']);
+
+                    $is_limited_access_grader = $limited_access_grader[$post['user_id']];
+                    $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
+                    $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
+                    $name = $given_name;
+                    if ($is_limited_access_grader) {
+                        $name = $given_name . " " . substr($family_name, 0, 1) . ".";
+                    }
+                    if ($is_instructor_or_full_access_grader) {
+                        $name = $given_name . ' ' . $family_name;
+                    }
+
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
@@ -1277,11 +1332,25 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
+
     public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+        $queries = $this->core->getQueries();
+        $author_user_id = [$post["user_id"]];
+        $author_user_group = $queries->getAuthorUserGroups($author_user_id)[0];
+        $limited_access_grader = $author_user_group['user_group'] === User::GROUP_LIMITED_ACCESS_GRADER;
+        $instructor_full_access = $author_user_group['user_group'] <= User::GROUP_FULL_ACCESS_GRADER;
+        $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
+        $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+        $name  = $given_name;
+        if ($limited_access_grader) {
+            $name = $given_name . " " . substr($family_name, 0, 1) . ".";
+        }
+        if ($instructor_full_access) {
+            $name = $given_name . ' ' . $family_name;
+        }
 
-        $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+        $is_staff = $queries->isStaffPost($post['user_id']);
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
         $content = $post['content'];
         $post_id = $post['id'];
