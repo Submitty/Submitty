@@ -1265,7 +1265,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    //window.location.href = return_url;
+                    window.location.href = return_url;
                 }
                 else {
                     if (jsondata['message'].indexOf('Name clash') !== -1) {
@@ -1291,7 +1291,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite, file_path, display_name) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, overwrite, file_path, display_name) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1324,12 +1324,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     if (hide_from_students !== null) {
         formData.append('hide_from_students', hide_from_students);
-    }
-    if (link_url !== null) {
-        formData.append('link_url', link_url);
-    }
-    if (link_title !== null) {
-        formData.append('link_title', link_title);
     }
     if (overwrite !== null) {
         formData.append('overwrite', overwrite);
@@ -1364,7 +1358,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    //window.location.href = return_url;
+                    window.location.href = return_url;
                 }
                 else {
                     if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {

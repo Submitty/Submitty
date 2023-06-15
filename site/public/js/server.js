@@ -408,32 +408,14 @@ function newEditCourseMaterialsForm(tag) {
     path.val(file_path.substring(1));
     const displayName = $("#display-name");
     displayName.val(display_name);
-    if ( !display_name ) {
-        displayName.val(file_path.split("/").pop());
-    } 
 
 
     if (is_link === 1) {
-        title_label.css('display', 'block');
-        url_label.css('display', 'block');
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
-        const url = $("#edit-url-url");
-        url.prop('disabled', false);
-        url.val(link_url);
-    }
-    else {
-        if (title_label.css('display') !== 'none') {
-            title_label.css('display', 'none');
-        }
-        if (url_label.css('display') !== 'none') {
-            url_label.css('display', 'none');
-        }
-    }
-
-    path.val(link_url);
-    displayName.val(link_title);
+        path.val(link_url);
+        displayName.val(link_title);
+    } else if (!display_name){
+        displayName.val(file_path.split("/").pop());
+    }    
 
 
     $("#material-edit-form", form).attr('data-id', id);
