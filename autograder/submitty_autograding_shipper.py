@@ -826,7 +826,8 @@ def checkout_vcs_repo(config, my_file):
         config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
-    is_vcs, vcs_type, vcs_base_url, vcs_partial_path, using_subdirectory, vcs_subdirectory = vcs_info
+    is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
+    using_subdirectory, vcs_subdirectory = vcs_info
 
     # cleanup the previous checkout (if it exists)
     shutil.rmtree(checkout_path, ignore_errors=True)
