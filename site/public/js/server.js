@@ -405,9 +405,12 @@ function newEditCourseMaterialsForm(tag) {
 
 
     const path = $("#new-file-name");
-    path.val(file_path);
+    path.val(file_path.substring(1));
     const displayName = $("#display-name");
     displayName.val(display_name);
+    if ( !display_name ) {
+        displayName.val(file_path.split("/").pop());
+    } 
 
 
     if (is_link === 1) {

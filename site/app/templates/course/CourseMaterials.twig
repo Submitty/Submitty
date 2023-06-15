@@ -40,24 +40,24 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_name, base_course_material_path, directory_priorities, 
+        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_name, "", base_course_material_path, directory_priorities, 
         material_list, date_format, folder_ids, seen, folder_visibilities, "root") }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_name, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_name, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
     {% for name, course_material in course_materials %}
         {% set sub_path = "#{current_path}/#{name}" %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_name, path ~ "/" ~ name , folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
         {% else %}
-            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_name, date_format, folder_ids, seen) }}
+            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_name, path ~ "/" ~ name, date_format, folder_ids, seen) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_name, date_format, folder_ids, seen) %}
+{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_name, path, date_format, folder_ids, seen) %}
     {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
         <div class="file-container">
             <div class="file-viewer">
@@ -91,7 +91,7 @@
                         data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}
                         data-hidden-state="{{course_material.isHiddenFromStudents}}"
                         data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
-                        data-path= "{{ course_material.getPath }}"
+                        data-path= "{{ path }}"
                         data-display-name= "{{ course_material.getDisplayName }}"
                         data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}"
                         data-link-url="{{ url_url }}"
@@ -157,10 +157,10 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_name, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_name, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, folder_path, directory_priorities,
-        material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+        {# {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, folder_path, directory_priorities,
+        material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }} #}
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
@@ -179,7 +179,7 @@
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
-                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, folder_path,
+                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_name, path, folder_path,
                 directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
             </div>
         </div>
