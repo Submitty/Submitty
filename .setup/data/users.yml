@@ -16,6 +16,8 @@
 #
 #   user_givenname: string for the user's given name
 #
+#   user_pronouns: string for a user's pronoun
+#
 #   user_preferred_givenname: [optional] name to display for user instead of their legal given name
 #         If this is omitted, then it will go into the database as NULL
 #

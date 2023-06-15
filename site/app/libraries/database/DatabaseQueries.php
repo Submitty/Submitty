@@ -4139,6 +4139,22 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    /**
+     * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
+     */
+    public function getInstructorLevelUnarchivedCourses(string $user_id): array {
+        $query = "
+        SELECT t.name AS term_name, c.semester, c.course
+        FROM courses AS c
+        INNER JOIN terms AS t ON c.semester=t.term_id
+        INNER JOIN courses_users AS cu ON c.course=cu.course AND c.semester=cu.semester
+        WHERE c.status = 1 AND cu.user_id = ? AND cu.user_group = 1
+        ORDER BY t.start_date DESC, c.course ASC
+        ";
+        $this->submitty_db->query($query, [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
@@ -7255,13 +7271,14 @@ WHERE current_state IN
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section,
+              u.course_section_id,
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
-                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections
+                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections, sec_reg.course_section_id
                 FROM users u
                 LEFT JOIN gradeable_anon ga
                 ON u.user_id=ga.user_id
@@ -7272,7 +7289,13 @@ WHERE current_state IN
                     FROM grading_registration
                     GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
-            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u.g_id=g.g_id
+                LEFT JOIN (
+                    SELECT
+                        sections_registration_id,
+                        course_section_id
+                    FROM sections_registration
+                ) AS sec_reg ON sec_reg.sections_registration_id=u.registration_section
+            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
             LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
