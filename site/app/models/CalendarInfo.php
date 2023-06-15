@@ -145,7 +145,7 @@ class CalendarInfo extends AbstractModel {
                     'title' => htmlspecialchars($cal_item->getText()),
                     'status' => $cal_item->getTypeString(),
                     'course' => $course->getTitle(),
-                    'semester' => $course->getSemester(),
+                    'semester' => $course->getTerm(),
                     'icon' => '',
                     'url' => '',
                     'show_due' => false,
