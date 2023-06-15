@@ -120,8 +120,9 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
             'setVersionStatus' =>
             [
                 [
-                'command' => function() {$this->my_config->setVersionStatus("latest_version");},
-                'assertion' => function() {$this->assertEquals($this->my_config->getVersionStatus(), "active_version");}
+                'command' => 
+                    $this->my_config->setVersionStatus("latest_version"),
+                'assertion' => $this->assertEquals($this->my_config->getVersionStatus(), "active_version")
                 ]
             ]
             
