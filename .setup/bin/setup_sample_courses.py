@@ -1942,7 +1942,7 @@ class Gradeable(object):
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
-                self.using_subdirectory = gradeable['eg_using_subdirectory']
+                self.using_subdirectory = gradeable['eg_using_subdirectory'] is True
                 self.subdirectory = gradeable['eg_vcs_subdirectory']
                 self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
