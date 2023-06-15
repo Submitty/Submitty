@@ -109,8 +109,8 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
     */
     public function testExceptions($data) {
         $this->expectException(ValidationException::class);
-        $data->command;
-        $data->assertion;
+        $data['command'];
+        $data['assertion'];
     }
 
     
