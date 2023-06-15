@@ -50,49 +50,6 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), ["ta", "ta2"]);
     }
 
-    public function provideData() : array    
-    {
-        $data = [
-            'setVersionStatus' =>
-            [
-                'command' => function() {$this->my_config->setVersionStatus("latest_version");},
-                'assertion' => function() {$this->assertEquals($this->my_config->getVersionStatus(), "active_version");}
-            ]
-            
-            ];
-        
-        
-
-        
-
-        // $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
-
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
-
-        // $this->my_config->setLanguage("swift");
-
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getLanguage(), "python");
-
-        // $this->my_config->setThreshold(-5);
-        
-        // $this->expectException(ValidationException::class);
-
-        // $this->assertEquals($this->my_config->getThreshold(), 25);
-
-        // $this->my_config->setHashSize(-3);
-        // $this->expectException(ValidationException::class);
-        // $this->assertEquals($this->my_config->getHashSize(), 7);
-
-        // $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
-       
-        // $this->assertFalse($this->my_config->hasOtherGradeablePaths());
-        return $data;
-    }
-   
     public function testAccurateSetters(): void {
         // version status
         $this->my_config->setVersionStatus("active_version");
@@ -155,4 +112,51 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $data->command;
         $data->assertion;
     }
+
+    
+    public function provideData() : array    
+    {
+        $data = [
+            'setVersionStatus' =>
+            [
+                [
+                'command' => function() {$this->my_config->setVersionStatus("latest_version");},
+                'assertion' => function() {$this->assertEquals($this->my_config->getVersionStatus(), "active_version");}
+                ]
+            ]
+            
+            ];
+        
+        
+
+        
+
+        // $this->my_config->setRegexArray(["foo\..\secret_file.txt", "*_3.cpp"]);
+
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getRegexArray(), ["foo.txt", "*_3.cpp"]);
+
+        // $this->my_config->setLanguage("swift");
+
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getLanguage(), "python");
+
+        // $this->my_config->setThreshold(-5);
+        
+        // $this->expectException(ValidationException::class);
+
+        // $this->assertEquals($this->my_config->getThreshold(), 25);
+
+        // $this->my_config->setHashSize(-3);
+        // $this->expectException(ValidationException::class);
+        // $this->assertEquals($this->my_config->getHashSize(), 7);
+
+        // $this->my_config->setOtherGradeablePaths(["/var/local/submitty/courses/f17/test_course/hw1","/my_documents/hw1"], 10);
+       
+        // $this->assertFalse($this->my_config->hasOtherGradeablePaths());
+        return $data;
+    }
+   
 }
