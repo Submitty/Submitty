@@ -10,7 +10,7 @@ use app\exceptions\FileNotFoundException;
 use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
-class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
+class PlagiarismConfigTester extends BaseUnitTest {
     private $my_config;
 
     public function setUp(): void {
@@ -127,11 +127,11 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
          // submissions dir
          $this->my_config->setRegexDirSubmissions(false);
          $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
- 
+
          // results dir
          $this->my_config->setRegexDirResults(true);
          $this->assertTrue($this->my_config->isRegexDirResultsSelected());
- 
+
          // checkout dir
          $this->my_config->setRegexDirCheckout(true);
          $this->assertTrue($this->my_config->isRegexDirCheckoutSelected());
@@ -141,5 +141,4 @@ class PlagiarismConfigTester extends \PHPUnit\Framework\TestCase  {
         $this->my_config->setIgnoredSubmissions([]);
         $this->assertEquals($this->my_config->getIgnoredSubmissions(), []);
     }
-
 }
