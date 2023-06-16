@@ -58,12 +58,12 @@
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>Section {{ section['sections_registration_id'] }} ({{ section['course_section_id'] }})</td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>Section {{ section['sections_registration_id'] }} ({{ section['course_section_id'] }})</td>
                                 <td>0</td>
                             </tr>
                             {% endif %}
