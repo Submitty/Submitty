@@ -433,13 +433,13 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 ///maybe delete
-        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
+        if (isset($_POST['display_name']) && $course_material->isLink()) {
+            if ($_POST['display_name'] !== $course_material->getDisplayName()) {
                 $path = $course_material->getPath();
                 $dirs = explode("/", $path);
                 array_pop($dirs);
                 $path = implode("/", $dirs);
-                $file_name = urlencode("link-" . $_POST['link_title']);
+                $file_name = urlencode("link-" . $_POST['display_name']);
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
@@ -454,10 +454,10 @@ class CourseMaterialsController extends AbstractController {
                 $path = FileUtils::joinPaths($path, $file_name);
                 FileUtils::writeFile($path, "");
                 unlink($course_material->getPath());
-                $course_material->setUrlTitle($_POST['link_title']);
+                $course_material->setDisplayName($_POST['link_title']);
                 $course_material->setPath($path);
             }
-            $course_material->setUrl($_POST['link_url']);
+            $course_material->setPath($_POST['link_url']);
         }
 //maybe end delete?
 
