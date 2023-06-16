@@ -173,6 +173,12 @@ class ForumController extends AbstractController {
         $result = [];
         if (!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
+            if ($this->core->getUser()->accessAdmin() && !empty($_POST["visibleDate"])) {
+                $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+            }
+            else {
+                $visibleDate = null;
+            }
             if ($this->isValidCategories(-1, [$category])) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
@@ -181,7 +187,7 @@ class ForumController extends AbstractController {
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"]);
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category, $_POST["rank"], $visibleDate);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             }
@@ -236,6 +242,7 @@ class ForumController extends AbstractController {
         $category_id = $_POST["category_id"];
         $category_desc = null;
         $category_color = null;
+        $category_visible_date = null;
 
         if (!empty($_POST["category_desc"])) {
             $category_desc = trim($_POST["category_desc"]);
@@ -252,8 +259,20 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
+        if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
+            if ($_POST["visibleDate"] === "    ") {
+                $category_visible_date = "";
+            }
+            else {
+                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                //ASSUME NO ISSUE
+            }
+        }
+        else {
+            $category_visible_date = null;
+        }
 
-        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color, $category_visible_date);
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
