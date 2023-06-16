@@ -34,6 +34,8 @@ class GradedGradeable extends AbstractModel {
 
     protected $regrade_graders = [];
 
+    protected $grade_graders = [];
+
     /** @prop @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
 

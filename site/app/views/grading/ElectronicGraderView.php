@@ -30,8 +30,13 @@ class ElectronicGraderView extends AbstractView {
      * @param int $rotating_but_not_registered
      * @param int $viewed_grade
      * @param string $section_type
+<<<<<<< Updated upstream
      * @param int $regrade_requests
      * @param int regrade_graders
+=======
+     * @param int $grade_inquiries
+     * @param int grade_graders
+>>>>>>> Stashed changes
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
@@ -39,6 +44,8 @@ class ElectronicGraderView extends AbstractView {
 
     private $user_id_to_User_cache = [];
 
+
+    
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -54,11 +61,18 @@ class ElectronicGraderView extends AbstractView {
         int $rotating_but_not_registered,
         int $viewed_grade,
         string $section_type,
+<<<<<<< Updated upstream
         int $regrade_requests,
         array $regrade_graders,
+=======
+        int $grade_inquiries,
+        array $grade_graders,
+>>>>>>> Stashed changes
         bool $show_warnings,
         int $submissions_in_queue
-    ) {
+    )
+
+    {
 
         $peer = $gradeable->hasPeerComponent();
 
@@ -312,8 +326,13 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_grade" => $individual_viewed_grade,
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
+<<<<<<< Updated upstream
             "regrade_requests" => $regrade_requests,
             "regrade_graders" => $regrade_graders,
+=======
+            "grade_inquiries" => $grade_inquiries,
+            "grade_graders" => $grade_graders,
+>>>>>>> Stashed changes
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,

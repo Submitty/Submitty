@@ -100,8 +100,27 @@
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
                     {% endfor %}
                 {% endif %}
+
+            {% if grade_inquiries > 0 %}
+                <br/>
+                <br/>
+                <b>Graders with unresolved grade inquiries:</b>
+                <div style="margin-left: 20px">
+                    {% for key, section in sections %}
+                        {% if key != "peer_stu_grad" %}
+                            {% set sectionNumber = key|replace({':': ''})|trim %}
+                            {% for grade_grader in grade_graders %}
+                                {% if sectionNumber == grade_grader.section %}
+                                    Section: {{ sectionNumber }}&nbsp;&nbsp;&nbsp; Inquiries: {{ grade_grader.unresolved_inquiries }}&nbsp;&nbsp;&nbsp; Graders:  {{ section.valid_graders | join(", ") }}
+                                    <br/>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
             {% endif %}
 
+<<<<<<< Updated upstream
             {% if not peer %}
                 <br/>
                 <br/>
@@ -113,6 +132,9 @@
 
    
            
+=======
+        {% endif %}
+>>>>>>> Stashed changes
             {# LEFT CHUNK #}
         </div>
         <div class = "box col-md-6">

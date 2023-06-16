@@ -133,6 +133,28 @@ class ElectronicGraderController extends AbstractController {
         return $histogram;
     }
 
+//     public function getGradersWithSectionInquiries($overall_scores) {
+//     $graders_with_inquiries = [];
+
+//     foreach ($overall_scores as $ov) {
+//         if ($ov->hasActiveGradeInquiry()) {
+//             $grader_id = $ov->getActiveGradeInquiry()->getGrader()->getId();
+//             $section = $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection();
+
+//             if ($section !== null) {
+//                 if (!isset($graders_with_inquiries[$section])) {
+//                     $graders_with_inquiries[$section] = [];
+//                 }
+
+//                 $graders_with_inquiries[$section][] = $grader_id;
+//             }
+//         }
+//     }
+
+//     return $graders_with_inquiries;
+// }
+
+
     /**
      * Helper function for Randomization
      * @param Array $student_array
@@ -583,10 +605,16 @@ class ElectronicGraderController extends AbstractController {
         $total_users_who_submitted = [];
         
 
+<<<<<<< Updated upstream
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         $regrade_graders = $this->core->getQueries()->getGradersWithGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         echo "Result: " . $regrade_requests . " " . print_r($regrade_graders, true);
         
+=======
+        $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+        $grade_graders = $this->core->getQueries()->getGradeInquiriesGraders($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+    
+>>>>>>> Stashed changes
         if ($isPeerGradeable) {
             $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
@@ -842,6 +870,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $total_students_submitted = 0;
         }
+
         $this->core->getOutput()->renderOutput(
             ['grading', 'ElectronicGrader'],
             'statusPage',
@@ -859,12 +888,21 @@ class ElectronicGraderController extends AbstractController {
             $rotating_but_not_registered,
             $viewed_grade,
             $section_key,
+<<<<<<< Updated upstream
             $regrade_requests,
             $regrade_graders,
             $show_warnings,
             $submissions_in_queue,
             $regrade_graders
+=======
+            $grade_inquiries,
+            $grade_graders,
+            $show_warnings,
+            $submissions_in_queue,
+            
+>>>>>>> Stashed changes
         );
+
     }
 
     /**

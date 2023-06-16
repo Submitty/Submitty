@@ -4904,6 +4904,7 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+<<<<<<< Updated upstream
     public function getGradersWithGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true)
     {
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
@@ -4918,6 +4919,30 @@ AND gc_id IN (
 
     }
 
+=======
+    public function getGradeInquiriesGraders($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("
+            SELECT u.registration_section, COUNT(*) AS unresolved_inquiries
+            FROM public.users u
+            JOIN public.grade_inquiries gi ON u.user_id = gi.user_id
+            WHERE gi.status != 0
+            GROUP BY u.registration_section
+        ");
+    
+        $sections = array(); // Array to store the number of unresolved inquiries per section
+    
+        while ($row = $this->course_db->row()) {
+            $section = $row['registration_section'];
+            $unresolved_inquiries = $row['unresolved_inquiries'];
+    
+            // Save the section number and the number of unresolved inquiries in the 2D array
+            $sections[] = array('section' => $section, 'unresolved_inquiries' => $unresolved_inquiries);
+        }
+        return $sections;
+    }
+    
+>>>>>>> Stashed changes
     /*
      * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
