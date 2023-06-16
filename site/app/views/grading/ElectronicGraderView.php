@@ -10,7 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
-use app\models\gradeable\RegradeRequest;
+use app\models\gradeable\GradeInquiry;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -30,6 +30,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $rotating_but_not_registered
      * @param int $viewed_grade
      * @param string $section_type
+<<<<<<< HEAD
 <<<<<<< Updated upstream
      * @param int $regrade_requests
      * @param int regrade_graders
@@ -37,6 +38,9 @@ class ElectronicGraderView extends AbstractView {
      * @param int $grade_inquiries
      * @param int grade_graders
 >>>>>>> Stashed changes
+=======
+     * @param int $grade_inquiries
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
@@ -61,6 +65,7 @@ class ElectronicGraderView extends AbstractView {
         int $rotating_but_not_registered,
         int $viewed_grade,
         string $section_type,
+<<<<<<< HEAD
 <<<<<<< Updated upstream
         int $regrade_requests,
         array $regrade_graders,
@@ -68,6 +73,9 @@ class ElectronicGraderView extends AbstractView {
         int $grade_inquiries,
         array $grade_graders,
 >>>>>>> Stashed changes
+=======
+        int $grade_inquiries,
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
         bool $show_warnings,
         int $submissions_in_queue
     )
@@ -326,6 +334,7 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_grade" => $individual_viewed_grade,
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
+<<<<<<< HEAD
 <<<<<<< Updated upstream
             "regrade_requests" => $regrade_requests,
             "regrade_graders" => $regrade_graders,
@@ -333,11 +342,14 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiries" => $grade_inquiries,
             "grade_graders" => $grade_graders,
 >>>>>>> Stashed changes
+=======
+            "grade_inquiries" => $grade_inquiries,
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "regrade_allowed" => false,
+            "grade_inquiry_allowed" => false,
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
@@ -655,7 +667,7 @@ HTML;
                     //non-peer not graded
                     $info["graded_groups"][] = "NULL";
                 }
-                elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
                     $info["graded_groups"][] = "grade-inquiry";
                 }
                 elseif (!$graded_component->getVerifier()) {
@@ -899,7 +911,7 @@ HTML;
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
-        $isRegradePanel = false;
+        $isGradeInquiryPanel = false;
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -918,7 +930,7 @@ HTML;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
-        $isRegradePanel = true;
+        $isGradeInquiryPanel = true;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
@@ -1017,7 +1029,7 @@ HTML;
                 $isPeerPanel,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
-                $isRegradePanel,
+                $isGradeInquiryPanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
                 $error_message['message']
@@ -1123,7 +1135,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getUser()->getGroup() < 4) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradeInquiryPanel', $graded_gradeable, $can_inquiry);
         }
 
         return $return . <<<HTML
@@ -1171,7 +1183,7 @@ HTML;
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
-            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
+            'grade_inquiry_pending' => $graded_gradeable->hasActiveGradeInquiry(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -1179,12 +1191,12 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
-            'isRegradePanel' => $isRegradePanel,
+            'isGradeInquiryPanel' => $isGradeInquiryPanel,
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
             "error_color" => $error_color,
@@ -1679,8 +1691,8 @@ HTML;
      * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+    public function renderGradeInquiryPanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradeInquiryPanel.twig", [
             "graded_gradeable" => $graded_gradeable,
             "can_inquiry" => $can_inquiry
         ]);

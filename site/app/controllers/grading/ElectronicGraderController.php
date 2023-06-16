@@ -105,7 +105,7 @@ class ElectronicGraderController extends AbstractController {
             elseif ($ov->getGradeable()->isTaGrading()) {
                 if ($ov->getOrCreateTaGradedGradeable()->anyGrades()) {
                     // if grade inquiry and not in Null section add to count
-                    if ($ov->hasActiveRegradeRequest()) {
+                    if ($ov->hasActiveGradeInquiry()) {
                         if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                             $histogram["noActive"] += 1;
                         }
@@ -605,6 +605,7 @@ class ElectronicGraderController extends AbstractController {
         $total_users_who_submitted = [];
         
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         $regrade_graders = $this->core->getQueries()->getGradersWithGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
@@ -615,6 +616,9 @@ class ElectronicGraderController extends AbstractController {
         $grade_graders = $this->core->getQueries()->getGradeInquiriesGraders($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
     
 >>>>>>> Stashed changes
+=======
+        $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
         if ($isPeerGradeable) {
             $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
@@ -888,9 +892,13 @@ class ElectronicGraderController extends AbstractController {
             $rotating_but_not_registered,
             $viewed_grade,
             $section_key,
+<<<<<<< HEAD
 <<<<<<< Updated upstream
             $regrade_requests,
             $regrade_graders,
+=======
+            $grade_inquiries,
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
             $show_warnings,
             $submissions_in_queue,
             $regrade_graders

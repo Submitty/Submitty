@@ -833,23 +833,6 @@ function openDiv(id) {
     return false;
 }
 
-function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
-}
-
 function markViewed(ids, redirect) {
     let data = new FormData();
     data.append("ids", ids);
@@ -863,36 +846,39 @@ function markViewed(ids, redirect) {
     });
 }
 
-function closeDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-
-
-}
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
         elem.hide();
         elem.removeClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        }
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
+}
+
+function toggleCMFolders(open) {
+    const elem = $('[id^="div_viewer_"]');
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        for (let i = 0; i < elem.length; i++) {
-          const ele_each = elem[i];
-          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        }
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
-    return false;
+    return open;
 }
 
 function openUrl(url) {
@@ -1288,16 +1274,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
