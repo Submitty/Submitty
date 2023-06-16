@@ -1,6 +1,6 @@
 /* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal */
-/* global curr_day, curr_month, curr_year, gradeables_by_date */
-/* global csrfToken, buildCourseUrl */
+/* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
+/* global csrfToken */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -123,6 +123,14 @@ function generateCalendarItem(item) {
     // Put the item in the day cell
     const link = (!item['disabled']) ? item['url'] : '';
     const onclick = item['onclick'];
+    let exists = false;
+    if (!item['show_due']) {
+        for (let course = 0; course < instructor_courses.length; course++) {
+            if (instructor_courses[course].course === item['course'] && instructor_courses[course].semester === item['semester']) {
+                exists = true;
+            }
+        }
+    }
     const icon = item['icon'];
     const element = document.createElement('a');
     element.classList.add('btn', item['class'], `cal-gradeable-status-${item['status']}`, 'cal-gradeable-item');
@@ -132,12 +140,20 @@ function generateCalendarItem(item) {
     if (item['status'] === 'ann') {
         element.style.setProperty('border-color', item['color']);
     }
+    if (exists) {
+        element.style.setProperty('cursor','pointer');
+    }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
     }
-    if (onclick !== '') {
-        element.onclick = onclick;
+    if (onclick !== '' && exists) {
+        if (!item['show_due']) {
+            element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
+        }
+        else {
+            element.onclick = onclick;
+        }
     }
     element.disabled = item['disabled'];
     if (icon !== '') {
@@ -158,11 +174,13 @@ function generateCalendarItem(item) {
  * @param date : string the item date
  * @returns {void} : only has to update existing variables
  */
-function editCalendarItemForm(itemType, itemText, itemId, date) {
-    $('#calendar-item-type-edit').val(itemType);
+function editCalendarItemForm(itemType, itemText, itemId, date, semester, course) {
+    $(`#calendar-item-type-edit>option[value=${itemType}]`).attr('selected', true);
     $('#calendar-item-text-edit').val(itemText);
     $('#edit-picker-edit').val(date);
     $('#calendar-item-id').val(itemId);
+    $('#calendar-item-semester-edit').val(semester);
+    $('#calendar-item-course-edit').val(course);
 
     $('#edit-calendar-item-form').show();
 }
@@ -174,12 +192,16 @@ function editCalendarItemForm(itemType, itemText, itemId, date) {
  */
 function deleteCalendarItem() {
     const id = $('#calendar-item-id').val();
+    const course = $('#calendar-item-course-edit').val();
+    const semester = $('#calendar-item-semester-edit').val();
     if (id !== '') {
         const data = new FormData();
         data.append('id', id);
+        data.append('course', course);
+        data.append('semester', semester);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildCourseUrl(['calendar', 'deleteItem']),
+            url: buildUrl(['calendar', 'items','delete']),
             type: 'POST',
             processData: false,
             contentType: false,
