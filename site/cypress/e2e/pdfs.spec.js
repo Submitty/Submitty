@@ -5,10 +5,24 @@ function switch_settings(setting, pdf_type) {
     cy.login('instructor');
     cy.get(`a[href*="/sample/gradeable/${pdf_type}/update"]`).click();
     cy.get('#page_3_nav').click();
+    cy.get('#minimum_grading_group option:selected').invoke('text').as('minimumGradingGroup');
     cy.get('#minimum_grading_group').select(setting);
     cy.get('#minimum_grading_group option:selected').should('have.text', setting);
+    cy.get('input[name="grader_assignment_method"]:checked').as('graderAssignmentMethod');
     cy.get('input[name="grader_assignment_method"][value="1"]').check();
     cy.logout();
+}
+
+function revert_settings(pdf_type) {
+    cy.visit(`/courses/${getCurrentSemester()}/sample`);
+    cy.login('instructor');
+    cy.get(`a[href*="/sample/gradeable/${pdf_type}/update"]`).click();
+    cy.get('#page_3_nav').click();
+    cy.get('@minimumGradingGroup').then(setting => {
+        cy.get('#minimum_grading_group').select(setting);
+        cy.get('#minimum_grading_group option:selected').should('have.text', setting);
+    });
+    cy.get('@graderAssignmentMethod').check();
 }
 
 function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name) {
@@ -44,10 +58,6 @@ function pdf_access(user_id, tr_number, td_number, gradeable_id, pdf_name) {
 }
 
 describe('Test cases for PDFs access', () => {
-    beforeEach(() => {
-        cy.checkLogoutInAfterEach();
-    });
-
     it('users should have access to basic pdfs', () => {
         const pdf_type = 'grading_homework_pdf';
         switch_settings('Limited Access Grader', pdf_type);
@@ -55,6 +65,8 @@ describe('Test cases for PDFs access', () => {
         pdf_access('instructor', '3', '8' ,pdf_type, 'words_1463.pdf');
         pdf_access('ta', '3', '8', pdf_type, 'words_1463.pdf');
         pdf_access('grader', '4', '8', pdf_type, 'words_881.pdf');
+
+        revert_settings(pdf_type);
     });
 
     it('users should have access to team pdfs', () => {
@@ -64,6 +76,8 @@ describe('Test cases for PDFs access', () => {
         pdf_access('instructor', '3', '9', pdf_type, 'words_1463.pdf');
         pdf_access('ta', '3', '9', pdf_type, 'words_1463.pdf');
         pdf_access('grader','1', '7', pdf_type, 'words_881.pdf');
+
+        revert_settings(pdf_type);
     });
 
     it('users should have access to peer pdfs', () => {
@@ -74,6 +88,8 @@ describe('Test cases for PDFs access', () => {
         pdf_access('ta', '3', '8', pdf_type, 'words_249.pdf');
         pdf_access('grader','2', '8', pdf_type, 'words_249.pdf');
         pdf_access('student','9', '5', pdf_type, 'words_881.pdf');
+
+        revert_settings(pdf_type);
     });
 
     it('users should have access to peer team pdfs', () => {
@@ -83,5 +99,7 @@ describe('Test cases for PDFs access', () => {
         pdf_access('instructor', '2', '9', pdf_type, 'words_1463.pdf');
         pdf_access('ta', '2', '9', pdf_type, 'words_1463.pdf');
         pdf_access('grader', '4', '7', pdf_type, 'words_1463.pdf');
+
+        revert_settings(pdf_type);
     });
 });
