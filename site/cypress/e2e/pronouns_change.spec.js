@@ -12,7 +12,7 @@ describe('Tests cases abut changing user pronouns', () => {
         const e = cy.get('#user-pronouns-change');
         e.clear();
         e.type('They/Them');
-        cy.get('#pronouns-submit').click();
+        cy.get('#edit-pronouns-form .form-button-container > .btn-primary').first().click();
 
     });
 
@@ -23,7 +23,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //ensure pronouns column is on
         cy.get('#toggle-columns-btn').click();
         cy.get('#toggle-pronouns').check();
-        cy.get('#toggle-columns-submit').click();
+        cy.get('#toggle-columns-form .form-button-container > .btn-primary').first().click();
 
         //Ensure correctness
         cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
@@ -60,7 +60,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#pronouns_val').click();
         const e = cy.get('#user-pronouns-change');
         e.clear();
-        cy.get('#pronouns-submit').click();
+        cy.get('#edit-pronouns-form .form-button-container > .btn-primary').first().click();
 
     });
 
