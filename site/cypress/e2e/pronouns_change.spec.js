@@ -35,8 +35,18 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.visit(['sample','student_photos']);
         cy.login('instructor');
 
-        //select proper place and ensure correctness
+        //select Joe Student's photo
         const e = cy.get('.student-image-container > .name').first();
+
+        //Select text from photo area and parse to get pronoun
+        e.invoke('text')
+        .then(text => text.split('\n'))                 // split by newline
+        .then(texts => texts.map(text => text.trim()))  // trim whitespace
+        .then(texts => texts.filter(text => text))     // remove empty
+        .then(texts => { 
+            //texts stores split text, should be [Joe Student, student, They/Them]
+            expect(texts[2]).to.equal('They/Them');
+        });
 
     });
 
