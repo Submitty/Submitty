@@ -320,7 +320,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     text-shadow: 0 0 3px transparent;
 }
 
-@media (width <= 660px) {
+@media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;
     }
@@ -333,7 +333,7 @@ main#main.full-screen-mode .plagiarism-result-cont {
     }
 }
 
-@media (width >= 660px) {
+@media (min-width: 660px) {
     #save-configuration-form {
         width: 80%;
     }
