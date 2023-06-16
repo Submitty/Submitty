@@ -1151,34 +1151,33 @@ function handleDownloadImages(csrf_token) {
 }
 
 function isValidFileName(file_name) {
-    if (file_name.indexOf('\'') != -1 || file_name.indexOf('"') != -1) {
-        alert('ERROR! You may not use quotes in your filename: ' + file_name);
-        return false;
-    } 
-    else if (file_name.indexOf('\\') != -1 || file_name.indexOf('/') != -1) {
-        alert('ERROR! You may not use a slash in your filename: ' + file_name);
+    if (file_name.indexOf('\'') !== -1 || file_name.indexOf('"') !== -1) {
+        alert(`ERROR! You may not use quotes in your filename: ${file_name}`);
         return false;
     }
-    else if (file_name.indexOf('<') != -1 || file_name.indexOf('>') != -1) {
-        alert('ERROR! You may not use angle brackets in your filename: ' + file_name);
+    else if (file_name.indexOf('\\') !== -1 || file_name.indexOf('/') !== -1) {
+        alert(`ERROR! You may not use a slash in your filename: ${file_name}`);
+        return false;
+    }
+    else if (file_name.indexOf('<') !== -1 || file_name.indexOf('>') !== -1) {
+        alert(`ERROR! You may not use angle brackets in your filename: ${file_name}`);
         return false;
     }
     return true;
 }
 
-function shouldReplaceFileIfDup(file_name, target_path) {
-    var k = fileExists(target_path + '/' + file_name, 1);
-    if ( k[0] == 1 )
-    {
-        var skip_confirmation = false;
-        if (expand_zip == 'on') {
-            var extension = getFileExtension(file_name);
-            if (extension.toLowerCase() == 'zip') {
+function shouldReplaceFileIfDup(file_name, target_path, expand_zip) {
+    const k = fileExists(`${target_path}/${file_name}`, 1);
+    if ( k[0] === 1 ) {
+        let skip_confirmation = false;
+        if (expand_zip === 'on') {
+            const extension = getFileExtension(file_name);
+            if (extension.toLowerCase() === 'zip') {
                 skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
             }
         }
         // don't want to replace, so skip
-        if(!skip_confirmation && !confirm('Note: ' + file_name + ' already exists. Do you want to replace it?')){
+        if (!skip_confirmation && !confirm(`Note: ${file_name} already exists. Do you want to replace it?`)) {
             return false;
         }
     }
@@ -1227,24 +1226,24 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     } // remove slash
 
 
-	var filesToBeAdded = false;
-    
-    if($('#file_selection').is(":visible")){
-      // Files selected
-      for (var i = 0; i < file_array.length; i++) {
-          for (var j = 0; j < file_array[i].length; j++) {
-              if (!isValidFileName(file_array[i][j].name)){
-                  return;
-              }
-              if (!shouldReplaceFileIfDup(file_array[i][j].name, target_path)){
-                  continue;
-              }
-              formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+    let filesToBeAdded = false;
 
-              filesToBeAdded = true;
-          }
-      }
-   }
+    if ($('#file_selection').is(':visible')) {
+        // Files selected
+        for (let i = 0; i < file_array.length; i++) {
+            for (let j = 0; j < file_array[i].length; j++) {
+                if (!isValidFileName(file_array[i][j].name)) {
+                    return;
+                }
+                if (!shouldReplaceFileIfDup(file_array[i][j].name, target_path, expand_zip)) {
+                    continue;
+                }
+                formData.append(`files${(i + 1)}[]`, file_array[i][j], file_array[i][j].name);
+
+                filesToBeAdded = true;
+            }
+        }
+    }
 
     let linkToBeAdded = false;
 
@@ -1346,14 +1345,14 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (sectionsEdit !== null) {
         formData.append('sections', sectionsEdit);
     }
-    if(file_path !== null && file_path !== ""){
-        var file_name = file_path.split("/").pop();
-        if (isValidFileName(file_name)){
+    if (file_path !== null && file_path !== '') {
+        const file_name = file_path.split('/').pop();
+        if (isValidFileName(file_name)) {
             formData.append('file_path', file_path);
         }
     }
 
-    if(display_name !== null && display_name !== "") {
+    if (display_name !== null && display_name !== '') {
         formData.append('display_name', display_name);
     }
 
@@ -1371,7 +1370,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                     window.location.href = return_url;
                 }
                 else {
-                    if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {
+                    if (file_path !== null && jsondata['message'].indexOf('Name clash') !== -1) {
                         newOverwriteCourseMaterialForm(jsondata['data'], true, true);
                     }
                     else {
