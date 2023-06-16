@@ -262,6 +262,7 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
