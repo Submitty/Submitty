@@ -28,7 +28,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         //ensure pronouns column is on
-        cy.get('#toggle-columns-btn').click();
+        cy.get('a[href="javascript:toggleColumnsForm()"]').click(); //open toggle columns form
         cy.get('#toggle-pronouns').check();
         cy.get('#toggle-columns-form .form-button-container > .btn-primary').first().click();
 
