@@ -4302,7 +4302,7 @@ AND gc_id IN (
         $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
         $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
-        $ar["user_pronouns"] = $name_rows["user_pronouns"];
+        $ar["pronouns"] = $name_rows["user_pronouns"];
         $ar["display_pronouns"] = $name_rows["display_pronouns"];
 
         return $ar;
