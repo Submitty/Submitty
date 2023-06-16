@@ -8,7 +8,7 @@ describe('Tests cases abut changing user pronouns', () => {
 
 
         //edit pronouns
-        cy.get('#pronouns_val').click()
+        cy.get('#pronouns_val').click();
         const e = cy.get('#user-pronouns-change');
         e.clear();
         e.type('They/Them');
@@ -21,8 +21,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         //ensure pronouns column is on
-        cy.get('#toggle-columns-btn').click()
-        cy.get('#toggle-pronouns').check()
+        cy.get('#toggle-columns-btn').click();
+        cy.get('#toggle-pronouns').check();
         cy.get('#toggle-columns-submit').click();
 
         //Ensure correctness
@@ -40,13 +40,13 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //Select text from photo area and parse to get pronoun
         e.invoke('text')
-        .then(text => text.split('\n'))                 // split by newline
-        .then(texts => texts.map(text => text.trim()))  // trim whitespace
-        .then(texts => texts.filter(text => text))     // remove empty
-        .then(texts => { 
-            //texts stores split text, should be [Joe Student, student, They/Them]
-            expect(texts[2]).to.equal('They/Them');
-        });
+            .then(text => text.split('\n'))                 // split by newline
+            .then(texts => texts.map(text => text.trim()))  // trim whitespace
+            .then(texts => texts.filter(text => text))      // remove empty
+            .then(texts => {
+                //texts stores split text, should be [Joe Student, student, They/Them]
+                expect(texts[2]).to.equal('They/Them');
+            });
 
     });
 
@@ -57,7 +57,7 @@ describe('Tests cases abut changing user pronouns', () => {
 
 
         //edit pronouns
-        cy.get('#pronouns_val').click()
+        cy.get('#pronouns_val').click();
         const e = cy.get('#user-pronouns-change');
         e.clear();
         cy.get('#pronouns-submit').click();
