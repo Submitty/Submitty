@@ -75,10 +75,10 @@
                 {% endif %}
                 {% if user_group == 1 %}
                     {% if course_material.isLink %}
-                        {% set url_title = course_material.getDisplayName %}
+                        {% set display_name = course_material.getDisplayName %}
                         {% set url_url = course_material.getUrl %}
                     {% else %}
-                        {% set url_title = "" %}
+                        {% set display_name = "" %}
                         {% set url_url = "" %}
                     {% endif %}
                     <a
@@ -92,7 +92,7 @@
                         data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
                         data-path = "{{ path }}"
                         data-display-name = "{{ course_material.getDisplayName }}"
-                        data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}"
+                        data-is-link="{{ course_material.isLink }}" data-link-title="{{ display_name }}"
                         data-link-url="{{ url_url }}"
                     >
                         <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>

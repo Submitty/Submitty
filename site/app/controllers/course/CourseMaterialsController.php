@@ -571,9 +571,9 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid filepath.");
         }
 
-        $url_title = null;
-        if (isset($_POST['url_title'])) {
-            $url_title = $_POST['url_title'];
+        $display_name = null;
+        if (isset($_POST['display_name'])) {
+            $display_name = $_POST['display_name'];
         }
 
         $dirs_to_make = [];
@@ -589,7 +589,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        if (isset($url_title) && isset($url_url)) {
+        if (isset($display_name) && isset($url_url)) {
             $details['type'][0] = CourseMaterial::LINK;
             $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             if (!empty($requested_path)) {
@@ -598,7 +598,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failed to make path.");
                 }
             }
-            $file_name = urlencode("link-" . $url_title);
+            $file_name = urlencode("link-" . $display_name);
             $clash_resolution = $this->resolveClashingMaterials($final_path, [$file_name], $overwrite_all);
             if ($clash_resolution !== true) {
                 return JsonResponse::getErrorResponse(
@@ -615,7 +615,7 @@ class CourseMaterialsController extends AbstractController {
                 $uploaded_files[1] = $_FILES["files1"];
             }
 
-            if (empty($uploaded_files) && !(isset($url_url) && isset($url_title))) {
+            if (empty($uploaded_files) && !(isset($url_url) && isset($display_name))) {
                 return JsonResponse::getErrorResponse("No files were submitted.");
             }
 
@@ -807,7 +807,7 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $url_title : null
+                $value === CourseMaterial::LINK ? $display_name : null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {

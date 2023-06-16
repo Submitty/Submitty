@@ -67,7 +67,7 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should allow uploading links', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type('Test URL');
+        cy.get('#display_name').type('Test URL');
         cy.get('#url_url').type(buildUrl(['sample', 'users'], true));
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -630,7 +630,7 @@ describe('Test cases revolving around course material uploading and access contr
         for (let i = 0; i <= 1; i++) {
             cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
             cy.get('#url_selection_radio').click();
-            cy.get('#url_title').type(link_titles[i]);
+            cy.get('#display_name').type(link_titles[i]);
             cy.get('#url_url').type(sample_url);
             cy.waitPageChange(() => {
                 cy.get('#submit-materials').click();
@@ -657,7 +657,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#display_name').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -667,7 +667,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a/b');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#display_name').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -708,7 +708,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#display_name').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -718,7 +718,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a/b');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#display_name').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();

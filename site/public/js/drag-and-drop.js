@@ -1239,9 +1239,9 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     let linkToBeAdded = false;
 
     if ($('#url_selection').is(':visible')) {
-        if ($('#url_title').val() !== '' && $('#url_url').val() !== '' ) {
+        if ($('#display_name').val() !== '' && $('#url_url').val() !== '' ) {
             linkToBeAdded = true;
-            formData.append('url_title', $('#url_title').val());
+            formData.append('display_name', $('#display_name').val());
             formData.append('url_url', $('#url_url').val());
         }
     }
