@@ -1,5 +1,5 @@
-/* global IS_INSTRUCTOR, toggleCMFolder, toggleCMFolders */
-/* exported setFolderCookie, toggleFoldersOpen */
+/* global toggleCMFolder, toggleCMFolders */
+/* exported setFolderCookie, toggleFoldersOpen, setupFolders */
 
 function setFolderCookie(folderPath, id, open) {
     const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
@@ -13,9 +13,6 @@ function toggleFoldersOpen() {
 }
 
 function handleHideMaterialsCheckboxChange(clicked) {
-    if (!IS_INSTRUCTOR) {
-        return;
-    }
     const warningIds = {'hide-materials-checkbox': 'upload-form', 'hide-materials-checkbox-edit': 'edit-form', 'hide-folder-materials-checkbox-edit': 'edit-folder-form'};
     const callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
     const caller = $(`#${callerId}`);
@@ -43,7 +40,7 @@ function handleHideMaterialsCheckboxChange(clicked) {
     }
 }
 
-window.onload = function () {
+function setupFolders(instructor = false) {
     //determine if folders have been left open or closed
     const foldersOpen = Boolean(JSON.parse(Cookies.get('foldersOpen') || 'false'));
     const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
@@ -62,7 +59,7 @@ window.onload = function () {
     // accepts an element (editButton) having required data attributes; other parameters represent the properties known to be common until now
     // returns an updated set of common props by comparing with the props of the given element
     function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
-        if (!IS_INSTRUCTOR) {
+        if (!instructor) {
             return;
         }
         let residualSections = [];
@@ -98,7 +95,7 @@ window.onload = function () {
 
     // sets the common properties of a given folder
     function folderSetter(elem) {
-        if (!IS_INSTRUCTOR) {
+        if (!instructor) {
             return;
         }
         const insideFileMatcher = new RegExp(`^${elem.attr('id').replace('div', 'file')}f[0-9]{0,}$`);
@@ -137,7 +134,7 @@ window.onload = function () {
     }
 
     function callFolderSetter(elem) {
-        if (!IS_INSTRUCTOR) {
+        if (!instructor) {
             return;
         }
         if (topFolderMatcher.test(elem.id)) {
@@ -146,7 +143,7 @@ window.onload = function () {
     }
 
     // set folder data for instructor
-    if (IS_INSTRUCTOR) {
+    if (instructor) {
         $('[id^=div_viewer_]').each(function() {
             callFolderSetter(this);
         });
@@ -165,7 +162,7 @@ window.onload = function () {
     // clean up cm data cookie
     Cookies.remove('cm_data');
 
-    if (IS_INSTRUCTOR) {
+    if (instructor) {
         $('#hide-materials-checkbox').on('change', handleHideMaterialsCheckboxChange);
         $('#hide-materials-checkbox-edit').on('change', handleHideMaterialsCheckboxChange);
         $('[id^="section-folder-edit"]').on('change', function() {
@@ -178,5 +175,4 @@ window.onload = function () {
             }
         });
     }
-};
-
+}
