@@ -5,11 +5,8 @@ function switch_settings(setting, pdf_type) {
     cy.login('instructor');
     cy.get(`a[href*="/sample/gradeable/${pdf_type}/update"]`).click();
     cy.get('#page_3_nav').click();
-    cy.get('#minimum_grading_group').find('option').contains(setting)
-        .then(($option) => {
-            cy.get('#minimum_grading_group').select($option.val());
-        });
-    cy.get('#minimum_grading_group').find('option:selected').should('have.text', setting);
+    cy.get('#minimum_grading_group').select(setting);
+    cy.get('#minimum_grading_group option:selected').should('have.text', setting);
     cy.get('input[name="grader_assignment_method"][value="1"]').check();
     cy.logout();
 }
