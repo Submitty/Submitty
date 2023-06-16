@@ -38,7 +38,7 @@ describe('Tests cases abut changing user pronouns', () => {
     });
 
     it('Verifies changed pronouns as instructor in Student Photos', () => {
-        
+
         cy.visit(['sample','student_photos']);
         cy.login('instructor');
 
@@ -65,7 +65,9 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('#pronouns_val').click();
         const e = cy.get('#user-pronouns-change');
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        if (oldPronouns !== '') e.type(oldPronouns);
+        if (oldPronouns !== '') {
+            e.type(oldPronouns);
+        }
         cy.get('#edit-pronouns-form .form-button-container > .btn-primary').first().click();
 
     });
