@@ -32,6 +32,10 @@ class GradedGradeable extends AbstractModel {
     /** @prop @var array The grade inquiries for this submitter/gradeable  */
     protected $grade_inquiries = [];
 
+    protected $regrade_graders = [];
+
+    protected $grade_graders = [];
+
     /** @prop @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
 
@@ -138,6 +142,10 @@ class GradedGradeable extends AbstractModel {
      */
     public function setGradeInquiries(array $grade_inquiries) {
         $this->grade_inquiries = $grade_inquiries;
+    }
+
+    public function setRegradeGraders(array $regrade_graders) {
+        $this->regrade_graders = $regrade_graders;
     }
 
     /**

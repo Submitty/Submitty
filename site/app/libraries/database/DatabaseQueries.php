@@ -4928,6 +4928,45 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+<<<<<<< Updated upstream
+    public function getGradersWithGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true)
+    {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("SELECT gcd.gcd_grader_id FROM gradeable_component AS gc JOIN gradeable_component_data AS gcd ON gc.gc_id = gcd.gc_id JOIN regrade_requests AS rr ON gc.gc_id = rr.gc_id;");
+
+        //$this->course_db->query("SELECT gcd_grader_id FROM public.gradeable_component_data;");
+        //$this->course_db->query("SELECT user_id from users");
+        //$this->course_db->query("SELECT gcd_grader_id FROM public.gradeable_component_data AS gcd JOIN public.regrade_requests AS rr ON rr.gc_id = gcd.gc_id;");
+
+        
+        return $this->course_db->row();
+
+    }
+
+=======
+    public function getGradeInquiriesGraders($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("
+            SELECT u.registration_section, COUNT(*) AS unresolved_inquiries
+            FROM public.users u
+            JOIN public.grade_inquiries gi ON u.user_id = gi.user_id
+            WHERE gi.status != 0
+            GROUP BY u.registration_section
+        ");
+    
+        $sections = array(); // Array to store the number of unresolved inquiries per section
+    
+        while ($row = $this->course_db->row()) {
+            $section = $row['registration_section'];
+            $unresolved_inquiries = $row['unresolved_inquiries'];
+    
+            // Save the section number and the number of unresolved inquiries in the 2D array
+            $sections[] = array('section' => $section, 'unresolved_inquiries' => $unresolved_inquiries);
+        }
+        return $sections;
+    }
+    
+>>>>>>> Stashed changes
     /*
      * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
@@ -7617,7 +7656,12 @@ WHERE current_state IN
                     $grade_inquiries_arr[] = new GradeInquiry($this->core, $grade_inquiry);
                 }
 
+<<<<<<< HEAD
+                $graded_gradeable->setRegradeRequests($grade_inquiries_arr);
+                // $graded_gradeable -> set
+=======
                 $graded_gradeable->setGradeInquiries($grade_inquiries_arr);
+>>>>>>> 99c84913aba1255d143da916766b0714df33ff5b
             }
 
             $graded_components_by_id = [];
