@@ -64,10 +64,10 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             // showing submission if user is a grader or student can submit
             if ($this->core->getUser()->accessGrading()) {
-                $return .= $this->renderSubmitBox($late_days,$gradeable, $graded_gradeable, $version_instance, $days_past_deadline);
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                $return .= $this->renderSubmitBox($late_days,$gradeable, $graded_gradeable, $version_instance, $days_past_deadline, $gradeable->canStudentSubmit());
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline, $gradeable->canStudentSubmit());
             }
         }
         catch (NotebookException $e) {
@@ -305,7 +305,7 @@ class HomeworkView extends AbstractView {
      * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(LateDays $late_days,Gradeable $gradeable, $graded_gradeable, $version_instance, int $days_past_deadline, bool $canStudentSubmit = true): string {
+    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $days_past_deadline, bool $canStudentSubmit = true): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
