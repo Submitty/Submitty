@@ -54,12 +54,13 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false) {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false, $active_columns = '1-1-1-1-1-1-1') {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
+        $this->core->getOutput()->addInternalJs('manage-grades.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -89,7 +90,8 @@ class UsersView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
-            "semester" => $this->core->getConfig()->getSemester()
+            "semester" => $this->core->getConfig()->getSemester(),
+            "active_columns" => explode('-', $active_columns)
         ]);
     }
 
