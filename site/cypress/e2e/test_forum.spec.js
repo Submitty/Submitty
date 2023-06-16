@@ -35,7 +35,7 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('.chosen-single > span').click();
     cy.wait(500);
     cy.get('.active-result').contains(toThread).click({ force: true });
-    cy.get('#merge-threads > form > .popup-box > .popup-window > .form-body > .form-buttons > .form-button-container > .btn-primary').click({ force: true });
+    cy.get('[value="Merge Thread"]').click({ force: true });
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
@@ -57,11 +57,11 @@ describe('Test cases revolving around creating, replying to, merging, and removi
 
     it('Create, reply to, merge, and delete threads', () => {
         // Comment
-        createThread(title1, content1, 'Comment ');
+        createThread(title1, content1, 'Comment');
         // Question
-        createThread(title2, content2, 'Question ');
+        createThread(title2, content2, 'Question');
         // Tutorials
-        createThread(title3, content3, 'Tutorials ');
+        createThread(title3, content3, 'Tutorials');
 
         // Comment
         replyToThread(title1, reply1);
