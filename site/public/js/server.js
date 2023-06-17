@@ -406,9 +406,6 @@ function newEditCourseMaterialsForm(tag) {
         url.val(link_url);
     }
     else {
-        if (title_label.css('display') !== 'none') {
-            title_label.css('display', 'none');
-        }
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }
