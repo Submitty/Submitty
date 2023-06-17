@@ -360,6 +360,7 @@ function newEditCourseMaterialsForm(tag) {
     let is_link = $(tag).data('is-link');
     let link_title = $(tag).data('link-title');
     let link_url = $(tag).data('link-url');
+    let file_path = $(tag).data('path');
 
     let form = $("#edit-course-materials-form");
 
@@ -395,20 +396,23 @@ function newEditCourseMaterialsForm(tag) {
     }
     const title_label = $("#edit-url-title-label", form);
     const url_label = $("#edit-url-url-label", form);
+    const path = $("#new-file-name");
+    path.val(file_path.substring(1));
+    const urlTitle = $("#edit-url-title");
+    urlTitle.val(link_title);
+    title_label.css('display', 'block');
+    const title = $("#edit-url-title");
+    title.prop('disabled', false);
+    title.val(file_path.substring(file_path.lastIndexOf("/") + 1));
     if (is_link === 1) {
-        title_label.css('display', 'block');
+        title.val(decodeURIComponent(file_path.substring(file_path.lastIndexOf("/") + 1).replace('link-','')));
+        path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
     }
     else {
-        if (title_label.css('display') !== 'none') {
-            title_label.css('display', 'none');
-        }
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }

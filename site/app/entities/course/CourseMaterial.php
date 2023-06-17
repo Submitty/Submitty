@@ -193,7 +193,7 @@ class CourseMaterial {
         return $this->url;
     }
 
-    public function getUrlTitle(): string {
+    public function getUrlTitle(): ?string {
         return $this->url_title;
     }
 
