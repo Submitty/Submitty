@@ -438,30 +438,62 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
-                $file_name = urlencode("link-" . $_POST['link_title']);
+
+
+
+        if (isset($_POST['file_path']) || isset($_POST['link_title'])) {
+            $path = $course_material->getPath();
+            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            
+
+            $requested_path = $_POST['file_path'];
+            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+
+            $lastSlashPos = strrpos($new_path, "/");
+            if (isset($_POST['link_title'])){
+                $file_name = $_POST['link_title'];
+                $new_path = substr($new_path, 0, $lastSlashPos + 1);
+                $new_path = FileUtils::joinPaths($new_path, $file_name);
+            }
+            else{
+                $file_name = substr($new_path, $lastSlashPos + 1);
+            }
+
+
+            if ($path !== $new_path) {
+
+                // check valid directory
+                $requested_path = explode("/", $requested_path);
+                if (count($requested_path) > 1) {
+                    $dir = explode("/", $new_path);
+                    array_pop($dir);
+                    $dir = implode("/", $dir);
+                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $dir]);
+                    if ($cm == null) {
+                        return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                    }
+                }
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
                 }
-                $clash_resolution = $this->resolveClashingMaterials($path, [$file_name], $overwrite);
+                $clash_resolution = $this->resolveClashingMaterials($new_path, [$file_name], $overwrite);
                 if ($clash_resolution !== true) {
                     return JsonResponse::getErrorResponse(
                         'Name clash',
                         $clash_resolution
                     );
                 }
-                $path = FileUtils::joinPaths($path, $file_name);
-                FileUtils::writeFile($path, "");
+                FileUtils::writeFile($new_path, "");
                 unlink($course_material->getPath());
-                $course_material->setUrlTitle($_POST['link_title']);
-                $course_material->setPath($path);
+                $course_material->setPath($new_path);
+                $course_material->setUrlTitle($file_name);
             }
+        }
+
+
+        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
             $course_material->setUrl($_POST['link_url']);
         }
 

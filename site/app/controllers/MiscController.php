@@ -246,6 +246,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
+                $url_title = $cm->getUrlTitle();
             }
         }
 
@@ -271,7 +272,23 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        $filename = pathinfo($path, PATHINFO_BASENAME);
+        if ($dir == 'submissions') {
+            //cannot download scanned images for bulk uploads
+            if (
+                strpos(basename($path), "upload_page_") !== false
+                && FileUtils::getContentType($path) !== "application/pdf"
+            ) {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
+            }
+        }
+
+        if (isset($url_title) && $url_title !== "") {
+            $filename = $url_title;
+        }
+        else {
+            $filename = pathinfo($path, PATHINFO_BASENAME);
+        }
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
