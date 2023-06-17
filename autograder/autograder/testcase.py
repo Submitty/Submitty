@@ -2,7 +2,6 @@ import os
 import traceback
 import socket
 import json
-from timeit import default_timer as timer
 
 from .execution_environments import jailed_sandbox, container_network
 
@@ -84,9 +83,8 @@ class Testcase():
         A wrapper function which executes either _run_compilation or _run_execution based on
         testcase type.
         """
-        self.secure_environment.log_container(f"TESTCASE {self.testcase_id} BEGIN", "", "", 0)
-        testcase_start = timer()
         if self.type in ['Compilation', 'FileCheck']:
+            self.secure_environment.log_container_meta("", "", "AUTOGRADING BEGIN", 0)
             success = self._run_compilation()
         else:
             success = self._run_execution()
@@ -97,13 +95,6 @@ class Testcase():
         else:
             print(self.machine, self.untrusted_user, f"{test_id} FAILURE")
             self.secure_environment.log_message(f"{test_id} FAILURE")
-        self.secure_environment.log_container(
-            f"TESTCASE {self.testcase_id} END",
-            "",
-            "",
-            timer() - testcase_start
-        )
-        self.secure_environment.log_container('')
 
     def _run_execution(self):
         """ Execute this testcase as an execution testcase. """

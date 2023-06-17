@@ -21,8 +21,6 @@ use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
-const DIR = 2;
-
 class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials")
@@ -106,7 +104,6 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/delete")
-     * @AccessControl(role="INSTRUCTOR")
      */
     public function deleteCourseMaterial($id) {
         $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
@@ -117,34 +114,22 @@ class CourseMaterialsController extends AbstractController {
         }
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, $cm->getPath());
-        if ($path === false) {
-            $message = "You do not have access to that page.";
-            $this->core->addErrorMessage($message);
-            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
-        }
-        // check to prevent the deletion of course_materials folder
-        if ($path === FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials")) {
-            $this->core->addErrorMessage(basename($path) . " can't be removed.");
-            return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
-        }
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(rawurldecode($cm->getPath())));
+
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             return new RedirectResponse($this->core->buildCourseUrl(['course_materials']));
         }
 
-        if ($cm->getType() === DIR) {
-            $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-            foreach ($all_files as $file) {
-                if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
-                    $this->core->getCourseEntityManager()->remove($file);
-                }
+        $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+
+        foreach ($all_files as $file) {
+            if (str_starts_with($file->getPath(), $path)) {
+                $this->core->getCourseEntityManager()->remove($file);
             }
         }
-        else {
-            $this->core->getCourseEntityManager()->remove($cm);
-        }
+        $this->core->getCourseEntityManager()->flush();
         $success = false;
         if (is_dir($path)) {
             $success = FileUtils::recursiveRmdir($path);
@@ -152,25 +137,7 @@ class CourseMaterialsController extends AbstractController {
         else {
             $success = unlink($path);
         }
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        // delete the topmost parent folder that's empty (contains no files)
-        if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
-            $empty_folders = [];
-            FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
-            if (count($empty_folders) > 0) {
-                $path = $empty_folders[0];
-                $success = $success && FileUtils::recursiveRmdir($path);
-                if (!isset($all_files)) {
-                    $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-                }
-                foreach ($all_files as $file) {
-                    if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
-                    }
-                }
-            }
-        }
-        $this->core->getCourseEntityManager()->flush();
+
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
@@ -256,7 +223,6 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/course_materials/release_all")
-     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
     public function setReleaseAll(): JsonResponse {
@@ -278,7 +244,7 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (str_starts_with(pathinfo($cm->getPath(), PATHINFO_DIRNAME), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                if (str_starts_with($cm->getPath(), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -328,22 +294,16 @@ class CourseMaterialsController extends AbstractController {
     }
 
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
-        $main_path =  $main_course_material->getPath();
-
         foreach ($course_materials as $course_material) {
-            $course_material_path = $course_material->getPath();
-            $course_material_dir = pathinfo($course_material->getPath(), PATHINFO_DIRNAME);
-
-            $same_start = str_starts_with($course_material_dir, $main_path);
-            $not_same_file = $course_material_path !== $main_path;
-
-            // Third condition prevents cases where two folders are "name" and "name_plus_more_text".
-            if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] === '/') {
+            if (
+                str_starts_with($course_material->getPath(), $main_course_material->getPath())
+                && $course_material->getPath() != $main_course_material->getPath()
+            ) {
                 if ($course_material->isDir()) {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $_POST['id'] = $course_material->getId();
+                    $_POST['requested_path'] = $course_material->getPath();
                     $this->ajaxEditCourseMaterialsFiles(false);
                 }
             }
@@ -389,22 +349,13 @@ class CourseMaterialsController extends AbstractController {
         //handle sections here
 
         if (isset($_POST['sections_lock']) && $_POST['sections_lock'] == "true") {
-            if (!isset($_POST['sections'])) {
+            if ($_POST['sections'] === "") {
                 $sections = null;
-            }
-            elseif ($_POST['sections'] === "") {
-                $sections = [];
             }
             else {
                 $sections = explode(",", $_POST['sections']);
             }
-            if (!isset($_POST['partial_sections'])) {
-                $partial_sections = [];
-            }
-            else {
-                $partial_sections = explode(",", $_POST['partial_sections']);
-            }
-            if ($sections !== null) {
+            if ($sections != null) {
                 $keep_ids = [];
 
                 foreach ($sections as $section) {
@@ -423,7 +374,7 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 foreach ($course_material->getSections() as $section) {
-                    if (!in_array($section->getSectionId(), $keep_ids) && !in_array($section->getSectionId(), $partial_sections)) {
+                    if (!in_array($section->getSectionId(), $keep_ids)) {
                         $course_material->removeSection($section);
                     }
                 }
@@ -438,34 +389,6 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-///maybe delete
-        if (isset($_POST['display_name']) && $course_material->isLink()) {
-            if ($_POST['display_name'] !== $course_material->getDisplayName()) {
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
-                $file_name = urlencode("link-" . $_POST['display_name']);
-                $overwrite = false;
-                if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
-                    $overwrite = true;
-                }
-                $clash_resolution = $this->resolveClashingMaterials($path, [$file_name], $overwrite);
-                if ($clash_resolution !== true) {
-                    return JsonResponse::getErrorResponse(
-                        'Name clash',
-                        $clash_resolution
-                    );
-                }
-                $path = FileUtils::joinPaths($path, $file_name);
-                FileUtils::writeFile($path, "");
-                unlink($course_material->getPath());
-                $course_material->setDisplayName($_POST['link_title']);
-                $course_material->setPath($path);
-            }
-            $course_material->setPath($_POST['link_url']);
-        }
-//maybe end delete?
 
         if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
@@ -567,19 +490,14 @@ class CourseMaterialsController extends AbstractController {
             $details['priority'] = $_POST['sort_priority'];
         }
 
-        $overwrite_all = false;
-        if (isset($_POST['overwrite_all']) && $_POST['overwrite_all'] === 'true') {
-            $overwrite_all = true;
-        }
-
         $n = strpos($requested_path, '..');
         if ($n !== false) {
             return JsonResponse::getErrorResponse("Invalid filepath.");
         }
 
-        $display_name = null;
-        if (isset($_POST['display_name'])) {
-            $display_name = $_POST['display_name'];
+        $url_title = null;
+        if (isset($_POST['url_title'])) {
+            $url_title = $_POST['url_title'];
         }
 
         $dirs_to_make = [];
@@ -595,7 +513,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        if (isset($display_name) && isset($url_url)) {
+        if (isset($url_title) && isset($url_url)) {
             $details['type'][0] = CourseMaterial::LINK;
             $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             if (!empty($requested_path)) {
@@ -604,15 +522,10 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failed to make path.");
                 }
             }
-            $file_name = urlencode("link-" . $display_name);
-            $clash_resolution = $this->resolveClashingMaterials($final_path, [$file_name], $overwrite_all);
-            if ($clash_resolution !== true) {
-                return JsonResponse::getErrorResponse(
-                    'Name clash',
-                    $clash_resolution
-                );
+            $details['path'][0] = FileUtils::joinPaths($final_path, urlencode("link-" . $url_title));
+            if (file_exists($details['path'][0])) {
+                return JsonResponse::getErrorResponse("Link with title already exists in this location. Please pick a different title.");
             }
-            $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
             FileUtils::writeFile($details['path'][0], "");
         }
         else {
@@ -621,7 +534,7 @@ class CourseMaterialsController extends AbstractController {
                 $uploaded_files[1] = $_FILES["files1"];
             }
 
-            if (empty($uploaded_files) && !(isset($url_url) && isset($display_name))) {
+            if (empty($uploaded_files) && !(isset($url_url) && isset($url_title))) {
                 return JsonResponse::getErrorResponse("No files were submitted.");
             }
 
@@ -659,17 +572,17 @@ class CourseMaterialsController extends AbstractController {
 
             $count_item = count($status);
             if (isset($uploaded_files[1])) {
-                $clash_resolution = $this->resolveClashingMaterials($upload_path, $uploaded_files[1]['name'], $overwrite_all);
-                if ($clash_resolution !== true) {
-                    return JsonResponse::getErrorResponse(
-                        'Name clash',
-                        $clash_resolution
-                    );
-                }
                 $index = 0;
                 for ($j = 0; $j < $count_item; $j++) {
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
+
+                        $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                            ->findOneBy(['path' => $dst]);
+                        if ($cm != null) {
+                            return JsonResponse::getErrorResponse("A file already exists with path " .
+                                $dst . ". Please delete the current file if you would like to use this path.");
+                        }
 
                         if (strlen($dst) > 255) {
                             return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
@@ -698,19 +611,8 @@ class CourseMaterialsController extends AbstractController {
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
-                            $double_dot = ["../","..\\","/..","\\.."];
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $entries[] = $zip->getNameIndex($i);
-                                //check to ensure that entry name doesn't have ..
-                                $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
-                                    if (strpos($entries[count($entries) - 1], $dot) !== false) {
-                                        return true;
-                                    }
-                                    return false;
-                                });
-                                if (count($dot_check) !== 0) {
-                                    return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
-                                }
                             }
                             $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                                 $name = strtolower($entry);
@@ -732,12 +634,14 @@ class CourseMaterialsController extends AbstractController {
                                 return substr($entry, -1) !== '/';
                             });
 
-                            $clash_resolution = $this->resolveClashingMaterials($upload_path, $zfiles, $overwrite_all);
-                            if ($clash_resolution !== true) {
-                                return JsonResponse::getErrorResponse(
-                                    'Name clash',
-                                    $clash_resolution
-                                );
+                            foreach ($zfiles as $zfile) {
+                                $path = FileUtils::joinPaths($upload_path, $zfile);
+                                $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                                    ->findOneBy(['path' => $path]);
+                                if ($cm != null) {
+                                    return JsonResponse::getErrorResponse("A file already exists with path " .
+                                        $path . ". Please delete the current file if you would like to use this path.");
+                                }
                             }
 
                             $zip->extractTo($upload_path, $entries);
@@ -813,7 +717,7 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $display_name : null
+                $value === CourseMaterial::LINK ? $url_title : null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
@@ -843,33 +747,4 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    /**
-     * @return array<int, string>|bool true
-     */
-    private function resolveClashingMaterials(string $upload_path, array $file_names, bool $overwrite_all) {
-        $prepend_path = function ($elem) use ($upload_path) {
-            return FileUtils::joinPaths($upload_path, $elem);
-        };
-        $file_names = array_map($prepend_path, $file_names);
-        $c_materials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->
-            findBy(['path' => $file_names]);
-        $clashing_materials = [];
-        foreach ($c_materials as $cm) {
-            $clashing_materials[$cm->getId()] = $cm->getPath();
-        }
-        if ($clashing_materials !== []) {
-            if ($overwrite_all) {
-                $em = $this->core->getCourseEntityManager();
-                foreach ($clashing_materials as $id => $path) {
-                    $cm_ref = $em->getReference(CourseMaterial::class, $id);
-                    $em->remove($cm_ref);
-                    unlink($path);
-                }
-                $em->flush();
-                return true;
-            }
-            return array_values($clashing_materials);
-        }
-        return true;
-    }
 }

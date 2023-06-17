@@ -195,17 +195,20 @@ class OfficeHoursQueueController extends AbstractController {
      * @return RedirectResponse
      */
     public function switchQueue($queue_code) {
-        $user_id = $this->core->getUser()->getId();
-
         //do all error checking before leaving previous queue
+        if (empty($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing user id");
+            return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
+        }
+
         //make sure they are already in a queue first
-        if (!$this->core->getQueries()->alreadyInAQueue($user_id)) {
+        if (!$this->core->getQueries()->alreadyInAQueue($_POST['user_id'])) {
             $this->core->addErrorMessage("You aren't in a queue");
             return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
         }
 
         //get the time they joined the previous queue
-        $time_in = $this->core->getQueries()->getTimeJoinedQueue($user_id, $queue_code);
+        $time_in = $this->core->getQueries()->getTimeJoinedQueue($_POST['user_id'], $queue_code);
         $token = $_POST['token'];
         $new_queue_code = $_POST['code'];
 
@@ -248,10 +251,10 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         //remove them from current queue
-        $this->core->getQueries()->removeUserFromQueue($user_id, 'self', $queue_code);
+        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], 'self', $queue_code);
 
         //add to new queue
-        $this->core->getQueries()->addToQueue($validated_code, $user_id, $_POST['name'], $contact_info, $time_in);
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info, $time_in);
         $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));

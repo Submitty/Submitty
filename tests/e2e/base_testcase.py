@@ -80,13 +80,12 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         # attempt to set-up the connection to Chrome. Repeat a handful of times
         # in-case Chrome crashes during initialization
-        for attempt in range(5):
+        for _ in range(5):
             try:
                 self.driver = webdriver.Chrome(options=self.options)
                 break
             except WebDriverException:
-                if attempt == 4:
-                    raise WebDriverException
+                pass
         if self.driver is None:
             self.driver = webdriver.Chrome(options=self.options)
 
@@ -203,7 +202,7 @@ class BaseTestCase(unittest.TestCase):
         """
         Causes the running selenium test to pause until the user has hit the enter key in the
         terminal that is running python. This is useful for using in the middle of building tests
-        as then you can use the javascript console to inspect the page, get the name/id of elements
+        as then you cna use the javascript console to inspect the page, get the name/id of elements
         or other such actions and then use that to continue building the test
         """
         input("Hit enter to continue...")

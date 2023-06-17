@@ -209,7 +209,7 @@ class ImagesController extends AbstractController {
 
         if ($result) {
             return JsonResponse::getSuccessResponse([
-                'given_family_username' => $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName(),
+                'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
                 'image_data' => $image_data,
                 'image_mime_type' => $image_mime_type,
                 'icon_html' => $icon_html,

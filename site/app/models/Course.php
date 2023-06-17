@@ -25,8 +25,6 @@ class Course extends AbstractModel {
     protected $display_name;
     /** @property int $user_group used to rank courses in homepage view. */
     protected $user_group;
-    /** @property string $registration_section for homepage view */
-    protected $registration_section;
 
     /**
      * Course constructor.
@@ -41,7 +39,6 @@ class Course extends AbstractModel {
         $this->title = $details['course'];
         $this->display_name = "";
         $this->user_group = $details['user_group'] ?? 3;
-        $this->registration_section = $details['registration_section'] ?? null;
     }
 
     public function loadDisplayName() {
@@ -77,8 +74,7 @@ class Course extends AbstractModel {
             "title" => $this->title,
             "display_name" => $this->display_name,
             "display_semester" => $this->semester_name,
-            "user_group" => $this->user_group,
-            "registration_section" => $this->registration_section
+            "user_group" => $this->user_group
         ];
     }
 }

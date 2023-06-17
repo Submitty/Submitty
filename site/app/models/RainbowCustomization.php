@@ -140,10 +140,7 @@ class RainbowCustomization extends AbstractModel {
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
                 foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if ($j_index >= count($json_bucket->ids)) {
-                        $c_gradeable['override_max'] = $c_gradeable['max_score'];
-                    }
-                    elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
+                    if ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
                         $c_gradeable['override'] = true;
                         $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
                     }
@@ -423,32 +420,17 @@ class RainbowCustomization extends AbstractModel {
             // Get sections from the file
             $sectionsFromFile = (array) $this->RCJSON->getSection();
 
-            // gets the number of sections in the database
+            // If sections from database is larger than sections from file then there must be a new section in
+            // in the database, add new fields into sections from file with defaults
+            $sectionsFromFileCount = count($sectionsFromFile);
             $sectionsCount = count($sections);
 
-            // creates a copy of the database sections to compare against the file sections
-            $database_copy = [];
-            for ($i = 0; $i < $sectionsCount; $i++) {
-                $database_copy[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
-            }
-
-            // checks whether or not sections have been added and updates the file sections
-            $result = array_diff_key($database_copy, $sectionsFromFile);
-            if (count($result) > 0) {
-                foreach ($result as $x => $val) {
-                    $sectionsFromFile[$x] = $val;
+            if ($sectionsFromFileCount != $sectionsCount) {
+                for ($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++) {
+                    $sectionsFromFile[$i] = (string) $i;
                 }
             }
 
-            // checks whether or not sections have been removed and updates the file sections
-            $result = array_diff_key($sectionsFromFile, $database_copy);
-            if (count($result) > 0) {
-                foreach ($result as $x => $val) {
-                    unset($sectionsFromFile[$x]);
-                }
-            }
-
-            // Collect sections out of the file
             return (object) $sectionsFromFile;
         }
         else {

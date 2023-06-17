@@ -30,14 +30,12 @@ from typing import List, Tuple
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
-from autograder import scheduler
 from autograder import config as submitty_config
 
 
 INTERACTIVE_QUEUE = ''
 IN_PROGRESS_PATH = ''
 JOB_ID = '~SHIP~'
-_COPY_SUFFIX = "_COPYING"
 
 
 def instantiate_global_variables(config):
@@ -94,10 +92,8 @@ def copy_files(
     """
     if address == 'localhost':
         for src, dest in files:
-            dest_tmp = dest + _COPY_SUFFIX
             if src != dest:
-                shutil.copy(src, dest_tmp)
-                os.rename(dest_tmp, dest)
+                shutil.copy(src, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -120,14 +116,10 @@ def copy_files(
         try:
             if direction == CopyDirection.PUSH:
                 for local, remote in files:
-                    remote_tmp = remote + _COPY_SUFFIX
-                    sftp.put(local, remote_tmp)
-                    sftp.posix_rename(remote_tmp, remote)
+                    sftp.put(local, remote)
             else:
                 for remote, local in files:
-                    local_tmp = local + _COPY_SUFFIX
-                    sftp.get(remote, local_tmp)
-                    os.rename(local_tmp, local)
+                    sftp.get(remote, local)
         finally:
             if sftp is not None:
                 sftp.close()
@@ -378,7 +370,6 @@ def prepare_job(
             next_to_grade
         )
         autograding_zip_tmp, submission_zip_tmp = zips
-        todo_queue_file_tmp_fd, todo_queue_file_tmp = tempfile.mkstemp()
 
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
@@ -410,14 +401,14 @@ def prepare_job(
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    with open(todo_queue_file_tmp, 'w') as outfile:
+    with open(todo_queue_file, 'w') as outfile:
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
         copy_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
-            (todo_queue_file_tmp, todo_queue_file)
+            (todo_queue_file, todo_queue_file)
         ], CopyDirection.PUSH)
     except Exception as e:
         config.logger.log_stack_trace(traceback.format_exc(), job_id=JOB_ID)
@@ -427,19 +418,10 @@ def prepare_job(
         print(f"ERROR: could not move files due to the following error: {e}")
         return False
     finally:
-        os.close(todo_queue_file_tmp_fd)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(autograding_zip_tmp)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(autograding_zip_tmp + _COPY_SUFFIX)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(submission_zip_tmp)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(submission_zip_tmp + _COPY_SUFFIX)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(todo_queue_file_tmp)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(todo_queue_file_tmp + _COPY_SUFFIX)
+        os.remove(autograding_zip_tmp)
+        os.remove(submission_zip_tmp)
+        if host != 'localhost':
+            os.remove(todo_queue_file)
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
@@ -508,8 +490,8 @@ def unpack_job(
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
         copy_files(config, which_machine, [
-            (target_results_zip, local_results_zip),
-            (target_done_queue_file, local_done_queue_file)
+            (target_done_queue_file, local_done_queue_file),
+            (target_results_zip, local_results_zip)
         ], CopyDirection.PULL)
     except (socket.timeout, TimeoutError, FileNotFoundError):
         # These are expected error cases, so we clean up on our end and return a `WAITING` status.
@@ -541,12 +523,7 @@ def unpack_job(
         # We've assigned a value to status, so return the status
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_done_queue_file)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(local_done_queue_file + _COPY_SUFFIX)
-        with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(local_results_zip + _COPY_SUFFIX)
         return status
 
     try:
@@ -632,13 +609,9 @@ def unpack_job(
     finally:
         # Whether we succeeded or failed, make sure that we've cleaned up after ourselves.
         with contextlib.suppress(FileNotFoundError):
-            os.remove(local_done_queue_file)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(local_done_queue_file + _COPY_SUFFIX)
-        with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
         with contextlib.suppress(FileNotFoundError):
-            os.remove(local_results_zip + _COPY_SUFFIX)
+            os.remove(local_done_queue_file)
 
     if status == GradingStatus.SUCCESS:
         config.logger.log_message(f"Unpacked job from {worker_name}", jobname=item_name)
@@ -807,6 +780,7 @@ def checkout_vcs_repo(config, my_file):
         obj["semester"],
         obj["course"]
     )
+    submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
@@ -826,29 +800,42 @@ def checkout_vcs_repo(config, my_file):
         config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
-    is_vcs, vcs_type, vcs_base_url, vcs_partial_path, vcs_subdirectory = vcs_info
+    is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = vcs_info
 
     # cleanup the previous checkout (if it exists)
     shutil.rmtree(checkout_path, ignore_errors=True)
+    os.makedirs(checkout_path, exist_ok=True)
 
     job_id = "~VCS~"
 
     try:
-        # This is for external, instructor specified repositories
-        if '://' not in vcs_partial_path and '@' not in vcs_partial_path:
-            if '://' in vcs_base_url:
-                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
-            else:
-                vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
-        else:
-            vcs_path = vcs_partial_path
+        # If we are public or private github, we will have an empty vcs_subdirectory
+        if vcs_subdirectory == '':
+            with open(
+                os.path.join(submission_path, ".submit.VCS_CHECKOUT")
+            ) as submission_vcs_file:
+                VCS_JSON = json.load(submission_vcs_file)
+                git_user_id = VCS_JSON["git_user_id"]
+                git_repo_id = VCS_JSON["git_repo_id"]
+                if not valid_github_user_id(git_user_id):
+                    raise Exception("Invalid GitHub user/organization name: '"+git_user_id+"'")
+                if not valid_github_repo_id(git_repo_id):
+                    raise Exception("Invalid GitHub repository name: '"+git_repo_id+"'")
+                # construct path for GitHub
+                vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
 
-        sub_checkout_path = os.path.join(checkout_path, "tmp")
-        os.makedirs(sub_checkout_path, exist_ok=True)
-# _________________________________________________________________________________________________________
+        # is vcs_subdirectory standalone or should it be combined with base_url?
+        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+            vcs_path = vcs_subdirectory
+        else:
+            if '://' in vcs_base_url:
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+            else:
+                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+
         # warning: --depth is ignored in local clones; use file:// instead.
-        if '://' not in vcs_path and '@' not in vcs_path:
-            vcs_path = 'file:///' + vcs_path
+        if '://' not in vcs_path:
+            vcs_path = "file:///" + vcs_path
 
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
         checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
@@ -894,15 +881,13 @@ def checkout_vcs_repo(config, my_file):
         #
         #  NOTE: If the server is busy, it might take seconds or
         #     minutes for an available shipper to process the git
-        #     clone, and the timestamp might be slightly late)
+        #     clone, and thethe timestamp might be slightly late)
         #
         #  So we choose this option!  (for now)
         #
-
         clone_command = [
-                '/usr/bin/git', 'clone', vcs_path,
-                sub_checkout_path, '--depth', '1', '-b', which_branch
-            ]
+            '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', which_branch
+        ]
 
         with open(checkout_log_file, 'a') as f:
             print("VCS CHECKOUT", file=f)
@@ -916,7 +901,7 @@ def checkout_vcs_repo(config, my_file):
         # or because we don't have appropriate access credentials
         try:
             subprocess.check_call(clone_command)
-            os.chdir(sub_checkout_path)
+            os.chdir(checkout_path)
 
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
@@ -936,41 +921,12 @@ def checkout_vcs_repo(config, my_file):
                 #    # and check out the right version
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
-                # copy the subdirectory we want to the
-                # original checkout path and remove the extra files
-                try:
-                    if vcs_subdirectory != '':
-                        if vcs_subdirectory[0] == '/':
-                            vcs_subdirectory = vcs_subdirectory[1:]
-                        file_path = os.path.join(sub_checkout_path, vcs_subdirectory)
-                    else:
-                        file_path = sub_checkout_path
-
-                    shutil.copytree(file_path, checkout_path, dirs_exist_ok=True)
-                    shutil.rmtree(sub_checkout_path)
-
-                except Exception as error:
-                    shutil.rmtree(sub_checkout_path)
-                    config.logger.log_message(
-                        f'ERROR: failed to find files in the {vcs_subdirectory} subdirectory',
-                        job_id=job_id
-                    )
-                    os.chdir(checkout_path)
-                    error_path = os.path.join(
-                        checkout_path, 'failed_subdirectory_invalid_or_empty.txt'
-                    )
-                    with open(error_path, 'w') as f:
-                        print(str(error), file=f)
-                        print("\n", file=f)
-                        print(f"Check to be sure the subdirectory '{vcs_subdirectory}'" +
-                              " exists and all relevant files are present.", file=f)
-                        print("If you have made changes, " +
-                              "make sure you commit and push them.", file=f)
-
-                with open(checkout_log_file, 'a') as log_file:
-                    subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
-                    print("\n====================================\n", file=log_file)
-                    subprocess.call(['du', '-skh', checkout_path], stdout=log_file)
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
+                print(
+                    "\n====================================\n",
+                    file=open(checkout_log_file, 'a')
+                )
+                subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
                 obj['revision'] = what_version
 
             # exception on git rev-list
@@ -986,11 +942,14 @@ def checkout_vcs_repo(config, my_file):
                 with open(error_path, 'w') as f:
                     print(str(error), file=f)
                     print("\n", file=f)
-                    print("Check to be sure the repository is not empty.", file=f)
+                    print("Check to be sure the repository is not empty.\n", file=f)
                     print("Check to be sure the repository has a " + which_branch +
-                          " branch.", file=f)
-                    print("And check to be sure the timestamps on the " + which_branch +
-                          " branch are reasonable.", file=f)
+                          " branch.\n", file=f)
+                    print(
+                        "And check to be sure the timestamps on the " + which_branch +
+                        " branch are reasonable.\n",
+                        file=f
+                    )
 
         # exception on git clone
         except subprocess.CalledProcessError as error:
@@ -1000,11 +959,12 @@ def checkout_vcs_repo(config, my_file):
             with open(error_path, 'w') as f:
                 print(str(error), file=f)
                 print("\n", file=f)
-                print("Check to be sure the repository exists.", file=f)
-                print("If you have made changes, make sure you commit and push them. ", file=f)
+                print("Check to be sure the repository exists.\n", file=f)
                 print(
                     "And check to be sure the submitty_daemon user has appropriate access "
-                    "credentials.", file=f)
+                    "credentials.\n",
+                    file=f
+                )
 
     # exception in constructing full git repository url/path
     except Exception as error:
@@ -1017,10 +977,10 @@ def checkout_vcs_repo(config, my_file):
         with open(error_path, 'w') as f:
             print(str(error), file=f)
             print("\n", file=f)
-            print("Check to be sure the repository exists.", file=f)
+            print("Check to be sure the repository exists.\n", file=f)
             print(
                 "And check to be sure the submitty_daemon user has appropriate access "
-                "credentials.",
+                "credentials.\n",
                 file=f)
 
     # remove the .git directory (storing full history and metafiles)
@@ -1620,12 +1580,12 @@ def cleanup_shippers(config, worker_status_map, autograding_workers):
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers(config, worker_status_map, autograding_workers) -> List[scheduler.Worker]:
+def launch_shippers(config, worker_status_map, autograding_workers):
     print("LAUNCH SHIPPERS")
     config.logger.log_message("submitty_autograding_shipper.py launched")
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
-    shippers = []
+    processes = list()
     for name, machine in autograding_workers.items():
         # SKIP MACHINES THAT ARE NOT ENABLED OR NOT REACHABLE
         if not machine['enabled']:
@@ -1687,10 +1647,9 @@ def launch_shippers(config, worker_status_map, autograding_workers) -> List[sche
                 args=(config, thread_name, single_machine_data[name], full_address, u)
             )
             p.start()
-            shipper = scheduler.Worker(config, thread_name, machine, p)
-            shippers.append(shipper)
+            processes.append((thread_name, p))
 
-    return shippers
+    return processes
 
 
 def get_job_requirements(job_file):
@@ -1715,17 +1674,63 @@ def worker_job_match(worker, autograding_workers, job_requirements):
 
 def monitoring_loop(
     config: submitty_config.Config,
-    processes: List[scheduler.Worker]
+    autograding_workers: dict,
+    processes: List[Tuple[str, multiprocessing.Process]]
 ):
 
     print("MONITORING LOOP")
-    sched = scheduler.FCFSScheduler(config, processes)
     total_num_workers = len(processes)
 
     # main monitoring loop
     try:
         while True:
-            sched.update_and_schedule()
+            alive = 0
+            for name, p in processes:
+                if p.is_alive:
+                    alive = alive+1
+                else:
+                    config.logger.log_message(f"ERROR: process {name} is not alive")
+            if alive != total_num_workers:
+                config.logger.log_message(
+                    f"ERROR: #shippers={total_num_workers} != #alive={alive}"
+                )
+
+            # Find which workers are currently idle, as well as any autograding
+            # jobs which need to be scheduled.
+            workers = [name for (name, p) in processes if p.is_alive]
+            idle_workers = list(filter(
+                lambda n: len(os.listdir(worker_folder(n))) == 0,
+                workers
+            ))
+            jobs = filter(
+                os.path.isfile,
+                map(
+                    lambda f: os.path.join(INTERACTIVE_QUEUE, f),
+                    os.listdir(INTERACTIVE_QUEUE)
+                )
+            )
+
+            # Distribute available jobs randomly among workers currently idle.
+            for job in jobs:
+                if len(idle_workers) == 0:
+                    break
+                job_requirements = get_job_requirements(job)
+                # prune the list to the workers that have the necessary capabilities for this job
+                matching_workers = list(filter(
+                    lambda n: worker_job_match(n, autograding_workers, job_requirements),
+                    idle_workers
+                ))
+                if len(matching_workers) == 0:
+                    # skip this job for now if none of the idle workers can handle this job
+                    continue
+                # pick one of the matching workers randomly
+                dest = random.choice(matching_workers)
+                config.logger.log_message(
+                    f"Pushing job {os.path.basename(job)} to {dest}."
+                )
+                shutil.move(job, worker_folder(dest))
+                idle_workers.remove(dest)
+
             time.sleep(1)
 
     except KeyboardInterrupt:
@@ -1806,4 +1811,4 @@ if __name__ == "__main__":
     worker_status_map = update_remote_autograding_workers(config, autograding_workers)
     cleanup_shippers(config, worker_status_map, autograding_workers)
     processes = launch_shippers(config, worker_status_map, autograding_workers)
-    monitoring_loop(config, processes)
+    monitoring_loop(config, autograding_workers, processes)

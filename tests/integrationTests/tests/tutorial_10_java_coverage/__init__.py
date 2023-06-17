@@ -55,7 +55,6 @@ def schema_validation(test):
 
 @testcase
 def correct(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "correct.zip"),
@@ -76,7 +75,6 @@ def correct(test):
 
 @testcase
 def correct_no_coverage(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "correct_no_coverage.zip"),
@@ -97,7 +95,6 @@ def correct_no_coverage(test):
 
 @testcase
 def buggy_coverage(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy_coverage.zip"),
@@ -118,7 +115,6 @@ def buggy_coverage(test):
 
 @testcase
 def buggy_no_coverage(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy_no_coverage.zip"),

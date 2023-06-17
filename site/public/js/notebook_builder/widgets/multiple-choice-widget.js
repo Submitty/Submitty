@@ -1,6 +1,3 @@
-/* global Widget */
-/* exported MultipleChoiceWidget */
-
 class MultipleChoiceWidget extends Widget {
     constructor() {
         super();
@@ -10,7 +7,7 @@ class MultipleChoiceWidget extends Widget {
         this.state = {
             type: 'multiple_choice',
             choices: [],
-            filename: 'default.txt',
+            filename: 'default.txt'
         };
     }
 

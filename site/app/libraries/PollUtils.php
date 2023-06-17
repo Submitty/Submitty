@@ -10,33 +10,29 @@ namespace app\libraries;
 class PollUtils {
     /**
      * Generates a PHP array containing the all the poll data used in the export procedure
-     * @param \app\entities\poll\Poll[] $polls the array of polls to be summarized
+     * @param array $polls the array of polls to be summarized
      */
     public static function getPollExportData(array $polls): array {
-        $export_data = [];
+        $data = [];
         foreach ($polls as $poll) {
-            $poll_data = [
-                'id' => $poll->getId(),
-                'name' => $poll->getName(),
-                'question' => $poll->getQuestion(),
-                'question_type' => $poll->getQuestionType(),
-                'responses' => [],
-                'correct_responses' => [],
-                'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
-                'status' => $poll->getStatus(),
-                'release_histogram' => $poll->getReleaseHistogram(),
-                'release_answer' => $poll->getReleaseAnswer(),
-                'image_path' => $poll->getImagePath()
-            ];
-            foreach ($poll->getOptions() as $option) {
-                $poll_data['responses'][$option->getOrderId()] = $option->getResponse();
-                if ($option->isCorrect()) {
-                    $poll_data['correct_responses'][] = $option->getOrderId();
-                }
+            $responses = [];
+            foreach ($poll->getResponses() as $response) {
+                $responses[$response] = $poll->getResponseString($response);
             }
-            $export_data[] = $poll_data;
+            $data[] = [
+                "id" => $poll->getId(),
+                "name" => $poll->getName(),
+                "question" => $poll->getQuestion(),
+                "question_type" => $poll->getQuestionType(),
+                "responses" => $responses,
+                "correct_responses" => $poll->getAnswers(),
+                "release_date" => $poll->getReleaseDate(),
+                "status" => $poll->getStatus(),
+                "image_path" => $poll->getImagePath(),
+                "release_histogram" => $poll->getReleaseHistogram()
+            ];
         }
-        return $export_data;
+        return $data;
     }
 
     public static function getPollTypes(): array {
@@ -57,14 +53,6 @@ class PollUtils {
     }
 
     public static function getReleaseHistogramSettings(): array {
-        return [
-            "never",
-            "when_ended",
-            "always"
-        ];
-    }
-
-    public static function getReleaseAnswerSettings(): array {
         return [
             "never",
             "when_ended",

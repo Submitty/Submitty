@@ -42,7 +42,7 @@ class GlobalView extends AbstractView {
             "page_title" => $page_title,
             "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
-            "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
+            "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
@@ -57,12 +57,10 @@ class GlobalView extends AbstractView {
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
-            "manifast_path" => $this->core->getOutput()->getManifastPath(),
-            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
         ]);
     }
 
-    public function footer($runtime, $wrapper_urls, $footer_links, $content_only, bool $performance_warning) {
+    public function footer($runtime, $wrapper_urls, $footer_links, $content_only) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
@@ -75,7 +73,6 @@ class GlobalView extends AbstractView {
             "footer_links" => $footer_links,
             "module_js" => $this->output->getModuleJs(),
             "content_only" => $content_only,
-            "performance_warning" => $performance_warning
         ]);
     }
 }

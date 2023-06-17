@@ -17,7 +17,7 @@ class QueryIdentifier {
             $tokens = str_split($query);
             $pos = 4;
             $tokenCount = count($tokens);
-            $parenthesis = 0;
+            $paranthesis = 0;
             $afterColumnList = false;
             $afterCte = false;
             while ($pos < $tokenCount) {
@@ -28,11 +28,11 @@ class QueryIdentifier {
 
                 if ($afterColumnList) {
                     if ($tokens[$pos] === '(') {
-                        $parenthesis++;
+                        $paranthesis++;
                     }
                     elseif ($tokens[$pos] === ')') {
-                        $parenthesis--;
-                        if ($afterColumnList && $parenthesis === 0) {
+                        $paranthesis--;
+                        if ($afterColumnList && $paranthesis === 0) {
                             $afterCte = true;
                         }
                     }
@@ -49,7 +49,7 @@ class QueryIdentifier {
                 }
 
                 if ($token !== '') {
-                    if ($parenthesis === 0 && $token === 'as') {
+                    if ($paranthesis === 0 && $token === 'as') {
                         $afterColumnList = true;
                     }
                     elseif ($afterColumnList && $afterCte) {

@@ -1,28 +1,21 @@
-/* exported NUM_MARKDOWN, Widget */
-
-const NUM_MARKDOWN = 0;
+/* export NUM_MARKDOWN */
+let NUM_MARKDOWN = 0;
 
 class Widget {
     /**
      * Get the html representation of the widget.
      */
-    render() {
-        throw 'Implement this method in the child class.';
-    }
+    render() { throw 'Implement this method in the child class.'; }
 
     /**
      * Parse through any interactive elements inside the widget and save them into the widget's state object.
      */
-    commitState() {
-        throw 'Implement this method in the child class.';
-    }
+    commitState() { throw 'Implement this method in the child class.'; }
 
     /**
      * Get the JSON representation of the widget.  This is usually just the state object.
      */
-    getJSON() {
-        throw 'Implement this method in the child class.';
-    }
+    getJSON() { throw 'Implement this method in the child class.'; }
 
     /**
      * Gets a widget container div.
@@ -33,7 +26,7 @@ class Widget {
     getContainer(heading_text) {
         const widget_main = document.createElement('div');
         widget_main.classList.add('widget-main');
-        widget_main.appendChild(this.getHeadingContainer(heading_text));
+        widget_main.appendChild(this.getHeadingContainer(heading_text))
         widget_main.appendChild(this.getInteractiveContainer());
 
         const widget_controls = this.getControls();

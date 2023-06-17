@@ -7,8 +7,8 @@ test('helper', () => {
     expect(helper('0', '1', 0)).toEqual(true);
     expect(helper('1', '0', 0)).toEqual(false);
     expect(helper('0', '0', 0)).toEqual(false);
-    expect(helper('', 'apple', 0)).toEqual(true);
-    expect(helper('apple', '', 0)).toEqual(false);
+    expect(helper('', 'apple', 0)).toEqual(false);
+    expect(helper('apple', '', 0)).toEqual(true);
     expect(helper('1', 'apple', 0)).toEqual(true);
     expect(helper('apple', '1', 0)).toEqual(false);
     expect(helper('cat', 'apple', 1)).toEqual(false);
@@ -111,14 +111,14 @@ test('comparator', () => {
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
-    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
-    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
-    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
-    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
-    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
+    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
+    expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
+    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'asc')).toEqual(true);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'asc')).toEqual(false);
+    expect(comparator(rowArray[3].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 0, 'desc')).toEqual(false);
+    expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[3].getElementsByTagName('TD'), 0, 'desc')).toEqual(true);
 
     // testing second column
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 1, 'asc')).toEqual(true);
@@ -136,7 +136,7 @@ test('comparator', () => {
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 4, 'desc')).toEqual(true);
     expect(comparator(rowArray[2].getElementsByTagName('TD'), rowArray[0].getElementsByTagName('TD'), 4, 'desc')).toEqual(false);
 
-    // testing ninth column
+    // testing nineth column
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 8, 'desc')).toEqual(false);
     expect(comparator(rowArray[0].getElementsByTagName('TD'), rowArray[1].getElementsByTagName('TD'), 8, 'asc')).toEqual(true);
     expect(comparator(rowArray[1].getElementsByTagName('TD'), rowArray[2].getElementsByTagName('TD'), 8, 'desc')).toEqual(false);
@@ -160,6 +160,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="azhacker">
                 <td>1</td>
@@ -253,20 +254,9 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
-            <tr id="zoezoe">
-                <td></td>
-                <td class="align-left">zoezoe</td>
-                <td class="align-left">Zoe</td>
-                <td class="align-left">Zoe</td>
-                <td></td>
-                <td></td>
-                <td>2018-04-03 18:47:02</td>
-                <td></td>
-                <td>10</td>
-                <td></td>
-                <td style="display: none;">False</td>
-            </tr><tr id="aphacker">
+            <tr id="aphacker">
                 <td>1</td>
                 <td class="align-left">aphacker</td>
                 <td class="align-left">Alyssa P</td>
@@ -326,6 +316,18 @@ test('sort', () => {
                 <td>21</td>
                 <td></td>
                 <td style="display: none;">False</td>
+            </tr><tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
             </tr>
         </tbody>
     </table>`;
@@ -347,8 +349,21 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
-            <tr id="bechta">
+            <tr id="zoezoe">
+                <td></td>
+                <td class="align-left">zoezoe</td>
+                <td class="align-left">Zoe</td>
+                <td class="align-left">Zoe</td>
+                <td></td>
+                <td></td>
+                <td>2018-04-03 18:47:02</td>
+                <td></td>
+                <td>10</td>
+                <td></td>
+                <td style="display: none;">False</td>
+            </tr><tr id="bechta">
                 <td>Audit</td>
                 <td class="align-left">bechta</td>
                 <td class="align-left">Abigale</td>
@@ -408,18 +423,6 @@ test('sort', () => {
                 <td>0</td>
                 <td></td>
                 <td style="display: none;">False</td>
-            </tr><tr id="zoezoe">
-                <td></td>
-                <td class="align-left">zoezoe</td>
-                <td class="align-left">Zoe</td>
-                <td class="align-left">Zoe</td>
-                <td></td>
-                <td></td>
-                <td>2018-04-03 18:47:02</td>
-                <td></td>
-                <td>10</td>
-                <td></td>
-                <td style="display: none;">False</td>
             </tr>
         </tbody>
     </table>`;
@@ -442,6 +445,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="aphacker">
                 <td>1</td>
@@ -537,6 +541,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
@@ -633,6 +638,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="zoezoe">
                 <td></td>
@@ -729,6 +735,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="batdiddle">
                 <td>4</td>
@@ -825,6 +832,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="aphacker">
                 <td>1</td>
@@ -921,6 +929,7 @@ test('sort', () => {
                 <td id="10" style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
+
         <tbody id="tbody">
             <tr id="bechta">
                 <td>Audit</td>

@@ -75,7 +75,7 @@ class GradedComponent extends AbstractModel {
      * @param array $details any remaining properties
      * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
-    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details, User $verifier = null) {
+    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details) {
         parent::__construct($core);
 
         if ($ta_graded_gradeable === null) {
@@ -89,7 +89,9 @@ class GradedComponent extends AbstractModel {
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
         $this->verifier_id = $details['verifier_id'] ?? '';
-        $this->verifier = $verifier;
+        if ($this->verifier_id !== '') {
+            $this->verifier = $this->core->getQueries()->getUserById($this->verifier_id);
+        }
         $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -346,7 +348,7 @@ class GradedComponent extends AbstractModel {
 
     /**
      * Sets the time for when this component was verified
-     * @param string|null $verify_time
+     * @param string $verify_time
      */
     public function setVerifyTime($verify_time) {
         if ($verify_time === null) {

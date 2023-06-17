@@ -85,7 +85,6 @@ def solution(test):
 
 @testcase
 def buggy(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error1.py"),
@@ -104,7 +103,6 @@ def buggy(test):
 
 @testcase
 def buggy2(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error2.py"),

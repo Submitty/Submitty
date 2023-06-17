@@ -11,19 +11,24 @@ text.actor {
     stroke: var(--standard-medium-dark-gray);
 }
 
+.messageLine0{
+
+}
+
 .positive-end {
-    content: "\f00c";
-    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: "Font Awesome 5 Free";
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+}
+
+.messageLine1{
+
 }
 
 .negative-end {
-    content: "\f12a";
-    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: "Font Awesome 5 Free";
+    content: '\f12a';
+    font-family: 'Font Awesome 5 Free';
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .labelText {
     word-wrap: break-word;
 }
@@ -33,7 +38,6 @@ text.actor {
     fill: var(--standard-pale-yellow);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .noteText {
     word-wrap: break-word;
 }

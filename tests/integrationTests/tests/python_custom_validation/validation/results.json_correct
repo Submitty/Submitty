@@ -10,13 +10,7 @@
             "autochecks": [
                 {
                     "actual_file": "test02/STDOUT.txt",
-                    "description": "STDOUT.txt",
-                    "messages": [
-                        {
-                            "message": "Success: numbers summed correctly.",
-                            "type": "success"
-                        }
-                    ]
+                    "description": "STDOUT.txt"
                 }
             ],
             "points_awarded": 8,
@@ -26,13 +20,7 @@
             "autochecks": [
                 {
                     "actual_file": "test03/STDOUT.txt",
-                    "description": "STDOUT.txt",
-                    "messages": [
-                        {
-                            "message": "Success: numbers summed correctly.",
-                            "type": "success"
-                        }
-                    ]
+                    "description": "STDOUT.txt"
                 }
             ],
             "points_awarded": 6,
@@ -42,13 +30,7 @@
             "autochecks": [
                 {
                     "actual_file": "test04/STDOUT_0.txt",
-                    "description": "STDOUT_0.txt",
-                    "messages": [
-                        {
-                            "message": "Success: numbers summed correctly.",
-                            "type": "success"
-                        }
-                    ]
+                    "description": "STDOUT_0.txt"
                 },
                 {
                     "actual_file": "test04/STDOUT_1.txt",

@@ -2,7 +2,8 @@
 
 namespace app\libraries;
 
-use League\CommonMark\Block\Renderer\FencedCodeRenderer;
+use app\libraries\CustomCodeBlockRenderer;
+use Spatie\CommonMarkHighlighter\FencedCodeRenderer;
 
 class CustomFencedCodeRenderer extends CustomCodeBlockRenderer {
     public function __construct() {

@@ -22,20 +22,20 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testCreateNonExistantDir() {
-        $this->assertDirectoryDoesNotExist($this->path);
+        $this->assertDirectoryNotExists($this->path);
         $this->assertTrue(FileUtils::createDir($this->path));
         $this->assertDirectoryExists($this->path);
     }
 
     public function testCreateExistingDir() {
-        $this->assertDirectoryDoesNotExist($this->path);
+        $this->assertDirectoryNotExists($this->path);
         $this->assertTrue(FileUtils::createDir($this->path));
         $this->assertTrue(FileUtils::createDir($this->path));
         $this->assertDirectoryExists($this->path);
     }
 
     public function testCreateDirOverFile() {
-        $this->assertFileDoesNotExist($this->path);
+        $this->assertFileNotExists($this->path);
         file_put_contents($this->path, "Some Data");
         $this->assertFileExists($this->path);
         $this->assertFalse(is_dir($this->path));
@@ -44,16 +44,16 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testCreateDirRecursive() {
-        $this->assertDirectoryDoesNotExist($this->path);
-        $this->assertDirectoryDoesNotExist(FileUtils::joinPaths($this->path, 'test'));
+        $this->assertDirectoryNotExists($this->path);
+        $this->assertDirectoryNotExists(FileUtils::joinPaths($this->path, 'test'));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->path, 'test'), true));
         $this->assertDirectoryExists(FileUtils::joinPaths($this->path, 'test'));
         $this->assertDirectoryExists($this->path);
     }
 
     public function testCreateDirMode() {
-        $this->assertDirectoryDoesNotExist($this->path);
-        $this->assertDirectoryDoesNotExist($this->path);
+        $this->assertDirectoryNotExists($this->path);
+        $this->assertDirectoryNotExists($this->path);
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->path), false, 0777));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->path, 'test'), false, 0555));
         $this->assertDirectoryExists($this->path);
@@ -63,7 +63,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testRecursiveRmDir() {
-        $this->assertFileDoesNotExist($this->path);
+        $this->assertFileNotExists($this->path);
         FileUtils::createDir($this->path);
         file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "a");
         file_put_contents(FileUtils::joinPaths($this->path, "test2.txt"), "b");
@@ -71,7 +71,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         FileUtils::createDir(FileUtils::joinPaths($this->path, "b"));
         file_put_contents(FileUtils::joinPaths($this->path, "b", "test.txt"), "aa");
         $this->assertTrue(FileUtils::recursiveRmdir($this->path));
-        $this->assertFileDoesNotExist($this->path);
+        $this->assertFileNotExists($this->path);
     }
 
     /**
@@ -188,7 +188,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testEmptyDir() {
-        $this->assertFileDoesNotExist($this->path);
+        $this->assertFileNotExists($this->path);
         FileUtils::createDir($this->path);
         file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "a");
         file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "b");

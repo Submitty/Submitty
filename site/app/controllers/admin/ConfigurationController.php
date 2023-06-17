@@ -44,7 +44,8 @@ class ConfigurationController extends AbstractController {
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
             'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
-            'grade_inquiry_message'          => $this->core->getConfig()->getGradeInquiryMessage(),
+            'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
+            'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
@@ -141,6 +142,7 @@ class ConfigurationController extends AbstractController {
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
+                    'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
                     'seek_message_enabled',
@@ -201,11 +203,6 @@ class ConfigurationController extends AbstractController {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Could not save config file')
             );
-        }
-
-        // All late day cache now invalid
-        if ($name === 'default_student_late_days') {
-            $this->core->getQueries()->flushAllLateDayCache();
         }
 
         return MultiResponse::JsonOnlyResponse(

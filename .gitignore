@@ -32,7 +32,6 @@ coverage.xml
 /site/cypress/videos/
 /site/public/mjs/
 /site/report/
-/site/incremental_build/
 
 db_update.php
 .setup/data/random_users.txt
@@ -43,5 +42,3 @@ composer.phar
 Pipfile
 Pipfile.lock
 .phpunit.result.cache
-
-.env

@@ -109,7 +109,6 @@ def buggy2(test):
 
 @testcase
 def syntax_error(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
@@ -128,7 +127,6 @@ def syntax_error(test):
 
 @testcase
 def infinite_loop_too_much_output(test):
-    return  # TODO: REMOVE THIS!
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))

@@ -35,7 +35,7 @@ def get_environments(candidates):
     of master.
 
     :param candidates: List of environments to include
-    :type candidates: list
+    :type candiates: list
     :return: List of valid environments in allowed order
     :rtype: list
     """

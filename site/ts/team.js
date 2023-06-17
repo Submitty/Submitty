@@ -6,10 +6,7 @@ export function showUpdateTeamName() {
 }
 
 export function init() {
-    const icon = document.getElementById('team-name-change-icon');
-    if (icon) {
-        icon.addEventListener('click', showUpdateTeamName);
-    }
+    document.getElementById('team-name-change-icon').addEventListener('click', showUpdateTeamName);
 }
 
 document.addEventListener('DOMContentLoaded', () => init());

@@ -21,6 +21,8 @@ input[type="color"] {
     color: #555555;
     vertical-align: middle;
     border: 1px solid #cccccc;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
     border-radius: 4px;
     width: auto;
 }
@@ -46,6 +48,8 @@ select {
 
 input[type="checkbox"] {
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     appearance: none;
     background: #ffffff;
     box-sizing: border-box;
@@ -53,6 +57,8 @@ input[type="checkbox"] {
     height: 20px;
     border: 1px solid #000000;
     transition: all 0.2s linear;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -62,8 +68,7 @@ input[type="checkbox"]:checked {
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked::before {
-    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: "Font Awesome\ 5 Free";
+    font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
     color: var(--text-white);
     font-size: 18px;

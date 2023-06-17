@@ -87,7 +87,7 @@ def anon_log(in_filename,out_filename):
 
                     things=which.split('__')
                     if len(things) != 5:
-                        # discard unparsable things (only errors)
+                        # discard unparseable things (only errors)
                         continue
                     semester = things[0]
                     course = things[1]
@@ -107,7 +107,7 @@ def anon_log(in_filename,out_filename):
                     
                     things=which.split('/')
                     if len(things) != 6:
-                        # discard unparsable things (only errors)
+                        # discard unparseable things (only errors)
                         continue
                     semester = things[0]
                     course = things[1]

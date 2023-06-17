@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   install_system.sh [--vagrant] [--utm] [--worker] [<extra> <extra> ...]
+#   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
 
 err_message() {
     >&2 echo -e "
@@ -59,8 +59,6 @@ source ${CURRENT_DIR}/bin/versions.sh
 # PROVISION SETUP
 #################
 
-export DEV_VM=0
-export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
@@ -71,13 +69,8 @@ export WORKER_PAIR=0
 # don't recognize as a flag
 while :; do
     case $1 in
-        --utm)
-            export UTM=1
-            export DEV_VM=1
-            ;;
         --vagrant)
             export VAGRANT=1
-            export DEV_VM=1
             ;;
         --worker)
             export WORKER=1
@@ -102,17 +95,10 @@ if [ ${VAGRANT} == 1 ]; then
     export DEBIAN_FRONTEND=noninteractive
 fi
 
-if [ ${UTM} == 1 ]; then
-    mkdir ${SUBMITTY_REPOSITORY}/.utm
-fi
-
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
-    # SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-    if [ ${UTM} == 0 ]; then
-	cp /home/vagrant/.ssh/authorized_keys /root/.ssh
-    fi
+    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
@@ -199,8 +185,6 @@ fi
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
 DATABASE_PASSWORD=submitty_dbuser
-DB_COURSE_USER=submitty_course_dbuser
-DB_COURSE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -208,8 +192,19 @@ DB_COURSE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+#################################################################
+# PYTHON PACKAGE SETUP
+#########################
 
+#libraries for QR code processing:
+#install DLL for zbar
+apt-get install libzbar0 --yes
+
+pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
+
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
+    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt
+fi
 
 #################################################################
 # Node Package Setup
@@ -223,8 +218,9 @@ bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
 # STACK SETUP
 #################
 
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
-    # We only might build analysis tools from source on a development machine
+# stack is not available for non-x86_64 systems
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] && [ "$(uname -m)" = "x86_64" ]; then
+    # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
 fi
@@ -267,18 +263,7 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-# CREATE VAGRANT USER WHEN MANUALLY INSTALLING ON UTM
-if getent passwd vagrant > /dev/null; then
-    # Already exists
-    echo 're-running install submitty'
-elif [ ${UTM} == 1 ]; then
-    useradd -m vagrant
-fi
-# END UTM
-
-
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
 	usermod -aG sudo vagrant
 fi
 
@@ -320,7 +305,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.56.21"
+        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@172.18.2.8"
     fi
 fi
 
@@ -450,8 +435,8 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         # remove default sites which would cause server to mess up
-        rm -f /etc/apache2/sites*/000-default.conf
-        rm -f /etc/apache2/sites*/default-ssl.conf
+        rm /etc/apache2/sites*/000-default.conf
+        rm /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
@@ -510,7 +495,7 @@ EOF
     rm -f /etc/nginx/sites-enabled/submitty.conf
     ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
-    if [ ${DEV_VM} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
         sed -i -e "s/8443/${WEBSOCKET_PORT}/g" /etc/nginx/sites-available/submitty.conf
     fi
 
@@ -545,7 +530,7 @@ EOF
     DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
     DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
 
-    if [ ${DEV_VM} != 1 ]; then
+    if [ ${VAGRANT} != 1 ]; then
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
@@ -576,7 +561,7 @@ if [ ${WORKER} == 0 ]; then
         PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
     fi
 
-    if [ ${DEV_VM} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
         cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
         echo "Creating PostgreSQL users"
@@ -651,13 +636,13 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo "Running configure submitty in worker mode"
-    if [ ${DEV_VM} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
         echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
     fi
 else
-    if [ ${DEV_VM} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
         # in case it is not, default to our primary URL
         if [ -z "${SUBMISSION_URL}" ]; then
@@ -666,8 +651,6 @@ else
         echo -e "/var/run/postgresql
 ${DB_USER}
 ${DATABASE_PASSWORD}
-${DB_COURSE_USER}
-${DB_COURSE_PASSWORD}
 America/New_York
 ${SUBMISSION_URL}
 
@@ -675,6 +658,7 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
+submitty-admin
 submitty-admin
 y
 
@@ -709,13 +693,10 @@ fi
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-    dbcourse_user_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_course_password | tr -d '"'`
 
     # create the submitty_dbuser role in postgres (if it does not yet exist)
     # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
     su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN CREATE ROLE ${DB_USER} SUPERUSER LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
-
-    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_COURSE_USER}') THEN CREATE ROLE ${DB_COURSE_USER} LOGIN PASSWORD '${dbcourse_user_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
@@ -724,7 +705,7 @@ if [ ${WORKER} == 0 ]; then
         echo "Creating submitty master database"
         su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
         su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
-        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config -e master -e system migrate --initial
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
     else
         echo "Submitty master database already exists"
     fi
@@ -767,7 +748,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [ ${WORKER} == 0 ]; then
-    if [[ ${DEV_VM} == 1 ]]; then
+    if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
@@ -783,7 +764,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
@@ -794,6 +775,31 @@ if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
     systemctl enable nullsmtpd
 fi
 
+# Setup preferred_name_logging
+echo -e "Setup preferred name logging."
+
+# Copy preferred_name_logging.php to sbin
+rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
+chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+
+# Backup and adjust/overwrite Postgresql's configuration
+if [ ${WORKER} == 0 ]; then
+    cp -a /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
+    sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
+            s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
+	    s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[^][(){}<>|:;&#=!'?\*\~\$\"\` tab]\+'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
+	    s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'~;
+            s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9]\+~log_file_mode = 0640~;
+            s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_age = 1d~;
+            s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9]\+~log_rotation_size = 0~;
+            s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = warning~;
+            s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = -1~;
+            s~^#*[ tab]*log_statement[ tab]*=[ tab]*'[a-z]\+'~log_statement = 'ddl'~;
+            s~^#*[ tab]*log_error_verbosity[ tab]*=[ tab]*[a-z]\+~log_error_verbosity = default~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+fi
+
+echo -e "Finished preferred_name_logging setup."
 
 #################################################################
 # DOCKER SETUP
@@ -802,7 +808,7 @@ fi
 # If we are in vagrant and http_proxy is set, then vagrant-proxyconf
 # is probably being used, and it will work for the rest of this script,
 # but fail here if we do not manually set the proxy for docker
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ]; then
     if [ ! -z ${http_proxy+x} ]; then
         mkdir -p /home/${DAEMON_USER}/.docker
         proxy="            \"httpProxy\": \"${http_proxy}\""
@@ -848,23 +854,5 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 
-echo "
-#####################################################################
-
-                     INSTALLATION SUCCESS!
-
-                        .GGQGGGSlu
-                      .GGGGGGGGGGGS
-                 :llUGGGGGGGGGGGGGGGG
-                 'GGGGGGGGGGGGGGGGGGb        .
-                    %GGGGGGGGGGGGGGG~   ..GSGGG
-                       GGGGGGGGGGGGGGSGGGGGGGGGG[
-                     ;GGGGGGGGGGGGp\ \ \GGGGGGGGL
-                    !GGGGGGGGGGGGGGS\ \ \GGGGGG
-                    GGGGGGGGGGGGGGGGG\ \ \9GGGG
-                    %GGGGGGGGGGGGGGGS/ / /.GGG
-                     %GGGGGGGGGGGGGS/ / /GGG
-                      '%NNNNNNNNNNNNNNNNNN
-#####################################################################
-"
+echo "Done."
 exit 0

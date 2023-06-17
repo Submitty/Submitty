@@ -16,35 +16,28 @@ function addConfetti() {
         }
     });
     window.addEventListener('keypress', (e) => {
-        if (e.code === 'Enter' && canvas.style.display !== 'none') {
+        if (e.code === 'Enter' && canvas.style.display != 'none'){
             canvas.style.display = 'none';
             return;
         }
     });
 
-    // Resume confetti animation when window is visible again
-    window.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && is_drawing) {
-            lastUpdateTime = Date.now();
-            draw();
-        }
-    });
-
     canvas.width  = window.innerWidth;
-    canvas.height = document.body.clientHeight;
+    const body = document.body;
+    const html = document.documentElement;
+    canvas.height = Math.max( body.scrollHeight, body.offsetHeight,
+        html.clientHeight, html.scrollHeight, html.offsetHeight );
 
     canvas.style.display = 'block';
 
     const ctx = canvas.getContext('2d');
     const pieces = [];
-    const numberOfPieces = canvas.height;
+    const numberOfPieces = 2500;
     let lastUpdateTime = Date.now();
     const x_const = 0.25;
     const max_times = 250;
     const size_const = 10;
     const gravity_const = 0.25;
-
-    let is_drawing = false;
 
     const date_box = document.getElementById('submission_timestamp');
     let submission_date = '';
@@ -56,7 +49,7 @@ function addConfetti() {
     let month = d.getMonth();
 
     //if we parsed the submission due date, use that instead
-    if (submission_date.length >= 1) {
+    if (submission_date.length >= 1){
         month = parseInt(submission_date[0], 10) - 1;
     }
 
@@ -64,7 +57,7 @@ function addConfetti() {
         let colors = [];
 
         //JS month : 0-11
-        switch (month) {
+        switch (month){
             case 0: //jan
                 colors = ['#406bc9','#ffffff','#809bce','#9ac8de','#b6c7be'];
                 break;
@@ -135,9 +128,9 @@ function addConfetti() {
 
         times_ran ++;
 
-        if (pieces.length <= 0) {
+        if (times_ran >= max_times * 10){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.style.display = 'none';
+            canvas.style.display = '';
             canvas.width = 0;
             canvas.height = 0;
         }
@@ -146,16 +139,7 @@ function addConfetti() {
 
     function draw () {
 
-        if (canvas.style.display === 'none') {
-            cancelAnimationFrame(frame);
-            is_drawing = false;
-            return;
-        }
-
-        is_drawing = true;
-
-        // Stop the confetti animation if the page is not visible
-        if (document.visibilityState === 'hidden') {
+        if (canvas.style.display === 'none'){
             cancelAnimationFrame(frame);
             return;
         }

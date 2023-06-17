@@ -12,6 +12,7 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
     public function testGetSessionInvalidId() {
         $core = new Core();
         $queries = $this->createMock(DatabaseQueries::class);
+        $queries->expects($this->once())->method('removeExpiredSessions');
         $queries->expects($this->once())->method('getSession')->with('id')->willReturn([]);
         $queries->expects($this->never())->method('updateSessionExpiration');
         $core->setQueries($queries);
@@ -23,11 +24,11 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
     public function testSessionManager() {
         $core = new Core();
         $queries = $this->createMock(DatabaseQueries::class);
+        $queries->expects($this->once())->method('removeExpiredSessions');
         $queries->expects($this->once())->method('getSession')->with('id')->willReturn([
             'session_id' => 'id',
             'user_id' => 'test',
-            'csrf_token' => 'token',
-            'session_expires' => '2000-01-01'
+            'csrf_token' => 'token'
         ]);
         $queries->expects($this->once())->method('updateSessionExpiration')->with('id');
         $queries->expects($this->once())->method('removeSessionById')->with('id');
@@ -51,9 +52,9 @@ class SessionManagerTester extends \PHPUnit\Framework\TestCase {
         $core->setQueries($queries);
         $manager = new SessionManager($core);
         $session_id = $manager->newSession('test');
-        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $session_id);
+        $this->assertRegExp('/[a-f0-9]{32}/', $session_id);
         $this->assertEquals($session_id, $manager->newSession('test'));
-        $this->assertMatchesRegularExpression('/[a-f0-9]{32}/', $manager->getCsrfToken());
+        $this->assertRegExp('/[a-f0-9]{32}/', $manager->getCsrfToken());
     }
 
     public function testRemoveCurrentSessionNoSession() {

@@ -40,8 +40,12 @@
         "description" : "Timestamp student standard output files",
         "type" : "boolean"
       },
-      "hide_test_details" : {
-        "description" : "Hide autograding test details from students.",
+      "hide_submitted_files" : {
+        "description" : "Hide any file submissions from students.",
+        "type" : "boolean"
+      },
+      "hide_version_and_test_details" : {
+        "description" : "Hide submission version and autograding test details from students.",
         "type" : "boolean"
       },
       "publish_actions" : {
@@ -915,22 +919,22 @@
                   "start_x" : {
                     "description" : "(Optional) An integer starting x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 0
+                    "minimum" : 1
                   },
                   "start_y" : {
                     "description" : "(Optional) An integer starting y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 0
+                    "minimum" : 1
                   },
                   "end_x" : {
                     "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 0
+                    "minimum" : 1
                   },
                   "end_y" : {
                     "description" : "(Optional) An integer ending y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 0
+                    "minimum" : 1
                   },
                   "mouse_button" : {
                     "description" : "(Optional) left, middle, or right. The mouse button to be clicked. Defaults to left.",
@@ -1202,10 +1206,6 @@
               "minItems" : 1
             }
           ]
-        },
-        "expected_string" : {
-          "description" : "The professor specified an expected output string.",
-          "type" : "string"
         },
         "deduction" : {
           "description" : "The amount of points that this validation step is worth, scaled between 0 and 1.",

@@ -14,13 +14,8 @@ if [ -x "$(command -v pip3)" ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
 
-# Expand the default logical volume for Ubuntu
-lvresize -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
-resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
-
-# Start installation
-# shellcheck disable=2068
-if ! sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}; then
+sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
+if [ $? -ne 0 ]; then
     DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
     VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
     >&2 echo -e "

@@ -41,12 +41,11 @@
                 }
             </script>
         </fieldset>
-        <label id="edit_dt" style="pointer-events:none;">
+        <label>
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-picker" class="edit-picker" type="text" size="26" style="pointer-events:auto;"><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <input id="edit-picker" class="edit-picker" type="text" size="26"/>
         </label>
         <label>
             <span>
@@ -55,9 +54,8 @@
             <input id="edit-sort" value="Check" type="text" size="26"/>
         </label>
         <label>
-            <input id="hide-materials-checkbox-edit" type="checkbox">
-            Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            <input id="hide-materials-checkbox-edit" type="checkbox"/>
+            Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
         <label hidden id="edit-url-title-label">
             <span>
@@ -87,28 +85,20 @@
                 }
 
                 let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
+                reg_sectionArray.forEach(function(element){
+                    let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
+                    if  ($(currentSectionEdit).is(':checked'))  {
+                        sectionsEdit.push(element['sections_registration_id']);
+                    }
+                });
                 let sections_lock = document.getElementById('all-sections-showing-yes').checked === true;
-                if (sections_lock) {
-                    reg_sectionArray.forEach(function(element){
-                        let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
-                        if  ($(currentSectionEdit).is(':checked'))  {
-                            sectionsEdit.push(element['sections_registration_id']);
-                        }
-                    });
-                }
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-
-                let overwrite = false;
-                let overwrite_elem = $('#overwrite-submit');
-                if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
-                    overwrite = true;
-                }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, file_path, display_name, overwrite);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, cmTime, sort, sections_lock, null, file_path, display_name);
         };
 
-        const edit_fp = flatpickr('.edit-picker', {
+        flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
@@ -147,7 +137,6 @@
                     }
                 }
             )],
-            appendTo: document.getElementById('edit-course-materials-form'),
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -158,9 +147,6 @@
               fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
-    $('.form-body').on('scroll', function() {
-        edit_fp._positionCalendar();
-    });
     </script>
 {% endblock %}
 {% block buttons %}

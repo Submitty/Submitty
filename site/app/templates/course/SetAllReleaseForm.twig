@@ -34,7 +34,7 @@
         }
 
 
-        const release_date_fp = flatpickr("#date_to_release_all", {
+        flatpickr("#date_to_release_all", {
             plugins: [ShortcutButtonsPlugin(
                     {
                         button: [
@@ -72,7 +72,6 @@
                         }
                     }
             )],
-            appendTo: document.getElementById('set-all-release-form'),
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -83,9 +82,6 @@
                 fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
-    $('.form-body').on('scroll', function() {
-        release_date_fp._positionCalendar();
-    });
     </script>
 
 {% endblock %}

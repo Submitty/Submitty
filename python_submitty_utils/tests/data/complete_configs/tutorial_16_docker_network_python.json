@@ -110,7 +110,8 @@
         "test_cases": []
     },
     "gradeable_message": "",
-    "hide_test_details": false,
+    "hide_submitted_files": false,
+    "hide_version_and_test_details": false,
     "id": "16_docker_network_python",
     "item_pool": [],
     "load_gradeable_message": {

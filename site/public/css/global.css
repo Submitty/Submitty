@@ -111,7 +111,6 @@ nav a > i.f {
 #wrapper {
     display: flex;
     flex-grow: 1;
-    min-height: max-content;
 }
 
 main {

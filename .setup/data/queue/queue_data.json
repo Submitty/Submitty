@@ -18,8 +18,7 @@
             "time_help_start": "",
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "done",
@@ -37,8 +36,7 @@
             "time_help_start": "",
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "done",
@@ -56,8 +54,7 @@
             "time_help_start": null,
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "being_helped",
@@ -75,8 +72,7 @@
             "time_help_start": "",
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "waiting",
@@ -94,8 +90,7 @@
             "time_help_start": null,
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "waiting",
@@ -113,8 +108,7 @@
             "time_help_start": null,
             "paused": true,
             "time_paused": 0,
-            "time_paused_start": "",
-            "star_type": "none"
+            "time_paused_start": ""
         },
         {
             "current_state": "waiting",
@@ -132,27 +126,25 @@
             "time_help_start": null,
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         },
         {
             "current_state": "waiting",
             "removal_type": null,
             "queue_code": "Lab Help",
-            "user_id": "huelsw",
-            "name": "Wally 😎‍💻",
+            "user_id": "chrisw",
+            "name": "Willy 😎‍💻",
             "time_in": "",
             "time_out": null,
-            "added_by": "huelsw",
+            "added_by": "chrisw",
             "help_started_by": null,
             "removed_by": null,
-            "contact_info": "huelsw@sample.edu",
+            "contact_info": "chrisw@sample.edu",
             "last_time_in_queue": "",
             "time_help_start": null,
             "paused": false,
             "time_paused": 0,
-            "time_paused_start": null,
-            "star_type": "none"
+            "time_paused_start": null
         }
     ]
 }

@@ -3,7 +3,6 @@
 namespace tests\app\controllers\grading;
 
 use app\controllers\grading\SimpleGraderController;
-use app\libraries\GradeableType;
 use app\models\User;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -62,24 +61,22 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => 'Did not pass in user_id'
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
     public function testSaveInvalidGradeable() {
         $_POST['user_id'] = 'test';
         $_POST['csrf_token'] = 'test';
-        $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
-        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => true], ['getGradeableConfig' => $gradeable]);
+        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => true], ['getGradeableConfig' => null]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
-                'message' => 'Invalid user ID'
+                'message' => 'Invalid gradeable ID'
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -87,8 +84,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['user_id'] = 'test';
         $_POST['csrf_token'] = 'test';
         $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
-        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => $gradeable], ['getGradeableConfig' => $gradeable]);
+        $core = $this->createMockCore(['csrf_token' => true], ['no_user' => $gradeable], ['getGradeableConfig' => true]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
         $this->assertEquals(
@@ -96,7 +92,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => 'Invalid user ID'
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -106,7 +102,6 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['scores'] = '';
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
@@ -115,7 +110,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => "Didn't submit any scores"
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -125,7 +120,6 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['scores'] = "123";
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user], ['canI' => false]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save('test');
@@ -134,7 +128,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => "You do not have permission to do this."
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -145,7 +139,6 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['old_scores'] = [1];
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockGradeable(4);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $graded_gradeable = $this->createMockGradedGradeable(1);
         $core = $this->createMockCore(
             ['csrf_token' => true],
@@ -160,7 +153,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => "Save error: score must be a number less than the upper clamp"
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -171,7 +164,6 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['old_scores'] = [1];
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockGradeable(6);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $graded_gradeable = $this->createMockGradedGradeable(2);
         $core = $this->createMockCore(
             ['csrf_token' => true],
@@ -186,7 +178,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                 'status' => 'fail',
                 'message' => "Save error: displayed stale data (1) does not match database (2)"
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 
@@ -197,7 +189,6 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['old_scores'] = [2];
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockGradeable(6);
-        $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $graded_gradeable = $this->createMockGradedGradeable(2);
         $core = $this->createMockCore(
             ['csrf_token' => true],
@@ -214,7 +205,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
                     '0' => 5
                 ]
             ],
-            $response->json
+            $response->json_response->json
         );
     }
 }

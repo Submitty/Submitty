@@ -67,7 +67,7 @@ class MultiResponse implements ResponseInterface {
 
     /**
      * Convert this MultiResponse into a json response instead
-     * Useful when dealing with sending messages back to controllers
+     * Usefull when dealing with sending messages back to controllers
      *
      * @return JsonResponse
      */

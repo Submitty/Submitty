@@ -5,12 +5,10 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\gradeable\LateDays;
 
 /**
  * Class LateController
@@ -20,64 +18,32 @@ use app\models\gradeable\LateDays;
 class LateController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/late_days")
-     * @return WebResponse
+     * @return MultiResponse
      */
     public function viewLateDays() {
-        return new WebResponse(
-            ['admin', 'LateDay'],
-            'displayLateDays',
-            $this->core->getQueries()->getUsersWithLateDays(),
-            $this->core->getQueries()->getAllUsers(),
-            $this->core->getConfig()->getDefaultStudentLateDays()
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['admin', 'LateDay'],
+                'displayLateDays',
+                $this->core->getQueries()->getUsersWithLateDays(),
+                $this->core->getQueries()->getAllUsers(),
+                $this->core->getConfig()->getDefaultStudentLateDays()
+            )
         );
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/extensions")
-     * @return WebResponse
+     * @return MultiResponse
      */
     public function viewExtensions() {
-        return new WebResponse(
-            ['admin', 'Extensions'],
-            'displayExtensions',
-            $this->core->getQueries()->getAllElectronicGradeablesIds()
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['admin', 'Extensions'],
+                'displayExtensions',
+                $this->core->getQueries()->getAllElectronicGradeablesIds()
+            )
         );
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
-     * @return WebResponse
-     */
-    public function viewLateDaysForensics() {
-        return new WebResponse(
-            ['admin', 'LateDay'],
-            'displayLateDayForesnics',
-            $this->core->getQueries()->getAllUsers(),
-            $this->core->getConfig()->getDefaultStudentLateDays()
-        );
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
-     * @return RedirectResponse
-     */
-    public function flushLateDayCache() {
-        $this->core->getQueries()->flushAllLateDayCache();
-        $this->core->addSuccessMessage("Late day cache flushed!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
-     * @return RedirectResponse
-     */
-    public function calculateLateDayCache() {
-        $this->core->getQueries()->generateLateDayCacheForUsers();
-
-        $this->core->addSuccessMessage("Late day cache calculated!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
     }
 
     /**
@@ -98,6 +64,9 @@ class LateController extends AbstractController {
                 );
             }
             else {
+                // TO DO: Update late day cache for late days (bulk)
+                $late_day_status = null;
+
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
@@ -132,6 +101,9 @@ class LateController extends AbstractController {
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
+            // TO DO: Update late day cache for late day change
+            $late_day_status = null;
+
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
@@ -163,6 +135,9 @@ class LateController extends AbstractController {
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
         $this->core->addSuccessMessage("Late days entry removed");
 
+        // TO DO: Update late day cache for late day removal
+        $late_day_status = null;
+
         return $this->getLateDays();
     }
 
@@ -182,6 +157,8 @@ class LateController extends AbstractController {
                 );
             }
             else {
+                // TO DO: Update late day cache for late day extension (bulk)
+                $late_day_status = null;
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
@@ -261,8 +238,8 @@ class LateController extends AbstractController {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     $team_members = [];
                     for ($i = 0; $i < count($team_member_ids); $i++) {
-                        $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedGivenName() . " " .
-                            $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFamilyName();
+                        $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
+                            $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
                     }
                     $popup_html = $this->core->getOutput()->renderTwigTemplate(
                         "admin/users/MoreExtensions.twig",
@@ -274,34 +251,14 @@ class LateController extends AbstractController {
                 }
             }
             else {
+                // TO DO: Update late day cache for late day extension (user)
+                $late_day_status = null;
+
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
-    }
-
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"GET"})
-     * @return RedirectResponse|WebResponse
-     **/
-    public function viewStudentLatedays() {
-        if (!isset($_GET['student_id'])) {
-            $this->core->addErrorMessage("No student ID provided");
-            return new RedirectResponse($this->core->buildCourseUrl(['users']));
-        }
-        $student_id = $_GET['student_id'];
-        $user = $this->core->getQueries()->getUserById($student_id);
-        if ($user === null) {
-            $this->core->addErrorMessage("Invalid Student ID \"" . $_GET['student_id'] . "\"");
-            return new RedirectResponse($this->core->buildCourseUrl(['users']));
-        }
-        return new WebResponse(
-            'LateDaysTable',
-            'showLateTabletoInstructor',
-            LateDays::fromUser($this->core, $user)
-        );
     }
 
     /**
@@ -311,7 +268,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = ['user_id' => $user->getId(),'user_givenname' => $user->getDisplayedGivenName(), 'user_familyname' => $user->getDisplayedFamilyName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
@@ -384,7 +341,7 @@ class LateController extends AbstractController {
             if ($type === "extension" && !$this->validateHomework($fields[1])) {
                 $data = null;
                 return [
-                    "success" => false,
+                    "successs" => false,
                     "error" => "Could not resolve gradeable ID '{$fields[1]}' on row {$row_number}",
                 ];
             }

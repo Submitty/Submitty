@@ -29,7 +29,6 @@
     outline: 2px solid var(--standard-focus-cornflower-blue);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .openAllDiv {
     color: var(--file-browser-blue);
 }

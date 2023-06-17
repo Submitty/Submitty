@@ -1,13 +1,11 @@
 includes:
     - %rootDir%/../../../phpstan-baseline.neon
-    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
 
 parameters:
     ignoreErrors:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
-    reportAlwaysTrueInLastCondition: true
-    level: 5
+    level: 4
 
 services:
     - class: tests\phpstan\ModelClassExtension

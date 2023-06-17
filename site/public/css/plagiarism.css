@@ -151,34 +151,32 @@ input[type="text"]:invalid {
 }
 
 /* ==== Results Page ======================================================== */
-.color-pickers > input[type="color"] {
-    width: 50px;
-    margin-top: 0.2em;
-    margin-right: 0.2em;
-}
-
 .match-style {
+    background-color: yellow;
     border-right: 1px solid var(--text-white);
 }
 
 .specific-match-style {
+    background-color: orange;
     border-right: 1px solid var(--text-white);
 }
 
 .common-code-style {
-    border-right: 1px solid var(--text-white);
+    background-color: lightgray;
 }
 
 .provided-code-style {
-    border-right: 1px solid var(--text-white);
+    background-color: #b5e3b5;
 }
 
 .selected-style-red {
-    border-right: 1px solid var(--text-white);
+    background-color: red;
+    border: 1px solid black;
 }
 
 .selected-style-blue {
-    border-right: 1px solid var(--text-white);
+    background-color: lightblue;
+    border: 1px solid black;
 }
 
 .plagiarism-result-cont {

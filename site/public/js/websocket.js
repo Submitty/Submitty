@@ -2,7 +2,7 @@
  * Wrapper around the builtin WebSocket class. This provides us
  * with two major benefits:
  *  1. The websocket will attempt to reconnect if the connection closes
- *  2. It will automatically perform JSON.parse/JSON.stringify on
+ *  2. It willl automatically perform JSON.parse/JSON.stringify on
  *      incoming/outgoing messages.
  *
  * Example usage would be:
@@ -35,7 +35,6 @@ class WebSocketClient {
         my_url.port = window.websocketPort;
         my_url.pathname = 'ws';
         this.url = my_url.href;
-        this.serverError = false;
     }
 
     open(page) {
@@ -54,15 +53,10 @@ class WebSocketClient {
         };
 
         this.client.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (Object.keys(data).includes('error') && data['error'] === 'Server error') {
-                this.serverError = true;
-                return;
-            }
             this.number++;
             if (this.onmessage) {
                 try {
-                    this.onmessage(data);
+                    this.onmessage(JSON.parse(event.data));
                 }
                 catch (exc) {
                     console.error(`error on message: ${exc}`);
@@ -71,13 +65,9 @@ class WebSocketClient {
         };
 
         this.client.onclose = (event) => {
-            const sys_message = $('#socket-server-system-message');
             switch (event.code) {
                 case 1000:
                     console.log('WebSocket: Closed');
-                    if (this.serverError) {
-                        sys_message.show();
-                    }
                     break;
                 default:
                     this.reconnect(page);
@@ -87,18 +77,16 @@ class WebSocketClient {
         };
 
         this.client.onerror = (error) => {
-            const sys_message = $('#socket-server-system-message');
             switch (error.code) {
                 case 'ECONNREFUSED':
                     this.reconnect(page);
-                    sys_message.show();
                     break;
                 default:
                     //console.log(`WebSocket: Error - ${error.code}`);
                     //this.onerror(error);
                     break;
             }
-            sys_message.show();
+            $('#socket-server-system-message').show();
         };
     }
 

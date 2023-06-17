@@ -51,7 +51,7 @@
             "containers": [
                 {
                     "commands": [
-                        "python3 *.py"
+                        "python *.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "container0",
@@ -60,7 +60,7 @@
                     "server": false
                 }
             ],
-            "details": "python3 *.py",
+            "details": "python *.py",
             "dispatcher_actions": [],
             "points": 0,
             "pre_commands": [],

@@ -42,12 +42,11 @@
             {% endfor %}
             </div>
         </fieldset>
-        <label id="upload_dt" style="pointer-events:none;">
+        <label id="upload_dt">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>
             <span>
@@ -56,9 +55,8 @@
             <input id="upload_sort" value="0.0" type="text" size="26"/>
         </label>
         <label>
-            <input id="hide-materials-checkbox" type="checkbox" value="off">
-            Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
+            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset>
@@ -98,7 +96,7 @@
           <span>
             <label>
               Title for URL:
-              <input id="display_name" type="text" class="full-width"/>
+              <input id="url_title" type="text" class="full-width"/>
             </label>
             <label>
               URL:
@@ -108,8 +106,8 @@
         </div>
     </div>
     <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -129,7 +127,7 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-upload-' +element['sections_registration_id']
+                    var currentSection = '#section-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
@@ -142,9 +140,7 @@
                     const cmPath = document.getElementById('cm_path').innerHTML;
                     const requestedPath = document.getElementById("input-provide-full-path").value;
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
-                    const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
-                    overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock);
                 }
                 else {
                     alert("Select at least one section");
@@ -152,7 +148,7 @@
                 e.stopPropagation();
             });
         });
-        const upload_fp = flatpickr('#upload_picker', {
+        flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -190,7 +186,6 @@
                             }
                         }
                     )],
-                    appendTo: document.getElementById('upload-course-materials-form'),
                     allowInput: true,
                     enableTime: true,
                     enableSeconds: true,
@@ -201,9 +196,6 @@
                       fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                     }
                     });
-    $('.form-body').on('scroll', function() {
-        upload_fp._positionCalendar();
-    });
     </script>
     <script>
         createArray(1);

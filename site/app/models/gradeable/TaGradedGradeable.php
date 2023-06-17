@@ -14,6 +14,8 @@ use FilesystemIterator;
  * Class TaGradedGradeable
  * @package app\models\gradeable
  *
+ * @method string getOverallComments()
+ * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
  */

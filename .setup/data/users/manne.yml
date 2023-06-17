@@ -6,9 +6,8 @@ courses:
     user_group: 2
   tutorial:
     user_group: 4
-user_givenname: Emmett
+user_firstname: Emmett
 user_id: manne
 anon_id: 5trdVwqDrt564rT
-user_familyname: Mann
+user_lastname: Mann
 user_numeric_id: 755670469
-user_pronouns: He/Him

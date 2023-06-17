@@ -26,7 +26,8 @@ main#main.full-screen-mode .content {
 }
 
 #wrapper {
-    min-height: max-content;
+    padding-top: 30px;
+    min-height: 0;
 }
 
 aside {
@@ -43,17 +44,15 @@ aside {
     position: relative;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 #bar_wrapper {
     box-sizing: content-box;
     padding: 6px 0;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 #bar_banner {
     position: relative;
     display: block;
-    width: 100%;
+    width:100%;
     margin: auto;
     margin-bottom: 5px;
 }
@@ -65,7 +64,6 @@ aside {
     max-width: 100%;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .navigation-box.smaller-navbar .progress_bar {
     position: relative;
     width: unset;
@@ -84,7 +82,6 @@ aside {
     transform: unset;
 }
 
-/* stylelint-disable-next-line no-duplicate-selectors */
 .navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #two-panel-exchange-btn,
@@ -94,7 +91,6 @@ aside {
     display: none;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .navigation-box.smaller-navbar .grading_toolbar {
     flex-wrap: wrap;
 }
@@ -120,14 +116,12 @@ aside {
 }
 
 /* Toolbar CSS */
-/* stylelint-disable-next-line selector-class-pattern, no-descending-specificity */
 .grading_toolbar {
     display: flex;
     padding-top: 3px;
     padding-bottom: 3px;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar .ta-navlink-cont:hover {
     transform: translate(0, -2px);
     cursor: pointer;
@@ -149,13 +143,11 @@ aside {
     display: inline-block;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 #fullscreen-btn-cont.active i.fa-expand,
 #fullscreen-btn-cont i.fa-compress {
     display: none;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 #two-panel-exchange-btn {
     display: none;
 }
@@ -172,7 +164,6 @@ button > i.fas:hover {
     color: initial;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
@@ -190,13 +181,11 @@ button > i.fas:hover {
     background: #36e08e;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .progressbar {
     width: 190px;
     height: 100%;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .progress-value {
     position: absolute;
     top: 49%;
@@ -242,7 +231,6 @@ progress::-webkit-progress-value {
     outline: none;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
     position: absolute;
     top: 1px;
@@ -250,7 +238,6 @@ progress::-webkit-progress-value {
     font-size: 14px;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i:hover {
     color: unset;
 }
@@ -267,7 +254,6 @@ progress::-webkit-progress-value {
     padding: 10px 20px;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .smaller-header .grade-panel button i {
     left: 12px;
     top: 0;
@@ -283,7 +269,6 @@ progress::-webkit-progress-value {
 }
 
 /* Default Btn CSS (background + hover + active) */
-/* stylelint-disable-next-line no-descending-specificity, no-duplicate-selectors */
 .grade-panel {
     border: 2px solid #1c83b7;
 }
@@ -295,103 +280,82 @@ progress::-webkit-progress-value {
     background: #286888;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 #autograding_results_btn {
     border: 2px solid #bc0a33;
 }
 
-/* stylelint-disable selector-id-pattern */
 #autograding_results_btn:hover,
 #autograding_results_btn.active,
 #autograding_results_select option:hover,
 #autograding_results_select option:focus {
     background: #962e2e;
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #grading_rubric_btn {
     border: 2px solid #249c63;
 }
 
-/* stylelint-disable selector-id-pattern */
 #grading_rubric_btn:hover,
 #grading_rubric_btn.active,
 #grading_rubric_select option:hover,
 #grading_rubric_select option:focus {
     background: #1c794d;
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #submission_browser_btn {
     border: 2px solid #1c83b7;
 }
 
-/* stylelint-disable selector-id-pattern */
 #submission_browser_btn:hover,
 #submission_browser_btn.active,
 #submission_browser_select option:hover,
 #submission_browser_select option:focus {
     background: #286888;
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #student_info_btn {
     border: 2px solid var(--text-black);
 }
 
-/* stylelint-disable selector-id-pattern */
 #student_info_btn:hover,
 #student_info_btn.active,
 #student_info_select option:hover,
 #student_info_select option:focus {
     background: var(--subheading-underscore-grey);
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #peer_info_btn {
     border: 2px solid var(--standard-plum-purple);
 }
 
-/* stylelint-disable selector-id-pattern */
 #peer_info_btn:hover,
 #peer_info_btn.active,
 #peer_info_select option:hover,
 #peer_info_select option:focus {
     background: var(--standard-plum-purple);
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #discussion_browser_btn {
     border: 2px solid #316895;
 }
 
-/* stylelint-disable selector-id-pattern */
 #discussion_browser_btn:hover,
 #discussion_browser_btn.active,
 #discussion_browser_select option:hover,
 #discussion_browser_select option:focus {
     background: #316895;
 }
-/* stylelint-enable selector-id-pattern */
 
-/* stylelint-disable-next-line selector-id-pattern */
-#grade_inquiry_info_btn {
+#regrade_info_btn {
     border: 2px solid #f29f0d;
 }
 
-/* stylelint-disable selector-id-pattern */
-#grade_inquiry_info_btn:hover,
-#grade_inquiry_info_btn.active,
-#grade_inquiry_info_select option:hover,
-#grade_inquiry_info_select option:focus {
+#regrade_info_btn:hover,
+#regrade_info_btn.active,
+#regrade_info_select option:hover,
+#regrade_info_select option:focus {
     background: #9e7835;
 }
-/* stylelint-enable selector-id-pattern */
 
 /* Grading Panel Position selector */
 .panel-position-cont {
@@ -399,7 +363,8 @@ progress::-webkit-progress-value {
     position: absolute;
     border: 2px solid;
     font-size: 12px;
-    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
     z-index: 1;
     left: -1px;
     top: 21px;
@@ -409,7 +374,6 @@ progress::-webkit-progress-value {
     min-width: max-content;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option {
     padding: 10px;
     color: var(--text-black);
@@ -417,7 +381,6 @@ progress::-webkit-progress-value {
     border-bottom: 1px solid var(--text-black);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:hover,
 .panel-position-cont option:focus {
     color: white;
@@ -428,7 +391,7 @@ progress::-webkit-progress-value {
 .panels-container {
     margin: 0;
     background: var(--standard-medium-gray);
-    position: relative;
+    position:relative;
 }
 
 .two-panel-cont {
@@ -547,7 +510,7 @@ progress::-webkit-progress-value {
     color: dimgray;
     position: absolute;
     top: 50%;
-    width: 100%;
+    width:100%;
     text-align: center;
 }
 
@@ -562,61 +525,52 @@ progress::-webkit-progress-value {
 #grading-scroll-message {
     color: var(--standard-medium-gray);
     margin-left: 5px;
-    font-size: 14px;
+    font-size:  14px;
 }
 
 #grading-panel-student-name::-webkit-scrollbar {
-    appearance: none;
+    -webkit-appearance: none;
     width: 7px;
 }
 
 #grading-panel-student-name::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: rgb(0 0 0 / 50%);
-    box-shadow: 0 0 1px rgb(255 255 255 / 50%);
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#grade_inquiry_inner_info .inner-container {
+#regrade_inner_info .inner-container {
     padding: 20px;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .rubric_panel {
     border: 5px solid var(--standard-gray-blue);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #autograding_results.rubric_panel {
     border: 5px solid var(--standard-vibrant-pink-red);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #grading_rubric.rubric_panel {
     border: 5px solid var(--standard-dark-mint-green);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #submission_browser.rubric_panel {
     border: 5px solid var(--standard-gray-blue);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#grade_inquiry_info.rubric_panel {
+#regrade_info.rubric_panel {
     border: 5px solid var(--standard-vibrant-orange);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #student_info.rubric_panel {
     border: 5px solid var(--text-black);
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #peer_info.rubric_panel {
     border: 5px solid var(--standard-plum-purple);
 }
 
-/* stylelint-disable-next-line selector-class-pattern, no-duplicate-selectors */
 .rubric_panel {
     font-size: 90%;
     background-color: var(--standard-pale-blue-gray);
@@ -642,7 +596,6 @@ progress::-webkit-progress-value {
     font-weight: bold;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .grading_label {
     display: inline-block;
     padding: 10px;
@@ -655,7 +608,7 @@ progress::-webkit-progress-value {
     position: relative;
     display: block;
     width: fit-content;
-    padding: 0.5vh 0.5vw;
+    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
     height: fit-content;
     top: 2px;
     margin: auto;
@@ -667,7 +620,6 @@ progress::-webkit-progress-value {
     background-color: var(--badge-backgroud-red);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .info_banner {
     border: solid 6px var(--important-post);
     position: relative;
@@ -686,7 +638,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-auto-grading-results {
-    background: url("../img/glyphicons-40-notes.png") no-repeat;
+    background: url('../img/glyphicons-40-notes.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -699,7 +651,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-grading-panel {
-    background: url("../img/glyphicons-151-edit.png") no-repeat;
+    background: url('../img/glyphicons-151-edit.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -717,7 +669,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-files {
-    background: url("../img/glyphicons-145-folder-open.png") no-repeat;
+    background: url('../img/glyphicons-145-folder-open.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -730,7 +682,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-status {
-    background: url("../img/glyphicons-4-user.png") no-repeat;
+    background: url('../img/glyphicons-4-user.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -738,8 +690,8 @@ progress::-webkit-progress-value {
 }
 
 .icon-selected.fa-user {
-    box-shadow: 0 0 3px 3px rgb(0 0 0 / 40%);
-    background-color: rgb(0 0 0 / 40%);
+    box-shadow: 0 0 3px 3px rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .icon-selected.fa-users {
@@ -747,7 +699,6 @@ progress::-webkit-progress-value {
     background-color: var(--standard-plum-purple);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .icon-selected.grade_inquiry_icon {
     box-shadow: 0 0 3px 3px var(--standard-vibrant-orange);
     background-color: var(--standard-vibrant-orange);
@@ -764,7 +715,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-refresh {
-    background: url("../img/refresh-page-option.png") no-repeat;
+    background: url('../img/refresh-page-option.png') no-repeat;
     background-size: 100%;
     display: inline-block;
     height: 22px;
@@ -773,7 +724,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-left {
-    background: url("../img/glyphicons-225-chevron-left.png") no-repeat;
+    background: url('../img/glyphicons-225-chevron-left.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -781,7 +732,7 @@ progress::-webkit-progress-value {
 }
 
 .icon-right {
-    background: url("../img/glyphicons-224-chevron-right.png") no-repeat;
+    background: url('../img/glyphicons-224-chevron-right.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -790,7 +741,7 @@ progress::-webkit-progress-value {
 
 .custom-mark-number-input::-webkit-outer-spin-button,
 .custom-mark-number-input::-webkit-inner-spin-button {
-    appearance: none;
+    -webkit-appearance: none;
     margin: 0;
 }
 
@@ -825,7 +776,6 @@ progress::-webkit-progress-value {
     cursor: pointer;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .div-viewer a,
 .div-viewer a:link,
 .div-viewer a:visited,
@@ -838,7 +788,6 @@ progress::-webkit-progress-value {
     text-decoration: none;
 }
 
-/* stylelint-disable-next-line no-duplicate-selectors */
 .icon-header {
     font-size: 27px;
     position: relative;
@@ -848,36 +797,36 @@ progress::-webkit-progress-value {
 }
 
 .icon-folder-closed {
-    background: url("../img/glyphicons-halflings.png") no-repeat -384px -120px;
-    color: rgb(51 51 51);
+    background: url('../img/glyphicons-halflings.png') no-repeat -384px -120px;
+    color: rgb(51, 51, 51);
     display: inline-block;
     height: 14px;
     width: 14px;
 }
 
 .icon-folder-open {
-    background: url("../img/glyphicons-halflings.png") no-repeat -410px -120px;
-    color: rgb(51 51 51);
+    background: url('../img/glyphicons-halflings.png') no-repeat -410px -120px;
+    color: rgb(51, 51, 51);
     display: inline-block;
     height: 14px;
     width: 14px;
 }
 
 .icon-plus {
-    background-image: url("../img/glyphicons-halflings.png");
+    background-image: url('../img/glyphicons-halflings.png');
     background-position: 0 -96px;
     background-repeat: no-repeat;
-    color: rgb(51 51 51);
+    color: rgb(51, 51, 51);
     display: inline-block;
     height: 14px;
     width: 14px;
 }
 
 .icon-minus {
-    background-image: url("../img/glyphicons-halflings.png");
+    background-image: url('../img/glyphicons-halflings.png');
     background-position: -24px -96px;
     background-repeat: no-repeat;
-    color: rgb(51 51 51);
+    color: rgb(51, 51, 51);
     display: inline-block;
     height: 14px;
     width: 14px;
@@ -908,7 +857,7 @@ progress::-webkit-progress-value {
     padding: 0 0 0 20px;
     max-height: 100px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overlfow-y: scroll;
     width: 100%;
     overflow-wrap: break-word;
 }
@@ -918,25 +867,21 @@ progress::-webkit-progress-value {
     border-radius: 4px;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 tr.is_publish {
     background-color: #81d4fa;
 }
 
 .btn-large {
     width: 96%;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     margin-left: 2%;
     margin-right: 2%;
     margin-top: 5px;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     margin-bottom: 5px;
     font-size: 17px;
     padding: 16px;
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#grade_inquiry_box.rubric_panel {
+#regrade_request_box.rubric_panel {
     border: 5px solid #f47a42;
 }
 
@@ -999,7 +944,7 @@ tr.is_publish {
 }
 
 #rubric-container {
-    padding: 0 10px;
+    padding: 0 10px 0 10px;
 }
 
 .gradeable .row-wrap {
@@ -1059,7 +1004,7 @@ tr.is_publish {
     resize: vertical;
 }
 
-.gradeable .edit-component-container .content-block input[type="text"] {
+.gradeable .edit-component-container .content-block input[type=text] {
     width: 100%;
 }
 
@@ -1098,7 +1043,7 @@ tr.is_publish {
     padding-left: 10px;
 }
 
-.gradeable .component .box-title input[type="number"] {
+.gradeable .component .box-title input[type=number] {
     text-align: right;
 }
 
@@ -1140,7 +1085,6 @@ tr.is_publish {
     cursor: pointer;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .component .row.divider,
 .solution-box .row.divider {
     background: #dddddd;
@@ -1150,6 +1094,9 @@ tr.is_publish {
     padding-right: 10px;
     margin-top: 8px;
     margin-bottom: 8px;
+}
+
+.gradeable .component .content-block {
 }
 
 .gradeable .ta-rubric-table,
@@ -1220,7 +1167,6 @@ tr.is_publish {
     visibility: hidden;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container span {
     display: inline-flex;
     box-sizing: content-box;
@@ -1238,7 +1184,6 @@ tr.is_publish {
     justify-content: flex-start;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container input,
 .gradeable .mark-container textarea {
     box-sizing: border-box;
@@ -1265,7 +1210,6 @@ tr.is_publish {
     background-color: var(--alert-border-blue);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-disabled span {
     cursor: not-allowed;
     opacity: 0.3;
@@ -1313,7 +1257,6 @@ tr.is_publish {
     background-color: initial;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .mark-container .col-sm input {
     width: 100%;
     margin: 2px;
@@ -1382,12 +1325,10 @@ tr.is_publish {
     margin-top: 25px;
 }
 
-/* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #discussion_browser.rubric_panel {
     border: 5px solid var(--standard-light-seafoam);
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 #directory_view {
     position: relative;
     float: left;
@@ -1401,18 +1342,16 @@ tr.is_publish {
 }
 
 .sticky-file-info {
-    position: absolute;
-    right: 5px;
-    left: 5px;
+    position: sticky;
+    top: 0;
     background-color: var(--standard-pale-blue-gray);
     padding: 10px 15px 0;
     z-index: 30;
 }
 
-#image-rotate-icons-bar,
-#notebook-image-rotate-icons-bar {
+#image-rotate-icons-bar, #notebook-image-rotate-icons-bar {
     display: none;
-    padding: 0 10px;
+    padding: 0px 10px;
 }
 
 #file-content {
@@ -1420,7 +1359,6 @@ tr.is_publish {
     width: 100%;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 #changeCodeStyle {
     display: inline-block;
 }
@@ -1455,7 +1393,6 @@ tr.is_publish {
     grid-template-columns: repeat(auto-fill, 250px);
     max-width: 83vw;
     grid-column-gap: 5px;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     grid-row-gap: 5px;
 }
 
@@ -1466,7 +1403,6 @@ tr.is_publish {
     padding: 5px;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .layout-option-item button {
     margin-top: 2px;
 }
@@ -1478,7 +1414,6 @@ tr.is_publish {
 
 /* Solution/TA Notes Panel */
 
-/* stylelint-disable-next-line selector-id-pattern */
 #solution_ta_notes {
     padding: 10px;
 }
@@ -1531,7 +1466,6 @@ input[type="radio"][disabled=""]:checked::before {
 }
 
 /* Animations */
-/* stylelint-disable-next-line keyframes-name-pattern */
 @keyframes scaleUp {
     from {
         position: fixed;

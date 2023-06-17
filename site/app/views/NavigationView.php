@@ -515,7 +515,7 @@ class NavigationView extends AbstractView {
             if (!$gradeable->hasDueDate()) {
                 $date_text = "";
             }
-            if (!$gradeable->isStudentSubmit() && $core->getUser()->accessFullGrading() && $core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+            if (!$gradeable->isStudentSubmit() && $core->getUser()->accessFullGrading()) {
                 // Student isn't submitting
                 $title = "BULK UPLOAD";
                 $class = "btn-primary";
@@ -651,7 +651,7 @@ class NavigationView extends AbstractView {
                 ]);
             }
 
-            if ($gradeable->anyActiveGradeInquiries()) {
+            if ($gradeable->anyActiveRegradeRequests()) {
                 //Open grade inquiries
                 return new Button($this->core, [
                     "title" => "REGRADE",
@@ -695,9 +695,6 @@ class NavigationView extends AbstractView {
                 $title = 'GRADE';
                 $date_text = 'grades due ';
                 $date_time = $gradeable->getGradeDueDate();
-            }
-            elseif ($list_section === GradeableList::GRADING && !$gradeable->hasReleaseDate()) {
-                $title = 'GRADE';
             }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';
