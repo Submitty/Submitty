@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\GradingQueue;
 use app\views\AutogradingStatusView;
 use app\views\ErrorView;
+use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AutogradingStatusController extends AbstractController {
@@ -41,6 +42,37 @@ class AutogradingStatusController extends AbstractController {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $info = $this->getAutogradingInfo();
+        return JsonResponse::getSuccessResponse($info);
+    }
+
+    /**
+     * Attempts to read the stack trace and find any error message
+     * @Route("/autograding_status/get_stack", methods={"GET"})
+     * @return JsonResponse
+     */
+    public function getErrorStackTrace(): JsonResponse {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
+            return JsonResponse::getFailResponse("You do not have access to this endpoint.");
+        }
+        $stack_trace_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "autograding_stack_traces");
+        if (!is_readable($stack_trace_path)) {
+            return JsonResponse::getFailResponse("Could not access the stack trace path.");
+        }
+        // Grab only the information of the 7 most recent stacktrace
+        $files = array_slice(scandir($stack_trace_path, SCANDIR_SORT_DESCENDING), 0, 7);
+        $info = [];
+        foreach ($files as $f) {
+            if ($f === '.' || $f === '..') {
+                continue;
+            }
+            $file_path = FileUtils::joinPaths($stack_trace_path, $f);
+            if (is_readable($file_path)) {
+                $info[$f] = file_get_contents($file_path);
+            }
+            else {
+                $info[$f] = "Not readable";
+            }
+        }
         return JsonResponse::getSuccessResponse($info);
     }
 

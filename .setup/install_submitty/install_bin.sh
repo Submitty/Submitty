@@ -33,7 +33,7 @@ for i in "${array[@]}"; do
 done
 
 # COURSE_BUILDERS & DAEMON_USER need access to these scripts
-array=( build_homework_function.sh make_assignments_txt_file.py make_generated_output.py config_syntax_check.py json_schemas json_schemas/complete_config_schema.json set_allowed_mins.py )
+array=( build_homework_function.sh make_assignments_txt_file.py make_generated_output.py config_syntax_check.py json_schemas json_schemas/complete_config_schema.json set_allowed_mins.py comment_count.py )
 for i in "${array[@]}"; do
     chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
@@ -41,6 +41,9 @@ done
 
 chown root:root ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
+
+# others need rx permissions for comment_count because its an autograding command
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/bin/comment_count.py
 
 #####################################
 
@@ -55,7 +58,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/autograder
 mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 
 # copy all of the files
-rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
+rsync -rtz --exclude tests  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
 rsync -rtz  ${SUBMITTY_REPOSITORY}/autograder/* ${SUBMITTY_INSTALL_DIR}/autograder/
 
 # most of the scripts should be root only
@@ -70,7 +73,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things in sbin
-array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py send_email.py generate_grade_summaries.py submitty_daemon_jobs)
+array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py send_email.py cleanup_old_email.py generate_grade_summaries.py submitty_daemon_jobs)
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
@@ -99,3 +102,6 @@ if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
     chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 fi
 
+
+echo -e "Updating system dependencies"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"

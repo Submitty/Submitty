@@ -55,32 +55,37 @@ def add_empty_commit(folder,which_branch):
     # otherwise clone to a non-bare repo and add an empty commit
     # to the specified branch
     with tempfile.TemporaryDirectory() as tmpdirname:
-        os.system(f'git clone {folder} {tmpdirname}')
+        subprocess.run(['git', 'clone', folder, tmpdirname])
         os.chdir(tmpdirname)
-        os.system(f'git checkout -b {which_branch}')
-        os.system("git " +
-                  "-c user.name=submitty -c user.email=submitty@example.com commit " +
-                  "--allow-empty -m 'initial empty commit' " +
-                  "--author='submitty <submitty@example.com>'")
-        os.system(f'git push origin {which_branch}')
+        subprocess.run(['git', 'checkout', '-b', which_branch])
+        subprocess.run(['git',
+            '-c', 'user.name=submitty',
+            '-c', 'user.email=submitty@example.com',
+            'commit', '--allow-empty',
+            '-m', 'initial empty commit',
+            '--author=submitty <submitty@example.com>'])
+        subprocess.run(['git', 'push', 'origin', which_branch])
 
     print(f'Made new empty commit on branch {which_branch} in repo {folder}')
 
 
 # =======================================================================
-def create_new_repo(folder, which_branch):
+def create_new_repo(folder, subdirectory, which_branch):
 
     # create the folder & initialize an empty bare repo
-    os.makedirs(folder, mode=0o770)
+    path = folder
+    if subdirectory != '':
+        path = os.path.join(folder, subdirectory)
+    os.makedirs(path, mode=0o770)
     os.chdir(folder)
     # note: --initial-branch option requires git 2.28.0 or greater
-    os.system(f'git init --bare --shared --initial-branch={which_branch}')
+    subprocess.run(['git', 'init', '--bare', '--shared', f'--initial-branch={which_branch}'])
 
-    # unfortuantely, when an empty repo with no branches is cloned,
+    # unfortunately, when an empty repo with no branches is cloned,
     # the active branch and HEAD does NOT default to the specified branch
 
     # so let's manually specify the initial branch
-    os.system(f'git symbolic-ref HEAD refs/heads/{which_branch}')
+    subprocess.run(['git', 'symbolic-ref', 'HEAD', f'refs/heads/{which_branch}'])
 
     # and explicitly add an empty commit to the specified branch
     # so that the repository is not empty
@@ -90,20 +95,20 @@ def create_new_repo(folder, which_branch):
 
 
 # =======================================================================
-def create_or_update_repo(folder, which_branch):
+def create_or_update_repo(folder, subdirectory, which_branch):
     print ('--------------------------------------------')
     print (f'Create or update repo {folder}')
 
     if not os.path.isdir(folder):
         # if the repo doesn't already exist, create it
-        create_new_repo(folder,which_branch)
+        create_new_repo(folder, subdirectory, which_branch)
 
     else:
         os.chdir(folder)
 
         # whether or not this repo was newly created, set the default HEAD
         # on the origin repo
-        os.system(f'git symbolic-ref HEAD refs/heads/{which_branch}')
+        subprocess.run(['git', 'symbolic-ref', 'HEAD', f'refs/heads/{which_branch}'])
 
         # if this repo has no branches with valid commits, add an
         # empty commit to the specified branch so that the repository
@@ -190,8 +195,12 @@ elif not args.non_interactive:
     print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
     response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
     if not response.lower() == 'y':
-        print ("exiting");
+        print ("exiting")
         sys.exit()
+
+subdirectory = ''
+if eg.eg_vcs_subdirectory != '':
+    subdirectory = eg.eg_vcs_subdirectory
 
 
 # Load the git branch for autgrading from the course config file
@@ -218,7 +227,7 @@ if is_team:
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), course_git_autograding_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), subdirectory, course_git_autograding_branch)
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -226,4 +235,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), course_git_autograding_branch)
+        create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), subdirectory, course_git_autograding_branch)

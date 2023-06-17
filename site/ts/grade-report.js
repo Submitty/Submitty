@@ -4,11 +4,11 @@ export function promptCustomizationUpload() {
 }
 
 export function init() {
-    $('#config-upload').on('change', function(){
+    $('#config-upload').on('change', function() {
         $(this).closest('form').submit();
     });
 
-    $('#toggle-json').on('click', function(){
+    $('#toggle-json').on('click', function() {
         $('#customization-json').toggle();
         if ($('#customization-json').is(':visible')) {
             $(this).html('Hide JSON');

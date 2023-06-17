@@ -1,7 +1,7 @@
 /* OUTPUT: ERROR: FLOATING POINT ERROR
  *         Program Terminated
  * Child exited with status 8
- * Note: Throws during runtime occurance of a division by zero
+ * Note: Throws during runtime occurrence of a division by zero
  * However, when explicitly dividing by 0 (i.e. 1/x), a warning is thrown
  * and exception not caught (prints out a large number if you were to print out result):
  * Compilation output:
