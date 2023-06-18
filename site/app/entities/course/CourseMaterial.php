@@ -202,6 +202,11 @@ class CourseMaterial {
     }
 
     public function setUrlTitle(string $url_title): void {
+        echo $url_title;
+
+        if (url_title == null){
+            $url_title = "browski";
+        }
         $this->url_title = $url_title;
     }
 }

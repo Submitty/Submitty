@@ -360,6 +360,7 @@ function newEditCourseMaterialsForm(tag) {
     let is_link = $(tag).data('is-link');
     let link_title = $(tag).data('link-title');
     let link_url = $(tag).data('link-url');
+    let file_path = $(tag).data('path');
 
     let form = $("#edit-course-materials-form");
 
@@ -395,7 +396,12 @@ function newEditCourseMaterialsForm(tag) {
     }
     const title_label = $("#edit-url-title-label", form);
     const url_label = $("#edit-url-url-label", form);
+    const path = $("#new-file-name");
+    path.val(file_path.substring(1));
+
     if (is_link === 1) {
+        path.val(link_url);
+
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
