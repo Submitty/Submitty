@@ -1284,7 +1284,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite, file_path) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1321,6 +1321,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (link_url !== null) {
         formData.append('link_url', link_url);
     }
+
+    if (file_path !== null) {
+        formData.append('file_path', file_path);
+    }
+
     if (link_title !== null) {
         formData.append('link_title', link_title);
     }

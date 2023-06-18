@@ -438,7 +438,47 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
+
+
+
+        if (isset($_POST['file_path'])) {
+            $path = $course_material->getPath();
+            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            $requested_path = $_POST['file_path'];
+            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+            if ($course_material->isFile() && $path !== $new_path) {
+                // check valid directory
+                $requested_path = explode("/", $requested_path);
+                if (count($requested_path) > 1) {
+                    $dir = explode("/", $new_path);
+                    array_pop($dir);
+                    $dir = implode("/", $dir);
+                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                    ->findOneBy(['path' => $dir]);
+                    if ($cm == null) {
+                        return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                    }
+                }
+                $tmp_course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
+                        ->findOneBy(['path' => $new_path]);
+                if ($tmp_course_material !== null) {
+                    return JsonResponse::getErrorResponse("File already exists in current directory. Please rename file or put under different directory");
+                }
+                FileUtils::writeFile($new_path, "");
+                rename($course_material->getPath(), $new_path);
+                $course_material->setPath($new_path);
+            }
+            // elseif ($course_material->isLink()) {
+            //     $course_material->setUrl($_POST['file_path']);
+            // }
+        }
+
+        if (isset($_POST['link_title'])) {
+            $link_title = $_POST['link_title'];
+            $course_material->setUrlTitle($link_title);
+        }
+
+        if (isset($_POST['link_url']) && $course_material->isLink()) {
             if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
                 $path = $course_material->getPath();
                 $dirs = explode("/", $path);
