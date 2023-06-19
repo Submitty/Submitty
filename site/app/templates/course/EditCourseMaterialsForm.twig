@@ -92,9 +92,8 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                let url_title = document.getElementById("edit-url-title");
+                let url_title = document.getElementById("edit-url-title").value;
                 let url_url = document.getElementById("edit-url-url");
-                let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
                 let file_path = document.getElementById("new-file-name").value; 
                 let overwrite = false;
@@ -102,7 +101,7 @@
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val, overwrite, file_path);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title, overwrite, file_path);
         };
 
         const edit_fp = flatpickr('.edit-picker', {
