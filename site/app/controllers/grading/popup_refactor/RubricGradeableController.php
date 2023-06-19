@@ -74,6 +74,12 @@ class RubricGradeableController extends AbstractController {
      */
     private $navigate_assigned_students_only;
 
+    /**
+     * If true, students names will be replaced with hashed IDs.
+     */
+    private $is_anonymous_mode;
+
+
     # ---------------------------------
 
 
@@ -121,6 +127,7 @@ class RubricGradeableController extends AbstractController {
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
+        $this->setIsAnonomousMode();
 
         $this->current_student_id = $who_id;
         $this->sort_type = $sort;
@@ -151,6 +158,14 @@ class RubricGradeableController extends AbstractController {
             // The following line exits execution.
             $this->core->redirect($this->core->buildCourseUrl());
         }
+    }
+
+
+    /**
+     * Determines whether we are in anonomous browsing based on settings from the Details page.
+     */
+    private function setIsAnonomousMode() {
+       $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
     }
 
 
