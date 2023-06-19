@@ -400,7 +400,10 @@ function newEditCourseMaterialsForm(tag) {
     path.val(file_path.substring(1));
     const urlTitle = $("#edit-url-title");
     urlTitle.val(link_title);
-
+    title_label.css('display', 'block');
+    const title = $("#edit-url-title");
+    title.prop('disabled', false);
+    title.val(link_title);
     if (is_link === 1) {
         this_path = file_path.substring(1);
         const startIndex = this_path.indexOf('course_materials/') + 'course_materials/'.length;
@@ -408,11 +411,7 @@ function newEditCourseMaterialsForm(tag) {
         const decodedString = decodeURIComponent(substring);
         path.val(decodedString);
 
-        title_label.css('display', 'block');
         url_label.css('display', 'block');
-        const title = $("#edit-url-title");
-        title.prop('disabled', false);
-        title.val(link_title);
         const url = $("#edit-url-url");
         url.prop('disabled', false);
         url.val(link_url);
