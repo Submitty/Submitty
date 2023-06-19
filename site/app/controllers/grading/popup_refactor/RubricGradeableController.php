@@ -20,9 +20,18 @@ namespace app\controllers\grading\popup_refactor;
 
 
 # Includes:
+// Our super class
 use app\controllers\AbstractController;
+
+// Used for URL to function calls
 use Symfony\Component\Routing\Annotation\Route;
+
+// Used to compare gradeables
 use app\libraries\GradeableType;
+
+// Used for prev and next navigation, as well as outputing the sorting type as
+// a string
+use app\models\GradingOrder;
 
 
 # Main Class:
@@ -94,7 +103,10 @@ class RubricGradeableController extends AbstractController {
      */
     public function createMainRubricGradeablePage($gradeable_id, $who_id = '', $sort = "id", $direction = "ASC",
             $navigate_assigned_students_only = "true") {
+
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
+
+        $this->createBreadcrumbHeader();
     }
 
 
@@ -110,10 +122,10 @@ class RubricGradeableController extends AbstractController {
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
 
-        $current_student_id = $who_id;
-        $sort_type = $sort;
-        $sort_direction = $direction;
-        $navigate_assigned_students_only;
+        $this->current_student_id = $who_id;
+        $this->sort_type = $sort;
+        $this->sort_direction = $direction;
+        $this->navigate_assigned_students_only;
     }
 
 
@@ -125,13 +137,13 @@ class RubricGradeableController extends AbstractController {
      */
     private function setCurrentGradeable($gradeable_id) {
         // tryGetGradeable inherited from AbstractController
-        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        $this->current_gradeable = $this->tryGetGradeable($gradeable_id, false);
 
         // Gradeable must exist and be Rubric.
         $error_message = "";
-        if ($gradeable === false)
+        if ($this->current_gradeable === false)
             $error_message = 'Invalid Gradeable!';
-        if (empty($error_message) && $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
+        if (empty($error_message) && $this->current_gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
             $error_message = 'This gradeable is not a rubric gradeable.';
 
         if (!empty($error_message)) {
@@ -139,6 +151,21 @@ class RubricGradeableController extends AbstractController {
             // The following line exits execution.
             $this->core->redirect($this->core->buildCourseUrl());
         }
+    }
+
+
+    /**
+     * Created breadcrumb navigation header based on current sorting and gradeable id.
+     * Navigation should be:
+     *     Submitty > COURSE_NAME > GRADEABLE_NAME Grading > Grading Interface $sort_id $sort_direction Order
+     */
+    private function createBreadcrumbHeader() {
+        $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->current_gradeable->getId(),
+            'grading', 'details']);
+        $this->core->getOutput()->addBreadcrumb("{$this->current_gradeable->getTitle()} Grading", $gradeableUrl);
+
+        $this->core->getOutput()->addBreadcrumb('Grading Interface ' .
+            GradingOrder::getGradingOrderMessage($this->sort_type, $this->sort_direction));
     }
 
 }
