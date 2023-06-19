@@ -343,13 +343,13 @@
     }
 
  function changeOverride() {
-        var status = '{{ include_overridden }}';
+        var status = '{{ include_grade_override }}';
 
         if (status == 'omit') {
-            document.cookie = "include_overridden=include;";
+            document.cookie = "include_grade_override=include;";
         }
         else {
-            document.cookie = "include_overridden=omit;";
+            document.cookie = "include_grade_override=omit;";
         }
         
         location.reload();

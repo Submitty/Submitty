@@ -24,7 +24,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-
+ 
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
@@ -682,17 +682,16 @@ class ElectronicGraderController extends AbstractController {
             }
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            echo "plz v2  is = " . ( array_sum($late_components)) . "\n";
-            echo "graded v2  is = " . ( array_sum($graded_components)) . "\n";
+           /* echo "plz v2  is = " . ( array_sum($late_components)) . "\n";
+            echo "graded v2  is = " . ( array_sum($graded_components)) . "\n";*/
 
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            /*$override_cookie = array_key_exists('include_grade_overrides', $_COOKIE) ? $_COOKIE['include_grade_overrides'] === 'true' : false;*/
-           /* $override_cookie = array_key_exists('include_grade_overrides', $_COOKIE) && $_COOKIE['include_grade_overrides'] === 'true';*/
-            /*$override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';*/
-            $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';
 
+           /* $override_cookie = array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit';*/
+
+            $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];

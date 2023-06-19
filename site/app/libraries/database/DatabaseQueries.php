@@ -18,7 +18,7 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\User;
+use app\models\User; 
 use app\models\Notification;
 use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
@@ -1750,10 +1750,11 @@ ORDER BY {$orderby}",
             ON 
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
-            INNER JOIN late_day_cache
-            ON late_day_cache.g_id=electronic_gradeable.g_id
-            AND late_day_cache.user_id=users.user_id
-            AND late_day_cache.late_day_status=3
+            INNER JOIN late_day_cache AS ldc
+            ON ldc.g_id=electronic_gradeable.g_id
+            AND ldc.user_id=users.user_id
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
             {$where}
             GROUP BY {$section_key}
             ORDER BY {$orderby}",
@@ -2029,7 +2030,8 @@ ORDER BY {$u_or_t}.{$section_key}",
         INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=eg.g_id
             AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}  
-            AND ldc.late_day_status=3
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
             ORDER BY {$u_or_t}.{$section_key}",
@@ -2248,6 +2250,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getAverageForGradeable($g_id, $section_key, $is_team, $override) {
+
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -3774,10 +3777,11 @@ ORDER BY {$section_key}",
             ON 
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
-            INNER JOIN late_day_cache
-            ON late_day_cache.g_id=electronic_gradeable.g_id
-            AND late_day_cache.team_id=gradeable_teams.team_id
-            AND late_day_cache.late_day_status=3
+            INNER JOIN late_day_cache AS ldc
+            ON ldc.g_id=electronic_gradeable.g_id
+            AND ldc.team_id=gradeable_teams.team_id
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
             {$where}
             GROUP BY {$section_key}
             ORDER BY {$section_key}",
