@@ -93,8 +93,8 @@ class RubricGradeableController extends AbstractController {
      * 
      */
     public function createMainRubricGradeablePage($gradeable_id, $who_id = '', $sort = "id", $direction = "ASC",
-        $navigate_assigned_students_only = "true") {
-    $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
+            $navigate_assigned_students_only = "true") {
+        $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
     }
 
 
@@ -108,12 +108,12 @@ class RubricGradeableController extends AbstractController {
      * @param string $navigate_assigned_students_only - When going to the next student, this variable controls whether we skip students. 
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
-    $this->setCurrentGradeable($gradeable_id);
+        $this->setCurrentGradeable($gradeable_id);
 
-    $current_student_id = $who_id;
-    $sort_type = $sort;
-    $sort_direction = $direction;
-    $navigate_assigned_students_only;
+        $current_student_id = $who_id;
+        $sort_type = $sort;
+        $sort_direction = $direction;
+        $navigate_assigned_students_only;
     }
 
 
@@ -124,16 +124,15 @@ class RubricGradeableController extends AbstractController {
      * @param string $gradeable_id - The id string of the current gradeable.
      */
     private function setCurrentGradeable($gradeable_id) {
-    // tryGetGradeable inherited from AbstractController
-    $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        // tryGetGradeable inherited from AbstractController
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
 
-    // Gradeable must exist and be Rubric.
-    $error_message = "";
+        // Gradeable must exist and be Rubric.
+        $error_message = "";
         if ($gradeable === false)
             $error_message = 'Invalid Gradeable!';
         if (empty($error_message) && $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
             $error_message = 'This gradeable is not a rubric gradeable.';
-
 
         if (!empty($error_message)) {
             $this->core->addErrorMessage($error_message);
