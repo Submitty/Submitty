@@ -38,6 +38,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string getCourseSectionId()
+ * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
  * @method string getRegistrationType()
  * @method void setManualRegistration(bool $flag)
@@ -84,9 +86,9 @@ class User extends AbstractModel {
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop @var string The id of this user which should be a unique identifier */
     protected $id;
-    /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    /** @prop @var string Alternate ID for a user, such as a campus assigned ID */
     protected $numeric_id = null;
     /**
      * @prop
@@ -122,6 +124,8 @@ class User extends AbstractModel {
     protected $access_level;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
+    /** @prop @var string Unique id for course section */
+    protected $course_section_id = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
@@ -225,6 +229,7 @@ class User extends AbstractModel {
         $this->notification_settings = self::constructNotificationSettings($details);
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
+        $this->course_section_id = isset($details['course_section_id']) ? $details['course_section_id'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
@@ -605,6 +610,9 @@ class User extends AbstractModel {
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 //"NULL" registration section should be validated as a datatype, not as a string.
+                return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+            case 'course_section_id':
+                //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
             case 'grading_assignments':
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
