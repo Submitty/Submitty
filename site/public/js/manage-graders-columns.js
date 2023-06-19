@@ -1,4 +1,4 @@
-/* exported toggleColumnsForm, updateManageStudentsColumns, fillAllCheckboxes
+/* exported toggleColumnsForm, updateManageGradesColumns, fillAllCheckboxes
 */
 
 //Data structure for active columns
