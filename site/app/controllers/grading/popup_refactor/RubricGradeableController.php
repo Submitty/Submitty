@@ -45,11 +45,23 @@ class RubricGradeableController extends AbstractController {
 	/**
      * INFORMATION
      * 
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta/grade")
      * @param string $gradeable_id - The id string of this gradeable, set in the gradeable's settings.
      */
-	public function test_page_creation($gradeable_id) {
-		print "Hello World!";
+	public function test_page_creation(
+        $gradeable_id,
+        $who_id = '',
+        $from = "",
+        $to = null,
+        $gradeable_version = null,
+        $sort = "id",
+        $direction = "ASC",
+        $component_id = "-1",
+        $anon_mode = false,
+        $filter = 'default',
+        $navigate_assigned_students_only = "true"
+    ) {
+		print "Hello World!\n$direction";
 	}
 }
 
