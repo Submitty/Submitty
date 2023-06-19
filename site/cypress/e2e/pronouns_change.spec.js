@@ -19,7 +19,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //type in new pronouns
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
         e.type('They/Them');
-        cy.get('#edit-pronouns-form .form-button-container > .btn-primary').first().click();
+        cy.get('#submit').click();
 
     });
 
@@ -30,7 +30,7 @@ describe('Tests cases abut changing user pronouns', () => {
         //ensure pronouns column is on
         cy.get('a[href="javascript:toggleColumnsForm()"]').click(); //open toggle columns form
         cy.get('#toggle-pronouns').check();
-        cy.get('#toggle-columns-form .form-button-container > .btn-primary').first().click();
+        cy.get('#submit').first().click();
 
         //Ensure correctness in table
         cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
@@ -68,7 +68,7 @@ describe('Tests cases abut changing user pronouns', () => {
         if (oldPronouns !== '') {
             e.type(oldPronouns);
         }
-        cy.get('#edit-pronouns-form .form-button-container > .btn-primary').first().click();
+        cy.get('#submit').first().click();
 
     });
 
