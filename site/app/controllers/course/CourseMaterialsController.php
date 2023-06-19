@@ -446,7 +446,7 @@ class CourseMaterialsController extends AbstractController {
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
             $new_path = FileUtils::joinPaths($upload_path, $requested_path);
-            if ($course_material->isFile() && $path !== $new_path) {
+            if ($path !== $new_path) {
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
@@ -500,6 +500,7 @@ class CourseMaterialsController extends AbstractController {
                 $dirs = explode("/", $path);
                 array_pop($dirs);
                 $path = implode("/", $dirs);
+                $file_name = urlencode("link-" . $_POST['link_title']);
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
