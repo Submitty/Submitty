@@ -2,10 +2,12 @@
 /**
  * ---------------------
  * 
- * RubricGradeableController.php
+ * RubricGraderController.php
  * First Created By: Nia Heermance
  * 
- * This class's functionNAME will eventually be called when a Rubric Gradeable's grading page is opened.
+ * This class's createMainRubricGradeablePage will eventually be called when a
+ * Rubric Gradeable's grading page is opened.
+ * 
  * Currently, to access the page associated with this class, enter URL:
  * 
  *     /courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta[?more_stuff_here_is_okay]
@@ -35,7 +37,7 @@ use app\models\GradingOrder;
 
 
 # Main Class:
-class RubricGradeableController extends AbstractController {
+class RubricGraderController extends AbstractController {
 
     # ---------------------------------
 
@@ -107,7 +109,7 @@ class RubricGradeableController extends AbstractController {
      * provided to the URL.
      * 
      */
-    public function createMainRubricGradeablePage($gradeable_id, $who_id = '', $sort = "id", $direction = "ASC",
+    public function createMainRubricGraderPage($gradeable_id, $who_id = '', $sort = "id", $direction = "ASC",
             $navigate_assigned_students_only = "true") {
 
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
