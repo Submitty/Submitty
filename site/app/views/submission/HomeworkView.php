@@ -448,12 +448,13 @@ class HomeworkView extends AbstractView {
         // Grab all team member late day information
         $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
         $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
-                if ($ldi !== null) {
-                    $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
-                    return $ldi->getLateDaysRemaining() - $days_to_be_charged; 
-                } else {
-                    return 0;
-                }
+            if ($ldi !== null) {
+                $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
+                return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+            }
+            else {
+                return 0;
+            }
         }, $team_ldi)) : 0;
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
