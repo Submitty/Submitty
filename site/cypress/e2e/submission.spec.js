@@ -173,16 +173,13 @@ function makeSubmission({
         cy.wrap(fileNamesSet.size).should('eq', 0);
     });
 
-    // wait for the autograding results to finish. Refresh the page intermittently to (hopefully) load autograding results
+    // wait for the autograding results to finish loading autograding results
     cy.wrap(false).as('autogradingDone');
     if (autograding) {
         for (let i = 0; i < 6; i++) {
             cy.wait(500);
             cy.get('main').then(($element) => {
-                if ($element.find('div[id^="tc_0"]').length !== 0) {
-                    cy.reload();
-                }
-                else {
+                if ($element.find('div[id^="tc_0"]').length === 0) {
                     cy.wrap(true).as('autogradingDone');
                 }
             });
