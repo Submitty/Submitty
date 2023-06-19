@@ -148,6 +148,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'displayed_given_name' => 'User',
             'displayed_family_name' => 'Tester',
             'pronouns' => '',
+            'display_pronouns' => false,
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,

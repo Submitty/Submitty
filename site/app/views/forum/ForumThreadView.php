@@ -1126,7 +1126,7 @@ class ForumThreadView extends AbstractView {
             }
         }
 
-        if ($this->core->getUser()->getGroup() == 4 ) {
+        if ($this->core->getUser()->getGroup() == 4) {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($user_info["pronouns"]);
