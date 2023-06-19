@@ -35,7 +35,11 @@ function changeSubmissionVersion() {
                 });
 
             // Accept late day alert
-            acceptAlerts(1);
+            cy.on('window:confirm', (msg) => {
+                expect(msg).to.satisfy((msg) => {
+                    return msg.includes('Are you sure you want to continue?');
+                });
+            });
 
             // Wait until the page reloads to change the active version, completing the test
             cy.get('select#submission-version-select option')
@@ -106,13 +110,12 @@ function inputFiles(filePaths = [], dragAndDrop = false, targetId = 'upload1') {
     }
 }
 
-function acceptAlerts(numAlerts) {
-    for (let i = 0; i < numAlerts; i++) {
-        cy.on('window:alert', () => {
-            // Accept the alert
-            cy.stub();
-        });
-    }
+function removeSuccessPopup() {
+    cy.get('body').then(($element) => {
+        if ($element.find('#success-0').length > 0) {
+            $element.find('#success-0').remove();
+        }
+    });
 }
 
 function makeSubmission({
@@ -136,13 +139,18 @@ function makeSubmission({
 
         // input and submit the files
         inputFiles(filePaths, dragAndDrop, targetId);
-        cy.get('#submit').click();
 
-        // accept submission and late day limit alerts
-        acceptAlerts(2);
+        // checks the alert message exist (we are not checking the exact msg) on clicking submit button, since there are two alerts on click() they can have 2 msg
+        cy.on('window:confirm', (msg) => {
+            expect(msg).to.satisfy((msg) => {
+                return msg.includes('Do you want to replace it?') || msg.includes('Are you sure you want to continue?');
+            });
+        });
+        cy.get('#submit').click();
 
         // Making sure that the files are submitted properly by waiting for the submission success popup (inner message)
         cy.get('#success-0');
+        removeSuccessPopup();
 
         // make sure the submission count has increased
         cy.get(submissionSelector).should('have.length', submissionCount + 1);
