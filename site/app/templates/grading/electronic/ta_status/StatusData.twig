@@ -21,7 +21,7 @@
                     <b>Number of teams:</b> {{ total_submissions }}
                     <br/>
                     <br/>
-                        {% if include_grade_override  == 'as' %}
+                        {% if include_bad_submissions  == 'omit' %}
                         <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                     {% else %}
                         <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
@@ -35,7 +35,7 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
                     {% else %}
                         <br/>
-                        {% if   include_grade_override == 'as'  %}
+                        {% if   include_bad_submissions == 'omit'  %}
                             <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             <br/>
                             <br/>
@@ -62,7 +62,7 @@
                 <div style="margin-left: 20px">
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
-                                {% if include_grade_override  == 'as'  %}
+                                {% if include_bad_submissions  == 'omit'  %}
                                 Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
                             {% else %}
                                 Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
@@ -121,16 +121,6 @@
         </div>
         <div class = "box col-md-6">
             {# RIGHT CHUNK#}
-                        {% if not peer %}
-                <a class="btn btn-default" style="float: right"
-                    onclick="changeOverride()">
-                    {% if include_grade_override == 'omit' %}
-                        Include Grade Overrides
-                    {% else %}
-                        Omit Grade Overrides
-                    {% endif %}
-                </a>
-            {% endif %}
 
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                 <br>
