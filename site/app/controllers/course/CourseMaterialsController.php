@@ -449,6 +449,11 @@ class CourseMaterialsController extends AbstractController {
             if ($path !== $new_path) {
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
+                if ($course_material->isLink()){
+                    $name = array_pop($requested_path);
+                    $r_file_name = urlencode("link-" . $_POST['link_title']);
+                    array_push($requested_path, $r_file_name);
+                }
                 if (count($requested_path) > 1) {
                     $dir = explode("/", $new_path);
                     array_pop($dir);
