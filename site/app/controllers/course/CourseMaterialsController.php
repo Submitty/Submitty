@@ -468,14 +468,30 @@ class CourseMaterialsController extends AbstractController {
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
             }
-            // elseif ($course_material->isLink()) {
-            //     $course_material->setUrl($_POST['file_path']);
-            // }
+            elseif ($course_material->isLink()) {
+                $course_material->setUrl($_POST['file_path']);
+            }
         }
 
         if (isset($_POST['link_title'])) {
             $link_title = $_POST['link_title'];
+            $file_name = $link_title;
             $course_material->setUrlTitle($link_title);
+            $path = $course_material->getPath();
+
+            $overwrite = false;
+            if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
+                $overwrite = true;
+            }
+            $clash_resolution = $this->resolveClashingMaterials($path, [$file_name], $overwrite);
+            if ($clash_resolution !== true) {
+                return JsonResponse::getErrorResponse(
+                    'Name clash',
+                    $clash_resolution
+                );
+            }
+
+
         }
 
         if (isset($_POST['link_url']) && $course_material->isLink()) {
@@ -484,7 +500,6 @@ class CourseMaterialsController extends AbstractController {
                 $dirs = explode("/", $path);
                 array_pop($dirs);
                 $path = implode("/", $dirs);
-                $file_name = urlencode("link-" . $_POST['link_title']);
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
