@@ -20,7 +20,7 @@
                     Include Grade Overrides
                 </td>
                 <td>
-                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Grade Override" id="toggle-filter-include-grade-override" {% if include_grade_override == 'include' %} checked {% endif %} />
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Grade Override" id="toggle-filter-include-grade-override" {% if include_grade_override == 'include' %} checked {% endif %} onclick="filter_overriden_grades()" />
                 </td>
             </tr>
                         <tr>
@@ -28,7 +28,7 @@
                     Include Bad Submissions
                 </td>
                 <td>
-                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Bad Submissions" id="toggle-filter-include-bad-submissions" {% if include_bad_submissions == 'include' %} checked {% endif %} />
+                    <input type="checkbox" class="toggle-filter-checkbox" aria-label="Toggle Include Bad Submissions" id="toggle-filter-include-bad-submissions" {% if include_bad_submissions == 'include' %} checked {% endif %} onclick="filter_bad_grades()" />
                 </td>
             </tr>
 
@@ -37,7 +37,7 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <button class="btn btn-primary" onclick="updateFilters()">
+    <button class="btn btn-primary" onclick="ApplyFilters()">
         Apply
     </button>
 {% endblock %}

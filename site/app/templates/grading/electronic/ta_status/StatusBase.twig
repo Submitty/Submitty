@@ -348,24 +348,27 @@
         }
     }
 
-    function updateFilters() {
+    function filter_overriden_grades() {
         var override_status = '{{ include_grade_override }}';
-        var bad_submissions_status = '{{ include_bad_submissions }}';
-
         if (override_status == 'omit') {
             document.cookie = "include_grade_override=include;";
         }
         else {
             document.cookie = "include_grade_override=omit;";
         }
+    }
 
+    function filter_bad_grades() {
+        var bad_submissions_status = '{{ include_bad_submissions }}';
         if (bad_submissions_status == 'omit') {
             document.cookie = "include_bad_submissions=include;";
         }
         else {
             document.cookie = "include_bad_submissions=omit;";
         }
+    }
 
+    function applyfilters() {
         location.reload();
     }
 
