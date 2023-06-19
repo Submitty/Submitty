@@ -398,9 +398,15 @@ function newEditCourseMaterialsForm(tag) {
     const url_label = $("#edit-url-url-label", form);
     const path = $("#new-file-name");
     path.val(file_path.substring(1));
+    const urlTitle = $("#edit-url-title");
+    urlTitle.val(link_title);
 
     if (is_link === 1) {
-        path.val(link_url);
+        this_path = file_path.substring(1);
+        const startIndex = this_path.indexOf('course_materials/') + 'course_materials/'.length;
+        const substring = this_path.substring(startIndex).replace('link-','');
+        const decodedString = decodeURIComponent(substring);
+        path.val(decodedString);
 
         title_label.css('display', 'block');
         url_label.css('display', 'block');
