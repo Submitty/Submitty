@@ -945,7 +945,7 @@ function handleSubmission(has_late_days, charged_late_days, days_past_deadline, 
 
     /*First message:
         If a student has enough late days and the days_past_deadline is within range of the days allowed by instructor,
-        then this message should be seen one time after each valid late days has been used 
+        then this message should be seen one time after each valid late days has been used
         (If a valid late day can be used, this message will get shown before that use, then for the rest of the day, any other submission won't trigger this message)
     */
 
