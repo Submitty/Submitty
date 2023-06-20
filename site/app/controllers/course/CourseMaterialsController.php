@@ -476,23 +476,26 @@ class CourseMaterialsController extends AbstractController {
         }
 
         if (isset($_POST['link_title']) && $course_material->isFile()) {
-            $link_title = $_POST['link_title'];
-            $file_name = $link_title;
-            $course_material->setUrlTitle($link_title);
+            $file_name = $_POST['link_title'];
+            $old_name = $course_material->getUrlTitle();
+            $course_material->setUrlTitle($file_name);
             $path = $course_material->getPath();
+            $new_path = str_replace($old_name, $file_name, $path);
 
             $overwrite = false;
             if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                 $overwrite = true;
             }
-            $clash_resolution = $this->resolveClashingMaterials($path, [$file_name], $overwrite);
+            $clash_resolution = $this->resolveClashingMaterials($new_path, [$file_name], $overwrite);
             if ($clash_resolution !== true) {
                 return JsonResponse::getErrorResponse(
                     'Name clash',
                     $clash_resolution
                 );
             }
-
+            FileUtils::writeFile($new_path, "");
+            rename($course_material->getPath(), $new_path);
+            $course_material->setPath($new_path);
 
         }
 
