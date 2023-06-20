@@ -31,10 +31,6 @@ use Symfony\Component\Routing\Annotation\Route;
 // Used to compare gradeables
 use app\libraries\GradeableType;
 
-// Used for prev and next navigation, as well as outputing the sorting type as
-// a string
-use app\models\GradingOrder;
-
 
 # Main Class:
 class RubricGraderController extends AbstractController {

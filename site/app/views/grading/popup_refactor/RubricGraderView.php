@@ -22,6 +22,10 @@ namespace app\views\grading\popup_refactor;
 // Our super class
 use app\views\AbstractView;
 
+// Used for prev and next navigation, as well as outputing the sorting type as
+// a string
+use app\models\GradingOrder;
+
 
 # Main Class:
 class RubricGraderView extends AbstractView {
@@ -38,9 +42,8 @@ class RubricGraderView extends AbstractView {
      * 
      */
     public function createRubricGradeableView($gradeable, $sort_type, $sort_direction) {
-        $this->setMemeberVariables($gradeable);
+        $this->setMemberVariables($gradeable);
 
-        print "hiiiiiiii";
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
     }
 
@@ -59,8 +62,11 @@ class RubricGraderView extends AbstractView {
      * Created breadcrumb navigation header based on current sorting and gradeable id.
      * Navigation should be:
      *     Submitty > COURSE_NAME > GRADEABLE_NAME Grading > Grading Interface $sort_id $sort_direction Order
+     * 
+     * @param string $sort_type - The current way we are sorting students.
+     * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      */
-    private function createBreadcrumbHeader() {
+    private function createBreadcrumbHeader($sort_type, $sort_direction) {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
             'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$this->gradeable->getTitle()} Grading", $gradeableUrl);
