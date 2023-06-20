@@ -478,7 +478,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        if (isset($_POST['link_title'])) {
+        if (isset($_POST['link_title']) && $course_material->isFile()) {
             $link_title = $_POST['link_title'];
             $file_name = $link_title;
             $course_material->setUrlTitle($link_title);
