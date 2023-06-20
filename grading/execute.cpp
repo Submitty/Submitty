@@ -715,7 +715,7 @@ void parse_command_line(const std::string &cmd,
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
       // a common student error is to submit multiple .py files where
-      // only one is expected and we want to run 'python *.py'
+      // only one is expected and we want to run 'python3 *.py'
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
         unsigned int pos = my_args[i].find(".py");
