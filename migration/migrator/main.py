@@ -470,3 +470,30 @@ def dump(args):
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')
+
+
+def load_triggers(args, silent=False):
+    trigger_dir = Path(__file__).resolve().parent.parent / 'triggers'
+    if not trigger_dir.is_dir():
+        if silent:
+            return
+        raise SystemExit('Error: Could not find triggers directory')
+    
+    files = [f for f in trigger_dir.iterdir() if f.is_file() and f.suffix == '.sql']
+
+    if len(files) == 0:
+        return
+
+    db_config = deepcopy(args.config.database)
+    db_config['dbname'] = 'submitty'
+    try:
+        database = db.Database(db_config, 'master')
+    except OperationalError as exc:
+        raise SystemExit('Error applying triggers to master database:\n  ' + str(exc).split('\n')[0])
+    
+    for file in files:
+        with open(file) as f:
+            query = f.read()
+            database.execute(query)
+    
+    database.close()
