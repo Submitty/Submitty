@@ -493,7 +493,7 @@ HTML;
                 $columns[]     = ["width" => "10%", "title" => "Grading",          "function" => "grading_blind"];
             }
             if ($peer === false) {
-                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
+                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total",  "sort_type" => "first"];
             }
             $columns[]         = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
         }
@@ -534,7 +534,7 @@ HTML;
             else {
                 $columns[]     = ["width" => "8%",  "title" => "Grading",       "function" => "grading"];
             }
-            $columns[]         = ["width" => "7%",  "title" => "Total",            "function" => "total"];
+            $columns[]         = ["width" => "7%",  "title" => "Total",            "function" => "total",  "sort_type" => "first"];
             $columns[]         = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
             if ($gradeable->isTaGradeReleased()) {
                 $columns[]     = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
