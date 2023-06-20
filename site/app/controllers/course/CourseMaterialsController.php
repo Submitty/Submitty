@@ -473,9 +473,6 @@ class CourseMaterialsController extends AbstractController {
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
             }
-            elseif ($course_material->isLink()) {
-                $course_material->setUrl($_POST['file_path']);
-            }
         }
 
         if (isset($_POST['link_title']) && $course_material->isFile()) {
