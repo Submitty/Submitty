@@ -378,7 +378,8 @@ def migrate_environment(database, environment, args, all_missing_migrations):
                 run_migration(database, migrations[key], environment, args)
                 break
     
-    load_triggers(args, True)
+    if environment == 'master':
+        load_triggers(args, True)
 
     print("DONE")
     if changes:
@@ -476,6 +477,11 @@ def dump(args):
 
 
 def load_triggers(args, silent=False):
+    if not 'master' in args.environments:
+        if silent:
+            return
+        raise SystemExit('Triggers are to be applied on the master DB')
+
     trigger_dir = Path(__file__).resolve().parent.parent / 'triggers'
     if not trigger_dir.is_dir():
         if silent:
