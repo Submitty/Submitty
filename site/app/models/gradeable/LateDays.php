@@ -147,7 +147,7 @@ class LateDays extends AbstractModel {
      * @return int
      */
     public function getLateDaysUsed() {
-        return $this->getLateDaysUsedByContext($this->core->getDateTimeNow());
+        return $this->getDefaultLateDays() - $this->getLateDaysRemaining()  ;
     }
 
     /**

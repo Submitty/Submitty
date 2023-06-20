@@ -912,6 +912,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
 
 /**
  * @param has_late_days
+ * @param charged_late_days
  * @param days_past_deadline
  * @param late_days_allowed
  * @param versions_used
@@ -925,7 +926,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(has_late_days,days_past_deadline, days_to_be_charged,late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(has_late_days, charged_late_days, days_past_deadline, days_to_be_charged,late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -941,14 +942,29 @@ function handleSubmission(has_late_days,days_past_deadline, days_to_be_charged,l
 
     let late_warning_seen = false;
     // check due date
-    if (has_late_days && days_past_deadline > 0 && days_past_deadline <= late_days_allowed && days_to_be_charged > 0) {
+
+    /*
+    First message :
+        If a student has enough late days and the days_past_deadline is within range of the days allowed by instructor,
+        then this message should be seen one time after each valid late days has been used 
+        (If a valid late day can be used, this message will get shown before that use, then for the rest of the day, any other submission won't trigger this message) 
+    */
+
+    if ( days_past_deadline > 0  && has_late_days  && days_past_deadline <= late_days_allowed && days_to_be_charged > 0) {
         message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_past_deadline} late day(s)?`;
         if (!confirm(message)) {
             $('#submit').prop('disabled', false);
             return;
         }
-    }
-    else if (days_past_deadline > 0 && ( (days_past_deadline > late_days_allowed ) || !has_late_days ) ) {
+    } 
+    /*
+    Second message:
+        If it is too many days past the allowed late days or a student doesn't have enough late days,
+        this warning message will appear at every submission. 
+        In order to make sure that this message doesn't appear after one valid late day has been used (because in that case a student could no longer have anymore late day)
+        we check if the same amount of late days have been charged as the days past the deadline. If it is the same amount, there is no need for this message to get shown.                
+    */
+    else if ( days_past_deadline > 0 &&  (days_past_deadline > late_days_allowed || (!has_late_days && days_past_deadline != charged_late_days ) ) ) {
         late_warning_seen = true;
         message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
         if (!confirm(message)) {

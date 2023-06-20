@@ -397,6 +397,7 @@
         else if (user_id == "") {
             handleSubmission(
                 {{ has_late_days ? 'true' : 'false' }},
+                {{ charged_late_days }},
                 {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
@@ -420,6 +421,7 @@
         else {
             handleSubmission(
                 {{ has_late_days ? 'true' : 'false' }},
+                {{ charged_late_days }},
                 {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
