@@ -8,3 +8,10 @@
  ---------------------
 */
 
+#navigation-bar-wrapper {
+    box-sizing: content-box;
+    padding: 6px 0;
+    width: 100%;
+}
+
+
