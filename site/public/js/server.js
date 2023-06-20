@@ -403,13 +403,14 @@ function newEditCourseMaterialsForm(tag) {
     title_label.css('display', 'block');
     const title = $("#edit-url-title");
     title.prop('disabled', false);
-    title.val(link_title);
+    title.val(file_path.substring(file_path.lastIndexOf("/") + 1));
     if (is_link === 1) {
         this_path = file_path.substring(1);
         const startIndex = this_path.indexOf('course_materials/') + 'course_materials/'.length;
         const substring = this_path.substring(startIndex).replace('link-','');
         const decodedString = decodeURIComponent(substring);
         path.val(decodedString);
+        title.val(decodeURIComponent(file_path.substring(file_path.lastIndexOf("/") + 1).replace('link-','')));
 
         url_label.css('display', 'block');
         const url = $("#edit-url-url");
