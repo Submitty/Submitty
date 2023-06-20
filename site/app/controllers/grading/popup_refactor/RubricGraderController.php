@@ -38,7 +38,6 @@ class RubricGraderController extends AbstractController {
     private $gradeable;
 
     /**
-     * @var current_student_id
      * The anonomous id of the student currently being grade.
      * This id can be set with setCurrentStudentId or when loading this page's URL
      * with ?who_id=INSERT_ID.
@@ -46,21 +45,18 @@ class RubricGraderController extends AbstractController {
     private $current_student_id;
 
     /**
-     * @var sort_type
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
      */
     private $sort_type;
 
     /**
-     * @var sort_direction
      * For a given ordering, do we sort it ascending "ASC" or descending "DSC".
      * Controls where next and prev arrows go.
      */
     private $sort_direction;
 
     /**
-     * @var navigate_assigned_students_only
      * Do we skip students that we are not assigned to when pressing next or prev arrows?
      */
     private $navigate_assigned_students_only;
