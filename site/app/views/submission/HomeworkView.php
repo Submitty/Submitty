@@ -353,6 +353,7 @@ class HomeworkView extends AbstractView {
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $charged_late_days =  $late_day_info !== null ? $late_day_info->getLateDaysCharged() : 0;
+        $remaining_late_days_for_gradeable = $late_day_info->getLateDaysRemaining();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
             $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
@@ -523,8 +524,8 @@ class HomeworkView extends AbstractView {
                 }
             },
             'days_past_deadline' => $days_past_deadline,
-            'has_late_days' => $late_days->hasLateDaysRemaining(),
             'charged_late_days' => $charged_late_days,
+            'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
             'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
