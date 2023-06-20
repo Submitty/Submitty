@@ -4,7 +4,6 @@
  * ---------------------
  *
  * RubricGradearView.php
- * First Created By: Nia Heermance
  *
  * This class creates the main display window for the Rubric Grader, featuring the
  * NavigationBar and the PanelBar.
@@ -31,7 +30,7 @@ use app\models\GradingOrder;
 # Main Class:
 class RubricGraderView extends AbstractView {
 
-    
+
     /**
      * Creates the Rubric Grading page visually.
      * This function is called in reateMainRubricGraderPage of RubricGraderController.php.
@@ -46,6 +45,8 @@ class RubricGraderView extends AbstractView {
         $this->setMemberVariables($gradeable);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
+
+        $this->addCSSs();
     }
 
 
@@ -74,6 +75,14 @@ class RubricGraderView extends AbstractView {
 
         $this->core->getOutput()->addBreadcrumb('Grading Interface ' .
             GradingOrder::getGradingOrderMessage($sort_type, $sort_direction));
+    }
+
+
+    /**
+     * Adds CSS files used for the Rubric Grader page.
+     */
+    private function addCSSs() {
+        $this->core->getOutput()->addInternalCss('popup_refactor/navigation-bar.css');
     }
 
 }

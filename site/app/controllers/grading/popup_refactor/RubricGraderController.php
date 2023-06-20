@@ -4,7 +4,6 @@
  * ---------------------
  *
  * RubricGraderController.php
- * First Created By: Nia Heermance
  *
  * This class's createMainRubricGradeablePage will eventually be called when a
  * Rubric Gradeable's grading page is opened.
@@ -19,7 +18,6 @@
  */
 
 # Namespace:
-
 namespace app\controllers\grading\popup_refactor;
 
 
