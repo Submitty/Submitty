@@ -46,7 +46,7 @@ class RubricGraderController extends AbstractController {
     /**
      * The current gradeable being graded.
      */
-    private $current_gradeable;
+    private $gradeable;
 
     /**
      * @var current_student_id
@@ -93,7 +93,7 @@ class RubricGraderController extends AbstractController {
     # Functions:
 
     /**
-     * Displays the Rubric Grading page. 
+     * Creates the Rubric Grading page. 
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta/grade")
      * 
      * @param string $gradeable_id - The id string of the current gradeable.
@@ -114,7 +114,18 @@ class RubricGraderController extends AbstractController {
 
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
 
-        $this->createBreadcrumbHeader();
+        $this->core->getOutput()->renderOutput(
+            # Path:
+                ['grading', 'popup_refactor', 'RubricGrader'],
+
+            # Function Name:
+                'createRubricGradeableView', 
+
+            # Variables:
+                $this->gradeable,
+                $this->sort_type,
+                $this->sort_direction
+        );
     }
 
 
@@ -125,7 +136,8 @@ class RubricGraderController extends AbstractController {
      * @param string $who_id - The id of the student we should grade.
      * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
      * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
-     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls whether we skip students. 
+     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls 
+     *     whether we skip students. 
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
@@ -139,20 +151,20 @@ class RubricGraderController extends AbstractController {
 
 
     /**
-     * Sets $current_gradeable to the appropiate assignment unless $gradeable_id is invalid,
+     * Sets $gradeable to the appropiate assignment unless $gradeable_id is invalid,
      * in which case an error is printed and the code exits.
      * 
      * @param string $gradeable_id - The id string of the current gradeable.
      */
     private function setCurrentGradeable($gradeable_id) {
         // tryGetGradeable inherited from AbstractController
-        $this->current_gradeable = $this->tryGetGradeable($gradeable_id, false);
+        $this->gradeable = $this->tryGetGradeable($gradeable_id, false);
 
         // Gradeable must exist and be Rubric.
         $error_message = "";
-        if ($this->current_gradeable === false)
+        if ($this->gradeable === false)
             $error_message = 'Invalid Gradeable!';
-        if (empty($error_message) && $this->current_gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
+        if (empty($error_message) && $this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
             $error_message = 'This gradeable is not a rubric gradeable.';
 
         if (!empty($error_message)) {
@@ -168,21 +180,6 @@ class RubricGraderController extends AbstractController {
      */
     private function setIsAnonomousMode() {
        $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
-    }
-
-
-    /**
-     * Created breadcrumb navigation header based on current sorting and gradeable id.
-     * Navigation should be:
-     *     Submitty > COURSE_NAME > GRADEABLE_NAME Grading > Grading Interface $sort_id $sort_direction Order
-     */
-    private function createBreadcrumbHeader() {
-        $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->current_gradeable->getId(),
-            'grading', 'details']);
-        $this->core->getOutput()->addBreadcrumb("{$this->current_gradeable->getTitle()} Grading", $gradeableUrl);
-
-        $this->core->getOutput()->addBreadcrumb('Grading Interface ' .
-            GradingOrder::getGradingOrderMessage($this->sort_type, $this->sort_direction));
     }
 
 }
