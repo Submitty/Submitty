@@ -404,6 +404,7 @@ jobs:
               sudo apt-get install poppler-utils
               sudo apt-get install valgrind
               sudo apt-get install moreutils
+              sudo apt-get install python2
 
           - name: Install third party dependencies
             run: |
