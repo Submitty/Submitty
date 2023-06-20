@@ -226,7 +226,7 @@ class GradingOrder extends AbstractModel {
      */
     private function initUsersGradeInquiry(bool $ungraded, int $component_id) {
         if (is_null($this->grade_inquiry_users)) {
-            $this->grade_inquiry_users = $this->core->getQueries()->getRegradeRequestsUsers($this->gradeable->getId(), $ungraded, $component_id);
+            $this->grade_inquiry_users = $this->core->getQueries()->getGradeInquiriesUsers($this->gradeable->getId(), $ungraded, $component_id);
         }
     }
 
