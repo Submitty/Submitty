@@ -133,7 +133,7 @@ class RubricGraderController extends AbstractController {
         $this->current_student_id = $who_id;
         $this->sort_type = $sort;
         $this->sort_direction = $direction;
-        $this->navigate_assigned_students_only;
+        $this->navigate_assigned_students_only = $navigate_assigned_students_only;
     }
 
 
