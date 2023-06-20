@@ -38,13 +38,6 @@ class RubricGraderController extends AbstractController {
     private $gradeable;
 
     /**
-     * The anonomous id of the student currently being grade.
-     * This id can be set with setCurrentStudentId or when loading this page's URL
-     * with ?who_id=INSERT_ID.
-     */
-    private $current_student_id;
-
-    /**
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
      */
@@ -55,16 +48,6 @@ class RubricGraderController extends AbstractController {
      * Controls where next and prev arrows go.
      */
     private $sort_direction;
-
-    /**
-     * Do we skip students that we are not assigned to when pressing next or prev arrows?
-     */
-    private $navigate_assigned_students_only;
-
-    /**
-     * If true, students names will be replaced with hashed IDs.
-     */
-    private $is_anonymous_mode;
 
     # ---------------------------------
 
@@ -128,12 +111,9 @@ class RubricGraderController extends AbstractController {
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
-        $this->setIsAnonomousMode();
 
-        $this->current_student_id = $who_id;
         $this->sort_type = $sort;
         $this->sort_direction = $direction;
-        $this->navigate_assigned_students_only = $navigate_assigned_students_only;
     }
 
 
@@ -161,13 +141,5 @@ class RubricGraderController extends AbstractController {
             // The following line exits execution.
             $this->core->redirect($this->core->buildCourseUrl());
         }
-    }
-
-
-    /**
-     * Determines whether we are in anonomous browsing based on settings from the Details page.
-     */
-    private function setIsAnonomousMode() {
-        $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
     }
 }
