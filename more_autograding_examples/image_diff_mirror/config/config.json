@@ -1,10 +1,17 @@
 {
 	"required_capabilities": "et-cetera",
 
+    "autograding_method": "docker",
+
+	"container_options": {
+        "container_image": "ubuntu:custom"
+	},
+
     "autograding" : {
         "submission_to_runner" : [ "*.txt", "*.png" ],
 	       "work_to_details" : ["**/*.png"]
     },
+    
     "max_submission_size" : 2000000,
     "testcases" : [    
         {
