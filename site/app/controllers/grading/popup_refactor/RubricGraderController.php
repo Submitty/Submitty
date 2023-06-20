@@ -19,24 +19,15 @@
  */
 
 # Namespace:
-
 namespace app\controllers\grading\popup_refactor;
 
-
 # Includes:
-// Our super class
 use app\controllers\AbstractController;
-
-// Used for URL to function calls
 use Symfony\Component\Routing\Annotation\Route;
-
-// Used to compare gradeables
 use app\libraries\GradeableType;
-
 
 # Main Class:
 class RubricGraderController extends AbstractController {
-
     # ---------------------------------
 
     # Member Variables:
@@ -79,7 +70,6 @@ class RubricGraderController extends AbstractController {
      */
     private $is_anonymous_mode;
 
-
     # ---------------------------------
 
 
@@ -91,7 +81,7 @@ class RubricGraderController extends AbstractController {
     # Functions:
 
     /**
-     * Creates the Rubric Grading page. 
+     * Creates the Rubric Grading page.
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")
      *
      * @param string $gradeable_id - The id string of the current gradeable.
@@ -100,29 +90,32 @@ class RubricGraderController extends AbstractController {
      * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
      * @param string $navigate_assigned_students_only - When going to the next student, this variable controls
      *                whether we skip students.
-     * 
+     *
      * This page is loaded on line 476 of Details.twig when the Grade button is clicked.
      *
      * Note that the argument names cannot be changed easily as they need to line up with the arguments
      * provided to the URL.
      *
      */
-    public function createMainRubricGraderPage($gradeable_id, $who_id = '', $sort = "id", $direction = "ASC",
-            $navigate_assigned_students_only = "true") {
+    public function createMainRubricGraderPage(
+        $gradeable_id,
+        $who_id = '',
+        $sort = "id",
+        $direction = "ASC",
+        $navigate_assigned_students_only = "true"
+    ) {
 
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
 
         $this->core->getOutput()->renderOutput(
             # Path:
-                ['grading', 'popup_refactor', 'RubricGrader'],
-
+            ['grading', 'popup_refactor', 'RubricGrader'],
             # Function Name:
-                'createRubricGradeableView', 
-
-            # Variables:
-                $this->gradeable,
-                $this->sort_type,
-                $this->sort_direction
+            'createRubricGradeableView',
+            # Arguments:
+            $this->gradeable,
+            $this->sort_type,
+            $this->sort_direction
         );
     }
 
@@ -134,8 +127,8 @@ class RubricGraderController extends AbstractController {
      * @param string $who_id - The id of the student we should grade.
      * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
      * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
-     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls 
-     *     whether we skip students. 
+     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls
+     *     whether we skip students.
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
@@ -160,10 +153,12 @@ class RubricGraderController extends AbstractController {
 
         // Gradeable must exist and be Rubric.
         $error_message = "";
-        if ($this->gradeable === false)
+        if ($this->gradeable === false) {
             $error_message = 'Invalid Gradeable!';
-        if (empty($error_message) && $this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) 
+        }
+        if (empty($error_message) && $this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             $error_message = 'This gradeable is not a rubric gradeable.';
+        }
 
         if (!empty($error_message)) {
             $this->core->addErrorMessage($error_message);
@@ -177,8 +172,6 @@ class RubricGraderController extends AbstractController {
      * Determines whether we are in anonomous browsing based on settings from the Details page.
      */
     private function setIsAnonomousMode() {
-       $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
+        $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
     }
-
 }
-
