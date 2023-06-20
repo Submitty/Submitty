@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\LateDayInfo;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -442,6 +443,13 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
 
+        // Grab all team member late day information
+        $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
+        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+            $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
+            return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+        }, $team_ldi)) : 0;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
@@ -455,12 +463,17 @@ class HomeworkView extends AbstractView {
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
+        $vcs_partial_path = '';
+        $vcs_partial_path = $gradeable->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
-            'vcs_base_url' => rtrim($this->core->getConfig()->getVcsBaseUrl(), '/'),
-            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_partial_path' => $vcs_partial_path ,
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
@@ -487,6 +500,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
+            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -1032,18 +1046,22 @@ class HomeworkView extends AbstractView {
         }
 
         $failed_file = '';
+        $file_count = 0;
         // See if the grade has succeeded or failed
-        if (count($param['files']) === 1) {
-            foreach ($param['files'] as $file) {
-                if (str_contains($file['relative_name'], 'failed')) {
-                    $failed_file = file_get_contents($file['path']);
-                // Exclude the Exception error message
-                    $failed_file = substr(strstr($failed_file, "\n"), 3);
+        if (in_array('files', $param)) {
+            $file_count = count($param['files']);
+            if ($file_count === 1) {
+                foreach ($param['files'] as $file) {
+                    if (str_contains($file['relative_name'], 'failed')) {
+                        $failed_file = file_get_contents($file['path']);
+                    // Exclude the Exception error message
+                        $failed_file = substr(strstr($failed_file, "\n"), 3);
+                    }
                 }
+                // Arbitrary size, currently bigger than all of the failed files, but
+                // could be increased if the failed files need more tips/messages
+                $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
             }
-            // Arbitrary size, currently bigger than all of the failed files, but
-            // could be increased if the failed files need more tips/messages
-            $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
         }
 
         // If its not git checkout
@@ -1062,7 +1080,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'failed_file' => $failed_file,
-            'file_length' => count($param['files']),
+            'file_length' => $file_count,
             'gradeable_id' => $gradeable->getId(),
             'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
