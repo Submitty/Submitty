@@ -10,7 +10,7 @@
  * 
  * Currently, to access the page associated with this class, enter URL:
  * 
- *     /courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta[?more_stuff_here_is_okay]
+ *     /courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta[?more_stuff_here_is_okay]
  * 
  * This class is also responsible for updating popup windows created.
  * 
@@ -90,7 +90,7 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Creates the Rubric Grading page. 
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_grading_beta/grade")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")
      * 
      * @param string $gradeable_id - The id string of the current gradeable.
      * @param string $who_id - The id of the student we should grade.
