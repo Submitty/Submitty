@@ -56,6 +56,10 @@ a.cal-btn:focus {
     text-align: left;
 }
 
+#calendar-item-type-edit{
+    float: right;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;
@@ -63,6 +67,11 @@ a.cal-btn:focus {
     margin-top: 0;
     margin-bottom: 0;
     line-height: 100%;
+}
+
+.cal-toolbar {
+    margin-bottom: 2px;
+    margin-top: 0;
 }
 
 h2.cal-month-title {
@@ -261,7 +270,16 @@ a.cal-gradeable-status-link:focus {
     color: var(--text-black)!important;
 }
 
-@media (width <= 800px) {
+/* creating/editing calendar event */
+div.calendar-submit {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-gap: 5px; 
+}
+div.calendar-submit label { text-align: "right"; }
+div.calendar-submit label::after { content: ":"; }
+
+@media (max-width: 800px) {
     #calendar-list {
         margin: 0;
     }

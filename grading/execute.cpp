@@ -81,6 +81,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
     { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
+    { "comment_count", SUBMITTY_INSTALL_DIRECTORY+"/bin/comment_count.py" },
+
     // Submitty Analysis ToolsTS
     { "submitty_count_ts",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_count_ts" },
     { "submitty_diagnostics_ts", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts"},
@@ -715,7 +717,7 @@ void parse_command_line(const std::string &cmd,
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
       // a common student error is to submit multiple .py files where
-      // only one is expected and we want to run 'python *.py'
+      // only one is expected and we want to run 'python3 *.py'
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
         unsigned int pos = my_args[i].find(".py");

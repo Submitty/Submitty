@@ -49,9 +49,8 @@ use app\libraries\FileUtils;
  * @method string getCourseCodeRequirements()
  * @method bool isForumEnabled()
  * @method string getForumCreateThreadMessage()
- * @method bool isRegradeEnabled()
  * @method bool isEmailEnabled()
- * @method string getRegradeMessage()
+ * @method string getGradeInquiryMessage()
  * @method string getVcsBaseUrl()
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
@@ -241,10 +240,8 @@ class Config extends AbstractModel {
     protected $forum_enabled;
     /** @prop @var string */
     protected $forum_create_thread_message;
-    /** @prop @var bool */
-    protected $regrade_enabled;
     /** @prop @var string */
-    protected $regrade_message;
+    protected $grade_inquiry_message;
     /** @prop @var bool */
     protected $seating_only_for_instructor;
     /** @prop @var string|null */
@@ -504,8 +501,8 @@ class Config extends AbstractModel {
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -531,7 +528,6 @@ class Config extends AbstractModel {
             'display_rainbow_grades_summary',
             'display_custom_message',
             'forum_enabled',
-            'regrade_enabled',
             'seating_only_for_instructor',
             'queue_enabled',
             'polls_enabled',
