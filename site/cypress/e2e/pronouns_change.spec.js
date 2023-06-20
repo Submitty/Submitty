@@ -21,6 +21,9 @@ describe('Tests cases abut changing user pronouns', () => {
         e.type('They/Them');
         cy.get('#edit-pronouns-submit').click();
 
+        //ensure pronouns changed on page
+        cy.get('#pronouns_val').contains('They/Them');
+
     });
 
     it('Verifies changed pronouns as instructor in Manage Students', () => {
@@ -62,6 +65,11 @@ describe('Tests cases abut changing user pronouns', () => {
             e.type(oldPronouns);
         }
         cy.get('#edit-pronouns-submit').first().click();
+
+        //ensure pronouns changed on page
+        if (oldPronouns !== '') {
+            cy.get('#pronouns_val').contains(oldPronouns);
+        }
 
     });
 
