@@ -17,29 +17,38 @@
 # Namespace:
 namespace app\views\grading\popup_refactor;
 
-
 # Includes:
-// Our super class
 use app\views\AbstractView;
-
-// Used for prev and next navigation, as well as outputing the sorting type as
-// a string
 use app\models\GradingOrder;
-
 
 # Main Class:
 class RubricGraderView extends AbstractView {
+    # ---------------------------------
 
+    # Member Variables:
+
+    /**
+     * The current gradeable being graded.
+     */
+    private $gradeable;
+
+    # ---------------------------------
+
+
+    # ---
+
+
+    # ---------------------------------
 
     /**
      * Creates the Rubric Grading page visually.
      * This function is called in reateMainRubricGraderPage of RubricGraderController.php.
-     * 
+     *
      * @param string $gradeable - The current Gradeable.
      * @param string $sort_type - The current way we are sorting students. Used to create the header.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      *     Used to create the header.
-     * 
+     *
      */
     public function createRubricGradeableView($gradeable, $sort_type, $sort_direction) {
         $this->setMemberVariables($gradeable);
@@ -52,19 +61,19 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Sets the corresponding memeber variables based on provided arguments.
-     * 
+     *
      * @param string $gradeable - The current Gradeable.
      */
     private function setMemberVariables($gradeable) {
         $this->gradeable = $gradeable;
-
     }
+
 
     /**
      * Created breadcrumb navigation header based on current sorting and gradeable id.
      * Navigation should be:
      *     Submitty > COURSE_NAME > GRADEABLE_NAME Grading > Grading Interface $sort_id $sort_direction Order
-     * 
+     *
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      */
@@ -84,5 +93,4 @@ class RubricGraderView extends AbstractView {
     private function addCSSs() {
         $this->core->getOutput()->addInternalCss('popup_refactor/navigation-bar.css');
     }
-
 }
