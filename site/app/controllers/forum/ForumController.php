@@ -474,7 +474,7 @@ class ForumController extends AbstractController {
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (strlen($post_content) ===0 || strlen($thread_id) === 0) {
+        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
