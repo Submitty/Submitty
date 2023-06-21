@@ -47,3 +47,14 @@ updates:
       - dependencies
     commit-message:
       prefix: "[DevDependency] "
+  - package-ecosystem: "github-actions"
+    directory: "/actions/e2e-Setup-Composite"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+    open-pull-requests-limit: 15
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "[DevDependency] "
