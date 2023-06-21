@@ -140,6 +140,11 @@ function generateCalendarItem(item) {
     if (item['status'] === 'ann') {
         element.style.setProperty('border-color', item['color']);
     }
+    if (item['status'] === 'note') {
+        element.style.setProperty('border-color', 'green');
+        element.style.setProperty('border-style', 'dotted');
+        element.style.setProperty('border-width', '3px');
+    }
     if (exists) {
         element.style.setProperty('cursor','pointer');
     }

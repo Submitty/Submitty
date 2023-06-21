@@ -81,7 +81,7 @@ class CalendarItem {
 
     public function setStringType(string $type): void {
         switch ($type) {
-            case 'text':
+            case 'note':
                 $this->type = self::TEXT;
                 break;
             case 'ann':
@@ -99,7 +99,7 @@ class CalendarItem {
     public function getTypeString(): string {
         switch ($this->type) {
             case self::TEXT:
-                return 'text';
+                return 'note';
             case self::ANNOUNCEMENT:
                 return 'ann';
         }
