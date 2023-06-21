@@ -24,6 +24,8 @@ namespace app\controllers\grading\popup_refactor;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\GradeableType;
+use app\models\gradeable\Gradeable;
+use app\models\User;
 
 // Main Class:
 class RubricGraderController extends AbstractController {
@@ -32,12 +34,13 @@ class RubricGraderController extends AbstractController {
     // Member Variables:
 
     /**
+     * @var Gradeable
      * The current gradeable being graded.
      */
     private $gradeable;
 
     /**
-     * @var current_student_id
+     * @var string
      * The anonomous id of the student currently being grade.
      * This id can be set with setCurrentStudentId or when loading this page's URL
      * with ?who_id=INSERT_ID.
@@ -45,29 +48,61 @@ class RubricGraderController extends AbstractController {
     private $current_student_id;
 
     /**
-     * @var sort_type
+     * @var string
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
      */
     private $sort_type;
 
     /**
-     * @var sort_direction
+     * @var string
      * For a given ordering, do we sort it ascending "ASC" or descending "DSC".
      * Controls where next and prev arrows go.
      */
     private $sort_direction;
 
     /**
-     * @var navigate_assigned_students_only
+     * @var bool
      * Do we skip students that we are not assigned to when pressing next or prev arrows?
      */
     private $navigate_assigned_students_only;
 
+   /**
+    * @var int
+    * User type for current website user.
+    * Enum from User:
+    *  1: User::GROUP_INSTRUCTOR
+    *  2: User::GROUP_FULL_ACCESS_GRADER
+    *  3: User::GROUP_LIMITED_ACCESS_GRADER
+    *  4: User::GROUP_STUDENT
+    */
+    private $user_type;
+
+   /**
+    * @var bool
+    * True if the current gradeable has peer grading.
+    */
+    private $is_peer_gradeable;
+
     /**
-     * If true, students names will be replaced with hashed IDs.
+    * @var bool
+    * True if the current gradeable has teams.
+    */
+    private $is_team_gradeable;
+
+    /**
+     * @var string
+     *
+     * The access mode for the current user for this gradeable. 
+     * Possible Values:
+     *  - "unblind" - Nothing about students is hidden.
+     *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
+     *               who they are currently grading.
+     *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
+     *               see which peer they are currently grading.
      */
-    private $is_anonymous_mode;
+    private $blind_access_mode = "";
+
 
     // ---------------------------------
 
@@ -103,7 +138,6 @@ class RubricGraderController extends AbstractController {
         $direction = "ASC",
         $navigate_assigned_students_only = "true"
     ) {
-
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
 
         $this->core->getOutput()->renderOutput(
@@ -114,7 +148,9 @@ class RubricGraderController extends AbstractController {
             // Arguments:
             $this->gradeable,
             $this->sort_type,
-            $this->sort_direction
+            $this->sort_direction,
+            $this->is_team_gradeable,
+            $this->blind_access_mode
         );
     }
 
@@ -131,7 +167,11 @@ class RubricGraderController extends AbstractController {
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
-        $this->setIsAnonomousMode();
+        $this->setUserType();
+
+        $this->setIfPeerGradeable();
+        $this->setIfTeamGradeable();
+        $this->setBlindAccessMode();
 
         $this->current_student_id = $who_id;
         $this->sort_type = $sort;
@@ -168,9 +208,79 @@ class RubricGraderController extends AbstractController {
 
 
     /**
-     * Determines whether we are in anonomous browsing based on settings from the Details page.
+     * Sets the current user type for the website user.
      */
-    private function setIsAnonomousMode() {
-        $is_anonymous_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
+    private function setUserType {
+        $user_type = $this->core->getUser()->getGroup();
+    }
+
+
+    /**
+     * Sets $is_peer_gradeable based on whether the current gradeable has peer grading.
+     * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
+     */
+    private function setIfPeerGradeable() {
+        $this->is_peer_gradeable = $this->gradeable->hasPeerComponent();
+    }
+
+
+    /**
+     * Sets $is_peer_gradeable based on whether the current gradeable has teams.
+     * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
+     */
+    private function setIfTeamGradeable() {
+        $is_team_gradeable = $this->gradeable->isTeamAssignment();
+    }
+
+
+    /**
+     * Sets $blind_access_mode for the current user for this grader session of this gradeable.
+     *
+     * Possible Values:
+     *  - "unblind" - Nothing about students is hidden.
+     *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
+     *                who they are currently grading.
+     *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
+     *                see which peer they are currently grading.
+     */
+    private function setBlindAccessMode() {
+        // Blind Settings for Instructors and Full Access Graders:
+        if ($this->user_type == User::GROUP_INSTRUCTOR || $this->user_type User::GROUP_FULL_ACCESS_GRADER) {
+            if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
+                $this->blind_access_mode = "single";
+            }
+            else {
+                $this->blind_access_mode = "unblind";
+            }
+        }
+
+        // Blind Settings for Limited Access Graders:
+        if ($this->user_type == User::GROUP_LIMITED_ACCESS_GRADER) {
+            if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
+                $this->blind_access_mode = "single";
+            }
+            else {
+                $this->blind_access_mode = "unblind";
+            }
+        }
+
+        // Blind Settings for Student Peer Graders:
+        if ($this->user_type == User::GROUP_STUDENT) {
+            if ($this->is_peer_gradeable) {
+                if ($this->gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+                    $blind_access_mode = "double";
+                }
+                elseif ($this->gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) {
+                    $blind_access_mode = "single";
+                }
+                else {
+                    $blind_access_mode = "unblind";
+                }
+            }
+
+            else {
+                $blind_access_mode = "unblind"
+            }
+        }
     }
 }

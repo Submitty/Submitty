@@ -32,6 +32,31 @@ class RubricGraderView extends AbstractView {
      */
     private $gradeable;
 
+    /**
+    * @var bool
+    * True if the current gradeable has peer grading.
+    */
+    private $is_peer_gradeable;
+
+     /**
+    * @var bool
+    * True if the current gradeable has teams.
+    */
+    private $is_team_gradeable;
+
+    /**
+     * @var string
+     *
+     * The access mode for the current user for this gradeable. 
+     * Possible Values:
+     *  - "unblind" - Nothing about students is hidden.
+     *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
+     *               who they are currently grading.
+     *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
+     *               see which peer they are currently grading.
+     */
+    private $blind_access_mode = "";
+
     // ---------------------------------
 
 
@@ -48,14 +73,26 @@ class RubricGraderView extends AbstractView {
      * @param string $sort_type - The current way we are sorting students. Used to create the header.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      *     Used to create the header.
+     * @param bool $is_peer_gradeable - True if the gradeable has peer grading.
+     * @param bool $is_team_gradeable - True if the gradeable is a team gradeable.
+     * @param string $blind_access_mode - Either "unblind", "single", or "double". See above for details.
      *
      */
-    public function createRubricGradeableView($gradeable, $sort_type, $sort_direction) {
-        $this->setMemberVariables($gradeable);
+    public function createRubricGradeableView(
+        $gradeable,
+        $sort_type,
+        $sort_direction,
+        $is_peer_gradeable,
+        $is_team_gradeable,
+        $blind_access_mode
+    ) {
+        $this->setMemberVariables($gradeable, $is_peer_gradeable, $is_team_gradeable, $blind_access_mode);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
 
         $this->addCSSs();
+
+        $this->renderNavigationBar();
     }
 
 
@@ -63,9 +100,16 @@ class RubricGraderView extends AbstractView {
      * Sets the corresponding memeber variables based on provided arguments.
      *
      * @param string $gradeable - The current Gradeable.
+     * @param bool $is_peer_gradeable - True if the gradeable has peer grading.
+     * @param bool $is_team_gradeable - True if the gradeable is a team gradeable.
+     * @param string $blind_access_mode - Either "unblind", "single", or "double". See above for details.
+     *     for details.
      */
-    private function setMemberVariables($gradeable) {
+    private function setMemberVariables($gradeable, $is_peer_gradeable, $is_team_gradeable, $blind_access_mode) {
         $this->gradeable = $gradeable;
+        $this->$is_peer_gradeable = $is_peer_gradeable;
+        $this->is_team_gradeable = $is_team_gradeable;
+        $this->blind_access_mode = $blind_access_mode;
     }
 
 
@@ -92,5 +136,13 @@ class RubricGraderView extends AbstractView {
      */
     private function addCSSs() {
         $this->core->getOutput()->addInternalCss('popup_refactor/navigation-bar.css');
+    }
+
+
+    /**
+     * Creates the NavigationBar used to traverse between students.
+     */
+    private function renderNavigationBar() {
+
     }
 }
