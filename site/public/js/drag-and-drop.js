@@ -1361,6 +1361,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                     if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {
                         newOverwriteCourseMaterialForm(jsondata['data'], true, true);
                     }
+                    else if (jsondata['message'].indexOf('Name clash') !== -1) {
+                        newOverwriteCourseMaterialForm(jsondata['data'], false, true);
+                    }
                     else {
                         alert(jsondata['message']);
                     }
