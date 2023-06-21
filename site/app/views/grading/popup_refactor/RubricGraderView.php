@@ -14,31 +14,31 @@
  * ---------------------
  */
 
-# Namespace:
+// Namespace:
 namespace app\views\grading\popup_refactor;
 
-# Includes:
+// Includes:
 use app\views\AbstractView;
 use app\models\GradingOrder;
 
-# Main Class:
+// Main Class:
 class RubricGraderView extends AbstractView {
-    # ---------------------------------
+    // ---------------------------------
 
-    # Member Variables:
+    // Member Variables:
 
     /**
      * The current gradeable being graded.
      */
     private $gradeable;
 
-    # ---------------------------------
+    // ---------------------------------
 
 
-    # ---
+    // ---
 
 
-    # ---------------------------------
+    // ---------------------------------
 
     /**
      * Creates the Rubric Grading page visually.

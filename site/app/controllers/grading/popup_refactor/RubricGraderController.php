@@ -17,19 +17,19 @@
  * ---------------------
  */
 
-# Namespace:
+// Namespace:
 namespace app\controllers\grading\popup_refactor;
 
-# Includes:
+// Includes:
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\GradeableType;
 
-# Main Class:
+// Main Class:
 class RubricGraderController extends AbstractController {
-    # ---------------------------------
+    // ---------------------------------
 
-    # Member Variables:
+    // Member Variables:
 
     /**
      * The current gradeable being graded.
@@ -69,15 +69,15 @@ class RubricGraderController extends AbstractController {
      */
     private $is_anonymous_mode;
 
-    # ---------------------------------
+    // ---------------------------------
 
 
-    # ---
+    // ---
 
 
-    # ---------------------------------
+    // ---------------------------------
 
-    # Functions:
+    // Functions:
 
     /**
      * Creates the Rubric Grading page.
@@ -107,11 +107,11 @@ class RubricGraderController extends AbstractController {
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
 
         $this->core->getOutput()->renderOutput(
-            # Path:
+            // Path:
             ['grading', 'popup_refactor', 'RubricGrader'],
-            # Function Name:
+            // Function Name:
             'createRubricGradeableView',
-            # Arguments:
+            // Arguments:
             $this->gradeable,
             $this->sort_type,
             $this->sort_direction
