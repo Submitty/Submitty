@@ -75,6 +75,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
+            'vcs_subdirectory' => '',
+            'using_subdirectory' => false,
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
@@ -261,6 +263,8 @@ class AdminGradeableController extends AbstractController {
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
@@ -863,8 +867,10 @@ class AdminGradeableController extends AbstractController {
 
         $repo_name = '';
         $subdir = '';
-        if ($details['subdirectory_gradeable'] === 'true') {
+        $using_subdirectory = false;
+        if ($details['using_subdirectory'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
+            $using_subdirectory = true;
         }
         $vcs_partial_path = '';
         // VCS specific values
@@ -896,6 +902,7 @@ class AdminGradeableController extends AbstractController {
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => $host_type,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -905,6 +912,7 @@ class AdminGradeableController extends AbstractController {
             $non_vcs_property_values = [
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => -1,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -963,6 +971,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'using_subdirectory' => false,
                 'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
@@ -1078,6 +1087,7 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
+            'using_subdirectory',
             'has_due_date',
             'has_release_date',
             'allow_custom_marks'
@@ -1277,6 +1287,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 
