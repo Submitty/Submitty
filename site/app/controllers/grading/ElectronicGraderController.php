@@ -607,6 +607,7 @@ class ElectronicGraderController extends AbstractController {
         }
         if ($peer) {
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
+            $section_key = 'registration_section';
             $peer_array = $this->core->getQueries()->getPeerAssignment($gradeable_id, $this->core->getUser()->getId());
             $peers_to_grade = count($peer_array);
             $num_components = count($gradeable->getPeerComponents());
@@ -619,7 +620,6 @@ class ElectronicGraderController extends AbstractController {
             $autograded_average = null;
             $overall_average = null;
             $overall_scores = null;
-            $section_key = 'registration_section';
         }
         elseif ($gradeable->isGradeByRegistration()) {
             if (!$this->core->getAccess()->canI("grading.electronic.status.full")) {
