@@ -345,7 +345,7 @@ class ForumController extends AbstractController {
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int) $category_id;
         }
-        if (empty($thread_title) || empty($thread_post_content)) {
+        if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         }
