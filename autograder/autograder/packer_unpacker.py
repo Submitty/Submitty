@@ -181,7 +181,8 @@ def prepare_autograding_and_submission_zip(
             )
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
-        is_vcs, vcs_type, vcs_base_url, vcs_partial_path, using_subdirectory, vcs_subdirectory = get_vcs_info(
+        (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
+        using_subdirectory, vcs_subdirectory) = get_vcs_info(
             config,
             config.submitty['submitty_data_dir'],
             obj["semester"],
