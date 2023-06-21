@@ -25,6 +25,7 @@ use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\User;
 
 // Main Class:
@@ -38,6 +39,12 @@ class RubricGraderController extends AbstractController {
      * The current gradeable being graded.
      */
     private $gradeable;
+
+    /**
+     * @var GradedGradeable
+     * The current submission being graded.
+     */
+    private $current_submission;
 
     /**
      * @var string
@@ -147,10 +154,12 @@ class RubricGraderController extends AbstractController {
             'createRubricGradeableView',
             // Arguments:
             $this->gradeable,
+            $this->current_submission,
             $this->sort_type,
             $this->sort_direction,
             $this->is_team_gradeable,
-            $this->blind_access_mode
+            $this->blind_access_mode,
+            $this->gradeableDetailsPage()
         );
     }
 
@@ -167,6 +176,7 @@ class RubricGraderController extends AbstractController {
      */
     private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
+        $this->setCurrentSubmission($who_id);
         $this->setUserType();
 
         $this->setIfPeerGradeable();
@@ -208,9 +218,36 @@ class RubricGraderController extends AbstractController {
 
 
     /**
+     * Sets the current student's submission we are looking at
+     * If the submission does not exist, we exit the page.
+     * 
+     * @param string $who_id - The id of the student we should grade.
+     */
+    private function setCurrentSubmission($who_id) {
+        $this->current_submission = $this->tryGetGradedGradeable($this->gradeable, $who_id, false);
+
+        // Submission does not exist
+        if ($this->current_submission === false) {
+            $this->core->redirect($this->gradeableDetailsPage);
+        }
+    }
+
+    /**
+     * Returns the URL of this gradeable's details page.
+     */
+    private function gradeableDetailsPage() {
+        return $this->core->buildCourseUrl(
+            ['gradeable', $this->gradeable->getId(), 'grading', 'details']) 
+            . '?'
+            . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]
+        );
+    }
+
+
+    /**
      * Sets the current user type for the website user.
      */
-    private function setUserType {
+    private function setUserType() {
         $user_type = $this->core->getUser()->getGroup();
     }
 
@@ -245,7 +282,7 @@ class RubricGraderController extends AbstractController {
      */
     private function setBlindAccessMode() {
         // Blind Settings for Instructors and Full Access Graders:
-        if ($this->user_type == User::GROUP_INSTRUCTOR || $this->user_type User::GROUP_FULL_ACCESS_GRADER) {
+        if ($this->user_type === User::GROUP_INSTRUCTOR || $this->user_type === User::GROUP_FULL_ACCESS_GRADER) {
             if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
                 $this->blind_access_mode = "single";
             }
@@ -255,7 +292,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Limited Access Graders:
-        if ($this->user_type == User::GROUP_LIMITED_ACCESS_GRADER) {
+        if ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
             if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
                 $this->blind_access_mode = "single";
             }
@@ -279,7 +316,7 @@ class RubricGraderController extends AbstractController {
             }
 
             else {
-                $blind_access_mode = "unblind"
+                $blind_access_mode = "unblind";
             }
         }
     }
