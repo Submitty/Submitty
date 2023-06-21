@@ -222,10 +222,11 @@ class RubricGraderController extends AbstractController {
      * Sets the current student's submission we are looking at
      * If the submission does not exist, we exit the page.
      * 
-     * @param string $who_id - The id of the student we should grade.
+     * @param string $who_id - The anonymous id of the student we should grade.
      */
     private function setCurrentSubmission($who_id) {
-        $this->current_submission = $this->tryGetGradedGradeable($this->gradeable, $who_id, false);
+        $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $this->gradeable->getId());
+        $this->current_submission = $this->tryGetGradedGradeable($this->gradeable, $submitter_id, false);
 
         // Submission does not exist
         if ($this->current_submission === false) {
