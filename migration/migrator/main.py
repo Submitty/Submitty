@@ -482,7 +482,7 @@ def load_triggers(args, silent=False):
             return
         raise SystemExit('Triggers are to be applied on the master DB')
 
-    trigger_dir = Path(__file__).resolve().parent.parent / 'triggers'
+    trigger_dir = Path(__file__).resolve().parent / 'triggers'
     if not trigger_dir.is_dir():
         if silent:
             return
