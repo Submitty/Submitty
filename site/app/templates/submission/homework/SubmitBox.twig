@@ -171,8 +171,16 @@
 
         {% endif %}
 
+        {% if vcs_host_type == 4 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: Please push all changes before grading.</em></span><br />
+            <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
+            <br><br>
+        {% endif %}
+        
+        
         <h3>Grade your repository:</h3>
-        {% if vcs_subdirectory != '' %}
+        {% if using_subdirectory %}
         <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
         {% endif %}
         <div class="upload-message">
@@ -391,6 +399,7 @@
             handleSubmission({{ late_days_use }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
+                {{ min_team_would_be_late_days_remaining }},
                 {{ highest_version }},
                 {{ max_submissions }},
                 "{{ csrf_token }}",
@@ -411,6 +420,7 @@
             handleSubmission({{ late_days_use }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
+                {{ min_team_would_be_late_days_remaining }},
                 highest_version,
                 {{ max_submissions }},
                 "{{ csrf_token }}",
