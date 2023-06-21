@@ -102,7 +102,7 @@ class RubricGraderView extends AbstractView {
 
         $this->addCSSs();
 
-        //$this->renderNavigationBar($details_url);
+        $this->renderNavigationBar($details_url);
     }
 
 
@@ -153,13 +153,15 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Creates the NavigationBar used to traverse between students.
+     * @param string $details_url - URL of the Details page for this gradeable.
      */
-    private function renderNavigationBar() {
-        $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
+    private function renderNavigationBar($details_url) {
+        $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [
             "blind_access_mode" => $this->blind_access_mode,
-            "is_team_gradeable" => $is_team_gradeable,
+            "is_team_gradeable" => $this->is_team_gradeable,
             "gradeable_submitter" => $this->current_submission->getSubmitter(),
             "details_url" => $details_url,
+            "progress" => 65 // TODO actually make progress work
         ]);
     }
 }
