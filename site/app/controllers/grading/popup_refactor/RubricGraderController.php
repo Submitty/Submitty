@@ -157,6 +157,7 @@ class RubricGraderController extends AbstractController {
             $this->current_submission,
             $this->sort_type,
             $this->sort_direction,
+            $this->is_peer_gradeable,
             $this->is_team_gradeable,
             $this->blind_access_mode,
             $this->gradeableDetailsPage()
@@ -228,7 +229,7 @@ class RubricGraderController extends AbstractController {
 
         // Submission does not exist
         if ($this->current_submission === false) {
-            $this->core->redirect($this->gradeableDetailsPage);
+            $this->core->redirect($this->gradeableDetailsPage());
         }
     }
 

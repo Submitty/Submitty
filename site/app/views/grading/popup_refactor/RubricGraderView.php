@@ -102,7 +102,7 @@ class RubricGraderView extends AbstractView {
 
         $this->addCSSs();
 
-        $this->renderNavigationBar($details_url);
+        //$this->renderNavigationBar($details_url);
     }
 
 
@@ -147,7 +147,7 @@ class RubricGraderView extends AbstractView {
      * Adds CSS files used for the Rubric Grader page.
      */
     private function addCSSs() {
-        $this->core->getOutput()->addInternalCss('popup_refactor/navigation-bar.css');
+        $this->core->getOutput()->addInternalCss('electronic.css');
     }
 
 
