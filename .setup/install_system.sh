@@ -464,7 +464,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-        sed -i '26s/pam_unix.so obscure try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass yescrypt/pam_unix.so obscure minlen=1 yescrypt/' /etc/pam.d/common-password
 
         # Create folder and give permissions to PHP user for xdebug profiling
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
