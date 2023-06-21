@@ -5029,6 +5029,7 @@ AND gc_id IN (
                   g_id AS eg_g_id,
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
+                  eg_using_subdirectory AS using_subdirectory,
                   eg_vcs_subdirectory AS vcs_subdirectory,
                   eg_vcs_partial_path AS vcs_partial_path,
                   eg_vcs_host_type AS vcs_host_type,
@@ -5725,6 +5726,7 @@ AND gc_id IN (
                 $gradeable->getSubmissionDueDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
+                $gradeable->isUsingSubdirectory(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsPartialPath(),
                 $gradeable->getVcsHostType(),
@@ -5760,6 +5762,7 @@ AND gc_id IN (
                   eg_submission_open_date,
                   eg_submission_due_date,
                   eg_is_repository,
+                  eg_using_subdirectory,
                   eg_vcs_subdirectory,
                   eg_vcs_partial_path,
                   eg_vcs_host_type,
@@ -5788,7 +5791,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5887,6 +5890,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $gradeable->isVcs(),
+                    $gradeable->isUsingSubdirectory(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsPartialPath(),
                     $gradeable->getVcsHostType(),
@@ -5923,6 +5927,7 @@ AND gc_id IN (
                       eg_submission_open_date=?,
                       eg_submission_due_date=?,
                       eg_is_repository=?,
+                      eg_using_subdirectory=?,
                       eg_vcs_subdirectory=?,
                       eg_vcs_partial_path=?,
                       eg_vcs_host_type=?,
