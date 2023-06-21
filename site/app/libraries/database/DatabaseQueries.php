@@ -18,7 +18,7 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\User; 
+use app\models\User;
 use app\models\Notification;
 use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
