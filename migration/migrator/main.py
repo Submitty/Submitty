@@ -377,7 +377,7 @@ def migrate_environment(database, environment, args, all_missing_migrations):
             elif migrations[key]['status'] == 1:
                 run_migration(database, migrations[key], environment, args)
                 break
-    
+
     if environment == 'master':
         load_triggers(args, True)
 
@@ -477,7 +477,7 @@ def dump(args):
 
 
 def load_triggers(args, silent=False):
-    if not 'master' in args.environments:
+    if 'master' not in args.environments:
         if silent:
             return
         raise SystemExit('Triggers are to be applied on the master DB')
@@ -487,7 +487,7 @@ def load_triggers(args, silent=False):
         if silent:
             return
         raise SystemExit('Error: Could not find triggers directory')
-    
+
     files = [f for f in trigger_dir.iterdir() if f.is_file() and f.suffix == '.sql']
 
     if len(files) == 0:
@@ -498,11 +498,13 @@ def load_triggers(args, silent=False):
     try:
         database = db.Database(db_config, 'master')
     except OperationalError as exc:
-        raise SystemExit('Error applying triggers to master database:\n  ' + str(exc).split('\n')[0])
-    
+        raise SystemExit(
+            'Error applying triggers to master database:\n  ' + str(exc).split('\n')[0]
+        )
+
     for file in files:
         with open(file) as f:
             query = f.read()
             database.execute(query)
-    
+
     database.close()
