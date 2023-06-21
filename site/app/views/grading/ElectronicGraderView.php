@@ -219,6 +219,7 @@ class ElectronicGraderView extends AbstractView {
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                echo("\n");
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
                 if ($section['total_components'] == 0) {
@@ -274,7 +275,7 @@ class ElectronicGraderView extends AbstractView {
                     $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
                 }
             }
-            //This else encompasses the above calculations for Teamss
+            //This else encompasses the above calculations for Teams
             //END OF ELSE
         }
 
