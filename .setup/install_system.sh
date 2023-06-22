@@ -196,6 +196,10 @@ else
 
 fi
 
+INSTALL_SYS_DIR=$(mktemp -d)
+chmod 777 "${INSTALL_SYS_DIR}"
+pushd "${INSTALL_SYS_DIR}" > /dev/null
+
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
 DATABASE_PASSWORD=submitty_dbuser
@@ -846,6 +850,9 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
 fi
+
+popd > /dev/null
+rm -rf "${INSTALL_SYS_DIR}"
 
 
 echo "
