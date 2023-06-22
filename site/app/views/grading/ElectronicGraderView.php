@@ -771,8 +771,21 @@ HTML;
 
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
-            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
-        });
+        if ($a['title'] == 'NULL' && $b['title'] == 'NULL') {
+            return 0; // Both are 'NULL', maintain the original order
+        }
+        if ($a['title'] == 'NULL') {
+            return 1; // $a is 'NULL', place it after $b
+        }
+        if ($b['title'] == 'NULL') {
+            return -1; // $b is 'NULL', place it after $a
+        }
+        // Convert titles to integers and compare them
+        $aTitle = intval($a['title']);
+        $bTitle = intval($b['title']);
+        return $aTitle - $bTitle;
+    });
+
 
 
         $empty_team_info = [];
