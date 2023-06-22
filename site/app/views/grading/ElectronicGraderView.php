@@ -770,7 +770,7 @@ HTML;
         $info['late_day_info'] = false;
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function ($a, $b) {
+        usort($sections, function (array $a, array $b) {
             if ($a['title'] == 'NULL' && $b['title'] == 'NULL') {
                 return 0; // Both are 'NULL', maintain the original order
             }
