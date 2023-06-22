@@ -1322,7 +1322,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('link_url', link_url);
     }
 
-    if (file_path !== null && file_path !== '') {
+    if (typeof file_path !== 'undefined' && file_path !== null && file_path !== '') {
         const file_name = file_path.split('/').pop();
         if (link_url !== null) {
             const lastSlashIndex = file_path.lastIndexOf('/');
@@ -1334,7 +1334,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         }
     }
 
-    if (link_title !== null) {
+    if (typeof link_title !== 'undefined' && link_title !== null) {
         formData.append('original_title', link_title);
         if (link_url !== null) {
             link_title = encodeURIComponent(`link-${link_title}`);
