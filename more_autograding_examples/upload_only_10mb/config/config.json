@@ -1,4 +1,11 @@
 {
+    "required_capabilities": "default",
+    
+    "autograding_method": "docker",
+
+	"container_options": {
+        "container_image": "ubuntu:custom"
+	},
     // 10 mb maximum submission size
     "max_submission_size" : 10000000,
     "assignment_message" : "10 mb maximum total file upload.  \nNo automatic grading for this assignment.",
