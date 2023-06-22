@@ -385,7 +385,7 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
 					and eg.eg_submission_open_date <= NOW()
 			),
 			submitted_gradeables AS (
-SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
+               SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
 				FROM electronic_gradeable_version egv
 				JOIN electronic_gradeable_data egd
 					ON egv.g_id=egd.g_id 
