@@ -55,7 +55,7 @@ class TestCli(unittest.TestCase):
             config_path = tempfile.mkdtemp()
             with self.assertRaises(ValueError) as cm:
                 migrator.cli.parse_args(['-e', 'system', 'bad'], Path(config_path))
-            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback', 'dump')", str(cm.exception))
+            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback', 'load_triggers', 'dump')", str(cm.exception))
         finally:
             shutil.rmtree(config_path)
 
