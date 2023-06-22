@@ -51,11 +51,11 @@ function fillAllCheckboxes(val) {
 
 //Cookies (loading and storing)
 function saveColumns(selectedColumns) {
-    Cookies.set('active_columns', selectedColumns.join('-'));
+    Cookies.set('active_grader_columns', selectedColumns.join('-'));
 }
 
 function loadColumns() {
-    const cookie = Cookies.get('active_columns').split('-');
+    const cookie = Cookies.get('active_grader_columns').split('-');
     for (let i = 0; i< cookie.length; i++) {
         if (cookie[i] === '1') {
             cookie[i] = 1;

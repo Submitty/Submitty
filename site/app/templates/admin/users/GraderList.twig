@@ -17,25 +17,25 @@
             <thead>
                <tr>
                 <th>#</th>
-                {% if active_columns[0] %}
+                {% if active_grader_columns[0] %}
                     <th "text-align:left;">User ID</th>
                 {% endif %}
-                {% if active_columns[1] %}
+                {% if active_grader_columns[1] %}
                     <th "text-align:left;">First Name</th>
                 {% endif %}
-                {% if active_columns[2] %}
+                {% if active_grader_columns[2] %}
                     <th "text-align:left;">Last Name</th>
                 {% endif %}
-                {% if active_columns[3] %}
+                {% if active_grader_columns[3] %}
                     <th "text-align:left;">User Group</th>
                 {% endif %}
-                {% if active_columns[4] %}
+                {% if active_grader_columns[4] %}
                     <th "text-align:left;">Registration Sections</th>
                 {% endif %}
-                {% if active_columns[5] %}
+                {% if active_grader_columns[5] %}
                     <th "text-align:left;">Edit Grader</th>
                 {% endif %}
-                {% if active_columns[6] %}
+                {% if active_grader_columns[6] %}
                     <th "text-align:left;">Demote Grader</th>
                 {% endif %}
                </tr>
@@ -49,22 +49,22 @@
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">
                                 <td></td>
-                                {% if active_columns[0] %}
+                                {% if active_grader_columns[0] %}
                                      <td class="align-left td-grader-id">{{ grader.getId() }}</td>
                                 {% endif %}
-                                {% if active_columns[1] %}
+                                {% if active_grader_columns[1] %}
                                      <td class="align-left td-given-name">{{ grader.getDisplayedGivenName() }}</td>
                                 {% endif %}
-                                {% if active_columns[2] %}
+                                {% if active_grader_columns[2] %}
                                      <td class="align-left td-family-name">{{ grader.getDisplayedFamilyName() }}</td>
                                 {% endif %}
-                                {% if active_columns[3] %}
+                                {% if active_grader_columns[3] %}
                                      <td class="align-left td-grader-group">{{ groups[grader.getGroup()].name }}</td>
                                 {% endif %}
-                                {% if active_columns[4] %}
+                                {% if active_grader_columns[4] %}
                                      <td class="align-left td-registration-section">{{ grader.getGradingRegistrationSections()|join(", ") ?: "None" }}</td>
                                 {% endif %}
-                                {% if active_columns[5] %}
+                                {% if active_grader_columns[5] %}
                                      <td class="align-left td-edit-grader">
                                         <a href="javascript:editUserForm('{{ grader.getId() }}');"
                                         aria-label="edit grader {{grader.getDisplayedGivenName()}} {{grader.getDisplayedFamilyName()}}">
@@ -72,7 +72,7 @@
                                         </a>
                                      </td>
                                 {% endif %}
-                                {% if active_columns[6] %}
+                                {% if active_grader_columns[6] %}
                                      <td class="align-left td-demote-grader">
                                         <a href="javascript:demoteGraderForm('{{ grader.getId() }}', '{{ grader.getDisplayedGivenName() }}', '{{ grader.getDisplayedFamilyName() }}');"
                                             aria-label="">
