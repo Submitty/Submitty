@@ -19,6 +19,7 @@ def get_migrations_path():
     """Return the set migration path."""
     return MIGRATIONS_PATH
 
+
 def get_triggers_path():
     """Return the set triggers path."""
     return TRIGGERS_PATH
