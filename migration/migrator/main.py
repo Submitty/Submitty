@@ -10,7 +10,7 @@ from typing import Set
 
 from sqlalchemy.exc import OperationalError
 
-from . import db, get_dir_path, get_migrations_path, get_environments
+from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_environments
 from .dumper import dump_database
 from .loader import load_module, load_migrations
 
@@ -478,7 +478,7 @@ def load_triggers(args, silent=False):
             return
         raise SystemExit('Triggers are to be applied on the master DB')
 
-    trigger_dir = Path(__file__).resolve().parent / 'triggers'
+    trigger_dir = get_triggers_path()
     if not trigger_dir.is_dir():
         if silent:
             return
