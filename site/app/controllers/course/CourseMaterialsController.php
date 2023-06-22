@@ -444,24 +444,19 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['file_path']) || isset($_POST['link_title'])) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-            
-
             $requested_path = $_POST['file_path'];
             $new_path = FileUtils::joinPaths($upload_path, $requested_path);
 
             $lastSlashPos = strrpos($new_path, "/");
-            if (isset($_POST['link_title'])){
+            if (isset($_POST['link_title'])) {
                 $file_name = $_POST['link_title'];
                 $new_path = substr($new_path, 0, $lastSlashPos + 1);
                 $new_path = FileUtils::joinPaths($new_path, $file_name);
             }
-            else{
+            else {
                 $file_name = substr($new_path, $lastSlashPos + 1);
             }
-
-
             if ($path !== $new_path) {
-
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
@@ -493,7 +488,7 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($new_path, "");
                 unlink($course_material->getPath());
                 $course_material->setPath($new_path);
-                if (isset($_POST['original_title'])){
+                if (isset($_POST['original_title'])) {
                     $course_material->setUrlTitle($_POST['original_title']);
                 }
             }
