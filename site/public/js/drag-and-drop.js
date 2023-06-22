@@ -1325,9 +1325,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (file_path !== null && file_path !== '') {
         const file_name = file_path.split('/').pop();
         if (link_url !== null) {
-            const lastSlashIndex = file_path.lastIndexOf('/');       
-            const modified_file_path = `${file_path.substring(0, lastSlashIndex + 1)}link-${file_path.substring(lastSlashIndex + 1)}`;
-            file_path = encodeURIComponent(modified_file_path);
+            const lastSlashIndex = file_path.lastIndexOf('/');
+            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
+            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
         }
         if (isValidFileName(file_name)) {
             formData.append('file_path', file_path);
