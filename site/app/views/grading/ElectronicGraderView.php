@@ -577,9 +577,6 @@ HTML;
             }
         }
 
-        // Generate late days
-        $this->core->getQueries()->generateLateDayCacheForUsers();
-        // TO DO: Add bulk LateDays creation from database
 
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
@@ -588,7 +585,6 @@ HTML;
             //Extra info for the template
             $info = [
                 "graded_gradeable" => $row,
-                "late_day_info" => $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row)
             ];
 
             if ($peer) {
@@ -766,12 +762,9 @@ HTML;
             }
         }
 
-        //set late_day_info
-        $info['late_day_info'] = false;
-
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
-            return ($a['graded_gradeable']['title'] == 'NULL' || $b['graded_gradeable']['title'] == 'NULL') ? ($a['graded_gradeable']['title'] == 'NULL') : ($a['graded_gradeable']['title'] > $b['graded_gradeable']['title']);
+            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
         });
 
         $empty_team_info = [];
