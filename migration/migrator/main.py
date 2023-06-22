@@ -378,9 +378,6 @@ def migrate_environment(database, environment, args, all_missing_migrations):
                 run_migration(database, migrations[key], environment, args)
                 break
 
-    if environment == 'master':
-        load_triggers(args, True)
-
     print("DONE")
     if changes:
         print()
@@ -461,7 +458,6 @@ def dump(args):
     data_dir /= 'data'
 
     if 'master' in args.environments:
-        load_triggers(args, True)
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
         dump_database('submitty', out_file)
