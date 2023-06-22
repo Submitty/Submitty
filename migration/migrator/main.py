@@ -280,6 +280,9 @@ def handle_migration(args):
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()
+    
+    if 'master' in args.environments:
+        load_triggers(args)
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
