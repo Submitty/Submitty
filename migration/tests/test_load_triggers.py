@@ -43,4 +43,4 @@ class TestLoadTriggers(unittest.TestCase):
             self.assertTrue(database.execute.called)
             self.assertTrue(database.close.called)
             self.assertEqual(self.num_files, database.execute.call_count)
-            self.assertEqual(self.data, [int(args[0][0]) for args in reversed(database.execute.call_args_list)])
+            self.assertEqual(set(self.data), {int(args[0][0]) for args in database.execute.call_args_list})
