@@ -1823,6 +1823,7 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
+        self.using_subdirectory = False
         self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
@@ -1941,6 +1942,7 @@ class Gradeable(object):
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
+                self.using_subdirectory = gradeable['eg_using_subdirectory'] is True
                 self.subdirectory = gradeable['eg_vcs_subdirectory']
                 self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
@@ -2063,6 +2065,7 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, 
+                         eg_using_subdirectory=self.using_subdirectory,
                          eg_vcs_subdirectory=self.subdirectory,
                          eg_vcs_partial_path=self.vcs_partial_path,
                          eg_team_assignment=self.team_assignment,
@@ -2090,6 +2093,7 @@ class Gradeable(object):
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['upload_type'] = 'repository'
             form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}'
+            form_json['using_subdirectory'] = False
             form_json['subdirectory'] = ''
             return form_json
         form_json['gradeable_title'] = self.title
