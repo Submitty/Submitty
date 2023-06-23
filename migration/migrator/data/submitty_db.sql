@@ -319,8 +319,8 @@ CREATE TABLE public.courses (
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
+    CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
-    CONSTRAINT no_surrounding_spaces_course CHECK (((course)::text ~ '^[^ ].*[^ ]$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
 );
 
@@ -480,7 +480,7 @@ CREATE TABLE public.terms (
     name character varying(255) NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
-    CONSTRAINT no_surrounding_spaces_semester CHECK (((term_id)::text ~ '^[^ ].*[^ ]$'::text)),
+    CONSTRAINT term_id_validate CHECK (((term_id)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT terms_check CHECK ((end_date > start_date))
 );
 
