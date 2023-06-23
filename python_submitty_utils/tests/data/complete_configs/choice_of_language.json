@@ -116,64 +116,6 @@
             "containers": [
                 {
                     "commands": [
-                        "python2 part1/*.py"
-                    ],
-                    "container_image": "submitty/autograding-default:latest",
-                    "container_name": "container0",
-                    "number_of_ports": 1,
-                    "outgoing_connections": [],
-                    "server": false
-                }
-            ],
-            "details": "",
-            "dispatcher_actions": [],
-            "extra_credit": false,
-            "hidden": false,
-            "points": 5,
-            "pre_commands": [],
-            "publish_actions": false,
-            "release_hidden_details": false,
-            "single_port_per_container": false,
-            "solution_containers": [
-                {
-                    "commands": [],
-                    "container_image": "submitty/autograding-default:latest",
-                    "container_name": "container0",
-                    "number_of_ports": 1,
-                    "outgoing_connections": [],
-                    "server": false
-                }
-            ],
-            "testcase_id": "test01",
-            "testcase_label": "",
-            "timestamped_stdout": false,
-            "title": "Python 2 Testing",
-            "use_router": false,
-            "validation": [
-                {
-                    "actual_file": "STDOUT.txt",
-                    "deduction": 1.0,
-                    "expected_file": "output.txt",
-                    "method": "diff",
-                    "show_actual": "always",
-                    "show_expected": "always",
-                    "show_message": "always"
-                },
-                {
-                    "actual_file": "STDERR.txt",
-                    "deduction": 0.0,
-                    "description": "Standard Error (STDERR.txt)",
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
-                }
-            ],
-            "view_testcase_message": true
-        },
-        {
-            "containers": [
-                {
-                    "commands": [
                         "python3 part2/*.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
