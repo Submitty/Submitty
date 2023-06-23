@@ -1,5 +1,5 @@
-/* global toggleCMFolder, toggleCMFolders */
-/* exported setFolderCookie, toggleFoldersOpen, setupFolders */
+/* globals toggleCMFolders, toggleCMFolder */
+/* exported setFolderCookie, toggleFoldersOpen, setUpFolders */
 
 function setFolderCookie(folderPath, id, open) {
     const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
@@ -13,11 +13,7 @@ function toggleFoldersOpen() {
 }
 
 function handleHideMaterialsCheckboxChange(clicked) {
-    const warningIds = {
-        'hide-materials-checkbox': 'upload-form',
-        'hide-materials-checkbox-edit': 'edit-form',
-        'hide-folder-materials-checkbox-edit': 'edit-folder-form',
-    };
+    const warningIds = {'hide-materials-checkbox': 'upload-form', 'hide-materials-checkbox-edit': 'edit-form', 'hide-folder-materials-checkbox-edit': 'edit-folder-form'};
     const callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
     const caller = $(`#${callerId}`);
     const warningMessage = $(`#${callerId} ~ #${warningIds[callerId]}-hide-warning`);
@@ -44,7 +40,7 @@ function handleHideMaterialsCheckboxChange(clicked) {
     }
 }
 
-function setupFolders(instructor = false) {
+function setUpFolders(isInstructor = false) {
     //determine if folders have been left open or closed
     const foldersOpen = Boolean(JSON.parse(Cookies.get('foldersOpen') || 'false'));
     const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
@@ -63,9 +59,6 @@ function setupFolders(instructor = false) {
     // accepts an element (editButton) having required data attributes; other parameters represent the properties known to be common until now
     // returns an updated set of common props by comparing with the props of the given element
     function folderCommonProps(editButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch) {
-        if (!instructor) {
-            return;
-        }
         let residualSections = [];
         if (first) {
             commonSections = editButton.data('sections');
@@ -99,9 +92,6 @@ function setupFolders(instructor = false) {
 
     // sets the common properties of a given folder
     function folderSetter(elem) {
-        if (!instructor) {
-            return;
-        }
         const insideFileMatcher = new RegExp(`^${elem.attr('id').replace('div', 'file')}f[0-9]{0,}$`);
         const insideFolderMatcher = new RegExp(`^${elem.attr('id')}d[0-9]{0,}$`);
         let first = true;
@@ -138,22 +128,19 @@ function setupFolders(instructor = false) {
     }
 
     function callFolderSetter(elem) {
-        if (!instructor) {
-            return;
-        }
         if (topFolderMatcher.test(elem.id)) {
             folderSetter($(elem));
         }
     }
 
     // set folder data for instructor
-    if (instructor) {
+    if (isInstructor) {
         $('[id^=div_viewer_]').each(function() {
             callFolderSetter(this);
         });
     }
 
-    if (jumpToScrollPosition.length > 0 && jumpToScrollPosition !== '-1' && jumpToScrollPosition !== -1) {
+    if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
         const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
         for (const cm_id of cm_ids) {
             toggleCMFolder(cm_id);
@@ -166,7 +153,7 @@ function setupFolders(instructor = false) {
     // clean up cm data cookie
     Cookies.remove('cm_data');
 
-    if (instructor) {
+    if (isInstructor) {
         $('#hide-materials-checkbox').on('change', handleHideMaterialsCheckboxChange);
         $('#hide-materials-checkbox-edit').on('change', handleHideMaterialsCheckboxChange);
         $('[id^="section-folder-edit"]').on('change', function() {
@@ -180,3 +167,4 @@ function setupFolders(instructor = false) {
         });
     }
 }
+
