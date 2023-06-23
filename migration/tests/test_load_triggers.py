@@ -43,6 +43,7 @@ class TestLoadTriggers(unittest.TestCase):
         self.assertTrue(mock_class.called)
         database = mock_class.return_value
         self.assertTrue(database.execute.called)
+        self.assertTrue(database.commit.called)
         self.assertTrue(database.close.called)
         self.assertEqual(self.num_files, database.execute.call_count)
 

@@ -511,6 +511,7 @@ def load_triggers(args, silent=False):
             query = f.read()
             database.execute(query)
 
+    database.commit()
     database.close()
     print()
     print('DONE')
