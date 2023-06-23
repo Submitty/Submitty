@@ -100,7 +100,7 @@ function syncWithServer(criticalSync) {
 function checkDeadline() {
 
     curTime += (Date.now()-lastTime);
-    const time = Math.floor((deadline - curTime) / 1000);
+    const time = Math.abs(Math.floor((deadline - curTime) / 1000));
     const days = Math.floor(time / (3600 * 24));
     if (document.getElementById('gradeable-time-remaining-text') !== null) {
         if (curTime > deadline) {

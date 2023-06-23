@@ -927,7 +927,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, days_to_be_charged,late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, min_team_would_be_late_days_remaining, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -940,12 +940,11 @@ function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, 
             return;
         }
     }
-    days_past_deadline = Math.max(0,days_past_deadline-late_day_exceptions);
     let late_warning_seen = false;
     // check due date
-
+    days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
     if ( days_past_deadline > 0 && days_past_deadline <= late_days_allowed && days_past_deadline <= remaining_late_days_for_gradeable  && days_to_be_charged > 0) {
-        message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_past_deadline} late day(s)?`;
+        message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
         if (!confirm(message)) {
             $('#submit').prop('disabled', false);
             return;
