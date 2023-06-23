@@ -97,6 +97,19 @@ function syncWithServer(criticalSync) {
         }
     }
 }
+function checkDeadline() {
+
+  curTime += (Date.now()-lastTime);
+  const time = Math.floor((deadline - curTime) / 1000);
+  const days = Math.floor(time / (3600 * 24));
+
+    if (document.getElementById('gradeable-time-remaining-text') !== null) {
+            if (curTime > deadline) {
+                return Math.max(days, 1);
+            }
+}
+  return 0;
+}
 
 function updateTime() {
     if (Math.abs(Date.now() - lastTime) > 5000) {
