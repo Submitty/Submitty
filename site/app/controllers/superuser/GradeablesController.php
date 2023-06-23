@@ -28,11 +28,11 @@ class GradeablesController extends AbstractController {
         $gradeables = [];
         foreach ($this->core->getQueries()->getAllUnarchivedCourses() as $course) {
             /** @var \app\models\Course $course */
-            $this->core->loadCourseConfig($course->getSemester(), $course->getTitle());
+            $this->core->loadCourseConfig($course->getTerm(), $course->getTitle());
             $this->core->loadCourseDatabase();
             foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
                 /** @var \app\models\gradeable\Gradeable $gradeable */
-                $gradeables["{$course->getSemester()}_{$course->getTitle()}_{$gradeable->getId()}"] = $gradeable;
+                $gradeables["{$course->getTerm()}_{$course->getTitle()}_{$gradeable->getId()}"] = $gradeable;
             }
             $this->core->getCourseDB()->disconnect();
         }

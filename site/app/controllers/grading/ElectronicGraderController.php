@@ -1881,7 +1881,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
@@ -2248,7 +2248,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
@@ -3153,7 +3153,7 @@ class ElectronicGraderController extends AbstractController {
         $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
