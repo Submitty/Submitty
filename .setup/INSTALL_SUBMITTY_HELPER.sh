@@ -465,6 +465,8 @@ chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.j
 
 # create allowed_autograding_commands_custom.json if doesnt exist
 if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json" ]]; then
+    rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
+    cp "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
     touch "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 fi
 
