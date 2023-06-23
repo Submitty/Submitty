@@ -22,7 +22,7 @@ set (allowed_autograding_commands_custom ${SUBMITTY_INSTALL_DIR}/config/allowed_
 file (READ ${allowed_autograding_commands_default} allowed_autograding_commands_default_obj)
 file (READ ${allowed_autograding_commands_custom} allowed_autograding_commands_custom_obj)
 
-# Then embed the json files within a allowed_autograding_commands.cpp source file
+# Then embed the json files within an allowed_autograding_commands.cpp source file
 set (allowed_autograding_commands_headers "#include <string> \n#include <iostream> \n")
 set (allowed_autograding_commands_default_definition "extern const std::string GLOBAL_allowed_autograding_commands_default_string = R\"(")
 set (allowed_autograding_commands_custom_definition "extern const std::string GLOBAL_allowed_autograding_commands_custom_string = R\"(")

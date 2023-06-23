@@ -13,9 +13,12 @@
 // And then re-build any affected autograding configurations
 // --------------------------------------------------------------------------------------
 
-// This file json object embedded into the submitty_grading static library through
+// This file json object is embedded into the submitty_grading static library through
 // allowed_autograding_commands.cpp
 
 {
+
+    // for example ('ls' is also in the allowed_autograding_commands_default.json file)
     "ls":                      { "path": "/bin/ls" }
+
 }
