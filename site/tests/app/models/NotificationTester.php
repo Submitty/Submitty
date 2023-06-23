@@ -19,7 +19,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
     public function setUp(): void {
         $this->core = new Core();
         $config = new Config($this->core);
-        $config->setSemester('s20');
+        $config->setTerm('s20');
         $config->setCourse('sample');
         $user = new User($this->core, [
             'user_id' => 'test_user',
