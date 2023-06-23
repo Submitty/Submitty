@@ -11,8 +11,6 @@ def up(config, database):
     """
 
     database.execute("""
-        BEGIN;
-
         ALTER TABLE sessions ALTER COLUMN session_expires TYPE timestamptz(0);
 
         ALTER TABLE sessions
@@ -23,8 +21,6 @@ def up(config, database):
 
         ALTER TABLE users
         ADD COLUMN IF NOT EXISTS enforce_single_session boolean DEFAULT false;
-
-        COMMIT;
     """)
 
 
