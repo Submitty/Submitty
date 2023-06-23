@@ -463,10 +463,8 @@ class CourseMaterialsController extends AbstractController {
                     $dir = explode("/", $new_path);
                     array_pop($dir);
                     $dir = implode("/", $dir);
-                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $dir]);
-                    if ($cm == null) {
-                        return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                    if (!FileUtils::createDir($dir)) {
+                        return JsonResponse::getErrorResponse("Failed to make path.");
                     }
                 }
                 $overwrite = false;
