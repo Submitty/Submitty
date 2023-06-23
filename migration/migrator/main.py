@@ -498,7 +498,7 @@ def load_triggers(args, silent=False):
         database = db.Database(db_config, 'master')
     except OperationalError as exc:
         raise SystemExit(
-            'Error applying triggers to master database:\n  ' + str(exc).split('\n')[0]
+            'Error applying triggers to master database:\n  ' + str(exc.orig).split('\n')[0]
         )
 
     for file in files:
