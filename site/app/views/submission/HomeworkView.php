@@ -1229,7 +1229,7 @@ class HomeworkView extends AbstractView {
                 $author_user_ids = array_map(function ($post) {
                     return $post["user_id"];
                 }, $grade_inquiry_posts_for_id);
-                $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
+                $author_user_groups = $queries->getAuthorUserGroups(array_values($author_user_ids));
 
                 $instructor_full_access = [];
                 $limited_access_grader = [];
