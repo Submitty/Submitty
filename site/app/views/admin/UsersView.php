@@ -14,7 +14,6 @@ class UsersView extends AbstractView {
      * @param array  $formatted_tzs array containing a formatted time zone string for each user
      * @param bool   $use_database
      * @param string  $active_student_columns array of bools, columns that are visible (serialized as string)
-     * @param string  $active_grader_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
     public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_student_columns = '1-1-1-1-1-1-1-1-1-1-1-1') {
@@ -53,6 +52,7 @@ class UsersView extends AbstractView {
      * @param array  $rot_sections associative array representing rotating sections in the system
      * @param array  $download_info grader information for downloading
      * @param bool   $use_database
+     * @param string  $active_grader_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
     public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false, $active_grader_columns = '1-1-1-1-1-1-1') {

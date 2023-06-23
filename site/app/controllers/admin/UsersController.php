@@ -171,7 +171,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_grader_columns
             )
         );
     }
