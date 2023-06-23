@@ -46,7 +46,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         //Select text from photo area and parse to get pronoun
-        cy.get('.student-image-container > .name').first().contains('They/Them');;
+        cy.get('.student-image-container > .name').first().contains('They/Them');
 
     });
 
