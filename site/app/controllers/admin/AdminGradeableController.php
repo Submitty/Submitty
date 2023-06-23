@@ -44,7 +44,7 @@ class AdminGradeableController extends AbstractController {
 
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
-        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
         'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
@@ -75,10 +75,13 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
+            'vcs_subdirectory' => '',
+            'using_subdirectory' => false,
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken()
@@ -247,7 +250,7 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:s',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-            'regrade_allowed' => $gradeable->isRegradeAllowed(),
+            'grade_inquiry_allowed' => $gradeable->isGradeInquiryAllowed(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
             // Non-Gradeable-model data
@@ -259,6 +262,9 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
@@ -861,8 +867,10 @@ class AdminGradeableController extends AbstractController {
 
         $repo_name = '';
         $subdir = '';
-        if ($details['subdirectory_gradeable'] === 'true') {
+        $using_subdirectory = false;
+        if ($details['using_subdirectory'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
+            $using_subdirectory = true;
         }
         $vcs_partial_path = '';
         // VCS specific values
@@ -886,9 +894,15 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
+            elseif ($host_button === 'self-hosted') {
+                $host_type = 4;
+                $vcs_partial_path = $details['external_repo'];
+            }
+
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => $host_type,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -898,6 +912,7 @@ class AdminGradeableController extends AbstractController {
             $non_vcs_property_values = [
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => -1,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -920,13 +935,13 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
-            $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
+            $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
             $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
-                'regrade_allowed' => $regrade_allowed,
+                'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
@@ -956,6 +971,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'using_subdirectory' => false,
                 'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
@@ -1067,10 +1083,11 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'peer_grading',
             'late_submission_allowed',
-            'regrade_allowed',
+            'grade_inquiry_allowed',
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
+            'using_subdirectory',
             'has_due_date',
             'has_release_date',
             'allow_custom_marks'
@@ -1106,7 +1123,7 @@ class AdminGradeableController extends AbstractController {
         $late_day_status = null;
 
         // Set default value which may be set in loop below
-        $regrade_modified = false;
+        $grade_inquiry_modified = false;
 
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
@@ -1163,9 +1180,9 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
-            if ($prop === 'regrade_allowed') {
-                if ($post_val !== $gradeable->isRegradeAllowed()) {
-                    $regrade_modified = true;
+            if ($prop === 'grade_inquiry_allowed') {
+                if ($post_val !== $gradeable->isGradeInquiryAllowed()) {
+                    $grade_inquiry_modified = true;
                 }
             }
 
@@ -1199,7 +1216,7 @@ class AdminGradeableController extends AbstractController {
         //  affect date validation
         if ($date_set) {
             try {
-                $gradeable->setDates($dates, $regrade_modified);
+                $gradeable->setDates($dates, $grade_inquiry_modified);
                 $updated_properties = $gradeable->getDateStrings(false);
             }
             catch (ValidationException $e) {
@@ -1270,6 +1287,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 

@@ -47,7 +47,7 @@
                 {% if toggle_anon_button %}
                 <button class="btn btn-default" id="toggle-anon-button"
                     onclick="changeAnon()">
-                    {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
+                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
                 </button>
                 {% endif %}
             </div>
@@ -467,7 +467,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
@@ -517,7 +517,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
