@@ -23,7 +23,7 @@ sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-apt-get install -qqy python2 python2-dev python3 python3-dev libpython3.6 python3-pip
+apt-get install -qqy python3 python3-dev libpython3.6 python3-pip
 
 ############################
 # NTP: Network Time Protocol

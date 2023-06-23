@@ -118,7 +118,6 @@ runs:
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
         sudo apt-get install moreutils
-        sudo apt-get install python2
       shell: bash
 
     - name: Install third party dependencies
