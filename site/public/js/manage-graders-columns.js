@@ -51,7 +51,7 @@ function fillAllCheckboxes(val) {
 
 //Cookies (loading and storing)
 function saveColumns(selectedColumns) {
-    Cookies.set('active_grader_columns', selectedColumns.join('-'));
+    Cookies.set('active_grader_columns', selectedColumns.join('-'), { expires: 365, path: '' });
 }
 
 function loadColumns() {

@@ -202,7 +202,7 @@ class UsersController extends AbstractController {
             else {
                 $grader->setGradingRegistrationSections([]);
             }
-            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
         }
 
         $this->core->redirect($return_url);
@@ -280,7 +280,7 @@ class UsersController extends AbstractController {
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -406,7 +406,7 @@ class UsersController extends AbstractController {
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -433,7 +433,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -461,7 +461,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -1154,7 +1154,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 

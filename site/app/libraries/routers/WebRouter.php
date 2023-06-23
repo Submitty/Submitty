@@ -316,7 +316,7 @@ class WebRouter {
         }
         elseif (
             $this->core->getConfig()->isCourseLoaded()
-            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
+            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getTerm(), "course" => $this->core->getConfig()->getCourse()])
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
