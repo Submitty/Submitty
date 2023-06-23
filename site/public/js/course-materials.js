@@ -7,16 +7,16 @@ function setFolderCookie(folderPath, id, open) {
     Cookies.set('cm_folder_data', JSON.stringify(folderData));
 }
 
-function toggleFoldersOpen(){
+function toggleFoldersOpen() {
     Cookies.remove('cm_folder_data');
-    Cookies.set("foldersOpen", toggleCMFolders());
+    Cookies.set('foldersOpen', toggleCMFolders());
 }
 
 function handleHideMaterialsCheckboxChange(clicked) {
-    const warningIds = {"hide-materials-checkbox": "upload-form", "hide-materials-checkbox-edit": "edit-form", "hide-folder-materials-checkbox-edit": "edit-folder-form"};
-    var callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
-    var caller = $('#'+callerId);
-    var warningMessage = $('#'+callerId+' ~ #'+warningIds[callerId]+'-hide-warning');
+    const warningIds = {'hide-materials-checkbox': 'upload-form', 'hide-materials-checkbox-edit': 'edit-form', 'hide-folder-materials-checkbox-edit': 'edit-folder-form'};
+    const callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
+    const caller = $(`#${callerId}`);
+    const warningMessage = $(`#${callerId} ~ #${warningIds[callerId]}-hide-warning`);
     if (caller.hasClass('partial-checkbox')) {
         caller.removeClass('partial-checkbox');
         caller.siblings()[0].remove();
@@ -25,17 +25,17 @@ function handleHideMaterialsCheckboxChange(clicked) {
         }
         caller.prop('checked', true);
     }
-    if(caller.is(':checked') && warningMessage.length === 0) {
-        var callerParent = caller.parent().get(0);
+    if (caller.is(':checked') && warningMessage.length === 0) {
+        const callerParent = caller.parent().get(0);
         callerParent.insertAdjacentHTML(
             'beforeend',
-            '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width">\nWarning:
+            `<span id="${warningIds[callerId]}-hide-warning" class="red-message full-width">\nWarning:
             Students can view the hidden course material by guessing the corresponding
             course material ID (a simple number). It is recommended to instead use the release date feature
-            if it is necessary to prevent students from accessing course materials.\n</span>`
+            if it is necessary to prevent students from accessing course materials.\n</span>`,
         );
     }
-    else if(caller.is(':not(:checked)')) {
+    else if (caller.is(':not(:checked)')) {
         warningMessage.remove();
     }
 }
@@ -52,8 +52,8 @@ function setUpFolders(isInstructor = false) {
         }
     }
     // loop thru each div_viewer_xxx
-    var jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
-    var topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
+    const jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
+    const topFolderMatcher = new RegExp('^div_viewer_sd[0-9]{0,}$');
     const partiallyHidden = 2;
 
     // accepts an element (editButton) having required data attributes; other parameters represent the properties known to be common until now
@@ -67,9 +67,13 @@ function setUpFolders(isInstructor = false) {
             first = false;
         }
         else {
-            let combinedSections = [...(new Set([...commonSections, ...editButton.data('sections')]))];
-            commonSections = commonSections.filter(x => {return editButton.data('sections').includes(x);});
-            residualSections = combinedSections.filter(x => {return !commonSections.includes(x);});
+            const combinedSections = [...(new Set([...commonSections, ...editButton.data('sections')]))];
+            commonSections = commonSections.filter(x => {
+                return editButton.data('sections').includes(x);
+            });
+            residualSections = combinedSections.filter(x => {
+                return !commonSections.includes(x);
+            });
             if (!releaseTimeMismatch) {
                 if (editButton.data('release-time') !== releaseTime) {
                     releaseTimeMismatch = true;
@@ -88,32 +92,32 @@ function setUpFolders(isInstructor = false) {
 
     // sets the common properties of a given folder
     function folderSetter(elem) {
-        let insideFileMatcher = new RegExp(`^${elem.attr("id").replace("div", "file")}f[0-9]{0,}$`);
-        let insideFolderMatcher = new RegExp(`^${elem.attr("id")}d[0-9]{0,}$`);
+        const insideFileMatcher = new RegExp(`^${elem.attr('id').replace('div', 'file')}f[0-9]{0,}$`);
+        const insideFolderMatcher = new RegExp(`^${elem.attr('id')}d[0-9]{0,}$`);
         let first = true;
         let commonSections = [];
         let residualSections = [];
-        let partialSections = [];
-        let releaseTime = "";
+        const partialSections = [];
+        let releaseTime = '';
         let hiddenState = '';
         let hiddenStateMismatch = false;
         let releaseTimeMismatch = false;
-        $(`.folder-container > [id^=${elem.attr("id")}d]`, elem).each(function() {
+        $(`.folder-container > [id^=${elem.attr('id')}d]`, elem).each(function() {
             if (insideFolderMatcher.test($(this).attr('id'))) {
                 folderSetter($(this));
-                let fEditButton = $(this).siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]');
+                const fEditButton = $(this).siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]');
                 partialSections.push(...fEditButton.data('partial-sections'));
                 [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps(fEditButton, commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
                 partialSections.push(...residualSections);
             }
         });
-        $(`.file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]`, elem).each(function() {
+        $('.file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]', elem).each(function() {
             if (insideFileMatcher.test($(this).parent('.file-viewer').siblings('.file-viewer-data').attr('id'))) {
                 [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
                 partialSections.push(...residualSections);
             }
         });
-        let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
+        const editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
         editButton.attr('data-sections', JSON.stringify(commonSections));
         editButton.attr('data-partial-sections', JSON.stringify(partialSections));
         editButton.attr('data-release-time', releaseTime);
@@ -131,11 +135,13 @@ function setUpFolders(isInstructor = false) {
 
     // set folder data for instructor
     if (isInstructor) {
-        $('[id^=div_viewer_]').each(function() { callFolderSetter(this) });
+        $('[id^=div_viewer_]').each(function() {
+            callFolderSetter(this);
+        });
     }
 
     if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
-        const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
+        const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
         for (const cm_id of cm_ids) {
             toggleCMFolder(cm_id);
         }
