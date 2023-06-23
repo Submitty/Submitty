@@ -43,7 +43,7 @@ class EmailRoomSeatingControllerTester extends \PHPUnit\Framework\TestCase {
         $core = new Core();
         $core->setQueries($queries);
         $config = new Config($core);
-        $config->setSemester('s20');
+        $config->setTerm('s20');
         $config->setCourse('csci1100');
         $config->setRoomSeatingGradeableId('test');
         $core->setConfig($config);
@@ -142,7 +142,7 @@ Please email your instructor with any questions or concerns.',
         $core = new Core();
         $core->setQueries($queries);
         $config = new Config($core);
-        $config->setSemester('s20');
+        $config->setTerm('s20');
         $config->setCourse('csci1100');
         $config->setRoomSeatingGradeableId('test');
         $core->setConfig($config);
