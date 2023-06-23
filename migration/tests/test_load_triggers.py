@@ -45,7 +45,15 @@ class TestLoadTriggers(unittest.TestCase):
         self.assertTrue(database.execute.called)
         self.assertTrue(database.close.called)
         self.assertEqual(self.num_files, database.execute.call_count)
-        self.assertEqual(set(self.data), {int(args[0][0]) for args in database.execute.call_args_list})
+
+        data = [int(args[0][0]) for args in database.execute.call_args_list]
+        self.assertEqual(set(self.data), set(data))
+
+        self.assertEqual(
+            'Loading trigger functions to master...\n  {}\n\nDONE\n'
+                .format('\n  '.join(['test_fn_{}'.format(self.data.index(n)) for n in data])),
+            sys.stdout.getvalue()
+        )
 
     def test_no_master(self):
         args = Namespace()
@@ -90,6 +98,8 @@ class TestLoadTriggers(unittest.TestCase):
             migrator.main.load_triggers(args)
         
         self.assertFalse(mock_class.called)
+        
+        self.assertEqual('Loading trigger functions to master...DONE\n', sys.stdout.getvalue())
         
         migrator.TRIGGERS_PATH.rmdir()
         migrator.TRIGGERS_PATH = trigger_path
