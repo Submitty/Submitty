@@ -472,6 +472,7 @@ class HomeworkView extends AbstractView {
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_partial_path' => $vcs_partial_path ,
             'gradeable_id' => $gradeable->getId(),
@@ -1068,18 +1069,22 @@ class HomeworkView extends AbstractView {
         }
 
         $failed_file = '';
+        $file_count = 0;
         // See if the grade has succeeded or failed
-        if (count($param['files']) === 1) {
-            foreach ($param['files'] as $file) {
-                if (str_contains($file['relative_name'], 'failed')) {
-                    $failed_file = file_get_contents($file['path']);
-                // Exclude the Exception error message
-                    $failed_file = substr(strstr($failed_file, "\n"), 3);
+        if (in_array('files', $param)) {
+            $file_count = count($param['files']);
+            if ($file_count === 1) {
+                foreach ($param['files'] as $file) {
+                    if (str_contains($file['relative_name'], 'failed')) {
+                        $failed_file = file_get_contents($file['path']);
+                    // Exclude the Exception error message
+                        $failed_file = substr(strstr($failed_file, "\n"), 3);
+                    }
                 }
+                // Arbitrary size, currently bigger than all of the failed files, but
+                // could be increased if the failed files need more tips/messages
+                $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
             }
-            // Arbitrary size, currently bigger than all of the failed files, but
-            // could be increased if the failed files need more tips/messages
-            $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
         }
 
         // If its not git checkout
@@ -1098,7 +1103,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'failed_file' => $failed_file,
-            'file_length' => count($param['files']),
+            'file_length' => $file_count,
             'gradeable_id' => $gradeable->getId(),
             'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
@@ -1245,7 +1250,7 @@ class HomeworkView extends AbstractView {
                 $author_user_ids = array_map(function ($post) {
                     return $post["user_id"];
                 }, $grade_inquiry_posts_for_id);
-                $author_user_groups = $queries->getAuthorUserGroups($author_user_ids);
+                $author_user_groups = $queries->getAuthorUserGroups(array_values($author_user_ids));
 
                 $instructor_full_access = [];
                 $limited_access_grader = [];
