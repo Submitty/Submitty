@@ -65,7 +65,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
       nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
     allowed_autograding_commands.update(allowed_autograding_commands_custom);
   }
-  
+
   if (program.length() > 0 && program[0] == '/') {
     for (auto& entry : allowed_autograding_commands.items()) {
       nlohmann::json program_obj = entry.value();

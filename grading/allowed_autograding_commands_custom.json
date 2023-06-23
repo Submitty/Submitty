@@ -15,3 +15,7 @@
 
 // This file json object embedded into the submitty_grading static library through
 // allowed_autograding_commands.cpp
+
+{
+    "ls":                      { "path": "/bin/ls" }
+}
