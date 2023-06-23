@@ -55,19 +55,6 @@ def schema_validation(test):
         raise
 
 @testcase
-def python2(test):
-    cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "python2.py"),
-                     os.path.join(test.testcase_path, "data", "part1")])
-    test.run_compile()
-    test.run_run()
-    test.run_validator()
-    test.diff("grade.txt", "grade.txt_python2", "-b")
-    test.json_diff("results.json", "results.json_python2")
-
-
-@testcase
 def python3(test):
     cleanup(test)
     subprocess.call(["cp",

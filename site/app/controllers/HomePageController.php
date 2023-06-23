@@ -51,7 +51,7 @@ class HomePageController extends AbstractController {
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
                 $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester());
+                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
                 });
             }
         }
