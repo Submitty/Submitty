@@ -397,8 +397,9 @@
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission(
-                days_past_deadline,
-                {{ late_days_use }},
+                {{ remaining_late_days_for_gradeable }},
+                {{ charged_late_days }},
+                {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ min_team_would_be_late_days_remaining }},
@@ -420,8 +421,9 @@
         }
         else {
             handleSubmission(
-                days_past_deadline,
-                {{ late_days_use }},
+                {{ remaining_late_days_for_gradeable }},
+                {{ charged_late_days }},
+                {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ min_team_would_be_late_days_remaining }},
