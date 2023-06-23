@@ -1,4 +1,4 @@
-/* exported toggleColumnsForm, updateManageGradesColumns, fillAllCheckboxes
+/* exported toggleColumnsForm, updateManageGradersColumns, fillAllCheckboxes
 */
 
 //Data structure for active columns
@@ -24,7 +24,7 @@ function checkProperTicks() {
     }
 }
 
-function updateManageGradesColumns() {
+function updateManageGradersColumns() {
     getCheckboxValues();
     location.reload();
 }
