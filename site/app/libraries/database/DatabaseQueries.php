@@ -4139,6 +4139,22 @@ SQL;
         return $this->submitty_db->rows();
     }
 
+    /**
+     * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
+     */
+    public function getInstructorLevelUnarchivedCourses(string $user_id): array {
+        $query = "
+        SELECT t.name AS term_name, c.semester, c.course
+        FROM courses AS c
+        INNER JOIN terms AS t ON c.semester=t.term_id
+        INNER JOIN courses_users AS cu ON c.course=cu.course AND c.semester=cu.semester
+        WHERE c.status = 1 AND cu.user_id = ? AND cu.user_group = 1
+        ORDER BY t.start_date DESC, c.course ASC
+        ";
+        $this->submitty_db->query($query, [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
     public function getAllCoursesForUserId(string $user_id): array {
         $query = "
         SELECT t.name AS term_name, u.semester, u.course, u.user_group
@@ -4309,9 +4325,9 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category, $rank) {
+    public function addNewCategory($category, $rank, $visibleDate = null) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc, rank) VALUES (?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank]);
+        $this->course_db->query("INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank, $visibleDate]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }
@@ -4328,7 +4344,7 @@ AND gc_id IN (
         }
     }
 
-    public function editCategory($category_id, $category_desc, $category_color) {
+    public function editCategory($category_id, $category_desc, $category_color, $visible_date) {
         $this->course_db->beginTransaction();
         if (!is_null($category_desc)) {
             $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", [$category_desc, $category_id]);
@@ -4336,6 +4352,14 @@ AND gc_id IN (
         if (!is_null($category_color)) {
             $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", [$category_color, $category_id]);
         }
+        if (!is_null($visible_date)) {
+            if ($visible_date === "") {
+                $visible_date = null;
+            }
+
+            $this->course_db->query("UPDATE categories_list SET visible_date = ? WHERE category_id = ?", [$visible_date, $category_id]);
+        }
+
         $this->course_db->commit();
     }
 
@@ -4348,7 +4372,7 @@ AND gc_id IN (
     }
 
     public function getCategories() {
-        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST, category_id");
+        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
         return $this->course_db->rows();
     }
 
@@ -5035,6 +5059,7 @@ AND gc_id IN (
                   g_id AS eg_g_id,
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
+                  eg_using_subdirectory AS using_subdirectory,
                   eg_vcs_subdirectory AS vcs_subdirectory,
                   eg_vcs_partial_path AS vcs_partial_path,
                   eg_vcs_host_type AS vcs_host_type,
@@ -5731,6 +5756,7 @@ AND gc_id IN (
                 $gradeable->getSubmissionDueDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
+                $gradeable->isUsingSubdirectory(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsPartialPath(),
                 $gradeable->getVcsHostType(),
@@ -5766,6 +5792,7 @@ AND gc_id IN (
                   eg_submission_open_date,
                   eg_submission_due_date,
                   eg_is_repository,
+                  eg_using_subdirectory,
                   eg_vcs_subdirectory,
                   eg_vcs_partial_path,
                   eg_vcs_host_type,
@@ -5794,7 +5821,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5893,6 +5920,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $gradeable->isVcs(),
+                    $gradeable->isUsingSubdirectory(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsPartialPath(),
                     $gradeable->getVcsHostType(),
@@ -5929,6 +5957,7 @@ AND gc_id IN (
                       eg_submission_open_date=?,
                       eg_submission_due_date=?,
                       eg_is_repository=?,
+                      eg_using_subdirectory=?,
                       eg_vcs_subdirectory=?,
                       eg_vcs_partial_path=?,
                       eg_vcs_host_type=?,
@@ -7247,13 +7276,14 @@ WHERE current_state IN
               u.last_updated,
               u.grading_registration_sections,
               u.registration_section,
+              u.course_section_id,
               u.rotating_section,
               u.registration_type,
               ldeu.late_day_exceptions,
               u.registration_subsection';
             $submitter_inject = '
             JOIN (
-                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections
+                SELECT u.*, ga.anon_id AS g_anon, ga.g_id, sr.grading_registration_sections, sec_reg.course_section_id
                 FROM users u
                 LEFT JOIN gradeable_anon ga
                 ON u.user_id=ga.user_id
@@ -7264,7 +7294,13 @@ WHERE current_state IN
                     FROM grading_registration
                     GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
-            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u.g_id=g.g_id
+                LEFT JOIN (
+                    SELECT
+                        sections_registration_id,
+                        course_section_id
+                    FROM sections_registration
+                ) AS sec_reg ON sec_reg.sections_registration_id=u.registration_section
+            ) AS u ON (eg IS NULL OR NOT eg.team_assignment) AND u. g_id=g.g_id
 
             /* Join user late day exceptions */
             LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';

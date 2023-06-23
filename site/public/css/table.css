@@ -32,7 +32,7 @@
     padding: 0.5em;
 }
 
-@media (width <= 830px) {
+@media (max-width: 830px) {
     table.mobile-table,
     .mobile-table thead,
     .mobile-table tbody,
@@ -82,7 +82,7 @@
     }
 }
 
-@media (width >= 831px) {
+@media (min-width: 831px) {
     .mobile-table {
         border: 1px solid var(--standard-hover-light-gray);
     }
