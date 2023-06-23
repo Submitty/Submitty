@@ -1,16 +1,17 @@
+import random
+import shutil
+import sys
+import tempfile
+import unittest
 from argparse import Namespace
-from types import SimpleNamespace
 from io import StringIO
 from pathlib import Path
-import sys
-import random
-import tempfile
-import shutil
-import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
-from sqlalchemy.exc import OperationalError
 
 import migrator
+from sqlalchemy.exc import OperationalError
+
 
 class TestLoadTriggers(unittest.TestCase):
     def setUp(self):
