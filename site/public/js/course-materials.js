@@ -140,7 +140,7 @@ function setUpFolders(isInstructor = false) {
         });
     }
 
-    if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
+    if (jumpToScrollPosition.length > 0 && jumpToScrollPosition !== '-1' && jumpToScrollPosition !== -1) {
         const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n => n.length);
         for (const cm_id of cm_ids) {
             toggleCMFolder(cm_id);
