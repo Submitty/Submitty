@@ -10,7 +10,7 @@ function validate_navigation_page_sections(sections) {
 }
 
 describe('navigation page', () => {
-    before(() => {
+    beforeEach(() => {
         cy.visit('/');
         cy.wait(500);
         cy.viewport(1920,1200);
@@ -23,7 +23,7 @@ describe('navigation page', () => {
         const sections = {
             future: 5,
             beta: 3,
-            open: 5,
+            open: 8,
             closed: 3,
             items_being_graded: 9,
             graded: 11,
@@ -117,7 +117,7 @@ describe('navigation page', () => {
 
         const sections = {
             beta: 3,
-            open: 5,
+            open: 8,
             closed: 3,
             items_being_graded: 9,
             graded: 11,
@@ -133,7 +133,7 @@ describe('navigation page', () => {
         cy.visit(`/courses/${getCurrentSemester()}/sample`);
 
         const sections = {
-            open: 5,
+            open: 8,
             closed: 3,
             items_being_graded: 5,
             graded: 9,

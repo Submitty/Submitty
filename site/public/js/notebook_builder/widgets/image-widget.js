@@ -1,3 +1,6 @@
+/* global Widget, builder_data */
+/* exported ImageWidget */
+
 class ImageWidget extends Widget {
     constructor() {
         super();
@@ -111,7 +114,7 @@ class ImageWidget extends Widget {
         reader.onload = event => {
             image.src = event.target.result;
             image_container.prepend(image);
-        }
+        };
 
         file_selector.onchange = event => {
             const file = event.target.files[0];
@@ -126,7 +129,7 @@ class ImageWidget extends Widget {
 
                 image_container.appendChild(file_name_msg);
             }
-        }
+        };
     }
 
     /**
@@ -154,6 +157,6 @@ class ImageWidget extends Widget {
             const msg = document.createElement('p');
             msg.innerText = `Resolution (width x height)\nNative: ${image.naturalWidth} x ${image.naturalHeight}\nShown at: ${image.width} x ${image.height}`;
             image_container.appendChild(msg);
-        }
+        };
     }
 }

@@ -52,8 +52,7 @@ class AbstractJob(ABC):
     def run_job(self):
         pass
 
-    @abstractmethod
-    def cleanup_job(self):
+    def cleanup_job(self):  # noqa: B027
         pass
 
 
@@ -128,12 +127,18 @@ class BuildConfig(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = os.path.join(DATA_DIR, 'courses', semester, course, 'BUILD_{}.sh'.format(course))
-        build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
+        build_script = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, f'BUILD_{course}.sh')
+        build_output = os.path.join(DATA_DIR, 'courses', semester,
+                                    course, 'build', gradeable,
+                                    'build_script_output.txt')
 
         try:
+            res = subprocess.run([build_script, gradeable, "--clean"],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
             with open(build_output, "w") as output_file:
-                subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
+                output_file.write(res.stdout.decode("ascii"))
         except PermissionError:
             print("error, could not open "+output_file+" for writing")
 
@@ -382,6 +387,29 @@ class UpdateDockerImages(AbstractJob):
 
         log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
         logger.write_to_log(log_file_path, log_msg)
+
+    def cleanup_job(self):
+        pass
+
+
+class UpdateSystemInfo(AbstractJob):
+    def run_job(self):
+        today = datetime.datetime.now()
+        log_folder = os.path.join(DATA_DIR, "logs", "sysinfo")
+        log_file = os.path.join(log_folder, f"{today.strftime('%Y%m%d')}.txt")
+
+        flag = os.O_EXCL | os.O_WRONLY
+        if not os.path.exists(log_file):
+            flag = flag | os.O_CREAT
+        log = os.open(log_file, flag)
+
+        script = os.path.join(INSTALL_DIR, "sbin", "shipper_utils", "get_sysinfo.py")
+        with os.fdopen(log, 'a') as output_file:
+            subprocess.run(["python3", script, "--workers", "service", "disk", "sysload"],
+                           stdout=output_file, stderr=output_file)
+
+        log_msg = f"[Last ran on: {today.isoformat()}]\n"
+        logger.write_to_log(log_file, log_msg)
 
     def cleanup_job(self):
         pass

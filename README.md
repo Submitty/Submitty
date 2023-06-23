@@ -3,41 +3,38 @@
 </p>
 
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
+[![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
 
 # Usage
 
-System instructions located at http://submitty.org/
+System instructions located at [https://submitty.org/](https://submitty.org/)
 
 # Background
 
-Submitty is an open source programming assignment submission system
-from the 
-[Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/), launched
-by the [Department of Computer Science](https://science.rpi.edu/computer-science) at 
-[Rensselaer Polytechnic Institute (RPI)](https://rpi.edu/).
+[Submitty](https://submitty.org) is an open source course management, assignment submission, exam and grading system
+from the [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/),
+[Department of Computer Science](https://science.rpi.edu/computer-science) at
+[Rensselaer Polytechnic Institute](https://www.rpi.edu/).
+
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
+Our key features are described here: [https://submitty.org/index/features](https://submitty.org/index/features)
 
-# Key Features
 
-* Secure testing of many languages: Python, C/C++, Java, Scheme, Prolog, SPIM, and anything available on GNU / Linux!
-* Customizable automated grading with immediate feedback to students
-* Advanced grading tools: static analysis, JUnit, code coverage, memory debuggers, etc.
-* Student upload by drag-and-drop, zip upload, or version control
-* Correct mistakes through multiple submissions, flexible "late day" policy, hidden tests
-* Interface for complementary instructor/TA manual grading, overall grade summaries
-* Instructors have full access to logs for debugging, launch batch regrading
-* Scales to multiple courses with thousands of students
-* Supports multiple instructors and TAs per course
-* Open-source, free to use, install on your own hardware, or VPS
+## Contributing
+
+To learn how to contribute to our project, please read:  
+[How to Make a Pull Request](https://submitty.org/developer/getting_started/make_a_pull_request)  
+[How to Review a Pull Request](https://submitty.org/developer/getting_started/review_a_pull_request)  
 
 
 # Contact Us
 
-If you have a question, please [contact us](https://submitty.org/index/contact) through email or our Slack.
+If you have a question, please [contact us](https://submitty.org/index/contact) through Slack.
 
 
 ### LICENSING
+
 Submitty is licensed under BSD "3-Clause" which can be viewed in [LICENSE](LICENSE.md)  
 Licenses for the 3rd party components can be viewed in [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 
