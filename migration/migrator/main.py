@@ -476,6 +476,8 @@ def dump(args):
 
 
 def load_triggers(args, silent=False):
+    print('Loading trigger functions to master...', end='')
+
     if 'master' not in args.environments:
         if silent:
             return
@@ -490,7 +492,9 @@ def load_triggers(args, silent=False):
     files = [f for f in trigger_dir.iterdir() if f.is_file() and f.suffix == '.sql']
 
     if len(files) == 0:
+        print('DONE')
         return
+    print()
 
     db_config = deepcopy(args.config.database)
     db_config['dbname'] = 'submitty'
@@ -502,8 +506,11 @@ def load_triggers(args, silent=False):
         )
 
     for file in files:
+        print('  ' + file.stem)
         with open(file) as f:
             query = f.read()
             database.execute(query)
 
     database.close()
+    print()
+    print('DONE')
