@@ -942,7 +942,7 @@ function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, 
     }
     let late_warning_seen = false;
     // check due date
-    days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
     if ( days_past_deadline > 0 && days_past_deadline <= late_days_allowed && days_past_deadline <= remaining_late_days_for_gradeable  && days_to_be_charged > 0) {
         message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
         if (!confirm(message)) {
