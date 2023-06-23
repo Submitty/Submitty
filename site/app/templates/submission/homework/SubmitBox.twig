@@ -399,7 +399,8 @@
             handleSubmission(
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
-                {{ days_past_deadline }},
+                days_past_deadline,
+                {{ late_day_exceptions }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ min_team_would_be_late_days_remaining }},
@@ -423,7 +424,8 @@
             handleSubmission(
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
-                {{ days_past_deadline }},
+                days_past_deadline,
+                {{ late_day_exceptions }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ min_team_would_be_late_days_remaining }},

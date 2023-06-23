@@ -35,11 +35,11 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
-        $days_past_deadline = 0;
+        $late_day_exceptions = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
-            $days_past_deadline = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
+            $late_day_exceptions = max(0, $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
@@ -64,10 +64,10 @@ class HomeworkView extends AbstractView {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             // showing submission if user is a grader or student can submit
             if ($this->core->getUser()->accessGrading()) {
-                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline);
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $late_day_exceptions);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline, $gradeable->canStudentSubmit());
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $late_day_exceptions, $gradeable->canStudentSubmit());
             }
         }
         catch (NotebookException $e) {
@@ -301,11 +301,11 @@ class HomeworkView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
-     * @param int $days_past_deadline
+     * @param int $late_day_exceptions
      * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $days_past_deadline, bool $canStudentSubmit = true): string {
+    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_day_exceptions, bool $canStudentSubmit = true): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
@@ -524,7 +524,7 @@ class HomeworkView extends AbstractView {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
                 }
             },
-            'days_past_deadline' => $days_past_deadline,
+            'late_day_exceptions' => $late_day_exceptions,
             'charged_late_days' => $charged_late_days,
             'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
