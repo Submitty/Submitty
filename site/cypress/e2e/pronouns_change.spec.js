@@ -9,16 +9,16 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //open pronouns form
         cy.get('#pronouns_val').click();
-        const e = cy.get('#user-pronouns-change');
+        cy.get('#user-pronouns-change').as('e');
 
         //save old pronouns
-        e.then(($pronounsInput) => {
+        cy.get('@e').then(($pronounsInput) => {
             oldPronouns = $pronounsInput.val();
         });
 
         //type in new pronouns
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
-        e.type('They/Them');
+        cy.get('@e').type('They/Them');
         cy.get('#edit-pronouns-submit').click();
 
         //ensure pronouns changed on page
@@ -45,11 +45,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.visit(['sample','student_photos']);
         cy.login('instructor');
 
-        //select Joe Student's photo
-        const e = cy.get('.student-image-container > .name').first();
-
         //Select text from photo area and parse to get pronoun
-        e.contains('They/Them');
+        cy.get('.student-image-container > .name').first().contains('They/Them');;
 
     });
 
@@ -59,10 +56,9 @@ describe('Tests cases abut changing user pronouns', () => {
 
         //change back to old pronouns
         cy.get('#pronouns_val').click();
-        const e = cy.get('#user-pronouns-change');
         cy.get('button[aria-label="Clear pronoun input"]').click(); //clear input using trash can
         if (oldPronouns !== '') {
-            e.type(oldPronouns);
+            cy.get('#user-pronouns-change').type(oldPronouns);
         }
         cy.get('#edit-pronouns-submit').first().click();
 
