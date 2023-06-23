@@ -28,6 +28,18 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+
+    # First we need to patch missing constraints from existing courses prior to Fall 2019
+    database.execute("""
+
+        alter table electronic_gradeable drop constraint if exists eg_regrade_allowed_true;
+
+        alter table electronic_gradeable add constraint eg_regrade_allowed_true CHECK
+            (((eg_regrade_allowed IS TRUE) OR (eg_regrade_allowed IS FALSE)));
+
+    """)
+
+
     database.execute("""
         ALTER TABLE regrade_discussion
             RENAME TO grade_inquiry_discussion;
