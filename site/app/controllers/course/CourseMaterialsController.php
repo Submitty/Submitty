@@ -441,7 +441,7 @@ class CourseMaterialsController extends AbstractController {
 
 
 
-        if (isset($_POST['file_path']) || isset($_POST['link_title'])) {
+        if ( (isset($_POST['file_path']) || isset($_POST['link_title']) ) && !($course_materials->isDir())) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
