@@ -82,7 +82,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $config = new Config($this->core);
         $config->setDebug(true);
-        $config->setSemester($this->config['semester']);
+        $config->setTerm($this->config['semester']);
         $config->setCourse($this->config['course']);
         $config->setCoursePath($this->config['course_path']);
         $config->setSubmittyPath($this->config['tmp_path']);
@@ -158,6 +158,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'syllabus_bucket' => 'homework',
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
             'vcs_host_type' => -1,
@@ -174,7 +175,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
             'precision' => 0.5,
-            'regrade_allowed' => true,
+            'grade_inquiry_allowed' => true,
             'grade_inquiry_per_component_allowed' => true,
             'discussion_based' => false,
             'discussion_thread_ids' => '',

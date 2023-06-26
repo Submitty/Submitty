@@ -15,7 +15,7 @@ use app\libraries\FileUtils;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  *
- * @method string getSemester()
+ * @method string getTerm()
  * @method string getCourse()
  * @method string getBaseUrl()
  * @method string getVcsUrl()
@@ -50,7 +50,7 @@ use app\libraries\FileUtils;
  * @method bool isForumEnabled()
  * @method string getForumCreateThreadMessage()
  * @method bool isEmailEnabled()
- * @method string getRegradeMessage()
+ * @method string getGradeInquiryMessage()
  * @method string getVcsBaseUrl()
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
@@ -68,7 +68,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
- * @method void setSemester(string $semester)
+ * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
@@ -91,8 +91,8 @@ class Config extends AbstractModel {
      */
     protected $debug = false;
 
-    /** @prop @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
-    protected $semester;
+    /** @prop @var string contains the term to use, generally from the $_REQUEST['semester'] global */
+    protected $term;
     /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
@@ -241,7 +241,7 @@ class Config extends AbstractModel {
     /** @prop @var string */
     protected $forum_create_thread_message;
     /** @prop @var string */
-    protected $regrade_message;
+    protected $grade_inquiry_message;
     /** @prop @var bool */
     protected $seating_only_for_instructor;
     /** @prop @var string|null */
@@ -470,7 +470,7 @@ class Config extends AbstractModel {
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
-        $this->semester = $semester;
+        $this->term = $semester;
         $this->course = $course;
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
@@ -502,12 +502,12 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
-            $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
+            $this->vcs_base_url = $this->vcs_url . $this->term . '/' . $this->course;
         }
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";

@@ -122,7 +122,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'forum_enabled' => true,
                 'forum_create_thread_message' => '',
                 'seating_only_for_instructor' => false,
-                'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
@@ -183,7 +183,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson("s17", "csci0000", $course_json_path);
 
         $this->assertFalse($config->isDebug());
-        $this->assertEquals("s17", $config->getSemester());
+        $this->assertEquals("s17", $config->getTerm());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
@@ -241,7 +241,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $expected = [
             'debug' => false,
-            'semester' => 's17',
+            'term' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
@@ -274,7 +274,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
-            'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+            'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
             'course_json' => [
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
@@ -295,7 +295,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'forum_enabled' => true,
                     'forum_create_thread_message' => '',
                     'seating_only_for_instructor' => false,
-                    'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                    'grade_inquiry_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
@@ -511,7 +511,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-                'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
+                'grade_inquiry_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
                 'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
             ],
         ];

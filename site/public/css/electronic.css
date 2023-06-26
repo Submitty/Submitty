@@ -380,15 +380,15 @@ progress::-webkit-progress-value {
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
-#regrade_info_btn {
+#grade_inquiry_info_btn {
     border: 2px solid #f29f0d;
 }
 
 /* stylelint-disable selector-id-pattern */
-#regrade_info_btn:hover,
-#regrade_info_btn.active,
-#regrade_info_select option:hover,
-#regrade_info_select option:focus {
+#grade_inquiry_info_btn:hover,
+#grade_inquiry_info_btn.active,
+#grade_inquiry_info_select option:hover,
+#grade_inquiry_info_select option:focus {
     background: #9e7835;
 }
 /* stylelint-enable selector-id-pattern */
@@ -577,7 +577,7 @@ progress::-webkit-progress-value {
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#regrade_inner_info .inner-container {
+#grade_inquiry_inner_info .inner-container {
     padding: 20px;
 }
 
@@ -602,7 +602,7 @@ progress::-webkit-progress-value {
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#regrade_info.rubric_panel {
+#grade_inquiry_info.rubric_panel {
     border: 5px solid var(--standard-vibrant-orange);
 }
 
@@ -936,7 +936,7 @@ tr.is_publish {
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
-#regrade_request_box.rubric_panel {
+#grade_inquiry_box.rubric_panel {
     border: 5px solid #f47a42;
 }
 
@@ -1524,7 +1524,7 @@ input[type="radio"][disabled=""]:checked::before {
 }
 
 /* Media queries */
-@media (width <= 540px) {
+@media (max-width: 540px) {
     #electronic-gradeable-container {
         margin: 0;
     }
