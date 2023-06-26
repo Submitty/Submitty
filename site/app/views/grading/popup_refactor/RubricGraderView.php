@@ -20,7 +20,9 @@ namespace app\views\grading\popup_refactor;
 // Includes:
 use app\views\AbstractView;
 use app\models\GradingOrder;
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
+
 
 // Main Class:
 class RubricGraderView extends AbstractView {
@@ -102,8 +104,21 @@ class RubricGraderView extends AbstractView {
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
 
         $this->addCSSs();
+        $this->addJavaScriptCode();
 
-        $this->renderNavigationBar($details_url);
+        $page_html = <<<HTML
+                <div class="content" id="electronic-gradeable-container">
+                    <div class="content-items-container">
+                    <div class="content-item content-item-right">
+                HTML;
+
+        $page_html .= $this->renderNavigationBar($details_url);
+
+        return $page_html . <<<HTML
+                                         </div>
+                                     </div>
+                                </div>
+            HTML;
     }
 
 
@@ -159,11 +174,19 @@ class RubricGraderView extends AbstractView {
 
 
     /**
+     * Adds JavaScript code used for the Rubric Grader page.
+     */
+    private function addJavaScriptCode() {
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
+    }
+
+    /**
      * Creates the NavigationBar used to traverse between students.
      * @param string $details_url - URL of the Details page for this gradeable.
      */
     private function renderNavigationBar(string $details_url) {
-        $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [
             "blind_access_mode" => $this->blind_access_mode,
             "is_team_gradeable" => $this->is_team_gradeable,
             "gradeable_submitter" => $this->current_submission->getSubmitter(),

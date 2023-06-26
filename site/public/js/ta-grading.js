@@ -592,8 +592,8 @@ function updateCookies(){
 // Student navigation
 function gotoMainPage() {
 
-  let window_location = $("#main-page")[0].dataset.href
-
+  let window_location = $("#main-page")[0].dataset.href;
+  
   if (getGradeableId() !== '') {
     closeAllComponents(true).then(function () {
       window.location = window_location;

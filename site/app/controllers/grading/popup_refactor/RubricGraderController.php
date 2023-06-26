@@ -27,7 +27,6 @@ use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
-use app\models\Gradeable;
 
 // Main Class:
 class RubricGraderController extends AbstractController {
@@ -109,7 +108,7 @@ class RubricGraderController extends AbstractController {
      *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
      *               see which peer they are currently grading.
      */
-    private $blind_access_mode = "";
+    private $blind_access_mode;
 
 
     // ---------------------------------
@@ -252,12 +251,11 @@ class RubricGraderController extends AbstractController {
         );
     }
 
-
     /**
      * Sets the current user type for the website user.
      */
     private function setUserType() {
-        $user_type = $this->core->getUser()->getGroup();
+        $this->user_type = $this->core->getUser()->getGroup();
     }
 
 
@@ -275,7 +273,7 @@ class RubricGraderController extends AbstractController {
      * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
      */
     private function setIfTeamGradeable() {
-        $is_team_gradeable = $this->gradeable->isTeamAssignment();
+        $this->is_team_gradeable = $this->gradeable->isTeamAssignment();
     }
 
 
@@ -301,7 +299,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Limited Access Graders:
-        if ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
+        elseif ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
             if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
                 $this->blind_access_mode = "single";
             }
@@ -311,21 +309,21 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Student Peer Graders:
-        if ($this->user_type == User::GROUP_STUDENT) {
+        elseif ($this->user_type == User::GROUP_STUDENT) {
             if ($this->is_peer_gradeable) {
                 if ($this->gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
-                    $blind_access_mode = "double";
+                    $this->blind_access_mode = "double";
                 }
                 elseif ($this->gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) {
-                    $blind_access_mode = "single";
+                    $this->blind_access_mode = "single";
                 }
                 else {
-                    $blind_access_mode = "unblind";
+                    $this->blind_access_mode = "unblind";
                 }
             }
 
             else {
-                $blind_access_mode = "unblind";
+                $this->blind_access_mode = "unblind";
             }
         }
     }
