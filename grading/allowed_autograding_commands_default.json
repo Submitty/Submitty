@@ -1,0 +1,134 @@
+// This file is installed at /usr/local/submitty/config/allowed_autograding_commands_default.json
+
+// IMPORTANT: This 'installed' file will be overwritten from the repository source code version on software re-installation.
+// Please edit the repository source code to modify this file -- OR --
+// edit the customizable file located at /usr/local/submitty/config/allowed_autograding_commands_custom.json
+
+// --------------------------------------------------------------------------------------
+// After updating this file, to apply changes run:
+//         /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
+// And then re-build any affected autograding configurations
+// --------------------------------------------------------------------------------------
+
+// This file json object is embedded into the submitty_grading static library through
+// allowed_autograding_commands.cpp
+
+{
+    // Basic System Utilities (for debugging)
+    "ls":                      { "path": "/bin/ls" },
+    "time":                    { "path": "/usr/bin/time" },
+    "mv":                      { "path": "/bin/mv" },
+    "cp":                      { "path": "/bin/cp" },
+    "chmod":                   { "path": "/bin/chmod" },
+    "find":                    { "path": "/usr/bin/find" },
+    "cat":                     { "path": "/bin/cat" },
+    "compare":                 { "path": "/usr/bin/compare" }, //image magick!
+    "mogrify":                 { "path": "/usr/bin/mogrify" }, //image magick!
+    "convert":                 { "path": "/usr/bin/convert" }, //image magick!
+    "wkhtmltoimage":           { "path": "/usr/bin/wkhtmltoimage" },
+    "wkhtmltopdf":             { "path": "/usr/bin/wkhtmltopdf" },
+    "xvfb-run":                { "path": "/xvfb-run" }, // allow htmltoimage and htmltopdf to run headless
+    "cut":                     { "path": "/usr/bin/cut" },
+    "sort":                    { "path": "/usr/bin/sort" },
+    "grep":                    { "path": "/bin/grep" },
+    "sed":                     { "path": "/bin/sed" },
+    "awk":                     { "path": "/usr/bin/awk" },
+    "pwd":                     { "path": "/bin/pwd" },
+    "env":                     { "path": "/usr/bin/env" },
+    "pdftotext":               { "path": "/usr/bin/pdftotext" },
+    "pdflatex":                { "path": "/usr/bin/pdflatex" },
+    "wc":                      { "path": "/usr/bin/wc" },
+    "head":                    { "path": "/usr/bin/head" },
+    "tail":                    { "path": "/usr/bin/tail" },
+    "uniq":                    { "path": "/usr/bin/uniq" },
+    "echo":                    { "path": "/bin/echo" },
+
+    // Submitty Analysis Tools
+    "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
+    "commonast": 	       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
+    "comment_count":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/bin/comment_count.py" },
+
+    // Submitty Analysis ToolsTS
+    "submitty_count_ts":       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_count_ts"},
+    "submitty_diagnostics_ts": { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisToolsTS/build/submitty_diagnostics_ts" },
+
+    // for Computer Science I
+    "python":                  { "path": "/usr/bin/python" },
+    "python3":                 { "path": "/usr/bin/python3" },
+    "python3.5":               { "path": "/usr/bin/python3.5" },
+    "python3.6":               { "path": "/usr/bin/python3.6" },
+    "pylint":                  { "path": "/usr/local/bin/pylint" },
+    "pytest":                  { "path": "/usr/local/bin/pytest" },
+
+    // for Data Structures
+    "g++":                     { "path": "/usr/bin/g++" },
+    "clang++":                 { "path": "/usr/bin/clang++" },
+    "clang-format":            { "path": "/usr/bin/clang-format" },
+    "drmemory":                { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/drmemory/bin64/drmemory" },
+    "valgrind":                { "path": "/usr/bin/valgrind" },
+
+    // for Computer Organization
+    "spim":                    { "path": "/usr/bin/spim" },
+    "clang":                   { "path": "/usr/bin/clang" },
+    "gdb":                     { "path": "/usr/bin/gdb" },
+
+    // for Principles of Software
+    "java":                    { "path": "/usr/bin/java" },
+    "javac":                   { "path": "/usr/bin/javac" },
+    "mono":                    { "path": "/usr/bin/mono" }, // should put more checks here, only run with "mono dafny/Dafny.exe"
+
+    // for Operating Systems
+    "gcc":                     { "path": "/usr/bin/gcc" },
+    "strings":                 { "path": "/usr/bin/strings" },
+
+    // for Programming Languages
+    "swipl":                   { "path": "/usr/bin/swipl" },
+    "plt-r5rs":                { "path": "/usr/bin/plt-r5rs" },
+    "ozc":                     { "path": "/usr/bin/ozc" },
+    "ozengine":                { "path": "/usr/bin/ozengine" },
+
+    // for Program Analysis course
+    "ghc":                     { "path": "/usr/bin/ghc" },
+    "ocaml":                   { "path": "/usr/bin/ocaml" },
+    "ocamllex":                { "path": "/usr/bin/ocamllex" },
+    "ocamlyacc":               { "path": "/usr/bin/ocamlyacc" },
+    "z3":                      { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/tools/z3" },
+
+    // for Cmake & Make
+    "cmake":                   { "path": "/usr/bin/cmake" },
+    "make":                    { "path": "/usr/bin/make" },
+
+    // for Network Programming
+    "timeout":                 { "path": "/usr/bin/timeout" },
+    "mpicc.openmpi":           { "path": "/usr/bin/mpicc.openmpi" },
+    "mpirun.openmpi":          { "path": "/usr/bin/mpirun.openmpi" },
+    "mpirun":                  { "path": "/usr/local/mpich-3.2/bin/mpirun" },
+    "mpicc":                   { "path": "/usr/local/mpich-3.2/bin/mpicc" },
+    "expect":                  { "path": "/usr/bin/expect" },
+    "sleep":                   { "path": "/bin/sleep" },
+
+    // for Distributed Systems
+    "script":                  { "path": "/usr/bin/script" },
+
+    // for LLVM / Compiler class
+    "lex":                     { "path": "/usr/bin/lex" },
+    "flex":                    { "path": "/usr/bin/flex" },
+    "yacc":                    { "path": "/usr/bin/yacc" },
+    "bison":                   { "path": "/usr/bin/bison" },
+
+    // for graphics/window interaction
+    "scrot":                   { "path": "/usr/bin/scrot" }, //screenshot utility
+    "xdotool":                 { "path": "/usr/bin/xdotool" }, //keyboard/mouse input
+    "wmctrl":                  { "path": "/usr/bin/wmctrl" }, //bring window into focus
+    "xwininfo":                { "path": "/usr/bin/xwininfo" }, // get info about window
+
+    // for Debugging
+    "strace":                  { "path": "/usr/bin/strace" },
+
+    // Matlab
+    "matlab":                  { "path": "/usr/local/bin/matlab" },
+
+    // only for docker
+    "bash":                    { "path": "/bin/bash", "onlyDocker": true },
+    "php":                     { "path": "/usr/bin/php", "onlyDocker": true }
+}
