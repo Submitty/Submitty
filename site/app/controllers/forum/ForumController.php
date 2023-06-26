@@ -345,7 +345,7 @@ class ForumController extends AbstractController {
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int) $category_id;
         }
-        if (empty($thread_title) || empty($thread_post_content)) {
+        if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         }
@@ -474,7 +474,7 @@ class ForumController extends AbstractController {
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if (empty($post_content) || empty($thread_id)) {
+        if (strlen($post_content) === 0 || strlen($thread_id) === 0) {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }

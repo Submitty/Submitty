@@ -42,14 +42,6 @@ class RubricGraderController extends AbstractController {
 
     /**
      * @var string
-     * The anonomous id of the student currently being grade.
-     * This id can be set with setCurrentStudentId or when loading this page's URL
-     * with ?who_id=INSERT_ID.
-     */
-    private $current_student_id;
-
-    /**
-     * @var string
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
      */
@@ -61,12 +53,6 @@ class RubricGraderController extends AbstractController {
      * Controls where next and prev arrows go.
      */
     private $sort_direction;
-
-    /**
-     * @var bool
-     * Do we skip students that we are not assigned to when pressing next or prev arrows?
-     */
-    private $navigate_assigned_students_only;
 
     /**
      * @var int
@@ -104,7 +90,6 @@ class RubricGraderController extends AbstractController {
      */
     private $blind_access_mode;
 
-
     // ---------------------------------
 
 
@@ -123,8 +108,6 @@ class RubricGraderController extends AbstractController {
      * @param string $who_id - The id of the student we should grade.
      * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
      * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
-     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls
-     *                whether we skip students.
      *
      * This page is loaded on line 476 of Details.twig when the Grade button is clicked.
      *
@@ -139,7 +122,7 @@ class RubricGraderController extends AbstractController {
         string $direction = "ASC",
         string $navigate_assigned_students_only = "true"
     ) {
-        $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
+        $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction);
 
         $this->core->getOutput()->renderOutput(
             // Path:
@@ -166,15 +149,12 @@ class RubricGraderController extends AbstractController {
      * @param string $who_id - The id of the student we should grade.
      * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
      * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
-     * @param string $navigate_assigned_students_only - When going to the next student, this variable controls
-     *     whether we skip students.
      */
     private function setMemberVariables(
         string $gradeable_id,
         string $who_id,
         string $sort,
-        string $direction,
-        string $navigate_assigned_students_only
+        string $direction
     ) {
         $this->setCurrentGradeable($gradeable_id);
         $this->setCurrentSubmission($who_id);
@@ -186,7 +166,6 @@ class RubricGraderController extends AbstractController {
 
         $this->sort_type = $sort;
         $this->sort_direction = $direction;
-        $this->navigate_assigned_students_only;
     }
 
 
