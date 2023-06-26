@@ -287,12 +287,14 @@ function newUploadCourseMaterialsForm() {
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
+    console.log("yo");
     let id = $(tag).data('id');
     let dir = $(tag).data('priority');
     let folder_sections = $(tag).data('sections');
     let partial_sections = $(tag).data('partial-sections');
     let release_time =  $(tag).data('release-time');
     let is_hidden = $(tag).data('hidden-state');
+    console.log(is_hidden);
     const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
 
@@ -301,6 +303,7 @@ function newEditCourseMaterialsFolderForm(tag) {
 
     let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
     if (is_hidden > 0) {
+        console.log("should be hidden");
         hide_materials_box.prop('checked', true).trigger('change');
         if (is_hidden === partially_hidden) {
             hide_materials_box.attr('class', 'partial-checkbox');
@@ -308,6 +311,7 @@ function newEditCourseMaterialsFolderForm(tag) {
         }
     }
     else {
+        console.log("not hidden");
         hide_materials_box.prop('checked', false).trigger('change');
     }
 

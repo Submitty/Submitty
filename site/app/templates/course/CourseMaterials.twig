@@ -303,6 +303,13 @@
                     }
                 });
                 let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
+
+                console.log("commonSections:", commonSections);
+                console.log("partialSections:", partialSections);
+                console.log("releaseTime:", releaseTime);
+                console.log("hiddenState:", hiddenState);
+
+                
                 editButton.attr('data-sections', JSON.stringify(commonSections));
                 editButton.attr('data-partial-sections', JSON.stringify(partialSections));
                 editButton.attr('data-release-time', releaseTime);
