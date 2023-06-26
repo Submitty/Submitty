@@ -105,7 +105,7 @@ class ElectronicGraderController extends AbstractController {
             elseif ($ov->getGradeable()->isTaGrading()) {
                 if ($ov->getOrCreateTaGradedGradeable()->anyGrades()) {
                     // if grade inquiry and not in Null section add to count
-                    if ($ov->hasActiveRegradeRequest()) {
+                    if ($ov->hasActiveGradeInquiry()) {
                         if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                             $histogram["noActive"] += 1;
                         }
@@ -579,9 +579,10 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
+        $peer_components = 0;
         $total_users_who_submitted = [];
 
-        $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
+        $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
             $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
             $peer_graded_components = 0;
@@ -597,6 +598,7 @@ class ElectronicGraderController extends AbstractController {
             }
             foreach ($student_array as $student) {
                 $peer_graded_components += $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $student);
+                $peer_components += count($this->core->getQueries()->getPeerAssignment($gradeable_id, $student));
             }
         }
         if ($peer) {
@@ -705,6 +707,7 @@ class ElectronicGraderController extends AbstractController {
                    'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'graded_components' => 0,
                    'view_peer_graded_components' => $peer_graded_components,
+                   'view_peer_components' => $peer_components,
                    'ta_graded_components' => 0,
                    'num_gradeables' => $num_gradeables,
                    'graders' => [],
@@ -852,7 +855,7 @@ class ElectronicGraderController extends AbstractController {
             $rotating_but_not_registered,
             $viewed_grade,
             $section_key,
-            $regrade_requests,
+            $grade_inquiries,
             $show_warnings,
             $submissions_in_queue
         );
@@ -862,7 +865,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails(string $gradeable_id, string $direction = "ASC") {
+    public function showDetails(string $gradeable_id) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -888,6 +891,7 @@ class ElectronicGraderController extends AbstractController {
         }
         $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
+        $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
@@ -1252,7 +1256,7 @@ class ElectronicGraderController extends AbstractController {
                 unlink($csv_file);
             }
         );
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($contents === false) {
@@ -1822,7 +1826,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
@@ -2189,7 +2193,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
@@ -3094,7 +3098,7 @@ class ElectronicGraderController extends AbstractController {
         $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
 
         $logger_params = [
-            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),

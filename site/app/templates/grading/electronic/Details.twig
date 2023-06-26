@@ -47,7 +47,7 @@
                 {% if toggle_anon_button %}
                 <button class="btn btn-default" id="toggle-anon-button"
                     onclick="changeAnon()">
-                    {{ anon_mode ? "Disable Anon Mode" : "Enable Anon Mode" }}
+                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
                 </button>
                 {% endif %}
             </div>
@@ -122,7 +122,7 @@
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
                         <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">
-                            <a href="{{ details_base_url }}?sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
+                            <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
@@ -453,10 +453,10 @@
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
@@ -467,7 +467,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
@@ -517,7 +517,7 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveRegradeRequest() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
@@ -706,10 +706,10 @@
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
-            document.cookie = 'view=assigned; path=/;';
+            Cookies.set('view', 'assigned', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
         } else {
-            document.cookie = 'view=all; path=/;';
+            Cookies.set('view', 'all', { path: '/' });
             localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
         }
         location.reload();
@@ -718,21 +718,27 @@
     function changeAnon() {
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
-            document.cookie = 'anon_mode=off;';
+            Cookies.set('anon_mode', 'off');
         }
         else {
-            document.cookie = 'anon_mode=on;';
+            Cookies.set('anon_mode', 'on');
         }
         location.reload();
     }
 
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
-            document.cookie = 'sort=id;';
+            Cookies.set('sort', 'id');
         }
         else {
-            document.cookie = 'sort=random;';
+            Cookies.set('sort', 'random');
         }
+        location.reload();
+    }
+
+    function sortTableByColumn(sort_type = 'id', direction) {
+        Cookies.set('sort', sort_type);
+        Cookies.set('direction', direction);
         location.reload();
     }
 

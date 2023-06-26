@@ -373,6 +373,7 @@ class ReportController extends AbstractController {
         $user_data['legal_family_name'] = $user->getLegalFamilyName();
         $user_data['preferred_family_name'] = $user->getPreferredFamilyName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
@@ -429,6 +430,21 @@ class ReportController extends AbstractController {
             'gradeable_type' => GradeableType::typeToString($g->getType()),
             'grade_released_date' => $g->hasReleaseDate() ? $g->getGradeReleasedDate()->format('Y-m-d H:i:s O') : $g->getSubmissionOpenDate()->format('Y-m-d H:i:s O'),
         ];
+
+        if ($g->isGradeInquiryAllowed()) {
+            // Export the grade inquiry status
+            if ($gg->hasGradeInquiry()) {
+                if ($gg->hasActiveGradeInquiry()) {
+                    $entry['inquiry'] = 'Open';
+                }
+                else {
+                    $entry['inquiry'] = 'Resolved';
+                }
+            }
+            else {
+                $entry['inquiry'] = 'None';
+            }
+        }
 
         // Add team members to output
         if ($g->isTeamAssignment()) {
@@ -618,7 +634,7 @@ class ReportController extends AbstractController {
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                     $this->core->getConfig()->getCourse(),
-                    $this->core->getConfig()->getSemester()
+                    $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
             ]);
@@ -680,14 +696,14 @@ class ReportController extends AbstractController {
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
         // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
@@ -713,7 +729,7 @@ class ReportController extends AbstractController {
 
         // Check the course auto_debug_output.txt to ensure no exceptions were thrown
         $debug_output_path = '/var/local/submitty/courses/' .
-            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getTerm() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
