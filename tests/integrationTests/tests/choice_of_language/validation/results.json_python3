@@ -9,41 +9,19 @@
                     "description": "STDOUT.txt",
                     "difference_file": "test01/0_diff.json",
                     "expected_file": "test_output/testassignment/output.txt"
-                },
-                {
-                    "actual_file": "test01/STDERR.txt",
-                    "description": "Standard Error (STDERR.txt)",
-                    "messages": [
-                        {
-                            "message": "WARNING: This file should be empty",
-                            "type": "warning"
-                        }
-                    ]
-                },
-                {
-                    "actual_file": "test01/execute_logfile.txt",
-                    "description": "Execution Logfile"
                 }
             ],
-            "points_awarded": 0,
-            "test_name": "Python 2 Testing"
-        },
-        {
-            "autochecks": [
-                {
-                    "actual_file": "test02/STDOUT.txt",
-                    "description": "STDOUT.txt",
-                    "difference_file": "test02/0_diff.json",
-                    "expected_file": "test_output/testassignment/output.txt"
-                }
-            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 1316
+            },
             "points_awarded": 5,
             "test_name": "Python 3 Testing"
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test03/STDERR.txt",
+                    "actual_file": "test02/STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
                         {
@@ -62,10 +40,14 @@
                     ]
                 },
                 {
-                    "actual_file": "test03/execute_logfile.txt",
+                    "actual_file": "test02/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 1320
+            },
             "points_awarded": 0,
             "test_name": "C Compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
@@ -76,7 +58,7 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'test04/STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test03/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
@@ -85,23 +67,27 @@
                     "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'test04/STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test03/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test04/execute_logfile.txt",
+                    "actual_file": "test03/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
+            "metrics": {
+                "elapsed_time": 0.0,
+                "max_rss_size": 0
+            },
             "points_awarded": 0,
             "test_name": "C Testing"
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test05/STDERR.txt",
+                    "actual_file": "test04/STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
                         {
@@ -120,10 +106,14 @@
                     ]
                 },
                 {
-                    "actual_file": "test05/execute_logfile.txt",
+                    "actual_file": "test04/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 1256
+            },
             "points_awarded": 0,
             "test_name": "C++ Compilation",
             "testcase_message": "Compilation Errors and/or Warnings."
@@ -134,7 +124,7 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'test06/STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test05/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
@@ -143,20 +133,25 @@
                     "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'test06/STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test05/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test06/execute_logfile.txt",
+                    "actual_file": "test05/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
+            "metrics": {
+                "elapsed_time": 0.0,
+                "max_rss_size": 0
+            },
             "points_awarded": 0,
             "test_name": "C++ Testing"
         },
         {
+            "metrics": null,
             "points_awarded": 0,
             "test_name": "Submission Limit",
             "view_testcase": false

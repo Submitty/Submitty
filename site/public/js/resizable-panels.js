@@ -1,7 +1,7 @@
 /* exported initializeResizablePanels */
 
 /**
- * callback attached to run after the initialization of resizeable panels
+ * callback attached to run after the initialization of resizable panels
  *
  * @callback resizeCallback
  * @param {string} updatedVal updated width/height after the user is done with resizing

@@ -25,7 +25,7 @@
                         textarea_maxlength (see below)
     onclick: REQUIRED, name of function to be executed when Preview button/tab is clicked
                 ex. onclick : 'previewMyPageMarkdown'
-                IMPORTANT: THIS FUNCTION MUST RECIEVE 'mode' AS ITS LAST ARGUMENT. 
+                IMPORTANT: THIS FUNCTION MUST RECEIVE 'mode' AS ITS LAST ARGUMENT. 
                             See site/public/js/forum.js and polls.js for examples.
                 NOTE: If you would like to pass other arguments besides 'mode' to your onclick 
                       function, you must use Function.prototype.bind. 
@@ -84,6 +84,9 @@
             rows="10" cols="30"
             {# 524288 characters is the default max length for text input fields #}
             maxlength="{{ (no_maxlength|default(null) ? '524288' : (textarea_maxlength|default(null) ? textarea_maxlength :'5000'))}}"
+            {% if required is defined and required %}
+                required
+            {% endif %}
             {% if textarea_onchange is defined %}
                 onchange="{{ textarea_onchange }}"
             {% endif %}

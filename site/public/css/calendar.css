@@ -56,6 +56,10 @@ a.cal-btn:focus {
     text-align: left;
 }
 
+#calendar-item-type-edit{
+    float: right;
+}
+
 .cal-month-title {
     font-size: 26px;
     text-transform: uppercase;
@@ -63,6 +67,11 @@ a.cal-btn:focus {
     margin-top: 0;
     margin-bottom: 0;
     line-height: 100%;
+}
+
+.cal-toolbar {
+    margin-bottom: 2px;
+    margin-top: 0;
 }
 
 h2.cal-month-title {
@@ -142,6 +151,7 @@ h2.cal-month-title {
 .cal-day-cell {
     min-height: 100px;
     max-height: 195px;
+    height: 100px;
 }
 
 .cal-cell-expand {
@@ -159,6 +169,7 @@ h2.cal-month-title {
 
 /* each item in the day cell */
 .cal-gradeable-item {
+    color: var(--text-black)!important;
     margin: 1px;
     text-decoration: none;
     white-space: normal;
@@ -169,7 +180,7 @@ h2.cal-month-title {
     vertical-align: baseline;
     padding: 0 0 0 5px;
     display: block;
-    width: 100%;
+    width: 98%;
     user-select: none;
     background-image: none;
     border-radius: 4px;
@@ -209,10 +220,11 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd;  /* This color is from DS website */
+    color: #218ffd!important;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
-    border: none;
+    border-style: solid;
+    border-width: 3px;
     box-shadow: none;
 }
 
@@ -221,7 +233,8 @@ a.cal-gradeable-status-ann:hover {
     padding: 0;
     font-style: italic;
     cursor: default;
-    border: none;
+    border-style: solid;
+    border-width: 3px!important;
 }
 
 a.cal-gradeable-status-ann:focus {
@@ -251,6 +264,20 @@ a.cal-gradeable-status-link:focus {
     padding: 0;
     border: none;
 }
+
+.calendar-color-blue {
+    background-color: #218ffd;
+    color: var(--text-black)!important;
+}
+
+/* creating/editing calendar event */
+div.calendar-submit {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-gap: 5px; 
+}
+div.calendar-submit label { text-align: "right"; }
+div.calendar-submit label::after { content: ":"; }
 
 @media (max-width: 800px) {
     #calendar-list {

@@ -22,7 +22,7 @@ OLD_MARK_LIST = {};
 OLD_GRADED_COMPONENT_LIST = {};
 
 /**
- * A number ot represent the id of no component
+ * A number to represent the id of no component
  * @type {int}
  */
 NO_COMPONENT_ID = -1;
@@ -1527,8 +1527,7 @@ function getMarkIdFromOrder(component_id, mark_order) {
  * @return {int} Returns zero of no open component exists
  */
 function getOpenComponentIdFromCookie() {
-    let component_id = document.cookie.replace(/(?:(?:^|.*;\s*)open_component_id\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    component_id = parseInt(component_id);
+    const component_id = parseInt(Cookies.get('open_component_id'));
     if(isNaN(component_id)) {
         return NO_COMPONENT_ID;
     }
@@ -1539,7 +1538,7 @@ function getOpenComponentIdFromCookie() {
  * Updates the open component in the cookie
  */
 function updateCookieComponent() {
-    document.cookie = "open_component_id=" + getFirstOpenComponentId() + "; path=/;";
+    Cookies.set('open_component_id', getFirstOpenComponentId(), { path: '/' });
 }
 
 /**
@@ -2669,9 +2668,9 @@ function scrollToPage(page_num){
     if (lastLoadedFile.charAt(0) === ".") {
         lastLoadedFile = lastLoadedFile.substring(1);
     }
-    if (lastLoadedFile.startsWith(".upload_page_") || lastLoadedFile.startsWith("upload_page_")) {
-        let targetFile = "upload_page_" + page_num + "." + lastLoadedFile.split(".").pop();
-        if (activeView && lastLoadedFile === targetFile) {
+    if (lastLoadedFile.startsWith("upload_page_")) {
+        let lastLoadedFilePageNum = parseInt(lastLoadedFile.split("_")[2].split(".")[0]);
+        if (activeView && page_num === lastLoadedFilePageNum) {
             return;
         }
         let maxPage = -1;
@@ -2679,14 +2678,14 @@ function scrollToPage(page_num){
         let maxPageLoc = null;
         for (let i = 0; i < files.length; i++) {
             let filename = files[i].innerText.trim();
-            let filenameNoPeriod = filename.substring(1);
-            if (filename === targetFile || filenameNoPeriod === targetFile) {
-                viewFileFullPanel(filename, files[i].getAttribute("file-url"));
-                return;
-            } else if (filenameNoPeriod.startsWith("upload_page_")) {
-                let pageNum = parseInt(filename.split("_")[2].split(".")[0]);
-                if (pageNum > maxPage) {
-                    maxPage = pageNum;
+            let filenameNoPeriod = filename.charAt(0) === "." ? filename.substring(1) : filename;
+            if (filenameNoPeriod.startsWith("upload_page_")) {
+                let currPageNum = parseInt(filename.split("_")[2].split(".")[0]);
+                if (page_num === currPageNum) {
+                    viewFileFullPanel(filename, files[i].getAttribute("file-url"));
+                    return;
+                } else if (currPageNum > maxPage) {
+                    maxPage = currPageNum;
                     maxPageName = filename;
                     maxPageLoc = files[i].getAttribute("file-url");
                 }

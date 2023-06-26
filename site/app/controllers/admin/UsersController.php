@@ -55,8 +55,9 @@ class UsersController extends AbstractController {
                     break;
             }
             array_push($download_info, [
-                'first_name' => $student->getDisplayedFirstName(),
-                'last_name' => $student->getDisplayedLastName(),
+                'given_name' => $student->getDisplayedGivenName(),
+                'family_name' => $student->getDisplayedFamilyName(),
+                'pronouns' => $student->getPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -66,6 +67,19 @@ class UsersController extends AbstractController {
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
+        }
+
+        //Get Active Columns
+        $active_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
+            $active_columns = $_COOKIE['active_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_columns = implode('-', array_fill(0, 12, true));
+            }
         }
 
         return new MultiResponse(
@@ -78,7 +92,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
                 $formatted_tzs,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_columns
             )
         );
     }
@@ -122,8 +137,9 @@ class UsersController extends AbstractController {
                     break;
             }
             array_push($download_info, [
-                'first_name' => $grader->getDisplayedFirstName(),
-                'last_name' => $grader->getDisplayedLastName(),
+                'given_name' => $grader->getDisplayedGivenName(),
+                'family_name' => $grader->getDisplayedFamilyName(),
+                'pronouns' => $grader->getPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -172,7 +188,7 @@ class UsersController extends AbstractController {
             else {
                 $grader->setGradingRegistrationSections([]);
             }
-            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
         }
 
         $this->core->redirect($return_url);
@@ -187,14 +203,16 @@ class UsersController extends AbstractController {
             'user_id' => $user->getId(),
             'already_in_course' => true,
             'user_numeric_id' => $user->getNumericId(),
-            'user_firstname' => $user->getLegalFirstName(),
-            'user_lastname' => $user->getLegalLastName(),
-            'user_preferred_firstname' => $user->getPreferredFirstName(),
-            'user_preferred_lastname' => $user->getPreferredLastName(),
+            'user_givenname' => $user->getLegalGivenName(),
+            'user_familyname' => $user->getLegalFamilyName(),
+            'user_preferred_givenname' => $user->getPreferredGivenName(),
+            'user_preferred_familyname' => $user->getPreferredFamilyName(),
+            'user_pronouns' => $user->getPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
+            'course_section_id' => $user->getCourseSectionId(),
             'rotating_section' => $user->getRotatingSection(),
             'user_updated' => $user->isUserUpdated(),
             'instructor_updated' => $user->isInstructorUpdated(),
@@ -220,14 +238,16 @@ class UsersController extends AbstractController {
             $user_information[$user_id] = [
                 'already_in_course' => $already_in_course,
                 'user_numeric_id' => $user->getNumericId(),
-                'user_firstname' => $user->getLegalFirstName(),
-                'user_lastname' => $user->getLegalLastName(),
-                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
-                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_givenname' => $user->getLegalGivenName(),
+                'user_familyname' => $user->getLegalFamilyName(),
+                'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
+                'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
+                'user_pronouns' => $user->getPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
                 'registration_section' => $user->getRegistrationSection(),
+                'course_section_id' => $user->getCourseSectionId(),
                 'rotating_section' => $user->getRotatingSection(),
                 'user_updated' => $user->isUserUpdated(),
                 'instructor_updated' => $user->isInstructorUpdated(),
@@ -246,7 +266,7 @@ class UsersController extends AbstractController {
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -264,19 +284,21 @@ class UsersController extends AbstractController {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
-        //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_firstname']) . "\"<br>";
-        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
+        //Pronouns must be less than 12 characters.
+        $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "" : "Error in pronouns: \"" . strip_tags($_POST['user_pronouns']) . "\"<br>";
+        //Given and Family name must be alpha characters, white-space, or certain punctuation.
+        $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
+        $error_message .= User::validateUserData('user_legal_familyname', trim($_POST['user_familyname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_familyname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Check secondary email address for appropriate format.
         $error_message .= User::validateUserData('user_email_secondary', trim($_POST['user_email_secondary'])) ? "" : "Error in secondary email: \"" . strip_tags($_POST['user_email_secondary']) . "\"<br>";
-        //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";
+        //Preferred given name must be alpha characters, white-space, or certain punctuation.
+        if (!empty($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_givenname', trim($_POST['user_preferred_givenname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_givenname']) . "\"<br>";
         }
-        if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_lastname']) . "\"<br>";
+        if (!empty($_POST['user_preferred_familyname']) && trim($_POST['user_preferred_familyname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_familyname', trim($_POST['user_preferred_familyname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_familyname']) . "\"<br>";
         }
 
         //Database password cannot be blank, no check on format
@@ -302,15 +324,17 @@ class UsersController extends AbstractController {
 
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
-        $user->setLegalFirstName(trim($_POST['user_firstname']));
-        if (isset($_POST['user_preferred_firstname'])) {
-            $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
+        $user->setLegalGivenName(trim($_POST['user_givenname']));
+        if (isset($_POST['user_preferred_givenname'])) {
+            $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
-        $user->setLegalLastName(trim($_POST['user_lastname']));
-        if (isset($_POST['user_preferred_lastname'])) {
-            $user->setPreferredLastName(trim($_POST['user_preferred_lastname']));
+        $user->setLegalFamilyName(trim($_POST['user_familyname']));
+        if (isset($_POST['user_preferred_familyname'])) {
+            $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
+
+        $user->setPronouns(trim($_POST['user_pronouns']));
 
         $user->setEmail(trim($_POST['user_email']));
 
@@ -355,7 +379,8 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
+            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
@@ -365,8 +390,9 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -393,7 +419,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -421,7 +447,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -610,7 +636,7 @@ class UsersController extends AbstractController {
             // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
-                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, intval($counts[$i]));
                     $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
@@ -625,6 +651,16 @@ class UsersController extends AbstractController {
                     registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
+
+            //Gets all the ids of the excluded sections
+            $excluded_registration_sections = $_POST["excluded_registration_sections"] ?? [];
+            $excluded_users = $this->core->getQueries()->getUsersByRegistrationSections($excluded_registration_sections);
+            $excluded_user_ids = array_map(function (User $user) {
+                return $user->getId();
+            }, $excluded_users);
+
+            $unassigned_user_ids = array_values(array_diff($unassigned_user_ids, $excluded_user_ids));
+
             // 'fewest' rotating section setup option can only use random sort
             shuffle($unassigned_user_ids);
             // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
@@ -636,7 +672,7 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                return $expected_size - $curr_size['count'];
+                return $curr_size === null ? $expected_size : $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
@@ -745,7 +781,7 @@ class UsersController extends AbstractController {
                 curl_close($ch);
             }
             else {
-                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly receive spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
         }
@@ -759,7 +795,7 @@ class UsersController extends AbstractController {
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
@@ -864,13 +900,13 @@ class UsersController extends AbstractController {
         $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         // Validation and error checking.
-        $pref_firstname_idx = $use_database ? 6 : 5;
-        $pref_lastname_idx = $pref_firstname_idx + 1;
-        $registration_type_idx = $pref_firstname_idx + 2;
-        $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_firstname_idx + 2;
+        $pref_givenname_idx = $use_database ? 6 : 5;
+        $pref_familyname_idx = $pref_givenname_idx + 1;
+        $registration_type_idx = $pref_givenname_idx + 2;
+        $registration_section_idx = $list_type === 'classlist' ? 4 : $pref_givenname_idx + 2;
         $grading_assignments_idx = $use_database ? 9 : 8;
         $bad_row_details = [];
-        $bad_columns = []; //Tracks columns in which errors occured
+        $bad_columns = []; //Tracks columns in which errors occurred
 
         /* Used for validation of grading assignment for graders to registration sections. Graders cannot
           be assigned to grade the (created-by-default) null registration section. */
@@ -885,14 +921,14 @@ class UsersController extends AbstractController {
             'column_count' => 'Only 5 to 10 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_id_saml' => 'UserId must be a valid SAML username',
-            'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
-            'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
+            'user_legal_givenname' => 'Legal first name must be alpha characters, white-space, or certain punctuation.',
+            'user_legal_familyname' => 'Legal last name must be alpha characters, white-space, or certain punctuation.',
             'user_email' => 'Email address should be valid with appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.',
             'registration_section' =>  'Registration must contain only these characters - A-Z,a-z,_,-',
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
-            'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
-            'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
+            'user_preferred_givenname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
+            'user_preferred_familyname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.',
             'grading_assignments_format' => 'Grading assignments must be comma-separated course registration sections, ' .
                 'enclosed in double quotes (e.g. "1,3,STAFF").',
             'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
@@ -937,18 +973,18 @@ class UsersController extends AbstractController {
                     }
                 }
             }
-            // First Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_firstname', $vals[1])) {
-                $bad_row_details[$row_num + 1][] = 'first name';
-                if (!in_array('user_legal_firstname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_firstname';
+            // Given Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_givenname', $vals[1])) {
+                $bad_row_details[$row_num + 1][] = 'given name';
+                if (!in_array('user_legal_givenname', $bad_columns)) {
+                    $bad_columns[] = 'user_legal_givenname';
                 }
             }
-            // Last Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_lastname', $vals[2])) {
-                $bad_row_details[$row_num + 1][] = 'last Name';
-                if (!in_array('user_legal_lastname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_lastname';
+            // Family Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_familyname', $vals[2])) {
+                $bad_row_details[$row_num + 1][] = 'family name';
+                if (!in_array('user_legal_familyname', $bad_columns)) {
+                    $bad_columns[] = 'user_legal_familyname';
                 }
             }
             // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
@@ -991,18 +1027,18 @@ class UsersController extends AbstractController {
                     $bad_columns[] = 'user_password';
                 }
             }
-            /* Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            /* Preferred given and family name must be alpha characters, white-space, or certain punctuation.
                Automatically validate if not set (this field is optional) */
-            if (!(empty($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred first name';
-                if (!in_array('user_preferred_firstname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_firstname';
+            if (!(empty($vals[$pref_givenname_idx]) || User::validateUserData('user_preferred_givenname', $vals[$pref_givenname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred given name';
+                if (!in_array('user_preferred_givenname', $bad_columns)) {
+                    $bad_columns[] = 'user_preferred_givenname';
                 }
             }
-            if (!(empty($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred last name';
-                if (!in_array('user_preferred_lastname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_lastname';
+            if (!(empty($vals[$pref_familyname_idx]) || User::validateUserData('user_preferred_familyname', $vals[$pref_familyname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred family name';
+                if (!in_array('user_preferred_familyname', $bad_columns)) {
+                    $bad_columns[] = 'user_preferred_familyname';
                 }
             }
             /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
@@ -1104,7 +1140,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 
@@ -1133,8 +1169,8 @@ class UsersController extends AbstractController {
             else {
                 $user = new User($this->core);
                 $user->setId($row[0]);
-                $user->setLegalFirstName($row[1]);
-                $user->setLegalLastName($row[2]);
+                $user->setLegalGivenName($row[1]);
+                $user->setLegalFamilyName($row[2]);
                 $user->setEmail($row[3]);
                 // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
@@ -1143,11 +1179,11 @@ class UsersController extends AbstractController {
                     $user->setRegistrationSection($row[$registration_section_idx]);
                 }
                 $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
-                if (!empty($row[$pref_firstname_idx])) {
-                    $user->setPreferredFirstName($row[$pref_firstname_idx]);
+                if (!empty($row[$pref_givenname_idx])) {
+                    $user->setPreferredGivenName($row[$pref_givenname_idx]);
                 }
-                if (!empty($row[$pref_lastname_idx])) {
-                    $user->setPreferredLastName($row[$pref_lastname_idx]);
+                if (!empty($row[$pref_familyname_idx])) {
+                    $user->setPreferredFamilyName($row[$pref_familyname_idx]);
                 }
                 if ($use_database) {
                     $user->setPassword($row[5]);

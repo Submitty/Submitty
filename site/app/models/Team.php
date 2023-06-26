@@ -93,8 +93,8 @@ class Team extends AbstractModel {
             do {
                 $random = "";
                 for ($i = 0; $i < 15; $i++) {
-                    // this throws an exception if there's no avaiable source for generating
-                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // this throws an exception if there's no available source for generating
+                    // random exists, but that shouldn't happen on our targeted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];

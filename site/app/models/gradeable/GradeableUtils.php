@@ -2,9 +2,9 @@
 
 namespace app\models\gradeable;
 
+use app\entities\calendar\CalendarItem;
 use app\libraries\Core;
 use app\models\Button;
-use app\models\Course;
 use app\models\User;
 use app\views\NavigationView;
 
@@ -12,12 +12,10 @@ class GradeableUtils {
     /**
      * Get the gradeables of a specified course.
      *
-     * @param Core $core
-     * @param Course $course
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception
      */
-    public static function getGradeablesFromCourse(Core $core, Course $course): array {
+    public static function getGradeablesFromCourse(Core $core, string $semester, string $title, array &$calendar_messages, bool $global = true): array {
         /** @var array<string, Gradeable> $gradeables */
         $gradeables = [];
         /** @var Gradeable[] $visible_gradeables */
@@ -27,21 +25,25 @@ class GradeableUtils {
         /** @var array<string, Button> $submit_btns */
         $submit_btns = [];
 
-        // Load the database and configuration of a course
-        $core->loadCourseConfig($course->getSemester(), $course->getTitle());
-        $core->loadCourseDatabase();
+        if ($global) {
+            // Load the database and configuration of a course
+            $core->loadCourseConfig($semester, $title);
+            $core->loadCourseDatabase();
+        }
+
+        $calendar_messages[$title] = $core->getCourseEntityManager()->getRepository(CalendarItem::class)->findAll();
 
         // Load all Gradeable objects of the current course
         foreach ($core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             /** @var Gradeable $gradeable */
-            $gradeables[serialize([$course->getSemester(), $course->getTitle(), $gradeable->getId()])] = $gradeable;
+            $gradeables[serialize([$semester, $title, $gradeable->getId()])] = $gradeable;
             $visible_gradeables[] = $gradeable;
         }
 
         // Load all GradedGradable objects of the current course
         foreach ($core->getQueries()->getGradedGradeables($visible_gradeables, $core->getUser()->getId()) as $gg) {
             /** @var GradedGradeable $gg */
-            $graded_gradeables[serialize([$course->getSemester(), $course->getTitle(), $gg->getGradeableId()])] = $gg;
+            $graded_gradeables[serialize([$semester, $title, $gg->getGradeableId()])] = $gg;
         }
 
         // Create submit buttons for all gradeables
@@ -57,8 +59,10 @@ class GradeableUtils {
             }
         }
 
-        // Disconnect from the course database
-        $core->getCourseDB()->disconnect();
+        if ($global) {
+            // Disconnect from the course database
+            $core->getCourseDB()->disconnect();
+        }
 
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
     }
@@ -68,21 +72,19 @@ class GradeableUtils {
      * gradeables in all courses of a single user.
      * The method loads from the database of all courses and get all gradeables information.
      * Only load once unless the user refreshes the page.
+     * NOTE: Calendar Messages is passed by refence in order to be changed in "getGradeablesFromCourse"
      *
-     * @param Core $core
-     * @param User $user The user to filter gradeables by
      * @return array<string, array<string, Gradeable>|array<string, GradedGradeable>|array<string, Button>>
      * @throws \Exception if a Gradeable failed to load from the database
      */
-    public static function getAllGradeableListFromUserId(Core $core, User $user): array {
+    public static function getAllGradeableListFromUserId(Core $core, User $user, array $courses, array &$calendar_messages): array {
         $gradeables = [];
         $graded_gradeables = [];
         $submit_btns = [];
 
         // Load the gradeable information for each course
-        $courses = $core->getQueries()->getCourseForUserId($user->getId());
         foreach ($courses as $course) {
-            $gradeables_of_course = self::getGradeablesFromCourse($core, $course);
+            $gradeables_of_course = self::getGradeablesFromCourse($core, $course->getTerm(), $course->getTitle(), $calendar_messages);
             $gradeables = array_merge($gradeables, $gradeables_of_course["gradeables"]);
             $graded_gradeables = array_merge($graded_gradeables, $gradeables_of_course["graded_gradeables"]);
             $submit_btns = array_merge($submit_btns, $gradeables_of_course["submit_btns"]);
@@ -90,5 +92,28 @@ class GradeableUtils {
 
         $core->getConfig()->setCourseLoaded(false);
         return ["gradeables" => $gradeables, "graded_gradeables" => $graded_gradeables, "submit_btns" => $submit_btns];
+    }
+
+    /**
+     * This function assumes that you are calling it where Core has a defined course
+     *
+     * @return \app\models\Button[][]|Gradeable[][]|GradedGradeable[][]|array[]
+     */
+    public static function getGradeablesFromUserAndCourse(Core $core, array &$calendar_messages): array {
+        $gradeables_of_course = self::getGradeablesFromCourse(
+            $core,
+            $core->getConfig()->getTerm(),
+            $core->getConfig()->getCourse(),
+            $calendar_messages,
+            false
+        );
+
+        $gradeables = $gradeables_of_course["gradeables"];
+        $graded_gradeables = $gradeables_of_course["graded_gradeables"];
+        $submit_btns = $gradeables_of_course["submit_btns"];
+
+        return ["gradeables" => $gradeables,
+            "graded_gradeables" => $graded_gradeables,
+            "submit_btns" => $submit_btns];
     }
 }
