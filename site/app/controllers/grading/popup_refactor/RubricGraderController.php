@@ -96,7 +96,6 @@ class RubricGraderController extends AbstractController {
      */
     private $blind_access_mode;
 
-
     // ---------------------------------
 
 
