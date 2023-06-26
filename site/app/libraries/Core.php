@@ -318,7 +318,7 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            $regex = str_replace("<semester>", $this->getConfig()->getSemester(), $regex);
+            $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
             $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
             $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
             if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
@@ -342,7 +342,7 @@ class Core {
         }
 
         $this->grading_queue = new GradingQueue(
-            $this->config->getSemester(),
+            $this->config->getTerm(),
             $this->config->getCourse(),
             $this->config->getSubmittyPath()
         );
@@ -695,7 +695,7 @@ class Core {
      * @return string
      */
     public function buildCourseUrl($parts = []) {
-        array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getTerm(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
 
@@ -752,8 +752,8 @@ class Core {
     }
 
     public function getFullSemester() {
-        $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== "") {
+        $semester = $this->getConfig()->getTerm();
+        if ($this->getConfig()->getTerm() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
             if ($arr1[0] == "f") {
