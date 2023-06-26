@@ -74,33 +74,33 @@ class RubricGraderController extends AbstractController {
      */
     private $navigate_assigned_students_only;
 
-   /**
-    * @var int
-    * User type for current website user.
-    * Enum from User:
-    *  1: User::GROUP_INSTRUCTOR
-    *  2: User::GROUP_FULL_ACCESS_GRADER
-    *  3: User::GROUP_LIMITED_ACCESS_GRADER
-    *  4: User::GROUP_STUDENT
-    */
+    /**
+     * @var int
+     * User type for current website user.
+     * Enum from User:
+     *  1: User::GROUP_INSTRUCTOR
+     *  2: User::GROUP_FULL_ACCESS_GRADER
+     *  3: User::GROUP_LIMITED_ACCESS_GRADER
+     *  4: User::GROUP_STUDENT
+     */
     private $user_type;
 
-   /**
-    * @var bool
-    * True if the current gradeable has peer grading.
-    */
+    /**
+     * @var bool
+     * True if the current gradeable has peer grading.
+     */
     private $is_peer_gradeable;
 
     /**
-    * @var bool
-    * True if the current gradeable has teams.
-    */
+     * @var bool
+     * True if the current gradeable has teams.
+     */
     private $is_team_gradeable;
 
     /**
      * @var string
      *
-     * The access mode for the current user for this gradeable. 
+     * The access mode for the current user for this gradeable.
      * Possible Values:
      *  - "unblind" - Nothing about students is hidden.
      *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
@@ -227,11 +227,14 @@ class RubricGraderController extends AbstractController {
     /**
      * Sets the current student's submission we are looking at
      * If the submission does not exist, we exit the page.
-     * 
+     *
      * @param string $who_id - The anonymous id of the student we should grade.
      */
     private function setCurrentSubmission($who_id) {
         $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $this->gradeable->getId());
+        if ($submitter_id === null) {
+            $submitter_id = $who_id;
+        }
         $this->current_submission = $this->tryGetGradedGradeable($this->gradeable, $submitter_id, false);
 
         // Submission does not exist
@@ -240,16 +243,17 @@ class RubricGraderController extends AbstractController {
         }
     }
 
+
     /**
      * Returns the URL of this gradeable's details page.
      */
     private function gradeableDetailsPage() {
-        return $this->core->buildCourseUrl(
-            ['gradeable', $this->gradeable->getId(), 'grading', 'details']) 
+        $home_page = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details']);
             . '?'
-            . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]
-        );
+            . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]);
+        return $home_page;
     }
+
 
     /**
      * Sets the current user type for the website user.
@@ -299,7 +303,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Limited Access Graders:
-        elseif ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
+        if ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
             if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
                 $this->blind_access_mode = "single";
             }
@@ -309,7 +313,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Student Peer Graders:
-        elseif ($this->user_type == User::GROUP_STUDENT) {
+        if ($this->user_type == User::GROUP_STUDENT) {
             if ($this->is_peer_gradeable) {
                 if ($this->gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
                     $this->blind_access_mode = "double";
@@ -321,7 +325,6 @@ class RubricGraderController extends AbstractController {
                     $this->blind_access_mode = "unblind";
                 }
             }
-
             else {
                 $this->blind_access_mode = "double";
             }

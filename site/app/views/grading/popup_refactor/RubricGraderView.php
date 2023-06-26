@@ -23,7 +23,6 @@ use app\models\GradingOrder;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 
-
 // Main Class:
 class RubricGraderView extends AbstractView {
     // ---------------------------------
@@ -42,21 +41,21 @@ class RubricGraderView extends AbstractView {
     private $current_submission;
 
     /**
-    * @var bool
-    * True if the current gradeable has peer grading.
-    */
+     * @var bool
+     * True if the current gradeable has peer grading.
+     */
     private $is_peer_gradeable;
 
-     /**
-    * @var bool
-    * True if the current gradeable has teams.
-    */
+    /**
+     * @var bool
+     * True if the current gradeable has teams.
+     */
     private $is_team_gradeable;
 
     /**
      * @var string
      *
-     * The access mode for the current user for this gradeable. 
+     * The access mode for the current user for this gradeable.
      * Possible Values:
      *  - "unblind" - Nothing about students is hidden.
      *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
