@@ -21,6 +21,7 @@ namespace app\views\grading\popup_refactor;
 # Includes:
 use app\views\AbstractView;
 use app\models\GradingOrder;
+use app\models\gradeable\Gradeable;
 
 # Main Class:
 class RubricGraderView extends AbstractView {
@@ -45,13 +46,13 @@ class RubricGraderView extends AbstractView {
      * Creates the Rubric Grading page visually.
      * This function is called in reateMainRubricGraderPage of RubricGraderController.php.
      *
-     * @param string $gradeable - The current Gradeable.
+     * @param Gradeable $gradeable - The current Gradeable.
      * @param string $sort_type - The current way we are sorting students. Used to create the header.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      *     Used to create the header.
      *
      */
-    public function createRubricGradeableView($gradeable, $sort_type, $sort_direction) {
+    public function createRubricGradeableView(Gradeable $gradeable, string $sort_type, string $sort_direction) {
         $this->setMemberVariables($gradeable);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
@@ -61,9 +62,9 @@ class RubricGraderView extends AbstractView {
     /**
      * Sets the corresponding memeber variables based on provided arguments.
      *
-     * @param string $gradeable - The current Gradeable.
+     * @param Gradeable $gradeable - The current Gradeable.
      */
-    private function setMemberVariables($gradeable) {
+    private function setMemberVariables(Gradeable $gradeable) {
         $this->gradeable = $gradeable;
     }
 
@@ -75,7 +76,7 @@ class RubricGraderView extends AbstractView {
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      */
-    private function createBreadcrumbHeader($sort_type, $sort_direction) {
+    private function createBreadcrumbHeader(string $sort_type, string $sort_direction) {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
             'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$this->gradeable->getTitle()} Grading", $gradeableUrl);

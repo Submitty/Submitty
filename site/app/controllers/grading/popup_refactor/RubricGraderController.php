@@ -25,6 +25,7 @@ namespace app\controllers\grading\popup_refactor;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\GradeableType;
+use app\models\gradeable\Gradeable;
 
 # Main Class:
 class RubricGraderController extends AbstractController {
@@ -77,11 +78,11 @@ class RubricGraderController extends AbstractController {
      *
      */
     public function createMainRubricGraderPage(
-        $gradeable_id,
-        $who_id = '',
-        $sort = "id",
-        $direction = "ASC",
-        $navigate_assigned_students_only = "true"
+        string $gradeable_id,
+        string $who_id = '',
+        string $sort = "id",
+        string $direction = "ASC",
+        string $navigate_assigned_students_only = "true"
     ) {
 
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
@@ -109,7 +110,12 @@ class RubricGraderController extends AbstractController {
      * @param string $navigate_assigned_students_only - When going to the next student, this variable controls
      *     whether we skip students.
      */
-    private function setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only) {
+    private function setMemberVariables(
+        string $gradeable_id,
+        string $who_id,
+        string $sort,
+        string $direction,
+        string $navigate_assigned_students_only) {
         $this->setCurrentGradeable($gradeable_id);
 
         $this->sort_type = $sort;
@@ -123,7 +129,7 @@ class RubricGraderController extends AbstractController {
      *
      * @param string $gradeable_id - The id string of the current gradeable.
      */
-    private function setCurrentGradeable($gradeable_id) {
+    private function setCurrentGradeable(string $gradeable_id) {
         // tryGetGradeable inherited from AbstractController
         $this->gradeable = $this->tryGetGradeable($gradeable_id, false);
 
@@ -132,7 +138,7 @@ class RubricGraderController extends AbstractController {
         if ($this->gradeable === false) {
             $error_message = 'Invalid Gradeable!';
         }
-        if (empty($error_message) && $this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+        elseif ($this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             $error_message = 'This gradeable is not a rubric gradeable.';
         }
 
