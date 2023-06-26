@@ -248,10 +248,9 @@ class RubricGraderController extends AbstractController {
      * Returns the URL of this gradeable's details page.
      */
     private function gradeableDetailsPage() {
-        $home_page = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details'])
+        return $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details'])
             . '?'
             . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]);
-        return $home_page;
     }
 
 
