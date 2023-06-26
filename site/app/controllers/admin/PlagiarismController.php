@@ -87,7 +87,7 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         return FileUtils::joinPaths($daemon_job_queue_path, "lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
@@ -100,7 +100,7 @@ class PlagiarismController extends AbstractController {
      * @return string
      */
     private function getProcessingQueuePath(string $gradeable_id, int $config_id): string {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         return FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_lichen__{$semester}__{$course}__{$gradeable_id}__{$config_id}.json");
@@ -112,7 +112,7 @@ class PlagiarismController extends AbstractController {
      * @return int
      */
     private function getCurrentUserGroup(): int {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $group = filegroup(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $semester, $course));
         if (!$group) {
@@ -127,7 +127,7 @@ class PlagiarismController extends AbstractController {
      * @throws Exception
      */
     private function getOtherSemesterCourses(): array {
-        $this_semester = $this->core->getConfig()->getSemester();
+        $this_semester = $this->core->getConfig()->getTerm();
         $this_course = $this->core->getConfig()->getCourse();
         $valid_courses = $this->core->getQueries()->getOtherCoursesWithSameGroup($this_semester, $this_course);
         $ret = [];
@@ -164,7 +164,7 @@ class PlagiarismController extends AbstractController {
         // actually do the collection of gradeables here
         $gradeables = [];
         foreach (scandir(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "courses", $term, $course, "submissions")) as $gradeable) {
-            if ($gradeable !== '.' && $gradeable !== '..' && ($term !== $this->core->getConfig()->getSemester() || $course !== $this->core->getConfig()->getCourse() || $gradeable !== $this_gradeable)) {
+            if ($gradeable !== '.' && $gradeable !== '..' && ($term !== $this->core->getConfig()->getTerm() || $course !== $this->core->getConfig()->getCourse() || $gradeable !== $this_gradeable)) {
                 $gradeables[] = $gradeable;
             }
         }
@@ -320,7 +320,7 @@ class PlagiarismController extends AbstractController {
      */
     private function enqueueLichenJob(string $job, string $gradeable_id, int $config_id): void {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         $config = $em->getRepository(PlagiarismConfig::class)
@@ -384,7 +384,7 @@ class PlagiarismController extends AbstractController {
      */
     private function getJsonForConfig(string $gradeable_id, int $config_id): array {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         /** @var PlagiarismConfig $config */
@@ -687,7 +687,7 @@ class PlagiarismController extends AbstractController {
      */
     public function savePlagiarismConfiguration(string $new_or_edit, string $gradeable_id, string $config_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         // Determine whether this is a new config or an existing config
@@ -1291,7 +1291,7 @@ class PlagiarismController extends AbstractController {
      * @param string $config_id
      */
     public function toggleNightlyRerun(string $gradeable_id, string $config_id) {
-        // $semester = $this->core->getConfig()->getSemester();
+        // $semester = $this->core->getConfig()->getTerm();
         // $course = $this->core->getConfig()->getCourse();
         // $return_url = $this->core->buildCourseUrl(['plagiarism']);
         //
@@ -1447,7 +1447,7 @@ class PlagiarismController extends AbstractController {
             return JsonResponse::getErrorResponse('Error: path contains invalid component ".."');
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         if (isset($source_gradeable) && $source_gradeable !== "{$semester}__{$course}__{$gradeable_id}") {
             $file_name = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable, $user_id, $version), "submission.concatenated");
@@ -1506,7 +1506,7 @@ class PlagiarismController extends AbstractController {
         // get the list of tokens for user 2
         $tokens_user_2 = [];
         if (isset($user_id_2)) {
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
             if (isset($source_gradeable_user_2) && $source_gradeable_user_2 !== "{$semester}__{$course}__{$gradeable_id}") {
                 $user_2_tokens_file_path = FileUtils::joinPaths($this->getOtherGradeablePath($gradeable_id, $config_id, $source_gradeable_user_2, $user_id_2, $version_user_2), "tokens.json");
