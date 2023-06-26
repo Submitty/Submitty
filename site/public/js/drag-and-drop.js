@@ -15,6 +15,8 @@ https://www.sitepoint.com/html5-ajax-file-upload/
 http://www.html5rocks.com/en/tutorials/file/dndfiles/
 */
 
+import { isValidFileName } from '../ts/twig/courseMaterials/upload.js';
+
 // INITIALIZATION
 //========================================================================================
 // eslint-disable-next-line no-var
