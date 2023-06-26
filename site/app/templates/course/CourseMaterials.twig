@@ -297,19 +297,12 @@
                     }
                 });
                 $(`.file-container > .file-viewer > a[onclick^=newEditCourseMaterialsForm]`, elem).each(function() {
-                    if (insideFileMatcher.test($(this).parent('.file-viewer').siblings('.file-viewer-data').attr('id'))) {
+                    if (true) {
                         [commonSections, residualSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch] = folderCommonProps($(this), commonSections, releaseTime, hiddenState, first, hiddenStateMismatch, releaseTimeMismatch);
                         partialSections.push(...residualSections);
                     }
                 });
                 let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
-
-                console.log("commonSections:", commonSections);
-                console.log("partialSections:", partialSections);
-                console.log("releaseTime:", releaseTime);
-                console.log("hiddenState:", hiddenState);
-
-                
                 editButton.attr('data-sections', JSON.stringify(commonSections));
                 editButton.attr('data-partial-sections', JSON.stringify(partialSections));
                 editButton.attr('data-release-time', releaseTime);
