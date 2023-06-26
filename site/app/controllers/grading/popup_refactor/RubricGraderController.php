@@ -323,7 +323,7 @@ class RubricGraderController extends AbstractController {
             }
 
             else {
-                $this->blind_access_mode = "unblind";
+                $this->blind_access_mode = "double";
             }
         }
     }
