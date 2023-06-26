@@ -41,12 +41,6 @@ class RubricGraderController extends AbstractController {
     private $gradeable;
 
     /**
-     * @var GradedGradeable
-     * The current submission being graded.
-     */
-    private $current_submission;
-
-    /**
      * @var string
      * The anonomous id of the student currently being grade.
      * This id can be set with setCurrentStudentId or when loading this page's URL
@@ -190,7 +184,6 @@ class RubricGraderController extends AbstractController {
         $this->setIfTeamGradeable();
         $this->setBlindAccessMode();
 
-        $this->current_student_id = $who_id;
         $this->sort_type = $sort;
         $this->sort_direction = $direction;
         $this->navigate_assigned_students_only;
