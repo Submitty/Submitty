@@ -1195,7 +1195,7 @@ class Course(object):
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src, repo_path,gradeable.subdirectory )
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
                                                 mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
                                             else:
                                                 create_gradeable_submission(src, dst)
