@@ -114,7 +114,7 @@ class RubricGraderController extends AbstractController {
      * @param string $gradeable_id - The id string of the current gradeable.
      * @param string $who_id - The id of the student we should grade.
      * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
-     * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order. 
+     * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
      *
      * This page is loaded on line 476 of Details.twig when the Grade button is clicked.
      *
