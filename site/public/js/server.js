@@ -352,6 +352,7 @@ function newEditCourseMaterialsFolderForm(tag) {
 }
 
 function newEditCourseMaterialsForm(tag) {
+    console.log("hi");
     let id = $(tag).data('id');
     let dir = $(tag).data('priority');
     let this_file_section = $(tag).data('sections');
