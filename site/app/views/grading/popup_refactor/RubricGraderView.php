@@ -107,18 +107,16 @@ class RubricGraderView extends AbstractView {
         $this->addJavaScriptCode();
 
         $page_html = <<<HTML
-                <div class="content" id="electronic-gradeable-container">
-                    <div class="content-items-container">
-                    <div class="content-item content-item-right">
-                HTML;
+            <div class="content" id="electronic-gradeable-container">
+            <div class="content-items-container">
+            <div class="content-item content-item-right">
+        HTML;
 
         $page_html .= $this->renderNavigationBar($details_url);
 
         return $page_html . <<<HTML
-                                         </div>
-                                     </div>
-                                </div>
-            HTML;
+            </div> </div> </div>
+        HTML;
     }
 
 
