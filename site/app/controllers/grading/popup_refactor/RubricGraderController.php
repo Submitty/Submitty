@@ -34,17 +34,20 @@ class RubricGraderController extends AbstractController {
     # Member Variables:
 
     /**
+     * @var Gradeable
      * The current gradeable being graded.
      */
     private $gradeable;
 
     /**
+     * @var string
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
      */
     private $sort_type;
 
     /**
+     * @var string
      * For a given ordering, do we sort it ascending "ASC" or descending "DSC".
      * Controls where next and prev arrows go.
      */
@@ -115,7 +118,8 @@ class RubricGraderController extends AbstractController {
         string $who_id,
         string $sort,
         string $direction,
-        string $navigate_assigned_students_only) {
+        string $navigate_assigned_students_only
+    ) {
         $this->setCurrentGradeable($gradeable_id);
 
         $this->sort_type = $sort;
