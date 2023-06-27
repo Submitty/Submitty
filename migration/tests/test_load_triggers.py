@@ -120,28 +120,31 @@ class TestLoadTriggers(unittest.TestCase):
 
     def test_no_trigger_dir(self):
         trigger_path = migrator.TRIGGERS_PATH
-        migrator.TRIGGERS_PATH = Path(tempfile.mkstemp()[1])
+        migrator.TRIGGERS_PATH = Path(tempfile.mkdtemp())
 
-        args = Namespace()
-        args.environments = ['master']
-        args.config = SimpleNamespace()
-        args.config.database = dict()
+        for environment in ['master', 'course']:
+            args = Namespace()
+            args.environments = [environment]
+            args.config = SimpleNamespace()
+            args.config.database = dict()
 
-        with self.assertRaises(SystemExit) as cm:
-            migrator.main.load_triggers(args)
-        self.assertEqual('Error: Could not find triggers directory', cm.exception.args[0])
+            with self.assertRaises(SystemExit) as cm:
+                migrator.main.load_triggers(args)
+            self.assertEqual('Error: Could not find triggers directory for ' + environment, cm.exception.args[0])
 
-        migrator.main.load_triggers(args, True)
+            migrator.main.load_triggers(args, True)
 
-        migrator.TRIGGERS_PATH.unlink()
+        migrator.TRIGGERS_PATH.rmdir()
         migrator.TRIGGERS_PATH = trigger_path
     
     def test_no_trigger_files(self):
         trigger_path = migrator.TRIGGERS_PATH
         migrator.TRIGGERS_PATH = Path(tempfile.mkdtemp())
+        (migrator.TRIGGERS_PATH / 'master').mkdir()
+        (migrator.TRIGGERS_PATH / 'course').mkdir()
 
         args = Namespace()
-        args.environments = ['master']
+        args.environments = ['master', 'course']
         args.config = SimpleNamespace()
         args.config.database = dict()
 
@@ -150,9 +153,10 @@ class TestLoadTriggers(unittest.TestCase):
         
         self.assertFalse(mock_class.called)
         
-        self.assertEqual('Loading trigger functions to master...DONE\n', sys.stdout.getvalue())
+        self.assertEqual('Loading trigger functions to master...DONE\n'
+                         'Loading trigger functions to course...DONE\n', sys.stdout.getvalue())
         
-        migrator.TRIGGERS_PATH.rmdir()
+        shutil.rmtree(migrator.TRIGGERS_PATH.absolute())
         migrator.TRIGGERS_PATH = trigger_path
     
     def test_db_fail(self):
@@ -167,4 +171,4 @@ class TestLoadTriggers(unittest.TestCase):
                 migrator.main.load_triggers(args)
         
         self.assertTrue(mock_class.called)
-        self.assertEqual('Error applying triggers to master database:\n  first', cm.exception.args[0])
+        self.assertEqual('Error connecting to master database:\n  first', cm.exception.args[0])
