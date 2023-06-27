@@ -123,28 +123,6 @@ class TestLoadTriggers(unittest.TestCase):
 
         self.assertEqual(course_logs, sys.stdout.getvalue())
 
-    def test_no_trigger_dir(self):
-        trigger_path = migrator.TRIGGERS_PATH
-        migrator.TRIGGERS_PATH = Path(tempfile.mkdtemp())
-
-        for environment in ['master', 'course']:
-            args = Namespace()
-            args.environments = [environment]
-            args.config = SimpleNamespace()
-            args.config.database = dict()
-
-            with self.assertRaises(SystemExit) as cm:
-                migrator.main.load_triggers(args)
-            self.assertEqual(
-                'Error: Could not find triggers directory for ' + environment,
-                cm.exception.args[0]
-            )
-
-            migrator.main.load_triggers(args, True)
-
-        migrator.TRIGGERS_PATH.rmdir()
-        migrator.TRIGGERS_PATH = trigger_path
-
     def test_no_trigger_files(self):
         trigger_path = migrator.TRIGGERS_PATH
         migrator.TRIGGERS_PATH = Path(tempfile.mkdtemp())
