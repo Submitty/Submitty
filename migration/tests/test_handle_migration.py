@@ -187,7 +187,8 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(database, mock_migrate_environment.call_args[0][0])
         self.assertEqual('system', mock_migrate_environment.call_args[0][1])
         self.assertEqual(args, mock_migrate_environment.call_args[0][2])
-        self.assertFalse(mock_load_triggers.called)
+        self.assertTrue(mock_load_triggers.called)
+        self.assertEqual(args, mock_load_triggers.call_args[0][0])
         self.assertFalse(database.open)
 
     @patch('migrator.main.migrate_environment')
@@ -231,7 +232,8 @@ class TestHandleMigration(unittest.TestCase):
         self.assertEqual(args, mock_migrate_environment.call_args[0][2])
         self.assertEqual(args.semester, 'f19')
         self.assertEqual(args.course, 'csci1100')
-        self.assertFalse(mock_load_triggers.called)
+        self.assertTrue(mock_load_triggers.called)
+        self.assertEqual(args, mock_load_triggers.call_args[0][0])
         self.assertFalse(database.open)
 
     @patch('migrator.main.migrate_environment')
@@ -279,7 +281,8 @@ class TestHandleMigration(unittest.TestCase):
         self.assertTrue(mock_migrate_environment.called)
         self.assertEqual(3, mock_migrate_environment.call_count)
 
-        self.assertFalse(mock_load_triggers.called)
+        self.assertTrue(mock_load_triggers.called)
+        self.assertEqual(args, mock_load_triggers.call_args[0][0])
 
         mock_args = mock_migrate_environment.call_args_list[0][0]
         expected_args = deepcopy(args)
@@ -359,7 +362,8 @@ class TestHandleMigration(unittest.TestCase):
         self.assertTrue(mock_migrate_environment.called)
         self.assertEqual(1, mock_migrate_environment.call_count)
 
-        self.assertFalse(mock_load_triggers.called)
+        self.assertTrue(mock_load_triggers.called)
+        self.assertEqual(args, mock_load_triggers.call_args[0][0])
 
         mock_args = mock_migrate_environment.call_args_list[0][0]
         expected_args = deepcopy(args)
@@ -429,7 +433,8 @@ class TestHandleMigration(unittest.TestCase):
         )
         self.assertTrue(mock_migrate_environment.called)
         self.assertEqual(3, mock_migrate_environment.call_count)
-        self.assertFalse(mock_load_triggers.called)
+        self.assertTrue(mock_load_triggers.called)
+        self.assertEqual(args, mock_load_triggers.call_args[0][0])
 
     @patch('migrator.main.migrate_environment')
     @patch('migrator.main.load_triggers')
