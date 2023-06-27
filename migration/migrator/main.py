@@ -281,8 +281,7 @@ def handle_migration(args):
         if missing_migration.exists():
             missing_migration.unlink()
 
-    if 'master' in args.environments:
-        load_triggers(args)
+    load_triggers(args)
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -477,15 +476,10 @@ def dump(args):
 
 def load_triggers(args, silent=False):
     for environment in args.environments:
-        if environment != 'master' and environment != 'course':
+        if environment not in ('master', 'course'):
             continue
 
         trigger_dir = get_triggers_path() / environment
-        if not trigger_dir.is_dir():
-            if silent:
-                continue
-            raise SystemExit('Error: Could not find triggers directory for ' + environment)
-
         sql = [(f, f.read_text()) for f in trigger_dir.iterdir()
                if f.is_file() and f.suffix == '.sql']
 
