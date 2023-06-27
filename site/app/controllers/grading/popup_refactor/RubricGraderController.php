@@ -41,6 +41,12 @@ class RubricGraderController extends AbstractController {
     private $gradeable;
 
     /**
+     * @var GradedGradeable
+     * The current submission being graded.
+     */
+    private $current_submission;
+
+    /**
      * @var string
      * By what ordering are we sorting by.
      * Controls where next and prev arrows go.
