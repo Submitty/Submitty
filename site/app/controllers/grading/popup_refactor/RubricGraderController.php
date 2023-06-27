@@ -160,7 +160,8 @@ class RubricGraderController extends AbstractController {
         string $gradeable_id,
         string $who_id,
         string $sort,
-        string $direction
+        string $direction,
+        string $navigate_assigned_students_only
     ) {
         $this->setCurrentGradeable($gradeable_id);
         $this->setCurrentSubmission($who_id);
