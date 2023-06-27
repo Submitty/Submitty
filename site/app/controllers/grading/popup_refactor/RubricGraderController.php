@@ -5,7 +5,7 @@
  *
  * RubricGraderController.php
  *
- * This class's createMainRubricGradeablePage will eventually be called when a
+ * This class's createMainRubricGraderPage will eventually be called when a
  * Rubric Gradeable's grading page is opened.
  *
  * Currently, to access the page associated with this class, enter URL:
