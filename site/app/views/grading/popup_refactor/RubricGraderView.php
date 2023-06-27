@@ -30,6 +30,7 @@ class RubricGraderView extends AbstractView {
     // Member Variables:
 
     /**
+     * @var Gradeable
      * The current gradeable being graded.
      */
     private $gradeable;
