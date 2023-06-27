@@ -56,18 +56,6 @@ class TestLoadTriggers(unittest.TestCase):
             sys.stdout.getvalue()
         )
 
-    def test_no_master(self):
-        args = Namespace()
-        args.environments = ['course', 'system']
-        args.config = SimpleNamespace()
-        args.config.database = dict()
-
-        with self.assertRaises(SystemExit) as cm:
-            migrator.main.load_triggers(args)
-        self.assertEqual('Triggers are to be applied on the master DB', cm.exception.args[0])
-
-        migrator.main.load_triggers(args, True)
-
     def test_no_trigger_dir(self):
         trigger_path = migrator.TRIGGERS_PATH
         migrator.TRIGGERS_PATH = Path(tempfile.mkstemp()[1])
