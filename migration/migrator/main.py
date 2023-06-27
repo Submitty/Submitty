@@ -474,7 +474,7 @@ def dump(args):
         print('DONE')
 
 
-def load_triggers(args, silent=False):
+def load_triggers(args):
     for environment in args.environments:
         if environment not in ('master', 'course'):
             continue
