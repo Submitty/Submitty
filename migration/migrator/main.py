@@ -476,42 +476,63 @@ def dump(args):
 
 
 def load_triggers(args, silent=False):
-    print('Loading trigger functions to master...', end='')
+    for environment in args.environments:
+        if environment != 'master' and environment != 'course':
+            continue
 
-    if 'master' not in args.environments:
-        if silent:
-            return
-        raise SystemExit('Triggers are to be applied on the master DB')
+        trigger_dir = get_triggers_path() / environment
+        if not trigger_dir.is_dir():
+            if silent:
+                continue
+            raise SystemExit('Error: Could not find triggers directory for ' + environment)
 
-    trigger_dir = get_triggers_path()
-    if not trigger_dir.is_dir():
-        if silent:
-            return
-        raise SystemExit('Error: Could not find triggers directory')
+        sql = [(f, f.read_text()) for f in trigger_dir.iterdir()
+               if f.is_file() and f.suffix == '.sql']
 
-    files = [f for f in trigger_dir.iterdir() if f.is_file() and f.suffix == '.sql']
+        if len(sql) == 0:
+            print('Loading trigger functions to {}...DONE'.format(environment))
+            continue
 
-    if len(files) == 0:
-        print('DONE')
-        return
-    print()
+        db_config = deepcopy(args.config.database)
+        db_config['dbname'] = 'submitty'
+        try:
+            masterdb = db.Database(db_config, 'master')
+        except OperationalError as exc:
+            raise SystemExit(
+                'Error connecting to master database:\n  {}'.format(str(exc.orig).split('\n')[0])
+            )
 
-    db_config = deepcopy(args.config.database)
-    db_config['dbname'] = 'submitty'
-    try:
-        database = db.Database(db_config, 'master')
-    except OperationalError as exc:
-        raise SystemExit(
-            'Error applying triggers to master database:\n  ' + str(exc.orig).split('\n')[0]
-        )
+        if environment == 'master':
+            print('Loading trigger functions to master...')
+            for file, data in sql:
+                print('  ' + file.stem)
+                masterdb.execute(data)
+            masterdb.commit()
+            masterdb.close()
+            print('DONE')
 
-    for file in files:
-        print('  ' + file.stem)
-        with open(file) as f:
-            query = f.read()
-            database.execute(query)
+        elif environment == 'course':
+            courses = masterdb.execute(
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course;'
+            ).all()
+            masterdb.close()
+            for course in courses:
+                db_config = deepcopy(args.config.database)
+                db_config['dbname'] = 'submitty_{}_{}'.format(course['semester'], course['course'])
+                try:
+                    coursedb = db.Database(db_config, 'course')
+                except OperationalError as exc:
+                    print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
+                        db_config['dbname'],
+                        str(exc.orig).split('\n')[0]
+                    ))
+                    continue
 
-    database.commit()
-    database.close()
-    print()
-    print('DONE')
+                print('Loading trigger functions to {}.{}...'
+                      .format(course['semester'], course['course']))
+                for file, data in sql:
+                    print('  ' + file.stem)
+                    coursedb.execute(data)
+                coursedb.commit()
+                coursedb.close()
+                print('DONE')
