@@ -145,7 +145,7 @@ class TestLoadTriggers(unittest.TestCase):
         shutil.rmtree(migrator.TRIGGERS_PATH.absolute())
         migrator.TRIGGERS_PATH = trigger_path
 
-    def test_db_fail(self):
+    def test_master_db_fail(self):
         args = Namespace()
         args.environments = ['master']
         args.config = SimpleNamespace()
@@ -158,3 +158,40 @@ class TestLoadTriggers(unittest.TestCase):
 
         self.assertTrue(mock_class.called)
         self.assertEqual('Error connecting to master database:\n  first', cm.exception.args[0])
+
+    def test_course_db_fail(self):
+        args = Namespace()
+        args.environments = ['course']
+        args.config = SimpleNamespace()
+        args.config.database = dict()
+
+        masterdb = Mock()
+        masterdb.execute.return_value.all.return_value = [
+            {
+                'semester': 'my_semester_1',
+                'course': 'my_course_1'
+            },
+            {
+                'semester': 'my_semester_2',
+                'course': 'my_course_2'
+            }
+        ]
+
+        with patch.object(migrator.db, 'Database') as mock_class:
+            mock_class.side_effect = [
+                masterdb,
+                OperationalError(None, None, 'first\nsecond'),
+                OperationalError(None, None, 'third\nfourth')
+            ]
+            migrator.main.load_triggers(args)
+
+        self.assertEqual(3, mock_class.call_count)
+        self.assertEqual(0, mock_class.return_value.execute.call_count)
+
+        self.assertEqual(
+            'Failed to connect to course db \'submitty_my_semester_1_my_course_1\'\n'
+            '  Error: first\n'
+            'Failed to connect to course db \'submitty_my_semester_2_my_course_2\'\n'
+            '  Error: third\n',
+            sys.stdout.getvalue()
+        )
