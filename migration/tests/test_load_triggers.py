@@ -123,6 +123,16 @@ class TestLoadTriggers(unittest.TestCase):
 
         self.assertEqual(course_logs, sys.stdout.getvalue())
 
+    def test_system(self):
+        args = Namespace()
+        args.environments = ['system']
+        args.config = SimpleNamespace()
+        args.config.database = dict()
+
+        migrator.main.load_triggers(args)
+
+        self.assertEqual('', sys.stdout.getvalue())
+
     def test_no_trigger_files(self):
         trigger_path = migrator.TRIGGERS_PATH
         migrator.TRIGGERS_PATH = Path(tempfile.mkdtemp())
