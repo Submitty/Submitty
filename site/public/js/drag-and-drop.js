@@ -1335,7 +1335,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
             file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
         }
-        if (isValidFileName(file_name)) {
+        if (window.isValidFileName(file_name)) {
             formData.append('file_path', file_path);
         }
     }
@@ -1408,19 +1408,19 @@ function initializeDropZone(id) {
 
 
 
-function isValidFileName(file_name) {
-    if (file_name.indexOf('\'') !== -1 || file_name.indexOf('"') !== -1) {
-        alert(`ERROR! You may not use quotes in your filename: ${file_name}`);
-        return false;
-    }
-    else if (file_name.indexOf('\\') !== -1 || file_name.indexOf('/') !== -1) {
-        alert(`ERROR! You may not use a slash in your filename: ${file_name}`);
-        return false;
-    }
-    else if (file_name.indexOf('<') !== -1 || file_name.indexOf('>') !== -1) {
-        alert(`ERROR! You may not use angle brackets in your filename: ${file_name}`);
-        return false;
-    }
-    return true;
+// function isValidFileName(file_name) {
+//     if (file_name.indexOf('\'') !== -1 || file_name.indexOf('"') !== -1) {
+//         alert(`ERROR! You may not use quotes in your filename: ${file_name}`);
+//         return false;
+//     }
+//     else if (file_name.indexOf('\\') !== -1 || file_name.indexOf('/') !== -1) {
+//         alert(`ERROR! You may not use a slash in your filename: ${file_name}`);
+//         return false;
+//     }
+//     else if (file_name.indexOf('<') !== -1 || file_name.indexOf('>') !== -1) {
+//         alert(`ERROR! You may not use angle brackets in your filename: ${file_name}`);
+//         return false;
+//     }
+//     return true;
 
-}
+// }
