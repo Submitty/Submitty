@@ -59,7 +59,7 @@ nav a > i.f {
     padding-right: 70px;
 }
 
-@media (width <= 541px) {
+@media (max-width: 541px) {
     #breadcrumbs {
         padding-left: 0;
         padding-right: 0;
@@ -139,7 +139,7 @@ footer .footer-separator {
     display: block;
 }
 
-@media (width <= 541px) {
+@media (max-width: 541px) {
     #moorthy-duck {
         display: none;
     }
@@ -149,7 +149,7 @@ footer .footer-separator {
     }
 }
 
-@media (width >= 541px) {
+@media (min-width: 541px) {
     #home-button,
     #logout-button {
         display: none;

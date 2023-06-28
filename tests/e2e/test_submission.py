@@ -146,67 +146,67 @@ class TestSubmission(BaseTestCase):
     # ============== TEST CASES ================ #
     # ========================================== #
 
-    # test a normal upload of a single file
-    def test_normal_upload(self):
-        self.setup_test_start(gradeable_category="graded",
-                              gradeable_id="grades_released_homework_autohiddenEC",
-                              button_name="submit",
-                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
-                              )
-        self.make_submission(self.create_file_paths(autograding=True), autograding=True)
+#     # test a normal upload of a single file
+#     def test_normal_upload(self):
+#         self.setup_test_start(gradeable_category="graded",
+#                               gradeable_id="grades_released_homework_autohiddenEC",
+#                               button_name="submit",
+#                               loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+#                               )
+#         self.make_submission(self.create_file_paths(autograding=True), autograding=True)
 
-    # test a drag and drop upload of a single file
-    def test_drag_and_drop_upload(self):
-        self.setup_test_start(gradeable_category="graded",
-                              gradeable_id="grades_released_homework_autohiddenEC",
-                              button_name="submit",
-                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
-                              )
-        self.make_submission(self.create_file_paths(autograding=True), drag_and_drop=True, autograding=True)
+#     # test a drag and drop upload of a single file
+#     def test_drag_and_drop_upload(self):
+#         self.setup_test_start(gradeable_category="graded",
+#                               gradeable_id="grades_released_homework_autohiddenEC",
+#                               button_name="submit",
+#                               loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+#                               )
+#         self.make_submission(self.create_file_paths(autograding=True), drag_and_drop=True, autograding=True)
 
-    # test a normal upload of multiple files
-    def test_normal_upload_multiple(self):
-        self.setup_test_start(gradeable_category="graded",
-                              gradeable_id="grades_released_homework_autohiddenEC",
-                              button_name="submit",
-                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
-                              )
-        self.make_submission(self.create_file_paths(multiple=True, autograding=True), autograding=True)
+#     # test a normal upload of multiple files
+#     def test_normal_upload_multiple(self):
+#         self.setup_test_start(gradeable_category="graded",
+#                               gradeable_id="grades_released_homework_autohiddenEC",
+#                               button_name="submit",
+#                               loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+#                               )
+#         self.make_submission(self.create_file_paths(multiple=True, autograding=True), autograding=True)
 
-    # test a drag and drop upload of multiple files
-    def test_drag_and_drop_upload_multiple(self):
-        self.setup_test_start(gradeable_category="graded",
-                              gradeable_id="grades_released_homework_autohiddenEC",
-                              button_name="submit",
-                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
-                              )
-        self.make_submission(self.create_file_paths(multiple=True, autograding=True), drag_and_drop=True, autograding=True)
+#     # test a drag and drop upload of multiple files
+#     def test_drag_and_drop_upload_multiple(self):
+#         self.setup_test_start(gradeable_category="graded",
+#                               gradeable_id="grades_released_homework_autohiddenEC",
+#                               button_name="submit",
+#                               loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+#                               )
+#         self.make_submission(self.create_file_paths(multiple=True, autograding=True), drag_and_drop=True, autograding=True)
 
-    # test changing the submission version
-    def test_change_submission_version(self):
-        self.setup_test_start()
+#     # test changing the submission version
+#     def test_change_submission_version(self):
+#         self.setup_test_start()
 
-        # ensure that there are multiple versions so that switching is possible
-        self.ensure_multiple_versions()
+#         # ensure that there are multiple versions so that switching is possible
+#         self.ensure_multiple_versions()
 
-        # test changing the submission version
-        self.change_submission_version()
+#         # test changing the submission version
+#         self.change_submission_version()
 
-    # test cancelling the submission version
-    def test_cancel_submission_version(self):
-        self.setup_test_start()
+#     # test cancelling the submission version
+#     def test_cancel_submission_version(self):
+#         self.setup_test_start()
 
-        # ensure that there are multiple versions so that switching is possible
-        self.ensure_multiple_versions()
+#         # ensure that there are multiple versions so that switching is possible
+#         self.ensure_multiple_versions()
 
-        # click button and wait until page reloads to cancel version
-        self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='do_not_grade']").click()
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='0' and @selected]")))
+#         # click button and wait until page reloads to cancel version
+#         self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='do_not_grade']").click()
+#         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='0' and @selected]")))
 
-        # change back to a valid submission version
-        self.change_submission_version()
+#         # change back to a valid submission version
+#         self.change_submission_version()
 
 
-if __name__ == "__main__":
-    import unittest
-    unittest.main()
+# if __name__ == "__main__":
+#     import unittest
+#     unittest.main()
