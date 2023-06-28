@@ -1630,7 +1630,7 @@ class SubmissionController extends AbstractController {
                 $member_ldi = $previous_submission_ldi[$member->getId()];
                 $previous_status = $member_ldi !== null ? $member_ldi->getStatus() : 0;
 
-                return ($new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
+                return ($new_submission_ldi !== null && $new_submission_ldi->getStatus() === LateDayInfo::STATUS_BAD && $previous_status !== LateDayInfo::STATUS_BAD);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
 
@@ -1642,7 +1642,7 @@ class SubmissionController extends AbstractController {
                 $member_ldi = $previous_submission_ldi[$member->getId()];
                 $previous_days_charged = $member_ldi !== null ? $member_ldi->getLateDaysCharged() : 0;
 
-                return ($new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
+                return ($new_submission_ldi !== null && $new_submission_ldi->getLateDaysCharged() > $previous_days_charged);
             });
             $team_members = array_udiff($team_members, $bad_members, $compare_user);
 
