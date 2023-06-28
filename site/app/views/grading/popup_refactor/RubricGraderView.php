@@ -80,7 +80,6 @@ class RubricGraderView extends AbstractView {
      *
      * @param Gradeable $gradeable - The current gradeable.
      * @param GradedGradeable $current_submission - The current submission we are looking at.
-     * @param Gradeable $gradeable - The current Gradeable.
      * @param string $sort_type - The current way we are sorting students. Used to create the header.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      *     Used to create the header.
