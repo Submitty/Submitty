@@ -1,19 +1,6 @@
 <div id="bar_wrapper" class="ta-nav-wrapper">
     <div id="grading-panel-student-name">
-        <b>{% if blind_access_mode == "unblind" %}
-                {% if is_team_gradeable %}
-                    {% set team_members = gradeable_submitter.getTeam().getMemberUsers() %}
-                    Team {% if gradeable_submitter.getTeam().getTeamName() is not null %} {{ gradeable_submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
-                    {% for team_member in team_members %}
-                        &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
-                    {% endfor %}
-                {% else %}
-                    Student:<br/>
-                    {{ gradeable_submitter.getUser().getDisplayedGivenName() }} {{ gradeable_submitter.getUser().getDisplayedFamilyName() }} ({{ gradeable_submitter.getId() }})
-                    <br/>
-                {% endif %}
-            {% endif %}
-        </b>
+        {{ _self.create_student_information() }}
     </div>
     <div class="navigation-box">
         <div class="grading_toolbar">
@@ -111,3 +98,25 @@
         }
     });
 </script>
+
+
+{% macro create_student_information() %}
+    <b>{% if blind_access_mode == "unblind" %}
+        {% if is_team_gradeable %}
+            {% set team_members = gradeable_submitter.getTeam().getMemberUsers() %}
+            Team {% if gradeable_submitter.getTeam().getTeamName() is not null %} {{ gradeable_submitter.getTeam().getTeamName() }}{% endif %}({{ team_members|length }}): <span id="grading-scroll-message">{{ team_members|length > 3 ? "Scroll for more" : "" }}</span><br/>
+            {% for team_member in team_members %}
+                &emsp;{{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})<br/>
+            {% endfor %}
+        {% else %}
+            Student:<br/>
+            {{ gradeable_submitter.getUser().getDisplayedGivenName() }} {{ gradeable_submitter.getUser().getDisplayedFamilyName() }} ({{ gradeable_submitter.getId() }})
+            <br/>
+        {% endif %}
+    {% endif %}
+    </b>
+{% endmacro %}
+
+{% macro update_navigation_bar(new_gradeable_submitter)%}
+    {% set gradeable_submitty = new_gradeable_submitter %}
+{% endmacro %}
