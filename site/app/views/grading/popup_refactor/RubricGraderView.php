@@ -53,7 +53,7 @@ class RubricGraderView extends AbstractView {
      *     Used to create the header.
      *
      */
-    public function createRubricGradeableView(Gradeable $gradeable, string $sort_type, string $sort_direction) {
+    public function createRubricGradeableView(Gradeable $gradeable, string $sort_type, string $sort_direction): void {
         $this->setMemberVariables($gradeable);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
@@ -65,7 +65,7 @@ class RubricGraderView extends AbstractView {
      *
      * @param Gradeable $gradeable - The current Gradeable.
      */
-    private function setMemberVariables(Gradeable $gradeable) {
+    private function setMemberVariables(Gradeable $gradeable): void {
         $this->gradeable = $gradeable;
     }
 
@@ -77,7 +77,7 @@ class RubricGraderView extends AbstractView {
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      */
-    private function createBreadcrumbHeader(string $sort_type, string $sort_direction) {
+    private function createBreadcrumbHeader(string $sort_type, string $sort_direction): void {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
             'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$this->gradeable->getTitle()} Grading", $gradeableUrl);
