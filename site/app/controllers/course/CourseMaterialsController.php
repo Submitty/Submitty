@@ -460,14 +460,69 @@ class CourseMaterialsController extends AbstractController {
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
-                    $dir = explode("/", $new_path);
-                    array_pop($dir);
-                    $dir = implode("/", $dir);
-                    $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
-                    ->findOneBy(['path' => $dir]);
-                    if ($cm == null) {
-                        return JsonResponse::getErrorResponse("The specified path does not exits. Please create folder(s) or move into existing folder");
+                   
+                    $requested_path_directories = $requested_path;
+                    array_pop($requested_path_directories);
+                    $requested_path_directories = implode("/", $requested_path_directories);
+                    $full_dir_path = explode("/", $new_path);
+                    array_pop($full_dir_path);
+                    $full_dir_path = implode("/", $full_dir_path);
+
+
+
+                    //ADD IN NEW DIRECTORIES IF IT DOESN'T EXIST
+
+
+                    if (!FileUtils::createDir($full_dir_path, true)) {
+                        return JsonResponse::getErrorResponse("Invalid requested path");
                     }
+
+
+                    $dirs_to_make = []; 
+                    $this->addDirs($requested_path_directories, $upload_path, $dirs_to_make);
+
+
+                    if ($dirs_to_make != null) {
+                        $new_paths = [];
+                        foreach ($dirs_to_make as $dir) {
+                            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                                ['path' => $dir]
+                            );
+                            if ($cm == null && !in_array($dir, $new_paths)) {
+
+
+
+                                $course_material_dir = new CourseMaterial(
+                                    2, 
+                                    $dir,
+                                    $course_material->getReleaseDate(),
+                                    $course_material->isHiddenFromStudents(),
+                                    $course_material->getPriority(),
+                                    null,
+                                    null
+                                );
+                                $this->core->getCourseEntityManager()->persist($course_material_dir);
+
+
+                                $all_sections = $course_material->getSections()->getValues();
+
+                                if (count($all_sections) > 0) {
+                                    foreach ($all_sections as $section) {
+                                        $course_material_section = new CourseMaterialSection($section->getSectionID(), $course_material_dir);
+                                        $course_material_dir->addSection($course_material_section);
+                                    }
+                                }
+
+                                $new_paths[] = $dir;
+                            }
+                        }
+                    }
+
+
+
+
+
+                    //END OF ADDING IN NEW DIRECTORIES IF DOESN'T EXIST
                 }
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
