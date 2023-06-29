@@ -85,7 +85,7 @@ class RubricGraderController extends AbstractController {
         string $sort = "id",
         string $direction = "ASC",
         string $navigate_assigned_students_only = "true"
-    ) {
+    ): void {
 
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction, $navigate_assigned_students_only);
 
@@ -118,7 +118,7 @@ class RubricGraderController extends AbstractController {
         string $sort,
         string $direction,
         string $navigate_assigned_students_only
-    ) {
+    ): void {
         $this->setCurrentGradeable($gradeable_id);
 
         $this->sort_type = $sort;
@@ -132,7 +132,7 @@ class RubricGraderController extends AbstractController {
      *
      * @param string $gradeable_id - The id string of the current gradeable.
      */
-    private function setCurrentGradeable(string $gradeable_id) {
+    private function setCurrentGradeable(string $gradeable_id): void {
         // tryGetGradeable inherited from AbstractController
         $this->gradeable = $this->tryGetGradeable($gradeable_id, false);
 
