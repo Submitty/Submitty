@@ -1,5 +1,5 @@
-// import {getCurrentSemester} from '../support/utils.js';
-import {skipOn} from '@cypress/skip-test';
+import { getCurrentSemester } from '../support/utils.js';
+import { skipOn } from '@cypress/skip-test';
 
 const autograding_status_path = 'autograding_status';
 
@@ -10,7 +10,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.visit('/');
             cy.login();
             cy.wait(500);
-            cy.viewport(1920,1200);
+            cy.viewport(1920, 1200);
             cy.visit(autograding_status_path);
         });
 
