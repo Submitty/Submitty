@@ -361,7 +361,6 @@ function newEditCourseMaterialsForm(tag) {
     let link_title = $(tag).data('link-title');
     let link_url = $(tag).data('link-url');
     let file_path = $(tag).data('path');
-
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
@@ -399,13 +398,9 @@ function newEditCourseMaterialsForm(tag) {
     const path = $("#new-file-name");
     path.val(file_path.substring(1));
     const urlTitle = $("#edit-url-title");
-    urlTitle.val(link_title);
     title_label.css('display', 'block');
-    const title = $("#edit-url-title");
-    title.prop('disabled', false);
-    title.val(file_path.substring(file_path.lastIndexOf("/") + 1));
     if (is_link === 1) {
-        title.val(decodeURIComponent(file_path.substring(file_path.lastIndexOf("/") + 1).replace('link-','')));
+        urlTitle.val(link_title.replace('link-',''));
         path.val(decodeURIComponent(file_path.substring(file_path.indexOf("course_materials/") + 17).replace('link-','')));
         url_label.css('display', 'block');
         const url = $("#edit-url-url");
@@ -413,6 +408,7 @@ function newEditCourseMaterialsForm(tag) {
         url.val(link_url);
     }
     else {
+        urlTitle.val(link_title);
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }

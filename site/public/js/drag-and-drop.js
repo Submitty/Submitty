@@ -1244,7 +1244,12 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if ($('#url_selection').is(':visible')) {
         if ($('#url_title').val() !== '' && $('#url_url').val() !== '' ) {
             linkToBeAdded = true;
-            formData.append('url_title', $('#url_title').val());
+
+            let link_title = $('#url_title').val();
+            formData.append('original_title', link_title);
+            link_title = encodeURIComponent(`link-${link_title}`);
+
+            formData.append('url_title', link_title);
             formData.append('url_url', $('#url_url').val());
         }
     }
@@ -1405,22 +1410,3 @@ function initializeDropZone(id) {
     dropzone.addEventListener('dragleave', draghandle, false);
     dropzone.addEventListener('drop', drop, false);
 }
-
-
-
-// function isValidFileName(file_name) {
-//     if (file_name.indexOf('\'') !== -1 || file_name.indexOf('"') !== -1) {
-//         alert(`ERROR! You may not use quotes in your filename: ${file_name}`);
-//         return false;
-//     }
-//     else if (file_name.indexOf('\\') !== -1 || file_name.indexOf('/') !== -1) {
-//         alert(`ERROR! You may not use a slash in your filename: ${file_name}`);
-//         return false;
-//     }
-//     else if (file_name.indexOf('<') !== -1 || file_name.indexOf('>') !== -1) {
-//         alert(`ERROR! You may not use angle brackets in your filename: ${file_name}`);
-//         return false;
-//     }
-//     return true;
-
-// }

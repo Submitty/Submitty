@@ -76,11 +76,10 @@
                     <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ displayName }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
+                    {% set url_title = course_material.getUrlTitle %}
                     {% if course_material.isLink %}
-                        {% set url_title = course_material.getUrlTitle %}
                         {% set url_url = course_material.getUrl %}
                     {% else %}
-                        {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
                     <a

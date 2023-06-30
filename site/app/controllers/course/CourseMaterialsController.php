@@ -441,7 +441,7 @@ class CourseMaterialsController extends AbstractController {
 
 
 
-        if ( isset($_POST['file_path']) || isset($_POST['link_title']) ) {
+        if (isset($_POST['file_path']) || isset($_POST['link_title'])) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
@@ -460,7 +460,6 @@ class CourseMaterialsController extends AbstractController {
                 // check valid directory
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
-                   
                     $requested_path_directories = $requested_path;
                     array_pop($requested_path_directories);
                     $requested_path_directories = implode("/", $requested_path_directories);
@@ -478,7 +477,7 @@ class CourseMaterialsController extends AbstractController {
                     }
 
 
-                    $dirs_to_make = []; 
+                    $dirs_to_make = [];
                     $this->addDirs($requested_path_directories, $upload_path, $dirs_to_make);
 
 
@@ -489,11 +488,8 @@ class CourseMaterialsController extends AbstractController {
                                 ['path' => $dir]
                             );
                             if ($cm == null && !in_array($dir, $new_paths)) {
-
-
-
                                 $course_material_dir = new CourseMaterial(
-                                    2, 
+                                    2,
                                     $dir,
                                     $course_material->getReleaseDate(),
                                     $course_material->isHiddenFromStudents(),
@@ -502,8 +498,6 @@ class CourseMaterialsController extends AbstractController {
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
-
-
                                 $all_sections = $course_material->getSections()->getValues();
 
                                 if (count($all_sections) > 0) {
@@ -512,17 +506,10 @@ class CourseMaterialsController extends AbstractController {
                                         $course_material_dir->addSection($course_material_section);
                                     }
                                 }
-
                                 $new_paths[] = $dir;
                             }
                         }
                     }
-
-
-
-
-
-                    //END OF ADDING IN NEW DIRECTORIES IF DOESN'T EXIST
                 }
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
@@ -572,7 +559,6 @@ class CourseMaterialsController extends AbstractController {
      */
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         $details = [];
-
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
             $expand_zip = $_POST['expand_zip'];
@@ -638,6 +624,10 @@ class CourseMaterialsController extends AbstractController {
             $url_title = $_POST['url_title'];
         }
 
+        $url_title_name = $url_title;
+        if (isset($_POST['original_title'])) {
+            $url_title_name = $_POST['original_title'];
+        }
         $dirs_to_make = [];
 
         $url_url = null;
@@ -660,7 +650,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failed to make path.");
                 }
             }
-            $file_name = urlencode("link-" . $url_title);
+            $file_name = $url_title;
             $clash_resolution = $this->resolveClashingMaterials($final_path, [$file_name], $overwrite_all);
             if ($clash_resolution !== true) {
                 return JsonResponse::getErrorResponse(
@@ -869,7 +859,7 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $url_title : null
+                $value === CourseMaterial::LINK ? $url_title_name :  substr($details['path'][$key], strrpos($details['path'][$key], '/') + 1)
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
