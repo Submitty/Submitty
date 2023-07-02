@@ -28,3 +28,4 @@ if (len(sys.argv) > 1):
     n2=int(contents[3],10)
 
     print_change(o1,n1,o2,n2)
+    f.close()
