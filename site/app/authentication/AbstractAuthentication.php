@@ -31,15 +31,15 @@ abstract class AbstractAuthentication {
      */
     abstract public function authenticate();
 
-    public function setUserId($user_id) {
+    public function setUserId(string $user_id) {
         $this->user_id = trim(strtolower($user_id));
     }
 
-    public function setPassword($password) {
+    public function setPassword(string $password) {
         $this->password = $password;
     }
 
-    public function getUserId() {
+    public function getUserId(): ?string {
         return $this->user_id;
     }
 }

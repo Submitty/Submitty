@@ -1680,7 +1680,7 @@ function refreshCategories() {
         $(this).trigger('eventChangeCatClass');
     });
 
-    $('.cat-buttons').bind('eventChangeCatClass', changeColorClass);
+    $('.cat-buttons').on('eventChangeCatClass', changeColorClass);
     $('.cat-buttons').trigger('eventChangeCatClass');
 }
 
