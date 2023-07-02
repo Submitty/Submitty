@@ -97,7 +97,8 @@ def up(config):
     try:
         shutil.copyfile(pfn_script_src, pfn_script_dst, follow_symlinks=False)
         os.chown(pfn_script_dst, 0, config.submitty_users['daemon_gid'], follow_symlinks=False)
-        os.chmod(pfn_script_dst, 0o0550)
+        os.chmod(pfn_script_dst, 0o640)
+
     except shutil.SameFileError:
         pass
     except Exception as e:
