@@ -39,7 +39,7 @@ abstract class AbstractAuthentication {
         $this->password = $password;
     }
 
-    public function getUserId(): ?string {
+    public function getUserId(){
         return $this->user_id;
     }
 }
