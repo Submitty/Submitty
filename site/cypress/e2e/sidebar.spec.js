@@ -123,8 +123,8 @@ describe('Test sidebars', () => {
         cy.sidebarContains('Late Days Allowed', `/courses/${currentSemester}/sample/late_days`);
         cy.sidebarContains('Excused Absence Extensions', `/courses/${currentSemester}/sample/extensions`);
         cy.sidebarContains('Grade Override', `/courses/${currentSemester}/sample/grade_override`);
-        cy.sidebarContains('Plagiarism Detection' ,`/courses/${currentSemester}/sample/plagiarism`);
-        cy.sidebarContains('Grade Reports',`/courses/${currentSemester}/sample/reports`);
+        cy.sidebarContains('Plagiarism Detection', `/courses/${currentSemester}/sample/plagiarism`);
+        cy.sidebarContains('Grade Reports', `/courses/${currentSemester}/sample/reports`);
         cy.sidebarContains('My Late Day', `/courses/${currentSemester}/sample/late_table`);
 
         cy.sidebarContains('My Courses', '/home');
