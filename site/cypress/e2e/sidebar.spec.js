@@ -73,7 +73,7 @@ describe('Test sidebars', () => {
         cy.sidebarContains('My Profile', '/user_profile');
         cy.sidebarContains('Authentication Tokens', '/authentication_tokens');
         cy.sidebarContains('Calendar', '/calendar');
-        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();')
+        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();');
         cy.sidebarContains('Logout Joe', '/authentication/logout');
     });
 
@@ -95,7 +95,7 @@ describe('Test sidebars', () => {
         cy.sidebarContains('My Profile', '/user_profile');
         cy.sidebarContains('Authentication Tokens', '/authentication_tokens');
         cy.sidebarContains('Calendar', '/calendar');
-        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();')
+        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();');
         cy.sidebarContains('Logout Jill', '/authentication/logout');
     });
 
@@ -136,8 +136,7 @@ describe('Test sidebars', () => {
         cy.sidebarContains('New Course', '/home/courses/new');
         cy.sidebarContains('Autograding Status', '/autograding_status');
 
-        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();')
+        cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();');
         cy.sidebarContains('Logout Quinn', '/authentication/logout');
     });
-
 });
