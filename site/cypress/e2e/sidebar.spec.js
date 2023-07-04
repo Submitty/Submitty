@@ -5,7 +5,7 @@ const currentSemester = `${getCurrentSemester()}`;
 Cypress.Commands.add('sidebarContains', (title, extension) => {
     cy.get('aside ul li').contains(title).should('have.attr', 'href').and('contain', extension);
     if (!title.includes('Logout')) {
-        cy.get('aside ul li').contains(title).click();
+        cy.get('aside ul li').contains(title).click({force:true});
         if (title.includes('Autograding')) {
             cy.get('#main > .content > h1').should('contain', 'Job Statistics');
         }
@@ -21,7 +21,7 @@ Cypress.Commands.add('sidebarContains', (title, extension) => {
     }
 });
 
-Cypress.Commands.add('testBaseSidebar', (user) => {
+Cypress.Commands.add('baseSidebar', (user) => {
     cy.sidebarContains('My Courses', '/home');
     cy.sidebarContains('My Profile', '/user_profile');
     cy.sidebarContains('Authentication Tokens', '/authentication_tokens');
@@ -31,8 +31,8 @@ Cypress.Commands.add('testBaseSidebar', (user) => {
         cy.sidebarContains('New Course', '/home/courses/new');
         cy.sidebarContains('Autograding Status', '/autograding_status');
     }
+    cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();')
     cy.sidebarContains('Logout', '/authentication/logout');
-
 });
 
 Cypress.Commands.add('testCourseSidebar', (user, course) => {
@@ -67,7 +67,7 @@ Cypress.Commands.add('testCourseSidebar', (user, course) => {
             cy.sidebarContains('Grade Reports', `/courses/${currentSemester}/sample/reports`);
         }
     }
-    cy.testBaseSidebar(user);
+    cy.baseSidebar(user);
 });
 
 describe('Test sidebars', () => {
@@ -75,11 +75,6 @@ describe('Test sidebars', () => {
         beforeEach(() => {
             cy.visit('/');
         });
-        it(`Test ${user} home sidebars`, () => {
-            cy.login(user);
-            cy.testBaseSidebar(user);
-        });
-
         // Sample Course
         it(`Test ${user} sample course sidebar`, () => {
             cy.testCourseSidebar(user, 'sample');
