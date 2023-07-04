@@ -408,7 +408,7 @@ function newEditCourseMaterialsForm(tag) {
         url.val(link_url);
     }
     else {
-        urlTitle.val(link_title);
+        urlTitle.val(file_path.substring(file_path.lastIndexOf("/") + 1));
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }
