@@ -529,7 +529,6 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($new_path, "");
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
-                $this->core->getCourseEntityManager()->persist($course_material);
                 if (isset($_POST['original_title'])) {
                     $course_material->setUrlTitle($_POST['original_title']);
                 }
@@ -873,12 +872,6 @@ class CourseMaterialsController extends AbstractController {
                     $course_material_section = new CourseMaterialSection($section, $course_material);
                     $course_material->addSection($course_material_section);
                 }
-            }
-            if ($value === CourseMaterial::FILE) {
-                $path = $details['path'][$key];
-                $lastSlashPosition = strrpos($path, '/');
-                $file_name = substr($path, $lastSlashPosition + 1);
-                $course_material->setUrlTitle(file_name);
             }
         }
         $this->core->getCourseEntityManager()->flush();
