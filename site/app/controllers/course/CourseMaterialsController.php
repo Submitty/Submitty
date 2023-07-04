@@ -862,6 +862,12 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_title_name : null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
+            if ($value === CourseMaterial::FILE) {
+                $path = $details['path'][$key];
+                $lastSlashPosition = strrpos($path, '/');
+                $file_name = substr($path, $lastSlashPosition + 1);
+                $course_material->setUrlTitle($file_name);
+            }
             if ($details['section_lock']) {
                 foreach ($details['sections'] as $section) {
                     $course_material_section = new CourseMaterialSection($section, $course_material);
