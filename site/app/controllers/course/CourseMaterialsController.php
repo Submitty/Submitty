@@ -497,7 +497,6 @@ class CourseMaterialsController extends AbstractController {
                                     null,
                                     null
                                 );
-                                $this->core->getCourseEntityManager()->persist($course_material_dir);
                                 $all_sections = $course_material->getSections()->getValues();
 
                                 if (count($all_sections) > 0) {
@@ -530,7 +529,7 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($new_path, "");
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
-                $this->core->getCourseEntityManager()->persist($course_material_dir);
+                $this->core->getCourseEntityManager()->persist($course_material);
                 if (isset($_POST['original_title'])) {
                     $course_material->setUrlTitle($_POST['original_title']);
                 }
@@ -860,7 +859,7 @@ class CourseMaterialsController extends AbstractController {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $url_title_name :  substr($details['path'][$key], strrpos($details['path'][$key], '/') + 1)
+                $value === CourseMaterial::LINK ? $url_title_name : null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
