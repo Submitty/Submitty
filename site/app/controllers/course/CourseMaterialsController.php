@@ -874,6 +874,12 @@ class CourseMaterialsController extends AbstractController {
                     $course_material->addSection($course_material_section);
                 }
             }
+            if ($value === CourseMaterial::FILE) {
+                $path = $details['path'][$key];
+                $lastSlashPosition = strrpos($path, '/');
+                $file_name = substr($path, $lastSlashPosition + 1);
+                $course_material->setUrlTitle(file_name);
+            }
         }
         $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
