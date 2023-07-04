@@ -5,7 +5,7 @@ const currentSemester = `${getCurrentSemester()}`;
 Cypress.Commands.add('sidebarContains', (title, extension) => {
     cy.get('aside ul li').contains(title).should('have.attr', 'href').and('contain', extension);
     if (!title.includes('Logout')) {
-        cy.get('aside ul li').contains(title).click({force:true});
+        cy.get('aside ul li').contains(title).click({ force: true });
         if (title.includes('Autograding')) {
             cy.get('#main > .content > h1').should('contain', 'Job Statistics');
         }
