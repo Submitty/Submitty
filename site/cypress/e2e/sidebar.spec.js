@@ -32,7 +32,7 @@ Cypress.Commands.add('testBaseSidebar', (user) => {
         cy.sidebarContains('Autograding Status', '/autograding_status');
     }
     cy.sidebarContains('Logout', '/authentication/logout');
-    
+
 });
 
 Cypress.Commands.add('testCourseSidebar', (user, course) => {
