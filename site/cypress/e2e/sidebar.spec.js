@@ -46,9 +46,9 @@ Cypress.Commands.add('testCourseSidebar', (user, course) => {
     cy.sidebarContains('Discussion Forum', `/courses/${currentSemester}/sample/forum`);
     cy.sidebarContains('My Late Day', `/courses/${currentSemester}/sample/late_table`);
 
-    if (user != 'student') {
+    if (user !== 'student') {
         cy.sidebarContains('Student Photos', `/courses/${currentSemester}/sample/student_photos`);
-        if (user != 'ta') {
+        if (user !== 'ta') {
             cy.sidebarContains('New Gradeable', `/courses/${currentSemester}/sample/gradeable`);
             cy.sidebarContains('Course Settings', `/courses/${currentSemester}/sample/config`);
             cy.sidebarContains('SQL Toolbox', `/courses/${currentSemester}/sample/sql_toolbox`);
