@@ -457,7 +457,10 @@ class CourseMaterialsController extends AbstractController {
                 $file_name = substr($new_path, $lastSlashPos + 1);
             }
             if ($path !== $new_path) {
-                // check valid directory
+                if (!FileUtils::ValidPath($new_path)) {
+                    return JsonResponse::getErrorResponse("Invalid path or filename");
+                }
+
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
                     $requested_path_directories = $requested_path;

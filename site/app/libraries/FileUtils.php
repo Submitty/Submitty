@@ -765,4 +765,32 @@ class FileUtils {
             $results[] = $parent_dir;
         }
     }
+
+
+    /**
+     * Given a path, searches for the topmost directory that's empty, here empty means having no files but there can be
+     * empty subdirectories inside that directory
+     *
+     * @param string $path Absolute path to file or directory
+     * @return bool
+     */
+    public static function validPath($path) {
+        $disallowed = [
+            '..',   // Parent directory
+            ':',    // Drive separator (Windows)
+            '*',    // Wildcard character
+            '?',    // Wildcard character
+            '"',    // Double quote
+            '<',    // Less than
+            '>',    // Greater than
+            '|',    // Pipe
+            '\0'    // Null character
+        ];
+        foreach ($disallowed as $char) {
+            if (strpos($path, $char) !== false) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
