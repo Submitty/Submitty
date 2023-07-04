@@ -31,7 +31,7 @@ Cypress.Commands.add('baseSidebar', (user) => {
         cy.sidebarContains('New Course', '/home/courses/new');
         cy.sidebarContains('Autograding Status', '/autograding_status');
     }
-    cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();')
+    cy.sidebarContains('Collapse Sidebar', 'javascript: toggleSidebar();');
     cy.sidebarContains('Logout', '/authentication/logout');
 });
 
