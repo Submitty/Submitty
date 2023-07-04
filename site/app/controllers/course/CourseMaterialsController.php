@@ -530,6 +530,7 @@ class CourseMaterialsController extends AbstractController {
                 FileUtils::writeFile($new_path, "");
                 rename($course_material->getPath(), $new_path);
                 $course_material->setPath($new_path);
+                $this->core->getCourseEntityManager()->persist($course_material_dir);
                 if (isset($_POST['original_title'])) {
                     $course_material->setUrlTitle($_POST['original_title']);
                 }
