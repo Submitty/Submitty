@@ -3,6 +3,9 @@
 namespace app\views;
 
 use app\models\User;
+use app\libraries\FileUtils;
+use DirectoryIterator;
+
 
 class HomePageView extends AbstractView {
     /**
@@ -24,6 +27,9 @@ class HomePageView extends AbstractView {
             User::GROUP_STUDENT                 => "Student:"
         ];
 
+        $files = [];
+
+
         foreach ($course_types as $course_type) {
             $ranks = [];
 
@@ -38,6 +44,7 @@ class HomePageView extends AbstractView {
             //Assemble courses into rank lists
             foreach ($course_type as $course) {
                 $ranks[$course['user_group']]['courses'][] = $course;
+                self::addBannerImage($course, $files, $this->core->getConfig()->getSubmittyPath(), $this->core->buildCourseUrl());
             }
 
             //Filter any ranks with no courses
@@ -47,13 +54,19 @@ class HomePageView extends AbstractView {
             $statuses[] = $ranks;
         }
 
+
+
+
         $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "statuses" => $statuses,
+            "files" => $files,
         ]);
+
+
     }
 
     public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
@@ -83,5 +96,36 @@ class HomePageView extends AbstractView {
             "csrf_token" => $csrf_token,
             "latest_tag" => $this->core->getConfig()->getLatestTag()
         ]);
+    }
+
+
+
+
+
+
+    public static function addBannerImage($course, &$files, $submitty_path, $url_path) {
+        $base_course_material_path = FileUtils::joinPaths($submitty_path, 'courses', $course['semester'], $course['title'], 'uploads', 'course_materials', 'banner_images');
+
+        if (!file_exists($base_course_material_path)) {
+            return;
+        }
+
+        $base_url_path = FileUtils::joinPaths($course['semester'], $course['title'], 'course_material', 'banner_images');
+
+
+        // Create a DirectoryIterator for the base course material path
+        $directoryIterator = new DirectoryIterator($base_course_material_path);
+        foreach ($directoryIterator as $fileInfo) {
+            // Exclude directories and dot files
+            if ($fileInfo->isFile() && !$fileInfo->isDot()) {
+                $filePath = $base_url_path . '/' . $fileInfo->getFilename();
+                $baseCourseUrl = rtrim($url_path, '/');
+                $fileUrl = $baseCourseUrl .'/' . $filePath;
+                $files[] = [
+                    "filename" => $fileInfo->getFilename(),
+                    "image_link" => $fileUrl,
+                ];
+            }
+        }
     }
 }

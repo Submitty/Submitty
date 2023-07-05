@@ -1,4 +1,17 @@
 <div id="courses" class="content">
+{% for file in files %}
+    <img src="{{ file.image_link }}" alt="File: {{ file.filename }}" width="800" height="70"/>
+    <br>
+{% endfor %}
+
+
+
+
+
+
+
+
+
     {% for ranks in statuses %}
         {% if loop.index == 1 or ranks|length > 0 %}
             <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
