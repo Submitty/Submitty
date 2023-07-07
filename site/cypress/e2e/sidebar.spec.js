@@ -14,7 +14,7 @@ Cypress.Commands.add('baseSidebar', () => {
     cy.sidebarContains('Authentication Tokens', '/authentication_tokens');
     cy.sidebarContains('Calendar', '/calendar');
     cy.get('[data-testid="sidebar"]').contains('Collapse Sidebar').should('exist');
-    cy.get('[data-testid="sidebar"]').contains('Logout').should('exist'); 
+    cy.get('[data-testid="sidebar"]').contains('Logout').should('exist');
 });
 
 Cypress.Commands.add('instructorSidebar', () => {
@@ -76,14 +76,14 @@ Cypress.Commands.add('baseCourseSidebar', (user, course) => {
 
 describe('Test sidebars', () => {
     // Sample Course
-    it(`Test student sidebars`, () => {
+    it('Test student sidebars', () => {
         cy.baseCourseSidebar('student', 'sample');
         cy.baseSidebar();
         cy.notHaveInstructorSidebars();
         cy.get('[data-testid="sidebar"]').contains('Student Photos').should('not.exist');
     });
 
-    it(`Test ta sidebars`, () => {
+    it('Test ta sidebars', () => {
         cy.baseCourseSidebar('ta', 'sample');
         cy.baseSidebar();
         cy.visit(['sample']);
@@ -91,7 +91,7 @@ describe('Test sidebars', () => {
         cy.notHaveInstructorSidebars();
     });
 
-    it(`Test instructor sidebars`, () => {
+    it('Test instructor sidebars', () => {
         cy.baseCourseSidebar('instructor', 'sample');
         cy.instructorSidebar();
         cy.baseSidebar();
