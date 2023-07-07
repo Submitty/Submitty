@@ -4928,6 +4928,18 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+    /**
+     * get the grader of the gradeable component for inquiry
+     * @return string the id of the first new post inserted of the new grade inquiry
+     */
+    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true)
+    {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("SELECT b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id" . $grade_inquiry_all_only_query, [$gradeable_id]);
+        $this->course_db->query("SELECT user_id, gc_id FROM grade_inquiries WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
+        return ($this->course_db->row()['cnt']);
+    }
+
     /*
      * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
@@ -4983,6 +4995,7 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$grade_inquiry_id]);
         $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$grade_inquiry_id]);
     }
+
 
     public function deleteGradeable($g_id) {
         $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,

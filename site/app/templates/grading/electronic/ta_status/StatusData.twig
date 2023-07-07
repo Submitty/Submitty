@@ -95,6 +95,7 @@
                 <br/>
                 <br/>
                 <p><b>Number of unresolved grade inquiries:</b> {{ grade_inquiries }}</p>
+                <p><b>Number of unresolved grade this:</b> {{ graders }}</p>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
