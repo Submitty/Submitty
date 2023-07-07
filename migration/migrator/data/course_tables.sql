@@ -692,7 +692,8 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    url_title character varying(255)
+    url_title character varying(255),
+    banner_closed boolean DEFAULT false NOT NULL
 );
 
 

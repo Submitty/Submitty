@@ -81,6 +81,12 @@ class CourseMaterial {
      */
     protected $url_title;
 
+    /**
+     * @ORM\Column(type="boolean")
+     * @var bool
+     */
+    protected $banner_closed;
+
     public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $url_title) {
         $this->setType($type);
         $this->setPath($path);
@@ -90,6 +96,16 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->url_title = $url_title;
+        $this->banner_closed = false;
+
+    }
+
+    public function closeBanner() {
+        $this->banner_closed = true;
+    }
+
+    public function checkBannerOpen() : bool {
+        return $this->banner_closed;
     }
 
     /**
