@@ -2672,14 +2672,14 @@ ORDER BY user_id ASC"
     }
 
     public function insertNewRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
         return $this->submitty_db->getrowcount();
     }
 
     public function deleteRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", [$semester, $course, $section]);
         return $this->submitty_db->getRowCount();
@@ -5059,6 +5059,7 @@ AND gc_id IN (
                   g_id AS eg_g_id,
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
+                  eg_using_subdirectory AS using_subdirectory,
                   eg_vcs_subdirectory AS vcs_subdirectory,
                   eg_vcs_partial_path AS vcs_partial_path,
                   eg_vcs_host_type AS vcs_host_type,
@@ -5755,6 +5756,7 @@ AND gc_id IN (
                 $gradeable->getSubmissionDueDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
+                $gradeable->isUsingSubdirectory(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsPartialPath(),
                 $gradeable->getVcsHostType(),
@@ -5790,6 +5792,7 @@ AND gc_id IN (
                   eg_submission_open_date,
                   eg_submission_due_date,
                   eg_is_repository,
+                  eg_using_subdirectory,
                   eg_vcs_subdirectory,
                   eg_vcs_partial_path,
                   eg_vcs_host_type,
@@ -5818,7 +5821,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5917,6 +5920,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $gradeable->isVcs(),
+                    $gradeable->isUsingSubdirectory(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsPartialPath(),
                     $gradeable->getVcsHostType(),
@@ -5953,6 +5957,7 @@ AND gc_id IN (
                       eg_submission_open_date=?,
                       eg_submission_due_date=?,
                       eg_is_repository=?,
+                      eg_using_subdirectory=?,
                       eg_vcs_subdirectory=?,
                       eg_vcs_partial_path=?,
                       eg_vcs_host_type=?,
