@@ -758,9 +758,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  0, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag" << std::endl;
         }
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
@@ -772,10 +771,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag delta" << std::endl;
         }
-
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click has an optional mouse button.
@@ -1092,6 +1089,17 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
+        assert(grader.find("expected_string") == grader.end() && "You cannot specify both expected_file and expected_string");
+      }
+      if (grader.find("expected_string") != grader.end()) {
+        itr2 = grader.find("show_expected");
+        if (itr2 == grader.end()) {
+          grader["show_expected"] = "always";
+        } else {
+          assert (validShowValue(*itr2));
+        }
+        grader["use_expected_string"] = true;
+        assert(grader.find("expected_file") == grader.end() && "You cannot specify both expected_file and expected_string");
       }
     }
   }
@@ -1790,7 +1798,7 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
           nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
 
           int num_of_choices = 0;
-          for (auto it = choices.begin(); it != choices.end(); ++it){
+          for (auto it = choices.begin(), it_next = it; it != choices.end(); ++it, it_next = it){
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
 
@@ -1802,6 +1810,19 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
               assert(value != "");
               assert(description != "");
 
+              for (++it_next; it_next != choices.end(); ++it_next){
+
+                nlohmann::json choice_next = it_next.value();
+                std::string value_next = choice_next.value("value", "");
+                std::string description_next = choice_next.value("description", "");
+                if (value == value_next){
+                  std::cout  << "ERROR: Multiple choice question: two answers have the same value! " << std::endl;
+                  std::cout << "For answer descriptions: " << description << " and " << description_next << " both have the value: " << value << ". "<< std::endl;
+                  std::cout << "Please change one of the values!" << std::endl;
+                }
+                assert (value != value_next); 
+
+              }
               num_of_choices++;
           }
 

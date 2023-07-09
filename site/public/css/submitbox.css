@@ -13,6 +13,12 @@
     margin-left: auto;
 }
 
+#error-message {
+    text-align: left;
+    margin-left: auto;
+    margin-right: 50%;
+}
+
 #submission-form > * {
     margin: 1.5em 0;
 }

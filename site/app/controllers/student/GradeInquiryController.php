@@ -34,7 +34,7 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("Could not find gradeable associated with " . $gradeable_id);
         }
 
-        if (!$gradeable->isRegradeOpen()) {
+        if (!$gradeable->isGradeInquiryOpen()) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Grade inquiries are not enabled for this gradeable')
             );
@@ -48,14 +48,14 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Insufficient permissions to request regrade')
+                JsonResponse::getFailResponse('Insufficient permissions to create grade inquiry')
             );
         }
 
         try {
-            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
+            $this->core->getQueries()->insertNewGradeInquiry($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
@@ -100,7 +100,7 @@ class GradeInquiryController extends AbstractController {
             return null;
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Submitter has not made a grade inquiry')
             );
@@ -109,7 +109,7 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI(
             "grading.electronic.grade_inquiry",
             ['graded_gradeable' => $graded_gradeable]
-        ) && $user->accessFullGrading();
+        );
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to make grade inquiry post')
@@ -125,13 +125,13 @@ class GradeInquiryController extends AbstractController {
         $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
-            $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
-            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
-            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
+            $grade_inquiry_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
+            $grade_inquiry_post = $this->core->getQueries()->getGradeInquiryPost($grade_inquiry_post_id);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $grade_inquiry_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id, 'new_post' => $new_post])
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $grade_inquiry_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -172,7 +172,7 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return "";
         }
 
@@ -195,8 +195,8 @@ class GradeInquiryController extends AbstractController {
             return "";
         }
 
-        $new_post = $this->core->getQueries()->getRegradePost($post_id);
-        if ($new_post === null || $new_post['regrade_id'] !== $grade_inquiry->getId()) {
+        $new_post = $this->core->getQueries()->getGradeInquiryPost($post_id);
+        if ($new_post === null || $new_post['grade_inquiry_id'] !== $grade_inquiry->getId()) {
             return "";
         }
 
@@ -230,7 +230,7 @@ class GradeInquiryController extends AbstractController {
             return null;
         }
 
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasGradeInquiry()) {
             return JsonResponse::getFailResponse('Submitter has not made a grade inquiry');
         }
 
@@ -261,11 +261,11 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $grade_inquiry->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
+            $this->core->getQueries()->saveGradeInquiry($grade_inquiry);
             if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
+                $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return JsonResponse::getSuccessResponse(
@@ -299,7 +299,7 @@ class GradeInquiryController extends AbstractController {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['submission', 'Homework'],
-                'showRegradeDiscussion',
+                'showGradeInquiryDiscussion',
                 $graded_gradeable,
                 true
             )

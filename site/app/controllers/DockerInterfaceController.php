@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class DockerInterfaceController
  *
- * Works with Docker to provide a user inteface
+ * Works with Docker to provide a user interface
  *
  */
 class DockerInterfaceController extends AbstractController {
@@ -181,6 +181,19 @@ class DockerInterfaceController extends AbstractController {
         if (
             (!is_writable($docker_job_file) && file_exists($docker_job_file))
             || file_put_contents($docker_job_file, json_encode($docker_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return false;
+        }
+
+
+        $sysinfo_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue/sysinfo" . $now . ".json");
+        $sysinfo_data = [
+            "job" => "UpdateSystemInfo"
+        ];
+
+        if (
+            (!is_writable($sysinfo_job_file) && file_exists($sysinfo_job_file))
+            || file_put_contents($sysinfo_job_file, json_encode($sysinfo_data, JSON_PRETTY_PRINT)) === false
         ) {
             return false;
         }

@@ -423,17 +423,32 @@ class RainbowCustomization extends AbstractModel {
             // Get sections from the file
             $sectionsFromFile = (array) $this->RCJSON->getSection();
 
-            // If sections from database is larger than sections from file then there must be a new section in
-            // in the database, add new fields into sections from file with defaults
-            $sectionsFromFileCount = count($sectionsFromFile);
+            // gets the number of sections in the database
             $sectionsCount = count($sections);
 
-            if ($sectionsFromFileCount != $sectionsCount) {
-                for ($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++) {
-                    $sectionsFromFile[$i] = (string) $i;
+            // creates a copy of the database sections to compare against the file sections
+            $database_copy = [];
+            for ($i = 0; $i < $sectionsCount; $i++) {
+                $database_copy[$db_sections[$i]['sections_registration_id']] = (string) $db_sections[$i]['sections_registration_id'];
+            }
+
+            // checks whether or not sections have been added and updates the file sections
+            $result = array_diff_key($database_copy, $sectionsFromFile);
+            if (count($result) > 0) {
+                foreach ($result as $x => $val) {
+                    $sectionsFromFile[$x] = $val;
                 }
             }
 
+            // checks whether or not sections have been removed and updates the file sections
+            $result = array_diff_key($sectionsFromFile, $database_copy);
+            if (count($result) > 0) {
+                foreach ($result as $x => $val) {
+                    unset($sectionsFromFile[$x]);
+                }
+            }
+
+            // Collect sections out of the file
             return (object) $sectionsFromFile;
         }
         else {
@@ -488,7 +503,7 @@ class RainbowCustomization extends AbstractModel {
         // Configure json to go into jobs queue
         $job_json = (object) [];
         $job_json->job = 'RunAutoRainbowGrades';
-        $job_json->semester = $this->core->getConfig()->getSemester();
+        $job_json->semester = $this->core->getConfig()->getTerm();
         $job_json->course = $this->core->getConfig()->getCourse();
 
         // Encode
@@ -496,7 +511,7 @@ class RainbowCustomization extends AbstractModel {
 
         // Create path to new jobs queue json
         $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';

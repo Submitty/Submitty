@@ -175,6 +175,22 @@ class FileUtils {
     }
 
     /**
+     * checks to see if directory is empty, if so return true
+     */
+    public static function isEmptyDir(string $dir): bool {
+        if ($handle = opendir($dir)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file != '.' && $file != '..') {
+                    closedir($handle);
+                    return false;
+                }
+            }
+            closedir($handle);
+        }
+        return true;
+    }
+
+    /**
      * Create a directory if it doesn't already exist. If it's a file, delete the file, and then try to create
      * directory. Additionally, we can specify a certain mode for the directory as well as if we should recursively
      * create any folders specified in $dir if they don't all exist. The mkdir function takes into account the
@@ -582,7 +598,7 @@ class FileUtils {
             $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $file['size'];
 
             //manually check against set size limit
-            //incase the max POST size is greater than max file size
+            //in case the max POST size is greater than max file size
             if ($size > $max_size) {
                 $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }

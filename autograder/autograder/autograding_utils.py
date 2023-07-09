@@ -441,7 +441,10 @@ def archive_autograding_results(
         if os.path.exists(user_assignment_access_filename):
             with open(user_assignment_access_filename, 'r') as access_file:
                 obj = json.load(access_file)
-                first_access_string = obj[0]["timestamp"]
+                # can be empty if the student never clicks on the page and the
+                # instructor makes a submission for the student
+                if len(obj):
+                    first_access_string = obj[0]["timestamp"]
 
     history_file_tmp = os.path.join(tmp_submission, "history.json")
     history_file = os.path.join(tmp_results, "history.json")
@@ -714,6 +717,8 @@ def pattern_copy(what, patterns, source, target, tmp_logs):
         print(what, " pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
             for my_file in glob.glob(os.path.join(source, pattern), recursive=True):
+                if (os.path.islink(my_file)):
+                    continue
                 if (os.path.isfile(my_file)):
                     # grab the matched name
                     relpath = os.path.relpath(my_file, source)

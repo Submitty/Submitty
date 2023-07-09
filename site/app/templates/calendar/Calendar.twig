@@ -5,20 +5,48 @@
     const curr_year = {{ curr_year }};
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
+    const instructor_courses = {{ instructor_courses|json_encode|raw }};
 
-    window.addEventListener("load", function () {
-        loadCalendar({{ view_month }}, {{ view_year }});
+    $( document ).ready(function() {
+        // Get value of the type dropdown
+        const type = $("#calendar-item-type-edit").val();
+        loadCalendar(curr_month, curr_year, curr_day, type);
     });
+
+    function changeView(x) {
+        if (x.value === "month") {
+            document.cookie = "view=month";
+        }
+        else if (x.value === "two_week") {
+            document.cookie = "view=two_week";
+        }
+        else if (x.value === "one_week") {
+            document.cookie = "view=one_week";
+        }
+        loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
+    }
 </script>
+
 
 {# Begin Calendar #}
 <div class="content">
     <h1>Calendar</h1>
     <div class="cal-content">
         <div class="cal-toolbar">
+            {% if instructor_courses|length > 0 %}
+                <button type="button" onclick="openNewItemModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Item
+                </button>
+            {% endif %}
+            
+                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+                    <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
+                    <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
+                    <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
+                </select>
         </div>
 
-        <div class="calendar" style='margin-bottom: 20px' id="full-calendar">
+        <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
         </div>
     </div>
@@ -68,3 +96,6 @@
         </div>
     {% endif %}
 </div>
+
+{{ include('calendar/NewCalendarItem.twig') }}
+{{ include('calendar/EditCalendarItem.twig') }}

@@ -11,7 +11,23 @@ Usage: ./setup_sample_courses.py
 
 The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
-just the ones used for testing.
+just the ones used for testing.)
+
+Note about editing:
+If you make changes that use/alter random number generation, you may need to 
+edit the following files:
+    Peer Review:
+        students.txt
+        graders.txt
+    Office Hours Queue:
+        queue_data.json
+    Discussion Forum:
+        threads.txt
+        posts.txt
+        
+These files are manually written for a given set of users (the set is predetermined due to 
+the random's seed staying the same). If you make any changes that affects the contents of the 
+set these files will be outdated and result in failure of recreate_sample_courses.
 """
 from __future__ import print_function, division
 import argparse
@@ -33,6 +49,7 @@ import os.path
 import string
 import pdb
 import docker
+import random
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
@@ -57,6 +74,12 @@ DB_PORT = 5432
 DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
+# used for constructing the url to clone repos for vcs gradeables
+# with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
+#     submitty_config_json = json.load(submitty_config)
+SUBMISSION_URL = 'submitty_config_json["submission_url"]'
+VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
+
 DB_ONLY = False
 NO_SUBMISSIONS = False
 NO_GRADING = False
@@ -66,7 +89,7 @@ NOW = dateutils.get_current_time()
 
 def main():
     """
-    Main program execution. This gets us our commandline arugments, reads in the data files,
+    Main program execution. This gets us our commandline arguments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY, NO_SUBMISSIONS, NO_GRADING
@@ -106,7 +129,7 @@ def main():
     # permission errors exist) which ends up with just having a ton of
     # build failures. Better to wait on grading any homeworks until
     # we've done all steps of setting up a course.
-    print("pausing the autograding and jobs hander daemons")
+    print("pausing the autograding and jobs handler daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
@@ -167,12 +190,13 @@ def main():
                               user_id=user.id,
                               user_numeric_id = user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -180,11 +204,12 @@ def main():
                               user_id=user.id,
                               user_numeric_id=user.numeric_id,
                               user_password=get_php_db_password(user.password),
-                              user_firstname=user.firstname,
-                              user_preferred_firstname=user.preferred_firstname,
-                              user_lastname=user.lastname,
-                              user_preferred_lastname=user.preferred_lastname,
+                              user_givenname=user.givenname,
+                              user_preferred_givenname=user.preferred_givenname,
+                              user_familyname=user.familyname,
+                              user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
@@ -265,10 +290,10 @@ def get_random_text_from_file(filename):
     line = ""
     with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
-        for num, aline in enumerate(comment):
+        for num, alternate_line in enumerate(comment):
             if random.randrange(num + 2):
                 continue
-            line = aline
+            line = alternate_line
     return line.strip()
 
 
@@ -286,6 +311,19 @@ def generate_random_ta_note():
 
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
+
+def generate_pronouns():
+    pronoun_num = random.random()
+    if pronoun_num <= .05: 
+        pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+        return random.choice(pronoun_list)
+    elif pronoun_num <= .30:
+        return ""
+    elif pronoun_num <= .60:
+        return "She/Her"
+    elif pronoun_num <= .70:
+        return "They/Them"
+    else: return "He/Him"
 
 
 def generate_random_marks(default_value, max_value):
@@ -336,10 +374,10 @@ def generate_random_users(total, real_users):
     :return:
     :rtype: list[User]
     """
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleFirstNames.txt')) as male_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenFirstNames.txt')) as woman_file:
-        last_names = last_file.read().strip().split()
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'familyNames.txt')) as family_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleGivenNames.txt')) as male_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenGivenNames.txt')) as woman_file:
+        family_names = family_file.read().strip().split()
         male_names = male_file.read().strip().split()
         women_names = woman_file.read().strip().split()
 
@@ -349,11 +387,11 @@ def generate_random_users(total, real_users):
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
-                first_name = random.choice(male_names)
+                given_name = random.choice(male_names)
             else:
-                first_name = random.choice(women_names)
-            last_name = random.choice(last_names)
-            user_id = last_name.replace("'", "")[:5] + first_name[0]
+                given_name = random.choice(women_names)
+            family_name = random.choice(family_names)
+            user_id = family_name.replace("'", "")[:5] + given_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
             # create a binary string for the numeric ID
@@ -367,8 +405,9 @@ def generate_random_users(total, real_users):
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "user_numeric_id": numeric_id,
-                             "user_firstname": first_name,
-                             "user_lastname": last_name,
+                             "user_givenname": given_name,
+                             "user_familyname": family_name,
+                             "user_pronouns": generate_pronouns(),
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -552,8 +591,8 @@ def create_gradeable_submission(src, dst):
 
 def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     """
-    Specifically designed helper funtion that copys a annotation from the source to the destination.
-    The source annotation need to be modifed to reflect:
+    Specifically designed helper function that copies a annotation from the source to the destination.
+    The source annotation need to be modified to reflect:
         the file that the annotations belongs to
         the grader that is responsible for the annotation
 
@@ -578,6 +617,40 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     with open(os.path.join(dst, file_name), 'w') as f:
         json.dump(annotation_json, f, indent = 2)
 
+def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory):
+    # a function to commit and push a file to a user's submitty-hosted repository
+    my_cwd = os.getcwd()
+    with TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+        os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
+        os.chdir(os.path.join(temp_dir, user_id))
+        os.system('git checkout main')
+        os.system('git pull')
+        # use the above function to copy the files into the git repo for us
+        dst = os.getcwd()
+        if vcs_subdirectory != '':
+            dst = os.path.join(dst, vcs_subdirectory)
+        
+        create_gradeable_submission(src_file, dst)
+        os.system('git add --all')
+        os.system(f"git config user.email '{user_id}@example.com'")
+        os.system(f"git config user.name '{user_id}'")
+        os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
+        os.system('git push')
+    os.chdir(my_cwd)
+
+def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
+    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main')
+    if vcs_subdirectory != '':
+        if vcs_subdirectory[0] == '/':
+            vcs_subdirectory = vcs_subdirectory[1:]
+        file_path = os.path.join(f'{checkout_path}/tmp', vcs_subdirectory)
+    else:
+        file_path = os.path.join(f'{checkout_path}/tmp')
+
+    shutil.copytree(file_path, f'{checkout_path}', dirs_exist_ok=True)
+    shutil.rmtree(f'{checkout_path}/tmp')
+
 class User(object):
     """
     A basic object to contain the objects loaded from the users.json file. We use this to link
@@ -587,12 +660,13 @@ class User(object):
         id
         numeric_id
         password
-        firstname
-        lastname
+        givenname
+        familyname
+        pronouns
         email
         group
-        preferred_firstname
-        preferred_lastname
+        preferred_givenname
+        preferred_familyname
         access_level
         registration_section
         rotating_section
@@ -603,12 +677,13 @@ class User(object):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
         self.password = self.id
-        self.firstname = user['user_firstname']
-        self.lastname = user['user_lastname']
+        self.givenname = user['user_givenname']
+        self.familyname = user['user_familyname']
+        self.pronouns = user['user_pronouns']
         self.email = self.id + "@example.com"
         self.group = 4
-        self.preferred_firstname = None
-        self.preferred_lastname = None
+        self.preferred_givenname = None
+        self.preferred_familyname = None
         self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
@@ -618,10 +693,10 @@ class User(object):
         self.manual = False
         self.sudo = False
 
-        if 'user_preferred_firstname' in user:
-            self.preferred_firstname = user['user_preferred_firstname']
-        if 'user_preferred_lastname' in user:
-            self.preferred_lastname = user['user_preferred_lastname']
+        if 'user_preferred_givenname' in user:
+            self.preferred_givenname = user['user_preferred_givenname']
+        if 'user_preferred_familyname' in user:
+            self.preferred_familyname = user['user_preferred_familyname']
         if 'user_email' in user:
             self.email = user['user_email']
         if 'user_group' in user:
@@ -825,8 +900,8 @@ class Course(object):
         reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
-                                                       user.get_detail(self.code, "lastname"),
+            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "givenname"),
+                                                       user.get_detail(self.code, "familyname"),
                                                        user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
@@ -929,6 +1004,14 @@ class Course(object):
 
             # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
+
+            checkout_path = os.path.join(self.course_path, "checkout", gradeable.id)
+
+            if gradeable.is_repository:
+                # generate the repos for the vcs gradeable
+                print(f"generating repositories for gradeable {gradeable.id}")
+                subprocess.check_call(f"sudo {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py {self.semester} {self.code} {gradeable.id}", stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
+
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
             submission_count = 0
@@ -968,6 +1051,12 @@ class Course(object):
                         submission_path = os.path.join(gradeable_path, user.id)
                         annotation_path = os.path.join(gradeable_annotation_path, user.id)
 
+                    # need to create the directories for the user/version in "checkout" too for git sunmissions
+                    if gradeable.is_repository:
+                        user_checkout_path = os.path.join(checkout_path, user.id)
+                    else:
+                        user_checkout_path = None
+
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
                             # If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
@@ -989,6 +1078,13 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
+                            if gradeable.is_repository:
+                                if not os.path.exists(checkout_path):
+                                    os.makedirs(checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{checkout_path}"')
+                                if not os.path.exists(user_checkout_path):
+                                    os.makedirs(user_checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{user_checkout_path}"')
 
                             if gradeable.annotated_pdf is True:
                                 if not os.path.exists(gradeable_annotation_path):
@@ -1088,15 +1184,21 @@ class Course(object):
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
                                                 # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
                                                 annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
-                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
+                                                create_pdf_annotations(annotation_file_name, anon_dst, annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version), key)
-                                            create_gradeable_submission(src, dst)
+                                            # To mimic a 'checkout', the VCS gradeable files are cloned to the 'user_checkout_ folder
+                                            # They are also committed to the repository, so clicking regrade works. 
+                                            if gradeable.is_repository:
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
+                                            else:
+                                                create_gradeable_submission(src, dst)
                                     else:
                                         submission = random.choice(gradeable.submissions)
                                         if isinstance(submission, list):
@@ -1105,12 +1207,28 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version))
-                                            create_gradeable_submission(src, dst)
+                                            # To mimic a 'checkout', the VCS gradeable files are cloned to the 'user_checkout_ folder
+                                            # They are also committed to the repository, so clicking regrade works. 
+                                            if gradeable.is_repository:
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
+                                            else:
+                                                dst = os.path.join(submission_path, str(version))
+                                                create_gradeable_submission(src, dst)
                                 random_days -= 0.5
+                            # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
+                            if gradeable.is_repository:
+                                with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
+                                    # the file contains info only if the git repos are non-submitty hosted
+                                    pass
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    open_file.write(dateutils.write_submitty_date(NOW))
 
-                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                                json.dump(json_history, open_file)
+                            else:  
+                                with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
+                                    json.dump(json_history, open_file)
+
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
@@ -1415,7 +1533,6 @@ class Course(object):
                               release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
-                                  option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
                                   response=poll["responses"][i],
@@ -1431,7 +1548,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
                     "student_id": user.id,
-                    "option_id": response_id
+                    "option_id": response_id+1
                 })
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
@@ -1439,7 +1556,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
+                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
                 })
 
         # add responses to DB
@@ -1706,6 +1823,8 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
+        self.using_subdirectory = False
+        self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
         self.precision = 0.5
@@ -1817,12 +1936,15 @@ class Gradeable(object):
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
+            self.student_view_after_grades = False
             self.student_download = True
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
-            if self.is_repository and 'eg_subdirectory' in gradeable:
-                self.subdirectory = gradeable['eg_subdirectory']
+            if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
+                self.using_subdirectory = gradeable['eg_using_subdirectory'] is True
+                self.subdirectory = gradeable['eg_vcs_subdirectory']
+                self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
                 self.peer_grading = gradeable['eg_peer_grading']
             if 'eg_use_ta_grading' in gradeable:
@@ -1848,6 +1970,9 @@ class Gradeable(object):
             if 'eg_annotated_pdf' in gradeable:
                 self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
                 self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "annotation")
+            if 'eg_bulk_test' in gradeable:
+                self.student_view = gradeable['eg_bulk_test'] is True
+                self.student_view_after_grades = gradeable['eg_bulk_test'] is True
 
             self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
             self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
@@ -1939,12 +2064,16 @@ class Gradeable(object):
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
-                         eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
+                         eg_is_repository=self.is_repository, 
+                         eg_using_subdirectory=self.using_subdirectory,
+                         eg_vcs_subdirectory=self.subdirectory,
+                         eg_vcs_partial_path=self.vcs_partial_path,
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
+                         eg_student_view_after_grades=self.student_view_after_grades,
                          eg_student_download=self.student_download,
                          eg_student_submit=self.student_submit,
                          eg_config_path=self.config_path,
@@ -1960,6 +2089,13 @@ class Gradeable(object):
         form_json['gradeable_id'] = self.id
         if self.type == 0:
             form_json['config_path'] = self.config_path
+        if self.is_repository:
+            form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+            form_json['upload_type'] = 'repository'
+            form_json['vcs_partial_path'] = self.vcs_partial_path
+            form_json['using_subdirectory'] = self.using_subdirectory
+            form_json['subdirectory'] = self.subdirectory
+            return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
@@ -1977,7 +2113,7 @@ class Gradeable(object):
             form_json['section_type'] = self.get_submission_type()
             form_json['eg_late_days'] = self.late_days
             form_json['upload_type'] = self.get_upload_type()
-            form_json['upload_repo'] = self.subdirectory
+            form_json['upload_repo'] = ''
             form_json['comment_title'] = []
             form_json['points'] = []
             form_json['eg_extra'] = []

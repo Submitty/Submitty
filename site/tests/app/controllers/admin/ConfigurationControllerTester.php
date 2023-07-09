@@ -42,7 +42,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","regrade_enabled":false,"regrade_message":"Regrade Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -98,8 +98,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'vcs_type'                       => 'git',
             'forum_enabled'                  => true,
             'forum_create_thread_message'    => '',
-            'regrade_enabled'                => false,
-            'regrade_message'                => 'Regrade Message',
+            'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
@@ -181,8 +180,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'vcs_type'                       => 'git',
             'forum_enabled'                  => true,
             'forum_create_thread_message'    => '',
-            'regrade_enabled'                => false,
-            'regrade_message'                => 'Regrade Message',
+            'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
@@ -271,8 +269,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'vcs_type'                       => 'git',
             'forum_enabled'                  => true,
             'forum_create_thread_message'    => '',
-            'regrade_enabled'                => false,
-            'regrade_message'                => 'Regrade Message',
+            'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
@@ -416,13 +413,32 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $queries
             ->expects($this->exactly(4))
             ->method('addNewCategory')
-            ->withConsecutive(
-                [$this->equalTo('General Questions')],
-                [$this->equalTo('Homework Help')],
-                [$this->equalTo('Quizzes')],
-                [$this->equalTo('Tests')]
-            )
-            ->will($this->onConsecutiveCalls(0, 1, 2, 3));
+            ->with($this->callback(function ($value) {
+                switch ($value) {
+                    case 'General Questions':
+                        return true;
+                    case 'Homework Help':
+                        return true;
+                    case 'Quizzes':
+                        return true;
+                    case 'Tests':
+                        return true;
+                    default:
+                        return false;
+                }
+            }))
+            ->will($this->returnCallback(function ($value) {
+                switch ($value) {
+                    case 'General Questions':
+                        return 0;
+                    case 'Homework Help':
+                        return 1;
+                    case 'Quizzes':
+                        return 2;
+                    case 'Tests':
+                        return 3;
+                }
+            }));
 
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();

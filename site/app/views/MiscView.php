@@ -12,7 +12,7 @@ class MiscView extends AbstractView {
         ]);
     }
 
-    public function displayCode($file_type, $filename, $file_contents) {
+    public function displayCode($file_type, $filename, $file_contents, $search_enabled = true) {
         $this->core->getOutput()->setContentOnly(true);
 
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -25,6 +25,18 @@ class MiscView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
+        if ($search_enabled) {
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'search', 'search.js'));
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'search', 'searchcursor.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'match-highlighter.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'matchesonscrollbar.js'));
+            $this->core->getoutput()->addvendorjs(FileUtils::joinpaths('codemirror', 'addon', 'search', 'jump-to-line.js'));
+            $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'addon', 'search', 'matchesonscrollbar.css'));
+
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'addon', 'dialog', 'dialog.js'));
+            $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'addon', 'dialog', 'dialog.css'));
+        }
 
         $this->core->getOutput()->setPageName($filename);
 
