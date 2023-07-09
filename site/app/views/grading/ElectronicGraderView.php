@@ -1365,7 +1365,7 @@ HTML;
         $instructor = false;
         $limimted_access_grader = false;
         $full_access_grader = false;
-        if ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER ) {
+        if ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $instructor = true;
             $limimted_access_grader = true;
             $full_access_grader = true;
