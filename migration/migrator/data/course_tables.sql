@@ -692,7 +692,7 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    url_title character varying(255)
+    title character varying(255)
 );
 
 

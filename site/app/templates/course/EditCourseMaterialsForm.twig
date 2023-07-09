@@ -9,9 +9,9 @@
             <input type="text" id="new-file-name" class="full-width" />
         </label>
 
-        <label id="edit-url-title-label">
+        <label id="edit-title-label">
             <span><strong>File Name </strong></span>
-            <input type="text" id="edit-url-title" class="full-width" />
+            <input type="text" id="edit-title" class="full-width" />
         </label>
 
         <fieldset id="edit_sections">
@@ -91,7 +91,7 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                let url_title = document.getElementById("edit-url-title").value;
+                let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");
                 let url_url_val = url_url.disabled ? null : url_url.value;
                 let file_path = document.getElementById("new-file-name").value;
@@ -100,7 +100,7 @@
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title, overwrite, file_path);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, title, overwrite, file_path);
         };
 
         const edit_fp = flatpickr('.edit-picker', {

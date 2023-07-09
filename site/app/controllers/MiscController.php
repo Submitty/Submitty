@@ -246,7 +246,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
-                $url_title = $cm->getUrlTitle();
+                $title = $cm->getTitle();
             }
         }
 
@@ -283,8 +283,8 @@ class MiscController extends AbstractController {
             }
         }
 
-        if (isset($url_title) && $url_title !== "") {
-            $filename = $url_title;
+        if (isset($title) && $title !== "") {
+            $filename = $title;
         }
         else {
             $filename = pathinfo($path, PATHINFO_BASENAME);

@@ -63,9 +63,9 @@
             <div class="file-viewer">
                 {% if course_material.isLink %}
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
-                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
+                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getTitle }}</a>
                 {% else %}
-                    {% set displayName = course_material.getUrlTitle|default(name) %}
+                    {% set displayName = course_material.getTitle|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
                     {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
@@ -76,7 +76,7 @@
                     <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ displayName }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
-                    {% set url_title = course_material.getUrlTitle %}
+                    {% set title_name = course_material.getTitle %}
                     {% if course_material.isLink %}
                         {% set url_url = course_material.getUrl %}
                     {% else %}
@@ -91,7 +91,7 @@
                         data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}
                         data-hidden-state="{{course_material.isHiddenFromStudents}}"
                         data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
-                        data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}"
+                        data-is-link="{{ course_material.isLink }}" data-title="{{ title_name }}"
                         data-link-url="{{ url_url }}"
                         data-path = "{{ path }}"
                     >

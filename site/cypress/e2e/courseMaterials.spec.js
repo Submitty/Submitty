@@ -67,7 +67,7 @@ describe('Test cases revolving around course material uploading and access contr
     it('Should allow uploading links', () => {
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type('Test URL');
+        cy.get('#title').type('Test URL');
         cy.get('#url_url').type(buildUrl(['sample', 'users'], true));
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -630,14 +630,14 @@ describe('Test cases revolving around course material uploading and access contr
         for (let i = 0; i <= 1; i++) {
             cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
             cy.get('#url_selection_radio').click();
-            cy.get('#url_title').type(link_titles[i]);
+            cy.get('#title').type(link_titles[i]);
             cy.get('#url_url').type(sample_url);
             cy.waitPageChange(() => {
                 cy.get('#submit-materials').click();
             });
         }
         cy.get('.file-viewer > a').contains(link_titles[1]).parent().find('.fa-pencil-alt').click();
-        cy.get('#edit-url-title').clear().type(link_titles[0]);
+        cy.get('#edit-title').clear().type(link_titles[0]);
         cy.get('#submit-edit').click();
         cy.get('#overwrite-course-material-form', {timeout: 10000}).should('be.visible');
         cy.get('#existing-names').should('have.length', 1);
@@ -657,7 +657,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#title').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -667,7 +667,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a/b');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#title').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -687,7 +687,7 @@ describe('Test cases revolving around course material uploading and access contr
         // Confirm that link data was preserved
         for (let i = -1; i >= -3; i -= 2) {
             cy.get('.fa-pencil-alt').eq(i).click();
-            cy.get('#edit-url-title').should('have.value', link_titles[(i + 3) / 2]);
+            cy.get('#edit-title').should('have.value', link_titles[(i + 3) / 2]);
             cy.get('#edit-url-url').should('have.value', test_url);
             cy.get('#edit-course-materials-form > .popup-box > .popup-window > .form-title > .btn').click();
         }
@@ -708,7 +708,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[0]);
+        cy.get('#title').type(link_titles[0]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -718,7 +718,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('[onclick="newUploadCourseMaterialsForm()"]').click();
         cy.get('#input-provide-full-path').type('a/b');
         cy.get('#url_selection_radio').click();
-        cy.get('#url_title').type(link_titles[1]);
+        cy.get('#title').type(link_titles[1]);
         cy.get('#url_url').type(test_url);
         cy.waitPageChange(() => {
             cy.get('#submit-materials').click();
@@ -739,7 +739,7 @@ describe('Test cases revolving around course material uploading and access contr
         // Confirm that link data was preserved
         for (let i = 0; i < 2; i++) {
             cy.get('.fa-pencil-alt').eq(i + 2).click();
-            cy.get('#edit-url-title').should('have.value', link_titles[1 - i]);
+            cy.get('#edit-title').should('have.value', link_titles[1 - i]);
             cy.get('#edit-url-url').should('have.value', test_url);
             cy.get('#edit-course-materials-form > .popup-box > .popup-window > .form-title > .btn').click();
         }

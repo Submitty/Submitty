@@ -1242,14 +1242,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     let linkToBeAdded = false;
 
     if ($('#url_selection').is(':visible')) {
-        if ($('#url_title').val() !== '' && $('#url_url').val() !== '' ) {
+        if ($('#title').val() !== '' && $('#url_url').val() !== '' ) {
             linkToBeAdded = true;
 
-            let link_title = $('#url_title').val();
-            formData.append('original_title', link_title);
-            link_title = encodeURIComponent(`link-${link_title}`);
+            let title = $('#title').val();
+            formData.append('original_title', title);
+            title = encodeURIComponent(`link-${title}`);
 
-            formData.append('url_title', link_title);
+            formData.append('title', title);
             formData.append('url_url', $('#url_url').val());
         }
     }
@@ -1295,7 +1295,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite, file_path) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, title, overwrite, file_path) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1345,12 +1345,12 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         }
     }
 
-    if (link_title !== null) {
-        formData.append('original_title', link_title);
+    if (title !== null) {
+        formData.append('original_title', title);
         if (link_url !== null) {
-            link_title = encodeURIComponent(`link-${link_title}`);
+            title = encodeURIComponent(`link-${title}`);
         }
-        formData.append('link_title', link_title);
+        formData.append('title', title);
     }
 
     if (overwrite !== null) {
