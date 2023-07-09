@@ -19,7 +19,6 @@ use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
 $anon_status = 0;
-
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
