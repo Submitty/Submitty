@@ -1124,6 +1124,8 @@ HTML;
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
         $gradeable = $graded_gradeable->getGradeable();
+        global $anon_status;
+        $anon_status = $anon_mode;
         $isBlind = false;
         if ($gradeable->getLimitedAccessBlind() == 2) {
             $isBlind = true;
