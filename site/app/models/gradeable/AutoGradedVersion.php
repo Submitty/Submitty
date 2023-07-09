@@ -142,11 +142,12 @@ class AutoGradedVersion extends AbstractModel {
                 $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
                 $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
                 foreach ($user_assignment_settings as $file => $details) {
-                    if (basename($file) === 'user_assignment_settings.json') {
-                        $this->files[$dir][0][$file] = $details;
+                    if (basename($file) === 'user_assignment_settings.json') 
+                    {
+                       $this->meta_files[$dir][$file] = $details;
                     }
                 }
-            }
+            } 
 
             // If there is only one part (no separation of upload files),
             //  be sure to set the "Part 1" files to the "all" files

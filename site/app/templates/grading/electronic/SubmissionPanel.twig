@@ -35,7 +35,7 @@
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ _self.display_files(submissions, "s", 0, "submissions") }}
-                {% if instructor %}
+               {% if (instructor or limited_access_grader or full_access_grader) and  (not anon_status)   %}
                     {{ _self.display_file('user_assignment_settings.json', submissions['submissions']['user_assignment_settings.json'], 'u', 0, 'user_assignment_settings.json') }}
                 {% endif %}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
@@ -74,19 +74,20 @@
 {% endmacro %}
 
 {% macro display_file(dir, path, id, indent, title) %}
-    {% if not (dir == "user_assignment_settings.json" and title == "submissions") %}
+    {% if  not (dir == "user_assignment_settings.json"  and  title == "submissions") %}
     <div>
         <div class="file-viewer">
             <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
-                <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                <span class="fas fa-file-alt fa-1x" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ path|url_encode }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            <div style="margin-bottom: 5.5px;"></div>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
-    {% endif %}
+        {% endif %}
 {% endmacro %}
 
 {% macro display_dir(dir, contents, id, indent, title) %}

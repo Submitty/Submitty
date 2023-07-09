@@ -18,6 +18,8 @@ use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
+$anon_status = 0;
+
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
@@ -1359,10 +1361,16 @@ HTML;
             $student_grader = true;
         }
         $instructor = false;
-        if ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR) {
+        $limimted_access_grader = false;
+        $full_access_grader = false;
+        if ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER ) {
             $instructor = true;
+            $limimted_access_grader = true;
+            $full_access_grader = true;
         }
+
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
+        global $anon_status;
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
@@ -1376,6 +1384,8 @@ HTML;
             "submitter_id" => $submitter_id,
             "student_grader" => $student_grader,
             "instructor" => $instructor,
+            "limited_access_grader" => $limimted_access_grader,
+            "full_access_grader" => $full_access_grader,
             "anon_submitter_id" => $anon_submitter_id,
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
@@ -1384,6 +1394,7 @@ HTML;
             "results" => $results,
             "results_public" => $results_public,
             "active_version" => $display_version,
+            "anon_status" => $anon_status,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file'])
         ]);
