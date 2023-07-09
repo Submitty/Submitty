@@ -18,7 +18,7 @@ use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
-$anon_status = 0;
+
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
@@ -36,6 +36,11 @@ class ElectronicGraderView extends AbstractView {
      * @param int $submissions_in_queue
      * @return string
      */
+
+    /**
+     * @var int
+     */
+    public $anon_status = 0;
 
     private $user_id_to_User_cache = [];
 
@@ -1123,8 +1128,7 @@ HTML;
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
         $gradeable = $graded_gradeable->getGradeable();
-        global $anon_status;
-        $anon_status = $anon_mode;
+        $this->anon_status = $anon_mode;
         $isBlind = false;
         if ($gradeable->getLimitedAccessBlind() == 2) {
             $isBlind = true;
@@ -1371,7 +1375,6 @@ HTML;
         }
 
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
-        global $anon_status;
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
@@ -1395,7 +1398,7 @@ HTML;
             "results" => $results,
             "results_public" => $results_public,
             "active_version" => $display_version,
-            "anon_status" => $anon_status,
+            "anon_status" => $this->anon_status,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file'])
         ]);
