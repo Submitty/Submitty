@@ -87,7 +87,7 @@
 {% macro display_dir(dir, contents, id, indent, title) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>

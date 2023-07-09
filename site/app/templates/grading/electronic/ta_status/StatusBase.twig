@@ -140,7 +140,7 @@
     {# Top buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            <a class="btn btn-primary" style="float: left"
+            <a class="btn btn-primary" data-testid="Grading Index" style="float: left"
                 href="{{ details_url }}">
 
                 Grading Index
