@@ -1242,7 +1242,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     let linkToBeAdded = false;
 
     if ($('#url_selection').is(':visible')) {
-        if ($('#title').val() !== '' && $('#url_url').val() !== '' ) {
+        if ($('#title').val() !== '' && $('#url_url').val() !== '' && window.isValidFileName($('#title').val())) {
             linkToBeAdded = true;
 
             let title = $('#title').val();
@@ -1345,7 +1345,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         }
     }
 
-    if (title !== null) {
+    if (title !== null && window.isValidFileName(title)) {
         formData.append('original_title', title);
         if (link_url !== null) {
             title = encodeURIComponent(`link-${title}`);
