@@ -18,7 +18,6 @@ use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
-
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
