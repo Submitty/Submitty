@@ -1354,7 +1354,7 @@ class ElectronicGraderController extends AbstractController {
         $csvdata = "Given Name,Family Name,User ID,Team ID,Team Name,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
-                foreach ($team->getMemberUsers() as $user) {
+                foreach ($team->getMemberUsers() as $user){
                     $csvdata .= implode(',', [
                         $user->getDisplayedGivenName(),
                         $user->getDisplayedFamilyName(),
