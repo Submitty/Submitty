@@ -1,19 +1,76 @@
 <div id="courses" class="content">
-{% for file in files %}
-    <img id = "club_banners" class="club_banners {{ file.filename }}" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
-    <br>
-{% endfor %}
+<div class="banner">
+  {% for file in files %}
+    <img id="club_banners_{{ file.filename }}" class="club_banners {{ file.filename }}" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
+  {% endfor %}
+  <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
+  <button class="next-button" onclick="changeImage(1)">&#10095;</button>
+</div>
+
+
+
 
 <script>
+
+    var currentImageIndex = 0;
+
+
+
+
+    var hiddenImages = getHiddenImages();
+    var images = document.getElementsByClassName('club_banners');
+    images[currentImageIndex].classList.add("active");
+    for (var i = 0; i < images.length; i++) {
+        var className = images[i].className.split(' ')[1];
+        if (hiddenImages.includes(className)) {
+            console.log(hiddenImages);
+            images[i].style.display = 'none';
+        }
+    }
+
+    function changeImage(n) {
+      var originalIndex = currentImageIndex;
+
+      if (images[currentImageIndex].style.display !== 'none') {
+        images[currentImageIndex].classList.remove("active");
+      }
+      currentImageIndex += n;
+      if (currentImageIndex < 0) {
+        currentImageIndex = images.length - 1;
+      } else if (currentImageIndex >= images.length) {
+        currentImageIndex = 0;
+      }
+
+
+      // Wrap around to the first or last image if the index goes out of bounds
+      while (images[currentImageIndex].style.display === 'none' && currentImageIndex !== originalIndex) {
+        currentImageIndex += n;
+              if (currentImageIndex < 0) {
+                 currentImageIndex = images.length - 1;
+              } else if (currentImageIndex >= images.length) {
+                 currentImageIndex = 0;
+               }
+      }
+
+      images[currentImageIndex].classList.add("active");
+      if (images[currentImageIndex].style.display === 'none' && currentImageIndex === originalIndex) {
+        document.querySelector(".banner").style.display = 'none';
+      }
+    }
+
+
+
+
     function toggleImage(image) {
         var className = image.className.split(' ')[1]; 
         var hiddenImages = getHiddenImages();
         var imageIndex = hiddenImages.indexOf(className);
         if (imageIndex === -1) {
-            image.style.display = 'none';  
+            image.style.display = 'none'; 
             hiddenImages.push(className);  
         } 
-        setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+        setCookie('hiddenImages', JSON.stringify(hiddenImages));
+        changeImage(1);
     }
 
     function getHiddenImages() {
@@ -23,7 +80,7 @@
 
     function setCookie(name, value) {
         var date = new Date();
-        date.setFullYear(date.getFullYear() + 100); // Set expiration to 100 years from now
+        date.setFullYear(date.getFullYear() + 100); 
         document.cookie = name + '=' + (value || '') + '; path=/';
     }
 
@@ -42,14 +99,6 @@
         return null;
     }
 
-    var hiddenImages = getHiddenImages();
-    var images = document.getElementsByClassName('club_banners');
-    for (var i = 0; i < images.length; i++) {
-        var className = images[i].className.split(' ')[1];
-        if (hiddenImages.includes(className)) {
-            images[i].style.display = 'none';
-        }
-    }
 </script>
 
 
