@@ -179,7 +179,6 @@ class HomeworkView extends AbstractView {
         $active_days_charged = $late_day_info !== null ? $late_day_info->getLateDaysCharged() : $active_days_late - $extensions;
         $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() :  $late_days_remaining;
 
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getLateDays();
 
         $error = false;
@@ -350,7 +349,6 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
         }
         $this->core->getOutput()->addInternalJs('submission-page.js');
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $charged_late_days =  $late_day_info !== null ? $late_day_info->getLateDaysCharged() : 0;
         $remaining_late_days_for_gradeable = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() : 0;
@@ -449,10 +447,9 @@ class HomeworkView extends AbstractView {
 
         // Grab all team member late day information
         $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
-        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+        $min_team_member_late_days = $team_ldi !== null ? min(array_map(function ($ldi) {
             if ($ldi !== null) {
-                $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
-                return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+                return $ldi->getLateDaysRemaining();
             }
             else {
                 return 0;
@@ -510,7 +507,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
+            'min_team_member_late_days' => $min_team_member_late_days,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -524,6 +521,7 @@ class HomeworkView extends AbstractView {
                 }
             },
             'late_day_exceptions' => $late_day_exceptions,
+            'team_ldi' => $team_ldi,
             'charged_late_days' => $charged_late_days,
             'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
