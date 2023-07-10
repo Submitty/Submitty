@@ -1,14 +1,15 @@
 <div id="courses" class="content">
 {% for file in files %}
-    <img src="{{ file.image_link }}" alt="File: {{ file.filename }}" width="800" height="70"/>
+    <img id = "club_banners" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
     <br>
 {% endfor %}
 
 
-
-
-
-
+<script>
+    function toggleImage(img) {
+        img.style.display = "none";
+    }
+</script>
 
 
 

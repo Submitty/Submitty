@@ -12,3 +12,11 @@
     white-space: normal;
     word-wrap: break-word;
 }
+
+
+#club_banners {
+    border-style: double;
+    border-width: 5px;
+    width: 800px;
+    height: 70px;
+}
