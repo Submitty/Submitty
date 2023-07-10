@@ -7,7 +7,7 @@ parameters:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
     reportAlwaysTrueInLastCondition: true
-    level: 5
+    level: 6
 
 services:
     - class: tests\phpstan\ModelClassExtension
