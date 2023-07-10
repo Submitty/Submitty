@@ -196,7 +196,7 @@ div.btn-container {
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
-#regrade_request_enable_container {
+#grade_inquiry_enable_container {
     margin-top: 10px;
 }
 
@@ -205,9 +205,10 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container {
+#team-settings-container, #subdirectory-settings-container {
     margin-top: 10px;
 }
+
 
 #rebuild-status-panel {
     display: inline-block;
