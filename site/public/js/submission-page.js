@@ -1,5 +1,6 @@
 /* exported openActionsPopup */
 /* exported initializeTimer */
+/* exported checkDeadline */
 function openActionsPopup(popup_css, element_id) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${popup_css}" />`;
     elem_html += document.getElementById(element_id).innerHTML;
