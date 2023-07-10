@@ -115,7 +115,7 @@ Vagrant.configure(2) do |config|
       config.vm.define worker_name do |ubuntu|
         # If this IP address changes, it must be changed in install_system.sh and
         # CONFIGURE_SUBMITTY.py to allow the ssh connection
-        ubuntu.vm.network "private_network", ip: "192.168.56.21"
+        ubuntu.vm.network "private_network", ip: "192.168.56.#{i}"
         ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220 + i, id: 'ssh'
         ubuntu.vm.provision 'shell', inline: worker_script
       end
