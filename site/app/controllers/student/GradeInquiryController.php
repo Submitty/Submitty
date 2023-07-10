@@ -44,11 +44,17 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
 
+
+        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
         if ($graded_gradeable->hasTaGradingInfo()) {
             $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
             foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
                 foreach ($container->getGradedComponents() as $component_grade) {
-                    $gc_id = $component_grade->getComponentId();
+                    if ($gc_id == null) {
+                        $gc_id = $component_grade->getComponentId();
+                    }
+
                 }
             }
         } else {
