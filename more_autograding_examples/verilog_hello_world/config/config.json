@@ -15,7 +15,7 @@
     },
     // use the verilog container for grading
     "container_options": {
-        "container_image": "tkoz0/submitty-verilog"
+        "container_image": "submitty/verilog:latest"
     },
     "testcases": [
         {
