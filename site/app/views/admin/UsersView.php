@@ -91,7 +91,7 @@ class UsersView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
-            "semester" => $this->core->getConfig()->getTerm(),
+            "term" => $this->core->getConfig()->getTerm(),
             "active_grader_columns" => explode('-', $active_grader_columns)
         ]);
     }
