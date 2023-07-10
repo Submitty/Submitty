@@ -1,13 +1,54 @@
 <div id="courses" class="content">
 {% for file in files %}
-    <img id = "club_banners" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
+    <img id = "club_banners" class="club_banners {{ file.filename }}" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
     <br>
 {% endfor %}
 
-
 <script>
-    function toggleImage(img) {
-        img.style.display = "none";
+    function toggleImage(image) {
+        var className = image.className.split(' ')[1]; 
+        var hiddenImages = getHiddenImages();
+        var imageIndex = hiddenImages.indexOf(className);
+        if (imageIndex === -1) {
+            image.style.display = 'none';  
+            hiddenImages.push(className);  
+        } 
+        setCookie('hiddenImages', JSON.stringify(hiddenImages));  
+    }
+
+    function getHiddenImages() {
+        var hiddenImagesCookie = getCookie('hiddenImages');
+        return hiddenImagesCookie ? JSON.parse(hiddenImagesCookie) : [];
+    }
+
+    function setCookie(name, value) {
+        var date = new Date();
+        date.setFullYear(date.getFullYear() + 100); // Set expiration to 100 years from now
+        document.cookie = name + '=' + (value || '') + '; path=/';
+    }
+
+    function getCookie(name) {
+        var nameEQ = name + '=';
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            while (cookie.charAt(0) === ' ') {
+                cookie = cookie.substring(1, cookie.length);
+            }
+            if (cookie.indexOf(nameEQ) === 0) {
+                return cookie.substring(nameEQ.length, cookie.length);
+            }
+        }
+        return null;
+    }
+
+    var hiddenImages = getHiddenImages();
+    var images = document.getElementsByClassName('club_banners');
+    for (var i = 0; i < images.length; i++) {
+        var className = images[i].className.split(' ')[1];
+        if (hiddenImages.includes(className)) {
+            images[i].style.display = 'none';
+        }
     }
 </script>
 
