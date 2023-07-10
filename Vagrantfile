@@ -95,7 +95,15 @@ Vagrant.configure(2) do |config|
   
   custom_box = ENV.has_key?('VAGRANT_BOX')
 
-  num_workers = Integer(ENV.fetch('WORKERS', 0))
+  # Get the number of worker machines
+  machines_path = File.join(__dir__, '.vagrant/machines')
+  num_workers = Integer(ENV.fetch('WORKERS', 
+    Dir.exist?(machines_path) ?
+      Dir.children(machines_path).select {
+          |machine| machine.start_with?('submitty-worker')
+      }.length
+    : 0
+  ))
 
   mount_options = []
 
@@ -111,11 +119,11 @@ Vagrant.configure(2) do |config|
 
   if num_workers
     for i in 1..num_workers do
-      worker_name = "submitty-worker" + num_workers != 1 ? "-#{i}" : ''
+      worker_name = "submitty-worker" + (num_workers != 1 ? "-#{i}" : '')
       config.vm.define worker_name do |ubuntu|
         # If this IP address changes, it must be changed in install_system.sh and
         # CONFIGURE_SUBMITTY.py to allow the ssh connection
-        ubuntu.vm.network "private_network", ip: "192.168.56.#{i}"
+        ubuntu.vm.network "private_network", ip: "192.168.56.2#{i}"
         ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220 + i, id: 'ssh'
         ubuntu.vm.provision 'shell', inline: worker_script
       end
