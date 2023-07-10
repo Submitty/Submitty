@@ -32,32 +32,29 @@
 $stdout.sync = true
 $stderr.sync = true
 
-extra_command = ''
-autostart_worker = false
-if ENV.has_key?('NO_SUBMISSIONS')
-    extra_command << '--no_submissions '
-end
-if ENV.has_key?('EXTRA')
-    extra_command << ENV['EXTRA']
-end
-if ENV.has_key?('WORKER_PAIR')
-    autostart_worker = true
-    extra_command << '--worker-pair '
-end
+def gen_scripts()
+  extra_command = [
+    ENV.has_key?('WORKERS') ? '--worker-pair' : '',
+    ENV.has_key?('NO_SUBMISSIONS') ? '--no_submissions' : '',
+    ENV.fetch('EXTRA', '')
+  ].join(' ')
 
-$script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
+  script = <<SCRIPT
+  GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+  DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+  VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+  bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
-$worker_script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
+  worker_script = <<SCRIPT
+  GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+  DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+  VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+  bash ${GIT_PATH}/.setup/install_worker.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
+
+  return script, worker_script
+end
 
 base_boxes = Hash[]
 
@@ -98,6 +95,8 @@ Vagrant.configure(2) do |config|
   
   custom_box = ENV.has_key?('VAGRANT_BOX')
 
+  num_workers = Integer(ENV.fetch('WORKERS', 0))
+
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
@@ -108,12 +107,18 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  config.vm.define 'submitty-worker', autostart: autostart_worker do |ubuntu|
-    # If this IP address changes, it must be changed in install_system.sh and
-    # CONFIGURE_SUBMITTY.py to allow the ssh connection
-    ubuntu.vm.network "private_network", ip: "192.168.56.21"
-    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: $worker_script
+  script, worker_script = gen_scripts()
+
+  if num_workers
+    for i in 1..num_workers do
+      config.vm.define 'submitty-worker-' + i.to_s do |ubuntu|
+        # If this IP address changes, it must be changed in install_system.sh and
+        # CONFIGURE_SUBMITTY.py to allow the ssh connection
+        ubuntu.vm.network "private_network", ip: "192.168.56.21"
+        ubuntu.vm.network 'forwarded_port', guest: 22, host: 2220, id: 'ssh'
+        ubuntu.vm.provision 'shell', inline: worker_script
+      end
+    end
   end
 
   # Our primary development target, RPI uses it as of Fall 2021
@@ -123,7 +128,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
     ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
     ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: $script
+    ubuntu.vm.provision 'shell', inline: script
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
