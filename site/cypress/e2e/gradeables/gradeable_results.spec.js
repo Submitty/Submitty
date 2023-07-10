@@ -46,7 +46,6 @@ describe('Testing functionality of Autograder Results', () => {
         cy.get('.loading-tools-show').eq(1).click();
         cy.get('.loading-tools-in-progress').first().click(); //cancel
         cy.get('#testcase_1').should('have.css', 'display').and('match', /none/);
-
     });
 
-})
+});
