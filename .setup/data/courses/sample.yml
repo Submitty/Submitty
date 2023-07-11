@@ -540,6 +540,7 @@ gradeables:
     g_ta_view_start_date: 1970-01-01 23:59:59
     eg_is_repository: true
     eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
+    eg_using_subdirectory: false
     eg_vcs_subdirectory: ""
     g_title: Open VCS Homework
     gradeable_config: vcs_submissions
@@ -609,6 +610,7 @@ gradeables:
     g_ta_view_start_date: 1970-01-01 23:59:59
     eg_is_repository: true
     eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
+    eg_using_subdirectory: true
     eg_vcs_subdirectory: "src"
     g_title: Subdirectory VCS Homework
     gradeable_config: vcs_submissions

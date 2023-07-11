@@ -84,7 +84,7 @@ class GradeableUtils {
 
         // Load the gradeable information for each course
         foreach ($courses as $course) {
-            $gradeables_of_course = self::getGradeablesFromCourse($core, $course->getSemester(), $course->getTitle(), $calendar_messages);
+            $gradeables_of_course = self::getGradeablesFromCourse($core, $course->getTerm(), $course->getTitle(), $calendar_messages);
             $gradeables = array_merge($gradeables, $gradeables_of_course["gradeables"]);
             $graded_gradeables = array_merge($graded_gradeables, $gradeables_of_course["graded_gradeables"]);
             $submit_btns = array_merge($submit_btns, $gradeables_of_course["submit_btns"]);
@@ -102,7 +102,7 @@ class GradeableUtils {
     public static function getGradeablesFromUserAndCourse(Core $core, array &$calendar_messages): array {
         $gradeables_of_course = self::getGradeablesFromCourse(
             $core,
-            $core->getConfig()->getSemester(),
+            $core->getConfig()->getTerm(),
             $core->getConfig()->getCourse(),
             $calendar_messages,
             false
