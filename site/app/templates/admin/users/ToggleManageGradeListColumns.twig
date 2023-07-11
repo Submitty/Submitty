@@ -1,0 +1,49 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}toggle-columns-form{% endblock %}
+{% block title %}Toggle Columns{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <p class="toggle-columns-instructions">
+        Select which columns you would like to display.
+    </p>
+    <div class="toggle-columns-menu">
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>User ID</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>First Name</label>   
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Last Name</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>User Group</label> 
+        </div>
+        <div class="toggle-checkbox-area">   
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Registration Sections</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Edit Grader</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box">
+            <label>Demote Grader</label>
+        </div>
+    </div>
+    <div class="toggle-all-buttons">
+        <a href="javascript:fillAllCheckboxes(true)" class="btn btn-primary">All On</a>
+        <a href="javascript:fillAllCheckboxes(false)" class="btn btn-primary">All Off</a>
+    </div>
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageGradersColumns()"/>
+
+{% endblock %}
