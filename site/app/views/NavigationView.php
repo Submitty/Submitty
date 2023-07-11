@@ -651,7 +651,7 @@ class NavigationView extends AbstractView {
                 ]);
             }
 
-            if ($gradeable->anyActiveRegradeRequests()) {
+            if ($gradeable->anyActiveGradeInquiries()) {
                 //Open grade inquiries
                 return new Button($this->core, [
                     "title" => "REGRADE",

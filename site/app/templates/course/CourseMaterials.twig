@@ -8,7 +8,7 @@
 
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         {# button to open all of the subfolders and cookie it#}            
-        <a onclick='Cookies.set("foldersOpen",openAllDivForCourseMaterials());' id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
+        <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
         {% if user_group == 1 %}
             {# button to set the release dates of all files in the page/course materials #}
             <a
@@ -40,15 +40,17 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
+        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, 
+        material_list, date_format, folder_ids, seen, folder_visibilities, "root") }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
     {% for name, course_material in course_materials %}
+        {% set sub_path = "#{current_path}/#{name}" %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
         {% else %}
             {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format, folder_ids, seen) }}
         {% endif %}
@@ -153,20 +155,21 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
-    {% else %}
+        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities,
+        material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+    {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
-                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="Cookies.set('{{ folder_path }}',openDivForCourseMaterials('{{ id }}')+'{{ id }}')" tabindex="0">
+                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setFolderCookie('{{ folder_path }}', '{{ id }}', toggleCMFolder('{{ id }}'))" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </a>
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
                     <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}", "{{ id }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
                 {% if not seen[folder_path] %}
@@ -174,13 +177,24 @@
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
-                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen) }}
+                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path,
+                directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
             </div>
         </div>
     {% endif %}
 {% endmacro %}
 
 <script>
+    function setFolderCookie(folderPath, id, open) {
+        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+        folderData[folderPath] = { id, open };
+        Cookies.set('cm_folder_data', JSON.stringify(folderData));
+    }
+
+    function toggleFoldersOpen(){
+        Cookies.remove('cm_folder_data');
+        Cookies.set("foldersOpen", toggleCMFolders());
+    }
     {% if user_group == 1 %}
 
         function handleHideMaterialsCheckboxChange(clicked) {
@@ -215,47 +229,14 @@
 
     window.onload = function () {
         //determine if folders have been left open or closed
-        var folderCookie = Cookies.get('foldersOpen') || '';
-        //if the cookie says it is open
-        if(folderCookie == "open"){
-            //open all the folders
-            openAllDivForCourseMaterials();
-            //
-            {% for file in material_list %}
-            //if one of the subdirs, check if it is closed post opening all
-            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
-            if(subFolderCookie.indexOf("closed")==0){
-                //if closed. close it after it has been opened by the override above
-                closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+        const foldersOpen = Boolean(JSON.parse(Cookies.get('foldersOpen') || 'false'));
+        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+        //open/close folders on screen as directed
+        toggleCMFolders(foldersOpen);
+        for (const data of Object.values(folderData)) {
+            if (!data.open === foldersOpen) {
+                toggleCMFolder(data.id, !foldersOpen);
             }
-            {% endfor %}
-        }
-        else{
-            //makes sure that opened folders don't get opened multiple times
-            let trackOpens = new Map();
-            //goes through all possible directories
-            {% for file in material_list %}
-            //get the cookie for each dir
-            var subFolderCookie = Cookies.get("{{ file.getPath }}".substr(0,'{{ file.getPath }}'.lastIndexOf("/"))) || '';
-            //if the folder is open
-            if(subFolderCookie.indexOf("open")==0){
-                //check if the folder has been opened already (do it it again will close it)
-                if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
-                    //undefined means it has not been opened
-                    //set the value as open so it will not be reopened
-                    trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
-                    //open the folder
-                    openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
-                }
-            }
-            else{
-                if(subFolderCookie.indexOf("closed")==0){
-                    //if the folder should be closed, close it
-                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-                    //there's no way to open it in that function
-                }
-            }
-            {% endfor %}
         }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = Cookies.get('jumpToScrollPosition') || '';
@@ -345,7 +326,7 @@
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
             const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
             for (const cm_id of cm_ids) {
-                openDivForCourseMaterials(cm_id);
+                toggleCMFolder(cm_id);
             }
             // jump to last location if scroll is enabled.
             window.scrollTo(0, jumpToScrollPosition);

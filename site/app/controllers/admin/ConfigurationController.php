@@ -44,7 +44,7 @@ class ConfigurationController extends AbstractController {
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
             'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
-            'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
+            'grade_inquiry_message'          => $this->core->getConfig()->getGradeInquiryMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
@@ -62,7 +62,7 @@ class ConfigurationController extends AbstractController {
             $admin_in_course =  $this->core->getQueries()->checkIsInstructorInCourse(
                 $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                 $this->core->getConfig()->getCourse(),
-                $this->core->getConfig()->getSemester()
+                $this->core->getConfig()->getTerm()
             );
         }
 

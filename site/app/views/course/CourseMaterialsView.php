@@ -22,6 +22,7 @@ class CourseMaterialsView extends AbstractView {
         $directories = [];
         $directory_priorities = [];
         $seen = [];
+        $folder_visibilities = [];
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
@@ -135,6 +136,8 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
+        $this->setFolderVisibilities($final_structure, $folder_visibilities);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -142,6 +145,7 @@ class CourseMaterialsView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "seen" => $seen,
+            "folder_visibilities" => $folder_visibilities,
             "base_course_material_path" => $base_course_material_path,
             "directory_priorities" => $directory_priorities,
             "material_list" => $course_materials_db,
@@ -191,5 +195,52 @@ class CourseMaterialsView extends AbstractView {
             }
         }
         return $has_unseen;
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities -  Dictionary: path name => bool. True if visible to students, false if not.
+     */
+    private function setFolderVisibilities(array $course_materials, array &$folder_visibilities): void {
+        foreach ($course_materials as $path => $course_material) {
+            if (is_array($course_material)) {
+                // Found root-level folder; this folder could be invisible
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, "root/$path");
+            }
+        }
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
+     * @param string $current_path - Path to the folder that $course_materials represents.
+     */
+    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $current_path): void {
+        $cur_visibility = false;
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                // Material is actually folder
+                $sub_path = "$current_path/$name";
+
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $sub_path);
+
+                // At least one file visible in this folder
+                if ($folder_visibilities[$sub_path]) {
+                    $cur_visibility = true;
+                }
+            }
+            else {
+                // Material is file
+                if (!$course_material->isHiddenFromStudents()) {
+                    $cur_visibility = true;
+                }
+            }
+        }
+
+        $folder_visibilities[$current_path] = $cur_visibility;
     }
 }

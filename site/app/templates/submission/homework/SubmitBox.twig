@@ -171,8 +171,16 @@
 
         {% endif %}
 
+        {% if vcs_host_type == 4 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: Please push all changes before grading.</em></span><br />
+            <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
+            <br><br>
+        {% endif %}
+        
+        
         <h3>Grade your repository:</h3>
-        {% if vcs_subdirectory != '' %}
+        {% if using_subdirectory %}
         <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
         {% endif %}
         <div class="upload-message">
@@ -385,12 +393,15 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
-
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
-            handleSubmission({{ late_days_use }},
+            handleSubmission(
+                {{ remaining_late_days_for_gradeable }},
+                {{ charged_late_days }},
+                {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
+                {{ min_team_would_be_late_days_remaining }},
                 {{ highest_version }},
                 {{ max_submissions }},
                 "{{ csrf_token }}",
@@ -408,9 +419,13 @@
             );
         }
         else {
-            handleSubmission({{ late_days_use }},
+            handleSubmission(
+                {{ remaining_late_days_for_gradeable }},
+                {{ charged_late_days }},
+                {{ days_past_deadline }},
                 {{ days_to_be_charged }},
                 {{ allowed_late_days }},
+                {{ min_team_would_be_late_days_remaining }},
                 highest_version,
                 {{ max_submissions }},
                 "{{ csrf_token }}",
