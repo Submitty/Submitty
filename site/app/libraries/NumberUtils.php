@@ -47,7 +47,7 @@ class NumberUtils {
     /**
      * @param int $array_length
      * @param string $seed
-     * @return int[]
+     * @return array the randomized indices array
      */
     public static function getRandomIndices(int $array_length, string $seed): array {
         // creating an array which is holding the indices to be shuffled.
