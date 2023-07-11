@@ -310,6 +310,18 @@ SET default_tablespace = '';
 
 
 --
+-- Name: banner_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.banner_images (
+    release_date date NOT NULL,
+    closing_date date NOT NULL,
+    name character varying(255) NOT NULL,
+    extra_info character varying(255)
+);
+
+
+--
 -- Name: courses; Type: TABLE; Schema: public; Owner: -
 --
 
