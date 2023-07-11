@@ -289,7 +289,7 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       postgres:
-        image: postgres
+        image: gitlab.cs.wallawalla.edu:5050/cs_department/docker-images/submitty
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -319,7 +319,7 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       postgres:
-        image: postgres
+        image: gitlab.cs.wallawalla.edu:5050/cs_department/docker-images/submitty
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -457,7 +457,7 @@ jobs:
     # Configure test suite seems to be necessary for the Integration tests
     services:
       postgres:
-        image: postgres
+        image: gitlab.cs.wallawalla.edu:5050/cs_department/docker-images/submitty
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
