@@ -525,6 +525,7 @@ class HomeworkView extends AbstractView {
             },
             'late_day_exceptions' => $late_day_exceptions,
             'team_ldi' => $team_ldi,
+            'is_team_assignment' => $gradeable->isTeamAssignment(),
             'charged_late_days' => $charged_late_days,
             'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
