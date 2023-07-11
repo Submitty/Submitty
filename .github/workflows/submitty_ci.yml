@@ -441,7 +441,7 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-  e2eCypress_cloud:
+  e2eCypress:
     runs-on: ubuntu-20.04
     strategy:
       # don't fail the entire matrix on failure
