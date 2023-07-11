@@ -1,7 +1,10 @@
 <div id="courses" class="content">
 <div class="banner">
   {% for file in files %}
-    <img id="club_banners_{{ file.filename }}" class="club_banners {{ file.filename }}" src="{{ file.image_link }}" alt="File: {{ file.filename }}" onclick="toggleImage(this)"/>
+    <div>
+      <img id="club_banners_{{ file.filename }}" class="club_banners {{ file.filename }}" src="{{ file.image_link }}" alt="File: {{ file.filename }}" />
+      <button class="delete-button" onclick="toggleImage(this)">x</button>
+    </div>
   {% endfor %}
   <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
   <button class="next-button" onclick="changeImage(1)">&#10095;</button>
@@ -61,7 +64,11 @@
 
 
 
-    function toggleImage(image) {
+    function toggleImage(button) {
+        alert(`You are removing this image from display`);
+        image = images[currentImageIndex];
+        console.log(button);
+        console.log(image);
         var className = image.className.split(' ')[1]; 
         var hiddenImages = getHiddenImages();
         var imageIndex = hiddenImages.indexOf(className);
