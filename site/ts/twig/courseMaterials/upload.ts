@@ -6,22 +6,17 @@ declare global {
   }
 }
 
-
 function isValidFileName(file_name: string) {
-    if (file_name.indexOf('\'') !== -1 || file_name.indexOf('"') !== -1) {
-        alert(`ERROR! You may not use quotes in your filename: ${file_name}`);
-        return false;
-    }
-    else if (file_name.indexOf('\\') !== -1 || file_name.indexOf('/') !== -1) {
-        alert(`ERROR! You may not use a slash in your filename: ${file_name}`);
-        return false;
-    }
-    else if (file_name.indexOf('<') !== -1 || file_name.indexOf('>') !== -1) {
-        alert(`ERROR! You may not use angle brackets in your filename: ${file_name}`);
+    const disallowedCharRegex = /[\\'"/<>]/;
+    const invalidCharMatch = file_name.match(disallowedCharRegex);
+    if (invalidCharMatch) {
+        const invalidChar = invalidCharMatch[0];
+        alert(`ERROR! The filename ${file_name} contains an invalid character: ${invalidChar}. Please use a valid filename.`);
         return false;
     }
     return true;
 }
+
 
 
 window.isValidFileName = isValidFileName;
