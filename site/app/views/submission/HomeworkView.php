@@ -516,6 +516,9 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'student_id' => $student_id,
             'numberUtils' => new class () {
+                /**
+                * @return array<int>
+                */
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
                 }
