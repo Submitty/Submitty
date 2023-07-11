@@ -448,7 +448,7 @@ jobs:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1,2,3,4]
+        containers: [1, 2, 3, 4]
     services:
       postgres:
         image: postgres
@@ -491,7 +491,7 @@ jobs:
           browser: chrome
           env: run_area=CI
           record: true
-          parallel: true # Runs test in parallel using settings above
+          parallel: true  # Runs test in parallel using settings above
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
