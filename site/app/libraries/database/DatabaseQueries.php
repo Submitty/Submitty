@@ -2672,14 +2672,14 @@ ORDER BY user_id ASC"
     }
 
     public function insertNewRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
         return $this->submitty_db->getrowcount();
     }
 
     public function deleteRegistrationSection($section) {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", [$semester, $course, $section]);
         return $this->submitty_db->getRowCount();
@@ -4325,9 +4325,9 @@ AND gc_id IN (
         return str_replace("|", " ", $category_desc);
     }
 
-    public function addNewCategory($category, $rank) {
+    public function addNewCategory($category, $rank, $visibleDate = null) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc, rank) VALUES (?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank]);
+        $this->course_db->query("INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, ?) RETURNING category_id", [$this->filterCategoryDesc($category), $rank, $visibleDate]);
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }
@@ -4344,7 +4344,7 @@ AND gc_id IN (
         }
     }
 
-    public function editCategory($category_id, $category_desc, $category_color) {
+    public function editCategory($category_id, $category_desc, $category_color, $visible_date) {
         $this->course_db->beginTransaction();
         if (!is_null($category_desc)) {
             $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", [$category_desc, $category_id]);
@@ -4352,6 +4352,14 @@ AND gc_id IN (
         if (!is_null($category_color)) {
             $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", [$category_color, $category_id]);
         }
+        if (!is_null($visible_date)) {
+            if ($visible_date === "") {
+                $visible_date = null;
+            }
+
+            $this->course_db->query("UPDATE categories_list SET visible_date = ? WHERE category_id = ?", [$visible_date, $category_id]);
+        }
+
         $this->course_db->commit();
     }
 
@@ -4364,7 +4372,7 @@ AND gc_id IN (
     }
 
     public function getCategories() {
-        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST, category_id");
+        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
         return $this->course_db->rows();
     }
 
@@ -5051,6 +5059,7 @@ AND gc_id IN (
                   g_id AS eg_g_id,
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
+                  eg_using_subdirectory AS using_subdirectory,
                   eg_vcs_subdirectory AS vcs_subdirectory,
                   eg_vcs_partial_path AS vcs_partial_path,
                   eg_vcs_host_type AS vcs_host_type,
@@ -5747,6 +5756,7 @@ AND gc_id IN (
                 $gradeable->getSubmissionDueDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
+                $gradeable->isUsingSubdirectory(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsPartialPath(),
                 $gradeable->getVcsHostType(),
@@ -5782,6 +5792,7 @@ AND gc_id IN (
                   eg_submission_open_date,
                   eg_submission_due_date,
                   eg_is_repository,
+                  eg_using_subdirectory,
                   eg_vcs_subdirectory,
                   eg_vcs_partial_path,
                   eg_vcs_host_type,
@@ -5810,7 +5821,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5909,6 +5920,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $gradeable->isVcs(),
+                    $gradeable->isUsingSubdirectory(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsPartialPath(),
                     $gradeable->getVcsHostType(),
@@ -5945,6 +5957,7 @@ AND gc_id IN (
                       eg_submission_open_date=?,
                       eg_submission_due_date=?,
                       eg_is_repository=?,
+                      eg_using_subdirectory=?,
                       eg_vcs_subdirectory=?,
                       eg_vcs_partial_path=?,
                       eg_vcs_host_type=?,

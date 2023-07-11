@@ -26,7 +26,7 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
+            $this->editPage($gradeable, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {
             // If the gradeable can't be found, redirect to new page
@@ -44,7 +44,7 @@ class AdminGradeableController extends AbstractController {
 
     const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
-        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
         'electronic_bulk' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
@@ -75,10 +75,13 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
+            'vcs_subdirectory' => '',
+            'using_subdirectory' => false,
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken()
@@ -259,6 +262,9 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
@@ -861,8 +867,10 @@ class AdminGradeableController extends AbstractController {
 
         $repo_name = '';
         $subdir = '';
-        if ($details['subdirectory_gradeable'] === 'true') {
+        $using_subdirectory = false;
+        if ($details['using_subdirectory'] === 'true') {
             $subdir = $details['vcs_subdirectory'];
+            $using_subdirectory = true;
         }
         $vcs_partial_path = '';
         // VCS specific values
@@ -886,9 +894,15 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
+            elseif ($host_button === 'self-hosted') {
+                $host_type = 4;
+                $vcs_partial_path = $details['external_repo'];
+            }
+
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => $host_type,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -898,6 +912,7 @@ class AdminGradeableController extends AbstractController {
             $non_vcs_property_values = [
                 'vcs' => false,
                 'vcs_subdirectory' => $subdir,
+                'using_subdirectory' => $using_subdirectory,
                 'vcs_host_type' => -1,
                 'vcs_partial_path' => $vcs_partial_path
             ];
@@ -956,6 +971,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'using_subdirectory' => false,
                 'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
@@ -1015,7 +1031,7 @@ class AdminGradeableController extends AbstractController {
             && !$gradeable->isTeamAssignment()
         ) {
             $this->enqueueGenerateRepos(
-                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $repo_name
             );
@@ -1071,6 +1087,7 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
+            'using_subdirectory',
             'has_due_date',
             'has_release_date',
             'allow_custom_marks'
@@ -1270,6 +1287,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 
@@ -1284,7 +1302,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function enqueueBuildFile($g_id) {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         // FIXME:  should use a variable instead of hardcoded top level path
@@ -1360,8 +1378,8 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
     public function getBuildStatusOfGradeable(string $gradeable_id): void {
-        $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
-        $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $queued_filename = $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getTerm() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 

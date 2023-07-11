@@ -62,10 +62,15 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
 
     vcs_partial_path = ''
     vcs_subdirectory = ''
+    using_subdirectory = False
     if is_vcs:
         if 'vcs_partial_path' in form_json:
             vcs_partial_path = form_json['vcs_partial_path']
             vcs_subdirectory = form_json["subdirectory"]
+            if 'using_subdirectory' not in form_json:
+                using_subdirectory = (vcs_subdirectory != '')
+            else:
+                using_subdirectory = form_json['using_subdirectory']
         else:
             # for backwards compatibility - if gradeable was built before
             # version v23.06.00 was installed
@@ -79,7 +84,7 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
-    return is_vcs, vcs_type, vcs_base_url, vcs_partial_path, vcs_subdirectory
+    return is_vcs, vcs_type, vcs_base_url, vcs_partial_path, using_subdirectory, vcs_subdirectory
 
 
 def copytree_if_exists(config, job_id, source, target):
@@ -176,7 +181,8 @@ def prepare_autograding_and_submission_zip(
             )
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
-        is_vcs, vcs_type, vcs_base_url, vcs_partial_path, vcs_subdirectory = get_vcs_info(
+        (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
+         using_subdirectory, vcs_subdirectory) = get_vcs_info(
             config,
             config.submitty['submitty_data_dir'],
             obj["semester"],
