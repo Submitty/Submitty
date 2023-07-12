@@ -500,6 +500,8 @@ class Access {
                     if (!$gradeable->canStudentDownload()) {
                         return false;
                     }
+                    //TODO: Add a check in Gradeable.php, using the arg "dir","path" in the argument
+                    //to check if these are Notebook generated or not
                 }
             }
 
