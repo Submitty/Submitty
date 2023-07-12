@@ -931,8 +931,26 @@ class Gradeable extends AbstractModel {
         return $this->student_download;
     }
 
-    public function canStudentDownloadFile(string $file_name) {
-        
+    public function canStudentDownloadFile(int $version, ?int $display_version, string $gradeable_id, string $file_name) {
+        $autograding_config = $this->getAutogradingConfig();
+        if ($autograding_config->isNotebookGradeable()) {
+            $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+
+            $notebook = $notebook_model->getNotebook();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $version,
+                $notebook,
+                $this->core->getUser()->getId(),
+                $display_version,
+                $gradeable_id
+            );
+            
+            foreach ($notebook_data as $note) {
+                if (array_key_exists('filename', $note)) {
+                    return $file_name == $note['filename'];
+                }
+            }
+        }
     }
 
     /**
