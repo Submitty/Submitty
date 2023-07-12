@@ -1,12 +1,12 @@
 function accurateSectionHeaders(sectionType, sectionLimit) {
-    var sectionNumber = 1;
+    let sectionNumber = 1;
     cy.get('[data-testid="gradeable-sections"]').each(($element) => {
         // Specific number of sections then a group with no section,
         // so set sectionNumber to the string 'NULL'
         if (sectionNumber > sectionLimit) {
             sectionNumber = 'NULL';
         }
-        cy.wrap($element).should('contain.text', sectionType.concat(" ", sectionNumber));
+        cy.wrap($element).should('contain.text', sectionType.concat(' ', sectionNumber));
         sectionNumber++;
     });
 }
