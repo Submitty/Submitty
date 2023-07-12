@@ -36,6 +36,7 @@ function minimum_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
     cy.get('#agree-button').click({ force: true });
     cy.get('[data-testid="details-table"]').should('be.visible');
+    cy.get('[data-testid="view-sections"]').should('not.exist');
     select_gradeable();
 }
 
@@ -44,7 +45,10 @@ function no_pdf_access(gradeable_id) {
     cy.get('[data-testid="banner-message"]').should('be.visible').and('contain.text', 'You do not have permission');
 }
 
-const gradeable_type = ['grading_homework_team_pdf', 'grading_homework_pdf', 'grading_pdf_peer_homework', 'grading_pdf_peer_team_homework'];
+const gradeable_type = ['grading_homework_team_pdf',
+    'grading_homework_pdf',
+    'grading_pdf_peer_homework',
+    'grading_pdf_peer_team_homework'];
 
 describe('Test cases for PDFs access', () => {
     before(() => {
