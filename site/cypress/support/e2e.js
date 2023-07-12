@@ -23,7 +23,7 @@ beforeEach(() => {
 
 // eslint-disable-next-line prefer-arrow-callback
 afterEach(() => {
-    cy.get('@checkLogout').then((checkLogout) => {
-        cy.logout(true, checkLogout);
-    });
+    // cy.get('@checkLogout').then((checkLogout) => {
+    //     cy.logout(true, checkLogout);
+    // });
 });
