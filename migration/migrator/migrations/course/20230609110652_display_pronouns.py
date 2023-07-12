@@ -33,4 +33,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    sql = """ALTER TABLE users DROP COLUMN IF EXISTS display_pronouns;"""
+    database.execute(sql)
     pass
