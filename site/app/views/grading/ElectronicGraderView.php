@@ -1721,6 +1721,9 @@ HTML;
             "testcase_messages" => $testcase_messages,
             "image_data" => $image_data,
             'numberUtils' => new class () {
+                /**
+                 * @return array<int,int>
+                 */
                 //needed to show student multiple choices in random order
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);

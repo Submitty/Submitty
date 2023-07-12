@@ -1568,7 +1568,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Get the Late Day Info for each user associated with a submitter and gradeable
      * @param Submitter $submitter
      * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo|array
+     * @return LateDayInfo|array<string,LateDayInfo>
      */
     public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
         // Collect Late Day Info for each user associated with the submitter
@@ -1717,7 +1717,7 @@ ORDER BY {$orderby}",
      * @param  int $g_id gradeable id we are looking up
      * @param  array $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
-     * @return int[] with a key representing a section and value representing the number of bad submissions
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
      */
     public function getBadUserSubmissionsByGradingSection($g_id, $sections, $section_key) {
         $return = [];
@@ -1986,7 +1986,7 @@ ORDER BY {$u_or_t}.{$section_key}",
      * @param  array $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
-     * @return int[] with a key representing a section and value representing the number of bad submissions
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
      */
     public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         //getBadTeamSubmissionsByGradingSection
@@ -3749,7 +3749,7 @@ ORDER BY {$section_key}",
      * @param  int $g_id gradeable id we are looking up
      * @param  array $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
-     * @return int[] with a key representing a section and value representing the number of bad submissions
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
      */
     public function getBadTeamSubmissionsByGradingSection($g_id, $sections, $section_key) {
         $return = [];
