@@ -19,9 +19,8 @@ describe('Test cases revolving around simple grading lab', () => {
 
         it(`${user} should have grader submission options`, () => {
             cy.login(user);
-cy.visit(['sample', 'gradeable', 'grading_lab_rotating', 'grading']);
-            
-accurateSectionHeaders('Students Assigned to Rotating Section', 5);
+            cy.visit(['sample', 'gradeable', 'grading_lab_rotating', 'grading']);
+            accurateSectionHeaders('Students Assigned to Rotating Section', 5);
             cy.visit(['sample', 'gradeable', 'grading_lab', 'grading']);
             accurateSectionHeaders('Students Enrolled in Registration Section', 10);
             cy.get('#cell-1-0-0').invoke('attr', 'data-score').then((initialValue) => {
@@ -98,7 +97,7 @@ describe('Test cases revolving around simple grading test', () => {
     });
 
     ['ta', 'instructor'].forEach((user) => {
-        beforeEach(()=>{
+        beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'grading_test', 'grading']);
         });
 
@@ -113,7 +112,7 @@ describe('Test cases revolving around simple grading test', () => {
                     });
                 });
             });
-            
+
             // Test different people can grade the same cell
             cy.get('#cell-1-0-0').clear().type('3.4');
             cy.get('#cell-1-0-1').clear().type('3.4');
