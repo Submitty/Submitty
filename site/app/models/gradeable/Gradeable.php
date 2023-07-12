@@ -46,6 +46,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method void setUsingSubdirectory($using_subdirectory)
+ * @method bool isUsingSubdirectory()
  * @method void setVcsPartialPath($vcs_partial_path)
  * @method string getVcsPartialPath()
  * @method int getVcsHostType()
@@ -174,6 +176,8 @@ class Gradeable extends AbstractModel {
     protected $autograding_config_path = "";
     /** @prop @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
+    /** @prop @var bool If the gradeable is using a VCS subdirectory within the repository */
+    protected $using_subdirectory = false;
     /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
     /** @prop @var string The path to the repository from the base url */
@@ -293,6 +297,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setUsingSubdirectory($details['using_subdirectory']);
             $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
@@ -1593,7 +1598,7 @@ class Gradeable extends AbstractModel {
                 $submission_path = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
                     'courses',
-                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getTerm(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
                     $this->getId()
@@ -2168,7 +2173,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
     }
 

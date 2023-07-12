@@ -21,7 +21,7 @@ class EmailStatusController extends AbstractController {
      * @return WebResponse
      */
     public function getEmailStatusPage(): WebResponse {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         /** @var EmailRepository $repository */
@@ -42,7 +42,7 @@ class EmailStatusController extends AbstractController {
      * @return WebResponse
      */
     public function getEmailStatusesByPage(): WebResponse {
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $page = isset($_POST['page']) ? $_POST['page'] : 1;
 

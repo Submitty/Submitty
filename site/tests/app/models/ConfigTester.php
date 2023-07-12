@@ -183,7 +183,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson("s17", "csci0000", $course_json_path);
 
         $this->assertFalse($config->isDebug());
-        $this->assertEquals("s17", $config->getSemester());
+        $this->assertEquals("s17", $config->getTerm());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
@@ -241,7 +241,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $expected = [
             'debug' => false,
-            'semester' => 's17',
+            'term' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',

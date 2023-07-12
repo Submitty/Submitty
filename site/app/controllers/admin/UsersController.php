@@ -70,16 +70,16 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        //Get Active Columns
-        $active_columns = '';
+        //Get Active student Columns
+        $active_student_columns = '';
         //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
-        if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
-            $active_columns = $_COOKIE['active_columns'];
+        if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 12) {
+            $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_columns = implode('-', array_fill(0, 12, true));
+            if (setcookie('active_student_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_student_columns = implode('-', array_fill(0, 12, true));
             }
         }
 
@@ -94,7 +94,7 @@ class UsersController extends AbstractController {
                 $download_info,
                 $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
-                $active_columns
+                $active_student_columns
             )
         );
     }
@@ -151,6 +151,19 @@ class UsersController extends AbstractController {
             ]);
         }
 
+        //Get Active grader Columns
+        $active_grader_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 7) {
+            $active_grader_columns = $_COOKIE['active_grader_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_grader_columns', implode('-', array_fill(0, 7, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_grader_columns = implode('-', array_fill(0, 7, true));
+            }
+        }
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
@@ -160,7 +173,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_grader_columns
             )
         );
     }
@@ -190,7 +204,7 @@ class UsersController extends AbstractController {
             else {
                 $grader->setGradingRegistrationSections([]);
             }
-            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
         }
 
         $this->core->redirect($return_url);
@@ -270,7 +284,7 @@ class UsersController extends AbstractController {
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -398,7 +412,7 @@ class UsersController extends AbstractController {
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -425,7 +439,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -453,7 +467,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -1146,7 +1160,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 

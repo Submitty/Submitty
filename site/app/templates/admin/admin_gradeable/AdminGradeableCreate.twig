@@ -278,37 +278,32 @@
 
                 </fieldset>
 
-            <div id="subdirectory-settings-container">
-                {% if action == 'new' or action == 'template' %}
-                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
-                    <fieldset><legend>Are the student's files for this gradeable expected to 
-                    be in a specific subdirectory of their VCS repository?</legend>
-                {% else %}
-                    {% if gradeable.getVcsSubdirectory() != '' %}
-                    Path to students files within the repository: <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="auto_save"
-                                    aria-label="repository name" value="{{ gradeable.getVcsSubdirectory() }}" /><br />
-                    {% endif %}
-                {% endif %}
-                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
-                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
-
-                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
-                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
+                <div id="subdirectory-settings-container" class="subdirectory">
+                        {# (VPAT) fieldset/legend needed for subdirectory radio group #}
+                    <div>
+                        <fieldset><legend>Are the student's files for this gradeable expected to 
+                        be in a specific subdirectory of their VCS repository?</legend>
+                        
+                            <input type="radio" id="subdir_yes_radio" name="using_subdirectory" value="true" class="bool_val auto_save" 
+                                    {{ action != 'new' and using_subdirectory ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+                            <input type="radio" id="subdir_no_radio" name="using_subdirectory" value="false" class="bool_val auto_save" 
+                                    {{ action == 'new' or (action == 'edit' and  not using_subdirectory) ? 'checked' :  '' }} /> <label for="subdir_no_radio">No</label>
+                        {# (VPAT) Closes fieldset for subdirectory radio group #}
+                        </fieldset>    
+                    </div>
+                    
                 </div>
-                {# (VPAT) Closes fieldset for subdirectory radio group #}
-                </fieldset>
-                
-            </div>
-            <div class="subdirectory_yes" id="subdir_yes">
-               {% if action == 'new' %}
-                <label for="vcs_subdirectory">What is the path to the 
-                    student's files within the VCS repository?
-                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
-                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" required /><br />
+
+                <div class="subdirectory_yes" id="subdir_yes">
+                    {% if action == 'new' or action == 'template' %}
+                    What is the path to students files within the VCS repository:
+                    {% else %}
+                    Path to students files within the VCS repository:
+                    {% endif %}
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory_input" class="required auto_save" placeholder="(Required)"
+                                        aria-label="repository name" value="{{ vcs_subdirectory }}" required/><br />
                     <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
-                {% endif %}
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -463,11 +458,11 @@
     function onSubdirectoryChange() {
         if($('#subdir_yes_radio').is(':checked')) {
             disableElementChildren('.subdirectory_yes', false);
-            $('#vcs_subdirectory').prop('required', true);
+            $('#vcs_subdirectory_input').prop('required', true);
         }
         else {
             disableElementChildren('.subdirectory_yes', true);
-            $('#vcs_subdirectory').prop('required', false);
+            $('#vcs_subdirectory_input').prop('required', false);
         }
     }
 
@@ -623,7 +618,6 @@
             }
         }
 
-
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
         $('[name="type"]').change(onGradeableTypeChange);
@@ -634,7 +628,7 @@
 
         // Hide the subdirectory field if not selected
         onSubdirectoryChange();
-        $('[name="subdirectory_gradeable"]').change(onSubdirectoryChange);
+        $('[name="using_subdirectory"]').change(onSubdirectoryChange);
 
         // Hide VCS settings depending on different radio buttons
         onVCSTypeChange();
