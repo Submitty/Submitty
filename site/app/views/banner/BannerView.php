@@ -17,7 +17,9 @@ class BannerView extends AbstractView {
      *
      */
     public function showBanner(): string {
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
-        return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig");
+        return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", ["csrf_token" => $this->core->getCsrfToken()]);
     }
 }

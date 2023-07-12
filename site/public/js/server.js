@@ -286,6 +286,25 @@ function newUploadCourseMaterialsForm() {
     $('#overwrite-materials-flag').remove();
 }
 
+function newUploadBanner() {
+
+    createArray(1);
+
+    var files = [];
+
+    $('.popup-form').css('display', 'none');
+    var form = $("#upload-banner");
+
+    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+
+    form.css("display", "block");
+    captureTabInModal("upload-banner");
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
+
 function newEditCourseMaterialsFolderForm(tag) {
     let id = $(tag).data('id');
     let dir = $(tag).data('priority');
