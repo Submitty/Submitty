@@ -172,7 +172,6 @@ abstract class AbstractDatabase {
             elseif ($identity === QueryIdentifier::SELECT) {
                 $columns = $this->getColumnData($statement);
                 $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-                // @codeCoverageIgnoreEnd
                 foreach ($this->results as $idx => $result) {
                     $this->results[$idx] = $this->transformResult($result, $columns);
                 }
