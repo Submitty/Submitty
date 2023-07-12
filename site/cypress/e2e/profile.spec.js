@@ -82,10 +82,8 @@ describe('Test cases revolving around user profile page', () => {
 
     // Selenium test_time_zone_selection
     it('Time zone selector should work', () => {
-        // 420 time zones
-        const random_number = Math.floor(Math.random() * 420);
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
-        cy.get('[data-testid="time-zone-dropdown"]').select(random_number);
+        cy.get('[data-testid="time-zone-dropdown"]').select('(UTC-04:00) America/New_York');
         // Since the login success message is still up, we get the next message.
         cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
         cy.get('[data-testid="time-zone-dropdown"]').select('NOT_SET/NOT_SET');
