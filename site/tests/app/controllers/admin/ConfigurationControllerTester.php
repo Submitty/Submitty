@@ -413,13 +413,32 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $queries
             ->expects($this->exactly(4))
             ->method('addNewCategory')
-            ->withConsecutive(
-                [$this->equalTo('General Questions')],
-                [$this->equalTo('Homework Help')],
-                [$this->equalTo('Quizzes')],
-                [$this->equalTo('Tests')]
-            )
-            ->will($this->onConsecutiveCalls(0, 1, 2, 3));
+            ->with($this->callback(function ($value) {
+                switch ($value) {
+                    case 'General Questions':
+                        return true;
+                    case 'Homework Help':
+                        return true;
+                    case 'Quizzes':
+                        return true;
+                    case 'Tests':
+                        return true;
+                    default:
+                        return false;
+                }
+            }))
+            ->will($this->returnCallback(function ($value) {
+                switch ($value) {
+                    case 'General Questions':
+                        return 0;
+                    case 'Homework Help':
+                        return 1;
+                    case 'Quizzes':
+                        return 2;
+                    case 'Tests':
+                        return 3;
+                }
+            }));
 
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();

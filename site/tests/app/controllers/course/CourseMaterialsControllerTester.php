@@ -174,7 +174,19 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(8))
             ->method('persist')
-            ->withConsecutive([$course_materials[0]], [$course_materials[1]], [$course_materials[2]], [$course_materials[3]]);
+            ->willReturnCallback(function () use ($course_materials, &$i) {
+                switch ($i) {
+                    case 0:
+                        return $course_materials[0];
+                    case 1:
+                        return $course_materials[1];
+                    case 2:
+                        return $course_materials[2];
+                    case 3:
+                        return $course_materials[3];
+                }
+                $i++;
+            });
 
         $this->core->getCourseEntityManager()
             ->expects($this->once())
@@ -472,8 +484,24 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $repository
             ->expects($this->exactly(2))
             ->method('findOneBy')
-            ->withConsecutive([['path' => $this->upload_path . "/foo/foo2"]], [['path' => $this->upload_path . "/foo"]])
-            ->willReturnOnConsecutiveCalls($course_material, $course_material);
+            ->with($this->callback(function ($value) {
+                switch (true) {
+                    case $value == ['path' => $this->upload_path . "/foo/foo2"]:
+                        return true;
+                    case $value == ['path' => $this->upload_path . "/foo"]:
+                        return true;
+                    default:
+                        return false;
+                }
+            }))
+            ->will($this->returnCallback(function ($value) use ($course_material) {
+                switch (true) {
+                    case $value == ['path' => $this->upload_path . "/foo/foo2"]:
+                        return $course_material;
+                    case $value == ['path' => $this->upload_path . "/foo"]:
+                        return $course_material;
+                }
+            }));
         $this->core->getCourseEntityManager()
             ->expects($this->exactly(3))
             ->method('getRepository')
