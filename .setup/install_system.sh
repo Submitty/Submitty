@@ -480,12 +480,12 @@ if [ ${WORKER} == 0 ]; then
         # In case you reprovision without wiping the drive, don't paste this twice
         if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
         then
-            # Tell it to send requests to our host on port 9000 (PhpStorm default)
+            # Tell it to send requests to our host on port 9003 (PhpStorm default)
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-[xdebug]
-xdebug.remote_enable=1
-xdebug.remote_port=9000
-xdebug.remote_connect_back=1
+xdebug.start_with_request=trigger
+xdebug.client_port=9003
+xdebug.discover_client_host=true
+xdebug.mode=debug
 EOF
         fi
 
@@ -493,9 +493,9 @@ EOF
         then
             # Allow remote profiling and upload outputs to the shared folder
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-xdebug.profiler_enable_trigger=1
-xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+xdebug.output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
+            sed -i -e "s/debug/debug,profile/g"
         fi
     fi
 
