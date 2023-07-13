@@ -1,4 +1,4 @@
-import {buildUrl} from '../support/utils.js';
+import {buildUrl} from '../../support/utils.js';
 
 describe('Test cases revolving around course material uploading and access control', () => {
     beforeEach(() => {
