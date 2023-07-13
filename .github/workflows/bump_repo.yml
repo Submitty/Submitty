@@ -22,7 +22,7 @@ jobs:
       - name: Create Pull Request
         uses: Submitty/peter-evans-create-pull-request
         with:
-          token: ${{ secrets.SUBMITTYBOT_DEPENDENCY }}
+          token: ${{ secrets.SUBMITTYBOT_DEPENDENCY_TOKEN }}
           commit-message: >
             Update ${{ github.event.client_payload.repo_name }}
             to ${{ github.event.client_payload.tag }}
