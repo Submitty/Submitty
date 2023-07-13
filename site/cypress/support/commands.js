@@ -52,33 +52,6 @@ Cypress.Commands.add('login', (username = 'instructor') => {
 });
 
 /**
-* Log into Submitty using the UI, assumes no one is logged in already and at login page
-*
-* @param {String} [username=instructor] - username & password of who to log in as
-*/
-Cypress.Commands.add('loginViaUI', (username = 'instructor') => {
-    cy.get('body')
-        .then(body => {
-            if (body.find('input[name=user_id]').length > 0) {
-                cy.get('input[name=user_id]').type(username, { force: true });
-                cy.get('input[name=password]').type(username, { force: true });
-                cy.waitPageChange(() => {
-                    cy.get('input[name=login]').click();
-                });
-            }
-            else {
-                cy.get('#saml-login').click();
-                cy.get('input[name=username]').type(username, { force: true });
-                cy.get('input[name=password]').type(username, { force: true });
-                cy.waitPageChange(() => {
-                    cy.get('#submit > td:nth-child(3) > button').click();
-                });
-            }
-        });
-});
-
-
-/**
 * Log out of Submitty, assumes a user is already logged in
 */
 Cypress.Commands.add('logout', () => {

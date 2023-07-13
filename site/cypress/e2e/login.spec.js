@@ -1,6 +1,26 @@
 import { buildUrl } from '../support/utils.js';
 
-// const { it } = require("mocha");
+function loginViaUI(username = 'instructor') {
+    cy.get('body')
+        .then(body => {
+            if (body.find('input[name=user_id]').length > 0) {
+                cy.get('input[name=user_id]').type(username, { force: true });
+                cy.get('input[name=password]').type(username, { force: true });
+                cy.waitPageChange(() => {
+                    cy.get('input[name=login]').click();
+                });
+            }
+            else {
+                cy.get('#saml-login').click();
+                cy.get('input[name=username]').type(username, { force: true });
+                cy.get('input[name=password]').type(username, { force: true });
+                cy.waitPageChange(() => {
+                    cy.get('#submit > td:nth-child(3) > button').click();
+                });
+            }
+        });
+}
+
 
 describe('Test cases revolving around the logging in functionality of the site', () => {
     describe('Test cases where the user should successfully login', () => {
@@ -9,7 +29,7 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.visit('/');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
 
-            cy.loginViaUI();
+            loginViaUI();
 
             //should now be logged in as instructor and have a loggout button
             cy.get('#logout .icon-title').should((val) => {
@@ -25,7 +45,7 @@ describe('Test cases revolving around the logging in functionality of the site',
         it('should login through login endpoint', () => {
             cy.visit('authentication/login');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
-            cy.loginViaUI();
+            loginViaUI();
             cy.get('#logout .icon-title').should((val) => {
                 expect(val.text().trim()).to.equal('Logout Quinn');
             });
@@ -37,7 +57,7 @@ describe('Test cases revolving around the logging in functionality of the site',
             const full_url = buildUrl(['sample', 'config'], true);
             cy.visit(['sample', 'config']);
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
-            cy.loginViaUI();
+            loginViaUI();
             cy.url().should('eq', full_url);
 
             cy.logout();
@@ -52,7 +72,7 @@ describe('Test cases revolving around the logging in functionality of the site',
         it('should check if you can access a course', () => {
             cy.visit('authentication/login');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
-            cy.loginViaUI('pearsr');
+            loginViaUI('pearsr');
             cy.get('#courses > h1').contains('My Courses');
             cy.visit(['sample']);
             cy.get('.content').contains('You don\'t have access to this course.');
