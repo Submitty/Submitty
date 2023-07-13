@@ -414,7 +414,7 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/login.spec.js
+          spec: cypress/e2e/cypress-system/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -430,7 +430,7 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
-          spec: cypress/e2e/login.spec.js
+          spec: cypress/e2e/cypress-system/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
@@ -496,6 +496,7 @@ jobs:
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          spec: cypress/e2e/cypress-feature/*
           browser: chrome
           env: run_area=CI
           record: true
