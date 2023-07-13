@@ -1,4 +1,4 @@
-/* exported toggleColumnsForm, updateManageStudentsColumns, fillAllCheckboxes
+/* exported toggleColumnsForm, updateManageGradersColumns, fillAllCheckboxes
 */
 
 //Data structure for active columns
@@ -24,14 +24,14 @@ function checkProperTicks() {
     }
 }
 
-function updateManageStudentsColumns() {
+function updateManageGradersColumns() {
     getCheckboxValues();
     location.reload();
 }
 
 //Gets the values of all the checkboxes
 function getCheckboxValues() {
-    const selectedColumns = new Array(12);
+    const selectedColumns = new Array(7);
     for (let i = 0; i<checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
             selectedColumns[i] = 1;
@@ -51,11 +51,11 @@ function fillAllCheckboxes(val) {
 
 //Cookies (loading and storing)
 function saveColumns(selectedColumns) {
-    Cookies.set('active_student_columns', selectedColumns.join('-'), { expires: 365, path: '' });
+    Cookies.set('active_grader_columns', selectedColumns.join('-'), { expires: 365, path: '' });
 }
 
 function loadColumns() {
-    const cookie = Cookies.get('active_student_columns').split('-');
+    const cookie = Cookies.get('active_grader_columns').split('-');
     for (let i = 0; i< cookie.length; i++) {
         if (cookie[i] === '1') {
             cookie[i] = 1;
