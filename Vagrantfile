@@ -32,6 +32,8 @@
 $stdout.sync = true
 $stderr.sync = true
 
+require 'json'
+
 def gen_scripts()
   extra_command = [
     ENV.has_key?('WORKERS') ? '--worker-pair' : '',
@@ -82,6 +84,32 @@ def mount_folders(config, mount_options)
   }
 end
 
+def configure_workers()
+  worker_file = File.join(__dir__, '.vagrant-workers.json')
+  if ENV.has_key?('WORKERS')
+    unless Dir.glob(File.join(__dir__, '.vagrant/machines/*/*/action_provision')).empty?
+      puts("You have provided the 'WORKERS' variable.\nPlease ensure that all existing machines are destroyed prior to recreating the worker configuration.")
+      exit
+    end
+    worker_data = Hash[]
+    n = Integer(ENV['WORKERS'])
+    for i in 1..n do
+      worker_data["submitty-worker-#{i}"] = {
+        :ssh_port => Integer(ENV.fetch('VM_WORKER_BASE_PORT', '224X').gsub('X', '0')) + i,
+        :ip_addr => ENV.fetch('VM_WORKER_BASE_IP', '192.168.56.2XX').gsub(/X+/) {|s| i.to_s.rjust(s.length, '0')}
+      }
+    end
+    File.write(worker_file, JSON.pretty_generate(worker_data))
+    return worker_data
+  else
+    if File.file?(worker_file)
+      return JSON.parse(File.read(worker_file), symbolize_names: true)
+    else
+      return Hash[]
+    end
+  end
+end
+
 Vagrant.configure(2) do |config|
   if Vagrant.has_plugin?('vagrant-env')
     config.env.enable
@@ -95,16 +123,6 @@ Vagrant.configure(2) do |config|
   
   custom_box = ENV.has_key?('VAGRANT_BOX')
 
-  # Get the number of worker machines
-  machines_path = File.join(__dir__, '.vagrant/machines')
-  num_workers = Integer(ENV.fetch('WORKERS', 
-    Dir.exist?(machines_path) ?
-      Dir.children(machines_path).select {
-          |machine| machine.start_with?('submitty-worker')
-      }.length
-    : 0
-  ))
-
   mount_options = []
 
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
@@ -117,16 +135,11 @@ Vagrant.configure(2) do |config|
 
   script, worker_script = gen_scripts()
 
-  if num_workers
-    for i in 1..num_workers do
-      worker_name = "submitty-worker" + (num_workers != 1 ? "-#{i}" : '')
-      config.vm.define worker_name do |ubuntu|
-        # If this IP address changes, it must be changed in install_system.sh and
-        # CONFIGURE_SUBMITTY.py to allow the ssh connection
-        ubuntu.vm.network "private_network", ip: "192.168.56.2#{i}"
-        ubuntu.vm.network 'forwarded_port', guest: 22, host: 2230 + i, id: 'ssh'
-        ubuntu.vm.provision 'shell', inline: worker_script
-      end
+  configure_workers.map do |worker, data|
+    config.vm.define worker do |ubuntu|
+      ubuntu.vm.network 'private_network', ip: data[:ip_addr]
+      ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
+      ubuntu.vm.provision 'shell', inline: worker_script
     end
   end
 

@@ -1,6 +1,7 @@
 /.idea/
 /output/
 /.vagrant/
+.vagrant-workers.json
 
 selenium*.jar
 .DS_Store
