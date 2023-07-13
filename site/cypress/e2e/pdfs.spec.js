@@ -42,7 +42,7 @@ function minimum_pdf_access(gradeable_id) {
 
 function no_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
-    cy.get('[data-testid="banner-message"]').should('be.visible').and('contain.text', 'You do not have permission');
+    cy.get('[data-testid="popup-message"]').should('be.visible').and('contain.text', 'You do not have permission');
 }
 
 const gradeable_type = [
