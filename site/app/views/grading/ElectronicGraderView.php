@@ -31,7 +31,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $grade_inquiries
-     * @param array<string, int> $graders_of_inquiries
+     * @param array<mixed> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
