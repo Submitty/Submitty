@@ -5163,7 +5163,7 @@ AND gc_id IN (
      * If the grade is not-by component, function will return all graders who were involved in grading the student
      * @param string $gradeable_id
      * @param  bool $is_grade_inquiry_per_component_allowed
-     * @return array<int, string> of gcd_grader_id and count of unresolved grade inquiries of the grader
+     * @return array<string, int> of gcd_grader_id and count of unresolved grade inquiries of the grader
      */
     public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $return = [];
