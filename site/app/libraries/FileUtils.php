@@ -332,15 +332,14 @@ class FileUtils {
      *
      * @return int
      */
-    public static function getZipSize(string $filename): int {
+    public static function getZipSize($filename) {
         $size = 0;
-        $zip = new \ZipArchive();
-        $res = $zip->open($filename);
-        if ($res === true) {
-            for ($i = 0; $i < $zip->count(); $i++) {
-                $size += $zip->statIndex($i)['size'];
+        $zip = zip_open($filename);
+        if (is_resource($zip)) {
+            while ($inner_file = zip_read($zip)) {
+                $size += zip_entry_filesize($inner_file);
             }
-            $zip->close();
+            zip_close($zip);
         }
         return $size;
     }
@@ -349,12 +348,11 @@ class FileUtils {
      * @param string $zipname
      * @return bool
      */
-    public static function checkFileInZipName(string $zipname): bool {
-        $zip = new \ZipArchive();
-        $res = $zip->open($zipname);
-        if ($res === true) {
-            for ($i = 0; $i < $zip->count(); $i++) {
-                $fname = $zip->statIndex($i)['name'];
+    public static function checkFileInZipName($zipname) {
+        $zip = zip_open($zipname);
+        if (is_resource(($zip))) {
+            while ($inner_file = zip_read($zip)) {
+                $fname = zip_entry_name($inner_file);
                 if (FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }

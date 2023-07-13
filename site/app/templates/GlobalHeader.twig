@@ -269,7 +269,7 @@
         </div>
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
-                <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
+                <aside class="{{collapse_sidebar?'collapsed':''}}">
                     <ul>
                         {% for button in sidebar_buttons %}
                             {{ self.render_sidebar_button(button, false) }}

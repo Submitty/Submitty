@@ -1032,29 +1032,7 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
-            $notebook_data = null;
-            $hidefiles = [];
-            if ($autograding_config->isNotebookGradeable()) {
-                $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
-
-                $notebook = $notebook_model->getNotebook();
-                if ($graded_gradeable !== null) {
-                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-                        $notebook,
-                        $this->core->getUser()->getId(),
-                        $version_instance->getVersion(),
-                        $graded_gradeable->getGradeableId()
-                    );
-                }
-                foreach ($notebook_data as $note) {
-                    if (array_key_exists('filename', $note)) {
-                        array_push($hidefiles, $note['filename']);
-                    }
-                }
-            }
             $param = array_merge($param, [
-                'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
@@ -1117,7 +1095,7 @@ class HomeworkView extends AbstractView {
             'failed_file' => $failed_file,
             'file_length' => $file_count,
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
+            'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1137,8 +1115,9 @@ class HomeworkView extends AbstractView {
             'allowed_late_days' => $gradeable->getLateDays(),
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
             'is_vcs' => $gradeable->isVcs(),
-            'can_change_submissions' => $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $gradeable->isStudentSubmit(),
+            'can_download' => $can_download,
+            'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),

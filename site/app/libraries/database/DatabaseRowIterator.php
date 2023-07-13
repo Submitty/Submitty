@@ -37,11 +37,11 @@ class DatabaseRowIterator implements \Iterator {
         $this->next();
     }
 
-    public function current(): mixed {
+    public function current() {
         return $this->result;
     }
 
-    public function next(): void {
+    public function next() {
         if (!$this->valid()) {
             return;
         }
@@ -58,15 +58,15 @@ class DatabaseRowIterator implements \Iterator {
         }
     }
 
-    public function key(): int {
+    public function key() {
         return $this->key;
     }
 
-    public function valid(): bool {
+    public function valid() {
         return $this->valid;
     }
 
-    public function rewind(): void {
+    public function rewind() {
     }
 
     public function close() {

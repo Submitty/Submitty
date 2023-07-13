@@ -93,7 +93,7 @@ Please email your instructor with any questions or concerns.';
         ];
 
         foreach ($replaces as $key => $variable) {
-            $message = str_replace('{$' . $variable . '}', strval($data[$key] ?? 'SEE INSTRUCTOR'), $message);
+            $message = str_replace('{$' . $variable . '}', $data[$key] ?? 'SEE INSTRUCTOR', $message);
         }
 
         $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
