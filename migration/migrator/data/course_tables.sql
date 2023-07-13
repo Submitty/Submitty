@@ -25,6 +25,42 @@ CREATE TYPE public.notifications_component AS ENUM (
 );
 
 
+--
+-- Name: add_course_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.add_course_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            temp_row RECORD;
+            random_str TEXT;
+            num_rows INT;
+        BEGIN
+            FOR temp_row IN SELECT g_id FROM gradeable LOOP
+                LOOP
+                    random_str = random_string(15);
+                    PERFORM 1 FROM gradeable_anon
+                    WHERE g_id=temp_row.g_id AND anon_id=random_str;
+                    GET DIAGNOSTICS num_rows = ROW_COUNT;
+                    IF num_rows = 0 THEN
+                        EXIT;
+                    END IF;
+                END LOOP;
+                INSERT INTO gradeable_anon (
+                    SELECT NEW.user_id, temp_row.g_id, random_str
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM gradeable_anon
+                        WHERE user_id=NEW.user_id AND g_id=temp_row.g_id
+                    )
+                );
+            END LOOP;
+            RETURN NULL;
+        END;
+    $$;
+
+
 SET default_tablespace = '';
 
 
@@ -34,17 +70,16 @@ SET default_tablespace = '';
 
 CREATE TABLE public.late_day_cache (
     g_id character varying(255),
-    user_id character varying(255),
+    user_id character varying(255) NOT NULL,
     team_id character varying(255),
-    late_day_date timestamp without time zone NOT NULL,
+    late_day_date timestamp with time zone NOT NULL,
     late_days_remaining integer NOT NULL,
     late_days_allowed integer,
     submission_days_late integer,
     late_day_exceptions integer,
     late_day_status integer,
     late_days_change integer NOT NULL,
-    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL)))),
-    CONSTRAINT ldc_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT ldc_gradeable_info CHECK (((g_id IS NULL) OR ((submission_days_late IS NOT NULL) AND (late_day_exceptions IS NOT NULL))))
 );
 
 
@@ -59,12 +94,11 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
     DECLARE
         var_row RECORD;
         return_cache late_day_cache%rowtype;
-        latestDate timestamp without time zone;
+        latestDate timestamp with time zone;
         late_days_remaining integer;
         late_days_change integer;
-        assignment_budget integer;
         late_days_used integer;
-        returnrow late_day_cache%rowtype;
+        returnedrow late_day_cache%rowtype;
     BEGIN
         -- Grab latest row of data available
         FOR var_row IN (
@@ -79,7 +113,7 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
         END LOOP;
         
         -- Get the number of late days charged up to this point
-        late_days_used = (SELECT COALESCE(SUM(ldc.late_days_change), 0)
+        late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
@@ -112,21 +146,43 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
                 return_cache.late_days_remaining = late_days_remaining;
             --is gradeable event
             ELSE
-                late_days_change = 0;
-                assignment_budget = LEAST(var_row.late_days_allowed, late_days_remaining) + var_row.late_day_exceptions;
-                IF var_row.submission_days_late <= assignment_budget THEN
-                    -- clamp the days charged to be the days late minus exceptions above zero.
-                    late_days_change = -GREATEST(0, LEAST(var_row.submission_days_late, assignment_budget) - var_row.late_day_exceptions);
-                END IF;
-                late_days_remaining = late_days_remaining + late_days_change;
-                late_days_used = late_days_used - late_days_change;
+                returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
+                late_days_used = late_days_used - returnedrow.late_days_change;
+                late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                 return_cache = var_row;
-                return_cache.late_days_change = late_days_change;
-                return_cache.late_days_remaining = late_days_remaining;
+                return_cache.late_days_change = returnedrow.late_days_change;
+                return_cache.late_days_remaining = returnedrow.late_days_remaining;
             END IF;
             RETURN NEXT return_cache;
         END LOOP;
         RETURN;
+    END;
+    $$;
+
+
+--
+-- Name: calculate_submission_days_late(timestamp with time zone, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.calculate_submission_days_late(submission_time timestamp with time zone, submission_due_date timestamp with time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        RETURN 
+        CASE
+            WHEN submission_time IS NULL THEN 0
+            WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
+            WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
+                OR DATE_PART('minute', submission_time - submission_due_date) > 0
+                OR DATE_PART('second', submission_time - submission_due_date) > 0
+                THEN DATE_PART('day', submission_time - submission_due_date) + 1
+            ELSE DATE_PART('day', submission_time - submission_due_date)
+        END;
     END;
     $$;
 
@@ -157,60 +213,60 @@ $_$;
 CREATE FUNCTION public.csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader_id text) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
-  DECLARE
-    -- Size of first array after splitting
-    size INTEGER;
-    -- Array of individual line after splitting
-    line TEXT[];
-    -- Variable to store each line in the array
-    i TEXT;
-    -- Array of gc_ids for this gradeable
-    gcids INTEGER[];
-    -- gradeable_data id for this gradeable for this student
-    gdid INTEGER;
-    -- Array counter
-    j INTEGER;
-    -- Is this gradeable component text?
-    istext BOOLEAN[];
-    --Score to be inserted
-    score NUMERIC;
-  BEGIN
-    gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
-    istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
-    -- Get the number of gradeable components for this gradeable. Will be used to test
-    -- for uniform sized arrays
-    size := array_length(gcids, 1);
-    FOREACH i IN ARRAY vcode
-      LOOP
-        -- Split the current line
-        line := string_to_array(i, ',');
-        -- Check for uniform size
-        IF array_length(line, 1) <> size + 1 THEN
-          RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
-        END IF;
-
-        -- Remove any existing record for this student for this gradeable
-        DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
-
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_overall_comment) VALUES (gradeable_id, line[1], '', 1);
-
-        SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
-
-        FOR j IN 1..size
+    DECLARE
+        -- Size of first array after splitting
+        size INTEGER;
+        -- Array of individual line after splitting
+        line TEXT[];
+        -- Variable to store each line in the array
+        i TEXT;
+        -- Array of gc_ids for this gradeable
+        gcids INTEGER[];
+        -- gradeable_data id for this gradeable for this student
+        gdid INTEGER;
+        -- Array counter
+        j INTEGER;
+        -- Is this gradeable component text?
+        istext BOOLEAN[];
+        --Score to be inserted
+        score NUMERIC;
+    BEGIN
+        gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
+        istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
+        -- Get the number of gradeable components for this gradeable. Will be used to test
+        -- for uniform sized arrays
+        size := array_length(gcids, 1);
+        FOREACH i IN ARRAY vcode
         LOOP
-          IF istext[j] THEN
-          --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
-          ELSE
-            score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
-          END IF;
-        END LOOP;
+            -- Split the current line
+            line := string_to_array(i, ',');
+            -- Check for uniform size
+            IF array_length(line, 1) <> size + 1 THEN
+            RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
+            END IF;
 
-      END LOOP;
-    RETURN TRUE ;
-  END;
-  $$;
+            -- Remove any existing record for this student for this gradeable
+            DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
+
+            INSERT INTO gradeable_data(g_id, gd_user_id) VALUES (gradeable_id, line[1]);
+
+            SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
+
+            FOR j IN 1..size
+            LOOP
+            IF istext[j] THEN
+            --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            ELSE
+                score := CAST(line[j+1] AS NUMERIC);
+                INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            END IF;
+            END LOOP;
+
+        END LOOP;
+        RETURN TRUE ;
+    END;
+    $$;
 
 
 --
@@ -226,24 +282,24 @@ CREATE FUNCTION public.electronic_gradeable_change() RETURNS trigger
             due_date timestamp;
         BEGIN
             -- Check for any important changes
-            IF NEW.eg_submission_due_date = OLD.eg_submission_due_date
+            IF TG_OP = 'UPDATE'
+            AND NEW.eg_submission_due_date = OLD.eg_submission_due_date
             AND NEW.eg_has_due_date = OLD.eg_has_due_date
             AND NEW.eg_allow_late_submission = OLD.eg_allow_late_submission
             AND NEW.eg_late_days = OLD.eg_late_days THEN
-            RETURN NEW;
+                RETURN NEW;
             END IF;
-            
-            -- Get effective g_id
-            g_id = NEW.g_id;
             
             -- Grab submission due date
-            due_date = NEW.eg_submission_due_date;
-            
-            -- If submission due date was updated, use the earliest date
-            IF OLD.eg_submission_due_date IS NOT NULL
-            AND NEW.eg_submission_due_date != OLD.eg_submission_due_date THEN
-                due_date = LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date);
-            END IF;
+            due_date = 
+            CASE
+                -- INSERT
+                WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
+                -- DELETE
+                WHEN TG_OP = 'DELETE' THEN OLD.eg_submission_due_date
+                -- UPDATE
+                ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
+            END;
             
             DELETE FROM late_day_cache WHERE late_day_date >= due_date;
             RETURN NEW;
@@ -263,6 +319,44 @@ $_$;
 
 
 --
+-- Name: get_late_day_info_from_previous(integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_late_day_info_from_previous(submission_days_late integer, late_days_allowed integer, late_day_exceptions integer, late_days_remaining integer) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        late_days_change = 0;
+        assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+        IF submission_days_late <= assignment_budget THEN
+            -- clamp the days charged to be the days late minus exceptions above zero.
+            late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+        END IF;
+
+        return_row.late_day_status = 
+        CASE
+            -- BAD STATUS
+            WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+            -- LATE STATUS
+            WHEN submission_days_late > late_day_exceptions THEN 2
+            -- GOOD STATUS
+            ELSE 1
+        END;
+
+        return_row.late_days_change = late_days_change;
+        return_row.late_days_remaining = late_days_remaining + late_days_change;
+        RETURN NEXT return_row;
+        RETURN;
+    END;
+    $$;
+
+
+--
 -- Name: grab_late_day_gradeables_for_user(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -271,67 +365,74 @@ CREATE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS S
     AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
         FOR var_row in (
+            WITH valid_gradeables AS (
+                SELECT g.g_id, g.g_title, eg.eg_submission_due_date, eg.eg_late_days
+                FROM gradeable g
+                JOIN electronic_gradeable eg
+                    ON eg.g_id=g.g_id
+                WHERE 
+                    eg.eg_submission_due_date IS NOT NULL
+                    and eg.eg_has_due_date = TRUE
+                    and eg.eg_student_submit = TRUE
+                    and eg.eg_student_view = TRUE
+                    and g.g_gradeable_type = 0
+                    and eg.eg_allow_late_submission = TRUE
+                    and eg.eg_submission_open_date <= NOW()
+            ),
+            submitted_gradeables AS (
+                SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
+                FROM electronic_gradeable_version egv
+                JOIN electronic_gradeable_data egd
+                    ON egv.g_id=egd.g_id 
+                    AND egv.active_version=egd.g_version
+                    AND (
+                        CASE
+                            when egd.team_id IS NOT NULL THEN egv.team_id=egd.team_id
+                            else egv.user_id=egd.user_id
+                        END
+                    )
+                LEFT JOIN teams t
+                    ON t.team_id=egd.team_id
+                LEFT JOIN users u
+                    ON u.user_id=t.user_id
+                    OR u.user_id=egd.user_id
+                WHERE u.user_id=user_id
+            )
             SELECT
-                g.g_id,
-                u.user_id,
-                g.g_title,
-                eg.eg_submission_due_date AS late_day_date,
-                eg.eg_late_days AS late_days_allowed,
-                CASE
-                    WHEN egd.submission_time IS NULL THEN 0
-                    WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
-                    WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
-                        THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
-                    ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
-                END AS submission_days_late,
+                vg.g_id,
+                vg.g_title,
+                COALESCE(sg.user_id, user_id) as user_id,
+                sg.team_id,
+                vg.eg_submission_due_date AS late_day_date,
+                vg.eg_late_days AS late_days_allowed,
+                calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
                 CASE
                     WHEN lde.late_day_exceptions IS NULL THEN 0
                     ELSE lde.late_day_exceptions
                 END AS late_day_exceptions
-            FROM gradeable g
-            LEFT JOIN electronic_gradeable eg
-                ON g.g_id=eg.g_id
-            LEFT JOIN users u
-            ON u.user_id=user_id
-            LEFT JOIN (
-                SELECT egd.submission_time, egd.g_id, egd.user_id
-                FROM electronic_gradeable_data egd
-                RIGHT JOIN electronic_gradeable_version egv
-                    ON egv.g_id=egd.g_id 
-                    AND egv.user_id=egd.user_id
-                    AND egv.active_version=egd.g_version
-            ) as egd
-                ON egd.user_id = u.user_id
-                AND g.g_id=egd.g_id
+            FROM valid_gradeables vg
+            LEFT JOIN submitted_gradeables sg
+                ON vg.g_id=sg.g_id
             LEFT JOIN late_day_exceptions lde
-                ON u.user_id = lde.user_id
-                AND g.g_id = lde.g_id
-            WHERE 
-                eg.eg_submission_due_date IS NOT NULL
-                and eg.eg_has_due_date = TRUE
-                and eg.eg_student_submit = TRUE
-                and g.g_gradeable_type = 0
-                and eg.eg_allow_late_submission = TRUE
-                and eg.eg_team_assignment = FALSE
-            ORDER BY late_day_date, g_id
-        ) LOOP
-            returnrow.g_id = var_row.g_id;
-            returnrow.user_id = var_row.user_id;
-            returnrow.g_title = var_row.g_title;
-            returnrow.late_days_allowed = var_row.late_days_allowed;
-            returnrow.late_day_date = var_row.late_day_date;
-            returnrow.submission_days_late = var_row.submission_days_late;
-            returnrow.late_day_exceptions = var_row.late_day_exceptions;
-            RETURN NEXT returnrow;
+                ON lde.user_id=user_id
+                AND vg.g_id=lde.g_id
+        ORDER BY late_day_date, g_id
+    ) LOOP
+        returnrow.g_id = var_row.g_id;
+        returnrow.team_id = var_row.team_id;
+        returnrow.user_id = var_row.user_id;
+        returnrow.late_days_allowed = var_row.late_days_allowed;
+        returnrow.late_day_date = var_row.late_day_date;
+        returnrow.submission_days_late = var_row.submission_days_late;
+        returnrow.late_day_exceptions = var_row.late_day_exceptions;
+        RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN; 
     END;
     $$;
 
@@ -345,7 +446,7 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
     AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
@@ -364,7 +465,7 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
             returnrow.late_days_allowed = var_row.late_days_allowed;
             RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN; 
     END;
     $$;
 
@@ -392,22 +493,29 @@ CREATE FUNCTION public.gradeable_delete() RETURNS trigger
 CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+            team_id varchar;
+            version RECORD;
         BEGIN
-            --- Update or Insert
-            IF NEW.g_id IS NOT NULL THEN
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = NEW.g_id)
-                                            AND ((user_id = NEW.user_id AND NEW.team_id IS NULL)
-                                                OR (NEW.user_id IS NULL AND team_id = NEW.team_id));
-            --- Delete
-            ELSE
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = OLD.g_id)
-                                            AND ((user_id = OLD.user_id AND OLD.team_id IS NULL)
-                                                OR (OLD.user_id IS NULL AND team_id = OLD.team_id));
-            END IF ;
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+            team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
+            
+            --- Remove all lade day cache for all gradeables past this submission die date
+            --- for every user associated with the gradeable
+            DELETE FROM late_day_cache ldc
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+                                    FROM electronic_gradeable eg
+                                    WHERE eg.g_id = g_id)
+                AND (
+                    ldc.user_id IN (SELECT t.user_id FROM teams t WHERE t.team_id = team_id)
+                    OR
+                    ldc.user_id = user_id
+                );
+
             RETURN NEW;
         END;
     $$;
@@ -425,15 +533,9 @@ CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
             g_id varchar;
             user_id varchar;
         BEGIN
-            -- Grab values for delete
-            g_id = OLD.g_id; 
-            user_id = OLD.user_id;
-
-            -- Change values for update/insert
-            IF NEW.g_id IS NOT NULL THEN
-                g_id = NEW.g_id;
-                user_id = NEW.user_id;
-            END IF;
+            -- Grab values for delete/update/insert
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
 
             DELETE FROM late_day_cache ldc 
             WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
@@ -452,16 +554,43 @@ CREATE FUNCTION public.late_day_extension_change() RETURNS trigger
 CREATE FUNCTION public.late_days_allowed_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+    #variable_conflict use_variable
+    DECLARE
+        g_id varchar;
+        user_id varchar;
+        team_id varchar;
+        version RECORD;
     BEGIN
-        --- Update or Insert
-        IF NEW.since_timestamp IS NOT NULL THEN
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= NEW.since_timestamp AND ldc.user_id = NEW.user_id;
-        --- Delete
-        ELSE
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= OLD.since_timestamp AND ldc.user_id = OLD.user_id;
-        END IF ;
+        version = CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+        -- since_timestamp = CASE WHEN TG_OP = 'DELETE' THEN OLD.since_timestamp ELSE NEW.since_timestamp END;
+        -- user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+        DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= version.since_timestamp AND ldc.user_id = version.user_id;
         RETURN NEW;
     END;
+    $$;
+
+
+--
+-- Name: random_string(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.random_string(length integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+            chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+            result text := '';
+            i integer := 0;
+        BEGIN
+            IF length < 0 THEN
+                raise exception 'Given length cannot be less than 0';
+            END IF;
+            FOR i IN 1..length LOOP
+                result := result || chars[1+random()*(array_length(chars, 1)-1)];
+            END LOOP;
+            RETURN result;
+        END;
     $$;
 
 
@@ -487,6 +616,38 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+-- Name: calendar_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.calendar_messages (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: calendar_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.calendar_messages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: calendar_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.calendar_messages_id_seq OWNED BY public.calendar_messages.id;
+
+
+--
 -- Name: categories_list; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -494,7 +655,8 @@ CREATE TABLE public.categories_list (
     category_id integer NOT NULL,
     category_desc character varying NOT NULL,
     rank integer,
-    color character varying DEFAULT '#000080'::character varying NOT NULL
+    color character varying DEFAULT '#000080'::character varying NOT NULL,
+    visible_date date
 );
 
 
@@ -604,13 +766,13 @@ CREATE TABLE public.electronic_gradeable (
     g_id character varying(255) NOT NULL,
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
-    eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_partial_path character varying(1024) NOT NULL,
     eg_vcs_host_type integer DEFAULT 0 NOT NULL,
     eg_team_assignment boolean NOT NULL,
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_scanned_exam boolean DEFAULT false NOT NULL,
+    eg_student_download boolean DEFAULT false NOT NULL,
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
@@ -620,7 +782,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_late_days integer DEFAULT '-1'::integer NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_precision numeric NOT NULL,
-    eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_grade_inquiry_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
@@ -632,9 +794,11 @@ CREATE TABLE public.electronic_gradeable (
     eg_depends_on character varying(255) DEFAULT NULL::character varying,
     eg_depends_on_points integer,
     eg_has_release_date boolean DEFAULT true NOT NULL,
+    eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
+    eg_using_subdirectory boolean DEFAULT false NOT NULL,
+    CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
@@ -682,8 +846,78 @@ CREATE TABLE public.forum_posts_history (
     post_id integer NOT NULL,
     edit_author character varying NOT NULL,
     content text NOT NULL,
-    edit_timestamp timestamp with time zone NOT NULL
+    edit_timestamp timestamp(0) with time zone NOT NULL
 );
+
+
+--
+-- Name: grade_inquiries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grade_inquiries (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    status integer DEFAULT 0 NOT NULL,
+    gc_id integer
+);
+
+
+--
+-- Name: grade_inquiries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grade_inquiries_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grade_inquiries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grade_inquiries_id_seq OWNED BY public.grade_inquiries.id;
+
+
+--
+-- Name: grade_inquiry_discussion; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grade_inquiry_discussion (
+    id integer NOT NULL,
+    grade_inquiry_id integer NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    user_id character varying(255) NOT NULL,
+    content text,
+    deleted boolean DEFAULT false NOT NULL,
+    gc_id integer
+);
+
+
+--
+-- Name: grade_inquiry_discussion_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grade_inquiry_discussion_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grade_inquiry_discussion_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grade_inquiry_discussion_id_seq OWNED BY public.grade_inquiry_discussion.id;
 
 
 --
@@ -766,6 +1000,17 @@ CREATE TABLE public.gradeable_allowed_minutes_override (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     allowed_minutes integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_anon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_anon (
+    user_id character varying NOT NULL,
+    g_id character varying(255) NOT NULL,
+    anon_id character varying(255) NOT NULL
 );
 
 
@@ -882,7 +1127,6 @@ CREATE TABLE public.gradeable_data (
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255),
     gd_team_id character varying(255),
-    gd_overall_comment character varying NOT NULL,
     gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );
 
@@ -1012,11 +1256,14 @@ CREATE TABLE public.lichen (
     regex_dir_checkout boolean NOT NULL,
     language character varying(255) NOT NULL,
     threshold smallint NOT NULL,
-    sequence_length smallint NOT NULL,
+    hash_size smallint NOT NULL,
     other_gradeables text,
     ignore_submissions text,
+    last_run_timestamp timestamp with time zone DEFAULT now(),
+    has_provided_code boolean DEFAULT false NOT NULL,
+    other_gradeable_paths text,
     CONSTRAINT lichen_config_id_check CHECK ((config_id > 0)),
-    CONSTRAINT lichen_sequence_length_check CHECK ((sequence_length > 1)),
+    CONSTRAINT lichen_hash_size_check CHECK ((hash_size > 1)),
     CONSTRAINT lichen_threshold_check CHECK ((threshold > 1))
 );
 
@@ -1039,6 +1286,38 @@ CREATE SEQUENCE public.lichen_id_seq
 --
 
 ALTER SEQUENCE public.lichen_id_seq OWNED BY public.lichen.id;
+
+
+--
+-- Name: lichen_run_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.lichen_run_access (
+    id integer NOT NULL,
+    lichen_run_id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.lichen_run_access_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: lichen_run_access_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.lichen_run_access_id_seq OWNED BY public.lichen_run_access.id;
 
 
 --
@@ -1090,8 +1369,8 @@ CREATE TABLE public.notifications (
     content text NOT NULL,
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    seen_at timestamp with time zone
+    created_at timestamp(0) with time zone NOT NULL,
+    seen_at timestamp(0) with time zone
 );
 
 
@@ -1143,12 +1422,32 @@ CREATE TABLE public.peer_feedback (
 --
 
 CREATE TABLE public.poll_options (
-    option_id integer NOT NULL,
     order_id integer NOT NULL,
     poll_id integer,
     response text NOT NULL,
-    correct boolean NOT NULL
+    correct boolean NOT NULL,
+    option_id integer NOT NULL
 );
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_options_option_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_options_option_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_options_option_id_seq OWNED BY public.poll_options.option_id;
 
 
 --
@@ -1158,8 +1457,29 @@ CREATE TABLE public.poll_options (
 CREATE TABLE public.poll_responses (
     poll_id integer NOT NULL,
     student_id text NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.poll_responses_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: poll_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.poll_responses_id_seq OWNED BY public.poll_responses.id;
 
 
 --
@@ -1174,7 +1494,8 @@ CREATE TABLE public.polls (
     release_date date NOT NULL,
     image_path text,
     question_type character varying(35) DEFAULT 'single-response-multiple-correct'::character varying,
-    release_histogram character varying(10) DEFAULT 'never'::character varying
+    release_histogram character varying(10) DEFAULT 'never'::character varying,
+    release_answer character varying(10) DEFAULT 'never'::character varying
 );
 
 
@@ -1208,7 +1529,7 @@ CREATE TABLE public.posts (
     parent_id integer DEFAULT '-1'::integer,
     author_user_id character varying NOT NULL,
     content text NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL,
     anonymous boolean NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
     endorsed_by character varying,
@@ -1259,7 +1580,8 @@ CREATE TABLE public.queue (
     time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL,
     time_paused integer DEFAULT 0 NOT NULL,
-    time_paused_start timestamp with time zone
+    time_paused_start timestamp with time zone,
+    star_type character varying(16) DEFAULT 'none'::character varying
 );
 
 
@@ -1293,7 +1615,9 @@ CREATE TABLE public.queue_settings (
     code text NOT NULL,
     token text,
     regex_pattern character varying,
-    contact_information boolean DEFAULT true NOT NULL
+    contact_information boolean DEFAULT true NOT NULL,
+    message character varying(400) DEFAULT NULL::character varying,
+    message_sent_time timestamp with time zone
 );
 
 
@@ -1318,81 +1642,12 @@ ALTER SEQUENCE public.queue_settings_id_seq OWNED BY public.queue_settings.id;
 
 
 --
--- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.regrade_discussion (
-    id integer NOT NULL,
-    regrade_id integer NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    user_id character varying(255) NOT NULL,
-    content text,
-    deleted boolean DEFAULT false NOT NULL,
-    gc_id integer
-);
-
-
---
--- Name: regrade_discussion_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.regrade_discussion_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: regrade_discussion_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.regrade_discussion_id_seq OWNED BY public.regrade_discussion.id;
-
-
---
--- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.regrade_requests (
-    id integer NOT NULL,
-    g_id character varying(255) NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    user_id character varying(255),
-    team_id character varying(255),
-    status integer DEFAULT 0 NOT NULL,
-    gc_id integer
-);
-
-
---
--- Name: regrade_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.regrade_requests_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: regrade_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.regrade_requests_id_seq OWNED BY public.regrade_requests.id;
-
-
---
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.sections_registration (
-    sections_registration_id character varying(255) NOT NULL
+    sections_registration_id character varying(255) NOT NULL,
+    course_section_id character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -1425,7 +1680,7 @@ CREATE TABLE public.solution_ta_notes (
     component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
-    edited_at timestamp with time zone NOT NULL,
+    edited_at timestamp(0) with time zone NOT NULL,
     itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
@@ -1530,12 +1785,11 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE TABLE public.users (
     user_id character varying NOT NULL,
-    anon_id character varying,
     user_numeric_id character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
+    user_givenname character varying NOT NULL,
+    user_preferred_givenname character varying,
+    user_familyname character varying NOT NULL,
+    user_preferred_familyname character varying,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
@@ -1549,7 +1803,12 @@ CREATE TABLE public.users (
     registration_subsection character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
+    user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_last_initial_format integer DEFAULT 0 NOT NULL,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
+    CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
 
 
@@ -1560,8 +1819,15 @@ CREATE TABLE public.users (
 CREATE TABLE public.viewed_responses (
     thread_id integer NOT NULL,
     user_id character varying NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL
 );
+
+
+--
+-- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.calendar_messages ALTER COLUMN id SET DEFAULT nextval('public.calendar_messages_id_seq'::regclass);
 
 
 --
@@ -1583,6 +1849,20 @@ ALTER TABLE ONLY public.course_materials ALTER COLUMN id SET DEFAULT nextval('pu
 --
 
 ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT nextval('public.course_materials_access_id_seq'::regclass);
+
+
+--
+-- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries ALTER COLUMN id SET DEFAULT nextval('public.grade_inquiries_id_seq'::regclass);
+
+
+--
+-- Name: grade_inquiry_discussion id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion ALTER COLUMN id SET DEFAULT nextval('public.grade_inquiry_discussion_id_seq'::regclass);
 
 
 --
@@ -1628,10 +1908,31 @@ ALTER TABLE ONLY public.lichen ALTER COLUMN id SET DEFAULT nextval('public.liche
 
 
 --
+-- Name: lichen_run_access id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access ALTER COLUMN id SET DEFAULT nextval('public.lichen_run_access_id_seq'::regclass);
+
+
+--
 -- Name: notifications id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
+
+
+--
+-- Name: poll_options option_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options ALTER COLUMN option_id SET DEFAULT nextval('public.poll_options_option_id_seq'::regclass);
+
+
+--
+-- Name: poll_responses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses ALTER COLUMN id SET DEFAULT nextval('public.poll_responses_id_seq'::regclass);
 
 
 --
@@ -1660,20 +1961,6 @@ ALTER TABLE ONLY public.queue ALTER COLUMN entry_id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.queue_settings ALTER COLUMN id SET DEFAULT nextval('public.queue_settings_id_seq'::regclass);
-
-
---
--- Name: regrade_discussion id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion ALTER COLUMN id SET DEFAULT nextval('public.regrade_discussion_id_seq'::regclass);
-
-
---
--- Name: regrade_requests id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests ALTER COLUMN id SET DEFAULT nextval('public.regrade_requests_id_seq'::regclass);
 
 
 --
@@ -1763,6 +2050,22 @@ ALTER TABLE ONLY public.gradeable_data
 
 
 --
+-- Name: grade_inquiries grade_inquiries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: grade_override grade_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1776,6 +2079,14 @@ ALTER TABLE ONLY public.grade_override
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gradeable_anon gradeable_anon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_pkey PRIMARY KEY (g_id, anon_id);
 
 
 --
@@ -1851,10 +2162,10 @@ ALTER TABLE ONLY public.gradeable
 
 
 --
--- Name: regrade_requests gradeable_team_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries gradeable_team_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
 
@@ -1875,10 +2186,10 @@ ALTER TABLE ONLY public.gradeable_data
 
 
 --
--- Name: regrade_requests gradeable_user_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grade_inquiries gradeable_user_gc_id; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.regrade_requests
+ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
 
 
@@ -1919,15 +2230,7 @@ ALTER TABLE ONLY public.late_days
 --
 
 ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, team_id);
-
-
---
--- Name: late_day_cache ldc_g_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.late_day_cache
-    ADD CONSTRAINT ldc_g_user_id_unique UNIQUE (g_id, user_id);
+    ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);
 
 
 --
@@ -1944,6 +2247,14 @@ ALTER TABLE ONLY public.lichen
 
 ALTER TABLE ONLY public.lichen
     ADD CONSTRAINT lichen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lichen_run_access lichen_run_access_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT lichen_run_access_pkey PRIMARY KEY (id);
 
 
 --
@@ -1995,6 +2306,22 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: poll_options poll_options_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_pkey PRIMARY KEY (option_id);
+
+
+--
+-- Name: poll_responses poll_responses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses
+    ADD CONSTRAINT poll_responses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: polls polls_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2024,22 +2351,6 @@ ALTER TABLE ONLY public.queue
 
 ALTER TABLE ONLY public.queue_settings
     ADD CONSTRAINT queue_settings_pkey PRIMARY KEY (id);
-
-
---
--- Name: regrade_discussion regrade_discussion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_pkey PRIMARY KEY (id);
-
-
---
--- Name: regrade_requests regrade_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests
-    ADD CONSTRAINT regrade_requests_pkey PRIMARY KEY (id);
 
 
 --
@@ -2137,6 +2448,20 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
+-- Name: gradeable_component_data_gd; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_gd ON public.gradeable_component_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_component_data_no_grader_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2144,17 +2469,59 @@ CREATE INDEX gradeable_component_data_no_grader_index ON public.gradeable_compon
 
 
 --
+-- Name: gradeable_component_mark_data_gcm_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gcm_id_idx ON public.gradeable_component_mark_data USING btree (gcm_id);
+
+
+--
+-- Name: gradeable_component_mark_data_gd_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_mark_data_gd_id_idx ON public.gradeable_component_mark_data USING btree (gd_id);
+
+
+--
 -- Name: gradeable_team_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX gradeable_team_unique ON public.regrade_requests USING btree (team_id, g_id) WHERE (gc_id IS NULL);
+CREATE UNIQUE INDEX gradeable_team_unique ON public.grade_inquiries USING btree (team_id, g_id) WHERE (gc_id IS NULL);
 
 
 --
 -- Name: gradeable_user_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+CREATE UNIQUE INDEX gradeable_user_unique ON public.grade_inquiries USING btree (user_id, g_id) WHERE (gc_id IS NULL);
+
+
+--
+-- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_idx ON public.grading_registration USING btree (user_id);
+
+
+--
+-- Name: grading_registration_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_registration_user_id_index ON public.grading_registration USING btree (user_id);
+
+
+--
+-- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
+
+
+--
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
 
 
 --
@@ -2162,6 +2529,13 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.regrade_requests USING btree
 --
 
 CREATE INDEX users_user_numeric_id_idx ON public.users USING btree (user_numeric_id);
+
+
+--
+-- Name: users add_course_user; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER add_course_user AFTER INSERT OR UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.add_course_user();
 
 
 --
@@ -2296,6 +2670,14 @@ ALTER TABLE ONLY public.lichen
 
 
 --
+-- Name: lichen_run_access fk_lichen_run_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.lichen_run_access
+    ADD CONSTRAINT fk_lichen_run_id FOREIGN KEY (lichen_run_id) REFERENCES public.lichen(id) ON DELETE CASCADE;
+
+
+--
 -- Name: course_materials_sections fk_section_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2333,6 +2715,62 @@ ALTER TABLE ONLY public.forum_posts_history
 
 ALTER TABLE ONLY public.forum_posts_history
     ADD CONSTRAINT forum_posts_history_post_id_fk FOREIGN KEY (post_id) REFERENCES public.posts(id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: grade_inquiries grade_inquiries_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiries
+    ADD CONSTRAINT grade_inquiries_fk3 FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_fk0 FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: grade_inquiry_discussion grade_inquiry_discussion_grade_inquiries_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grade_inquiry_discussion
+    ADD CONSTRAINT grade_inquiry_discussion_grade_inquiries_id_fk FOREIGN KEY (grade_inquiry_id) REFERENCES public.grade_inquiries(id) ON UPDATE CASCADE;
 
 
 --
@@ -2381,6 +2819,22 @@ ALTER TABLE ONLY public.gradeable_access
 
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_anon gradeable_anon_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_anon
+    ADD CONSTRAINT gradeable_anon_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -2760,62 +3214,6 @@ ALTER TABLE ONLY public.queue
 
 
 --
--- Name: regrade_discussion regrade_discussion_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id);
-
-
---
--- Name: regrade_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: regrade_discussion regrade_discussion_regrade_requests_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_discussion
-    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id) ON UPDATE CASCADE;
-
-
---
--- Name: regrade_requests regrade_requests_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests
-    ADD CONSTRAINT regrade_requests_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
-
-
---
--- Name: regrade_requests regrade_requests_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests
-    ADD CONSTRAINT regrade_requests_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: regrade_requests regrade_requests_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests
-    ADD CONSTRAINT regrade_requests_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
-
-
---
--- Name: regrade_requests regrade_requests_fk3; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.regrade_requests
-    ADD CONSTRAINT regrade_requests_fk3 FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
-
-
---
 -- Name: seeking_team seeking_team_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2922,4 +3320,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-
