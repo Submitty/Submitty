@@ -20,6 +20,7 @@ class GradeInquiryController extends AbstractController {
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
+        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
 
         $user = $this->core->getUser();
         $submitter = $this->core->getQueries()->getSubmitterById($submitter_id);
@@ -43,24 +44,6 @@ class GradeInquiryController extends AbstractController {
         if ($graded_gradeable === false) {
             return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
-
-
-        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
-        if ($graded_gradeable->hasTaGradingInfo()) {
-            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-            foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
-                foreach ($container->getGradedComponents() as $component_grade) {
-                    if ($gc_id == null) {
-                        $gc_id = $component_grade->getComponentId();
-                    }
-
-                }
-            }
-        } else {
-            $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
-        }
-
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
