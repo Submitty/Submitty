@@ -403,7 +403,7 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           config: baseUrl=http://localhost
-          spec: cypress/e2e/login.spec.js
+          spec: cypress/e2e/cypress-system/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
