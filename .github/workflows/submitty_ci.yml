@@ -442,7 +442,7 @@ jobs:
         run: sudo bash tests/test_site_error_log.sh
 
   e2eCypress_cloud:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       # don't fail the entire matrix on failure
       fail-fast: false
