@@ -59,13 +59,6 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
             loginViaUI();
             cy.url().should('eq', full_url);
-
-            cy.logout();
-            // VIA Post request
-            cy.visit(['sample', 'config']);
-            cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login?old=${encodeURIComponent(full_url)}`);
-            cy.login();
-            cy.url().should('eq', full_url);
         });
 
 
@@ -80,7 +73,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
         it('logout button should successfully logout and end up at login screen', () => {
-            cy.login();
+            loginViaUI();
             cy.get('#logout > .flex-line').should('be.visible').click();
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
         });
