@@ -5165,7 +5165,7 @@ AND gc_id IN (
      * @param  bool $is_grade_inquiry_per_component_allowed
      * @return array<int, string> of gcd_grader_id and count of unresolved grade inquiries of the grader
      */
-    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true): array<int, string> {
+    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $return = [];
         if ($is_grade_inquiry_per_component_allowed) {
             $this->course_db->query("SELECT count(b.*), b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id WHERE a.status = '-1' AND a.g_id=? GROUP BY b.gcd_grader_id", [$gradeable_id]);
