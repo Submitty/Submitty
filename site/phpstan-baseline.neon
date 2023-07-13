@@ -14037,11 +14037,6 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method class@anonymous/app/views/grading/ElectronicGraderView\\.php\\:1692\\:\\:getRandomIndices\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Negated boolean expression is always false\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
