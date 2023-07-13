@@ -1237,7 +1237,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("The tmp file 'broken.zip' was not properly uploaded.", $return['message']);
+        $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 

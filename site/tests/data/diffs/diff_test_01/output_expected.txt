@@ -10,10 +10,10 @@
 	<div><span class='line_number'>&nbsp;7</span><span class='line_code'>noun ==&gt; computer</span></div>
 	<div><span class='line_number'>&nbsp;8</span><span class='line_code'>adjective ==&gt; cute</span></div>
 	<div><span class='line_number'>&nbsp;9</span><span class='line_code'>Look, Brad ...</span></div>
-	<div><span class='line_number'>10</span><span class='line_code'>  I can see you&#039;re really happy about this ...</span></div>
+	<div><span class='line_number'>10</span><span class='line_code'>  I can see you're really happy about this ...</span></div>
 	<div><span class='line_number'>11</span><span class='line_code'>  I honestly think you ought to eat calmly ...</span></div>
 	<div><span class='line_number'>12</span><span class='line_code'>  take a silly mouse and think things over ...</span></div>
-	<div><span class='line_number'>13</span><span class='line_code'>  I know I&#039;ve made some very hungry decisions recently,</span></div>
+	<div><span class='line_number'>13</span><span class='line_code'>  I know I've made some very hungry decisions recently,</span></div>
 	<div><span class='line_number'>14</span><span class='line_code'>  but I can give you my complete computer that my work will be backaaaaaaaaaaaaaa</span></div>
 	<div><span class='line_number'>15</span><span class='line_code'>  to cute.</span></div>
 	<div><span class='line_number'>16</span><span class='line_code'></span></div>

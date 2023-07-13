@@ -33,7 +33,7 @@ class CascadingIterator implements \Iterator {
      * @return mixed Can return any type.
      * @since 5.0.0
      */
-    public function current(): mixed {
+    public function current() {
         if ($this->iterator_key >= count($this->iterators)) {
             return null;
         }
@@ -56,7 +56,7 @@ class CascadingIterator implements \Iterator {
      * @return void Any returned value is ignored.
      * @since 5.0.0
      */
-    public function next(): void {
+    public function next() {
         $this->seek();
         $this->iterators[$this->iterator_key]->next();
         $this->key++;
@@ -70,11 +70,11 @@ class CascadingIterator implements \Iterator {
      * @return mixed scalar on success, or null on failure.
      * @since 5.0.0
      */
-    public function key(): mixed {
+    public function key() {
         return $this->key;
     }
 
-    public function iteratorKey(): int {
+    public function iteratorKey() {
         return $this->iterator_key;
     }
 
@@ -85,7 +85,7 @@ class CascadingIterator implements \Iterator {
      * Returns true on success or false on failure.
      * @since 5.0.0
      */
-    public function valid(): bool {
+    public function valid() {
         return $this->iterator_key < count($this->iterators) && $this->iterators[$this->iterator_key]->valid();
     }
 
@@ -93,7 +93,7 @@ class CascadingIterator implements \Iterator {
      * Rewind each iterator that we've used as specified by the
      * the iterator key
      */
-    public function rewind(): void {
+    public function rewind() {
         while ($this->iterator_key >= count($this->iterators)) {
             $this->iterator_key--;
         }

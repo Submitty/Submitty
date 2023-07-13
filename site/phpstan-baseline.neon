@@ -1012,6 +1012,11 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, true given\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: "#^Parameter \\#2 \\$timestamp of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateLateDays\\(\\) expects string, DateTime given\\.$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -2731,6 +2736,11 @@ parameters:
 			path: app/entities/course/CourseMaterial.php
 
 		-
+			message: "#^Parameter \\#1 \\$p of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:filter\\(\\) expects Closure\\(mixed\\=\\)\\: bool, Closure\\(app\\\\entities\\\\course\\\\CourseMaterialAccess\\)\\: bool given\\.$#"
+			count: 1
+			path: app/entities/course/CourseMaterial.php
+
+		-
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$accesses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/course/CourseMaterial.php
@@ -2897,6 +2907,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:setRegexArray\\(\\) has parameter \\$regex with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: "#^Parameter \\#1 \\$p of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:filter\\(\\) expects Closure\\(mixed\\=\\)\\: bool, Closure\\(app\\\\entities\\\\plagiarism\\\\PlagiarismRunAccess\\)\\: bool given\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
@@ -3132,6 +3147,11 @@ parameters:
 
 		-
 			message: "#^Class app\\\\libraries\\\\CascadingIterator implements generic interface Iterator but does not specify its types\\: TKey, TValue$#"
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\CascadingIterator\\:\\:iteratorKey\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/CascadingIterator.php
 
@@ -7533,6 +7553,11 @@ parameters:
 
 		-
 			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^Parameter \\#2 \\$parameters of function call_user_func_array expects array\\<int, mixed\\>, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: app/libraries/routers/WebRouter.php
 
@@ -14043,6 +14068,11 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var for variable \\$working_dir has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Parameter \\#2 \\$callback of function usort expects callable\\(array\\{graders\\: mixed, rows\\?\\: non\\-empty\\-array\\<int, array\\{graded_gradeable\\: app\\\\models\\\\gradeable\\\\GradedGradeable, team_edit_onclick\\?\\: string, edited_past_lock_date\\?\\: bool, graded_groups\\: array\\<int, mixed\\>\\}\\>, teamless_users\\?\\: non\\-empty\\-array\\<int, array\\{user\\: app\\\\models\\\\User, new_team_onclick\\: string\\}\\>, title\\: mixed\\}, array\\{graders\\: mixed, rows\\?\\: non\\-empty\\-array\\<int, array\\{graded_gradeable\\: app\\\\models\\\\gradeable\\\\GradedGradeable, team_edit_onclick\\?\\: string, edited_past_lock_date\\?\\: bool, graded_groups\\: array\\<int, mixed\\>\\}\\>, teamless_users\\?\\: non\\-empty\\-array\\<int, array\\{user\\: app\\\\models\\\\User, new_team_onclick\\: string\\}\\>, title\\: mixed\\}\\)\\: int, Closure\\(mixed, mixed\\)\\: bool given\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
