@@ -5165,14 +5165,14 @@ AND gc_id IN (
      */
     public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $return = [];
-        if ($is_grade_inquiry_per_component_allowed)
-        {
+        if ($is_grade_inquiry_per_component_allowed) {
             $this->course_db->query("SELECT count(b.*), b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id WHERE a.status = '-1' AND a.g_id=? GROUP BY b.gcd_grader_id", [$gradeable_id]);
             foreach ($this->course_db->rows() as $row) {
                 $return[$row['gcd_grader_id']] = $row['count'];
             }
             return $return;
-        } else {
+        }
+        else {
             $this->course_db->query("SELECT count(result.*), result.gcd_grader_id FROM (SELECT DISTINCT a.user_id, b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_data c ON a.g_id = c.g_id AND a.user_id = c.gd_user_id JOIN gradeable_component_data b ON c.gd_id = b.gd_id WHERE a.status = '-1' AND a.g_id=?) AS result GROUP BY result.gcd_grader_id", [$gradeable_id]);
             foreach ($this->course_db->rows() as $row) {
                 $return[$row['gcd_grader_id']] = $row['count'];
