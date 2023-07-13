@@ -927,7 +927,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -940,25 +940,30 @@ function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, 
             return;
         }
     }
-    let late_warning_seen = false;
-    // check due date
-    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
-    if ( days_past_deadline > 0 && days_past_deadline <= late_days_allowed && days_past_deadline <= remaining_late_days_for_gradeable+late_day_exceptions  && days_to_be_charged > 0) {
-        message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
-        if (!confirm(message)) {
-            $('#submit').prop('disabled', false);
-            return;
-        }
-    }
-    /*  Note: in order to make sure that this message doesn't appear after one valid late day has been used (because in that case a student could no longer have anymore late day)
-        we check if the same amount of late days have been charged as the days past the deadline. If it is the same amount, there is no need for this message to get shown.*/
 
-    else if ( days_past_deadline > 0 && ( days_past_deadline > late_days_allowed || ( days_past_deadline > remaining_late_days_for_gradeable  && days_past_deadline !== charged_late_days ) ) && days_to_be_charged>0  ) {
-        late_warning_seen = true;
-        message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
-        if (!confirm(message)) {
-            $('#submit').prop('disabled', false);
-            return;
+    let late_warning_seen = false;
+
+    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
+
+    if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
+
+        /* days_to_be_charged !== charged_late_days will make sure that any message won't appear multiple times if it already appeared once and the user made a submission */
+
+        if ( days_to_be_charged <= late_days_allowed && remaining_late_days_for_gradeable > 0  && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
+            message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
+            if (!confirm(message)) {
+                $('#submit').prop('disabled', false);
+                return;
+            }
+        }
+        else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable == 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
+            late_warning_seen = true;
+            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            if (!confirm(message)) {
+                $('#submit').prop('disabled', false);
+                return;
+            }
         }
     }
     // check team date

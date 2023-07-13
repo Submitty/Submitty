@@ -397,6 +397,7 @@
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission(
+                {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
                 days_past_deadline,
@@ -422,6 +423,7 @@
         }
         else {
             handleSubmission(
+                {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
                 days_past_deadline,
