@@ -77,6 +77,13 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.visit(['sample']);
             cy.get('.content').contains('You don\'t have access to this course.');
         });
+
+
+        it('logout button should successfully logout and end up at login screen', () => {
+            cy.login();
+            cy.get('#logout > .flex-line').should('be.visible').click();
+            cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
+        });
     });
 
 
