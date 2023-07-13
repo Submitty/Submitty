@@ -948,7 +948,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
 
     if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
 
-        /* days_to_be_charged !== charged_late_days will make sure that any message won't appear multiple times if it already appeared once and the user made a submission */
+        /* days_to_be_charged !== charged_late_days will make sure that both messages won't appear multiple times if it already appeared once and the user made a submission */
 
         if ( days_to_be_charged <= late_days_allowed && remaining_late_days_for_gradeable > 0  && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
             message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
@@ -967,7 +967,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         }
     }
     // check team date
-    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged < 0) {
+    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged + charged_late_days < 0) {
         message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
         if (!confirm(message)) {
             return;
