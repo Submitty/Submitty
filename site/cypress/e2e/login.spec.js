@@ -73,6 +73,7 @@ describe('Test cases revolving around the logging in functionality of the site',
 
 
         it('logout button should successfully logout and end up at login screen', () => {
+            cy.visit('/');
             loginViaUI();
             cy.get('#logout > .flex-line').should('be.visible').click();
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
