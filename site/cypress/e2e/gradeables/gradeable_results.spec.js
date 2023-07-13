@@ -9,7 +9,7 @@ describe('Testing functionality of Autograder Results', () => {
 
     it('Should display confetti', () => {
         cy.get('#confetti_canvas').should('not.be.visible');
-        cy.get('div[onclick="addConfetti();"]').click();
+        cy.get('.box-title-total').first().click();
         cy.get('#confetti_canvas').should('be.visible');
     });
 
@@ -34,10 +34,10 @@ describe('Testing functionality of Autograder Results', () => {
         //Close all
         cy.get('.loading-tools-hide').first().click();
         cy.get('#testcase_1').should('not.be.visible');
-        cy.get('#testcase_2').should('not.be.visible')
-        cy.get('#testcase_3').should('not.be.visible')
-        cy.get('#testcase_6').should('not.be.visible')
-        cy.get('#testcase_8').should('not.be.visible')
+        cy.get('#testcase_2').should('not.be.visible');
+        cy.get('#testcase_3').should('not.be.visible');
+        cy.get('#testcase_6').should('not.be.visible');
+        cy.get('#testcase_8').should('not.be.visible');
     });
 
     it('Should cancel loading', () => {
