@@ -28,7 +28,7 @@ import { buildUrl } from './utils.js';
 //These functions can be called like "cy.login(...)" and will yield a result
 
 /**
-* Log into Submitty using API, if a user is already logged in, you are redirected to 
+* Log into Submitty using API, if a user is already logged in, you are redirected to
 * the My Courses page (/home)
 *
 * @param {String} [username=instructor] - username & password of who to log in as
@@ -47,8 +47,8 @@ Cypress.Commands.add('login', (username = 'instructor') => {
             },
         }).then(response => {
             cy.visit(response.redirectedToUrl);
-        })
-    })
+        });
+    });
 });
 
 /**
@@ -80,13 +80,11 @@ Cypress.Commands.add('loginViaUI', (username = 'instructor') => {
 
 /**
 * Log out of Submitty, assumes a user is already logged in
-* If errorOnFail is false, it will check to see if the logout button exists before trying
-* to logout.
 */
 Cypress.Commands.add('logout', () => {
     cy.request({
         method: 'POST',
-        url: '/authentication/logout'
+        url: '/authentication/logout',
     });
     cy.visit('/');
 });

@@ -29,7 +29,6 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.get('#logout .icon-title').should((val) => {
                 expect(val.text().trim()).to.equal('Logout Quinn');
             });
-            cy.get('#logout .icon-title').click();
         });
 
 
@@ -49,7 +48,6 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.url().should('eq', full_url);
         });
 
-        
 
         it('should check if you can access a course', () => {
             cy.visit('authentication/login');
