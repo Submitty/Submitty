@@ -45,10 +45,12 @@ function no_pdf_access(gradeable_id) {
     cy.get('[data-testid="banner-message"]').should('be.visible').and('contain.text', 'You do not have permission');
 }
 
-const gradeable_type = ['grading_homework_team_pdf',
+const gradeable_type = [
+    'grading_homework_team_pdf',
     'grading_homework_pdf',
     'grading_pdf_peer_homework',
-    'grading_pdf_peer_team_homework'];
+    'grading_pdf_peer_team_homework'
+];
 
 describe('Test cases for PDFs access', () => {
     before(() => {
