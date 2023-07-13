@@ -1195,7 +1195,7 @@ class Course(object):
                                             # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
-                                                commit_submission_to_repo(user.id, src, repo_path,gradeable.subdirectory )
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
                                                 mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
                                             else:
                                                 create_gradeable_submission(src, dst)
@@ -2092,9 +2092,9 @@ class Gradeable(object):
         if self.is_repository:
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['upload_type'] = 'repository'
-            form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}'
-            form_json['using_subdirectory'] = False
-            form_json['subdirectory'] = ''
+            form_json['vcs_partial_path'] = self.vcs_partial_path
+            form_json['using_subdirectory'] = self.using_subdirectory
+            form_json['subdirectory'] = self.subdirectory
             return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
@@ -2113,7 +2113,7 @@ class Gradeable(object):
             form_json['section_type'] = self.get_submission_type()
             form_json['eg_late_days'] = self.late_days
             form_json['upload_type'] = self.get_upload_type()
-            form_json['upload_repo'] = self.subdirectory
+            form_json['upload_repo'] = ''
             form_json['comment_title'] = []
             form_json['points'] = []
             form_json['eg_extra'] = []
