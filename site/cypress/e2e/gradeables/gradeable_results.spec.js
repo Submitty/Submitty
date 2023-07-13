@@ -8,19 +8,19 @@ describe('Testing functionality of Autograder Results', () => {
     });
 
     it('Should display confetti', () => {
-        cy.get('#confetti_canvas').should('not.be.visible');
+        cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/block/);
         cy.get('.box-title-total').first().click();
-        cy.get('#confetti_canvas').should('be.visible');
+        cy.get('#confetti_canvas').should('have.css', 'display').and('match',/block/);
     });
 
     it('Should show and hide details', () => {
         //Open
-        cy.get('#testcase_1').should('not.be.visible');
+        cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
         cy.get('.loading-tools-show').eq(1).click();
         cy.get('#testcase_1').should('be.visible');
         //Close
-        cy.get('.loading-tools-hide').first().click();
-        cy.get('#testcase_1').should('not.be.visible');
+        cy.get('.loading-tools-hide').eq(1).click();
+        cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
     });
 
     it('Should expand and collapse all test cases', () => {
@@ -33,11 +33,11 @@ describe('Testing functionality of Autograder Results', () => {
         cy.get('#testcase_8').should('be.visible');
         //Close all
         cy.get('.loading-tools-hide').first().click();
-        cy.get('#testcase_1').should('not.be.visible');
-        cy.get('#testcase_2').should('not.be.visible');
-        cy.get('#testcase_3').should('not.be.visible');
-        cy.get('#testcase_6').should('not.be.visible');
-        cy.get('#testcase_8').should('not.be.visible');
+        cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
+        cy.get('#testcase_2').scrollIntoView().should('not.be.visible');
+        cy.get('#testcase_3').scrollIntoView().should('not.be.visible');
+        cy.get('#testcase_6').scrollIntoView().should('not.be.visible');
+        cy.get('#testcase_8').scrollIntoView().should('not.be.visible');
     });
 
     it('Should cancel loading', () => {
