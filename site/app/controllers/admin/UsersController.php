@@ -69,16 +69,16 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        //Get Active Columns
-        $active_columns = '';
+        //Get Active student Columns
+        $active_student_columns = '';
         //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
-        if (isset($_COOKIE['active_columns']) && count(explode('-', $_COOKIE['active_columns'])) == 12) {
-            $active_columns = $_COOKIE['active_columns'];
+        if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 12) {
+            $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_columns = implode('-', array_fill(0, 12, true));
+            if (setcookie('active_student_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_student_columns = implode('-', array_fill(0, 12, true));
             }
         }
 
@@ -93,7 +93,7 @@ class UsersController extends AbstractController {
                 $download_info,
                 $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
-                $active_columns
+                $active_student_columns
             )
         );
     }
@@ -149,6 +149,19 @@ class UsersController extends AbstractController {
             ]);
         }
 
+        //Get Active grader Columns
+        $active_grader_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 7) {
+            $active_grader_columns = $_COOKIE['active_grader_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_grader_columns', implode('-', array_fill(0, 7, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_grader_columns = implode('-', array_fill(0, 7, true));
+            }
+        }
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
@@ -158,7 +171,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_grader_columns
             )
         );
     }
@@ -677,7 +691,7 @@ class UsersController extends AbstractController {
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
-            $update_users = array_splice($unassigned_user_ids, 0, $section_assignment_counts[$section]);
+            $update_users = array_splice($unassigned_user_ids, 0, intval($section_assignment_counts[$section]));
             if (count($update_users) == 0) {
                 continue;
             }
