@@ -5161,9 +5161,11 @@ AND gc_id IN (
     /**
      * get the grader and the count of the gradeable component for inquiry
      * If the grade is not-by component, function will return all graders who were involved in grading the student
-     * @return array of gcd_grader_id and count of unresolved grade inquiries of the grader
+     * @param string $gradeable_id
+     * @param  bool $is_grade_inquiry_per_component_allowed
+     * @return array<int, string> of gcd_grader_id and count of unresolved grade inquiries of the grader
      */
-    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true): array<int, string> {
         $return = [];
         if ($is_grade_inquiry_per_component_allowed) {
             $this->course_db->query("SELECT count(b.*), b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id WHERE a.status = '-1' AND a.g_id=? GROUP BY b.gcd_grader_id", [$gradeable_id]);
@@ -5189,13 +5191,15 @@ AND gc_id IN (
         $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
     }
 
-    /*
+    /**
      * This is used to revert non-component inquiries back to by-component inquiries
      * convertInquiryComponentId function modifies the lowest gc_id of each student of the gradeable to null.
      * If instructor decides to switch to non-component from by-component then switch back to by-component,
      * this revertInquiryComponentId function will fetch the gc_id from grade_inquiry_discussion and update accordingly.
+     * @param Gradeable $gradeable
+     * @return void
      */
-    public function revertInquiryComponentId($gradeable) {
+    public function revertInquiryComponentId($gradeable): void {
         $this->course_db->query("UPDATE grade_inquiries SET gc_id=(SELECT b.gc_id FROM grade_inquiry_discussion b WHERE grade_inquiries.id = b.grade_inquiry_id) WHERE grade_inquiries.gc_id IS NULL AND grade_inquiries.g_id=?;", [$gradeable->getId()]);
     }
 
