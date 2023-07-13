@@ -16,7 +16,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.4
+  PHP_VER: 8.1
   NODE_VERSION: 16
   PYTHON_VERSION: 3.8
 
@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   css-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
@@ -50,7 +50,7 @@ jobs:
 
 
   js-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
@@ -74,7 +74,7 @@ jobs:
 
 
   js-unit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
@@ -100,7 +100,7 @@ jobs:
 
 
   php-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
@@ -135,7 +135,7 @@ jobs:
 
 
   php-unit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
@@ -168,7 +168,7 @@ jobs:
 
 
   python-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -190,7 +190,7 @@ jobs:
 
 
   python-unit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -266,7 +266,7 @@ jobs:
 
   yaml-lint:
     name: yaml-lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: install yamllint
@@ -277,7 +277,7 @@ jobs:
 
   shellcheck:
     name: ShellCheck
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: install ShellCheck
@@ -286,7 +286,7 @@ jobs:
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
   e2eSelenium:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres
@@ -316,7 +316,7 @@ jobs:
         run: sudo bash tests/test_site_error_log.sh
 
   e2eCypress:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres
@@ -514,7 +514,7 @@ jobs:
 
 
   e2eIntegrationTests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # Postgres should not be needed for the integration tests.
     # But unfortunately Configure test suite seems to use it at the moment, and
     # Configure test suite seems to be necessary for the Integration tests
