@@ -4929,23 +4929,44 @@ AND gc_id IN (
     }
 
     /**
-     * get the grader of the gradeable component for inquiry
-     * @return string the id of the first new post inserted of the new grade inquiry
+     * get the grader and the count of the gradeable component for inquiry
+     * If the grade is not-by component, function will return all graders who were involved in grading the student
+     * @return array of gcd_grader_id and count of unresolved grade inquiries of the grader
      */
-    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true)
-    {
-        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
-        $this->course_db->query("SELECT b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id" . $grade_inquiry_all_only_query, [$gradeable_id]);
-        $this->course_db->query("SELECT user_id, gc_id FROM grade_inquiries WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
-        return ($this->course_db->row()['cnt']);
+    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+        $return = [];
+        if ($is_grade_inquiry_per_component_allowed)
+        {
+            $this->course_db->query("SELECT count(b.*), b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id WHERE a.status = '-1' AND a.g_id=? GROUP BY b.gcd_grader_id", [$gradeable_id]);
+            foreach ($this->course_db->rows() as $row) {
+                $return[$row['gcd_grader_id']] = $row['count'];
+            }
+            return $return;
+        } else {
+            $this->course_db->query("SELECT count(result.*), result.gcd_grader_id FROM (SELECT DISTINCT a.user_id, b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_data c ON a.g_id = c.g_id AND a.user_id = c.gd_user_id JOIN gradeable_component_data b ON c.gd_id = b.gd_id WHERE a.status = '-1' AND a.g_id=?) AS result GROUP BY result.gcd_grader_id", [$gradeable_id]);
+            foreach ($this->course_db->rows() as $row) {
+                $return[$row['gcd_grader_id']] = $row['count'];
+            }
+            return $return;
+        }
     }
 
     /*
-     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
+     * This is used to convert one of the by-component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
         $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+    }
+
+    /*
+     * This is used to revert non-component inquiries back to by-component inquiries
+     * convertInquiryComponentId function modifies the lowest gc_id of each student of the gradeable to null.
+     * If instructor decides to switch to non-component from by-component then switch back to by-component,
+     * this revertInquiryComponentId function will fetch the gc_id from grade_inquiry_discussion and update accordingly.
+     */
+    public function revertInquiryComponentId($gradeable) {
+        $this->course_db->query("UPDATE grade_inquiries SET gc_id=(SELECT b.gc_id FROM grade_inquiry_discussion b WHERE grade_inquiries.id = b.grade_inquiry_id) WHERE grade_inquiries.gc_id IS NULL AND grade_inquiries.g_id=?;", [$gradeable->getId()]);
     }
 
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
