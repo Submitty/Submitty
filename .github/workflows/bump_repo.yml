@@ -20,7 +20,7 @@ jobs:
           -v ${{ github.event.client_payload.tag }}
           >> $GITHUB_OUTPUT
       - name: Create Pull Request
-        uses: Submitty/peter-evans-create-pull-request
+        uses: Submitty/peter-evans-create-pull-request@v23.07.00
         with:
           token: ${{ secrets.SUBMITTYBOT_DEPENDENCY_TOKEN }}
           commit-message: >
