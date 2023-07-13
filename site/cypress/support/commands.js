@@ -78,14 +78,12 @@ Cypress.Commands.add('loginViaUI', (username = 'instructor') => {
 });
 
 
-
-
 /**
 * Log out of Submitty, assumes a user is already logged in
 * If errorOnFail is false, it will check to see if the logout button exists before trying
 * to logout.
 */
-Cypress.Commands.add('logout', (force = false, errorOnFail = true) => {
+Cypress.Commands.add('logout', () => {
     cy.request({
         method: 'POST',
         url: '/authentication/logout'
