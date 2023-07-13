@@ -158,8 +158,8 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getTimeBeingHelped($time_out, $time_helped) {
         $diff = strtotime($time_out) - strtotime($time_helped);
-        $h = $diff / 3600 % 24;
-        $m = $diff / 60 % 60;
+        $h = intval($diff / 3600) % 24;
+        $m = intval($diff / 60) % 60;
         $s = $diff % 60;
         return $h . "h " . $m . "m " . $s . "s";
     }
@@ -171,8 +171,8 @@ class OfficeHoursQueueModel extends AbstractModel {
         else {
             $diff = strtotime($time_out) - strtotime($time_in);
         }
-        $h = $diff / 3600 % 24;
-        $m = $diff / 60 % 60;
+        $h = intval($diff / 3600) % 24;
+        $m = intval($diff / 60) % 60;
         $s = $diff % 60;
         return $h . "h " . $m . "m " . $s . "s";
     }
