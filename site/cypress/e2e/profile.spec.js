@@ -71,6 +71,59 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('#secondary-email-notify-row').should('be.visible');
     });
 
+    // Selenium test_basic_info
+    it('Should start with accurate values', () => {
+        cy.get('[data-testid="username-row"]').should('contain.text', 'instructor');
+        cy.get('[data-testid="givenname-row"]').should('contain.text', 'Quinn');
+        cy.get('[data-testid="familyname-row"]').should('contain.text', 'Instructor');
+        cy.get('[data-testid="pronouns-row"]').should('contain.text', 'She/Her');
+        cy.get('[data-testid="email-row"]').should('contain.text', 'instructor@example.com');
+    });
+
+    // Selenium test_time_zone_selection
+    it('Time zone selector should work', () => {
+        cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
+        cy.get('[data-testid="time-zone-dropdown"]').select('(UTC-04:00) America/New_York');
+        // Since the login success message is still up, we get the next message.
+        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
+        cy.get('[data-testid="time-zone-dropdown"]').select('NOT_SET/NOT_SET');
+    });
+
+    it('Should error then succeed uploading profile photo', () => {
+        const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
+        cy.get('[data-testid="upload-photo-button"]').click();
+        cy.get('[data-testid="submit-button"]').click();
+        // Since the login success message is still up, we get the next message.
+        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'No image uploaded to update the profile photo');
+        cy.get('[data-testid="upload-photo-button"]').click();
+        cy.get('[data-testid="user-image-button"]').selectFile(filePath);
+        cy.get('[data-testid="submit-button"]').click();
+        cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'Profile photo updated successfully!');
+    });
+
+    it('Flagging an innapropriate photo', () => {
+        // Make sure an image has been uploaded
+        const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
+        cy.get('[data-testid="upload-photo-button"]').click();
+        cy.get('[data-testid="user-image-button"]').selectFile(filePath);
+        cy.get('[data-testid="submit-button"]').click();
+        cy.visit(['sample', 'student_photos']);
+        cy.get('.fa-flag').click();
+        cy.on('window:confirm', () => {
+            return true;
+        });
+
+        cy.visit('/user_profile');
+        cy.get('[data-flagged="flagged"]').should('contain.text', 'Your preferred image was flagged as inappropriate.');
+
+        // Undo flagging of image
+        cy.visit(['sample', 'student_photos']);
+        cy.get('.fa-undo').click();
+        cy.on('window:confirm', () => {
+            return true;
+        });
+    });
+
     it('Should open and close the popups', () => {
         cy.get('.popup-form').should('not.be.visible');
 
