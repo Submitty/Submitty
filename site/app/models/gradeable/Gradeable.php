@@ -943,7 +943,6 @@ class Gradeable extends AbstractModel {
                 $display_version,
                 $gradeable_id
             );
-            
             foreach ($notebook_data as $note) {
                 if (array_key_exists('filename', $note)) {
                     return $file_name == $note['filename'];
