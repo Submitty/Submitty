@@ -17,7 +17,6 @@ def up(config, database, semester, course):
     sql = """ALTER TABLE users ADD COLUMN IF NOT EXISTS display_pronouns
       boolean DEFAULT false;"""
     database.execute(sql)
-    pass
 
 
 def down(config, database, semester, course):
@@ -33,6 +32,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    sql = """ALTER TABLE users DROP COLUMN IF EXISTS display_pronouns;"""
-    database.execute(sql)
     pass
