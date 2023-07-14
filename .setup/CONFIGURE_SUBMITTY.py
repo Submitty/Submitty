@@ -519,9 +519,13 @@ os.removedirs(tmp_folder)
 
 if not args.worker:
     if not os.path.isfile(WORKERS_JSON):
+        capabilities = ["default"]
+        if args.setup_for_sample_courses:
+            capabilities.extend(["cpp", "python", "et-cetera", "notebook"])
+
         worker_dict = {
             "primary": {
-                "capabilities": ["default"],
+                "capabilities": capabilities,
                 "address": "localhost",
                 "username": "",
                 "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
@@ -530,28 +534,17 @@ if not args.worker:
         }
 
         if args.worker_pair:
-            worker_dict["submitty-worker"] = {
-                "capabilities": ['default'],
-                "address": "192.168.56.21",
-                "username": "submitty",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                "enabled": True
-            }
-            if args.setup_for_sample_courses:
-                worker_dict['submitty-worker']['capabilities'].extend([
-                    'cpp',
-                    'python',
-                    'et-cetera',
-                    'notebook',
-                ])
-
-        if args.setup_for_sample_courses:
-            worker_dict['primary']['capabilities'].extend([
-                'cpp',
-                'python',
-                'et-cetera',
-                'notebook',
-            ])
+            with open(os.path.join(SUBMITTY_REPOSITORY, '.vagrant-workers.json')) as f:
+                vagrant_workers = json.load(f)
+ 
+            for worker, data in vagrant_workers:
+                worker_dict[worker] = {
+                    "capabilities": capabilities,
+                    "address": data["ip_addr"],
+                    "username": "submitty",
+                    "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                    "enabled": True
+                }
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
