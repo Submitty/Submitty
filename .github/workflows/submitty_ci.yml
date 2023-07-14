@@ -285,6 +285,7 @@ jobs:
       - name: Run ShellCheck
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
+
   e2eCypress:
     runs-on: ubuntu-22.04
     services:
