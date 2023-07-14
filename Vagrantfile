@@ -8,7 +8,7 @@
 #       or
 #   EXTRA=rpi vagrant up
 #       or
-#   WORKER_PAIR=1 vagrant up
+#   WORKERS=1 vagrant up
 #
 #
 # If you want to override the default image used for the virtual machines, you can set the

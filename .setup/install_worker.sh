@@ -4,7 +4,7 @@
 #   install_worker.sh [<extra> <extra> ...]
 
 # This script is used to set up the worker machine in a vagrant worker pair
-# made by running WORKER_PAIR=1 vagrant up
+# made by running WORKERS=n vagrant up
 
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUPERVISOR_USER=submitty
