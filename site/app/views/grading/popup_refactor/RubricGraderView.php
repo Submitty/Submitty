@@ -76,7 +76,7 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Creates the Rubric Grading page visually.
-     * This function is called in reateMainRubricGraderPage of RubricGraderController.php.
+     * This function is called in createMainRubricGraderPage of RubricGraderController.php.
      *
      * @param Gradeable $gradeable - The current gradeable.
      * @param GradedGradeable $current_submission - The current submission we are looking at.
@@ -88,6 +88,8 @@ class RubricGraderView extends AbstractView {
      * @param string $blind_access_mode - Either "unblind", "single", or "double". See above for details.
      * @param string $details_url - URL of the details page for this Gradeable.
      *
+     * @return string HTML for the RubricGrader page.
+     *
      */
     public function createRubricGradeableView(
         Gradeable $gradeable,
@@ -98,7 +100,7 @@ class RubricGraderView extends AbstractView {
         bool $is_team_gradeable,
         string $blind_access_mode,
         string $details_url
-    ) {
+    ): string {
         $this->setMemberVariables($gradeable, $current_submission, $is_peer_gradeable, $is_team_gradeable, $blind_access_mode);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
@@ -125,6 +127,7 @@ class RubricGraderView extends AbstractView {
      * @param bool $is_team_gradeable - True if the gradeable is a team gradeable.
      * @param string $blind_access_mode - Either "unblind", "single", or "double". See above for details.
      *     for details.
+     * @return void
      */
     private function setMemberVariables(
         Gradeable $gradeable,
@@ -132,7 +135,7 @@ class RubricGraderView extends AbstractView {
         bool $is_peer_gradeable,
         bool $is_team_gradeable,
         string $blind_access_mode
-    ) {
+    ): void {
         $this->gradeable = $gradeable;
         $this->current_submission = $current_submission;
         $this->$is_peer_gradeable = $is_peer_gradeable;
@@ -148,8 +151,9 @@ class RubricGraderView extends AbstractView {
      *
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
+     * @return void
      */
-    private function createBreadcrumbHeader(string $sort_type, string $sort_direction) {
+    private function createBreadcrumbHeader(string $sort_type, string $sort_direction): void {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
             'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$this->gradeable->getTitle()} Grading", $gradeableUrl);
@@ -161,16 +165,18 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Adds CSS files used for the Rubric Grader page.
+     * @return void
      */
-    private function addCSSs() {
+    private function addCSSs(): void {
         $this->core->getOutput()->addInternalCss('electronic.css');
     }
 
 
     /**
      * Adds JavaScript code used for the Rubric Grader page.
+     * @return void
      */
-    private function addJavaScriptCode() {
+    private function addJavaScriptCode(): void {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
     }
@@ -178,8 +184,9 @@ class RubricGraderView extends AbstractView {
     /**
      * Creates the NavigationBar used to traverse between students.
      * @param string $details_url - URL of the Details page for this gradeable.
+     * @return string HTML for the NavigationBar.
      */
-    private function renderNavigationBar(string $details_url) {
+    private function renderNavigationBar(string $details_url): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [
             "blind_access_mode" => $this->blind_access_mode,
             "is_team_gradeable" => $this->is_team_gradeable,
