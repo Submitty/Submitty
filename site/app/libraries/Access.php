@@ -211,6 +211,9 @@ class Access {
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
+
+        $this->permissions['path.read.banner_images'] = self::ALLOW_MIN_STUDENT;
+        $this->permissions['path.write.banner_images'] = self::ALLOW_MIN_INSTRUCTOR;
     }
 
     /**
@@ -242,6 +245,18 @@ class Access {
                 "path.write" => "path.write.submissions",
             ]
         ];
+
+        $this->directories["banner_images"] = [
+            "base" => $this->core->getConfig()->getSubmittyPath() . "/banner_images",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions",
+            ]
+        ];
+
+
+
         $this->directories["attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/attachments",
             "subparts" => ["gradeable", "submitter", "grader"],
