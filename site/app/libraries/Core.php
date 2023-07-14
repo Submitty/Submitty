@@ -12,8 +12,9 @@ use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
 use Doctrine\DBAL\Logging\DebugStack;
-use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -144,7 +145,7 @@ class Core {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
-                  "sudo service php7.2-fpm restart";
+                  "sudo service php" . PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "-fpm restart";
                 $this->addErrorMessage($message);
             }
         }
@@ -175,12 +176,13 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
-        $config = Setup::createAnnotationMetadataConfiguration(
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
+        $cache = new PhpFilesAdapter("", 0, $cache_path);
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
-            null,
-            null,
-            false
+            FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
+            $cache
         );
 
         if ($debug_stack) {
@@ -271,6 +273,60 @@ class Core {
         return $queries;
     }
 
+    public function hasDBPerformanceWarning(): bool {
+        if (count($this->getSubmittyQueries()) + count($this->getCourseQueries()) > 20) {
+            return true;
+        }
+
+        if (($this->course_db !== null && $this->course_db->hasDuplicateQueries()) || ($this->submitty_db !== null && $this->submitty_db->hasDuplicateQueries())) {
+            return true;
+        }
+
+        $queries = [];
+        if ($this->course_debug_stack !== null) {
+            foreach ($this->course_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+        if ($this->submitty_debug_stack !== null) {
+            foreach ($this->submitty_debug_stack->queries as $query) {
+                $queries[] = $query['sql'];
+            }
+        }
+
+        return count($queries) !== count(array_unique($queries));
+    }
+
+    private function logPerformanceWarning(): void {
+        if (!$this->config->isDebug()) {
+            return;  // We never want to log these warnings on production
+        }
+
+        $ignore_list_path = FileUtils::joinPaths($this->config->getSubmittyInstallPath(), 'site', '.performance_warning_ignore.json');
+        $ignore_list = json_decode(file_get_contents($ignore_list_path));
+
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            return;
+        }
+
+        foreach ($ignore_list as $regex) {
+            if ($this->getConfig()->getTerm() !== null) {
+                $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
+            }
+            if ($this->getConfig()->getCourse() !== null) {
+                $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            }
+            $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
+            if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
+                return; // this route matches an ignore rule
+            }
+        }
+
+        // didn't match any of the ignore rules...print a warning
+        $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
+        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+    }
+
     /**
      * Loads the shell of the grading queue
      *
@@ -282,7 +338,7 @@ class Core {
         }
 
         $this->grading_queue = new GradingQueue(
-            $this->config->getSemester(),
+            $this->config->getTerm(),
             $this->config->getCourse(),
             $this->config->getSubmittyPath()
         );
@@ -307,6 +363,11 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
+        // If this is in debug mode and performance warnings were generated, log them before closing the DB connection
+        if ($this->config !== null && $this->config->isDebug() && $this->hasDBPerformanceWarning()) {
+            $this->logPerformanceWarning();
+        }
+
         if ($this->course_db !== null) {
             $this->course_db->disconnect();
         }
@@ -461,10 +522,10 @@ class Core {
     }
 
     /**
-     * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
+     * Authenticates the user against whatever method was chosen within the master.ini config file (and exists
      * within the app/authentication folder. The username and password for the user being authenticated are passed
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
-     * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
+     * from this method. Returns True/False whether or not the authentication attempt succeeded/failed.
      *
      * @param bool $persistent_cookie should we store this for some amount of time (true) or till browser closure (false)
      * @return bool
@@ -472,16 +533,16 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate(bool $persistent_cookie = true): bool {
-        $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
+                $user_id = $this->authentication->getUserId();
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),
                     $user_id,
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $token->claims()->get('expire_time'));
+                return Utils::setCookie('submitty_session', $token->toString(), $token->claims()->get('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -507,9 +568,9 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                return (string) TokenManager::generateApiToken(
+                return TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id)
-                );
+                )->toString();
             }
         }
         catch (\Exception $e) {
@@ -585,7 +646,7 @@ class Core {
      * @return string
      */
     public function buildCourseUrl($parts = []) {
-        array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getTerm(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
 
@@ -642,8 +703,8 @@ class Core {
     }
 
     public function getFullSemester() {
-        $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== "") {
+        $semester = $this->getConfig()->getTerm();
+        if ($this->getConfig()->getTerm() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
             if ($arr1[0] == "f") {
@@ -767,23 +828,23 @@ class Core {
                     $_COOKIE[$cookie_key]
                 );
                 $session_id = $token->claims()->get('session_id');
-                $expire_time = $token->claims()->get('expire_time');
                 $logged_in = $this->getSession($session_id, $token->claims()->get('sub'));
-                // make sure that the session exists and it's for the user they're claiming
-                // to be
+                // make sure that the session exists and it's for the user they're claiming to be
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
                 }
                 else {
-                    if ($expire_time > 0) {
+                    // If more than a day has passed since we last updated the cookie, update it with the new timestamp
+                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                        $new_token = TokenManager::generateSessionToken(
+                            $session_id,
+                            $token->claims()->get('sub')
+                        );
                         Utils::setCookie(
                             $cookie_key,
-                            (string) TokenManager::generateSessionToken(
-                                $session_id,
-                                $token->claims()->get('sub')
-                            ),
-                            $expire_time
+                            $new_token->toString(),
+                            $new_token->claims()->get('expire_time')
                         );
                     }
                 }

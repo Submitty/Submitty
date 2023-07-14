@@ -10,7 +10,6 @@ use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class LeaderboardController extends AbstractController {
-
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")

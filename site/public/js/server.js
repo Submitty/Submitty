@@ -1,9 +1,8 @@
-window.addEventListener("resize", checkSidebarCollapse);
-
 ////////////Begin: Removed redundant link in breadcrumbs////////////////////////
 //See this pr for why we might want to remove this code at some point
 //https://github.com/Submitty/Submitty/pull/5071
 window.addEventListener("resize", function(){
+  loadInBreadcrumbLinks();
   adjustBreadcrumbLinks();
 });
 
@@ -15,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadInBreadcrumbLinks(){
-  mobileHomeLink = $("#home-button").attr('href');
-  desktopHomeLink = $("#desktop_home_link").attr('href');
+  mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $("#home-button").attr('href');
+  desktopHomeLink = desktopHomeLink !== null ? desktopHomeLink : $("#desktop_home_link").attr('href');
 }
 
 function adjustBreadcrumbLinks(){
@@ -29,8 +28,6 @@ function adjustBreadcrumbLinks(){
   }
 }
 ////////////End: Removed redundant link in breadcrumbs//////////////////////////
-
-
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -134,50 +131,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    let orig_div_name = div_name;
-    div_name = "#" + div_name;
-
-    let loadingTools = $("#tc_" + index).find(".loading-tools");
-
-    if($(div_name).is(":visible")){
-        $("#show_char_"+index).toggle();
-        $(div_name).empty();
-        toggleDiv(orig_div_name);
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-show").show();
-    }
-    else{
-        $("#show_char_"+index).toggle();
-        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
-
-        loadingTools.find("span").hide();
-        loadingTools.find(".loading-tools-in-progress").show();
-        $.getJSON({
-            url: url,
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Error getting file diff: ' + response.message);
-                    return;
-                }
-                $(div_name).empty();
-                $(div_name).html(response.data);
-                toggleDiv(orig_div_name);
-
-                loadingTools.find("span").hide();
-                loadingTools.find(".loading-tools-hide").show();
-                enableKeyToClick();
-            },
-            error: function(e) {
-                alert("Could not load diff, please refresh the page and try again.");
-                console.log(e);
-                displayAjaxError(e);
-            }
-        })
-    }
-}
-
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
@@ -199,30 +152,102 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(id, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
-    var current_y_offset = window.pageYOffset;
-    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
+    const url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
+    const current_y_offset = window.pageYOffset;
+    Cookies.set('jumpToScrollPosition', current_y_offset);
+
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
 
     $('[id^=div_viewer_]').each(function() {
-        var number = this.id.replace('div_viewer_', '').trim();
+        const cm_id = this.id.replace('div_viewer_', '').trim();
+        const elem = $('#div_viewer_' + cm_id);
+        if (!cm_id.length || !elem) {
+            return;
+        }
 
-        var elem = $('#div_viewer_' + number);
         if (elem.hasClass('open')) {
-            document.cookie = "cm_" +number+ "=1;";
+            if (!cm_ids.includes(cm_id)) {
+                cm_ids.push(cm_id);
+            }
         }
         else {
-            document.cookie = "cm_" +number+ "=0;";
+            if (cm_ids.includes(cm_id)) {
+                cm_ids.splice(cm_ids.indexOf(cm_id, 1));
+            }
         }
     });
+    
+    Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
-    var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).html('');
-    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
+    const form = $("#delete-course-material-form");
+    const deleteMessageElement = form.find('.delete-course-material-message')[0];
+    deleteMessageElement.innerHTML = '';
+
+    const cm_message = document.createElement('b');
+    cm_message.textContent = file_name;
+
+    if (str_id !== null) {
+        const files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        const num_of_links = files_or_links.filter(function () {
+            return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
+        }).length;
+        const num_of_files = files_or_links.length - num_of_links;
+        const file_s = (num_of_files > 1) ? 's' : '';
+        const link_s = (num_of_links > 1) ? 's' : '';
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
+
+        const emElement = document.createElement('em');
+        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}` + num_links_txt;
+
+        cm_message.appendChild(emElement);
+    }
+
+    deleteMessageElement.appendChild(cm_message);
+
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
+}
+
+function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
+    const form = $('#overwrite-course-material-form');
+    form.css('display', 'block');
+    if (clashing_names.length === 1) {
+        const to_replace = [[' All', '']];
+        if (is_link) {
+            to_replace.push(['file', 'link']);
+        }
+        form.html((i, html) => {
+            to_replace.forEach((elem) => {
+                html = html.replaceAll(elem[0], elem[1]);
+            });
+            return html;
+        });
+    }
+    else {
+        const singular = ['Material', 'file', 'name', 'one'];
+        form.html((i, html) => {
+            singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
+                html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
+            });
+            return html;
+        });
+    }
+    const clash_list = $('#existing-names');
+    clash_list.html("");
+    clashing_names.forEach((elem) => {
+        clash_list.append($('<li>', {
+            text: elem
+        }));
+    });
+    captureTabInModal("overwrite-course-material-form");
+    if (is_edit_form) {
+        $('#overwrite-submit').attr('is-edit-form', 1);
+    }
     form.find('.form-body').scrollTop(0);
 }
 
@@ -258,24 +283,83 @@ function newUploadCourseMaterialsForm() {
     captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
-
+    $('#overwrite-materials-flag').remove();
 }
 
-function newEditCourseMaterialsFolderForm(id, dir) {
+function newEditCourseMaterialsFolderForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let folder_sections = $(tag).data('sections');
+    let partial_sections = $(tag).data('partial-sections');
+    let release_time =  $(tag).data('release-time');
+    let is_hidden = $(tag).data('hidden-state');
+    const partially_hidden = 2;
     let form = $('#edit-course-materials-folder-form');
 
-    $('#hide-materials-checkbox-edit', form).prop('checked', false);
+    let element = document.getElementById("edit-folder-picker");
+    element._flatpickr.setDate(release_time);
+
+    let hide_materials_box = $('#hide-folder-materials-checkbox-edit', form);
+    if (is_hidden > 0) {
+        hide_materials_box.prop('checked', true).trigger('change');
+        if (is_hidden === partially_hidden) {
+            hide_materials_box.attr('class', 'partial-checkbox');
+            $(hide_materials_box.siblings()[0]).before("<span><br><em>(Currently, some materials inside this folder are hidden.)</em></span>");
+        }
+    }
+    else {
+        hide_materials_box.prop('checked', false).trigger('change');
+    }
+
+    $('#show-some-section-selection-folder-edit :checkbox:enabled').prop('checked', false);
+    let showSections = function() {
+        $("#all-sections-showing-no-folder", form).prop('checked',false);
+        $("#all-sections-showing-yes-folder", form).prop('checked',true);
+        $("#show-some-section-selection-folder-edit", form).show();
+    }
+    let sectionsVisible = false;
+    if (folder_sections.length !== 0) {
+        for(let index = 0; index < folder_sections.length; ++index) {
+            $("#section-folder-edit-" + folder_sections[index], form).prop('checked',true);
+            $("#section-folder-edit-" + folder_sections[index], form).removeClass('partial-checkbox');
+            if ($(this).attr('class') === '') {
+                $(this).removeAttr('class');
+            }
+        }
+        showSections();
+        sectionsVisible = true;
+    }
+    else{
+        $("#show-some-section-selection-folder-edit", form).hide();
+        $("#all-sections-showing-yes-folder", form).prop('checked',false);
+        $("#all-sections-showing-no-folder", form).prop('checked',true);
+    }
+    if (partial_sections.length !== 0) {
+        for(let index = 0; index < partial_sections.length; ++index) {
+            $("#section-folder-edit-" + partial_sections[index], form).attr('class', 'partial-checkbox');
+            $("#section-folder-edit-" + partial_sections[index], form).prop('checked', true);
+        }
+        if (!sectionsVisible) {
+            showSections();
+        }
+    }
+
     $('#material-folder-edit-form', form).attr('data-id', id);
-    $("#show-some-section-selection-edit", form).hide();
-    $("#all-sections-showing-yes", form).prop('checked',false);
-    $("#all-sections-showing-no", form).prop('checked',true);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-folder-form");
 }
 
-function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_students, release_time, is_link, link_title, link_url) {
+function newEditCourseMaterialsForm(tag) {
+    let id = $(tag).data('id');
+    let dir = $(tag).data('priority');
+    let this_file_section = $(tag).data('sections');
+    let this_hide_from_students = $(tag).data('hidden-state');
+    let release_time = $(tag).data('release-time');
+    let is_link = $(tag).data('is-link');
+    let link_title = $(tag).data('link-title');
+    let link_url = $(tag).data('link-url');
 
     let form = $("#edit-course-materials-form");
 
@@ -283,13 +367,16 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
 
     element._flatpickr.setDate(release_time);
 
-    if(this_hide_from_students === "1"){
-        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    if(this_hide_from_students === 1){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true).trigger('change');
     }
 
     else{
-        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+        $("#hide-materials-checkbox-edit", form).prop('checked',false).trigger('change');
     }
+
+    $('#hide-materials-checkbox-edit:checked ~ #edit-form-hide-warning').show();
+    $('#hide-materials-checkbox-edit:not(:checked) ~ #edit-form-hide-warning').hide();
 
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
 
@@ -306,11 +393,9 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    if (is_link === "1") {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
+    const title_label = $("#edit-url-title-label", form);
+    const url_label = $("#edit-url-url-label", form);
+    if (is_link === 1) {
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
@@ -320,9 +405,18 @@ function newEditCourseMaterialsForm(id, dir, this_file_section, this_hide_from_s
         url.prop('disabled', false);
         url.val(link_url);
     }
+    else {
+        if (title_label.css('display') !== 'none') {
+            title_label.css('display', 'none');
+        }
+        if (url_label.css('display') !== 'none') {
+            url_label.css('display', 'none');
+        }
+    }
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
+    $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -337,7 +431,7 @@ function captureTabInModal(formName, resetFocus=true){
     form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
-    var inputs = form.find(':focusable').filter(':visible');
+    var inputs = form.find(':tabbable').filter(':visible');
     var firstInput = inputs.first();
     var lastInput = inputs.last();
 
@@ -458,7 +552,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -468,7 +562,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -476,7 +570,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -484,7 +578,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -493,17 +587,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -553,7 +647,7 @@ function togglePageDetails() {
  * Opens a new tab on https://validator.w3.org with the contents of the current html page
  */
 function validateHtml() {
-  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" section
   function c(a, b) {
     const c = document.createElement("textarea");
     c.name = a;
@@ -624,11 +718,6 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
-function checkTaVersionChange(){
-    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
-    return confirm(message);
-}
-
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
@@ -664,7 +753,11 @@ function check_server(url) {
 }
 
 function downloadFile(path, dir) {
-    window.location = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    let download_path = buildCourseUrl(['download']) + `?dir=${encodeURIComponent(dir)}&path=${encodeURIComponent(path)}`;
+    if ($("#submission_browser").length > 0) {
+        download_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.location = download_path;
 }
 
 function downloadCourseMaterial(id) {
@@ -689,13 +782,33 @@ function downloadCourseMaterialZip(id) {
 }
 
 function checkColorActivated() {
-    var pos = 0;
-    var seq = "&&((%'%'BA\r";
+    pos = 0;
+    seq = "&&((%'%'BA\r";
+    const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
+
+    function inject() {
+        $(document.body).prepend('<div id="rainbow-mode" class="rainbow"></div>');
+    }
+    function remove() {
+        $(document.body).find('#rainbow-mode').remove();
+    }
+
+    function toggle(flag) {
+        if (flag) inject();
+        else remove();
+    }
+
+    if (rainbow_mode === true) {
+        inject();
+    }
+
     $(document.body).keyup(function colorEvent(e) {
         pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
         if (pos === seq.length) {
-            setInterval(function() { $("*").addClass("rainbow"); }, 100);
-            $(document.body).off('keyup', colorEvent);
+            flag = JSON.parse(localStorage.getItem('rainbow-mode')) === true;
+            localStorage.setItem('rainbow-mode', !flag);
+            toggle(!flag);
+            pos = 0;
         }
     });
 }
@@ -720,23 +833,6 @@ function openDiv(id) {
     return false;
 }
 
-function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
-}
-
 function markViewed(ids, redirect) {
     let data = new FormData();
     data.append("ids", ids);
@@ -750,37 +846,39 @@ function markViewed(ids, redirect) {
     });
 }
 
-function hideEmptyCourseMaterialFolders() {
-  // fetch all the folders and remove those one which have no `file` within.
-  $('.folder-container').each(function() {
-    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
-  });
-}
-
-function closeDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-
-
-}
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
+}
+
+function toggleCMFolders(open) {
+    const elem = $('[id^="div_viewer_"]');
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
-    return false;
+    return open;
 }
 
 function openUrl(url) {
@@ -832,7 +930,13 @@ function openFrame(url, id, filename, ta_grading_interpret=false) {
             else if (url.includes("checkout")) {
                 directory = "checkout";
             }
+            else if (url.includes("attachments")) {
+                directory = "attachments";
+            }
             url = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(filename)}&path=${encodeURIComponent(url)}&ta_grading=true`
+        }
+        if ($("#submission_browser").length > 0) {
+            url += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
         }
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
@@ -995,20 +1099,24 @@ function displaySuccessMessage(message) {
     displayMessage(message, 'success');
 }
 
+function displayWarningMessage(message) {
+    displayMessage(message, 'warning');
+}
+
 /**
  * Display a toast message after an action.
  *
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type either 'error' or 'success'
+ * @param {string} type either 'error', 'success', or 'warning'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
     $('#messages').fadeIn('slow');
-    if (type === 'success') {
+    if (type === 'success' || type === 'warning') {
         setTimeout(() => {
             $(`#${id}`).fadeOut();
         }, 5000);
@@ -1032,8 +1140,8 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t) {
-        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+    t.keydown(function(event) {
+        if (event.which == 27) {  //ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
@@ -1042,7 +1150,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
+        else if (!event.shiftKey && event.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1052,6 +1160,12 @@ function enableTabsInTextArea(jQuerySelector) {
         }
         // No need to test for SHIFT+TAB as it is not being redefined.
     });
+}
+
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
+        location.href = redirect;
+    }
 }
 
 function updateGradeOverride(data) {
@@ -1124,7 +1238,7 @@ function refreshOnResponseOverriddenGrades(json) {
     else {
         json['data']['users'].forEach(function(elem){
             let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
       $("#load-overridden-grades").removeClass('d-none');
@@ -1160,16 +1274,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
@@ -1266,13 +1370,12 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    var size = $(document.body).width();
-    if (size < 1150) {
-        document.cookie = "collapse_sidebar=true;";
+    if ($(document.body).width() < 1150) {
+        Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;";
+        Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1318,10 +1421,10 @@ $(document).ready(function() {
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("aside");
-    var shown = sidebar.hasClass("collapsed");
+    const sidebar = $("aside");
+    const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
+    Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1342,10 +1445,7 @@ $(document).ready(function() {
         }
     });
 
-    //If they make their screen too small, collapse the sidebar to allow more horizontal space
-    $(document.body).resize(function() {
-        checkSidebarCollapse();
-    });
+    window.addEventListener("resize", checkSidebarCollapse);
 });
 
 function checkBulkProgress(gradeable_id){
@@ -1461,7 +1561,14 @@ function popOutSubmittedFile(html_file, url_file) {
     else if (url_file.includes("split_pdf")) {
       directory = "split_pdf";
     }
-    window.open(display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    else if (url_file.includes("attachments")) {
+      directory = "attachments";
+    }
+    file_path= display_file_url + "?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true";
+    if ($("#submission_browser").length > 0) {
+        file_path += `&gradeable_id=${$("#submission_browser").data("gradeable-id")}`;
+    }
+    window.open(file_path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     return false;
   }
 
@@ -1515,7 +1622,7 @@ function flagUserImage(user_id, flag) {
                 let new_content;
                 if (data.image_data && data.image_mime_type) {
                     new_content = document.createElement('img');
-                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('alt', data.given_family_username);
                     new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
                 }
                 else {
@@ -1561,48 +1668,64 @@ function getFocusableElements() {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param markdown_textarea JQuery element of the textarea where the markdown is being entered
- * @param preview_element JQuery element of the span the markdown will be inserted into
- * @param preview_button JQuery element of the "Preview Markdown" button
- *                       Should have title="Preview Markdown"
- * @param data Object whose properties will get sent through a POST request
+ * @param {string} mode String representing what mode to switch the markdown area to.
+ *                      - `'preview'` activates preview mode
+ *                      - Anything else will activate write/edit mode
  */
-function previewMarkdown(markdown_textarea, preview_element, preview_button, data) {
-    const enablePreview = preview_element.is(':hidden');
+function previewMarkdown(mode) {
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    const markdown_toolbar = markdown_area.find('.markdown-area-toolbar');
+    const markdown_textarea = markdown_area.find('.markdown-textarea');
+    const markdown_preview = markdown_area.find('.markdown-preview');
+    const markdown_preview_load_spinner = markdown_area.find('.markdown-preview-load-spinner');
+    const accessibility_message = markdown_area.find('.accessibility-message');
 
-    $.ajax({
-        url: buildCourseUrl(['markdown', 'preview']),
-        type: 'POST',
-        data: {
-            enablePreview: enablePreview,
-            ...data,
-            csrf_token: csrfToken
-        },
-        success: function(data){
-            if (enablePreview) {
-                preview_element.empty();
-                preview_element.append(data);
-                preview_element.show();
-                markdown_textarea.hide();
+    const data = {
+        content: markdown_textarea.val()
+    }
 
-                preview_button.empty();
-                preview_button.append('Edit <i class="fa fa-edit fa-1x"></i>');
-                preview_button.attr('data-mode', 'preview');
+    //basic sanity checking
+    if (!(typeof mode === 'string'))   throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
+    if (!(typeof data === 'object'))   throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
+    if (!markdown_area.length)         throw new Error(`Could not obtain markdown_area.`);
+    if (!markdown_header.length)       throw new Error(`Could not obtain markdown_header.`);
+    if (!markdown_textarea.length)     throw new Error(`Could not obtain markdown_textarea`);
+    if (!markdown_preview.length)      throw new Error(`Could not obtain markdown_preview`);
+    if (!accessibility_message.length) throw new Error(`Could not obtain accessibility_message`);
 
+    if (mode === 'preview') {
+        if (markdown_header.attr('data-mode') === 'preview') return;
+        accessibility_message.hide();
+        markdown_textarea.hide();
+        markdown_preview.show();
+        markdown_preview_load_spinner.show();
+        markdown_toolbar.hide();
+        $.ajax({
+            url: buildUrl(['markdown']),
+            type: 'POST',
+            data: {
+                ...data,
+                csrf_token: csrfToken
+            },
+            success: function(markdown_data){
+                markdown_preview_load_spinner.hide();
+                markdown_preview.html(markdown_data);
+                markdown_header.attr('data-mode', 'preview');
+            },
+            error: function() {
+                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
             }
-            else {
-                preview_element.hide();
-                markdown_textarea.show();
-
-                preview_button.empty();
-                preview_button.append('Preview <i class="fas fa-eye fa-1x"></i>');
-                preview_button.attr('data-mode', 'edit');
-            }
-        },
-        error: function() {
-            displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-        }
-    });
+        });
+    }
+    else {
+        markdown_preview.empty();
+        markdown_preview.hide();
+        markdown_textarea.show();
+        markdown_toolbar.show();
+        markdown_header.attr('data-mode', 'edit');
+        accessibility_message.show();
+    }
 }
 
 /**
@@ -1634,29 +1757,71 @@ function renderMarkdown(markdownContainer, url, content) {
 /**
  * Function to toggle markdown rendering preview
  *
- * @param type Number representing the type of markdown preset to insert
- *             0: code
- *             1: link
- *             2: bold text
- *             3: italic text
- * @param divTitle JQuery compatible identifier for where to add the markdown presets
+ * @param {string} type string representing what type of markdown preset to insert.
+ *                      * `'code'`
+ *                      * `'link'`
+ *                      * `'bold'`
+ *                      * `'italic'`
  */
-function addMarkdownCode(type, divTitle){
-    var cursor = $(divTitle).prop('selectionStart');
-    var text = $(divTitle).val();
-    var insert = "";
-    if(type == 1) {
-        insert = "[display text](url)";
+function addMarkdownCode(type){
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+    //don't allow markdown insertion if we are in preview mode
+    if (markdown_header.attr('data-mode') === 'preview') return;
+
+    const cursor = $(this).prop('selectionStart');
+    const text = $(this).val();
+    let insert = '';
+    switch (type) {
+        case 'code':
+            const last_newline_pos = text.substring(0, cursor).split('').lastIndexOf('\n');
+            if (text.substring(last_newline_pos, cursor).length !== 1) {
+                insert = '\n';
+            }
+            insert += '```\ncode\n```\n';
+            break;
+        case 'link':
+            insert = '[display text](url)';
+            break;
+        case 'bold':
+            insert = '__bold text__';
+            break;
+        case 'italic':
+            insert = '_italic text_';
+            break;
     }
-    else if(type == 0){
-        insert = "```" +
-            "\ncode\n```";
-    }
-    else if(type == 2){
-        insert = "__bold text__ ";
-    }
-    else if(type == 3){
-        insert = "_italic text_ ";
-    }
-    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).val(text.substring(0, cursor) + insert + text.substring(cursor));
+    $(this).focus();
+    $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(Cookies.get("last_tz_warn_time"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        Cookies.set("last_tz_warn_time", Date.now());
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);

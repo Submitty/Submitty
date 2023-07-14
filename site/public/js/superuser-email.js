@@ -37,7 +37,7 @@ function sendEmail(url) {
         success: function(data) {
             try {
                 const parsedData = JSON.parse(data);
-                if (parsedData['status'] == 'success') {
+                if (parsedData['status'] === 'success') {
                     $('#email-content').val('');
                     $('#email-subject').val('');
                     displaySuccessMessage(parsedData['data']['message']);
@@ -63,14 +63,14 @@ function updateSuperuserEmailOptions(which) {
     const student = $('#email-student');
     const faculty = $('#email-faculty');
 
-    if (which == 'instructor') {
+    if (which === 'instructor') {
         if (!instructor.prop('checked')) {
             full.prop('checked',false);
             limited.prop('checked',false);
             student.prop('checked',false);
         }
     }
-    else if (which == 'full-access') {
+    else if (which === 'full-access') {
         if (full.prop('checked')) {
             instructor.prop('checked',true);
         }
@@ -79,7 +79,7 @@ function updateSuperuserEmailOptions(which) {
             student.prop('checked',false);
         }
     }
-    else if (which == 'limited-access') {
+    else if (which === 'limited-access') {
         if (limited.prop('checked')) {
             instructor.prop('checked',true);
             full.prop('checked',true);
@@ -88,7 +88,7 @@ function updateSuperuserEmailOptions(which) {
             student.prop('checked',false);
         }
     }
-    else if (which == 'student') {
+    else if (which === 'student') {
         if (student.prop('checked')) {
             instructor.prop('checked',true);
             full.prop('checked',true);

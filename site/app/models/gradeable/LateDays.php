@@ -17,7 +17,6 @@ use app\models\User;
  * @method array getLateDaysUpdates()
  */
 class LateDays extends AbstractModel {
-
     /** @var User|null The user to whom this data belongs */
     private $user = null;
     /** @prop @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
@@ -36,6 +35,7 @@ class LateDays extends AbstractModel {
     public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null, $reCache = false) {
         parent::__construct($core);
         $this->user = $user;
+        $this->late_days_updates = $late_day_updates;
 
         // Filter out non-electronic gradeables
         $graded_gradeables = array_filter($graded_gradeables, function (GradedGradeable $gg) {
@@ -90,12 +90,10 @@ class LateDays extends AbstractModel {
             $prev_late_days_available = $info->getLateDaysRemaining();
 
             $this->late_day_info[$id] = $info;
-
             // If the cache wasnt used, the value has been updated
             if (!$useCache && ($reCache)) {
                 $this->core->getQueries()->addLateDayCacheForUser($user, $info);
             }
-        }
     }
 
     /**

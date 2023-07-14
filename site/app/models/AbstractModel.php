@@ -13,7 +13,6 @@ use app\libraries\Core;
  * @method bool isModified()
  */
 abstract class AbstractModel {
-
     const CALL_SET = 1;
     const CALL_GET = 2;
     const CALL_IS = 3;

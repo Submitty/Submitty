@@ -204,7 +204,7 @@ class AutogradingConfigController extends AbstractController {
         }
         else {
             if (FileUtils::recursiveRmdir($config_path)) {
-                $this->core->addSuccessMessage("The config folder has been succesfully deleted");
+                $this->core->addSuccessMessage("The config folder has been successfully deleted");
             }
             else {
                 $this->core->addErrorMessage("Deleting config failed.");

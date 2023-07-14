@@ -61,7 +61,7 @@ to the migration file. The name can only contain alphanumeric characters, unders
 and dashes (regex validation string: `[a-zA-Z0-9_\-]`). This will then create a file
 for the set environment in `migration/migrations/<environment>` which has then name
 structure `YYYYMMDDHHmmss_NAME.py` where the first part of the string is the current
-timestmap concatentated by year, month, day, hour, minute, and second. The created
+timestamp concatenated by year, month, day, hour, minute, and second. The created
 file will have an `up` and `down` function which will both have the same parameters.
 The parameters are dependent on the environment you're using. System will only have
 a `Config` object (see `migrator.config.Config`), Master will have a `Config` object

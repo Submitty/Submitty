@@ -58,12 +58,33 @@ def get_vcs_info(config, top_dir, semester, course, gradeable, userid,  teamid):
         os.path.join(config.submitty['submitty_data_dir'], 'vcs')
     )
     vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
-    vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
+    vcs_base_url = vcs_base_url.replace('{$user_id}', userid)
+
+    vcs_partial_path = ''
+    vcs_subdirectory = ''
+    using_subdirectory = False
+    if is_vcs:
+        if 'vcs_partial_path' in form_json:
+            vcs_partial_path = form_json['vcs_partial_path']
+            vcs_subdirectory = form_json["subdirectory"]
+            if 'using_subdirectory' not in form_json:
+                using_subdirectory = (vcs_subdirectory != '')
+            else:
+                using_subdirectory = form_json['using_subdirectory']
+        else:
+            # for backwards compatibility - if gradeable was built before
+            # version v23.06.00 was installed
+            vcs_partial_path = form_json['subdirectory']
+
+    vcs_partial_path = vcs_partial_path.replace("{$vcs_type}", userid)
+    vcs_partial_path = vcs_partial_path.replace("{$gradeable_id}", gradeable)
+    vcs_partial_path = vcs_partial_path.replace("{$team_id}", teamid)
+    vcs_partial_path = vcs_partial_path.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
-    return is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
+    return is_vcs, vcs_type, vcs_base_url, vcs_partial_path, using_subdirectory, vcs_subdirectory
 
 
 def copytree_if_exists(config, job_id, source, target):
@@ -160,7 +181,8 @@ def prepare_autograding_and_submission_zip(
             )
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
-        is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = get_vcs_info(
+        (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
+         using_subdirectory, vcs_subdirectory) = get_vcs_info(
             config,
             config.submitty['submitty_data_dir'],
             obj["semester"],

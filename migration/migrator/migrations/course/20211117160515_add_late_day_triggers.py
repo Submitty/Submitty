@@ -15,6 +15,16 @@ def up(config, database, semester, course):
     :type course: str
     """
 
+    # Update late_day_cache table
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN user_id SET NOT NULL;')
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN late_days_change SET NOT NULL;')
+    database.execute('ALTER TABLE late_day_cache ALTER COLUMN late_day_date TYPE TIMESTAMP WITH TIME zone;')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_user_team_id_check')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_g_user_id_unique')
+    database.execute('ALTER TABLE late_day_cache DROP CONSTRAINT IF EXISTS ldc_g_team_id_unique')
+    database.execute('CREATE UNIQUE INDEX ldc_g_user_id_unique ON late_day_cache(g_id, user_id) WHERE team_id IS NULL;')
+    database.execute('ALTER TABLE late_day_cache ADD CONSTRAINT ldc_g_team_id_unique UNIQUE (g_id, user_id, team_id);')
+
     # Drop triggers
     database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
     database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")
@@ -24,71 +34,138 @@ def up(config, database, semester, course):
 
     # Create functions
     database.execute("""
-    CREATE OR REPLACE FUNCTION grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF late_day_cache
+    CREATE OR REPLACE FUNCTION get_late_day_info_from_previous(submission_days_late int, late_days_allowed int, late_day_exceptions int, late_days_remaining int) RETURNS SETOF late_day_cache
         LANGUAGE plpgsql
         AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        late_days_change = 0;
+        assignment_budget = LEAST(late_days_allowed, late_days_remaining) + late_day_exceptions;
+        IF submission_days_late <= assignment_budget THEN
+            -- clamp the days charged to be the days late minus exceptions above zero.
+            late_days_change = -GREATEST(0, LEAST(submission_days_late, assignment_budget) - late_day_exceptions);
+        END IF;
+
+        return_row.late_day_status = 
+        CASE
+            -- BAD STATUS
+            WHEN (submission_days_late > late_day_exceptions AND late_days_change = 0) THEN 3
+            -- LATE STATUS
+            WHEN submission_days_late > late_day_exceptions THEN 2
+            -- GOOD STATUS
+            ELSE 1
+        END;
+
+        return_row.late_days_change = late_days_change;
+        return_row.late_days_remaining = late_days_remaining + late_days_change;
+        RETURN NEXT return_row;
+        RETURN;
+    END;
+    $$;
+    """)
+
+    database.execute("""
+    CREATE OR REPLACE FUNCTION calculate_submission_days_late(submission_time timestamp with time zone, submission_due_date timestamp with time zone) RETURNS int
+        LANGUAGE plpgsql
+        AS $$
+    #variable_conflict use_variable
+    DECLARE
+        return_row late_day_cache%rowtype;
+        late_days_change integer;
+        assignment_budget integer;
+    BEGIN
+        RETURN 
+        CASE
+            WHEN submission_time IS NULL THEN 0
+            WHEN DATE_PART('day', submission_time - submission_due_date) < 0 THEN 0
+            WHEN DATE_PART('hour', submission_time - submission_due_date) > 0
+                OR DATE_PART('minute', submission_time - submission_due_date) > 0
+                OR DATE_PART('second', submission_time - submission_due_date) > 0
+                THEN DATE_PART('day', submission_time - submission_due_date) + 1
+            ELSE DATE_PART('day', submission_time - submission_due_date)
+        END;
+    END;
+    $$;
+    """)
+
+    database.execute("""
+    CREATE OR REPLACE FUNCTION public.grab_late_day_gradeables_for_user(user_id text) RETURNS SETOF public.late_day_cache
+    LANGUAGE plpgsql
+    AS $$
+    #variable_conflict use_variable
+    DECLARE
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
         FOR var_row in (
+            WITH valid_gradeables AS (
+                SELECT g.g_id, g.g_title, eg.eg_submission_due_date, eg.eg_late_days
+                FROM gradeable g
+                JOIN electronic_gradeable eg
+                    ON eg.g_id=g.g_id
+                WHERE 
+                    eg.eg_submission_due_date IS NOT NULL
+                    and eg.eg_has_due_date = TRUE
+                    and eg.eg_student_submit = TRUE
+                    and eg.eg_student_view = TRUE
+                    and g.g_gradeable_type = 0
+                    and eg.eg_allow_late_submission = TRUE
+                    and eg.eg_submission_open_date <= NOW()
+            ),
+            submitted_gradeables AS (
+                SELECT egd.g_id, u.user_id, t.team_id, egd.submission_time
+                FROM electronic_gradeable_version egv
+                JOIN electronic_gradeable_data egd
+                    ON egv.g_id=egd.g_id 
+                    AND egv.active_version=egd.g_version
+                    AND (
+                        CASE
+                            when egd.team_id IS NOT NULL THEN egv.team_id=egd.team_id
+                            else egv.user_id=egd.user_id
+                        END
+                    )
+                LEFT JOIN teams t
+                    ON t.team_id=egd.team_id
+                LEFT JOIN users u
+                    ON u.user_id=t.user_id
+                    OR u.user_id=egd.user_id
+                WHERE u.user_id=user_id
+            )
             SELECT
-                g.g_id,
-                u.user_id,
-                g.g_title,
-                eg.eg_submission_due_date AS late_day_date,
-                eg.eg_late_days AS late_days_allowed,
-                CASE
-                    WHEN egd.submission_time IS NULL THEN 0
-                    WHEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) < 0 THEN 0
-                    WHEN DATE_PART('hour', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('minute', egd.submission_time - eg.eg_submission_due_date) > 0
-                        OR DATE_PART('second', egd.submission_time - eg.eg_submission_due_date) > 0
-                        THEN DATE_PART('day', egd.submission_time - eg.eg_submission_due_date) + 1
-                    ELSE DATE_PART('day', egd.submission_time - eg.eg_submission_due_date)
-                END AS submission_days_late,
+                vg.g_id,
+                vg.g_title,
+                COALESCE(sg.user_id, user_id) as user_id,
+                sg.team_id,
+                vg.eg_submission_due_date AS late_day_date,
+                vg.eg_late_days AS late_days_allowed,
+                calculate_submission_days_late(sg.submission_time, vg.eg_submission_due_date) AS submission_days_late,
                 CASE
                     WHEN lde.late_day_exceptions IS NULL THEN 0
                     ELSE lde.late_day_exceptions
                 END AS late_day_exceptions
-            FROM gradeable g
-            LEFT JOIN electronic_gradeable eg
-                ON g.g_id=eg.g_id
-            LEFT JOIN users u
-            ON u.user_id=user_id
-            LEFT JOIN (
-                SELECT egd.submission_time, egd.g_id, egd.user_id
-                FROM electronic_gradeable_data egd
-                RIGHT JOIN electronic_gradeable_version egv
-                    ON egv.g_id=egd.g_id 
-                    AND egv.user_id=egd.user_id
-                    AND egv.active_version=egd.g_version
-            ) as egd
-                ON egd.user_id = u.user_id
-                AND g.g_id=egd.g_id
+            FROM valid_gradeables vg
+            LEFT JOIN submitted_gradeables sg
+                ON vg.g_id=sg.g_id
             LEFT JOIN late_day_exceptions lde
-                ON u.user_id = lde.user_id
-                AND g.g_id = lde.g_id
-            WHERE 
-                eg.eg_submission_due_date IS NOT NULL
-                and eg.eg_has_due_date = TRUE
-                and eg.eg_student_submit = TRUE
-                and g.g_gradeable_type = 0
-                and eg.eg_allow_late_submission = TRUE
-                and eg.eg_team_assignment = FALSE
-            ORDER BY late_day_date, g_id
-        ) LOOP
-            returnrow.g_id = var_row.g_id;
-            returnrow.user_id = var_row.user_id;
-            returnrow.late_days_allowed = var_row.late_days_allowed;
-            returnrow.late_day_date = var_row.late_day_date;
-            returnrow.submission_days_late = var_row.submission_days_late;
-            returnrow.late_day_exceptions = var_row.late_day_exceptions;
-            RETURN NEXT returnrow;
+                ON lde.user_id=user_id
+                AND vg.g_id=lde.g_id
+        ORDER BY late_day_date, g_id
+    ) LOOP
+        returnrow.g_id = var_row.g_id;
+        returnrow.team_id = var_row.team_id;
+        returnrow.user_id = var_row.user_id;
+        returnrow.late_days_allowed = var_row.late_days_allowed;
+        returnrow.late_day_date = var_row.late_day_date;
+        returnrow.submission_days_late = var_row.submission_days_late;
+        returnrow.late_day_exceptions = var_row.late_day_exceptions;
+        RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN; 
     END;
     $$;
     """)
@@ -99,7 +176,7 @@ def up(config, database, semester, course):
         AS $$
     #variable_conflict use_variable
     DECLARE
-    latestDate timestamp without time zone ;
+    latestDate timestamp with time zone ;
     var_row RECORD;
     returnrow late_day_cache%rowtype;
     BEGIN
@@ -118,7 +195,7 @@ def up(config, database, semester, course):
             returnrow.late_days_allowed = var_row.late_days_allowed;
             RETURN NEXT returnrow;
         END LOOP;
-        RETURN;	
+        RETURN; 
     END;
     $$;
     """)
@@ -131,12 +208,11 @@ def up(config, database, semester, course):
     DECLARE
         var_row RECORD;
         return_cache late_day_cache%rowtype;
-        latestDate timestamp without time zone;
+        latestDate timestamp with time zone;
         late_days_remaining integer;
         late_days_change integer;
-        assignment_budget integer;
         late_days_used integer;
-        returnrow late_day_cache%rowtype;
+        returnedrow late_day_cache%rowtype;
     BEGIN
         -- Grab latest row of data available
         FOR var_row IN (
@@ -184,17 +260,12 @@ def up(config, database, semester, course):
                 return_cache.late_days_remaining = late_days_remaining;
             --is gradeable event
             ELSE
-                late_days_change = 0;
-                assignment_budget = LEAST(var_row.late_days_allowed, late_days_remaining) + var_row.late_day_exceptions;
-                IF var_row.submission_days_late <= assignment_budget THEN
-                    -- clamp the days charged to be the days late minus exceptions above zero.
-                    late_days_change = -GREATEST(0, LEAST(var_row.submission_days_late, assignment_budget) - var_row.late_day_exceptions);
-                END IF;
-                late_days_remaining = late_days_remaining + late_days_change;
-                late_days_used = late_days_used - late_days_change;
+                returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
+                late_days_used = late_days_used - returnedrow.late_days_change;
+                late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                 return_cache = var_row;
-                return_cache.late_days_change = late_days_change;
-                return_cache.late_days_remaining = late_days_remaining;
+                return_cache.late_days_change = returnedrow.late_days_change;
+                return_cache.late_days_remaining = returnedrow.late_days_remaining;
             END IF;
             RETURN NEXT return_cache;
         END LOOP;
@@ -207,14 +278,18 @@ def up(config, database, semester, course):
     CREATE OR REPLACE FUNCTION late_days_allowed_change() RETURNS trigger
         LANGUAGE plpgsql
         AS $$
+    #variable_conflict use_variable
+    DECLARE
+        g_id varchar;
+        user_id varchar;
+        team_id varchar;
+        version RECORD;
     BEGIN
-        --- Update or Insert
-        IF NEW.since_timestamp IS NOT NULL THEN
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= NEW.since_timestamp AND ldc.user_id = NEW.user_id;
-        --- Delete
-        ELSE
-            DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= OLD.since_timestamp AND ldc.user_id = OLD.user_id;
-        END IF ;
+        version = CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+        -- since_timestamp = CASE WHEN TG_OP = 'DELETE' THEN OLD.since_timestamp ELSE NEW.since_timestamp END;
+        -- user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+        DELETE FROM late_day_cache ldc WHERE ldc.late_day_date >= version.since_timestamp AND ldc.user_id = version.user_id;
         RETURN NEW;
     END;
     $$;
@@ -222,22 +297,29 @@ def up(config, database, semester, course):
 
     database.execute("""
     CREATE OR REPLACE FUNCTION gradeable_version_change() RETURNS trigger AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+            team_id varchar;
+            version RECORD;
         BEGIN
-            --- Update or Insert
-            IF NEW.g_id IS NOT NULL THEN
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = NEW.g_id)
-                                            AND ((user_id = NEW.user_id AND NEW.team_id IS NULL)
-                                                OR (NEW.user_id IS NULL AND team_id = NEW.team_id));
-            --- Delete
-            ELSE
-                DELETE FROM late_day_cache WHERE late_day_date >= (SELECT eg_submission_due_date 
-                                                            FROM electronic_gradeable 
-                                                            WHERE g_id = OLD.g_id)
-                                            AND ((user_id = OLD.user_id AND OLD.team_id IS NULL)
-                                                OR (OLD.user_id IS NULL AND team_id = OLD.team_id));
-            END IF ;
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+            team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
+            
+            --- Remove all lade day cache for all gradeables past this submission die date
+            --- for every user associated with the gradeable
+            DELETE FROM late_day_cache ldc
+            WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
+                                    FROM electronic_gradeable eg
+                                    WHERE eg.g_id = g_id)
+                AND (
+                    ldc.user_id IN (SELECT t.user_id FROM teams t WHERE t.team_id = team_id)
+                    OR
+                    ldc.user_id = user_id
+                );
+
             RETURN NEW;
         END;
     $$ LANGUAGE plpgsql;
@@ -250,15 +332,9 @@ def up(config, database, semester, course):
             g_id varchar;
             user_id varchar;
         BEGIN
-            -- Grab values for delete
-            g_id = OLD.g_id; 
-            user_id = OLD.user_id;
-
-            -- Change values for update/insert
-            IF NEW.g_id IS NOT NULL THEN
-                g_id = NEW.g_id;
-                user_id = NEW.user_id;
-            END IF;
+            -- Grab values for delete/update/insert
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
 
             DELETE FROM late_day_cache ldc 
             WHERE ldc.late_day_date >= (SELECT eg_submission_due_date 
@@ -278,24 +354,24 @@ def up(config, database, semester, course):
             due_date timestamp;
         BEGIN
             -- Check for any important changes
-            IF NEW.eg_submission_due_date = OLD.eg_submission_due_date
+            IF TG_OP = 'UPDATE'
+            AND NEW.eg_submission_due_date = OLD.eg_submission_due_date
             AND NEW.eg_has_due_date = OLD.eg_has_due_date
             AND NEW.eg_allow_late_submission = OLD.eg_allow_late_submission
             AND NEW.eg_late_days = OLD.eg_late_days THEN
-            RETURN NEW;
+                RETURN NEW;
             END IF;
-            
-            -- Get effective g_id
-            g_id = NEW.g_id;
             
             -- Grab submission due date
-            due_date = NEW.eg_submission_due_date;
-            
-            -- If submission due date was updated, use the earliest date
-            IF OLD.eg_submission_due_date IS NOT NULL
-            AND NEW.eg_submission_due_date != OLD.eg_submission_due_date THEN
-                due_date = LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date);
-            END IF;
+            due_date = 
+            CASE
+                -- INSERT
+                WHEN TG_OP = 'INSERT' THEN NEW.eg_submission_due_date
+                -- DELETE
+                WHEN TG_OP = 'DELETE' THEN OLD.eg_submission_due_date
+                -- UPDATE
+                ELSE LEAST(NEW.eg_submission_due_date, OLD.eg_submission_due_date)
+            END;
             
             DELETE FROM late_day_cache WHERE late_day_date >= due_date;
             RETURN NEW;
@@ -317,27 +393,27 @@ def up(config, database, semester, course):
     # Create triggers
     database.execute("""
     CREATE TRIGGER gradeable_version_change AFTER INSERT OR UPDATE OR DELETE ON electronic_gradeable_version
-        FOR EACH ROW EXECUTE FUNCTION gradeable_version_change();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_version_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_days_allowed_change AFTER INSERT OR UPDATE OR DELETE ON late_days
-        FOR EACH ROW EXECUTE FUNCTION late_days_allowed_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_days_allowed_change();
     """)
 
     database.execute("""
     CREATE TRIGGER late_day_extension_change AFTER INSERT OR UPDATE OR DELETE ON late_day_exceptions
-        FOR EACH ROW EXECUTE FUNCTION late_day_extension_change();
+        FOR EACH ROW EXECUTE PROCEDURE late_day_extension_change();
     """)
 
     database.execute("""
     CREATE TRIGGER electronic_gradeable_change AFTER INSERT OR UPDATE OF eg_submission_due_date, eg_has_due_date, eg_allow_late_submission, eg_late_days ON electronic_gradeable
-        FOR EACH ROW EXECUTE FUNCTION electronic_gradeable_change();
+        FOR EACH ROW EXECUTE PROCEDURE electronic_gradeable_change();
     """)
 
     database.execute("""
     CREATE TRIGGER gradeable_delete BEFORE DELETE ON gradeable
-        FOR EACH ROW EXECUTE FUNCTION gradeable_delete();
+        FOR EACH ROW EXECUTE PROCEDURE gradeable_delete();
     """)
     pass
 
@@ -355,6 +431,12 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    # Remove all cache
+    database.execute("DELETE FROM late_day_cache")
+
+    # Drop index
+    database.execute('DROP INDEX IF EXISTS ldc_g_user_id_unique;')
+
     # Drop triggers
     database.execute("DROP TRIGGER IF EXISTS gradeable_version_change ON electronic_gradeable_version;")
     database.execute("DROP TRIGGER IF EXISTS late_days_allowed_change ON late_days;")

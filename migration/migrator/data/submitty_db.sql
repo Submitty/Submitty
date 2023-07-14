@@ -58,45 +58,69 @@ $$;
 
 
 --
+-- Name: saml_mapping_check(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.saml_mapping_check() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id) = 2
+            THEN
+                IF (SELECT count(*) FROM saml_mapped_users WHERE NEW.user_id = user_id AND user_id = saml_id) > 0
+                THEN
+                    RAISE EXCEPTION 'SAML mapping already exists for this user';
+                end if;
+                IF NEW.user_id = NEW.saml_id
+                THEN
+                    RAISE EXCEPTION 'Cannot create SAML mapping for proxy user';
+                end if;
+            end if;
+            RETURN NEW;
+        END;
+        $$;
+
+
+--
 -- Name: sync_courses_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.sync_courses_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-    user_row record;
-    db_conn varchar;
-    query_string text;
-BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+            DECLARE
+                user_row record;
+                db_conn varchar;
+                query_string text;
+            BEGIN
+                db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
 
-    IF (TG_OP = 'INSERT') THEN
-        -- FULL data sync on INSERT of a new user record.
-        SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-        query_string := 'INSERT INTO users (user_id, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated, user_group, registration_section, manual_registration) ' ||
-                        'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' || quote_literal(user_row.user_lastname) || ', ' ||
-                        '' || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_updated) || ', ' || quote_literal(user_row.instructor_updated) || ', ' ||
-                        '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
-        IF query_string IS NULL THEN
-            RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
-        END IF;
-        PERFORM dblink_exec(db_conn, query_string);
-    ELSIF (TG_OP = 'UPDATE') THEN
-        -- User update on registration_section
-        -- CASE clause ensures user's rotating section is set NULL when
-        -- registration is updated to NULL.  (e.g. student has dropped)
-        query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
-        IF query_string IS NULL THEN
-            RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
-        END IF;
-        PERFORM dblink_exec(db_conn, query_string);
-    END IF;
+                IF (TG_OP = 'INSERT') THEN
+                    -- FULL data sync on INSERT of a new user record.
+                    SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
+                    query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_last_initial_format, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
+                            'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_pronouns) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
+                            '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_last_initial_format) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_email_secondary) || ', ' || quote_literal(user_row.user_email_secondary_notify) || ', ' || quote_literal(user_row.user_updated) || ', ' ||
+                            '' || quote_literal(user_row.instructor_updated) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
+                    IF query_string IS NULL THEN
+                        RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
+                    END IF;
+                    PERFORM dblink_exec(db_conn, query_string);
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    -- User update on registration_section
+                    -- CASE clause ensures user's rotating section is set NULL when
+                    -- registration is updated to NULL.  (e.g. student has dropped)
+                    query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', registration_type=' || quote_literal(NEW.registration_type) || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
+                    IF query_string IS NULL THEN
+                        RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
+                    END IF;
+                    PERFORM dblink_exec(db_conn, query_string);
+                END IF;
 
-    -- All done.
-    RETURN NULL;
-END;
-$$;
+                -- All done.
+                RETURN NULL;
+            END;
+            $$;
 
 
 --
@@ -147,7 +171,9 @@ DECLARE
     query_string TEXT;
 BEGIN
     db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
-    query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
+    -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
+    query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
+                    || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
         RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
@@ -213,12 +239,23 @@ DECLARE
     query_string TEXT;
 BEGIN
     db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
-    query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-        RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
+
+    IF (TG_OP = 'INSERT') THEN
+        query_string := 'INSERT INTO sections_registration (sections_registration_id, course_section_id) VALUES(' || quote_literal(NEW.registration_section_id) || ',' || quote_literal(NEW.course_section_id) || ')';
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section() when doing INSERT';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        query_string := 'UPDATE sections_registration SET course_section_id=' || quote_literal(NEW.course_section_id) || ' WHERE sections_registration_id=' || quote_literal(NEW.registration_section_id);
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section() when doing UPDATE';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
     END IF;
-    PERFORM dblink_exec(db_conn, query_string);
 
     -- All done.
     RETURN NULL;
@@ -233,40 +270,40 @@ $$;
 CREATE FUNCTION public.sync_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-    DECLARE
-        course_row RECORD;
-        db_conn VARCHAR;
-        query_string TEXT;
-        preferred_name_change_details TEXT;
-    BEGIN
-        -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
-        IF coalesce(OLD.user_preferred_firstname, '') <> coalesce(NEW.user_preferred_firstname, '') THEN
-            preferred_name_change_details := format('PREFERRED_FIRSTNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_firstname, NEW.user_preferred_firstname);
-        END IF;
-        IF coalesce(OLD.user_preferred_lastname, '') <> coalesce(NEW.user_preferred_lastname, '') THEN
-            preferred_name_change_details := format('%sPREFERRED_LASTNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_lastname, NEW.user_preferred_lastname);
-        END IF;
-        -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
-        IF preferred_name_change_details IS NOT NULL THEN
-            preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
-            RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
-        END IF;
-        -- Propagate UPDATE to course DBs
-        FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-            RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-            db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-            query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
-            -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-            IF query_string IS NULL THEN
-                RAISE EXCEPTION 'query_string error in trigger function sync_user()';
+        DECLARE
+            course_row RECORD;
+            db_conn VARCHAR;
+            query_string TEXT;
+            preferred_name_change_details TEXT;
+        BEGIN
+            -- Check for changes in users.user_preferred_givenname and users.user_preferred_familyname.
+            IF coalesce(OLD.user_preferred_givenname, '') <> coalesce(NEW.user_preferred_givenname, '') THEN
+                preferred_name_change_details := format('PREFERRED_GIVENNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_givenname, NEW.user_preferred_givenname);
             END IF;
-            PERFORM dblink_exec(db_conn, query_string);
-        END LOOP;
+            IF coalesce(OLD.user_preferred_familyname, '') <> coalesce(NEW.user_preferred_familyname, '') THEN
+                preferred_name_change_details := format('%sPREFERRED_FAMILYNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_familyname, NEW.user_preferred_familyname);
+            END IF;
+            -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
+            IF preferred_name_change_details IS NOT NULL THEN
+                preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
+                RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
+            END IF;
+            -- Propagate UPDATE to course DBs
+            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+                query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_pronouns=' || quote_literal(NEW.user_pronouns) || ', user_givenname=' || quote_literal(NEW.user_givenname) || ', user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', user_familyname=' || quote_literal(NEW.user_familyname) || ', user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', user_last_initial_format=' || quote_literal(NEW.user_last_initial_format) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+                -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+                IF query_string IS NULL THEN
+                    RAISE EXCEPTION 'query_string error in trigger function sync_user()';
+                END IF;
+                PERFORM dblink_exec(db_conn, query_string);
+            END LOOP;
 
-        -- All done.
-        RETURN NULL;
-    END;
-    $$;
+            -- All done.
+            RETURN NULL;
+        END;
+        $$;
 
 
 SET default_tablespace = '';
@@ -282,6 +319,7 @@ CREATE TABLE public.courses (
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
+    CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
 );
@@ -294,7 +332,8 @@ CREATE TABLE public.courses (
 CREATE TABLE public.courses_registration_sections (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
-    registration_section_id character varying(255) NOT NULL
+    registration_section_id character varying(255) NOT NULL,
+    course_section_id character varying(255) DEFAULT ''::character varying
 );
 
 
@@ -308,7 +347,9 @@ CREATE TABLE public.courses_users (
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
+    registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -387,6 +428,38 @@ CREATE TABLE public.migrations_system (
 
 
 --
+-- Name: saml_mapped_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.saml_mapped_users (
+    id integer NOT NULL,
+    saml_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    active boolean DEFAULT true NOT NULL
+);
+
+
+--
+-- Name: saml_mapped_users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.saml_mapped_users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: saml_mapped_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.saml_mapped_users_id_seq OWNED BY public.saml_mapped_users.id;
+
+
+--
 -- Name: sessions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -407,6 +480,7 @@ CREATE TABLE public.terms (
     name character varying(255) NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
+    CONSTRAINT term_id_validate CHECK (((term_id)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT terms_check CHECK ((end_date > start_date))
 );
 
@@ -419,10 +493,10 @@ CREATE TABLE public.users (
     user_id character varying NOT NULL,
     user_numeric_id character varying,
     user_password character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
+    user_givenname character varying NOT NULL,
+    user_preferred_givenname character varying,
+    user_familyname character varying NOT NULL,
+    user_preferred_familyname character varying,
     user_access_level integer DEFAULT 3 NOT NULL,
     user_email character varying NOT NULL,
     user_updated boolean DEFAULT false NOT NULL,
@@ -433,8 +507,44 @@ CREATE TABLE public.users (
     display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     user_email_secondary character varying(255) DEFAULT ''::character varying NOT NULL,
     user_email_secondary_notify boolean DEFAULT false,
-    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
+    user_pronouns character varying(255) DEFAULT ''::character varying,
+    user_last_initial_format integer DEFAULT 0 NOT NULL,
+    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
+    CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
+
+
+--
+-- Name: vcs_auth_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.vcs_auth_tokens (
+    id integer NOT NULL,
+    user_id character varying NOT NULL,
+    token character varying NOT NULL,
+    name character varying NOT NULL,
+    expiration timestamp(0) with time zone
+);
+
+
+--
+-- Name: vcs_auth_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.vcs_auth_tokens_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: vcs_auth_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
@@ -442,6 +552,20 @@ CREATE TABLE public.users (
 --
 
 ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
+
+
+--
+-- Name: saml_mapped_users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('public.saml_mapped_users_id_seq'::regclass);
+
+
+--
+-- Name: vcs_auth_tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('public.vcs_auth_tokens_id_seq'::regclass);
 
 
 --
@@ -501,6 +625,22 @@ ALTER TABLE ONLY public.migrations_system
 
 
 --
+-- Name: saml_mapped_users saml_mapped_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT saml_mapped_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: saml_mapped_users saml_mapped_users_saml_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT saml_mapped_users_saml_id_user_id_key UNIQUE (saml_id, user_id);
+
+
+--
 -- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -530,6 +670,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: vcs_auth_tokens vcs_auth_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vcs_auth_tokens
+    ADD CONSTRAINT vcs_auth_tokens_pkey PRIMARY KEY (id);
 
 
 --
@@ -565,6 +713,13 @@ CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON publ
 --
 
 CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE public.sync_insert_registration_section();
+
+
+--
+-- Name: saml_mapped_users saml_mapping_check_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER saml_mapping_check_trigger AFTER INSERT ON public.saml_mapped_users FOR EACH ROW EXECUTE PROCEDURE public.saml_mapping_check();
 
 
 --
@@ -622,6 +777,14 @@ ALTER TABLE ONLY public.emails
 
 
 --
+-- Name: saml_mapped_users fk_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.saml_mapped_users
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: mapped_courses mapped_courses_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -635,6 +798,14 @@ ALTER TABLE ONLY public.mapped_courses
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: vcs_auth_tokens user_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vcs_auth_tokens
+    ADD CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --

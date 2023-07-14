@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class CourseMaterialsView extends AbstractView {
-
     public function listCourseMaterials(array $course_materials_db) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
@@ -23,15 +22,27 @@ class CourseMaterialsView extends AbstractView {
         $directories = [];
         $directory_priorities = [];
         $seen = [];
+        $folder_visibilities = [];
         $folder_ids = [];
+        $links = [];
+        $base_view_url = $this->core->buildCourseUrl(['course_material']);
 
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
+            $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
             if ($course_material->isDir()) {
-                $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
                 $directories[$rel_path] = $course_material;
                 $directory_priorities[$course_material->getPath()] = $course_material->getPriority();
                 $folder_ids[$course_material->getPath()] = $course_material->getId();
+            }
+            else {
+                $path_parts = explode("/", $rel_path);
+                $fin_path = "";
+                foreach ($path_parts as $path_part) {
+                    $fin_path .= rawurlencode($path_part) . '/';
+                }
+                $fin_path = substr($fin_path, 0, strlen($fin_path) - 1);
+                $links[$course_material->getId()] = $base_view_url . "/" . $fin_path;
             }
         }
         $sort_priority = function (CourseMaterial $a, CourseMaterial $b) use ($base_course_material_path) {
@@ -40,20 +51,20 @@ class CourseMaterialsView extends AbstractView {
             $dir_count_a = substr_count($rel_path_a, "/");
             $dir_count_b = substr_count($rel_path_b, "/");
             if ($dir_count_a > $dir_count_b) {
-                return true;
+                return 1;
             }
             elseif ($dir_count_a < $dir_count_b) {
-                return false;
+                return -1;
             }
             else {
                 if ($a->getPriority() > $b->getPriority()) {
-                    return true;
+                    return 1;
                 }
                 elseif ($a->getPriority() < $b->getPriority()) {
-                    return false;
+                    return -1;
                 }
                 else {
-                    return $a->getPath() > $b->getPath();
+                    return $a->getPath() > $b->getPath() ? 1 : -1;
                 }
             }
         };
@@ -77,7 +88,7 @@ class CourseMaterialsView extends AbstractView {
             if ($course_material->isDir()) {
                 continue;
             }
-            if ($this->core->getUser()->getGroup() != 1 && $course_material->getReleaseDate() > $date_now) {
+            if (!$this->core->getUser()->accessGrading() && $course_material->getReleaseDate() > $date_now) {
                 continue;
             }
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -121,7 +132,11 @@ class CourseMaterialsView extends AbstractView {
                 [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
+        $this->removeEmptyFolders($final_structure);
+
         $this->setSeen($final_structure, $seen, $base_course_material_path);
+
+        $this->setFolderVisibilities($final_structure, $folder_visibilities);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
@@ -130,14 +145,29 @@ class CourseMaterialsView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "seen" => $seen,
+            "folder_visibilities" => $folder_visibilities,
             "base_course_material_path" => $base_course_material_path,
             "directory_priorities" => $directory_priorities,
             "material_list" => $course_materials_db,
             "materials_exist" => count($course_materials_db) != 0,
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
-            "folder_ids" => $folder_ids
+            "folder_ids" => $folder_ids,
+            "links" => $links
         ]);
+    }
+
+    private function removeEmptyFolders(array &$course_materials): bool {
+        $is_empty = true;
+        foreach ($course_materials as $path => $course_material) {
+            if (is_array($course_material) && $this->removeEmptyFolders($course_material)) {
+                unset($course_materials[$path]);
+            }
+            else {
+                $is_empty = false;
+            }
+        }
+        return $is_empty;
     }
 
     private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
@@ -147,6 +177,7 @@ class CourseMaterialsView extends AbstractView {
             if (is_array($course_material)) {
                 if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path))) {
                     $seen[FileUtils::joinPaths($cur_path, $path)] = false;
+                    $has_unseen = true;
                 }
                 else {
                     $seen[FileUtils::joinPaths($cur_path, $path)] = true;
@@ -164,5 +195,52 @@ class CourseMaterialsView extends AbstractView {
             }
         }
         return $has_unseen;
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities -  Dictionary: path name => bool. True if visible to students, false if not.
+     */
+    private function setFolderVisibilities(array $course_materials, array &$folder_visibilities): void {
+        foreach ($course_materials as $path => $course_material) {
+            if (is_array($course_material)) {
+                // Found root-level folder; this folder could be invisible
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, "root/$path");
+            }
+        }
+    }
+
+    /**
+     * Recurses through folders and decides whether they should appear to students.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array $folder_visibilities - Dictionary: path name => bool. True if visible to students, false if not.
+     * @param string $current_path - Path to the folder that $course_materials represents.
+     */
+    private function setFolderVisibilitiesR(array $course_materials, array &$folder_visibilities, string $current_path): void {
+        $cur_visibility = false;
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                // Material is actually folder
+                $sub_path = "$current_path/$name";
+
+                $this->setFolderVisibilitiesR($course_material, $folder_visibilities, $sub_path);
+
+                // At least one file visible in this folder
+                if ($folder_visibilities[$sub_path]) {
+                    $cur_visibility = true;
+                }
+            }
+            else {
+                // Material is file
+                if (!$course_material->isHiddenFromStudents()) {
+                    $cur_visibility = true;
+                }
+            }
+        }
+
+        $folder_visibilities[$current_path] = $cur_visibility;
     }
 }

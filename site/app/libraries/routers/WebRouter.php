@@ -6,20 +6,21 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
+use Doctrine\Common\Annotations\PsrCachedReader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
+use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\models\User;
-use Doctrine\Common\Annotations\PsrCachedReader;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class WebRouter {
     /** @var Core  */
@@ -44,26 +45,46 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'annotations');
+        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
+        $cache = new FilesystemAdapter("", 0, $cache_path);
 
-        $fileLocator = new FileLocator();
-        /** @noinspection PhpUnhandledExceptionInspection */
+        $access_control_cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'access_control');
+        $ac_cache = new FilesystemAdapter("", 0, $access_control_cache_path);
+
         $this->reader = new PsrCachedReader(
             new AnnotationReader(),
-            new FilesystemAdapter("", 0, $cache_path),
+            $ac_cache,
             $this->core->getConfig()->isDebug()
         );
+
+        // This will fetch the cache for routes. If it doesn't find it then it will
+        // compile them, set the cache, and set compiledRoutes to that.
+        $compiledRoutes = $cache->get('routes', function (ItemInterface $item) {
+            return $this->getCompiledRoutes();
+        });
+
+        $context = new RequestContext();
+        $matcher = new CompiledUrlMatcher($compiledRoutes, $context->fromRequest($this->request));
+        $this->parameters = $matcher->matchRequest($this->request);
+    }
+
+    /**
+     * Returns Symfony compiled routes
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getCompiledRoutes(): array {
+        $fileLocator = new FileLocator();
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
-        $context = new RequestContext();
-        $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
-        $this->parameters = $matcher->matchRequest($this->request);
+        return (new CompiledUrlMatcherDumper($collection))->getCompiledRoutes();
     }
 
 
     /**
-     * If a request is a post request check to see if its less than the post_max_size or if its empty
+     * If a request is a post request check to see if its less than the post_max_size
      * @return MultiResponse|bool
      */
     private function checkPostMaxSize(Request $request) {
@@ -72,7 +93,7 @@ class WebRouter {
             $max_post_bytes = Utils::returnBytes($max_post_length);
             /** if a post request exceeds the max length set in the ini, php will drop everything set under $_POST, however the router might add routing information later so check both cases
             */
-            if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
+            if ($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) {
                 $msg = "POST request exceeds maximum size of " . $max_post_length;
                 $this->core->addErrorMessage($msg);
 
@@ -116,6 +137,11 @@ class WebRouter {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                return JsonResponse::getFailResponse("The {$enabled->getFeature()} feature is not enabled.");
             }
 
             if (!$router->checkFeatureFlag()) {
@@ -178,6 +204,15 @@ class WebRouter {
                 return new MultiResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
+            }
+
+            $enabled = $router->getEnabled();
+            if ($enabled !== null && !$router->checkEnabled($enabled)) {
+                $errorString = "The {$enabled->getFeature()} feature is not enabled.";
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($errorString),
+                    new WebResponse("Error", "courseErrorPage", $errorString)
                 );
             }
 
@@ -281,7 +316,7 @@ class WebRouter {
         }
         elseif (
             $this->core->getConfig()->isCourseLoaded()
-            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
+            && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getTerm(), "course" => $this->core->getConfig()->getCourse()])
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
@@ -390,13 +425,13 @@ class WebRouter {
             $access_test = false;
             switch ($access_control->getLevel()) {
                 case 'SUPERUSER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    $access_test = $user->isSuperUser();
                     break;
                 case 'FACULTY':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    $access_test = $user->accessFaculty();
                     break;
                 case 'USER':
-                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    $access_test = $user !== null;
                     break;
             }
             $access = $access && $access_test;
@@ -428,5 +463,17 @@ class WebRouter {
         }
 
         return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
+    }
+
+    private function getEnabled(): ?Enabled {
+        return $this->reader->getClassAnnotation(
+            new \ReflectionClass($this->parameters['_controller']),
+            Enabled::class
+        );
+    }
+
+    private function checkEnabled(Enabled $enabled): bool {
+        $method = "is" . ucFirst($enabled->getFeature()) . "Enabled";
+        return $this->core->getConfig()->$method();
     }
 }

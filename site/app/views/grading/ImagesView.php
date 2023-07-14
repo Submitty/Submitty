@@ -8,7 +8,6 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 
 class ImagesView extends AbstractView {
-
     /** Defines the html for the icon used to flag an image */
     const FLAG_ICON_HTML = '<i class="fas fa-flag"></i>';
 

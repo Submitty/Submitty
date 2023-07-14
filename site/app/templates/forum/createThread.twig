@@ -47,7 +47,6 @@
 
 <script>
     $( document ).ready(function() {
-        enableTabsInTextArea("[name=thread_post_content]");
         $("#thread_form").submit(() => {
             cancelDeferredSave(CREATE_THREAD_DEFER_KEY);
             clearCreateThreadAutosave();

@@ -1,17 +1,17 @@
-input[type=text],
-input[type=number] {
+input[type="text"],
+input[type="number"] {
     width: 50%;
     padding: 12px 20px;
     float: right;
 }
 
-input[type=number] {
-    -moz-appearance: textfield;
+input[type="number"] {
+    appearance: textfield;
 }
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
     margin: 0;
 }
 

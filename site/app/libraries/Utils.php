@@ -8,7 +8,6 @@ use Ds\Set;
  * Class Utils
  */
 class Utils {
-
     /**
      * Defines a new default str_pad that's useful for things like parts of a datetime
      *
@@ -106,21 +105,22 @@ class Utils {
      * @param string        $name name of the cookie
      * @param string|array  $data data of the cookie, if array, will json_encode it
      * @param int           $expire when should the cookie expire
+     * @param bool          $http_only toggle the http only flag on the cookie
      *
      * @return bool true if successfully able to set the cookie, else false
      */
-    public static function setCookie(string $name, $data, int $expire = 0): bool {
+    public static function setCookie(string $name, $data, int $expire = 0, bool $http_only = true): bool {
         if (is_array($data)) {
             $data = json_encode($data);
         }
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
         $_COOKIE[$name] = $data;
-        return setcookie($name, $data, $expire, "/", "", $secure);
+        return setcookie($name, $data, $expire, "/", "", $secure, $http_only);
     }
 
     /**
      * Given a filename, determine if it is an image.
-     * TOOD: Make this a stronger check than just on the appended file extension to the naem
+     * TODO: Make this a stronger check than just on the appended file extension to the name
      *
      * @param string $filename
      *
@@ -151,7 +151,7 @@ class Utils {
     /**
      * Compares two potentially null values using greater-than comparison.
      * @param mixed $gt_left Left operand for greater-than comparison
-     * @param mixed $gt_right Righ operand for greater-than comparison
+     * @param mixed $gt_right Right operand for greater-than comparison
      * @return bool True if $dtL > $dtR and neither are null, otherwise false
      */
     public static function compareNullableGt($gt_left, $gt_right) {
@@ -196,10 +196,10 @@ class Utils {
     }
 
     /*
-     * Given an array of students, returns a json object of formated student names in the form:
-     * First_Name Last_Name <student_id>
+     * Given an array of students, returns a json object of formatted student names in the form:
+     * Given_Name Family_Name <student_id>
      * Students in the null section are at the bottom of the list in the form:
-     * (In null section) First_Name Last_Name <student_id>
+     * (In null section) Given_Name Family_Name <student_id>
      * Optional param to show previous submission count
      * students_version is an array of user and their highest submitted version
      */
@@ -210,7 +210,7 @@ class Utils {
         foreach ($students as $student) {
             $student_entry = [
                 'value' => $student->getId(),
-                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
+                'label' => $student->getDisplayedGivenName() . ' ' . $student->getDisplayedFamilyName() . ' <' . $student->getId() . '>'
             ];
 
             if ($append_numeric_id) {
@@ -259,7 +259,7 @@ class Utils {
     }
 
     /**
-     * Convert bytes to a specified format thats human readable
+     * Convert bytes to a specified format that's human readable
      * E.g : MB, 10485760 => 10MB
      * @param string $format
      * @param int $bytes

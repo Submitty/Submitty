@@ -11,7 +11,6 @@ use app\exceptions\BaseException;
  * show the exact exception to the user (e.g. throwing database exceptions).
  */
 class ExceptionHandler {
-
     /**
      * Should we log any of the exceptions that the application hit?
      * @var bool

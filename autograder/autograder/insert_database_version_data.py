@@ -127,7 +127,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     us to do an update here (as the PHP also deals with the active version for us), but in case
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
-    """
+    """   # noqa: B018
     if is_team is True:
         result = db.execute(select([func.count()]).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
@@ -216,7 +216,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 def get_testcases(config, semester, course, g_id, notebook_data):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
-    correspondance with the testcases that come from the results.json file.
+    correspondence with the testcases that come from the results.json file.
 
     :param semester:
     :param course:
@@ -247,7 +247,6 @@ def get_testcases(config, semester, course, g_id, notebook_data):
             testcase_specs += item_dict['testcases']
 
     testcases = []
-    print(json.dumps(testcase_specs, indent=4))
     for testcase in testcase_specs:
         testcases.append({
                 'hidden': testcase.get('hidden', False),

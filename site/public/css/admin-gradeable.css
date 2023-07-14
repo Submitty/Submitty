@@ -18,23 +18,23 @@ input.readonly.peerstudents {
     width: 200px;
 }
 
-input[type=text]:invalid {
+/* stylelint-disable-next-line no-descending-specificity */
+input[type="text"]:invalid {
     background-color: var(--alert-invalid-entry-pink);
 }
 
-[data-theme="dark"] input[type=text]:invalid {
+/* stylelint-disable-next-line no-descending-specificity */
+[data-theme="dark"] input[type="text"]:invalid {
     background-color: var(--alert-danger-red);
 }
 
-[data-theme="dark"] input[type=text]:invalid::placeholder {
+[data-theme="dark"] input[type="text"]:invalid::placeholder {
     color: var(--alert-invalid-entry-pink);
 }
 
 select {
     margin-top: 7px;
-    width: -webkit-fill-available;
-    width: -moz-available;
-    width: fill-available;
+    width: available;
     min-width: 60px;
 }
 
@@ -67,7 +67,7 @@ select {
     top: -96px;
     left: -313px;
 }
-
+/* stylelint-disable-next-line selector-class-pattern */
 .ui_tpicker_unit_hide {
     display: none;
 }
@@ -105,6 +105,7 @@ a.nav-bar.disabled-btn {
     pointer-events: none;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 a.nav-bar.normal-btn {
     background-color: var(--default-white);
     color: var(--text-black);
@@ -130,6 +131,7 @@ input[type="checkbox"] {
     border-radius: 4px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #electronic_file {
     padding-left: 20px;
 }
@@ -160,6 +162,10 @@ table#grader-history td {
     text-align: center;
 }
 
+#checkpoint-numeric-gradeables-message {
+    font-style: italic;
+}
+
 #late-days-message {
     font-style: italic;
 }
@@ -172,6 +178,7 @@ table#grader-history td {
     margin-top: 20px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .config_search_error {
     font-weight: normal;
 
@@ -188,17 +195,20 @@ div.btn-container {
     margin-bottom: 5px;
 }
 
-#regrade_request_enable_container {
+/* stylelint-disable-next-line selector-id-pattern */
+#grade_inquiry_enable_container {
     margin-top: 10px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #discussion_grading_enable_container {
     margin-top: 10px;
 }
 
-#team-settings-container {
+#team-settings-container, #subdirectory-settings-container {
     margin-top: 10px;
 }
+
 
 #rebuild-status-panel {
     display: inline-block;
@@ -248,6 +258,7 @@ div.btn-container {
     float: right;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #zip_link_limited {
     text-decoration: none;
     color: var(--btn-text-white);
@@ -255,6 +266,7 @@ div.btn-container {
     padding-left: 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #zip_link_full {
     text-decoration: none;
     color: var(--btn-default-text);
@@ -262,6 +274,7 @@ div.btn-container {
     padding-left: 0;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #details_button {
     padding-right: 0;
 }
@@ -290,61 +303,34 @@ select[name="component-itempool"] {
     padding-right: 0;
 }
 
-#config_search {
-    width: 100%;
-}
-
 .drop-down {
     display: inline-block;
     width: 64%;
 }
 
-.drop-down-options {
-    border: 0.5px black solid;
-    position: relative;
-    width: 100%;
-    max-height: 30vh;
-    overflow-y: scroll;
+/* stylelint-disable selector-class-pattern -- Select2 internal classes */
+#config-drop-down .select2-selection,
+#config-drop-down .select2-selection__rendered,
+#config-drop-down .select2-selection__arrow,
+.select2-container .select2-dropdown,
+.select2-container .select2-dropdown .select2-search .select2-search__field {
+    color: var(--text-black);
+    background-color: var(--default-white);
 }
 
-.drop-down-options::-webkit-scrollbar {
-    width: 0.7vh;
+/* stylelint-disable selector-descendant-combinator-no-non-space -- line too long */
+.select2-container .select2-dropdown .select2-results__options
+.select2-results__option.select2-results__option--selected {
+    background-color: var(--submitty-logo-blue);
 }
+/* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
 
 body::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 3px black;
     box-shadow: inset 0 0 3px black;
 }
 
-.drop-down-options::-webkit-scrollbar-thumb {
-    background-color: var(--hover-actionable-blue);
-    outline: 1px solid slategrey;
-}
-
-.drop-down-option {
-    padding: 1vh;
-    text-overflow: ellipsis;
-}
-
-.drop-down-option:hover {
-    background-color: var(--hover-active-all-info-blue);
-}
-
-[data-theme="dark"] .drop-down-options {
-    background-color: var(--standard-medium-dark-gray);
-    border: 1px solid var(--standard-focus-cornflowe-blue);
-}
-
-#config_search {
-    padding-right: 45px;
-}
-
-#clear_search_button {
-    padding-right: 6px;
+/* stylelint-disable-next-line selector-id-pattern */
+#custom_marks_warning {
     color: red;
-}
-
-#custom_marks_warning{
-    color: red;
-    font-style:italic;
+    font-style: italic;
 }

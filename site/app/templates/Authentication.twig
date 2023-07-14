@@ -1,8 +1,15 @@
 <div class="content shadow" id="login-box">
-    <h1 id="login-guest">Login</h1>
+    <div id="login-guest">
+        {% include "misc/Markdown.twig" with {
+            "content": login_content
+        } only %}
+    </div>
     <!--
     <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
     -->
+    {% if is_saml %}
+    <a href="{{ saml_url }}" class="btn btn-primary" id="saml-login">{{ saml_name }}</a>
+    {% else %}
     <form action="{{ login_url }}" method="post" id="login">
         <label>
             User ID
@@ -18,4 +25,5 @@
         </label>
         <input type="submit" name="login" value="Login" class="btn btn-primary" />
     </form>
+    {% endif %}
 </div>

@@ -19,6 +19,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
+use PHPUnit\Util\Test;
 use tests\BaseUnitTest;
 use tests\utils\NullOutput;
 
@@ -66,11 +67,13 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
+        $this->core->setTesting(true);
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
-            'user_firstname' => 'Test',
-            'user_lastname' => 'Person',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -79,7 +82,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $config = new Config($this->core);
         $config->setDebug(true);
-        $config->setSemester($this->config['semester']);
+        $config->setTerm($this->config['semester']);
         $config->setCourse($this->config['course']);
         $config->setCoursePath($this->config['course_path']);
         $config->setSubmittyPath($this->config['tmp_path']);
@@ -92,7 +95,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $max_size = 1000000; // 1 MB
 
         if (empty(static::$annotations)) {
-            static::$annotations = $this->getAnnotations();
+            static::$annotations = Test::parseTestMethodAnnotations(get_class($this), $this->getName());
         }
         if (isset(static::$annotations['method']['highestVersion'][0])) {
             $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
@@ -155,14 +158,16 @@ class SubmissionControllerTester extends BaseUnitTest {
             'syllabus_bucket' => 'homework',
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
+            'vcs_partial_path' => '',
             'vcs_host_type' => -1,
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => true,
-            'scanned_exam' => false,
             'student_view' => $student_view,
             'student_view_after_grades' => false,
+            'student_download' => true,
             'student_submit' => true,
             'has_due_date' => true,
             'has_release_date' => true,
@@ -170,7 +175,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'peer_grade_set' => false,
             'late_submission_allowed' => true,
             'precision' => 0.5,
-            'regrade_allowed' => true,
+            'grade_inquiry_allowed' => true,
             'grade_inquiry_per_component_allowed' => true,
             'discussion_based' => false,
             'discussion_thread_ids' => '',
@@ -252,7 +257,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Creates a file with teh given contents to be used to upload for a specified part.
+     * Creates a file with the given contents to be used to upload for a specified part.
      *
      * @param string $filename
      * @param string $content
@@ -363,7 +368,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, 'test1.txt'), "a");
         $pattern = '/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/';
-        $this->assertRegExp($pattern, file_get_contents(FileUtils::joinPaths($tmp, ".submit.timestamp")));
+        $this->assertMatchesRegularExpression($pattern, file_get_contents(FileUtils::joinPaths($tmp, ".submit.timestamp")));
         $iter = new \FilesystemIterator($tmp);
         $files = [];
         foreach ($iter as $entry) {
@@ -389,7 +394,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(1, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
             }
         }
     }
@@ -587,9 +592,9 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(2, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
                 $this->assertEquals(2, $json['history'][1]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
             }
         }
         sort($dirs);
@@ -1232,7 +1237,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
+        $this->assertEquals("The tmp file 'broken.zip' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
@@ -1437,7 +1442,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertTrue(isset($json['history']));
                 $this->assertEquals(1, count($json['history']));
                 $this->assertEquals(1, $json['history'][0]['version']);
-                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
             }
         }
     }
@@ -1646,7 +1651,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(isset($json['history']));
         $this->assertEquals(2, count($json['history']));
         $this->assertEquals(0, $json['history'][1]['version']);
-        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+        $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
     /**
@@ -1675,7 +1680,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(isset($json['history']));
         $this->assertEquals(2, count($json['history']));
         $this->assertEquals(4, $json['history'][1]['version']);
-        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+        $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
     /*

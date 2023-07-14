@@ -7,7 +7,6 @@ use app\libraries\FileUtils;
 use app\libraries\plagiarism\PlagiarismUtils;
 
 class PlagiarismView extends AbstractView {
-
     /**
      * @param array $plagiarism_result_info
      * @param string $refresh_page
@@ -24,7 +23,7 @@ class PlagiarismView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "new_plagiarism_config_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']),
             "refreshLichenMainPageLink" => $this->core->buildCourseUrl(['plagiarism', 'check_refresh']),
-            "semester" => $this->core->getConfig()->getSemester(),
+            "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse()
         ]);
     }
@@ -49,7 +48,7 @@ class PlagiarismView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismResult.twig', [
             "gradeable_id" => $gradeable_id,
-            "term_course_gradeable" => "{$this->core->getConfig()->getSemester()}__{$this->core->getConfig()->getCourse()}__{$gradeable_id}",
+            "term_course_gradeable" => "{$this->core->getConfig()->getTerm()}__{$this->core->getConfig()->getCourse()}__{$gradeable_id}",
             "config_id" => $config_id,
             "gradeable_title" => $gradeable_title,
             "rankings" => $rankings,

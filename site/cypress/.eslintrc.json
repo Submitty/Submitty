@@ -2,8 +2,8 @@
     "env": {
         "cypress/globals": true,
         "node": true,
-        "browser": null,
-        "jquery": null
+        "browser": false,
+        "jquery": false
     },
     "parserOptions": {
         "sourceType": "module"

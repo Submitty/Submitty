@@ -1,4 +1,4 @@
 Traceback (most recent call last):
   File "infinite_loop_too_much_output.py", line 19, in <module>
-    print "hello", i
-IOError: [Errno 27] File too large
+    print("hello", i)
+OSError: [Errno 27] File too large

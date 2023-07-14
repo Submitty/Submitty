@@ -5,7 +5,7 @@ on:
     # * is created,
     # * title is edited, and
     # * new commits are added (to ensure failing title blocks merging)
-    types: [ opened, reopened, edited, synchronize ]
+    types: [opened, reopened, edited, synchronize]
 
 jobs:
   title-check:

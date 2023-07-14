@@ -9,7 +9,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -22,7 +22,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -35,7 +35,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -48,7 +48,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -61,7 +61,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -74,7 +74,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -87,7 +87,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -100,7 +100,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -113,7 +113,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -126,7 +126,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -139,7 +139,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -152,7 +152,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -165,7 +165,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -178,7 +178,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -191,7 +191,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -204,7 +204,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -217,7 +217,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -230,7 +230,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -243,7 +243,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -256,7 +256,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -269,7 +269,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -282,7 +282,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -295,7 +295,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -308,7 +308,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -321,7 +321,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -334,7 +334,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -347,7 +347,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -360,7 +360,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -373,7 +373,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -386,7 +386,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -399,7 +399,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -412,7 +412,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -425,7 +425,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -438,7 +438,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -451,7 +451,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -464,7 +464,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -477,7 +477,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -490,7 +490,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -503,7 +503,7 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"
 BREED: Snowshoe LIFE_SPAN: 14-19 years WEIGHT: 9-12 lbs INTERESTING: developed in mid-20th century
 BREED: Ragdoll_Cats LIFE_SPAN: 12-17 years WEIGHT: 10-15 lbs INTERESTING: first developed in 1960s
@@ -516,5 +516,5 @@ BREED: American_Curl LIFE_SPAN: 12-16 years WEIGHT: 5-10 lbs INTERESTING: ears a
 BREED: Siberian LIFE_SPAN: 11-15 years WEIGHT: 8-17 lbs INTERESTING: appear in Russian folktales
 BREED: Chinese_Li_Hua LIFE_SPAN: 9-16 years WEIGHT: 9-12 lbs  INTERESTING: is a natural breed
 BREED: Bombay LIFE_SPAN: 12-16 years WEIGHT: 6-11 lbs INTERESTING: named for a port city in India
-BREED: Himalayan LIFE_SPAN: 9-15 yeras WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
+BREED: Himalayan LIFE_SPAN: 9-15 years WEIGHT: 70-12 lbs INTERESTING: developed by crossing Persians with Siamese
 BREED: Exotic LIFE_SPAN: 8-15 years WEIGHT: 7-12 lbs INTERESTING: nicknamed "the lazy man's Persian"

@@ -1,5 +1,5 @@
 {% for thread in thread_content %}
-    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" id="thread_box_link_{{ thread.thread_id }}">
+    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" data-thread_title="{{ thread.title }}" id="thread_box_link_{{ thread.thread_id }}">
         <div class="{{ thread.class }}">
             <div class="flex-row">
                 <span class="thread-left-cont">
@@ -19,7 +19,8 @@
                     <span>
                         {% if thread.pinned %}
                             {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
-                            <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned to the top" aria-label="Pinned to the top"></i>
+                            {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
+                            <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
                         {% endif %}
                         {% if thread.favorite %}
                             <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
@@ -45,14 +46,6 @@
                 </span>
             </div>
             {% if is_full_page is defined and is_full_page %}
-                <span>
-                    {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread.thread_resolve_state == -1 %}
-                        <span class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
-                           onClick="return false; changeThreadStatus({{ thread.thread_id }});"
-                           title="Mark thread as resolved"
-                        >Mark as resolved</span>
-                    {% endif %}
-                </span>
                 <div class="post-action-container">
                     <span>
                         {% if user_group <= 2 and thread.author_info.user_id != current_user %}
@@ -103,4 +96,5 @@
             {% endif %}
         </div>
     </a>
+
 {% endfor %}

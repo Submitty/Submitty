@@ -1,3 +1,6 @@
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames */
+/* exported AbstractBuilder */
+
 class AbstractBuilder {
     constructor(attachment_div) {
         this.attachment_div = attachment_div;
@@ -33,13 +36,13 @@ class AbstractBuilder {
                         this.widgetAdd(new ItemWidget());
                         break;
                     case 'Up':
-                        this.widgetUp(event.target.widget)
+                        this.widgetUp(event.target.widget);
                         break;
                     case 'Down':
-                        this.widgetDown(event.target.widget)
+                        this.widgetDown(event.target.widget);
                         break;
                     case 'Remove':
-                        this.widgetRemove(event.target.widget)
+                        this.widgetRemove(event.target.widget);
                         break;
                     default:
                         break;
@@ -47,7 +50,7 @@ class AbstractBuilder {
 
                 event.stopPropagation();
             }
-        }
+        };
 
         // Handle updating notebook item widgets when itempool item widgets might have changed
         this.attachment_div.addEventListener('focusout', event => {
@@ -57,12 +60,14 @@ class AbstractBuilder {
         });
     }
 
-    getJSON()  { throw 'Implement this method in the child class.'; }
+    getJSON()  {
+        throw 'Implement this method in the child class.';
+    }
 
     load(data) {
         if (data.item_pool) {
             data.item_pool.forEach(item => {
-                let widget = new ItempoolWidget();
+                const widget = new ItempoolWidget();
                 widget.load(item);
                 this.widgetAdd(widget);
             });

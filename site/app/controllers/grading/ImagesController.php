@@ -12,7 +12,6 @@ use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
-
     /**
      * @Route("/courses/{_semester}/{_course}/student_photos")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
@@ -210,7 +209,7 @@ class ImagesController extends AbstractController {
 
         if ($result) {
             return JsonResponse::getSuccessResponse([
-                'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                'given_family_username' => $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName(),
                 'image_data' => $image_data,
                 'image_mime_type' => $image_mime_type,
                 'icon_html' => $icon_html,

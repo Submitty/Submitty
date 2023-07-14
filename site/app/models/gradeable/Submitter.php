@@ -15,7 +15,6 @@ use app\models\User;
  *  have either and access it in a consistent way.
  */
 class Submitter extends AbstractModel {
-
     /** @var Team|User The internal team or user instance */
     private $team_or_user;
 
@@ -98,8 +97,8 @@ class Submitter extends AbstractModel {
      * Gets the anonymous id of the user/team
      * @return string The anonymous id of the submitter
      */
-    public function getAnonId() {
-        return $this->team_or_user->getAnonId();
+    public function getAnonId($g_id) {
+        return ($this->isTeam() ? $this->getTeam()->getAnonId() : $this->getUser()->getAnonId($g_id));
     }
 
     /**
@@ -108,6 +107,13 @@ class Submitter extends AbstractModel {
      */
     public function getRegistrationSection() {
         return $this->team_or_user->getRegistrationSection();
+    }
+
+    /**
+     * Get the course_section_id for the submitter
+     */
+    public function getCourseSectionId(): string {
+        return $this->team_or_user->getCourseSectionId();
     }
 
     /**

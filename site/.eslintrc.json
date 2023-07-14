@@ -8,13 +8,15 @@
     "extends": "eslint:recommended",
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
+        "Cookies": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2017,
         "sourceType": "script"
     },
     "rules": {
+        "eqeqeq": ["error", "always"],
         "arrow-spacing": ["error"],
         "block-spacing": ["error"],
         "brace-style": ["error", "stroustrup"],
@@ -24,6 +26,7 @@
         "eol-last": ["error"],
         "indent": ["error", 4, {"SwitchCase": 1}],
         "keyword-spacing": ["error", {"before": true, "after": true}],
+        "space-before-blocks": ["error", "always"],
         "linebreak-style": ["error", "unix"],
         "no-trailing-spaces": ["error"],
         "no-var": ["error"],
@@ -33,17 +36,40 @@
         "quotes": ["error", "single", {"avoidEscape": true}],
         "semi": ["error", "always"],
         "semi-style": ["error", "last"],
-        "template-curly-spacing": ["error", "never"]
+        "template-curly-spacing": ["error", "never"],
+        "no-restricted-syntax": [
+            "error",
+            {
+                "message": "Direct use of `document.cookie` is not allowed. Consider using `Cookies.get` or `Cookies.set`.",
+                "selector": "MemberExpression[object.name=\"document\"][property.name=\"cookie\"]"
+            }
+        ]
     },
     "overrides": [
         {
-            "files": ["./public/mjs/*.js"],
+            "files": ["./ts/**/*.js"],
             "parserOptions": {
                 "sourceType": "module"
             }
         },
         {
-            "files": ["./tests/mjs/*.js"],
+            "files": ["./ts/**/*.ts"],
+            "extends" : [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended"
+            ],
+            "parser": "@typescript-eslint/parser",
+            "parserOptions": {
+                "sourceType": "module",
+                "project" : "./tsconfig.json"
+            },
+            "rules" : {
+                "@typescript-eslint/no-non-null-assertion" : "off"
+            }
+        },
+        {
+            "files": ["./tests/ts/*.js"],
             "plugins": ["jest"],
             "parserOptions": {
                 "sourceType": "module"
@@ -56,7 +82,7 @@
             }
         },
         {
-            "files": ["jest.config.js"],
+            "files": ["jest.config.*js"],
             "env": {
                 "node": true
             }

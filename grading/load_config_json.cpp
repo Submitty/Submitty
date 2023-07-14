@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <regex>
 #include <ctype.h>
 
 
@@ -12,6 +13,56 @@
 #include "execute.h"
 
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
+
+template <typename T>
+void json_set_default(nlohmann::json &whole_config, std::string field, const T& value) {
+  if (whole_config.find(field) == whole_config.end()) {
+    whole_config[field] = value;
+  }
+}
+
+uint64_t parse_file_size(std::string size_str) {
+  // Trim whitespaces, it cannot handle UTF-8 characters
+  size_str.erase(std::remove_if(size_str.begin(), size_str.end(), isspace), size_str.end());
+
+  // Convert string to lowercase, it cannot handle UTF-8 characters
+  for (char& c : size_str)
+    c = std::tolower(c);
+
+  // Accepted units, all Bs could be omitted:
+  //    Base 1000: B, KB,  MB,  GB,  TB   (SI)
+  //    Base 1024: B, KiB, MiB, GiB, TiB  (IEC-i)
+  const std::regex accepted { "\\d+([kmgt]i?)?b?" };
+  // check if it is well formatted
+  if (!std::regex_match(size_str, accepted)) {
+    std::cout << "Got string: " << size_str << std::endl;
+    throw std::invalid_argument("Wrong format: accepted format is \\d+([KMGT]i?)?B?");
+  }
+
+  // Extract numeric file size, will cause exception if the number is larger than 64-bit
+  size_t unit_begin  = 0;
+  uint64_t file_size = std::stoull(size_str, &unit_begin);
+  if (!file_size)
+    throw std::invalid_argument("Wrong file size: 0 byte");
+
+  // Parse the units
+  const std::string suffices { "bkmgt" };
+  size_t power = 0;
+  size_t base  = 1000;
+  if ((power = suffices.find(size_str[unit_begin])) == std::string::npos)
+    power = 0; // Handle empty unit, treat as byte
+  assert(power < 5);
+  if (size_str.size() - unit_begin >= 2 && size_str[unit_begin + 1] == 'i')
+    base = 1024;
+
+  // Return the multiplied size, throw if overflowed
+  uint64_t multiplier  = static_cast<uint64_t>(std::pow(base, power));
+  uint64_t parsed_size = file_size * multiplier;
+  if (file_size != parsed_size / multiplier)
+    throw std::overflow_error("Total file size overflowed");
+
+  return parsed_size;
+}
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
@@ -123,37 +174,55 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
     whole_config["gradeable_message"] = whole_config.value("assignment_message","");
     whole_config.erase("assignment_message");
   }
-  whole_config["gradeable_message"] = whole_config.value("gradeable_message", "");
 
-  whole_config["load_gradeable_message"] = whole_config.value("load_gradeable_message", nlohmann::json::object());
-  whole_config["load_gradeable_message"]["message"] = whole_config["load_gradeable_message"].value("message", "");
-  whole_config["load_gradeable_message"]["first_time_only"] = whole_config["load_gradeable_message"].value("first_time_only", false);
+  json_set_default(whole_config,"gradeable_message",std::string(""));
 
-  whole_config["early_submission_incentive"] = whole_config.value("early_submission_incentive", nlohmann::json::object());
-  whole_config["early_submission_incentive"]["message"] = whole_config["early_submission_incentive"].value("message", "");
-  whole_config["early_submission_incentive"]["minimum_days_early"] = whole_config["early_submission_incentive"].value("minimum_days_early", 0);
-  whole_config["early_submission_incentive"]["minimum_points"] = whole_config["early_submission_incentive"].value("minimum_points", 0);
-  whole_config["early_submission_incentive"]["test_cases"] = whole_config["early_submission_incentive"].value("test_cases", std::vector<int>());
+  if (whole_config.find("load_gradeable_message") == whole_config.end()) {
+    nlohmann::json o;
+    o["message"] = "";
+    o["first_time_only"] = false;
+    whole_config["load_gradeable_message"] = o;
+  } else {
+    json_set_default(whole_config["load_gradeable_message"],"message",std::string(""));
+    json_set_default(whole_config["load_gradeable_message"],"first_time_only",false);
+  }
 
-  whole_config["max_submission_size"] = whole_config.value("max_submission_size",MAX_SUBMISSION_SIZE);
+  if (whole_config.find("early_submission_incentive") == whole_config.end()) {
+    nlohmann::json o;
+    o["message"] = "";
+    o["minimum_days_early"] = 0;
+    o["minimum_points"] = 0;
+    o["test_cases"] = std::vector<int>();
+    whole_config["early_submission_incentive"] = o;
+  } else {
+    json_set_default(whole_config["early_submission_incentive"],"message",std::string(""));
+    json_set_default(whole_config["early_submission_incentive"],"minimum_days_early",0);
+    json_set_default(whole_config["early_submission_incentive"],"minimum_points",0);
+    json_set_default(whole_config["early_submission_incentive"],"test_cases",std::vector<int>());
+  }
 
-  whole_config["required_capabilities"] = whole_config.value("required_capabilities","default");
+  if (whole_config.find("max_submission_size") != whole_config.end()) {
+    if (whole_config["max_submission_size"].type() == nlohmann::json::value_t::string) {
+      // Found formatted string, convert to numeric bytes
+      uint64_t max_size_in_byte = parse_file_size(whole_config["max_submission_size"]);
+      whole_config["max_submission_size"] = max_size_in_byte;
+    } // Should not parse values: might overflow.  Let schema checker handle type errors
+  } else {
+    json_set_default(whole_config, "max_submission_size", MAX_SUBMISSION_SIZE);
+  }
+  json_set_default(whole_config, "required_capabilities", "default");
 
-  // Configure defaults for hide_submitted_files
-  whole_config["hide_submitted_files"] = whole_config.value("hide_submitted_files", false);
-
-  // Configure defaults for hide_version_and_test_details
-  whole_config["hide_version_and_test_details"] = whole_config.value("hide_version_and_test_details", false);
+  json_set_default(whole_config, "hide_test_details", whole_config.value("hide_version_and_test_details", false));
 
   // By default, we have one drop zone without a part label / sub
   // directory.
   nlohmann::json::iterator parts = whole_config.find("part_names");
   if (parts != whole_config.end()) {
-    nlohmann::json tmp =  nlohmann::json::array();
+    nlohmann::json tmp_array =  nlohmann::json::array();
     for (int i = 0; i < parts->size(); i++) {
-      tmp.push_back((*parts)[i]);
+      tmp_array.push_back((*parts)[i]);
     }
-    whole_config["part_names"] = tmp;
+    whole_config["part_names"] = tmp_array;
   }
 
   // But, if there are input fields, but there are no explicit parts
@@ -689,9 +758,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  0, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag" << std::endl;
         }
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
@@ -703,10 +771,8 @@ void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_conf
         validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
-          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+          std::cout << "WARNING: some movement expected in click and drag delta" << std::endl;
         }
-
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
 
       }
       //Click has an optional mouse button.
@@ -966,15 +1032,15 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     Execution_Helper(single_testcase);
   }
 
-  single_testcase["testcase_label"] = single_testcase.value("testcase_label", "");
-  single_testcase["details"] = single_testcase.value("details","");
-  single_testcase["extra_credit"] = single_testcase.value("extra_credit",false);
-  single_testcase["release_hidden_details"] = single_testcase.value("release_hidden_details", false);
-  single_testcase["hidden"] = single_testcase.value("hidden", false);
+  json_set_default(single_testcase,"testcase_label",std::string(""));
+  json_set_default(single_testcase,"details",std::string(""));
+  json_set_default(single_testcase,"extra_credit",false);
+  json_set_default(single_testcase,"release_hidden_details",false);
+  json_set_default(single_testcase,"hidden",false);
   assert(!(single_testcase["release_hidden_details"] && !single_testcase["hidden"]));
-  single_testcase["view_testcase_message"] = single_testcase.value("view_testcase_message",true);
-  single_testcase["publish_actions"] = single_testcase.value("publish_actions", false);
 
+  json_set_default(single_testcase,"view_testcase_message",true);
+  json_set_default(single_testcase,"publish_actions",false);
 
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
@@ -1023,6 +1089,17 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
         } else {
           assert (validShowValue(*itr2));
         }
+        assert(grader.find("expected_string") == grader.end() && "You cannot specify both expected_file and expected_string");
+      }
+      if (grader.find("expected_string") != grader.end()) {
+        itr2 = grader.find("show_expected");
+        if (itr2 == grader.end()) {
+          grader["show_expected"] = "always";
+        } else {
+          assert (validShowValue(*itr2));
+        }
+        grader["use_expected_string"] = true;
+        assert(grader.find("expected_file") == grader.end() && "You cannot specify both expected_file and expected_string");
       }
     }
   }
@@ -1721,7 +1798,7 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
           nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
 
           int num_of_choices = 0;
-          for (auto it = choices.begin(); it != choices.end(); ++it){
+          for (auto it = choices.begin(), it_next = it; it != choices.end(); ++it, it_next = it){
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
 
@@ -1733,6 +1810,19 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
               assert(value != "");
               assert(description != "");
 
+              for (++it_next; it_next != choices.end(); ++it_next){
+
+                nlohmann::json choice_next = it_next.value();
+                std::string value_next = choice_next.value("value", "");
+                std::string description_next = choice_next.value("description", "");
+                if (value == value_next){
+                  std::cout  << "ERROR: Multiple choice question: two answers have the same value! " << std::endl;
+                  std::cout << "For answer descriptions: " << description << " and " << description_next << " both have the value: " << value << ". "<< std::endl;
+                  std::cout << "Please change one of the values!" << std::endl;
+                }
+                assert (value != value_next); 
+
+              }
               num_of_choices++;
           }
 
@@ -1830,24 +1920,3 @@ nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann:
     }
     return complete;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

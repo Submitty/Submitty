@@ -130,7 +130,7 @@ void print(std::ofstream &out, std::vector<Cat> &cats)
 		out << cats[i].getBreed() << std::endl;
 		out << spacing << "Average Lifespan: " << cats[i].getAverageLifeSpan() << std::endl;
 		out << spacing << "Average Weight:   " << cats[i].getAverageSize() << std::endl;
-		out << spacing << "Intersting Fact:  " << cats[i].getInterestingFact() << std::endl;
+		out << spacing << "Interesting Fact:  " << cats[i].getInterestingFact() << std::endl;
 	}
 }
 
@@ -146,7 +146,7 @@ void print_extraLines(std::ofstream &out, std::vector<Cat> &cats)
 		    << std::endl << std::endl;
 		out << spacing << "Average Weight:   " << cats[i].getAverageSize() 
 		    << std::endl << std::endl;
-		out << spacing << "Intersting Fact:  " << cats[i].getInterestingFact() 
+		out << spacing << "Interesting Fact:  " << cats[i].getInterestingFact() 
 		    << std::endl << std::endl;
 	}
 }
@@ -163,7 +163,7 @@ void print_extraSpaces(std::ofstream &out, std::vector<Cat> &cats)
 		    << " " << std::endl;
 		out << spacing << "Average Weight:   " << cats[i].getAverageSize() 
 		    << " " << std::endl;
-		out << spacing << "Intersting Fact:  " << cats[i].getInterestingFact() 
+		out << spacing << "Interesting Fact:  " << cats[i].getInterestingFact() 
 		    << " " << std::endl;
 	}
 }
@@ -177,7 +177,7 @@ void print_lineOrder(std::ofstream &out, const std::vector<Cat> &cats)
 		out << cats[i].getBreed() << std::endl;
 		out << spacing << "Average Lifespan: " << cats[i].getAverageLifeSpan() << std::endl;
 		out << spacing << "Average Weight:   " << cats[i].getAverageSize() << std::endl;
-		out << spacing << "Intersting Fact:  " << cats[i].getInterestingFact() << std::endl;
+		out << spacing << "Interesting Fact:  " << cats[i].getInterestingFact() << std::endl;
 	}
 }
 
@@ -191,7 +191,7 @@ void print_frontSpacing(std::ofstream &out, std::vector<Cat> &cats)
 		out << cats[i].getBreed() << std::endl;
 		out << spacing << "Average Lifespan: " << cats[i].getAverageLifeSpan() << std::endl;
 		out << spacing << "Average Weight:   " << cats[i].getAverageSize() << std::endl;
-		out << spacing << "Intersting Fact:  " << cats[i].getInterestingFact() << std::endl;
+		out << spacing << "Interesting Fact:  " << cats[i].getInterestingFact() << std::endl;
 	}
 }
 
@@ -206,6 +206,6 @@ void print_columnSpacing(std::ofstream &out, std::vector<Cat> &cats)
 		out << cats[i].getBreed() << std::endl;
 		out << spacing << "Average Lifespan: " << cats[i].getAverageLifeSpan() << std::endl;
 		out << spacing << "Average Weight: " << cats[i].getAverageSize() << std::endl;
-		out << spacing << "Intersting Fact: " << cats[i].getInterestingFact() << std::endl;
+		out << spacing << "Interesting Fact: " << cats[i].getInterestingFact() << std::endl;
 	}
 }

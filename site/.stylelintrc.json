@@ -4,10 +4,12 @@
     "indentation": 4,
     "color-hex-length": "long",
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
-    "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$"
+    "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+    "media-feature-range-notation": null
   },
   "ignoreFiles": [
     "vendor/**",
+    "tests/report/**",
     "public/css/jquery-ui.min.css",
     "public/css/reset.css",
     "public/css/flatpickr.min.css",
@@ -17,24 +19,6 @@
     "public/css/pdf/toolbar_fullscreen.css",
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
-    "public/css/highlightjs/*",
-    "public/css/user-profile.css",
-    "public/css/submitbox.css",
-    "public/css/sequence.css",
-    "public/css/rainbow-customization.css",
-    "public/css/officeHoursQueue.css",
-    "public/css/notebook-builder.css",
-    "public/css/navigation.css",
-    "public/css/links.css",
-    "public/css/input.css",
-    "public/css/gradeable-notebook.css",
-    "public/css/gradeOverride.css",
-    "public/css/grade-inquiry.css",
-    "public/css/forum.css",
-    "public/css/fileinput.css",
-    "public/css/electronic.css",
-    "public/css/diff-viewer.css",
-    "public/css/details.css",
-    "public/css/admin-gradeable.css"
+    "public/css/highlightjs/*"
   ]
 }

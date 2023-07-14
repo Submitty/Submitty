@@ -4,7 +4,7 @@
 Script to reset the vagrant box and the configurations that install_system does
 to set up the submitty system with regards to apache, postgresql, etc. This then
 allows for install_system.sh to run cleanly and not end up with duplicate lines
-in configuration files or pre-existing databses.
+in configuration files or pre-existing databases.
 """
 
 from __future__ import print_function

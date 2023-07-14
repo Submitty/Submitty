@@ -46,20 +46,23 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method void setUsingSubdirectory($using_subdirectory)
+ * @method bool isUsingSubdirectory()
+ * @method void setVcsPartialPath($vcs_partial_path)
+ * @method string getVcsPartialPath()
  * @method int getVcsHostType()
  * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method bool isScannedExam()
- * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentViewAfterGrades()
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
+ * @method void setStudentDownload($can_student_download)
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -75,20 +78,19 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDependsOn($depends_on)
  * @method int getDependsOnPoints()
  * @method void setDependsOnPoints($depends_on_points)
- * @method bool isRegradeAllowed()
+ * @method bool isGradeInquiryAllowed()
  * @method bool isGradeInquiryPerComponentAllowed()
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
  * @method string  getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
- * @method int getActiveRegradeRequestCount()
+ * @method int getActiveGradeInquiriesCount()
  * @method void setHasDueDate($has_due_date)
  * @method void setHasReleaseDate($has_release_date)
  * @method object[] getPeerGradingPairs()
  * @method string getHiddenFiles()
  * @method void setHiddenFiles($hidden_files)
- * @method void setStudentSubmit($can_student_submit)
  * @method void setLimitedAccessBlind($limited_access_blind)
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
@@ -97,7 +99,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
- * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -136,7 +137,7 @@ class Gradeable extends AbstractModel {
     private $db_components = [];
 
     /** @prop @var bool If any submitters have active grade inquiries */
-    protected $active_regrade_request_count = 0;
+    protected $active_grade_inquiries_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
@@ -174,8 +175,12 @@ class Gradeable extends AbstractModel {
     protected $autograding_config_path = "";
     /** @prop @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
+    /** @prop @var bool If the gradeable is using a VCS subdirectory within the repository */
+    protected $using_subdirectory = false;
     /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @prop @var string The path to the repository from the base url */
+    protected $vcs_partial_path = "";
     /** @prop @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
     protected $vcs_host_type = -1;
     /** @prop @var bool If the gradeable is a team assignment */
@@ -184,13 +189,13 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @prop @var bool If the gradeable is using any manual grading */
     protected $ta_grading = true;
-    /** @prop @var bool If the gradeable is a 'scanned exam' */
-    protected $scanned_exam = false;
     /** @prop @var bool If students can view submissions */
     protected $student_view = false;
     /** @prop @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
-    /** @prop @var bool If students can make submissions */
+    /** @prop @var bool If students can download submission files */
+    protected $student_download = false;
+    /** @prop @var bool If students can make submissions and view other versions */
     protected $student_submit = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
@@ -240,8 +245,8 @@ class Gradeable extends AbstractModel {
     protected $grade_inquiry_start_date = null;
     /** @prop @var \DateTime The deadline for submitting a grade inquiry */
     protected $grade_inquiry_due_date = null;
-    /** @prop @var bool are grade inquiries enabled for this assignment*/
-    protected $regrade_allowed = true;
+    /** @prop @var bool are grade inquiries allowed for this assignment*/
+    protected $grade_inquiry_allowed = true;
     /** @prop @var bool are grade inquiries for specific components enabled for this assignment*/
     protected $grade_inquiry_per_component_allowed = false;
     /** @prop @var bool does this assignment have a discussion component*/
@@ -288,22 +293,24 @@ class Gradeable extends AbstractModel {
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->setAutogradingConfigPath($details['autograding_config_path']);
+            $this->setAutogradingConfigPath($details['autograding_config_path'], true);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setUsingSubdirectory($details['using_subdirectory']);
+            $this->setVcsPartialPath($details['vcs_partial_path']);
             $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
-            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
+            $this->setStudentDownload($details['student_download']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
             $this->setHasReleaseDate($details['has_release_date']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setGradeInquiryAllowedInternal($details['grade_inquiry_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
@@ -316,7 +323,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
+        $this->setActiveGradeInquiriesCount($details['active_grade_inquiries_count'] ?? 0);
 
         // Set dates last
         $this->setDates($details);
@@ -569,6 +576,7 @@ class Gradeable extends AbstractModel {
     }
     public function setPeerGradersList($input) {
         $bad_rows = [];
+        $self_grade_rows = [];
         foreach ($input as $row_num => $vals) {
             if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
@@ -576,13 +584,25 @@ class Gradeable extends AbstractModel {
             if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
+            if ($vals["grader"] === $vals["student"]) {
+                array_push($self_grade_rows, ($vals["grader"]));
+            }
         }
-        if (!empty($bad_rows)) {
-            $msg = "The given user id is not valid: ";
-            array_walk($bad_rows, function ($val) use (&$msg) {
-                $msg .= " {$val}";
-            });
-            $this->core->addErrorMessage($msg);
+        if (!empty($bad_rows) || !empty($self_grade_rows)) {
+            if (!empty($bad_rows)) {
+                $bad_row_msg = "The given user id is not valid: ";
+                array_walk($bad_rows, function ($val) use (&$bad_row_msg) {
+                    $bad_row_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($bad_row_msg);
+            }
+            if (!empty($self_grade_rows)) {
+                $self_grade_msg = "The given users have self gradings: ";
+                array_walk($self_grade_rows, function ($val) use (&$self_grade_msg) {
+                    $self_grade_msg .= " {$val}";
+                });
+                $this->core->addErrorMessage($self_grade_msg);
+            }
         }
         else {
             $query_string = "";
@@ -624,7 +644,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getPeerFeedback($grader_id, $anon_id) {
-        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $this->getId());
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
         if ($feedback == 'thanks') {
             return 'Thank you!';
@@ -694,7 +714,7 @@ class Gradeable extends AbstractModel {
      * Gets the dates that require validation for the gradeable's current configuration.
      * @return string[] array of date property names that need validation
      */
-    private function getDateValidationSet(bool $regrade_modified = false) {
+    private function getDateValidationSet(bool $grade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
@@ -721,8 +741,8 @@ class Gradeable extends AbstractModel {
                 $result[] = 'grade_released_date';
             }
 
-            // Only add in grade inquiry dates if its allowed & enabled
-            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed() && !$regrade_modified) {
+            // Only add in grade inquiry dates if its allowed
+            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$grade_inquiry_modified) {
                 $result[] = 'grade_inquiry_start_date';
                 $result[] = 'grade_inquiry_due_date';
             }
@@ -762,7 +782,7 @@ class Gradeable extends AbstractModel {
      * @param \DateTime[] $dates Array of dates, indexed by property name
      * @return \DateTime[] Array of dates, indexed by property name
      */
-    private function coerceDates(array $dates, bool $regrade_modified = false) {
+    private function coerceDates(array $dates, bool $grade_inquiry_modified = false) {
         // Takes an array of date properties (in order) and date values (indexed by property)
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
@@ -805,7 +825,7 @@ class Gradeable extends AbstractModel {
         };
 
         // Don't coerce the dates checked by validation
-        $skip_coercion_dates = $this->getDateValidationSet($regrade_modified);
+        $skip_coercion_dates = $this->getDateValidationSet($grade_inquiry_modified);
         if ($this->isTeamAssignment()) {
             $skip_coercion_dates[] = "team_lock_date";
         }
@@ -833,7 +853,7 @@ class Gradeable extends AbstractModel {
      * @param array $dates An array of dates/date strings indexed by property name
      * @throws ValidationException With all messages for each invalid property
      */
-    public function setDates(array $dates, bool $regrade_modified = false) {
+    public function setDates(array $dates, bool $grade_inquiry_modified = false) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
 
@@ -842,7 +862,7 @@ class Gradeable extends AbstractModel {
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
-        $dates = $this->coerceDates($dates, $regrade_modified);
+        $dates = $this->coerceDates($dates, $grade_inquiry_modified);
 
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings
@@ -900,6 +920,23 @@ class Gradeable extends AbstractModel {
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
+    }
+
+    /**
+     * Gets if the submitted files for this gradeable can be downloaded by students
+     * @return bool
+     */
+    public function canStudentDownload() {
+        return $this->student_download;
+    }
+
+    /**
+     * Gets if this gradeable is defined as a "bulk upload" gradeable (if students are only allowed to view it after
+     * grades are released)
+     * @return bool
+     */
+    public function isBulkUpload() {
+        return $this->isStudentView() && $this->isStudentViewAfterGrades();
     }
 
     /**
@@ -996,8 +1033,8 @@ class Gradeable extends AbstractModel {
      * @param int $count
      * @internal
      */
-    public function setActiveRegradeRequestCount(int $count) {
-        $this->active_regrade_request_count = $count;
+    public function setActiveGradeInquiriesCount(int $count) {
+        $this->active_grade_inquiries_count = $count;
     }
 
     /**
@@ -1007,7 +1044,7 @@ class Gradeable extends AbstractModel {
     private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
+            throw new \InvalidArgumentException('Gradeable id must be alphanumeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -1115,7 +1152,7 @@ class Gradeable extends AbstractModel {
         $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
+                throw new \InvalidArgumentException('Object in components array was not a component');
             }
         }
 
@@ -1258,12 +1295,153 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Given a file or directory it will validate if it can be read for autograding
+     *
+     * @param string $path
+     * @param array $group_map
+     * @param array $user_map
+     * @param bool $dir
+     * @return bool
+     */
+    private function checkValidPerms(string $path, array &$group_map, array &$user_map, bool $dir = false): bool {
+        $perms = @fileperms($path);
+        if ($perms === false) {
+            return false;
+        }
+        if ($perms & 0x0004) { // World readable check
+            if (($dir && ($perms & 0x0001)) || !$dir) { // World executable check if dir
+                return true;
+            }
+        }
+
+        $user = $this->core->getUser()->getId();
+        $group_id = @filegroup($path);
+        if ($group_id === false) {
+            return false;
+        }
+        if (!in_array($group_id, $group_map)) {
+            $group_map[$group_id] = posix_getgrgid($group_id)["members"];
+        }
+        $group_users = $group_map[$group_id];
+
+        $group_readable = false;
+
+        if ($perms & 0x0020) { // Group readable check
+            if (($dir && ($perms & 0x0008)) || !$dir) { // Group executable check if dir
+                $group_readable = true;
+            }
+        }
+
+        $instructor_check = in_array($user, $group_users) && $group_readable;
+        $submitty_daemon_check = in_array("submitty_daemon", $group_users) && $group_readable;
+
+        $owner_id = @fileowner($path);
+        if ($owner_id === false) {
+            return false;
+        }
+        if (!array_key_exists($owner_id, $user_map)) {
+            $user_map[$owner_id] = posix_getpwuid($owner_id)["name"];
+        }
+        $owner = $user_map[$owner_id];
+
+        $owner_readable = false;
+
+        if ($perms & 0x0100) {  // Owner readable check
+            if (($dir && ($perms & 0x0040)) || !$dir) { // Owner executable check if dir
+                $owner_readable = true;
+            }
+        }
+
+        if ($owner === "submitty_daemon") {
+            $submitty_daemon_check = $submitty_daemon_check || $owner_readable;
+        }
+
+        if ($owner === $user) {
+            $instructor_check = $instructor_check || $owner_readable;
+        }
+
+        if ($instructor_check && $submitty_daemon_check) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the path and all subdirectories/files are valid
+     * Returns a string if there was an error found
+     *
+     * @param string $path
+     * @return bool | string
+     */
+    private function checkPath(string $path) {
+        if (!is_readable($path)) {
+            return "Cannot read provided path.";
+        }
+        $group_map = [];
+        $user_map = [];
+        $dir = @scandir($path);
+        if (!is_array($dir)) {
+            return "Path provided is not a directory.";
+        }
+        // If the folder doesn't contain config.json then definitely isn't a valid path
+        if (!in_array("config.json", $dir)) {
+            return "Path provided does not contain a config.json.";
+        }
+        $cur_paths = [$path];
+        $next_paths = [];
+        $checked_paths = 1;
+        while ($checked_paths <= 1000 && count($cur_paths) !== 0) {
+            foreach ($cur_paths as $cur_path) {
+                $is_dir = is_dir($cur_path);
+                if (!$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
+                    return "Invalid permissions on a file or directory within specified path.";
+                }
+                if ($is_dir) {
+                    $next_paths_tmp = @scandir($cur_path);
+                    if (!is_array($next_paths_tmp)) {
+                        return "Invalid permissions on a file or directory within specified path.";
+                    }
+                    foreach ($next_paths_tmp as $next_path) {
+                        if ($next_path === "." || $next_path === "..") {
+                            continue;
+                        }
+                        $next_paths[] = FileUtils::joinPaths($cur_path, $next_path);
+                        $checked_paths++;
+                        if ($checked_paths >= 1000) {
+                            break;
+                        }
+                    }
+                    if ($checked_paths >= 1000) {
+                        break;
+                    }
+                }
+            }
+            $cur_paths = $next_paths;
+            $next_paths = [];
+        }
+
+        if ($checked_paths >= 1000) {
+            return "Path provided contains too many files.";
+        }
+
+        return true;
+    }
+
+    /**
      * Sets the path to the autograding config
      * @param string $path Must not be blank
      */
-    public function setAutogradingConfigPath($path) {
+    public function setAutogradingConfigPath($path, $skip_path_check = false) {
         if ($path === '') {
             throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
+        }
+        if (!$skip_path_check) {
+            $check = $this->checkPath($path);
+            if (!$this->core->isTesting() && is_string($check)) {
+                // String means an error was found
+                throw new \InvalidArgumentException($check);
+            }
         }
         $this->autograding_config_path = strval($path);
         $this->modified = true;
@@ -1314,13 +1492,13 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Sets whether regrades are allowed for this gradeable
-     * @param bool $regrade_allowed
+     * Sets whether grade inquiries are allowed for this gradeable
+     * @param bool $grade_inquiry_allowed
      * @throws ValidationException If date validation fails in this new grade inquiry configuration
      */
-    public function setRegradeAllowed(bool $regrade_allowed) {
-        $old = $this->regrade_allowed;
-        $this->regrade_allowed = $regrade_allowed;
+    public function setGradeInquiryAllowed(bool $grade_inquiry_allowed) {
+        $old = $this->grade_inquiry_allowed;
+        $this->grade_inquiry_allowed = $grade_inquiry_allowed;
 
         try {
             // Asserts that this date information is valid after changing this property
@@ -1328,23 +1506,23 @@ class Gradeable extends AbstractModel {
         }
         catch (ValidationException $e) {
             // Reset to the old value if validation fails
-            $this->regrade_allowed = $old;
+            $this->grade_inquiry_allowed = $old;
 
             // This line brings me great pain
             throw $e;
         }
-        // make sure grade_inquiry_per_component_allowed is false when regrade allowed is false
-        if (!$regrade_allowed) {
+        // make sure grade_inquiry_per_component_allowed is false when grade_inquiries_allowed is false
+        if (!$grade_inquiry_allowed) {
             $this->grade_inquiry_per_component_allowed = false;
         }
     }
 
     /**
-     * @param bool $regrade_allowed
+     * @param bool $grade_inquiry_allowed
      * @internal
      */
-    private function setRegradeAllowedInternal(bool $regrade_allowed) {
-        $this->regrade_allowed = $regrade_allowed;
+    private function setGradeInquiryAllowedInternal(bool $grade_inquiry_allowed) {
+        $this->grade_inquiry_allowed = $grade_inquiry_allowed;
     }
 
     /**
@@ -1392,8 +1570,8 @@ class Gradeable extends AbstractModel {
      * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
-    public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
+    public function anyActiveGradeInquiries() {
+        return $this->active_grade_inquiries_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**
@@ -1419,7 +1597,7 @@ class Gradeable extends AbstractModel {
                 $submission_path = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
                     'courses',
-                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getTerm(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
                     $this->getId()
@@ -1610,7 +1788,7 @@ class Gradeable extends AbstractModel {
                     'graded_components' => 0,
                 ];
                 if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    // Clamp to total components if unsubmitted assignment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                 }
             }
@@ -1887,11 +2065,11 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * return true if students can currently submit regrades for this assignment, false otherwise
+     * return true if students can currently submit grade inquiries for this assignment, false otherwise
      * @return bool
      */
-    public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+    public function isGradeInquiryOpen() {
+        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->grade_inquiry_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -1901,7 +2079,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryYetToStart() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -1912,7 +2090,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryEnded() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
+        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
@@ -1994,20 +2172,20 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
         }
     }
 
     public function getRepositoryPath(User $user, Team $team = null) {
-        if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
-            $vcs_path = $this->getVcsSubdirectory();
+        if (strpos($this->getVcsPartialPath(), '://') !== false || substr($this->getVcsPartialPath(), 0, 1) === '/') {
+            $vcs_path = $this->getVcsPartialPath();
         }
         else {
             if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
-                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsPartialPath();
             }
             else {
-                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsPartialPath());
             }
         }
         $repo = $vcs_path;
@@ -2058,7 +2236,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate()) : 0);
     }
 
     /**

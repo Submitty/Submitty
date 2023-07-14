@@ -13,7 +13,6 @@ use LogicException;
  * @package app
  */
 class NotificationFactory {
-
     /**
      * @var Core $core
      */
@@ -200,7 +199,7 @@ class NotificationFactory {
         $flattened_notifications = [];
         foreach ($notifications as $notification) {
             // check if user is in the null section
-            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getTerm())) {
                 continue;
             }
             if ($notification->getNotifyTarget() != $current_user->getId() || $current_user->getNotificationSetting('self_notification')) {
@@ -236,7 +235,7 @@ class NotificationFactory {
         $flattened_emails = [];
         foreach ($emails as $email) {
             // check if user is in the null section
-            if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
+            if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getTerm())) {
                 continue;
             }
             if ($skip_check || $email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
@@ -246,14 +245,14 @@ class NotificationFactory {
                     $flattened_emails[] = $email->getBody();
                     $flattened_emails[] = $email->getUserId();
                     $flattened_emails[] = $user->getSecondaryEmail();
-                    $flattened_emails[] = $this->core->getConfig()->getSemester();
+                    $flattened_emails[] = $this->core->getConfig()->getTerm();
                     $flattened_emails[] = $this->core->getConfig()->getCourse();
                 }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
                 $flattened_emails[] = $user->getEmail();
-                $flattened_emails[] = $this->core->getConfig()->getSemester();
+                $flattened_emails[] = $this->core->getConfig()->getTerm();
                 $flattened_emails[] = $this->core->getConfig()->getCourse();
             }
         }

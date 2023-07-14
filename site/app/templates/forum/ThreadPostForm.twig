@@ -88,10 +88,10 @@
             "placeholder" : post_content_placeholder,
             "preview_div_id" : "preview_box_" ~ post_box_id,
             "preview_div_name" : "preview_box_" ~ post_box_id,
-            "onclick" : "previewForumMarkdown.call(this)",
-            "render_buttons" : render_markdown is defined and render_markdown ? render_markdown : false,
-            "markdown_buttons_id" : "markdown_buttons_" ~ post_box_id,
+            "render_header" : render_markdown is defined and render_markdown ? render_markdown : false,
+            "markdown_header_id" : "markdown_header_" ~ post_box_id,
             "min_height" : min_height,
+            "required" :  true,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
             "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
@@ -118,9 +118,15 @@
           <legend id="cat_label">Categories:</legend>
           <div id=id='categories-pick-list'>
             {% for category in categories %}
+                {# if diff > 0 then visible_Date is true
+                 diff is used for comparsion betweeen  the given date of category and the current date of user 
+                 when date is above then current date then output is less than zero.
+                 and when date is below then current date the optput is greater then zero #}
+                {% if category.visible_date is null or category.diff > 0 %}
                 <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                     <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
                 </div>
+                {% endif %}
             {% endfor %}
           </div>
         </fieldset>
@@ -165,29 +171,34 @@
     {% endif %}
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
+        <div class="new-thread-settings-wrapper">
         {% if show_anon %}
-            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
+            <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label>Anonymous (to class)? </label>
         {% endif %}
+        {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
+            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
+            <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
+            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>       
+        {% endif %}
+        {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
+            <div class = "expiration inline-block" style="display: none;">
+              <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
+              <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
+            </div>
+        {% endif %}
+        </div>
+        <br style="margin-right:1rem;">
         {% if show_thread_status is defined and show_thread_status %}
-        <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">
+        <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status" style="margin-bottom: 1rem;">
             <option value="0">Comment</option>
             <option value="-1" selected="selected">Unresolved</option>
             <option value="1">Resolved</option>
         </select>
         {% endif %}
-        {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
-            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
-            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
-            <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
-            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
-        {% endif %}
-        {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
-            <div class = "expiration inline-block" style="display: none;">
-              <label class="inline-block" for="expirationDate">{{ "Expiration Date" }}</label>
-              <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
-            </div>
-        {% endif %}
+        <br style="margin-bottom:1rem;">
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="cancelEditPostForum()"
                      class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>

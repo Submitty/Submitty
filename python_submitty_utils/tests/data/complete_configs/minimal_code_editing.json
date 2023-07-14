@@ -55,8 +55,7 @@
         "test_cases": []
     },
     "gradeable_message": "",
-    "hide_submitted_files": false,
-    "hide_version_and_test_details": false,
+    "hide_test_details": false,
     "id": "minimal_code_editing",
     "item_pool": [],
     "load_gradeable_message": {

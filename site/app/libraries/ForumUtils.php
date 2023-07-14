@@ -10,7 +10,6 @@ use app\libraries\Utils;
  * Contains various useful functions for interacting with the forum
  */
 class ForumUtils {
-
     const FORUM_CHAR_POST_LIMIT = 5000;
 
     public static function checkGoodAttachment($isThread, $thread_id, $file_post) {
@@ -69,6 +68,6 @@ class ForumUtils {
         if ($anonymous) {
             return "Anonymous";
         }
-        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+        return $real_name['given_name'] . substr($real_name['family_name'], 0, 2) . '.';
     }
 }

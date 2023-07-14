@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
@@ -45,8 +44,7 @@ class ConfigurationController extends AbstractController {
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
             'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
-            'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
-            'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
+            'grade_inquiry_message'          => $this->core->getConfig()->getGradeInquiryMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
@@ -64,7 +62,7 @@ class ConfigurationController extends AbstractController {
             $admin_in_course =  $this->core->getQueries()->checkIsInstructorInCourse(
                 $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                 $this->core->getConfig()->getCourse(),
-                $this->core->getConfig()->getSemester()
+                $this->core->getConfig()->getTerm()
             );
         }
 
@@ -143,7 +141,6 @@ class ConfigurationController extends AbstractController {
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
-                    'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
                     'seek_message_enabled',
@@ -207,7 +204,7 @@ class ConfigurationController extends AbstractController {
         }
 
         // All late day cache now invalid
-        if ($name == 'default_student_late_days') {
+        if ($name === 'default_student_late_days') {
             $this->core->getQueries()->flushAllLateDayCache();
         }
 

@@ -1,0 +1,170 @@
+<div class="content">
+    <h1>
+        {{ poll.getName() }}
+    </h1>
+
+    {% if user_admin or poll.isHistogramAvailable() %}
+        <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
+        <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
+    {% endif %}
+    <br/>
+    <div class="poll-view-table" id="info-histogram-table">
+        <div class="poll-view-wrapper info-wrapper" id="poll-info">
+            {% include "misc/Markdown.twig" with {
+                "content": poll.getQuestion(),
+            } only %}
+            {% if file_data is not null %}
+                <br/>
+                <img src="{{ file_data }}">
+                <br/>
+            {% endif %}
+            <form method="post" action="{{ base_url }}/submitResponse">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                <fieldset>
+                    <legend>
+                        <h2>
+                            Possible responses:
+                        </h2>
+                    </legend>
+                    <table class="poll-content">
+                    {% set button_type = is_single_response ? "radio": "checkbox" %}
+                    {% if not user_admin %}
+                        <tr class="radio" for="answer-no-response">
+                            <td class="option-btn">
+                            <input class="no-response-radio"
+                                   type="{{button_type}}"
+                                   value="-1"
+                                   name="answers[]"
+                                   id="answer-no-response"
+                                   {{ poll.getUserResponses()|length == 0 ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="clearResponses()"
+                            />
+                            </td>
+                            <td class="no-response option-text">
+                            No response
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% set index = 0 %}
+
+                    {% set user_selections = poll.getSelectedOptionIds() %}
+                    {% for option in poll.getOptions() %}
+                        <tr class="radio option-row">
+                            <td class="option-btn">
+                            <input class="response-radio"
+                                   type={{ button_type }}
+                                   aria-label="Option {{ index + 1 }}"
+                                   value="{{ option.getId() }}"
+                                   name="answers[]"
+                                   id="answer-{{index}}"
+                                   {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
+                                   {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
+                                   onchange="disableNoResponse();"
+                            />
+                            </td>
+                            <td class="option-text">
+                            {% include "misc/Markdown.twig" with {
+                                "content" : option.getResponse(),
+                                "style": "display: inline"
+                            } only %}
+                            {% if option.isCorrect() and poll.isReleaseAnswer()%}
+                                <span class="fa-stack fa-2xs correct-tag">
+                                    <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
+                                    <i class="fa fa-check fa-stack-1x fa-xl correct-tag-checkmark"></i>
+                                </span>
+                            {% endif %}                                
+                            </td>                       
+                        </tr>
+                        {% set index = index + 1 %}
+                    {% endfor %}
+                    </table>
+                </fieldset>
+                {% if not user_admin and poll.isOpen() %}
+                    <button type="submit" class="btn btn-primary student-submit">Submit</button>
+                {% endif %}
+            </form>
+        </div>
+        {% if user_admin or poll.isHistogramAvailable() %}
+            <div class="poll-view-wrapper histogram-wrapper" id="poll-histogram" style="display: none;">
+                <div id="chartContainer"></div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function toggle_section(section_id) {
+        $(`#${section_id}`).toggle('fast');
+    }
+
+    function get_new_chart_width() {
+        const MIN_CHART_WIDTH = 400;
+        const DESIRED_CHART_FACTOR = 0.75;
+        const table_size = $("#info-histogram-table").width();
+        const desired_size = table_size * DESIRED_CHART_FACTOR;
+        // if the width of the viewport is small enough
+        if (desired_size < MIN_CHART_WIDTH) {
+            // set the width of poll-info to 100%
+            $("#poll-info").css("max-width", "100%");
+            return Math.max(MIN_CHART_WIDTH, table_size);
+        }
+        // reset width of poll-info
+        $("#poll-info").css("max-width", '');
+        return desired_size;
+    }
+
+    function disableNoResponse() {
+        $(".no-response-radio").prop("checked", false);
+    }
+
+    function clearResponses() {
+        if ($(".no-response-radio").is(':checked')) {
+            $(".response-radio").prop("checked", false);
+        }
+    }
+
+    {% if user_admin or poll.isHistogramAvailable() %}
+    window.onload = function () {
+        const data = [{
+            type: "bar",
+            x: [],
+            y: [],
+            marker: {
+                color: [],
+            },
+        }];
+        const [correctColor, defaultColor] =
+        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
+            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
+        {% for option in poll.getOptions() %}
+        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+        data[0].y.push({{ response_counts[option.getId()] }});
+        data[0].marker.color.push(
+            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+        );
+        {% endfor %}
+        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
+        const width = get_new_chart_width();
+        const layout = {
+            title: title_text.documentElement.textContent,
+            paper_bgcolor: $("body").css("--default-white"),
+            plot_bgcolor: $("body").css("--default-white"),
+            font: {
+                color: $("body").css("--text-black")
+            },
+            width: width
+        }
+        Plotly.newPlot("chartContainer", data, layout);
+        window.addEventListener('resize', function() {
+            const width = get_new_chart_width();
+            const container = document.getElementById('chartContainer');
+            const update = {
+                width: width
+            }
+            Plotly.relayout(container, update);
+        });
+    }
+    {% endif %}
+</script>

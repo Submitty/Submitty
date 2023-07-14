@@ -13,6 +13,12 @@
     margin-left: auto;
 }
 
+#error-message {
+    text-align: left;
+    margin-left: auto;
+    margin-right: 50%;
+}
+
 #submission-form > * {
     margin: 1.5em 0;
 }
@@ -66,10 +72,12 @@
     margin-bottom: 10px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #submission_header {
     margin-right: 10px;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
 }
@@ -113,6 +121,7 @@
         margin: 5px;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .badge {
         margin-left: 5px;
     }
@@ -155,6 +164,7 @@
         margin-bottom: 10px;
     }
 
+    /* stylelint-disable-next-line no-descending-specificity */
     .upload-box {
         margin-top: 10px;
     }

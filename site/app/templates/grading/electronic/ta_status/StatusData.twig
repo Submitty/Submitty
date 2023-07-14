@@ -21,7 +21,7 @@
                     <b>Number of teams:</b> {{ total_submissions }}
                     <br/>
                     <br/>
-                    {% if filters['late_submissions'].enabled %}
+                        {% if include_bad_submissions  == 'include' %}
                         <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                     {% else %}
                         <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
@@ -35,7 +35,8 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
                     {% else %}
                         <br/>
-                        {% if filters['late_submissions'].enabled %}
+                        {% if include_bad_submissions == 'include'  %}
+
                             <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             <br/>
                             <br/>
@@ -62,7 +63,7 @@
                 <div style="margin-left: 20px">
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
-                            {% if filters['late_submissions'].enabled %}
+                                {% if include_bad_submissions  == 'include'  %}
                                 Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
                             {% else %}
                                 Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
@@ -107,10 +108,10 @@
                 {% endif %}
             {% endif %}
 
-            {% if regrade_allowed and not peer %}
+            {% if grade_inquiry_allowed and not peer %}
                 <br/>
                 <br/>
-                <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
+                <p><b>Number of unresolved grade inquiries:</b> {{ grade_inquiries }}</p>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>

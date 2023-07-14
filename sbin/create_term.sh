@@ -54,7 +54,7 @@ name=$2
 start=$3
 end=$4
 
-# Validate that start and end dates are properly formatted.
+# Validate that start and end dates are properly formatted (MM/DD/YYY).
 regex='^(0[0-9]|1[0-2])/(0[0-9]|[1-2][0-9]|3[0-1])/20[0-9]{2}$'
 
 if ! [[ $start =~ $regex ]] ; then
@@ -83,7 +83,7 @@ fi
 # INSERT new term into master DB
 insert_string="
 INSERT INTO terms (term_id, name, start_date, end_date)
-VALUES ('${semester}', '${name}', '${start}', '${end}')"
+VALUES ('${semester}', '${name}', TO_DATE('${start}', 'MM/DD/YYYY'), TO_DATE('${end}', 'MM/DD/YYYY'))"
 
 if [ ${amend} -eq 1 ]; then
     insert_string+="

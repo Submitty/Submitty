@@ -41,7 +41,7 @@ DB_PASS = DB_JSON['database_password']
 # 5) The optional argument --grade, which causes the uploaded assignments to be added to the grading queue.
 
 #NOTE: variables beginning with ARCHIVED_ are populated using the homework assignment being copied.
-#Varialbes beginning with CURRENT_ are populated using the destination/current semester's directories.
+#Variables beginning with CURRENT_ are populated using the destination/current semester's directories.
 def main():
     #In order to successfully re-upload the assignment, we need the directory of the assignment to be inflated,
     #and the semester, course name, and assignment name that it should be uploaded to.

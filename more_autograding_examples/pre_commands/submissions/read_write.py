@@ -3,7 +3,7 @@ import sys
 
 if __name__ == "__main__":
   if len(sys.argv) < 3:
-    print("Please specify a mode (read or write) and a file taget")
+    print("Please specify a mode (read or write) and a file target")
     sys.exit(1)
 
   mode = sys.argv[1]

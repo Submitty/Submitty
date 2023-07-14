@@ -1,0 +1,24 @@
+<div class="content" id="user-select">
+    <h1>Who would you like to login as?</h1>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>User ID</th>
+            <th>Access Level</th>
+            <th></th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.getId }}</td>
+                <td>{{ access_levels[user.getAccessLevel] }}</td>
+                <td>
+                    <form method="POST" action="{{ login_url }}">
+                        <input type="hidden" name="user_id" value="{{ user.getId }}">
+                        <input type="submit" class="btn btn-primary" value="Login">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</div>

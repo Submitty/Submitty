@@ -1,29 +1,26 @@
 <script>
     $(function() {
-        $("[name='rotating_type']").change(function() {
-            if ($(this).val() == "alphabetically") {
-                $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
 
-            }
-            else {
-                $("[name='fewest']").attr('onclick', '').removeClass('disabled');
-            }
-        });
-
-        $("[name='sort_type']").change(function() {
+        $("[name='rotating_assignment_type']").change(function() {
             var val = $(this).val();
-			if (val != "redo") {
+			if (val !== "redo") {
 				$('#redo-data').hide();
 			}
             else {
 				$('#redo-data').show();
+            }
+            if (val !== "fewest"){
+                $('#fewest-exclude').hide();
+            }else{
+                $('#fewest-exclude').show();
             }
         });
     });
 
 
     $(document).ready(function() {
-       $('#redo-data').hide();
+        $('#redo-data').hide();
+        $('#fewest-exclude').hide();
     });
 
 </script>
@@ -52,6 +49,7 @@
                     <thead>
                         <tr>
                             <th>Section</th>
+                            <th>Course ID</th>
                             <th>Count</th>
                         </tr>
                     </thead>
@@ -61,12 +59,14 @@
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>Section {{ section['sections_registration_id'] }} </td>
+                                <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                             </tr>
                             {% else %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
                             </tr>
                             {% endif %}
@@ -75,11 +75,13 @@
                         {% if reg_sections_count['NULL'] %}
                         <tr>
                             <td>Section NULL</td>
+                            <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
                         </tr>
                         {% else %}
                         <tr>
                             <td>Section NULL</td>
+                            <td>0</td>
                             <td>0</td>
                         </tr>
                         {% endif %}
@@ -179,19 +181,30 @@
    				<fieldset class="flex-col">
 					<legend class="option-title">Change Current Sections</legend>
 					<label>
-						<input type="radio" name="sort_type" value="drop_null" />
+						<input type="radio" name="rotating_assignment_type" value="drop_null" />
                         Only remove unregistered students (registration section=NULL) from rotating sections
 					</label>
 					<label>
-						<input type="radio" name="sort_type" value="fewest" />
+						<input type="radio" name="rotating_assignment_type" value="fewest" />
                         Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
 					</label>
+                    <div id="fewest-exclude">
+                        <fieldset class="flex-col">
+                            <legend>Exclude students in the following registrations:</legend>
+                            {% for row in reg_sections %}
+                            <label>
+                                <input type="checkbox" name="excluded_registration_sections[]" value="{{ row['sections_registration_id'] }}" />
+                                Section {{ row['sections_registration_id'] }}
+                            </label>
+                            {% endfor %}
+                        </fieldset>
+                    </div>
                     <label>
-                        <input type="radio" name="sort_type" value="drop_all" />
+                        <input type="radio" name="rotating_assignment_type" value="drop_all" />
                         Remove all students from rotating sections
                     </label>
 					<label>
-						<input type="radio" name="sort_type" value="redo" />
+						<input type="radio" name="rotating_assignment_type" value="redo" />
                         Redo rotating sections completely
 					</label>
 				</fieldset>
@@ -202,7 +215,7 @@
                     </label>
                     <label>
                         Sort students:
-                        <select name="rotating_type">
+                        <select name="sort_type">
                             <option value="random">Randomly</option>
                             <option value="alphabetically">Alphabetically</option>
                         </select>
@@ -211,7 +224,7 @@
                         <legend>Exclude students in the following registrations:</legend>
                         {% for row in reg_sections %}
                         <label>
-                            <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" />
+                            <input type="checkbox" name="excluded_registration_sections[]" value="{{ row['sections_registration_id'] }}" />
                             Section {{ row['sections_registration_id'] }}
                         </label>
                         {% endfor %}

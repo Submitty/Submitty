@@ -17,7 +17,6 @@ use app\models\User;
  * @method string getId()
  */
 class LateDayInfo extends AbstractModel {
-
     const STATUS_NO_ACTIVE_VERSION = 0;
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
@@ -122,6 +121,46 @@ class LateDayInfo extends AbstractModel {
         return new LateDayInfo($core, $user, $event_info);
     }
 
+    /*
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Core $core
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|null
+     */
+    public static function fromUser(Core $core, User $user, GradedGradeable $graded_gradeable): ?LateDayInfo {
+        $ldc = $core->getQueries()->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
+        $ldi = null;
+
+        if ($ldc !== null) {
+            $ldi['graded_gradeable'] = $graded_gradeable;
+            $ldi = new LateDayInfo($core, $user, $ldc);
+        }
+
+        return $ldi;
+    }
+
+    /**
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Core $core
+     * @param Submitter $submitter
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array
+     */
+    public static function fromSubmitter(Core $core, Submitter $submitter, $graded_gradeable) {
+        // Collect Late Day Info for each user associated with the submitter
+        if ($submitter->isTeam()) {
+            $late_day_info = [];
+            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                $late_day_info[$member->getId()] = self::fromUser($core, $member, $graded_gradeable);
+            }
+            return $late_day_info;
+        }
+        else {
+            return self::fromUser($core, $submitter->getUser(), $graded_gradeable);
+        }
+    }
+
     public function toArray() {
         return [
             'gradeable_title' => $this->graded_gradeable->getGradeable()->getTitle(),
@@ -140,7 +179,7 @@ class LateDayInfo extends AbstractModel {
      * Gets information about this late day event in the format for the cache table
      * @return array
      */
-    public function generateEventInfo() {
+    public function generateEventInfo(): array {
         return [
             'g_id' => $this->isLateDayUpdate() ? null : $this->getId(),
             'user_id' => $this->user->getId(),
@@ -167,6 +206,14 @@ class LateDayInfo extends AbstractModel {
         }
 
         return $this->getStatus() == self::STATUS_GOOD || $this->getStatus() == self::STATUS_LATE;
+    }
+
+    /**
+     * Get g_id for the late day event
+     * @return string|null
+     */
+    public function getGradeableId(): ?string {
+        return $this->isLateDayUpdate() ? null : $this->graded_gradeable->getGradeableId();
     }
 
     /**
@@ -307,11 +354,11 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
-     * Gets the number of late days charged from this event
+     * Gets the number of late days charged from this event (capped at zero)
      * @return int
      */
     public function getLateDaysCharged() {
-        return -$this->late_days_change;
+        return max(-$this->late_days_change, 0);
     }
 
     /**
@@ -336,6 +383,16 @@ class LateDayInfo extends AbstractModel {
      */
     public function isRegradeAllowed() {
         return $this->graded_gradeable !== null && $this->graded_gradeable->getGradeable()->isRegradeAllowed();
+    }
+    /*
+     * Returns true if this event is a graded gradeable charge with grade inquiries allowed
+     * @return bool
+     */
+    public function isGradeInquiryAllowed() {
+        if ($this->graded_gradeable === null) {
+            return false;
+        }
+        return $this->graded_gradeable->getGradeable()->isGradeInquiryAllowed();
     }
 
     /**

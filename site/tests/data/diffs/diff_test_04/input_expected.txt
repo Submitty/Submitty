@@ -3,7 +3,7 @@
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -20,7 +20,7 @@ Daleks were in 37 stories, with the following other villains:
      "puppet", Dalek Supreme (Supreme Dalek), inc Progenitor, Dalek prime
      minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein's
      monster robot, Gantok, Grey Lady robot, Gubbage Cone, Hartman, Yvonne,
-     Hawthorne, Ice Warriors (inc benevolent appearences), Judoon,
+     Hawthorne, Ice Warriors (inc benevolent appearances), Judoon,
      Kovarian, Madame, Lytton, Commander Gustav, Master (the), Mavic Chen,
      Meddling Monk (the), Moroks, (the), Mortimus, Movellans, Nyder,
      Ogrons, Ood, the (Oodkind), inc benevolent appearances, Rassilon,
@@ -53,7 +53,7 @@ The doctors who fought Daleks were:
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -66,7 +66,7 @@ Enter a villain ==> stop
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -105,7 +105,7 @@ The doctors who fought Sontarans were:
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -135,7 +135,7 @@ The doctors who fought Davros were:
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -148,7 +148,7 @@ Enter a villain ==> 11
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame
@@ -161,7 +161,7 @@ Enter a villain ==> 0
 3. Master (the)
 4. Dalek Supreme (Supreme Dalek), inc Progenitor
 5. Sontarans
-6. Ice Warriors (inc benevolent appearences)
+6. Ice Warriors (inc benevolent appearances)
 7. Davros
 8. Silurians (exc Sea Devils)
 9. Kovarian, Madame

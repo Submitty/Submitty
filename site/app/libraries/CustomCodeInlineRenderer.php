@@ -9,7 +9,6 @@ use League\CommonMark\HtmlElement;
 use League\CommonMark\Inline\Renderer\CodeRenderer;
 
 class CustomCodeInlineRenderer implements InlineRendererInterface {
-
     /** @var \League\CommonMark\Inline\Renderer\CodeRenderer */
     protected $baseRenderer;
 

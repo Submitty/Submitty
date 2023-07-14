@@ -5,21 +5,32 @@ Evan Maicus 2016-current
 
 ## Developers  
 
+Eden Bendheim 2023-current  
+Jason Chen 2023-current  
+Anson Decker 2023-current  
+Jaeseok Kang 2023-current  
+Hanson Gu 2023-current  
+Sátvik Karanam 2023-current  
+Viane Matsibekker 2023-current  
+Jason Ng 2023-current  
+Mahi Pasarkar 2023-current  
+Hannah Rose 2023-current  
+Zachary Silverstein 2023-current  
+Adam Tuhacek 2023-current  
+Yanli Wang 2023-current  
+Kerui (Ray) Wu 2023-current  
+Bairong Zhang 2023-current  
+Jody Sunray 2022-current  
+Ryon Chan 2022-current  
+Kasja Arnold 2022-current  
+Bowen (Evan) Shi 2022-current  
+Jiarui (Jerry) Lu 2022-current  
+Thomas Kozlowski 2022-current  
 William Allen, 2021-current  
 Shelly Belsky, 2021-current  
-Miles Ednie, 2021-current  
-Eddie Krystowski, 2021-current  
-Ching Hei (Henrik) Lam, 2021-current  
 Christopher Reed, 2021-current  
-Xueqing (Brad) Wu, 2021-current  
-Alayn Arambula, 2021-current  
-Zixiang Zhang, 2020-current  
-Roland Rao, 2020-current  
-Vikram Srikishan, 2020-current  
 Jenay Barela, 2020-current  
 Jensen Li, 2020-current  
-Ben Kelly 2019-current  
-Hector Rodriguez Figueroa 2019-current  
 Shail Patel 2018-current  
 Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
@@ -29,8 +40,24 @@ Peter Bailie 2014-current
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
-Javier Portorreal, 2020  
-Stephanie Li, 2020  
+Akshat Batra, 2022, Google Summer of Code 2022  
+Madhur Jain, 2022, Google Summer of Code 2022  
+Poorna Gunathilaka, 2022, Google Summer of Code 2022  
+Matthew Bonnecaze 2022  
+Ben Kelly 2019-2022  
+Dan Janikowski 2022  
+Joe Krystowski, 2021-2022  
+Miles Ednie, 2021-2022  
+Eddie Krystowski, 2021-2022  
+Ching Hei (Henrik) Lam, 2021-2022  
+Xueqing (Brad) Wu, 2021-2022  
+Alayn Arambula, 2021-2022  
+Javier Portorreal, 2020-2022  
+Stephanie Li, 2020-2022  
+Zixiang Zhang, 2020-2021  
+Roland Rao, 2020-2021  
+Vikram Srikishan, 2020-2021  
+Hector Rodriguez Figueroa 2019-2021  
 Eli Schiff 2019-2020  
 Kevin McKinney 2019-2020  
 John (Jack) Hulton 2018-2021  
@@ -108,5 +135,8 @@ Amy Burnett
 Aidan Noll  
 Toshi Piazza  
 Matt Raneri  
+Chris Reed  
 Zachary Wimer  
+Fu Chai  
+Asher Gottlieb  
 For their bug reports of specific security vulnerabilities :)  

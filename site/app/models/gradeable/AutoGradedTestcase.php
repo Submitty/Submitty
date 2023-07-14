@@ -16,7 +16,6 @@ use app\models\GradeableAutocheck;
  * @method GradeableAutocheck[] getAutochecks()
  */
 class AutoGradedTestcase extends AbstractModel {
-
     /** @prop @var AutogradingTestcase The reference to the testcase this grade is for */
     private $testcase = null;
     /** @prop @var float The number points the submitter earned for this testcase */

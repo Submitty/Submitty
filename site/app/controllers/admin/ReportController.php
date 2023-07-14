@@ -3,11 +3,14 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\poll\Poll;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\PollUtils;
 use app\models\gradeable\AutoGradedGradeable;
@@ -28,7 +31,6 @@ use app\exceptions\ValidationException;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
-
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
 
@@ -44,8 +46,12 @@ class ReportController extends AbstractController {
 
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
-
-        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run);
+        $json = null;
+        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "customization.json");
+        if (file_exists($customization_path)) {
+            $json = file_get_contents($customization_path);
+        }
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run, $json);
     }
 
     /**
@@ -85,8 +91,8 @@ class ReportController extends AbstractController {
         ];
 
         // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c, $d) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c, $d);
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c);
             return null;
         });
 
@@ -269,15 +275,13 @@ class ReportController extends AbstractController {
             $all_late_days[$row['user_id']][] = $row;
         }
 
-        $all_polls = $this->core->getQueries()->getPolls();
-
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
 
         // Method to call the callback with the required parameters
-        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days, $all_polls) {
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days) {
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
             $late_days = new LateDays($this->core, $current_user, $ggs, $all_late_days[$current_user->getId()] ?? []);
-            return $per_user_callback($current_user, $ggs, $late_days, $all_polls);
+            return $per_user_callback($current_user, $ggs, $late_days);
         };
         foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $graded_gradeable_sort_keys) as $gg) {
             /** @var GradedGradeable $gg */
@@ -303,7 +307,7 @@ class ReportController extends AbstractController {
                     // This user had no results, so generate results
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
                     $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
-                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days, $all_polls);
+                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days);
                 }
             }
         }
@@ -326,15 +330,15 @@ class ReportController extends AbstractController {
         $row = [];
 
         $row['User ID'] = $user->getId();
-        $row['First Name'] = $user->getDisplayedFirstName();
-        $row['Last Name'] = $user->getDisplayedLastName();
+        $row['Given Name'] = $user->getDisplayedGivenName();
+        $row['Family Name'] = $user->getDisplayedFamilyName();
         $row['Registration Section'] = $user->getRegistrationSection();
 
         foreach ($ggs as $gg) {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-
+            $ldi = $late_days->getLateDayInfoByGradeable($gg->getGradeable());
             if (!$gg->hasOverriddenGrades()) {
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -342,7 +346,7 @@ class ReportController extends AbstractController {
                         // Version conflict or incomplete grading, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
-                    elseif ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                    elseif ($ldi !== null && $ldi->getStatus() === LateDayInfo::STATUS_BAD) {
                         // BAD submission, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
@@ -359,16 +363,19 @@ class ReportController extends AbstractController {
      * @param GradedGradeable[] $ggs The list of graded gradeables, indexed by gradeable id
      * @param LateDays $late_days The late day info for these graded gradeables
      */
-    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days, array $polls) {
+    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days) {
 
         $user_data = [];
         $user_data['user_id'] = $user->getId();
-        $user_data['legal_first_name'] = $user->getLegalFirstName();
-        $user_data['preferred_first_name'] = $user->getPreferredFirstName();
-        $user_data['legal_last_name'] = $user->getLegalLastName();
-        $user_data['preferred_last_name'] = $user->getPreferredLastName();
+        $user_data['user_numeric_id'] = $user->getNumericId();
+        $user_data['legal_given_name'] = $user->getLegalGivenName();
+        $user_data['preferred_given_name'] = $user->getPreferredGivenName();
+        $user_data['legal_family_name'] = $user->getLegalFamilyName();
+        $user_data['preferred_family_name'] = $user->getPreferredFamilyName();
         $user_data['registration_section'] = $user->getRegistrationSection();
+        $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
+        $user_data['registration_type'] = $user->getRegistrationType();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y");
 
@@ -385,12 +392,23 @@ class ReportController extends AbstractController {
      * @param string $base_path the base path to store the report
      */
     private function generatePollSummaryInternal(string $base_path): void {
-        $polls = $this->core->getQueries()->getPolls();
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
+        $polls = $repo->findAllWithAllResponses();
         $polls_data = [];
         foreach ($polls as $poll) {
+            $responses = [];
+            /** @var \app\entities\poll\Response */
+            foreach ($poll->getUserResponses() as $response) {
+                if (!array_key_exists($response->getStudentId(), $responses)) {
+                    $responses[$response->getStudentId()] = [];
+                }
+                $responses[$response->getStudentId()][] = $response->getOption()->getOrderId();
+            }
+
             $polls_data[] = [
                 "id" => $poll->getId(),
-                "responses" => $poll->getUserResponses()
+                "responses" => $responses
             ];
         }
         FileUtils::writeJsonFile(FileUtils::joinPaths($base_path, "poll_responses.json"), $polls_data);
@@ -412,6 +430,21 @@ class ReportController extends AbstractController {
             'gradeable_type' => GradeableType::typeToString($g->getType()),
             'grade_released_date' => $g->hasReleaseDate() ? $g->getGradeReleasedDate()->format('Y-m-d H:i:s O') : $g->getSubmissionOpenDate()->format('Y-m-d H:i:s O'),
         ];
+
+        if ($g->isGradeInquiryAllowed()) {
+            // Export the grade inquiry status
+            if ($gg->hasGradeInquiry()) {
+                if ($gg->hasActiveGradeInquiry()) {
+                    $entry['inquiry'] = 'Open';
+                }
+                else {
+                    $entry['inquiry'] = 'Resolved';
+                }
+            }
+            else {
+                $entry['inquiry'] = 'None';
+            }
+        }
 
         // Add team members to output
         if ($g->isTeamAssignment()) {
@@ -601,10 +634,60 @@ class ReportController extends AbstractController {
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                     $this->core->getConfig()->getCourse(),
-                    $this->core->getConfig()->getSemester()
+                    $this->core->getConfig()->getTerm()
                 ),
+                'csrfToken' => $this->core->getCsrfToken(),
             ]);
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
+     */
+    public function uploadRainbowConfig() {
+        $redirect_url =  $this->core->buildCourseUrl((['reports']));
+        if (empty($_FILES) || !isset($_FILES['config_upload'])) {
+            $msg = 'Upload failed: No file to upload';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $upload = $_FILES['config_upload'];
+        if (empty($upload['tmp_name'])) {
+            $msg = 'Upload failed: Empty tmp name for file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+
+        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'customization.json'))) {
+            $msg = 'Upload failed: Could not copy file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+
+        $msg = 'Rainbow Grades Customization uploaded';
+        $this->core->addSuccessMessage($msg);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                'customization_path' => $rainbow_grades_dir
+            ]),
+            null,
+            new RedirectResponse($redirect_url)
+        );
     }
 
     /**
@@ -613,14 +696,14 @@ class ReportController extends AbstractController {
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
 
         // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
-            $this->core->getConfig()->getSemester() .
+            $this->core->getConfig()->getTerm() .
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
@@ -646,7 +729,7 @@ class ReportController extends AbstractController {
 
         // Check the course auto_debug_output.txt to ensure no exceptions were thrown
         $debug_output_path = '/var/local/submitty/courses/' .
-            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getTerm() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 

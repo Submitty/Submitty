@@ -39,149 +39,56 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
+extern const std::string GLOBAL_allowed_autograding_commands_default_string;  // defined in allowed_autograding_commands.cpp
+extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // defined in allowed_autograding_commands.cpp
 
 // =====================================================================================
 // =====================================================================================
 
-
-bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker) {
-
-  std::map<std::string,std::string> allowed_system_programs = {
-
-    // Basic System Utilities (for debugging)
-    { "ls",                      "/bin/ls", },
-    { "time",                    "/usr/bin/time" },
-    { "mv",                      "/bin/mv" },
-    { "cp",                      "/bin/cp" },
-    { "chmod",                   "/bin/chmod" },
-    { "find",                    "/usr/bin/find" },
-    { "cat",                     "/bin/cat" },
-    { "compare",                 "/usr/bin/compare" }, //image magick!
-    { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
-    { "convert",                 "/usr/bin/convert" }, //image magick!
-    { "wkhtmltoimage",           "/usr/bin/wkhtmltoimage" },
-    { "wkhtmltopdf",             "/usr/bin/wkhtmltopdf" },
-    { "xvfb-run",                "/xvfb-run" },   // allow htmltoimage and htmltopdf to run headless
-    { "cut",                     "/usr/bin/cut" },
-    { "sort",                    "/usr/bin/sort" },
-    { "grep",                    "/bin/grep" },
-    { "sed",                     "/bin/sed" },
-    { "awk",                     "/usr/bin/awk" },
-    { "pwd",                     "/bin/pwd" },
-    { "env",                     "/usr/bin/env" },
-    { "pdftotext",               "/usr/bin/pdftotext" },
-    { "pdflatex",                "/usr/bin/pdflatex" },
-    { "wc",                      "/usr/bin/wc" },
-    { "head",                    "/usr/bin/head" },
-    { "tail",                    "/usr/bin/tail" },
-    { "uniq",                    "/usr/bin/uniq" },
-    { "echo",                    "/bin/echo" },
-
-    // Submitty Analysis Tools
-    { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
-    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
-
-    // for Computer Science I
-    { "python",                  "/usr/bin/python" },
-    { "python2",                 "/usr/bin/python2" },
-    { "python2.7",               "/usr/bin/python2.7" },
-    { "python3",                 "/usr/bin/python3" },
-    { "python3.5",               "/usr/bin/python3.5" },
-    { "python3.6",               "/usr/bin/python3.6" },
-    { "pylint",                  "/usr/local/bin/pylint" },
-
-    // for Data Structures
-    { "g++",                     "/usr/bin/g++" },
-    { "clang++",                 "/usr/bin/clang++" },
-    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
-    { "valgrind",                "/usr/bin/valgrind" },
-
-    // for Computer Organization
-    { "spim",                    "/usr/bin/spim" },
-    { "clang",                   "/usr/bin/clang" },
-    { "gdb",                     "/usr/bin/gdb" },
-
-    // for Principles of Software
-    { "java",                    "/usr/bin/java" },
-    { "javac",                   "/usr/bin/javac" },
-    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
-
-    // for Operating Systems
-    { "gcc",                     "/usr/bin/gcc" },
-    { "strings",                 "/usr/bin/strings" },
-
-    // for Programming Languages
-    { "swipl",                   "/usr/bin/swipl" },
-    { "plt-r5rs",                "/usr/bin/plt-r5rs" },
-    { "ozc",                     "/usr/bin/ozc" },
-    { "ozengine",                "/usr/bin/ozengine" },
-
-    // for Program Analysis course
-    { "ghc",                     "/usr/bin/ghc" },
-    { "ocaml",                   "/usr/bin/ocaml" },
-    { "ocamllex",                "/usr/bin/ocamllex" },
-    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
-    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
-
-    // for Cmake & Make
-    { "cmake",                   "/usr/bin/cmake" },
-    { "make",                    "/usr/bin/make" },
-
-    // for Network Programming
-    { "timeout",                 "/usr/bin/timeout" },
-    { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
-    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
-    { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
-    { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
-    { "expect",                  "/usr/bin/expect" },
-    { "sleep",                   "/bin/sleep" },
-
-    // for Distributed Systems
-    { "script",                  "/usr/bin/script" },
-
-    // for LLVM / Compiler class
-    { "lex",                     "/usr/bin/lex" },
-    { "flex",                    "/usr/bin/flex" },
-    { "yacc",                    "/usr/bin/yacc" },
-    { "bison",                   "/usr/bin/bison" },
-
-    // for graphics/window interaction
-    { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
-    { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
-    { "wmctrl",                  "/usr/bin/wmctrl"}, //bring window into focus
-    { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
-
-    // for Debugging
-    { "strace",                  "/usr/bin/strace" },
-
-    //Matlab
-    { "matlab",                  "/usr/local/bin/matlab" }
-
-  };
-
-  if(running_in_docker){
-    allowed_system_programs.insert({"bash", "/bin/bash"});
-    allowed_system_programs.insert({"php",  "/usr/bin/php"});
+bool command_available_in_env(const nlohmann::json &program_object, const bool &running_in_docker) {
+  bool onlyDocker = program_object.value("onlyDocker", false);
+  if (!running_in_docker && onlyDocker) {
+    return false;
   }
-  // find full path name
-  std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
-  if (itr != allowed_system_programs.end()) {
-    full_path_executable = itr->second;
-    return true;
-  }
-
-  // did they already use the full path name?
-  for (itr = allowed_system_programs.begin(); itr != allowed_system_programs.end(); itr++) {
-    if (itr->second == program) {
-      full_path_executable = program;
-      return true;
-    }
-  }
-
-  // not an allowed system program
-  return false;
+  return true;
 }
 
+bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
+{
+  // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
+  // ignore_comment flag set in parse function to ignore comments
+  nlohmann::json allowed_autograding_commands =
+    nlohmann::json::parse(GLOBAL_allowed_autograding_commands_default_string, nullptr, true, true);
+
+  if (!GLOBAL_allowed_autograding_commands_custom_string.empty()) {
+    nlohmann::json allowed_autograding_commands_custom =
+      nlohmann::json::parse(GLOBAL_allowed_autograding_commands_custom_string, nullptr, true, true);
+    allowed_autograding_commands.update(allowed_autograding_commands_custom);
+  }
+
+  if (program.length() > 0 && program[0] == '/') {
+    for (auto& entry : allowed_autograding_commands.items()) {
+      nlohmann::json program_obj = entry.value();
+      if (program_obj["path"] == program) {
+        if (command_available_in_env(program_obj, running_in_docker)) {
+          full_path_executable = program;
+          return true;
+        }
+        return false;
+      }
+    }
+  }
+  else {
+    if (allowed_autograding_commands.contains(program)) {
+      nlohmann::json program_obj = allowed_autograding_commands[program];
+      if (command_available_in_env(program_obj, running_in_docker)) {
+        full_path_executable = program_obj["path"];
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {
   std::set<std::string> answer;
@@ -709,7 +616,7 @@ void parse_command_line(const std::string &cmd,
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
       // a common student error is to submit multiple .py files where
-      // only one is expected and we want to run 'python *.py'
+      // only one is expected and we want to run 'python3 *.py'
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
         unsigned int pos = my_args[i].find(".py");
@@ -753,6 +660,16 @@ void parse_command_line(const std::string &cmd,
 // =====================================================================================
 // =====================================================================================
 // =====================================================================================
+
+std::string get_std_errfile(std::string cmd)
+{
+	size_t index = cmd.find("2>");
+	std::string file;
+	if (index != -1) {
+		file = cmd.substr(index + 2);
+	}
+	return file;
+}
 
 void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile) {
 
@@ -821,6 +738,31 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
     std::cout << message << std::endl;
     logfile   << message << "\nProgram Terminated " << std::endl;
 
+}
+
+void OutputSignalDescriptiveErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile, std::string std_errfile) {
+  // if kill signal
+  if (what_signal == 9) {
+    logfile << "ERROR: Program has either run out of time or tried to use unallowed resources" << std::endl;
+  }
+  else {
+    std::ifstream stderr(std_errfile);
+    std::string err;
+    if(stderr) {
+      std::ostringstream ss;
+      ss << stderr.rdbuf();
+      err = ss.str();
+      int num_mem_msgs = 2;
+      std::string memory_overuse_messages[num_mem_msgs] = {"bad_alloc", "MemoryError"};
+      for (size_t i = 0; i < num_mem_msgs; i++)
+      {
+        if (err.find(memory_overuse_messages[i]) != std::string::npos) {
+          logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+          break;
+        }
+      }
+    }
+  }
 }
 
 // =====================================================================================
@@ -1486,6 +1428,9 @@ int execute(const std::string &cmd,
         }
         else{
           logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(WEXITSTATUS(status), logfile, get_std_errfile(cmd));
+          }
           result=1;
           //
           // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
@@ -1500,6 +1445,9 @@ int execute(const std::string &cmd,
           int what_signal =  WTERMSIG(status);
           OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
           std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+          if (!override) {
+            OutputSignalDescriptiveErrorMessageToExecuteLogfile(what_signal, logfile, get_std_errfile(cmd));
+          }
           if (WTERMSIG(status) == 0){
             result=0;
           }

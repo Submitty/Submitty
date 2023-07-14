@@ -25,7 +25,7 @@
 
 import 'cypress-file-upload';
 import {buildUrl} from './utils.js';
-//These functions can be called like "cy.login(...)" and will yeild a result
+//These functions can be called like "cy.login(...)" and will yield a result
 
 /**
 * Log into Submitty, assumes no one is logged in already and at login page
@@ -33,17 +33,59 @@ import {buildUrl} from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username='instructor') => {
-    cy.get('input[name=user_id]').type(username, {force: true});
-    cy.get('input[name=password]').type(username, {force: true});
-    cy.get('input[name=login]').click();
+    cy.get('body')
+        .then(body => {
+            if (body.find('input[name=user_id]').length > 0) {
+                cy.get('input[name=user_id]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('input[name=login]').click();
+                });
+            }
+            else {
+                cy.get('#saml-login').click();
+                cy.get('input[name=username]').type(username, {force: true});
+                cy.get('input[name=password]').type(username, {force: true});
+                cy.waitPageChange(() => {
+                    cy.get('#submit > td:nth-child(3) > button').click();
+                });
+            }
+        });
 });
 
 /**
 * Log out of Submitty, assumes a user is already logged in
+* If errorOnFail is false, it will check to see if the logout button exists before trying
+* to logout.
 */
-Cypress.Commands.add('logout', () => {
-    cy.get('#logout > .flex-line > .icon-title').click();
+Cypress.Commands.add('logout', (force = false, errorOnFail = true) => {
+    cy.get('body').then((body) => {
+        if (!errorOnFail || body.find('#logout > .flex-line').length > 0) {
+            cy.waitPageChange(() => {
+                // Click without force fails when a test fails before afterEach
+                // https://github.com/cypress-io/cypress/issues/2831#issuecomment-712728988
+                cy.get('#logout > .flex-line').click({'force': force});
+            });
+        }
+    });
 });
+
+/**
+ * Waits for the current page to be changed (does not wait for the `load` event to run).
+ * Will continue execution as soon as the current page is changed.
+ * Provided by https://github.com/cypress-io/cypress/issues/1805#issuecomment-525482440
+ *
+ * @param {function} fn - the code to run that should navigate to a new page.
+ */
+Cypress.Commands.add('waitPageChange', (fn) => {
+    cy.window().then(win => {
+        win._cypress_beforeReload = true;
+    });
+    cy.window().should('have.prop', '_cypress_beforeReload', true);
+    fn();
+    cy.window().should('not.have.prop', '_cypress_beforeReload');
+});
+
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:
@@ -57,15 +99,42 @@ Cypress.Commands.add('logout', () => {
 Cypress.Commands.overwrite('visit', (originalFn, options) => {
     let url = '';
 
-    if (Array.isArray(options)){
+    if (Array.isArray(options)) {
         url = buildUrl(options);
     }
-    else if ((typeof options) === 'string'){
+    else if ((typeof options) === 'string') {
         url = options;
     }
     else {
         url = buildUrl([]);
     }
 
-    originalFn(url);
+    return originalFn(url);
+});
+
+/**
+ * Sets checkLogout to true - logout in the global afterEach hook will check to
+ * see if the logout button is available before attempting to logout.
+ */
+Cypress.Commands.add('checkLogoutInAfterEach', () => {
+    cy.wrap(true).as('checkLogout');
+});
+
+/**
+ * Wait and reload until
+ * @param {} condition
+ * @param {int} timeout
+ * @param {int} wait
+ */
+Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait=100) => {
+    cy.wait(wait);
+    cy.reload();
+    cy.then(() => {
+        return condition().then((result) => {
+            if (result || timeout <= 0) {
+                return result;
+            }
+            return cy.waitAndReloadUntil(condition, timeout - wait, wait);
+        });
+    });
 });

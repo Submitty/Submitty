@@ -16,7 +16,6 @@ use app\libraries\FileUtils;
  */
 
 class UserSpecificNotebook extends Notebook {
-
     /** @prop @var array array of items where the notebook selects from */
     protected $item_pool = [];
     /** @prop @var array testcases config */
@@ -77,7 +76,7 @@ class UserSpecificNotebook extends Notebook {
 
         foreach ($raw_notebook as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
-                //see if theres a target item pool and replace this with the actual notebook
+                //see if there's a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
                 $points = $notebook_cell["points"] ?? 0;
 
@@ -152,7 +151,7 @@ class UserSpecificNotebook extends Notebook {
         $gid = $this->gradeable_id;
         $uid = $this->user_id;
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         $hash = hexdec(substr(md5("{$item_label}|{$gid}|{$uid}|{$semester}|{$course}"), 24, 8));

@@ -1,0 +1,58 @@
+{
+    // explicitly grab the necessary submitted files for static analysis
+    "autograding" : {
+        "submission_to_runner" : [ "*.cpp", "*.c", "*.hpp", "*.h", "*.c", "*.hpp" ]
+    },
+    "testcases" : [
+        {
+            "title" : "Count TS cpp",
+            "command" : [ "submitty_count_ts -l cpp node auto *.cpp",
+                          "submitty_count_ts -l cpp call cout *.cpp",
+                          "submitty_count_ts -l cpp function sum *.cpp",
+                          "submitty_count_ts -l cpp identifier numbers *.cpp" ],
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_0.txt",
+                    "description" : "Number of `auto`",
+		            "comparison" : "eq",
+                    "term" : 0,
+                    "failure_message" : "You must not use the `auto` keyword.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_1.txt",
+                    "description" : "Function calls to `cout`",
+		            "comparison" : "eq",
+                    "term" : 1,
+                    "failure_message" : "Re read problem instructions",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_2.txt",
+                    "description" : "Function defined `sum`",
+		            "comparison" : "eq",
+                    "term" : 1,
+                    "failure_message" : "Re read problem instructions",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                },
+                {
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_3.txt",
+                    "description" : "Use of identifier `numbers`",
+		            "comparison" : "ge",
+                    "term" : 1,
+                    "failure_message" : "Re read problem instructions",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
+                }
+            ]
+        }
+    ]
+}

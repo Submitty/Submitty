@@ -12,7 +12,6 @@ use app\models\QueueItem;
  * A class to represent the status of the grading queue
  */
 class GradingQueue {
-
     /** @var string The prefix for each normal queue file */
     private $queue_file_prefix = '';
     /** @var string The path to the queue directory */
@@ -309,11 +308,11 @@ class GradingQueue {
                 $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60 * 24);
             }
             // Calculate the hours elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / (60 * 60)), 2, "0", STR_PAD_LEFT) . ":";
+            $elapsed_time .= str_pad(strval(floor($job_file["elapsed_time"] / (60 * 60))), 2, "0", STR_PAD_LEFT) . ":";
             $job_file["elapsed_time"] = $job_file["elapsed_time"] % (60 * 60);
             // Format the string with the minutes and seconds elapsed
-            $elapsed_time .= str_pad(floor($job_file["elapsed_time"] / 60), 2, "0", STR_PAD_LEFT) . ":"
-                . str_pad($job_file["elapsed_time"] % 60, 2, "0", STR_PAD_LEFT);
+            $elapsed_time .= str_pad(strval(floor($job_file["elapsed_time"] / 60)), 2, "0", STR_PAD_LEFT) . ":"
+                . str_pad(strval($job_file["elapsed_time"] % 60), 2, "0", STR_PAD_LEFT);
             $ongoing_job_info[$machine][] = [
                 "semester" => $file_segments[0],
                 "course" => $file_segments[1],
@@ -390,7 +389,7 @@ class GradingQueue {
                 }
             }
             $capability = "default";
-            if (in_array("required_capabilities", $entry->getQueueObj())) {
+            if (array_key_exists("required_capabilities", $entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 

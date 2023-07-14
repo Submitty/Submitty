@@ -1,7 +1,6 @@
 <script>
 
     $( document ).ready(function(){
-        enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         thread_post_handler();
         var b = $('#nav-buttons li a');
@@ -15,6 +14,10 @@
         $("form").areYouSure();
         loadThreadHandler();
         initSocketClient();
+
+        //delete new_thread Class to mark posts as seen in frontend for users who access posts via href or url
+        let thread_id = $('data#current-thread').val();
+        $(`#thread_box_link_${thread_id} .thread_box`).removeClass('new_thread');
     });
 
 </script>
@@ -100,7 +103,7 @@
                     }
                 });
             </script>
-            <div id="posts_list" style="overflow-y: auto; height:81vh;" class="col-9">
+            <div id="posts_list" style="overflow-y: auto; height:100%;" class="col-9">
 
                 {% include "forum/GeneratePostList.twig" with {
                     "userGroup" : generate_post_content.userGroup,

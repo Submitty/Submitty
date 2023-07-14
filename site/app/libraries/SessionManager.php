@@ -2,6 +2,9 @@
 
 namespace app\libraries;
 
+use DateInterval;
+use DateTime;
+
 /**
  * Class SessionManager
  *
@@ -11,6 +14,8 @@ namespace app\libraries;
  * they logged in.
  */
 class SessionManager {
+    const SESSION_EXPIRATION = "2 weeks";
+
     /**
      * @var Core
      */
@@ -28,27 +33,37 @@ class SessionManager {
     }
 
     /**
-     * Given a session id, grab the assiociated row from the database returning false if
+     * Given a session id, grab the associated row from the database returning false if
      * no such row exists or returning true if the row does exist. If the row exists, additionally
      * update when it'll expire by 24 hours
      *
      * @return bool|string
      */
     public function getSession(string $session_id) {
-        $this->core->getQueries()->removeExpiredSessions();
         $this->session = $this->core->getQueries()->getSession($session_id);
         if (empty($this->session)) {
             return false;
         }
-        $this->core->getQueries()->updateSessionExpiration($session_id);
+
+        // Only refresh the session once per day
+        if ($this->shouldSessionBeUpdated()) {
+            $this->core->getQueries()->updateSessionExpiration($session_id);
+        }
 
         return $this->session['user_id'];
     }
 
     /**
+     * Sessions should only be updated once per day to reduce load on the server.
+     * Check whether a day has passed since we last updated this session
+     */
+    public function shouldSessionBeUpdated(): bool {
+        $day_before_expiration = (new DateTime())->add(DateInterval::createFromDateString(self::SESSION_EXPIRATION))->sub(DateInterval::createFromDateString('1 day'));
+        return new DateTime($this->session['session_expires']) < $day_before_expiration;
+    }
+
+    /**
      * Create a new session for the user
-     *
-     * @return string
      */
     public function newSession(string $user_id): string {
         if (!isset($this->session['session_id'])) {

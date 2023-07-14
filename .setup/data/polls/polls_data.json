@@ -18,7 +18,8 @@
         "release_date": "2021-07-19",
         "status": "ended",
         "image_path": "/uploads/polls/poll_image_1_sea_animals.png",
-        "release_histogram": "never"
+        "release_histogram": "never",
+        "release_answer": "never"
     },
     {
         "id": 2,
@@ -37,7 +38,8 @@
         "release_date": "2021-07-19",
         "status": "ended",
         "image_path": null,
-        "release_histogram": "always"
+        "release_histogram": "always",
+        "release_answer": "when_ended"
     },
     {
         "id": 3,
@@ -63,7 +65,8 @@
         "release_date": "",
         "status": "open",
         "image_path": null,
-        "release_histogram": "when_ended"
+        "release_histogram": "when_ended",
+        "release_answer": "always"
     },
     {
         "id": 4,
@@ -84,6 +87,7 @@
         "release_date": "9999-12-31",
         "status": "closed",
         "image_path": null,
-        "release_histogram": "always"
+        "release_histogram": "always",
+        "release_answer": "always"
     }
 ]

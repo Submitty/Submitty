@@ -8,7 +8,13 @@
                     "actual_file": "test01/STDOUT.txt",
                     "description": "STDOUT.txt",
                     "difference_file": "test01/0_diff.json",
-                    "expected_file": "test_output/testassignment/fancy_hello_world.cpp"
+                    "expected_file": "test_output/testassignment/fancy_hello_world.cpp",
+                    "messages": [
+                        {
+                            "message": "Approx 99 characters added and/or deleted.  Character changes within allowed range.",
+                            "type": "success"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 5,

@@ -41,7 +41,7 @@ class Database:
         """
         Get connection string for SQLAlchemy.
 
-        :param params: Dictionary containg database connection details
+        :param params: Dictionary containing database connection details
         :type params: dict
         :return: The connection string
         :rtype: str
@@ -86,7 +86,7 @@ class Database:
         self.session.commit()
 
     def close(self):
-        """Close the session and DB connnection."""
+        """Close the session and DB connection."""
         self.session.close()
         self.engine.dispose()
         self.open = False

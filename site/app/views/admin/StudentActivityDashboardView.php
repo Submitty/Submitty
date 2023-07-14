@@ -6,7 +6,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class StudentActivityDashboardView extends AbstractView {
-
     public function createTable($data_dump) {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('activity-dashboard.css');

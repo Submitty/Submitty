@@ -2,6 +2,7 @@
 
 use app\exceptions\BaseException;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
@@ -25,7 +26,7 @@ session_start();
  * line
  */
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 
 $loader = require_once(__DIR__ . '/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
@@ -35,7 +36,7 @@ $request = Request::createFromGlobals();
 $core = new Core();
 
 /**
- * Register custom expection and error handlers that will get run anytime our application
+ * Register custom exception and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
  * page instead of the actual exception/stack trace during execution, both logging the error
  * and preventing the user from knowing exactly how our system is failing.
@@ -75,6 +76,7 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+DateUtils::setTimezone($core->getConfig()->getTimezone());
 $core->initializeTokenManager();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
@@ -105,7 +107,7 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 header('X-Frame-Options: SAMEORIGIN');
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 if ($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 }

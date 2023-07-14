@@ -15,7 +15,6 @@ use app\models\AbstractModel;
  * @method string getTag()
  */
 class LeaderboardConfig extends AbstractModel {
-
     /** @prop @var int The number of top students to show, 0 for all students */
     protected $top_visible_students;
     /** @prop @var string The human readable title */

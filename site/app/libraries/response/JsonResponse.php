@@ -9,7 +9,6 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class JsonResponse implements ResponseInterface {
-
     /** @var array json encoded array */
     public $json;
 

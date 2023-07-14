@@ -11,7 +11,6 @@ use app\libraries\Core;
  * @method int getRowCount()
  */
 class SubmissionCodeBox extends AbstractNotebookInput {
-
     /** @prop @var string The programming language of the text box */
     protected $language;
 

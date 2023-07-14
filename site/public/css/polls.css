@@ -4,7 +4,7 @@
 }
 
 .dropdown-bar {
-    padding: 0 0 20px 0;
+    padding: 0 0 20px;
 }
 
 .dropdown-btn {
@@ -26,7 +26,7 @@
 
 .poll-type-description {
     padding-left: 25px;
-    color: var(--standard-medium-gray);
+    color: var(--text-black);
 }
 
 .move-btn {
@@ -39,8 +39,31 @@
     cursor: pointer;
 }
 
+.option-btn {
+    vertical-align: middle;
+}
+
+.option-btn input[type="radio"]{
+    vertical-align: top;
+}
+
+.student-submit {
+    margin-top: 2em;
+}
+
+.option-text {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0.25em;
+}
+
 .radio p {
     display: inline;
+}
+
+.radio-label-pair {
+    display: flex;
+    align-items: flex-start;
 }
 
 input[type="radio"][disabled=""]:checked::before {
@@ -61,4 +84,42 @@ input[type="radio"][disabled=""]:checked::before {
 
 form {
     display: inline;
+}
+
+.poll-view-table {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.poll-view-wrapper.info-wrapper {
+    flex: 1 1 0;
+    margin-right: 3%;
+    max-width: 73%;
+}
+
+.poll-view-wrapper.info-wrapper img {
+    width: 100%;
+}
+
+.poll-view-wrapper.histogram-wrapper {
+    flex: 2 1 0;
+}
+
+#poll-name-container {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+}
+
+#poll-name {
+    flex-grow: 100;
+    margin-left: 0.5em;
+}
+
+.correct-tag-background {
+    color: var(--standard-dark-green);
+}
+
+.correct-tag-checkmark {
+    color: var(--text-white);
 }
