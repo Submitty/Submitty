@@ -180,7 +180,7 @@ class RubricGraderView extends AbstractView {
     /**
      * Creates the NavigationBar used to traverse between students.
      * @param string $details_url - URL of the Details page for this gradeable.
-     * @return HTML for the NavigationBar.
+     * @return string HTML for the NavigationBar.
      */
     private function renderNavigationBar(string $details_url): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [

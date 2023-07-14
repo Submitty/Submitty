@@ -227,7 +227,7 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Returns the URL of this gradeable's details page.
-     * @return URL string of the gradeable details page.
+     * @return string URL of the gradeable details page.
      */
     private function gradeableDetailsPage(): string {
         return $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details'])
