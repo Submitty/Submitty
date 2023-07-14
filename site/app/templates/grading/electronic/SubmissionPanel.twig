@@ -35,7 +35,7 @@
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ _self.display_files(submissions, "s", 0, "submissions") }}
-               {% if (instructor or limited_access_grader or full_access_grader) and  (not anon_status)   %}
+               {% if (not student_grader ) and  (not anon_status)   %}
                     {{ _self.display_file('user_assignment_settings.json', submissions['submissions']['user_assignment_settings.json'], 'u', 0, 'user_assignment_settings.json') }}
                 {% endif %}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}

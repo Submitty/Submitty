@@ -2113,7 +2113,7 @@ if (!Array.prototype.toggleElement) {
         value: function(element, comparer) {
             const index = this.inArray(comparer);
             // eslint-disable-next-line valid-typeof
-            if ((typeof(index) === 'boolean' && !index) || (typeof(index) === 'number' && index === 0)) {
+            if ((typeof(index) === 'boolean' && !index) || (typeof(index) === 'int' && index === 0)) {
                 this.push(element);
             }
             else {

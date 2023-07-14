@@ -1074,7 +1074,7 @@ function handleSubmission(remaining_late_days_for_gradeable, charged_late_days, 
                         window.location.href = return_url;
                     }
                     // eslint-disable-next-line valid-typeof
-                    else if (typeof data['code'] !== 'undefined' && data['code'] === 302) {
+                    else if (typeof data['code'] !== undefined && data['code'] === 302) {
                         window.location.href = data['data'];
                     }
                     else {
