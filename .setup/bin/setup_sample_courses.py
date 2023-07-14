@@ -49,8 +49,9 @@ import os.path
 import string
 import pdb
 import docker
-from tempfile import TemporaryDirectory
 import random
+from tempfile import TemporaryDirectory
+
 
 from submitty_utils import dateutils
 
