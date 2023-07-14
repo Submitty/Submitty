@@ -164,7 +164,7 @@ class RubricGraderController extends AbstractController {
         string $who_id,
         string $sort,
         string $direction
-    ) : void {
+    ): void {
         $this->setCurrentGradeable($gradeable_id);
         $this->setCurrentSubmission($who_id);
         $this->setUserGroup();

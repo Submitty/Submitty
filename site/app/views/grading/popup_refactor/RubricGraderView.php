@@ -134,7 +134,7 @@ class RubricGraderView extends AbstractView {
         bool $is_peer_gradeable,
         bool $is_team_gradeable,
         string $blind_access_mode
-    ) : void {
+    ): void {
         $this->gradeable = $gradeable;
         $this->current_submission = $current_submission;
         $this->$is_peer_gradeable = $is_peer_gradeable;
@@ -164,7 +164,7 @@ class RubricGraderView extends AbstractView {
     /**
      * Adds CSS files used for the Rubric Grader page.
      */
-    private function addCSSs() : void {
+    private function addCSSs(): void {
         $this->core->getOutput()->addInternalCss('electronic.css');
     }
 
