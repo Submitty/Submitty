@@ -5219,7 +5219,17 @@ AND gc_id IN (
      * @return void
      */
     public function revertInquiryComponentId($gradeable): void {
-        $this->course_db->query("UPDATE grade_inquiries SET gc_id=(SELECT b.gc_id FROM grade_inquiry_discussion b WHERE grade_inquiries.id = b.grade_inquiry_id) WHERE grade_inquiries.gc_id IS NULL AND grade_inquiries.g_id=?;", [$gradeable->getId()]);
+        $this->course_db->query("
+            UPDATE grade_inquiries
+            SET gc_id = (
+                SELECT b.gc_id
+                FROM grade_inquiry_discussion b
+                WHERE grade_inquiries.id = b.grade_inquiry_id
+            )
+            WHERE
+                grade_inquiries.gc_id IS NULL
+                AND grade_inquiries.g_id = ?
+        ", [$gradeable->getId()]);
     }
 
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
