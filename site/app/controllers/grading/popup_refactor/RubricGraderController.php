@@ -70,7 +70,7 @@ class RubricGraderController extends AbstractController {
      *  3: User::GROUP_LIMITED_ACCESS_GRADER
      *  4: User::GROUP_STUDENT
      */
-    private $user_type;
+    private $user_group;
 
     /**
      * @var bool
@@ -167,7 +167,7 @@ class RubricGraderController extends AbstractController {
     ) {
         $this->setCurrentGradeable($gradeable_id);
         $this->setCurrentSubmission($who_id);
-        $this->setUserType();
+        $this->setUserGroup();
 
         $this->setIfPeerGradeable();
         $this->setIfTeamGradeable();
@@ -238,8 +238,8 @@ class RubricGraderController extends AbstractController {
     /**
      * Sets the current user type for the website user.
      */
-    private function setUserType() {
-        $this->user_type = $this->core->getUser()->getGroup();
+    private function setUserGroup() {
+        $this->user_group = $this->core->getUser()->getGroup();
     }
 
 
@@ -273,7 +273,7 @@ class RubricGraderController extends AbstractController {
      */
     private function setBlindAccessMode() {
         // Blind Settings for Instructors and Full Access Graders:
-        if ($this->user_type === User::GROUP_INSTRUCTOR || $this->user_type === User::GROUP_FULL_ACCESS_GRADER) {
+        if ($this->user_group === User::GROUP_INSTRUCTOR || $this->user_group === User::GROUP_FULL_ACCESS_GRADER) {
             if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
                 $this->blind_access_mode = "single";
             }
@@ -283,7 +283,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Limited Access Graders:
-        if ($this->user_type === User::GROUP_LIMITED_ACCESS_GRADER) {
+        if ($this->user_group === User::GROUP_LIMITED_ACCESS_GRADER) {
             if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
                 $this->blind_access_mode = "single";
             }
@@ -293,7 +293,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Student Peer Graders:
-        if ($this->user_type == User::GROUP_STUDENT) {
+        if ($this->user_group == User::GROUP_STUDENT) {
             if ($this->is_peer_gradeable) {
                 if ($this->gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
                     $this->blind_access_mode = "double";
