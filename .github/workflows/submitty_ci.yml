@@ -285,36 +285,6 @@ jobs:
       - name: Run ShellCheck
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
-  e2eSelenium:
-    runs-on: ubuntu-22.04
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: submitty_dbuser
-          POSTGRES_USER: postgres
-          TZ: America/New_York
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - uses: ./.github/actions/e2e-Setup-Composite
-      - name: Run selenium e2e tests with pam auth
-        run: |
-          pushd ${SUBMITTY_REPOSITORY}
-          echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
-          TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
-          sudo bash tests/test_site_error_log.sh
-      - name: Check for site errors
-        working-directory: ${{ env.SUBMITTY_REPOSITORY }}
-        run: sudo bash tests/test_site_error_log.sh
-
   e2eCypress:
     runs-on: ubuntu-22.04
     services:
