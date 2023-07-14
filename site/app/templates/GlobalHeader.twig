@@ -252,7 +252,7 @@
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
             {% for message in messages %}
-                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}" data-testid="popup-message">
+                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
                     <span>
                         {% if message.type == "error" %}
                         <i class="fas fa-times-circle"></i>

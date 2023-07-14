@@ -492,7 +492,6 @@ EOF
 xdebug.profiler_enable_trigger=1
 xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
-            sed -i -e "s/debug/debug,profile/g" /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
         fi
     fi
 
