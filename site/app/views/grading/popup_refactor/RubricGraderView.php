@@ -89,7 +89,7 @@ class RubricGraderView extends AbstractView {
      * @param string $details_url - URL of the details page for this Gradeable.
      *
      * @return string HTML for the RubricGrader page.
-     * 
+     *
      */
     public function createRubricGradeableView(
         Gradeable $gradeable,
@@ -100,7 +100,7 @@ class RubricGraderView extends AbstractView {
         bool $is_team_gradeable,
         string $blind_access_mode,
         string $details_url
-    ) : string {
+    ): string {
         $this->setMemberVariables($gradeable, $current_submission, $is_peer_gradeable, $is_team_gradeable, $blind_access_mode);
 
         $this->createBreadcrumbHeader($sort_type, $sort_direction);
@@ -151,7 +151,7 @@ class RubricGraderView extends AbstractView {
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
      */
-    private function createBreadcrumbHeader(string $sort_type, string $sort_direction) : void {
+    private function createBreadcrumbHeader(string $sort_type, string $sort_direction): void {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
             'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$this->gradeable->getTitle()} Grading", $gradeableUrl);
@@ -172,7 +172,7 @@ class RubricGraderView extends AbstractView {
     /**
      * Adds JavaScript code used for the Rubric Grader page.
      */
-    private function addJavaScriptCode() : void {
+    private function addJavaScriptCode(): void {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
     }
@@ -182,7 +182,7 @@ class RubricGraderView extends AbstractView {
      * @param string $details_url - URL of the Details page for this gradeable.
      * @return HTML for the NavigationBar.
      */
-    private function renderNavigationBar(string $details_url) : string {
+    private function renderNavigationBar(string $details_url): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/popup_refactor/NavigationBar.twig", [
             "blind_access_mode" => $this->blind_access_mode,
             "is_team_gradeable" => $this->is_team_gradeable,

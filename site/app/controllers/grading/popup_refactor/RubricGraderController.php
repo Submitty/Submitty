@@ -130,7 +130,7 @@ class RubricGraderController extends AbstractController {
         string $sort = "id",
         string $direction = "ASC",
         string $navigate_assigned_students_only = "true"
-    ) : void {
+    ): void {
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction);
 
         $this->core->getOutput()->renderOutput(
@@ -184,7 +184,7 @@ class RubricGraderController extends AbstractController {
      *
      * @param string $gradeable_id - The id string of the current gradeable.
      */
-    private function setCurrentGradeable(string $gradeable_id) : void {
+    private function setCurrentGradeable(string $gradeable_id): void {
         // tryGetGradeable inherited from AbstractController
         $this->gradeable = $this->tryGetGradeable($gradeable_id, false);
 
@@ -211,7 +211,7 @@ class RubricGraderController extends AbstractController {
      *
      * @param string $who_id - The anonymous id of the student we should grade.
      */
-    private function setCurrentSubmission(string $who_id) : void {
+    private function setCurrentSubmission(string $who_id): void {
         $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $this->gradeable->getId());
         if ($submitter_id === null) {
             $submitter_id = $who_id;
@@ -229,7 +229,7 @@ class RubricGraderController extends AbstractController {
      * Returns the URL of this gradeable's details page.
      * @return URL string of the gradeable details page.
      */
-    private function gradeableDetailsPage() : string {
+    private function gradeableDetailsPage(): string {
         return $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details'])
             . '?'
             . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]);
@@ -239,7 +239,7 @@ class RubricGraderController extends AbstractController {
     /**
      * Sets the current user type for the website user.
      */
-    private function setUserGroup() : void {
+    private function setUserGroup(): void {
         $this->user_group = $this->core->getUser()->getGroup();
     }
 
@@ -257,7 +257,7 @@ class RubricGraderController extends AbstractController {
      * Sets $is_peer_gradeable based on whether the current gradeable has teams.
      * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
      */
-    private function setIfTeamGradeable() : void {
+    private function setIfTeamGradeable(): void {
         $this->is_team_gradeable = $this->gradeable->isTeamAssignment();
     }
 
@@ -272,7 +272,7 @@ class RubricGraderController extends AbstractController {
      *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
      *                see which peer they are currently grading.
      */
-    private function setBlindAccessMode() : void {
+    private function setBlindAccessMode(): void {
         // Blind Settings for Instructors and Full Access Graders:
         if ($this->user_group === User::GROUP_INSTRUCTOR || $this->user_group === User::GROUP_FULL_ACCESS_GRADER) {
             if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
