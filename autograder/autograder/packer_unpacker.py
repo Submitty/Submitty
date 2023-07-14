@@ -9,6 +9,7 @@ import string
 import random
 import zipfile
 import traceback
+from pathlib import Path
 
 from submitty_utils import dateutils
 from . import insert_database_version_data, autograding_utils
@@ -23,10 +24,16 @@ def get_queue_time(next_directory, next_to_grade):
 
 
 def load_queue_file_obj(config, job_id, next_directory, next_to_grade):
-    queue_file = os.path.join(next_directory, next_to_grade)
-    if not os.path.isfile(queue_file):
-        config.logger.log_message(f"ERROR: the file does not exist {queue_file}", job_id=job_id)
-        raise RuntimeError("ERROR: the file does not exist", queue_file)
+    queue_file = Path(next_directory) / next_to_grade
+
+    try:
+        if not queue_file.is_file():
+            config.logger.log_message(f"ERROR: the file does not exist {queue_file}", job_id=job_id)
+            raise RuntimeError("ERROR: the file does not exist", queue_file)
+    except PermissionError as e:
+        config.logger.log_message(f"ERROR: {e}", job_id=job_id)
+        raise RuntimeError(f"ERROR: {e}")
+
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
     return obj
