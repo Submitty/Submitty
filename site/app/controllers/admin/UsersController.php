@@ -697,7 +697,7 @@ class UsersController extends AbstractController {
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
-            $update_users = array_splice($unassigned_user_ids, 0, $section_assignment_counts[$section]);
+            $update_users = array_splice($unassigned_user_ids, 0, intval($section_assignment_counts[$section]));
             if (count($update_users) == 0) {
                 continue;
             }
