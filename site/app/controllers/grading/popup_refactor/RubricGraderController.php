@@ -251,6 +251,7 @@ class RubricGraderController extends AbstractController {
     /**
      * Sets $is_peer_gradeable based on whether the current gradeable has peer grading.
      * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
+     * @return void
      */
     private function setIfPeerGradeable() {
         $this->is_peer_gradeable = $this->gradeable->hasPeerComponent();

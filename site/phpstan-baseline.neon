@@ -2347,21 +2347,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:createMainRubricGraderPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setCurrentGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\pdf\\\\PDFController\\:\\:showGraderPDFEmbedded\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
@@ -14090,21 +14075,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\grading\\\\SimpleGraderView\\:\\:simpleDisplay\\(\\) has parameter \\$student_full with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createBreadcrumbHeader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createRubricGradeableView\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
 
 		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
