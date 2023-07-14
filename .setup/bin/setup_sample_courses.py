@@ -52,7 +52,6 @@ import docker
 import random
 from tempfile import TemporaryDirectory
 
-
 from submitty_utils import dateutils
 
 from ruamel.yaml import YAML
