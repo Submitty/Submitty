@@ -5168,20 +5168,20 @@ AND gc_id IN (
         if ($is_grade_inquiry_per_component_allowed) {
             $this->course_db->query("
                 SELECT
-                    count(b.*),
-                    b.gcd_grader_id
-                FROM grade_inquiries a
-                INNER JOIN gradeable_component_data b ON (
-                    a.gc_id = b.gc_id
+                    count(gcd.*),
+                    gcd.gcd_grader_id
+                FROM grade_inquiries gi
+                INNER JOIN gradeable_component_data gcd ON (
+                    gi.gc_id = gcd.gc_id
                 )
-                INNER JOIN gradeable_data c ON (
-                    b.gd_id = c.gd_id
-                    AND a.user_id = c.gd_user_id
+                INNER JOIN gradeable_data gd ON (
+                    gcd.gd_id = gd.gd_id
+                    AND gi.user_id = gd.gd_user_id
                 )
                 WHERE
-                    a.status = -1
-                    AND a.g_id = ?
-                GROUP BY b.gcd_grader_id
+                    gi.status = -1
+                    AND gi.g_id = ?
+                GROUP BY gcd.gcd_grader_id
             ", [$gradeable_id]);
             foreach ($this->course_db->rows() as $row) {
                 $return[$row['gcd_grader_id']] = $row['count'];
@@ -5195,19 +5195,19 @@ AND gc_id IN (
                     result.gcd_grader_id
                 FROM (
                     SELECT
-                        DISTINCT a.user_id,
-                        b.gcd_grader_id
-                    FROM grade_inquiries a
-                    INNER JOIN gradeable_data c ON (
-                        a.g_id = c.g_id
-                        AND a.user_id = c.gd_user_id
+                        DISTINCT gi.user_id,
+                        gcd.gcd_grader_id
+                    FROM grade_inquiries gi
+                    INNER JOIN gradeable_data gd ON (
+                        gi.g_id = gd.g_id
+                        AND gi.user_id = gd.gd_user_id
                     )
-                    INNER JOIN gradeable_component_data b ON (
-                        c.gd_id = b.gd_id
+                    INNER JOIN gradeable_component_data gcd ON (
+                        gd.gd_id = gcd.gd_id
                     )
                     WHERE 
-                        a.status = -1 
-                        AND a.g_id = ?
+                        gi.status = -1 
+                        AND gi.g_id = ?
                 ) AS result
                 GROUP BY result.gcd_grader_id
             ", [$gradeable_id]);
@@ -5232,15 +5232,14 @@ AND gc_id IN (
      * If instructor decides to switch to non-component from by-component then switch back to by-component,
      * this revertInquiryComponentId function will fetch the gc_id from grade_inquiry_discussion and update accordingly.
      * @param Gradeable $gradeable
-     * @return void
      */
-    public function revertInquiryComponentId($gradeable): void {
+    public function revertInquiryComponentId(Gradeable $gradeable): void {
         $this->course_db->query("
             UPDATE grade_inquiries
             SET gc_id = (
-                SELECT b.gc_id
-                FROM grade_inquiry_discussion b
-                WHERE grade_inquiries.id = b.grade_inquiry_id
+                SELECT gid.gc_id
+                FROM grade_inquiry_discussion gid
+                WHERE grade_inquiries.id = gid.grade_inquiry_id
             )
             WHERE
                 grade_inquiries.gc_id IS NULL
