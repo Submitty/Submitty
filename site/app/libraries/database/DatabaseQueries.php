@@ -5161,11 +5161,9 @@ AND gc_id IN (
     /**
      * get the grader and the count of the gradeable component for inquiry
      * If the grade is not-by component, function will return all graders who were involved in grading the student
-     * @param string $gradeable_id
-     * @param  bool $is_grade_inquiry_per_component_allowed
      * @return array<string, int> of gcd_grader_id and count of unresolved grade inquiries of the grader
      */
-    public function getGraderofGradeInquiry($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+    public function getGraderofGradeInquiry(string $gradeable_id, bool $is_grade_inquiry_per_component_allowed = true): array {
         $return = [];
         if ($is_grade_inquiry_per_component_allowed) {
             $this->course_db->query("SELECT count(b.*), b.gcd_grader_id FROM grade_inquiries a JOIN gradeable_component_data b ON a.gc_id = b.gc_id JOIN gradeable_data c ON b.gd_id = c.gd_id AND a.user_id = c.gd_user_id WHERE a.status = '-1' AND a.g_id=? GROUP BY b.gcd_grader_id", [$gradeable_id]);
