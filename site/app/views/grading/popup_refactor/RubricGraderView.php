@@ -76,7 +76,7 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Creates the Rubric Grading page visually.
-     * This function is called in reateMainRubricGraderPage of RubricGraderController.php.
+     * This function is called in createMainRubricGraderPage of RubricGraderController.php.
      *
      * @param Gradeable $gradeable - The current gradeable.
      * @param GradedGradeable $current_submission - The current submission we are looking at.
