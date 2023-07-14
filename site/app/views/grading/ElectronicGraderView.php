@@ -19,6 +19,8 @@ use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
 class ElectronicGraderView extends AbstractView {
+    private $user_id_to_User_cache = [];
+
     /**
      * @param Gradeable $gradeable
      * @param array[] $sections
@@ -31,14 +33,11 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $grade_inquiries
-     * @param array<mixed> $graders_of_inquiries
+     * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
      */
-
-    private $user_id_to_User_cache = [];
-
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
