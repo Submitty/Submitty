@@ -133,8 +133,6 @@ class RubricGraderController extends AbstractController {
     ) : void {
         $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction);
 
-        if 
-
         $this->core->getOutput()->renderOutput(
             // Path:
             ['grading', 'popup_refactor', 'RubricGrader'],
