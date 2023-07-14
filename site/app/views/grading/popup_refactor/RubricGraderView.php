@@ -127,6 +127,7 @@ class RubricGraderView extends AbstractView {
      * @param bool $is_team_gradeable - True if the gradeable is a team gradeable.
      * @param string $blind_access_mode - Either "unblind", "single", or "double". See above for details.
      *     for details.
+     * @return void
      */
     private function setMemberVariables(
         Gradeable $gradeable,
@@ -150,6 +151,7 @@ class RubricGraderView extends AbstractView {
      *
      * @param string $sort_type - The current way we are sorting students.
      * @param string $sort_direction -  Either "ASC" or "DESC" for ascending or descending sorting order.
+     * @return void
      */
     private function createBreadcrumbHeader(string $sort_type, string $sort_direction): void {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(),
@@ -163,6 +165,7 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Adds CSS files used for the Rubric Grader page.
+     * @return void
      */
     private function addCSSs(): void {
         $this->core->getOutput()->addInternalCss('electronic.css');
@@ -171,6 +174,7 @@ class RubricGraderView extends AbstractView {
 
     /**
      * Adds JavaScript code used for the Rubric Grader page.
+     * @return void
      */
     private function addJavaScriptCode(): void {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
