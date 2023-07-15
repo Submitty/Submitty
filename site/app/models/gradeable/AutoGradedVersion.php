@@ -137,14 +137,11 @@ class AutoGradedVersion extends AbstractModel {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
-            
+
             if ($dir === 'submissions') {
                 $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
                 $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], false);
-                // check if there is a user_assignment_settings.json file
                 if (!empty($user_assignment_settings)) {
-                    
-                    // Get the first file and its details
                     $file = key($user_assignment_settings);
                     $details = reset($user_assignment_settings);
                     
@@ -153,7 +150,7 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
-
+            
             // If there is only one part (no separation of upload files),
             //  be sure to set the "Part 1" files to the "all" files
             if ($config->getNumParts() === 1 && !$config->isNotebookGradeable()) {
