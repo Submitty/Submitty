@@ -138,10 +138,44 @@ class AutoGradedVersion extends AbstractModel {
                 }
             }
 
+            // if ($dir === 'submissions') {
+            //     $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
+            //     $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
+            //     foreach ($user_assignment_settings as $file => $details) {
+            //         echo $file;
+            //         echo "hello";
+            //         echo $details;  
+            //         if (basename($file) === 'user_assignment_settings.json') {
+            //             $this->meta_files[$dir][$file] = $details;
+            //         }
+            //     }
+            // }
+
+            // if ($dir === 'submissions') {
+            //     $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, 'user_assignment_settings');
+            //     $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], false);
+                
+            //     foreach ($user_assignment_settings as $file => $details) {
+            //         echo $file;
+            //         echo "hello";
+            //         echo $details;
+            //         if (basename($file) === 'user_assignment_settings.json') {
+            //             $this->meta_files[$dir][$file] = $details;
+            //         }
+            //     }
+            // }
+            
             if ($dir === 'submissions') {
                 $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
-                $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
-                foreach ($user_assignment_settings as $file => $details) {
+                $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], false);
+                
+                // check if there is a user_assignment_settings.json file
+                if (!empty($user_assignment_settings)) {
+                    
+                    // Get the first file and its details
+                    $file = key($user_assignment_settings);
+                    $details = reset($user_assignment_settings);
+                    
                     if (basename($file) === 'user_assignment_settings.json') {
                         $this->meta_files[$dir][$file] = $details;
                     }
