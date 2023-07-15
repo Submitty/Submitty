@@ -168,7 +168,6 @@ class AutoGradedVersion extends AbstractModel {
             if ($dir === 'submissions') {
                 $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
                 $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], false);
-                
                 // check if there is a user_assignment_settings.json file
                 if (!empty($user_assignment_settings)) {
                     
