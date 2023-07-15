@@ -137,33 +137,6 @@ class AutoGradedVersion extends AbstractModel {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
-
-            // if ($dir === 'submissions') {
-            //     $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
-            //     $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], true);
-            //     foreach ($user_assignment_settings as $file => $details) {
-            //         echo $file;
-            //         echo "hello";
-            //         echo $details;  
-            //         if (basename($file) === 'user_assignment_settings.json') {
-            //             $this->meta_files[$dir][$file] = $details;
-            //         }
-            //     }
-            // }
-
-            // if ($dir === 'submissions') {
-            //     $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, 'user_assignment_settings');
-            //     $user_assignment_settings = FileUtils::getAllFiles($user_assignment_settings_path, [], false);
-                
-            //     foreach ($user_assignment_settings as $file => $details) {
-            //         echo $file;
-            //         echo "hello";
-            //         echo $details;
-            //         if (basename($file) === 'user_assignment_settings.json') {
-            //             $this->meta_files[$dir][$file] = $details;
-            //         }
-            //     }
-            // }
             
             if ($dir === 'submissions') {
                 $user_assignment_settings_path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id);
