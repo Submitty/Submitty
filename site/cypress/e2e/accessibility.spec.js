@@ -53,6 +53,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
 
     before(() => {
         cy.fixture('accessibility_baseline').then(data => {
+            console.log(data);
             expect(data).to.be.an('object');
             baseline = new Map(Object.entries(data));
         });
@@ -101,6 +102,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                                 type: error.type.trim(),
                             });
                         }
+                        console.log(foundErrors);
 
                         expect(foundErrors).to.be.empty;
                     });

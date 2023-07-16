@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "vnu-jar": "^23.4.11"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.1"
+  }
+}
