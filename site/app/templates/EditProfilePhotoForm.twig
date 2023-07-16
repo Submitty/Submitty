@@ -18,7 +18,7 @@
         <h2>My Profile Photo</h2>
         </label>
         <br>
-        <input type="file" name="user_image" id="user-image-button" accept=".jpg, .jpeg, .gif, .png">
+        <input type="file" name="user_image" id="user-image-button" accept=".jpg, .jpeg, .gif, .png" data-testid="user-image-button">
         <br>
         <span>Maximum allowed file size: 5 MB | Supported file formats: JPG, GIF, PNG</span>
     </div>
@@ -30,5 +30,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" data-testid="submit-button"  />
 {% endblock %}
