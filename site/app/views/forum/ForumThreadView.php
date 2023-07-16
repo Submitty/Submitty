@@ -1382,8 +1382,6 @@ class ForumThreadView extends AbstractView {
         foreach ($users as $user => $details) {
             $given_name = $details["given_name"];
             $family_name = $details["family_name"];
-            $pronouns = $details["pronouns"];
-            $display_pronouns = $details["display_pronouns"];
             $post_count = count($details["posts"]);
             $posts = json_encode($details["posts"]);
             $ids = json_encode($details["id"]);
@@ -1395,8 +1393,6 @@ class ForumThreadView extends AbstractView {
             $userData[] = [
                 "family_name" => $family_name,
                 "given_name" => $given_name,
-                "pronouns" => $pronouns,
-                "display_pronouns" => $display_pronouns,
                 "post_count" => $post_count,
                 "details_total_threads" => $details["total_threads"],
                 "num_deleted" => $num_deleted,
