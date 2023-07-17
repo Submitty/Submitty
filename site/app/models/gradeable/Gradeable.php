@@ -953,6 +953,9 @@ class Gradeable extends AbstractModel {
 
             return false;
         }
+        else {
+            return true;
+        }
     }
 
     /**
