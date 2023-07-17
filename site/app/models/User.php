@@ -113,7 +113,7 @@ class User extends AbstractModel {
     /** @prop @var string The pronouns of the user */
     protected $pronouns = "";
     /** @prop @var bool The display pronouns option of the user */
-    protected $display_pronouns = false;
+    protected bool $display_pronouns = false;
     /** @prop @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */
@@ -270,6 +270,14 @@ class User extends AbstractModel {
         else {
             return $ret;
         }
+    }
+
+    /**
+     * set true or false to variable display_pronouns
+     * @param bool $new_display_pronouns new display_pronouns option
+     */
+    public function setDisplayPronouns(bool $new_display_pronouns): void {
+        $this->display_pronouns = $new_display_pronouns;
     }
 
     /**
