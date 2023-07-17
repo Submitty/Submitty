@@ -70,7 +70,7 @@
                             Display Pronouns in Discussion Forum:
                         </span>
                         <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
-                            {% if user.getDisplayPronouns %}
+                            {% if user.getDisplayPronouns() %}
                                 <i class="fas fa-pencil-alt"></i> True
                             {% else %}
                                 <i class="fas fa-pencil-alt"></i> False

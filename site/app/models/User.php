@@ -113,7 +113,7 @@ class User extends AbstractModel {
     /** @prop @var string The pronouns of the user */
     protected $pronouns = "";
     /** @prop @var bool The display pronouns option of the user */
-    protected bool $display_pronouns = false;
+    protected $display_pronouns = false;
     /** @prop @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
     /** @prop @var string The primary email of the user */

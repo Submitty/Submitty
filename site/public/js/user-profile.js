@@ -129,17 +129,9 @@ function updateUserPronouns(e) {
                     // update the pronouns and display (true or false)
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
                     console.log(data.display_pronouns);
-                    $('#display_pronouns_val').html(`${icon} ${data.display_pronouns.charAt(0).toUpperCase()
-                        + data.display_pronouns.slice(1)}`);
+                    $('#display_pronouns_val').html(`${icon} ${isForumDisplayChecked}`);
                     // update the data attributes
                     pronouns.data('current-pronouns', data.pronouns);
-
-                    if (isForumDisplayChecked) {
-                        forumDisplay.data('current-pronouns-forum-display',true);
-                    }
-                    else {
-                        forumDisplay.data('current-pronouns-forum-display',false);
-                    }
                     $('#edit-pronouns-form').hide();
                 }
                 else {
