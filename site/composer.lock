@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6cfa8933616d5fc8ac966422947b6f60",
+    "content-hash": "d25ebf13c983de06f880f3c428b3f965",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3590,31 +3590,30 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v5.4.24",
+            "version": "v6.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "3c59f97f6249ce552a44f01b93bfcbd786a954f5"
+                "reference": "bd1bcfb0eba14de22c4d086c5023e608f37366ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/3c59f97f6249ce552a44f01b93bfcbd786a954f5",
-                "reference": "3c59f97f6249ce552a44f01b93bfcbd786a954f5",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/bd1bcfb0eba14de22c4d086c5023e608f37366ed",
+                "reference": "bd1bcfb0eba14de22c4d086c5023e608f37366ed",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.2.5",
+                "php": ">=8.1",
                 "symfony/deprecation-contracts": "^2.1|^3",
-                "symfony/polyfill-mbstring": "~1.1",
-                "symfony/polyfill-php80": "^1.16"
+                "symfony/polyfill-mbstring": "~1.1"
             },
             "require-dev": {
                 "predis/predis": "~1.0",
-                "symfony/cache": "^4.4|^5.0|^6.0",
+                "symfony/cache": "^5.4|^6.0",
                 "symfony/dependency-injection": "^5.4|^6.0",
-                "symfony/expression-language": "^4.4|^5.0|^6.0",
+                "symfony/expression-language": "^5.4|^6.0",
                 "symfony/http-kernel": "^5.4.12|^6.0.12|^6.1.4",
-                "symfony/mime": "^4.4|^5.0|^6.0",
+                "symfony/mime": "^5.4|^6.0",
                 "symfony/rate-limiter": "^5.2|^6.0"
             },
             "suggest": {
@@ -3646,7 +3645,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v5.4.24"
+                "source": "https://github.com/symfony/http-foundation/tree/v6.1.12"
             },
             "funding": [
                 {
@@ -3662,7 +3661,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-05-19T07:21:23+00:00"
+            "time": "2023-01-30T15:43:30+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
