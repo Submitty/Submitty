@@ -276,8 +276,13 @@ class User extends AbstractModel {
      * set true or false to variable display_pronouns
      * @param bool $new_display_pronouns new display_pronouns option
      */
-    public function setDisplayPronouns(bool $new_display_pronouns): void {
-        $this->display_pronouns = $new_display_pronouns;
+    public function setDisplayPronouns(?bool $new_display_pronouns): void {
+        if ($new_display_pronouns === null) {
+            $this->display_pronouns = false;
+        }
+        else {
+            $this->display_pronouns = $new_display_pronouns;
+        }
     }
 
     /**
