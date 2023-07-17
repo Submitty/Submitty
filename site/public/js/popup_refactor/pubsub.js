@@ -47,7 +47,7 @@ export default class PubSub {
      * @param {Object} Array of arguments to pass to subscribers for this signal.
      */    
     publish(signal_name, arguments) {
-        this.subscribers[signal_name].forEach(subscribe_function => subscribe_function(...arguments));
+        this.subscribers[signal_name].forEach(subscribe_function => subscribe_function(arguments));
     }
 
 
