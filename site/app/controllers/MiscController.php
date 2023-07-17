@@ -190,6 +190,51 @@ class MiscController extends AbstractController {
         }
     }
 
+
+
+
+
+    /**
+     * @Route("/display-file/{filename}", name="display_banner_file")
+     */
+    public function displayBannerFile($filename)
+    {
+        // Specify the directory where the PNG images are stored
+        $imageDirectory = $this->core->getConfig()->getSubmittyPath();
+
+        // Resolve the file path based on the provided path parameter
+        $filePath = FileUtils::joinPaths($imageDirectory, $filename);
+
+        // Check if the file exists
+        if (!file_exists($filePath)) {
+            $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+            return false;
+        }
+
+        // Set the appropriate headers for PNG images
+        $contentType = 'image/png';
+        header('Content-Type: ' . $contentType);
+
+        // Output the image file
+        readfile($filePath);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * @Route("/courses/{_semester}/{_course}/read_file")
      */
