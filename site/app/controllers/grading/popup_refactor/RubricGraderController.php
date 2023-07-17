@@ -59,7 +59,7 @@ class RubricGraderController extends AbstractController {
         string $navigate_assigned_students_only = "true"
     ): void {
         $gradeable          = $this->getCurrentGradeable($gradeable_id);
-        
+
         $sort_type          = $sort;
         $sort_direction     = $direction;
         $details_page       = $this->gradeableDetailsPage($gradeable, $sort_type, $sort_direction);
@@ -152,7 +152,7 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Returns the URL of this gradeable's details page.
-     * 
+     *
      * @param Gradeable $gradeable    - Current gradeable we are grading.
      * @param string $sort_type       - Way we are sorting through students, e.g. by "id", etc.
      * @param  string $sort_direction - Either "ASC" or "DESC" for which way we sort by that type.
@@ -176,7 +176,7 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Returns whether the current gradeable has peer grading.
-     * 
+     *
      * @param Gradeable $gradeable - The current gradeable we are grading.
      * @return bool - True if this gradeable has peer grading.
      */
@@ -187,12 +187,12 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Returns whether the current gradeable has teams.
-     * 
+     *
      * @param Gradeable $gradeable - The current gradeable we are grading.
      * @return bool - True if this gradeable has peer grading.
      */
     private function getIfTeamGradeable($gradeable): bool {
-       return $gradeable->isTeamAssignment();
+        return $gradeable->isTeamAssignment();
     }
 
 
@@ -205,7 +205,7 @@ class RubricGraderController extends AbstractController {
      *                who they are currently grading.
      *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
      *                see which peer they are currently grading.
-     * 
+     *
      * @param int $user_group         - Quasi-enum for which user_group we are.
      * @param Gradeable $gradeable    - Gradeable we are grading.
      * @param bool $is_peer_gradeable - True if we are this is a peer gradeable.
