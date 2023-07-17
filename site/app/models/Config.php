@@ -15,8 +15,8 @@ use app\libraries\FileUtils;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  *
- * @method string getTerm()
- * @method string getCourse()
+ * @method string|null getTerm()
+ * @method string|null getCourse()
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
