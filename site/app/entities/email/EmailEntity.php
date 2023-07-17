@@ -2,65 +2,45 @@
 
 namespace app\entities\email;
 
+use app\repositories\email\EmailRepository;
+use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="app\repositories\email\EmailRepository")
- * @ORM\Table(name="emails")
- */
+#[ORM\Entity(repositoryClass: EmailRepository::class)]
+#[ORM\Table(name: "emails")]
 class EmailEntity {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     * @var int
-     */
-    private $id;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $user_id;
-    /**
-     * @ORM\Column(type="text")
-     * @var string
-     */
-    private $subject;
-    /**
-     * @ORM\Column(type="text")
-     * @var string
-     */
-    private $body;
-    /**
-     * @ORM\Column(type="datetime")
-     * @var \DateTime
-     */
-    private $created;
-    /**
-     * @ORM\Column(type="datetime")
-     * @var \DateTime
-     */
-    private $sent;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $error;
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @var string
-     */
-    private $email_address;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $semester;
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $course;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue]
+    private int $id;
+
+    #[ORM\Column(type: Types::STRING)]
+    private string $user_id;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private string $subject;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private string $body;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private DateTime $created;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?DateTime $sent;
+
+    #[ORM\Column(type: Types::STRING)]
+    private string $error;
+
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    private string $email_address;
+
+    #[ORM\Column(type: Types::STRING)]
+    private string $semester;
+
+    #[ORM\Column(type: Types::STRING)]
+    private string $course;
 
     /**
      * @return string
@@ -77,11 +57,11 @@ class EmailEntity {
         return $this->body;
     }
 
-    public function getCreated(): \DateTime {
+    public function getCreated(): DateTime {
         return $this->created;
     }
 
-    public function getSent(): ?\DateTime {
+    public function getSent(): ?DateTime {
         return $this->sent;
     }
 
