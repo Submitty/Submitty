@@ -272,17 +272,6 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        if ($dir == 'submissions') {
-            //cannot download scanned images for bulk uploads
-            if (
-                strpos(basename($path), "upload_page_") !== false
-                && FileUtils::getContentType($path) !== "application/pdf"
-            ) {
-                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
-                return false;
-            }
-        }
-
         if (isset($title) && $title !== "") {
             $filename = $title;
         }

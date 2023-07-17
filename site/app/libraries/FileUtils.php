@@ -770,15 +770,14 @@ class FileUtils {
 
 
     /**
-     * Given a path, searches for the topmost directory that's empty, here empty means having no files but there can be
-     * empty subdirectories inside that directory
+     * Given a path, determines if there are characters in it that could lead to a security issue,
+     * if not return true
      *
      * @param string $path Absolute path to file or directory
      * @return bool
      */
     public static function validPath($path) {
         $disallowed = [
-            '..',   // Parent directory
             ':',    // Drive separator (Windows)
             '*',    // Wildcard character
             '?',    // Wildcard character
@@ -788,11 +787,17 @@ class FileUtils {
             '|',    // Pipe
             '\0'    // Null character
         ];
+
         foreach ($disallowed as $char) {
             if (strpos($path, $char) !== false) {
                 return false;
             }
         }
+
+        if (substr($path, 0, 2) === '..' || substr($path, -2) === '..') {
+            return false;
+        }
+
         return true;
     }
 }
