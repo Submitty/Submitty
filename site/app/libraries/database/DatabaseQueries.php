@@ -1645,9 +1645,8 @@ WHERE semester=? AND course=? AND user_id=?",
      * Get the latest valid versrion for a gradeable (good or late status)
      * @param GradedGradeable $gg
      * @param string $submitter_id
-     * @return int
      */
-    public function getLatestValidGradeableVersion(GradedGradeable $gg, string $submitter_id, int $late_days_remaining) {
+    public function getLatestValidGradeableVersion(GradedGradeable $gg, string $submitter_id, int $late_days_remaining): int {
         $params = [$gg->getGradeableId(), $submitter_id, $late_days_remaining];
         $query = "SELECT
                     egd.g_version
