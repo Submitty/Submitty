@@ -44,4 +44,4 @@ numpy==1.24.3
 
 # python libraries for OCR for digit recognition
 onnx==1.14.0
-onnxruntime==1.11.1
+onnxruntime==1.15.1
