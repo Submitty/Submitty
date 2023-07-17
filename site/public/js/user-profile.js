@@ -128,8 +128,8 @@ function updateUserPronouns(e) {
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns and display (true or false)
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
-                    let isForumDisplayCheckedString = String(isForumDisplayChecked);
-                    let capitalizedString = isForumDisplayCheckedString.charAt(0).toUpperCase() + isForumDisplayCheckedString.slice(1);
+                    const isForumDisplayCheckedString = String(isForumDisplayChecked);
+                    const capitalizedString = isForumDisplayCheckedString.charAt(0).toUpperCase() + isForumDisplayCheckedString.slice(1);
                     $('#display_pronouns_val').html(`${icon} ${capitalizedString}`);
 
                     // update the data attributes
