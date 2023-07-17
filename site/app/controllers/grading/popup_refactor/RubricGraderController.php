@@ -128,7 +128,7 @@ class RubricGraderController extends AbstractController {
      * @param string    $who_id       - The anonymous id of the student we should grade.
      * @param string    $details_page - URL of this gradeable's details page in case we need to redirect there.
      *
-     * @return GradedGradeaable - Current submission being graded.
+     * @return GradedGradeable - Current submission being graded.
      */
     private function getCurrentSubmission(
         Gradeable $gradeable,
@@ -143,7 +143,7 @@ class RubricGraderController extends AbstractController {
 
         // Submission does not exist
         if ($current_submission === false) {
-            $this->core->redirect($this->gradeableDetailsPage());
+            $this->core->redirect($details_page);
         }
 
         return $current_submission;
@@ -233,7 +233,7 @@ class RubricGraderController extends AbstractController {
         }
 
         // Blind Settings for Student Peer Graders:
-        if ($user_group == User::GROUP_STUDENT) {
+        else { // ($user_group == User::GROUP_STUDENT)
             if ($is_peer_gradeable) {
                 if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
                     return "double";
