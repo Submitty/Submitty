@@ -1,7 +1,7 @@
  /**
  * ---------------------
  *
- * rubric-grader-controller.twig
+ * rubric-grader-controller.js
  *
  * The user-side controller for the new RubricGrader page.
  * Loads in advance the previous and next students, and allows
