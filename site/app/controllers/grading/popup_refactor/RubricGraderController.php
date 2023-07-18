@@ -158,7 +158,11 @@ class RubricGraderController extends AbstractController {
      * @param  string $sort_direction - Either "ASC" or "DESC" for which way we sort by that type.
      * @return string URL of the gradeable details page.
      */
-    private function gradeableDetailsPage($gradeable, $sort_type, $sort_direction): string {
+    private function gradeableDetailsPage(
+        Gradeable $gradeable,
+        string $sort_type,
+        string $sort_direction
+    ): string {
         return $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details'])
             . '?'
             . http_build_query(['sort' => $sort_type, 'direction' => $sort_direction]);
@@ -180,7 +184,7 @@ class RubricGraderController extends AbstractController {
      * @param Gradeable $gradeable - The current gradeable we are grading.
      * @return bool - True if this gradeable has peer grading.
      */
-    private function getIfPeerGradeable($gradeable): bool {
+    private function getIfPeerGradeable(Gradeable $gradeable): bool {
         return $gradeable->hasPeerComponent();
     }
 
@@ -191,7 +195,7 @@ class RubricGraderController extends AbstractController {
      * @param Gradeable $gradeable - The current gradeable we are grading.
      * @return bool - True if this gradeable has peer grading.
      */
-    private function getIfTeamGradeable($gradeable): bool {
+    private function getIfTeamGradeable(Gradeable $gradeable): bool {
         return $gradeable->isTeamAssignment();
     }
 
@@ -211,7 +215,11 @@ class RubricGraderController extends AbstractController {
      * @param bool $is_peer_gradeable - True if we are this is a peer gradeable.
      * @return string The blind access mode for the current grader.
      */
-    private function determineBlindAccessMode($user_group, $gradeable, $is_peer_gradeable): string {
+    private function determineBlindAccessMode(
+        int $user_group,
+        Gradeable $gradeable,
+        bool $is_peer_gradeable
+    ): string {
         // Blind Settings for Instructors and Full Access Graders:
         if ($user_group === User::GROUP_INSTRUCTOR || $user_group === User::GROUP_FULL_ACCESS_GRADER) {
             if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
@@ -220,19 +228,15 @@ class RubricGraderController extends AbstractController {
             else {
                 return "unblind";
             }
-        }
-
-        // Blind Settings for Limited Access Graders:
-        if ($user_group === User::GROUP_LIMITED_ACCESS_GRADER) {
+        } // Blind Settings for Limited Access Graders:
+        elseif ($user_group === User::GROUP_LIMITED_ACCESS_GRADER) {
             if ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
                 return "single";
             }
             else {
                 return "unblind";
             }
-        }
-
-        // Blind Settings for Student Peer Graders:
+        } // Blind Settings for Student Peer Graders:
         else { // ($user_group == User::GROUP_STUDENT)
             if ($is_peer_gradeable) {
                 if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
