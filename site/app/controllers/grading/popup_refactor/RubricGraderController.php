@@ -32,79 +32,6 @@ use app\models\User;
 class RubricGraderController extends AbstractController {
     // ---------------------------------
 
-    // Member Variables:
-
-    /**
-     * @var Gradeable
-     * The current gradeable being graded.
-     */
-    private $gradeable;
-
-    /**
-     * @var GradedGradeable
-     * The current submission being graded.
-     */
-    private $current_submission;
-
-    /**
-     * @var string
-     * By what ordering are we sorting by.
-     * Controls where next and prev arrows go.
-     */
-    private $sort_type;
-
-    /**
-     * @var string
-     * For a given ordering, do we sort it ascending "ASC" or descending "DSC".
-     * Controls where next and prev arrows go.
-     */
-    private $sort_direction;
-
-
-    /**
-     * @var int
-     * User type for current website user.
-     * Enum from User:
-     *  1: User::GROUP_INSTRUCTOR
-     *  2: User::GROUP_FULL_ACCESS_GRADER
-     *  3: User::GROUP_LIMITED_ACCESS_GRADER
-     *  4: User::GROUP_STUDENT
-     */
-    private $user_group;
-
-    /**
-     * @var bool
-     * True if the current gradeable has peer grading.
-     */
-    private $is_peer_gradeable;
-
-    /**
-     * @var bool
-     * True if the current gradeable has teams.
-     */
-    private $is_team_gradeable;
-
-    /**
-     * @var string
-     *
-     * The access mode for the current user for this gradeable.
-     * Possible Values:
-     *  - "unblind" - Nothing about students is hidden.
-     *  - "single"  - For peer grading or for full access grading's Anonymous Mode. Graders cannot see
-     *               who they are currently grading.
-     *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
-     *               see which peer they are currently grading.
-     */
-    private $blind_access_mode;
-
-    // ---------------------------------
-
-
-    // ---
-
-
-    // ---------------------------------
-
     // Functions:
 
     /**
@@ -131,7 +58,19 @@ class RubricGraderController extends AbstractController {
         string $direction = "ASC",
         string $navigate_assigned_students_only = "true"
     ): void {
-        $this->setMemberVariables($gradeable_id, $who_id, $sort, $direction);
+        $gradeable          = $this->getCurrentGradeable($gradeable_id);
+
+        $sort_type          = $sort;
+        $sort_direction     = $direction;
+        $details_page       = $this->gradeableDetailsPage($gradeable, $sort_type, $sort_direction);
+
+        $current_submission = $this->getCurrentSubmission($gradeable, $who_id, $details_page);
+        $sort_type          = $sort;
+        $sort_direction     = $direction;
+        $user_group         = $this->getUserGroup();
+        $is_peer_gradeable  = $this->getIfPeerGradeable($gradeable);
+        $is_team_gradeable  = $this->getIfTeamGradeable($gradeable);
+        $blind_access_mode  = $this->determineBlindAccessMode($user_group, $gradeable, $is_peer_gradeable);
 
         $this->core->getOutput()->renderOutput(
             // Path:
@@ -139,63 +78,35 @@ class RubricGraderController extends AbstractController {
             // Function Name:
             'createRubricGradeableView',
             // Arguments:
-            $this->gradeable,
-            $this->current_submission,
-            $this->sort_type,
-            $this->sort_direction,
-            $this->is_peer_gradeable,
-            $this->is_team_gradeable,
-            $this->blind_access_mode,
-            $this->gradeableDetailsPage()
+            $gradeable,
+            $current_submission,
+            $sort_type,
+            $sort_direction,
+            $is_peer_gradeable,
+            $is_team_gradeable,
+            $blind_access_mode,
+            $details_page
         );
     }
 
 
     /**
-     * Sets the corresponding memeber variables based on provided arguments.
-     *
-     * @param string $gradeable_id - The id string of the current gradeable.
-     * @param string $who_id - The id of the student we should grade.
-     * @param string $sort - The current way we are sorting students. Determines who the next and prev students are.
-     * @param string $direction - Either "ASC" or "DESC" for ascending or descending sorting order.
-     * @return void
-     */
-    private function setMemberVariables(
-        string $gradeable_id,
-        string $who_id,
-        string $sort,
-        string $direction
-    ): void {
-        $this->setCurrentGradeable($gradeable_id);
-        $this->setCurrentSubmission($who_id);
-        $this->setUserGroup();
-
-        $this->setIfPeerGradeable();
-        $this->setIfTeamGradeable();
-        $this->setBlindAccessMode();
-
-        $this->sort_type = $sort;
-        $this->sort_direction = $direction;
-    }
-
-
-    /**
-     * Sets $gradeable to the appropiate assignment unless $gradeable_id is invalid,
+     * Returns gradeable to the appropiate assignment unless $gradeable_id is invalid,
      * in which case an error is printed and the code exits.
      *
      * @param string $gradeable_id - The id string of the current gradeable.
-     * @return void
+     * @return Gradeable - The current gradeable being graded.
      */
-    private function setCurrentGradeable(string $gradeable_id): void {
+    private function getCurrentGradeable(string $gradeable_id): Gradeable {
         // tryGetGradeable inherited from AbstractController
-        $this->gradeable = $this->tryGetGradeable($gradeable_id, false);
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
 
         // Gradeable must exist and be Rubric.
         $error_message = "";
-        if ($this->gradeable === false) {
+        if ($gradeable === false) {
             $error_message = 'Invalid Gradeable!';
         }
-        elseif ($this->gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+        elseif ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             $error_message = 'This gradeable is not a rubric gradeable.';
         }
 
@@ -204,72 +115,93 @@ class RubricGraderController extends AbstractController {
             // The following line exits execution.
             $this->core->redirect($this->core->buildCourseUrl());
         }
+
+        return $gradeable;
     }
 
 
     /**
-     * Sets the current student's submission we are looking at
+     * Returns the current student's submission we are looking at.
      * If the submission does not exist, we exit the page.
      *
-     * @param string $who_id - The anonymous id of the student we should grade.
-     * @return void
+     * @param Gradeable $gradeable    - The current gradeable being graded.
+     * @param string    $who_id       - The anonymous id of the student we should grade.
+     * @param string    $details_page - URL of this gradeable's details page in case we need to redirect there.
+     *
+     * @return GradedGradeable - Current submission being graded.
      */
-    private function setCurrentSubmission(string $who_id): void {
-        $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $this->gradeable->getId());
+    private function getCurrentSubmission(
+        Gradeable $gradeable,
+        string $who_id,
+        string $details_page
+    ): GradedGradeable {
+        $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id, $gradeable->getId());
         if ($submitter_id === null) {
             $submitter_id = $who_id;
         }
-        $this->current_submission = $this->tryGetGradedGradeable($this->gradeable, $submitter_id, false);
+        $current_submission = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
 
         // Submission does not exist
-        if ($this->current_submission === false) {
-            $this->core->redirect($this->gradeableDetailsPage());
+        if ($current_submission === false) {
+            $this->core->redirect($details_page);
         }
+
+        return $current_submission;
     }
 
 
     /**
      * Returns the URL of this gradeable's details page.
+     *
+     * @param Gradeable $gradeable    - Current gradeable we are grading.
+     * @param string $sort_type       - Way we are sorting through students, e.g. by "id", etc.
+     * @param  string $sort_direction - Either "ASC" or "DESC" for which way we sort by that type.
      * @return string URL of the gradeable details page.
      */
-    private function gradeableDetailsPage(): string {
-        return $this->core->buildCourseUrl(['gradeable', $this->gradeable->getId(), 'grading', 'details'])
+    private function gradeableDetailsPage(
+        Gradeable $gradeable,
+        string $sort_type,
+        string $sort_direction
+    ): string {
+        return $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details'])
             . '?'
-            . http_build_query(['sort' => $this->sort_type, 'direction' => $this->sort_direction]);
+            . http_build_query(['sort' => $sort_type, 'direction' => $sort_direction]);
     }
 
 
     /**
-     * Sets the current user type for the website user.
-     * @return void
+     * Gets the current user type for the website user.
+     * @return int - Group int. See User model class.
      */
-    private function setUserGroup(): void {
-        $this->user_group = $this->core->getUser()->getGroup();
+    private function getUserGroup(): int {
+        return $this->core->getUser()->getGroup();
     }
 
 
     /**
-     * Sets $is_peer_gradeable based on whether the current gradeable has peer grading.
-     * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
-     * @return void
+     * Returns whether the current gradeable has peer grading.
+     *
+     * @param Gradeable $gradeable - The current gradeable we are grading.
+     * @return bool - True if this gradeable has peer grading.
      */
-    private function setIfPeerGradeable() {
-        $this->is_peer_gradeable = $this->gradeable->hasPeerComponent();
+    private function getIfPeerGradeable(Gradeable $gradeable): bool {
+        return $gradeable->hasPeerComponent();
     }
 
 
     /**
-     * Sets $is_peer_gradeable based on whether the current gradeable has teams.
-     * Make sure setCurrentGradeable($gradeable_id) is called first to set the gradeable.
-     * @return void
+     * Returns whether the current gradeable has teams.
+     *
+     * @param Gradeable $gradeable - The current gradeable we are grading.
+     * @return bool - True if this gradeable has peer grading.
      */
-    private function setIfTeamGradeable(): void {
-        $this->is_team_gradeable = $this->gradeable->isTeamAssignment();
+    private function getIfTeamGradeable(Gradeable $gradeable): bool {
+        return $gradeable->isTeamAssignment();
     }
 
 
     /**
-     * Sets $blind_access_mode for the current user for this grader session of this gradeable.
+     * Returns the blind_access_mode for the current user for this grader session of this gradeable.
      *
      * Possible Values:
      *  - "unblind" - Nothing about students is hidden.
@@ -277,44 +209,48 @@ class RubricGraderController extends AbstractController {
      *                who they are currently grading.
      *  - "double"  - For peer grading. In addition to blinded peer graders, students cannot
      *                see which peer they are currently grading.
-     * @return void
+     *
+     * @param int $user_group         - Quasi-enum for which user_group we are.
+     * @param Gradeable $gradeable    - Gradeable we are grading.
+     * @param bool $is_peer_gradeable - True if we are this is a peer gradeable.
+     * @return string The blind access mode for the current grader.
      */
-    private function setBlindAccessMode(): void {
+    private function determineBlindAccessMode(
+        int $user_group,
+        Gradeable $gradeable,
+        bool $is_peer_gradeable
+    ): string {
         // Blind Settings for Instructors and Full Access Graders:
-        if ($this->user_group === User::GROUP_INSTRUCTOR || $this->user_group === User::GROUP_FULL_ACCESS_GRADER) {
+        if ($user_group === User::GROUP_INSTRUCTOR || $user_group === User::GROUP_FULL_ACCESS_GRADER) {
             if (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') {
-                $this->blind_access_mode = "single";
+                return "single";
             }
             else {
-                $this->blind_access_mode = "unblind";
+                return "unblind";
             }
-        }
-
-        // Blind Settings for Limited Access Graders:
-        if ($this->user_group === User::GROUP_LIMITED_ACCESS_GRADER) {
-            if ($this->gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
-                $this->blind_access_mode = "single";
+        } // Blind Settings for Limited Access Graders:
+        elseif ($user_group === User::GROUP_LIMITED_ACCESS_GRADER) {
+            if ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) {
+                return "single";
             }
             else {
-                $this->blind_access_mode = "unblind";
+                return "unblind";
             }
-        }
-
-        // Blind Settings for Student Peer Graders:
-        if ($this->user_group == User::GROUP_STUDENT) {
-            if ($this->is_peer_gradeable) {
-                if ($this->gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
-                    $this->blind_access_mode = "double";
+        } // Blind Settings for Student Peer Graders:
+        else { // ($user_group == User::GROUP_STUDENT)
+            if ($is_peer_gradeable) {
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+                    return "double";
                 }
-                elseif ($this->gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) {
-                    $this->blind_access_mode = "single";
+                elseif ($gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) {
+                    return "single";
                 }
                 else {
-                    $this->blind_access_mode = "unblind";
+                    return "unblind";
                 }
             }
             else {
-                $this->blind_access_mode = "double";
+                return "double";
             }
         }
     }
