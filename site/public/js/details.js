@@ -1,5 +1,5 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections grade_inquiry_only*/
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -115,7 +115,7 @@ function collapseAllSections() {
 
 function grade_inquiry_only() {
     $('[data-testid=grade-button]').each(function() {
-        let hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
+        const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
         if (!hasGradeInquiry) {
             $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
         }
