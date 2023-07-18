@@ -115,7 +115,7 @@ function collapseAllSections() {
 
 function grade_inquiry_only() {
     $('[data-testid=grade-button]').each(function() {
-        var hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
+        let hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
         if (!hasGradeInquiry) {
             $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
         }
