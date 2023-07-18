@@ -500,8 +500,6 @@ class CourseMaterialsController extends AbstractController {
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
-
-                                
                                 $all_sections = $course_material->getSections()->getValues();
 
                                 if (count($all_sections) > 0) {
