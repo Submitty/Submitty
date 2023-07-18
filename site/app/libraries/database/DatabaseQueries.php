@@ -28,6 +28,7 @@ use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\LateDayInfo;
 
 /**
  * DatabaseQueries
@@ -1546,6 +1547,43 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get the Late Day Info for each user associated with a user and gradeable
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo
+     */
+    public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
+        $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
+        $cache['graded_gradeable'] = $graded_gradeable;
+        $ldi = null;
+
+        if ($cache !== null) {
+            $ldi = new LateDayInfo($this->core, $user, $cache);
+        }
+        return $ldi;
+    }
+
+    /**
+     * Get the Late Day Info for each user associated with a submitter and gradeable
+     * @param Submitter $submitter
+     * @param GradedGradeable $graded_gradeable
+     * @return LateDayInfo|array<string,LateDayInfo>
+     */
+    public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
+        // Collect Late Day Info for each user associated with the submitter
+        if ($submitter->isTeam()) {
+            $late_day_info = [];
+            foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                $late_day_info[$member->getId()] = $this->getLateDayInfoForUserGradeable($member, $graded_gradeable);
+            }
+            return $late_day_info;
+        }
+        else {
+            return $this->getLateDayInfoForUserGradeable($submitter->getUser(), $graded_gradeable);
+        }
+    }
+
+    /**
      * Generate and update the late day cache for all of the students in the course
      */
     public function generateLateDayCacheForUsers(): void {
@@ -1669,6 +1707,68 @@ ORDER BY {$orderby}",
             }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
+        return $return;
+    }
+
+    /**
+     * Gets the number of bad (late) user submissions associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array<int> $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadUserSubmissionsByGradingSection($g_id, $sections, $section_key) {
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParameterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
+        $this->course_db->query(
+            "
+            SELECT count(*) as cnt, {$section_key}
+            FROM users
+            INNER JOIN electronic_gradeable_version
+            ON
+            users.user_id = electronic_gradeable_version.user_id
+            AND users." . $section_key . " IS NOT NULL
+            AND electronic_gradeable_version.active_version>0
+            AND electronic_gradeable_version.g_id=?
+            INNER JOIN electronic_gradeable
+            ON 
+            electronic_gradeable.g_id=electronic_gradeable_version.g_id
+            AND electronic_gradeable.eg_submission_due_date IS NOT NULL
+            INNER JOIN late_day_cache AS ldc
+            ON ldc.g_id=electronic_gradeable.g_id
+            AND ldc.user_id=users.user_id
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$orderby}",
+            $params
+        );
+        //electronic_gradeable.eg_submission_due_date - electronic_gradeable_data.submission_time > '1 SECOND'
+        //var_dump($this->course_db->rows());
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
         return $return;
     }
 
@@ -1878,6 +1978,78 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
+    /**
+     * Gets the number of bad (late) graded components associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array<int> $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @param  boolean $is_team true if the gradeable is a team assignment
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+        //getBadTeamSubmissionsByGradingSection
+        //getBadUserSubmissionsByGradingSection
+         $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        $params = [$g_id,$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE {$section_key} IN " . $this->createParameterList(count($sections));
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query(
+            "
+            SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+            FROM {$users_or_teams} AS {$u_or_t}
+            INNER JOIN (
+              SELECT *, gd.g_id FROM gradeable_data AS gd
+              LEFT JOIN (
+              gradeable_component_data AS gcd
+              INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+              )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+            ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            INNER JOIN electronic_gradeable_version AS egv
+            ON
+            {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}
+            AND egv.active_version>0
+            AND egv.g_id=?
+            INNER JOIN electronic_gradeable AS eg
+            ON 
+            eg.g_id=egv.g_id
+            AND eg.eg_submission_due_date IS NOT NULL
+        /*found problem here */    
+        INNER JOIN late_day_cache AS ldc
+            ON ldc.g_id=eg.g_id
+            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}  
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
+            {$where}
+            GROUP BY {$u_or_t}.{$section_key}
+            ORDER BY {$u_or_t}.{$section_key}",
+            $params
+        );
+
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+        return $return;
+    }
+
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2077,6 +2249,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getAverageForGradeable($g_id, $section_key, $is_team, $override) {
+
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2451,7 +2624,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach ($rows as $row) {
-            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id'] ?? '');
             $modified_rows[] = $row;
         }
         return $modified_rows;
@@ -3539,6 +3712,63 @@ ORDER BY {$section_key}",
 
         return $return;
     }
+
+    /**
+     * Gets the number of bad (late) team submissions associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array<int> $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @return array<int,int> with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadTeamSubmissionsByGradingSection($g_id, $sections, $section_key) {
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParameterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+
+        $this->course_db->query(
+            "
+            SELECT count(*) as cnt, {$section_key}
+            FROM gradeable_teams
+            INNER JOIN electronic_gradeable_version
+            ON
+            gradeable_teams.team_id = electronic_gradeable_version.team_id
+            AND gradeable_teams." . $section_key . " IS NOT NULL
+            AND electronic_gradeable_version.active_version>0
+            AND electronic_gradeable_version.g_id=?
+            INNER JOIN electronic_gradeable
+            ON 
+            electronic_gradeable.g_id=electronic_gradeable_version.g_id
+            AND electronic_gradeable.eg_submission_due_date IS NOT NULL
+            INNER JOIN late_day_cache AS ldc
+            ON ldc.g_id=electronic_gradeable.g_id
+            AND ldc.team_id=gradeable_teams.team_id
+            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            And ldc.late_days_change =0
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$section_key}",
+            $params
+        );
+
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+
     public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key) {
         $return = [];
         $params = [$g_id];
@@ -5125,8 +5355,8 @@ AND gc_id IN (
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
             $overrides = [];
-            $users = json_decode($row['gamo_users']);
-            $minutes = json_decode($row['gamo_minutes']);
+            $users = json_decode($row['gamo_users'] ?? "[]");
+            $minutes = json_decode($row['gamo_minutes'] ?? "[]");
             if ($users !== null) {
                 for ($i = 0; $i < count($users); $i++) {
                     $overrides[] = [
@@ -7567,8 +7797,8 @@ WHERE current_state IN
             // This will be false if there is no manual grade yet
             if (isset($row['id'])) {
                 // prepare overall comments
-                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
-                $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
+                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"] ?? "[]");
+                $row["array_overall_comments"] = json_decode($row["array_overall_comments"] ?? "[]");
                 $row["overall_comments"] = [];
                 if ($row["array_commenter_ids"] !== null) {
                     for ($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
@@ -7661,7 +7891,7 @@ WHERE current_state IN
                     )
                 ) as $property
             ) {
-                $db_row_split[$property] = json_decode($row['array_' . $property]);
+                $db_row_split[$property] = json_decode($row['array_' . $property] ?? "");
             }
 
             if (isset($db_row_split['comp_id'])) {
