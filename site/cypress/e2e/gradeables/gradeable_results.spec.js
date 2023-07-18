@@ -8,9 +8,9 @@ describe('Testing functionality of Autograder Results', () => {
     });
 
     it('Should display confetti', () => {
-        cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/block/);
+        cy.get('#confetti_canvas').should('have.css', 'display').and('match',/none/);
         cy.get('.box-title-total').first().click();
-        cy.get('#confetti_canvas').should('have.css', 'display').and('match',/block/);
+        cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/none/);
     });
 
     it('Should show and hide details', () => {
