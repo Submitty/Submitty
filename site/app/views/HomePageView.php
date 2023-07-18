@@ -27,7 +27,6 @@ class HomePageView extends AbstractView {
             User::GROUP_STUDENT                 => "Student:"
         ];
 
-        $files = [];
 
 
         foreach ($course_types as $course_type) {
@@ -53,7 +52,11 @@ class HomePageView extends AbstractView {
             $statuses[] = $ranks;
             
         }
-        self::addBannerImage($files, $this->core->getConfig()->getSubmittyPath(), $this->core->buildUrl());
+
+        $images_data_array = [];
+        $error_image_data = '_NONE_';
+
+        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath());
 
         $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -61,7 +64,9 @@ class HomePageView extends AbstractView {
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "statuses" => $statuses,
-            "files" => $files,
+            "imageDataArray" => $images_data_array,
+            "errorImageData" => $error_image_data,
+
         ]);
 
 
@@ -101,7 +106,7 @@ class HomePageView extends AbstractView {
 
 
 
-    public static function addBannerImage(&$files, $submitty_path, $url_path) {
+    public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path) {
         $base_course_material_path = FileUtils::joinPaths($submitty_path, 'banner_images');
 
         if (!file_exists($base_course_material_path)) {
@@ -109,17 +114,31 @@ class HomePageView extends AbstractView {
         }
 
         // Create a DirectoryIterator for the base course material path
-        $directoryIterator = new DirectoryIterator($base_course_material_path);
+        $directoryIterator = new \DirectoryIterator($base_course_material_path);
         foreach ($directoryIterator as $fileInfo) {
             // Exclude directories and dot files
             if ($fileInfo->isFile() && !$fileInfo->isDot()) {
-                $baseCourseUrl = rtrim($url_path, '/');
+                if (!$fileInfo->valid()) {
+                    continue;
+                }
 
-                $fileUrl = $url_path .'/' . $fileInfo->getFilename();
-                $files[] = [
-                    "filename" => $fileInfo->getFilename(),
-                    "image_link" => $url_path . 'banner_images/' .$fileInfo->getFilename(),
-                ];
+                $expected_image = $fileInfo->getPathname();
+                $content_type = FileUtils::getContentType($expected_image);
+                if (substr($content_type, 0, 5) === "image") {
+                    // Read image path, convert to base64 encoding
+                    $expected_img_data = base64_encode(file_get_contents($expected_image));
+
+                    $img_name = $fileInfo->getBasename('.png');
+                    if ($img_name === "error_image") {
+                        $error_image_data = $expected_img_data;
+                    }
+                    else {
+                        $images_data_array[] = [
+                            "name" => $img_name,
+                            "data" => $expected_img_data
+                        ];
+                    }
+                }
             }
         }
     }
