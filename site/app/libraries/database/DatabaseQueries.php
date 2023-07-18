@@ -30,6 +30,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\LateDayInfo;
+use app\models\BannerImage;
 
 /**
  * DatabaseQueries
