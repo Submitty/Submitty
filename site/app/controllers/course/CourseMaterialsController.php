@@ -489,7 +489,7 @@ class CourseMaterialsController extends AbstractController {
                             $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
                                 ['path' => $dir]
                             );
-                            if ($cm == null && !in_array($dir, $new_paths)) {
+                            if ($cm === null && !in_array($dir, $new_paths)) {
                                 $course_material_dir = new CourseMaterial(
                                     2,
                                     $dir,
