@@ -14,6 +14,9 @@ use app\models\gradeable\GradeableUtils;
 use app\views\banner\BannerView;
 use Symfony\Component\Routing\Annotation\Route;
 
+use app\entities\course\BannerImage;
+use app\repositories\course\BannerImageRepository;
+
 
 use app\controllers\MiscController;
 use app\libraries\Core;
@@ -74,6 +77,18 @@ class BannerController extends AbstractController {
             if (!@unlink($uploaded_files["tmp_name"][$j])) {
                 return JsonResponse::getErrorResponse("Failed to delete the uploaded file '{$uploaded_files['name'][$j]}' from temporary storage.");
             }
+
+
+            $banner_image = new BannerImage(
+                $uploaded_files["name"][$j],
+                "howdy"
+            );
+            $this->core->getBannerEntityManager()->persist($banner_image);
+            
+        
+            $this->core->getBannerEntityManager()->flush();
+
+
         }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");

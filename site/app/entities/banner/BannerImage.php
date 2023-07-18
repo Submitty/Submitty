@@ -50,11 +50,11 @@ class BannerImage {
     protected $extra_info;
 
 
-    public function __construct() {
+    public function __construct(string $name, string $extra_info_name) {
         $this->setReleaseDate(DateUtils::getDateTimeNow());
         $this->setClosingDate(DateUtils::getDateTimeNow());
-        $this->setName("hi");
-        $this->setExtraInfo("howdy");
+        $this->setName($name);
+        $this->setExtraInfo($extra_info_name);
     }
 
 

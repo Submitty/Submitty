@@ -44,6 +44,9 @@ class Core {
     /** @var EntityManager */
     private $course_entity_manager;
 
+    /** @var EntityManager */
+    private $banner_entity_manager;
+
     /** @var DebugStack */
     private $course_debug_stack;
 
@@ -217,6 +220,7 @@ class Core {
         $this->setQueries($this->database_factory->getQueries($this));
         $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
         $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
+        $this->banner_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -261,6 +265,16 @@ class Core {
     public function getCourseEntityManager(): EntityManager {
         return $this->course_entity_manager;
     }
+
+
+    public function setBannerEntityManager(EntityManager $entity_manager): void {
+        $this->banner_entity_manager = $entity_manager;
+    }
+
+    public function getBannerEntityManager(): EntityManager {
+        return $this->banner_entity_manager;
+    }
+
 
     public function getCourseQueries(): array {
         if (!$this->config->isDebug() || !$this->course_db) {

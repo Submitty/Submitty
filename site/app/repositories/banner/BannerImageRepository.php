@@ -9,7 +9,7 @@ class BannerImageRepository extends EntityRepository {
     /**
      * @return BannerImage[]
      */
-    public function getCourseMaterials(): array {
+    public function getBannerImages(): array {
         $dql = 'SELECT b FROM app\entities\course\BannerImage b ORDER BY b.name ASC, b.extra_info ASC';
         return $this->_em->createQuery($dql)->getResult();
     }
