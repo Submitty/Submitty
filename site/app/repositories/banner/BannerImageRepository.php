@@ -1,0 +1,16 @@
+<?php
+
+namespace app\repositories\banner;
+
+use app\entities\banner\BannerImage;
+use Doctrine\ORM\EntityRepository;
+
+class BannerImageRepository extends EntityRepository {
+    /**
+     * @return BannerImage[]
+     */
+    public function getCourseMaterials(): array {
+        $dql = 'SELECT b FROM app\entities\course\BannerImage b ORDER BY b.name ASC, b.extra_info ASC';
+        return $this->_em->createQuery($dql)->getResult();
+    }
+}

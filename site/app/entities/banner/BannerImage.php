@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class BannerImage
  * @package app\entities
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="\app\repositories\banner\BannerImageRepository")
  * @ORM\Table(name="banner_images")
  */
 class BannerImage {
