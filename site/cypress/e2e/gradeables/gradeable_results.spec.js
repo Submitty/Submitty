@@ -8,9 +8,11 @@ describe('Testing functionality of Autograder Results', () => {
     });
 
     it('Should display confetti', () => {
-        cy.get('#confetti_canvas').should('have.css', 'display').and('match',/none/);
+        //cy.get('#confetti_canvas').should('have.css', 'display').and('match',/none/);
+        cy.get('#confetti_canvas').should('not.exist');
         cy.get('.box-title-total').first().click();
-        cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/none/);
+        //cy.get('#confetti_canvas').should('have.css', 'display').and('not.match',/none/);
+        cy.get('#confetti_canvas').should('exist');
     });
 
     it('Should show and hide details', () => {
