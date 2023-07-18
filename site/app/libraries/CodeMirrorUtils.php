@@ -28,6 +28,14 @@ class CodeMirrorUtils {
         'codemirror-spell-checker/spell-checker.min.js',
     ];
 
+    const DEFAULT_JS_FILES_CODEMIRROR_6 = [
+        'codemirror6/autocomplete/dist/index.js',
+        'codemirror6/commands/dist/index.js',
+        'codemirror6/language/dist/index.js',
+        'codemirror6/state/dist/index.js',
+        'codemirror6/view/dist/index.js',
+    ];
+
     const DEFAULT_MIME_TYPE = 'text/plain';
 
     /**
@@ -105,5 +113,18 @@ class CodeMirrorUtils {
 
         $core->getOutput()->addInternalJs('code-mirror-utils.js');
         $core->getOutput()->addInternalCss('code-mirror-utils.css');
+    }
+
+    /**
+     * Load the js codemirror6 dependencies we have defined above as constants
+     *
+     * @param Core $core
+     */
+    public static function loadCodeMirror6DefaultDependencies(Core $core): void {
+        foreach (self::DEFAULT_JS_FILES_CODEMIRROR_6 as $file) {
+            $core->getOutput()->addVendorJs($file);
+        }
+
+        $core->getOutput()->addInternalJs('code-mirror-utils.js');
     }
 }

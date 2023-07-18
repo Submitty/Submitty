@@ -14,7 +14,7 @@
     {% endif %}
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        <div id="checkpoint-sticky" class="column-wrapper">
+        <div id="checkpoint-fixed" class="column-wrapper">
             {% include "grading/simple/StudentSearch.twig" %}
             {% if action == 'lab' %}
                 <div>
@@ -184,7 +184,7 @@
                 {# Section header #}
                 <tbody>
                     <tr class="info">
-                        <td colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
+                        <td data-testid="gradeable-sections" colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -306,9 +306,11 @@
                     data-origval="{{ component_score }}"
                     data-maxclamp="{{ max_clamp }}"
                     value="{{ component_score }}"
-                    onclick="this.select()"
+                    onclick="this.dataset.typing || this.select()"
+                    ondblclick="this.dataset.typing = true;"
+                    onblur="this.dataset.typing = false;"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
-                    onkeydown="javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight','Period'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                    onkeydown="return ['Backspace','Delete','ArrowLeft','ArrowRight','Period'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
                     {% if component_grade is not null and component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -343,9 +345,10 @@
             <textarea class="option-small-box cell-grade"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
-                  onclick="this.select()"
+                  onclick="this.dataset.typing || this.select()"
+                  ondblclick="this.dataset.typing = true;"
+                  onblur="this.dataset.typing = false; minimizeHeight(this);"
                   onfocus="adjustHeight(this);"
-                  onblur="minimizeHeight(this);"
                   onkeyup="adjustHeight(this);"
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"

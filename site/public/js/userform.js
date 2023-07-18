@@ -254,6 +254,8 @@ function completeUserFormInformation(user) {
     $('[name="user_givenname"]').change();
     $('[name="user_preferred_givenname"]', form).val(user['user_preferred_givenname']);
     $('[name="user_preferred_givenname"]').change();
+    $('[name="user_pronouns"]', form).val(user['user_pronouns']);
+    $('[name="user_pronouns"]').change();
     $('[name="user_familyname"]', form).val(user['user_familyname']);
     $('[name="user_familyname"]').change();
     $('[name="user_preferred_familyname"]', form).val(user['user_preferred_familyname']);

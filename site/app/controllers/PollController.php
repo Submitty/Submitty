@@ -33,7 +33,7 @@ class PollController extends AbstractController {
 
         if ($this->core->getUser()->accessAdmin()) {
             // Check if we have a saved cookie session with the dropdown states for each of the instructor polls sections
-            $dropdown_states = ['today' => true, 'old' => false, 'future' => false];
+            $dropdown_states = ['today' => true, 'tomorrow' => true, 'old' => false, 'future' => false];
             foreach ($dropdown_states as $key => $val) {
                 $cookie_key = $key . "_polls_dropdown";
                 if (array_key_exists($cookie_key, $_COOKIE)) {
@@ -164,7 +164,7 @@ class PollController extends AbstractController {
     public function addNewPoll(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
-        $fields = ['name', 'question', 'question_type', 'release_date'];
+        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram', 'release_answer'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
                 $this->core->addErrorMessage("Poll must fill out all fields");
@@ -181,7 +181,17 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram']);
+        if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
+                    $this->core->addErrorMessage("Invalid student histogram release setting");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        if (!in_array($_POST["release_answer"], PollUtils::getReleaseAnswerSettings())) {
+                    $this->core->addErrorMessage("Invalid poll answer release setting");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -209,7 +219,7 @@ class PollController extends AbstractController {
 
         foreach ($_POST['option'] as $option) {
             if (!isset($option['order']) || !isset($option['response'])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             $option = new Option((int) $option['order'], $option['response'], isset($option['is_correct']) && $option['is_correct'] === 'on');
@@ -289,7 +299,7 @@ class PollController extends AbstractController {
             return new RedirectResponse($returnUrl);
         }
 
-        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram'];
+        $fields = ['name', 'question', 'question_type', 'release_date', 'release_histogram', 'release_answer'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
                 $this->core->addErrorMessage("Poll must fill out all fields");
@@ -313,6 +323,7 @@ class PollController extends AbstractController {
         $poll->setQuestionType($_POST['question_type']);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
+        $poll->setReleaseAnswer($_POST['release_answer']);
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -346,7 +357,7 @@ class PollController extends AbstractController {
 
         foreach ($_POST['option'] as $option) {
             if (!isset($option['order']) || !isset($option['response'])) {
-                $this->core->addErrorMessage("Error occured in adding poll");
+                $this->core->addErrorMessage("Error occurred in adding poll");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             $id = (int) $option['id'];
@@ -378,7 +389,7 @@ class PollController extends AbstractController {
         foreach ($poll->getOptions() as $poll_option) {
             if (!in_array($poll_option->getId(), $keep_ids)) {
                 if ($poll_option->hasUserResponses()) {
-                    $this->core->addErrorMessage("Error occured in editing poll: attempt to delete response option that has already been submitted as an answer");
+                    $this->core->addErrorMessage("Error occurred in editing poll: attempt to delete response option that has already been submitted as an answer");
                     return new RedirectResponse($returnUrl);
                 }
                 $poll->removeOption($poll_option);
@@ -598,7 +609,7 @@ class PollController extends AbstractController {
     public function getPollExportData() {
         /** @var Poll[] */
         $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAll();
-        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getSemester() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
+        $file_name = date("Y-m-d") . "_" . $this->core->getConfig()->getTerm() . "_" . $this->core->getConfig()->getCourse() . "_" . "poll_questions" . ".json";
         $data = FileUtils::encodeJson(PollUtils::getPollExportData($polls));
         if ($data === false) {
             $this->core->addErrorMessage("Failed to export poll data. Please try again");
@@ -640,7 +651,7 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {

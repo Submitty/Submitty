@@ -24,8 +24,9 @@ class PollUtils {
                 'correct_responses' => [],
                 'release_date' => $poll->getReleaseDate()->format('Y-m-d'),
                 'status' => $poll->getStatus(),
-                'image_path' => $poll->getImagePath(),
-                'release_histogram' => $poll->getReleaseHistogram()
+                'release_histogram' => $poll->getReleaseHistogram(),
+                'release_answer' => $poll->getReleaseAnswer(),
+                'image_path' => $poll->getImagePath()
             ];
             foreach ($poll->getOptions() as $option) {
                 $poll_data['responses'][$option->getOrderId()] = $option->getResponse();
@@ -53,5 +54,21 @@ class PollUtils {
         return (($poll_type == "single-response-single-correct")
                 || ($poll_type == "single-response-multiple-correct")
                 || ($poll_type == "single-response-survey"));
+    }
+
+    public static function getReleaseHistogramSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
+    }
+
+    public static function getReleaseAnswerSettings(): array {
+        return [
+            "never",
+            "when_ended",
+            "always"
+        ];
     }
 }

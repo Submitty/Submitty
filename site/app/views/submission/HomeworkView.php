@@ -11,6 +11,8 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\LateDayInfo;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -33,11 +35,11 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
-        $late_days_use = 0;
+        $days_past_deadline = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
-            $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
+            $days_past_deadline = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
         $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
@@ -59,12 +61,13 @@ class HomeworkView extends AbstractView {
         }
 
         try {
+            $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             // showing submission if user is a grader or student can submit
             if ($this->core->getUser()->accessGrading()) {
-                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline);
             }
             elseif ($gradeable->isStudentSubmit()) {
-                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $gradeable->canStudentSubmit());
+                $return .= $this->renderSubmitBox($late_days, $gradeable, $graded_gradeable, $version_instance, $days_past_deadline, $gradeable->canStudentSubmit());
             }
         }
         catch (NotebookException $e) {
@@ -125,12 +128,11 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        $regrade_available = $this->core->getConfig()->isRegradeEnabled()
-            && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
+        $grade_inquiry_available = ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
-            && $gradeable->isRegradeOpen()
+            && $gradeable->isGradeInquiryOpen()
             && $submission_count !== 0;
 
         if (
@@ -139,14 +141,14 @@ class HomeworkView extends AbstractView {
             && $submission_count !== 0
             && $active_version !== 0
         ) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $grade_inquiry_available);
 
             if ($gradeable->hasPeerComponent()) {
-                $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
+                $return .= $this->renderPeerResultsBox($graded_gradeable, $grade_inquiry_available);
             }
         }
-        if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
-            $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
+        if ($grade_inquiry_available || $graded_gradeable !== null && $graded_gradeable->hasGradeInquiry()) {
+            $return .= $this->renderGradeInquiryBox($graded_gradeable, $can_inquiry);
         }
         return $return;
     }
@@ -295,14 +297,15 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->renderTwigOutput("submission/homework/SubmissionsClosedBox.twig");
     }
     /**
+     * @param LateDays $late_days
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
-     * @param int $late_days_use
+     * @param int $days_past_deadline
      * @param bool $canStudentSubmit
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, bool $canStudentSubmit = true): string {
+    private function renderSubmitBox(LateDays $late_days, Gradeable $gradeable, $graded_gradeable, $version_instance, int $days_past_deadline, bool $canStudentSubmit = true): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $output = "";
@@ -348,6 +351,9 @@ class HomeworkView extends AbstractView {
         }
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
+        $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
+        $charged_late_days =  $late_day_info !== null ? $late_day_info->getLateDaysCharged() : 0;
+        $remaining_late_days_for_gradeable = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() : 0;
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
             $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
@@ -442,20 +448,43 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
 
+        // Grab all team member late day information
+        $team_ldi = ($graded_gradeable !== null && $my_team !== null) ? LateDayInfo::fromSubmitter($this->core, $graded_gradeable->getSubmitter(), $graded_gradeable) : null;
+        $min_team_would_be_late_days_remaining = $team_ldi !== null ? min(array_map(function ($ldi) use ($would_be_days_late) {
+            if ($ldi !== null) {
+                $days_to_be_charged = $would_be_days_late - $ldi->getDaysLate();
+                return $ldi->getLateDaysRemaining() - $days_to_be_charged;
+            }
+            else {
+                return 0;
+            }
+        }, $team_ldi)) : 0;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+        $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $has_overridden_grades = false;
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
+        $vcs_partial_path = '';
+        $vcs_partial_path = $gradeable->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_partial_path' => $vcs_partial_path ,
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
@@ -476,11 +505,13 @@ class HomeworkView extends AbstractView {
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && ($gradeable->isSubmissionClosed() && !$gradeable->isTaGradeReleased()),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
+            'bulk_upload_access' => $this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable]),
             'user_id' => $this->core->getUser()->getId(),
             'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
+            'min_team_would_be_late_days_remaining' => $min_team_would_be_late_days_remaining,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -493,7 +524,9 @@ class HomeworkView extends AbstractView {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
                 }
             },
-            'late_days_use' => $late_days_use,
+            'days_past_deadline' => $days_past_deadline,
+            'charged_late_days' => $charged_late_days,
+            'remaining_late_days_for_gradeable' => $remaining_late_days_for_gradeable,
             'old_files' => $old_files,
             'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
@@ -680,7 +713,7 @@ class HomeworkView extends AbstractView {
                            'matches' => $matches ];
         }
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
@@ -999,7 +1032,29 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
+            $notebook_data = null;
+            $hidefiles = [];
+            if ($autograding_config->isNotebookGradeable()) {
+                $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+
+                $notebook = $notebook_model->getNotebook();
+                if ($graded_gradeable !== null) {
+                    $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                        $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                        $notebook,
+                        $this->core->getUser()->getId(),
+                        $version_instance->getVersion(),
+                        $graded_gradeable->getGradeableId()
+                    );
+                }
+                foreach ($notebook_data as $note) {
+                    if (array_key_exists('filename', $note)) {
+                        array_push($hidefiles, $note['filename']);
+                    }
+                }
+            }
             $param = array_merge($param, [
+                'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
@@ -1025,6 +1080,25 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        $failed_file = '';
+        $file_count = 0;
+        // See if the grade has succeeded or failed
+        if (in_array('files', $param)) {
+            $file_count = count($param['files']);
+            if ($file_count === 1) {
+                foreach ($param['files'] as $file) {
+                    if (str_contains($file['relative_name'], 'failed')) {
+                        $failed_file = file_get_contents($file['path']);
+                    // Exclude the Exception error message
+                        $failed_file = substr(strstr($failed_file, "\n"), 3);
+                    }
+                }
+                // Arbitrary size, currently bigger than all of the failed files, but
+                // could be increased if the failed files need more tips/messages
+                $failed_file = (strlen($failed_file) > 1000) ? substr($failed_file, 0, 1000) : $failed_file;
+            }
+        }
+
         // If its not git checkout
         $can_download = !$gradeable->isVcs();
 
@@ -1040,8 +1114,10 @@ class HomeworkView extends AbstractView {
         $view_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
         $param = array_merge($param, [
+            'failed_file' => $failed_file,
+            'file_length' => $file_count,
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => $gradeable->canStudentDownload(),
+            'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1053,6 +1129,7 @@ class HomeworkView extends AbstractView {
             'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'change_version_url' => $change_version_url,
             'view_version_url' => $view_version_url,
             'versions' => $version_data,
@@ -1060,9 +1137,8 @@ class HomeworkView extends AbstractView {
             'allowed_late_days' => $gradeable->getLateDays(),
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
             'is_vcs' => $gradeable->isVcs(),
-            'can_download' => $can_download,
-            'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+            'can_change_submissions' => $gradeable->isStudentSubmit(),
+            'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
             'csrf_token' => $this->core->getCsrfToken(),
@@ -1076,10 +1152,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $grade_inquiry_available): string {
 
         $rendered_ta_results = '';
         $been_ta_graded = false;
@@ -1089,7 +1165,7 @@ class HomeworkView extends AbstractView {
                 'AutoGrading',
                 'showTAResults',
                 $graded_gradeable->getTaGradedGradeable(),
-                $regrade_available,
+                $grade_inquiry_available,
                 $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
             );
         }
@@ -1101,10 +1177,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @return string
      */
-    private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+    private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $grade_inquiry_available): string {
 
         $rendered_peer_results = '';
         $been_peer_graded = false;
@@ -1115,7 +1191,7 @@ class HomeworkView extends AbstractView {
                 'AutoGrading',
                 'showPeerResults',
                 $graded_gradeable->getTaGradedGradeable(),
-                $regrade_available,
+                $grade_inquiry_available,
                 $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
             );
         }
@@ -1130,8 +1206,8 @@ class HomeworkView extends AbstractView {
      * @param bool $can_inquiry
      * @return string
      */
-    private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/RegradeBox.twig', [
+    private function renderGradeInquiryBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/GradeInquiryBox.twig', [
             'graded_gradeable' => $graded_gradeable,
             'can_inquiry' => $can_inquiry
         ]);
@@ -1142,11 +1218,11 @@ class HomeworkView extends AbstractView {
      * @param bool $can_inquiry
      * @return string
      */
-    public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+    public function showGradeInquiryDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
-        $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
-        $regrade_message = $this->core->getConfig()->getRegradeMessage();
-        $request_regrade_url = $this->core->buildCourseUrl([
+        $is_inquiry_open = $graded_gradeable->getGradeable()->isGradeInquiryOpen();
+        $grade_inquiry_message = $this->core->getConfig()->getGradeInquiryMessage();
+        $grade_inquiry_url = $this->core->buildCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry',
@@ -1158,21 +1234,21 @@ class HomeworkView extends AbstractView {
             'grade_inquiry',
             'toggle_status'
         ]);
-        $make_regrade_post_url = $this->core->buildCourseUrl([
+        $make_grade_inquiry_post_url = $this->core->buildCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry',
             'post'
         ]);
 
-        $grade_inquiries = $graded_gradeable->getRegradeRequests();
+        $grade_inquiries = $graded_gradeable->getGradeInquiries();
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
-
         // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
-            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+            $queries = $this->core->getQueries();
+            $grade_inquiry_posts = $queries->getGradeInquiryDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
@@ -1181,14 +1257,41 @@ class HomeworkView extends AbstractView {
                     $gc_title = $component->getTitle();
                 }
 
+
+                $grade_inquiry_posts_for_id = $grade_inquiry_posts[$grade_inquiry->getId()];
+                $author_user_ids = array_map(function ($post) {
+                    return $post["user_id"];
+                }, $grade_inquiry_posts_for_id);
+                $author_user_groups = $queries->getAuthorUserGroups(array_values($author_user_ids));
+
+                $instructor_full_access = [];
+                $limited_access_grader = [];
+
+                foreach ($author_user_groups as $author) {
+                    $limited_access_grader[$author["user_id"]] = $author["user_group"] === User::GROUP_LIMITED_ACCESS_GRADER;
+                    $instructor_full_access[$author["user_id"]] = $author["user_group"] <= User::GROUP_FULL_ACCESS_GRADER;
+                }
+
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
                     if (empty($post)) {
                         break;
                     }
-                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $is_staff = $queries->isStaffPost($post['user_id']);
+
+                    $is_limited_access_grader = $limited_access_grader[$post['user_id']];
+                    $is_instructor_or_full_access_grader = $instructor_full_access[$post['user_id']];
+                    $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+                    $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
+                    $name = $given_name;
+                    if ($is_limited_access_grader) {
+                        $name = $given_name . " " . substr($family_name, 0, 1) . ".";
+                    }
+                    if ($is_instructor_or_full_access_grader) {
+                        $name = $given_name . ' ' . $family_name;
+                    }
+
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $post_id = $post['id'];
@@ -1243,15 +1346,15 @@ class HomeworkView extends AbstractView {
         }
         $components_twig_array[] = ['id' => 0, 'title' => 'All'];
 
-        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Discussion.twig', [
             'grade_inquiries' => $grade_inquiries_twig_array,
-            'request_regrade_url' => $request_regrade_url,
+            'grade_inquiry_url' => $grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
-            'make_request_post_url' => $make_regrade_post_url,
+            'make_request_post_url' => $make_grade_inquiry_post_url,
             'has_submission' => $graded_gradeable->hasSubmission(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'g_id' => $graded_gradeable->getGradeable()->getId(),
-            'regrade_message' => $regrade_message,
+            'grade_inquiry_message' => $grade_inquiry_message,
             'can_inquiry' => $can_inquiry,
             'is_inquiry_yet_to_start' => $graded_gradeable->getGradeable()->isGradeInquiryYetToStart(),
             'is_inquiry_open' => $is_inquiry_open,
@@ -1267,11 +1370,25 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
+
     public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+        $queries = $this->core->getQueries();
+        $author_user_id = [$post["user_id"]];
+        $author_user_group = $queries->getAuthorUserGroups($author_user_id)[0];
+        $limited_access_grader = $author_user_group['user_group'] === User::GROUP_LIMITED_ACCESS_GRADER;
+        $instructor_full_access = $author_user_group['user_group'] <= User::GROUP_FULL_ACCESS_GRADER;
+        $family_name = $queries->getUserById($post['user_id'])->getDisplayedFamilyName();
+        $given_name = $queries->getUserById($post['user_id'])->getDisplayedGivenName();
+        $name  = $given_name;
+        if ($limited_access_grader) {
+            $name = $given_name . " " . substr($family_name, 0, 1) . ".";
+        }
+        if ($instructor_full_access) {
+            $name = $given_name . ' ' . $family_name;
+        }
 
-        $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedGivenName();
+        $is_staff = $queries->isStaffPost($post['user_id']);
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
         $content = $post['content'];
         $post_id = $post['id'];
@@ -1283,7 +1400,7 @@ class HomeworkView extends AbstractView {
             $gc_title = $gradeable_component->getTitle();
         }
 
-        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Post.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Post.twig', [
             'post' => [
                 'is_staff' => $is_staff,
                 'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),

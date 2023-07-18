@@ -915,22 +915,22 @@
                   "start_x" : {
                     "description" : "(Optional) An integer starting x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 1
+                    "minimum" : 0
                   },
                   "start_y" : {
                     "description" : "(Optional) An integer starting y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 1
+                    "minimum" : 0
                   },
                   "end_x" : {
                     "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 1
+                    "minimum" : 0
                   },
                   "end_y" : {
                     "description" : "(Optional) An integer ending y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
                     "type" : "integer",
-                    "minimum" : 1
+                    "minimum" : 0
                   },
                   "mouse_button" : {
                     "description" : "(Optional) left, middle, or right. The mouse button to be clicked. Defaults to left.",

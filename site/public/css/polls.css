@@ -39,8 +39,22 @@
     cursor: pointer;
 }
 
-.response-btn {
+.option-btn {
+    vertical-align: middle;
+}
+
+.option-btn input[type="radio"]{
     vertical-align: top;
+}
+
+.student-submit {
+    margin-top: 2em;
+}
+
+.option-text {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0.25em;
 }
 
 .radio p {
@@ -100,4 +114,12 @@ form {
 #poll-name {
     flex-grow: 100;
     margin-left: 0.5em;
+}
+
+.correct-tag-background {
+    color: var(--standard-dark-green);
+}
+
+.correct-tag-checkmark {
+    color: var(--text-white);
 }

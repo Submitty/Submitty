@@ -49,6 +49,11 @@ class Poll {
     private $release_histogram;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $release_answer;
+
+    /**
      * @ORM\OneToMany(targetEntity="\app\entities\poll\Option",mappedBy="poll",orphanRemoval=true)
      * @ORM\JoinColumn(name="poll_id", referencedColumnName="poll_id")
      * @ORM\OrderBy({"order_id" = "ASC"})
@@ -63,12 +68,13 @@ class Poll {
      */
     private $responses;
 
-    public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $image_path = null) {
+    public function __construct(string $name, string $question, string $question_type, \DateTime $release_date, string $release_histogram, string $release_answer, string $image_path = null) {
         $this->setName($name);
         $this->setQuestion($question);
         $this->setQuestionType($question_type);
         $this->setReleaseDate($release_date);
         $this->setReleaseHistogram($release_histogram);
+        $this->setReleaseAnswer($release_answer);
         $this->setImagePath($image_path);
         $this->setClosed();
 
@@ -165,6 +171,26 @@ class Poll {
 
     public function isHistogramAvailable(): bool {
         return ($this->release_histogram === "always" && !$this->isClosed()) || ($this->release_histogram === "when_ended" && $this->isEnded());
+    }
+
+    /**
+     * Note: This function should only be used if the actual string is desired.  (exporting poll data for example)
+     *       isReleaseAnswer() is preferred if at all possible.
+     */
+
+    public function setReleaseAnswer(string $status): void {
+        if ($status !== "never" && $status !== "always" && $status !== "when_ended") {
+            throw new \RuntimeException("Invalid release answer status");
+        }
+        $this->release_answer = $status;
+    }
+
+    public function getReleaseAnswer(): string {
+        return $this->release_answer;
+    }
+
+    public function isReleaseAnswer(): bool {
+        return ($this->release_answer === "always" && !$this->isClosed()) || ($this->release_answer === "when_ended" && $this->isEnded());
     }
 
     /**

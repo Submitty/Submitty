@@ -12,37 +12,36 @@
 opencv-python-headless==4.6.0.66
 
 # jsonschema & jsonref & pytz & tzlocal
-pytz==2022.2.1 # Submitty-util specific.
+pytz==2022.7.1 # Submitty-util specific.
+
 
 python-pam==2.0.2
-ruamel.yaml==0.17.21
-psycopg2-binary==2.9.4
+ruamel.yaml==0.17.32
+psycopg2-binary==2.9.6
 sqlalchemy==1.4.29
-pylint==2.13.9
-psutil==5.9.2
+pylint==2.17.2
+psutil==5.9.5
 python-dateutil==2.8.2
-watchdog==2.1.9
-xlsx2csv==0.8.0
+watchdog==2.3.0
+xlsx2csv==0.8.1
 pause==0.3
 paramiko==2.11.0
 tzlocal==2.1
 PyPDF2==2.4.1
-distro==1.7.0
+distro==1.8.0
 jsonschema==3.2.0
 jsonref==0.2
-docker==5.0.3
-
-# For Lichen / Plagiarism Detection
-parso==0.8.3
+docker==6.1.2
+urllib3==2.0.3
 
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 clang==14.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.9
-pdf2image==1.16.0
-numpy==1.23.3
+pdf2image==1.16.3
+numpy==1.24.3
 
 # python libraries for OCR for digit recognition
-onnx==1.12.0
-onnxruntime==1.11.1
+onnx==1.14.0
+onnxruntime==1.15.1

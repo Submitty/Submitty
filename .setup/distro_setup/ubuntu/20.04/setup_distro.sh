@@ -6,7 +6,7 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${DEV_VM} == 1 ]; then
     export SUBMISSION_URL='http://localhost:1511'
     export SUBMISSION_PORT=1511
     export DATABASE_PORT=16442
@@ -51,7 +51,7 @@ apt-get install -qqy postgresql-12
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
 apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml php-ds php-imagick
 
-if [ ${VAGRANT} == 1 ]; then
+if [ ${DEV_VM} == 1 ]; then
     apt-get install -qqy php-xdebug
 fi
 
@@ -107,7 +107,7 @@ apt-get install git -y
 # ------------------------------------------------------------------
 
 # Install OpenLDAP for testing on Vagrant
-if [ ${VAGRANT} == 1 ]; then
+if [ ${DEV_VM} == 1 ]; then
     apt-get install -qqy php-ldap
 
     CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -116,6 +116,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 # Install SAML IdP docker container for testing
-if [ ${VAGRANT} == 1 ]; then
+if [ ${DEV_VM} == 1 ]; then
     docker pull submitty/docker-test-saml-idp:latest
 fi

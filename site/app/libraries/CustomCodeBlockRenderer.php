@@ -23,7 +23,7 @@ class CustomCodeBlockRenderer implements BlockRendererInterface {
 
     private function addLineNumbers(HtmlElement $element, int $num_lines) {
         if ($num_lines < 5) {
-            return $element->getContents();
+            return $element;
         }
         $line_numbers_content = "";
         for ($num = 1; $num <= $num_lines; $num++) {

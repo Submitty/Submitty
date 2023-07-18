@@ -1,0 +1,35 @@
+
+{
+    "database_details": {
+        "dbname": "submitty_git_example_db"
+    },
+    "course_details": {
+        "course_name": "CS1 Git Problem Example",
+        "course_home_url": "https://submitty.test",
+        "default_hw_late_days": 99,
+        "default_student_late_days": 99,
+        "zero_rubric_grades": false,
+        "upload_message": "By submitting, you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.",
+        "display_rainbow_grades_summary": false,
+        "display_custom_message": false,
+        "course_email": "Please contact your TA or instructor to submit a grade inquiry.",
+        "vcs_base_url": "VCS_BASE_URL",
+        "vcs_type": "git",
+        "private_repository": "",
+        "forum_enabled": false,
+        "forum_create_thread_message": "",
+        "grade_inquiry_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
+        "seating_only_for_instructor": false,
+        "room_seating_gradeable_id": "",
+        "auto_rainbow_grades": false,
+        "queue_enabled": false,
+        "queue_message": "",
+        "queue_announcement_message": "",
+        "polls_enabled": false,
+        "polls_pts_for_correct": 1,
+        "polls_pts_for_incorrect": 0,
+        "seek_message_enabled": false,
+        "seek_message_instructions": "Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.",
+        "git_autograding_branch": "main"
+    }
+}
