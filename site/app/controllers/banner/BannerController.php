@@ -14,8 +14,8 @@ use app\models\gradeable\GradeableUtils;
 use app\views\banner\BannerView;
 use Symfony\Component\Routing\Annotation\Route;
 
-use app\entities\course\BannerImage;
-use app\repositories\course\BannerImageRepository;
+use app\entities\banner\BannerImage;
+use app\repositories\banner\BannerImageRepository;
 
 
 use app\controllers\MiscController;

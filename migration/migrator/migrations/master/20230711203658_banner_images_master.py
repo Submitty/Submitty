@@ -19,7 +19,7 @@ def up(config, database):
 
     query = """
         CREATE TABLE banner_images (
-            id integer not NULL,
+            id SERIAL PRIMARY KEY,
             release_date DATE NOT NULL,
             closing_date DATE NOT NULL,
             name VARCHAR(255) NOT NULL,
@@ -27,11 +27,11 @@ def up(config, database):
         )
     """
 
-
-
     database.execute(query)
 
-
+    # Associate the sequence with the id column
+    alter_query = "ALTER TABLE banner_images ALTER COLUMN id SET DEFAULT nextval('banner_images_id_seq'::regclass)"
+    database.execute(alter_query)
 
 def down(config, database):
     banner_images_dir = Path(config.submitty['submitty_data_dir'], 'banner_images')
@@ -40,5 +40,5 @@ def down(config, database):
         # Delete all contents within banner_images directory
         shutil.rmtree(str(banner_images_dir))
 
-    query = query = "DROP TABLE IF EXISTS banner_images"
+    query = "DROP TABLE IF EXISTS banner_images"
     database.execute(query)
