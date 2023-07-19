@@ -73,6 +73,19 @@ class BannerImage {
     public function setName(string $name): void {
         $this->name = $name;
     }
+
+    public function getReleaseDate(): \DateTime {
+        return $this->release_date;
+    }
+
+    public function getClosingDate(): \DateTime {
+        return $this->closing_date;
+    }
+
+    public function getName(): string  {
+        return $this->name;
+    }
+
     public function setExtraInfo(string $name): void {
         $this->extra_info = $name;
     }

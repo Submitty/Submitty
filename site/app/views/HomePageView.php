@@ -138,11 +138,14 @@ class HomePageView extends AbstractView {
                         $error_image_data = $expected_img_data;
                     }
                     else {
-                        $images_data_array[] = [
-                            "name" => $img_name,
-                            "data" => $expected_img_data,
-                            "extra_info" => $banner_item->getExtraInfo()
-                        ];
+                        $date_now = new \DateTime();
+                        if ($banner_item->getReleaseDate() <= $date_now && $date_now <= $banner_item->getClosingDate()) {
+                            $images_data_array[] = [
+                                "name" => $img_name,
+                                "data" => $expected_img_data,
+                                "extra_info" => $banner_item->getExtraInfo()
+                            ];
+                        }
                     }
                 }
             }
