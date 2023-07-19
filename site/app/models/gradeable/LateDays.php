@@ -94,6 +94,7 @@ class LateDays extends AbstractModel {
             if (!$useCache && ($reCache)) {
                 $this->core->getQueries()->addLateDayCacheForUser($user, $info);
             }
+        }
     }
 
     /**

@@ -1649,6 +1649,11 @@ WHERE semester=? AND course=? AND user_id=?",
      * @return LateDayInfo
      */
     public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
+
+        if ($user === null) {
+            return null;
+        }
+
         $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
         $cache['graded_gradeable'] = $graded_gradeable;
         $ldi = null;
@@ -1656,6 +1661,7 @@ WHERE semester=? AND course=? AND user_id=?",
         if ($cache !== null) {
             $ldi = new LateDayInfo($this->core, $user, $cache);
         }
+
         return $ldi;
     }
 

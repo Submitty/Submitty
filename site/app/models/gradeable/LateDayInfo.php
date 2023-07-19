@@ -194,14 +194,6 @@ class LateDayInfo extends AbstractModel {
             'late_days_change' => $this->getLateDaysChange()
         ];
     }
-    public function isOnTimeSubmission() {
-        // if there is no submission or if this isnt a gradeable event, ignore
-        if (!$this->has_submission || $this->isLateDayUpdate()) {
-            return true;
-        }
-
-        return $this->getStatus() == self::STATUS_GOOD || $this->getStatus() == self::STATUS_LATE;
-    }
 
     /**
      * Gets if the submitter submitted on time

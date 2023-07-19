@@ -448,11 +448,11 @@
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
 
-    {% elseif info.late_day_info.isOnTimeSubmission() == false %}
+    {% elseif not info.late_day_info == null and info.late_day_info.isOnTimeSubmission() == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
     
-    {% elseif info.late_day_info.isOnTimeSubmission() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 

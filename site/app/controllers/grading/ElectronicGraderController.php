@@ -585,10 +585,16 @@ class ElectronicGraderController extends AbstractController {
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
-
+        $section_key = '';
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = 'registration_section';
+        }
+        else {
+            $section_key = 'rotating_section';
+        }
         $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
-            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section');
+            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
@@ -606,8 +612,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         if ($peer) {
-            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
-            $section_key = 'registration_section';
+            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
             $peer_array = $this->core->getQueries()->getPeerAssignment($gradeable_id, $this->core->getUser()->getId());
             $peers_to_grade = count($peer_array);
             $num_components = count($gradeable->getPeerComponents());
@@ -631,7 +636,6 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $section['sections_registration_id'];
                 }
             }
-            $section_key = 'registration_section';
             if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
@@ -648,7 +652,6 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $section['sections_rotating_id'];
                 }
             }
-            $section_key = 'rotating_section';
             if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
             }
@@ -1741,16 +1744,21 @@ class ElectronicGraderController extends AbstractController {
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
+        $section_key = '';
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = 'registration_section';
+        }
+        else {
+            $section_key = 'rotating_section';
+        }
 
         if ($peer) {
-            $section_key = 'registration_section';
             $total = $gradeable->getPeerGradeSet();
             $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
             $non_late_total_submitted = $total_submitted;
             $non_late_graded = $graded;
         }
         elseif ($gradeable->isGradeByRegistration()) {
-            $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && $sections == null) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
