@@ -18,10 +18,10 @@ describe('Testing functionality of Autograder Results', () => {
     it('Should show and hide details', () => {
         //Open
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
-        cy.get('.loading-tools-show').scrollIntoView().eq(1).click();
+        cy.get('.loading-tools-show').eq(1).scrollIntoView().click();
         cy.get('#testcase_1').scrollIntoView().should('be.visible');
         //Close
-        cy.get('.loading-tools-hide').scrollIntoView().eq(1).click();
+        cy.get('.loading-tools-hide').eq(1).scrollIntoView().click();
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
     });
 
