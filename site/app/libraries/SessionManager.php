@@ -73,6 +73,7 @@ class SessionManager {
 
     /**
      * Create a new session for the user
+     * @param array<string, string> $user_agent
      */
     public function newSession(string $user_id, array $user_agent): string {
         if (empty($this->session)) {

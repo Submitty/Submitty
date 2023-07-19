@@ -3173,7 +3173,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param bool $to_set
      *
      */
-    public function updateSingleSessionSetting(string $user_id, bool $to_set = false) {
+    public function updateSingleSessionSetting(string $user_id, bool $to_set = false): void {
         $this->submitty_db->query("UPDATE users SET enforce_single_session=? WHERE user_id=?", [$to_set, $user_id]);
     }
 

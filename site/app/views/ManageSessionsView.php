@@ -3,6 +3,10 @@
 namespace app\views;
 
 class ManageSessionsView extends AbstractView {
+    /**
+     * @param array<mixed> $user_sessions
+     * @return void
+     */
     public function showSessionsPage(array $user_sessions) {
         $this->core->getOutput()->addBreadcrumb("Manage Sessions");
         $this->core->getOutput()->addInternalCss('table.css');

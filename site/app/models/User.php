@@ -123,7 +123,7 @@ class User extends AbstractModel {
     /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
     /** @prop @var bool Should the user only have one active session at a time? */
-    protected $enforce_single_session;
+    protected bool $enforce_single_session;
     /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @prop @var string Unique id for course section */

@@ -4226,11 +4226,6 @@ parameters:
 			path: app/libraries/SamlSettings.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\SessionManager\\:\\:\\$session has no type specified\\.$#"
-			count: 1
-			path: app/libraries/SessionManager.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
 			count: 1
 			path: app/libraries/TokenManager.php
@@ -6266,11 +6261,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSession\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSimilarNumericIdMatches\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6846,11 +6836,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:openQueue\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6907,11 +6892,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removePeerAssignmentsForGrader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removeSessionById\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7187,11 +7167,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSeekingTeamMessageById\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSessionExpiration\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -12230,6 +12205,11 @@ parameters:
 			message: "#^Property app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:\\$warning has no type specified\\.$#"
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			count: 1
+			path: app/repositories/SessionRepository.php
 
 		-
 			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"

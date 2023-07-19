@@ -63,6 +63,9 @@ class Session {
      */
     private $platform;
 
+    /**
+     * @param array<string, string> $user_agent
+     */
     public function __construct(string $session_id, string $user_id, string $csrf_token, \DateTime $session_expires, \DateTime $session_created, array $user_agent) {
         $this->session_id = $session_id;
         $this->user_id = $user_id;
@@ -110,7 +113,7 @@ class Session {
         return $this->session_id === $current_session_id;
     }
 
-    public function updateSessionExpiration(\DateTime $current_dt) {
+    public function updateSessionExpiration(\DateTime $current_dt): void {
         $this->session_expires = $current_dt->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION));
     }
 }
