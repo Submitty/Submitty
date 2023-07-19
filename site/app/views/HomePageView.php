@@ -6,6 +6,10 @@ use app\models\User;
 use app\libraries\FileUtils;
 use DirectoryIterator;
 
+use app\entities\banner\BannerImage;
+use app\repositories\banner\BannerImageRepository;
+
+use app\libraries\Core;
 
 class HomePageView extends AbstractView {
     /**
@@ -55,7 +59,8 @@ class HomePageView extends AbstractView {
 
         $images_data_array = [];
         $error_image_data = '_NONE_';
-
+        $banner_item = $this->core->getBannerEntityManager()->getRepository(BannerImage::class)->findBy(['name' => "Beauty.png"]);
+        var_dump($banner_item);
         self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath());
 
         $this->output->addInternalCss('homepage.css');
