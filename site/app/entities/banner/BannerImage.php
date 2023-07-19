@@ -26,18 +26,16 @@ class BannerImage {
      * @var integer
      */
     protected $id;
-
     /**
-     * @ORM\Column(type="datetimetz")
+     * @ORM\Column(type="datetime", precision=6)
      * @var \DateTime
      */
     protected $release_date;
 
     /**
-     * @ORM\Column(type="datetimetz")
+     * @ORM\Column(type="datetime", precision=6)
      * @var \DateTime
      */
-
     protected $closing_date;
     /**
      * @ORM\Column(type="string")

@@ -22,8 +22,8 @@ def up(config, database):
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             extra_info VARCHAR(255),
-            release_date timestamptz,
-            closing_date timestamptz
+            release_date timestamp(6),
+            closing_date timestamp(6)
         )
     """
 
