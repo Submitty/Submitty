@@ -389,7 +389,7 @@ class GradingQueue {
                 }
             }
             $capability = "default";
-            if (array_key_exists("required_capabilities", $entry->getQueueObj())) {
+            if (in_array("required_capabilities", $entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 

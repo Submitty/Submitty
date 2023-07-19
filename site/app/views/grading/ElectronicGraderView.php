@@ -642,7 +642,7 @@ HTML;
                 }
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-                $team_name = addslashes($row->getSubmitter()->getTeam()->getTeamName() ?? "");
+                $team_name = addslashes($row->getSubmitter()->getTeam()->getTeamName());
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}', '{$team_name}');";
                 $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"] ?? null;
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
@@ -769,10 +769,7 @@ HTML;
 
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
-            if ($a['title'] === 'NULL' || $b['title'] === 'NULL') {
-                return $a['title'] === 'NULL' ? 1 : -1;
-            }
-            return strnatcmp($a['title'], $b['title']); // use strnatcmp to sort 9 before 10
+            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
         });
 
         $empty_team_info = [];
@@ -1354,12 +1351,10 @@ HTML;
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    if ($hidden_files !== null) {
-                        foreach (explode(",", $hidden_files) as $file_regex) {
-                            $file_regex = trim($file_regex);
-                            if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
-                                $skipping = true;
-                            }
+                    foreach (explode(",", $hidden_files) as $file_regex) {
+                        $file_regex = trim($file_regex);
+                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
+                            $skipping = true;
                         }
                     }
                     if (!$skipping) {

@@ -2870,7 +2870,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach ($rows as $row) {
-            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id'] ?? '');
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
             $modified_rows[] = $row;
         }
         return $modified_rows;
@@ -5634,8 +5634,8 @@ AND gc_id IN (
             // Finally, create the gradeable
             $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
             $overrides = [];
-            $users = json_decode($row['gamo_users'] ?? "[]");
-            $minutes = json_decode($row['gamo_minutes'] ?? "[]");
+            $users = json_decode($row['gamo_users']);
+            $minutes = json_decode($row['gamo_minutes']);
             if ($users !== null) {
                 for ($i = 0; $i < count($users); $i++) {
                     $overrides[] = [
@@ -8076,8 +8076,8 @@ WHERE current_state IN
             // This will be false if there is no manual grade yet
             if (isset($row['id'])) {
                 // prepare overall comments
-                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"] ?? "[]");
-                $row["array_overall_comments"] = json_decode($row["array_overall_comments"] ?? "[]");
+                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
+                $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
                 $row["overall_comments"] = [];
                 if ($row["array_commenter_ids"] !== null) {
                     for ($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
@@ -8170,7 +8170,7 @@ WHERE current_state IN
                     )
                 ) as $property
             ) {
-                $db_row_split[$property] = json_decode($row['array_' . $property] ?? "");
+                $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
             if (isset($db_row_split['comp_id'])) {

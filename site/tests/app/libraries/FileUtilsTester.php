@@ -661,7 +661,7 @@ STRING;
         $this->assertEquals(
             $stat[0],
             ['name' => 'big.txt',
-             'type' => 'application/octet-stream',
+             'type' => 'text/plain',
              'error' => 'File "big.txt" too large got (2.0000953674316MB)',
              'size' => 100 + Utils::returnBytes(ini_get('upload_max_filesize')),
              'is_zip' => false,
@@ -676,7 +676,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'just_big_enough.txt',
-             'type' => 'application/octet-stream',
+             'type' => 'text/plain',
              'error' => 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
              'is_zip' => false,
