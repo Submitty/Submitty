@@ -64,11 +64,11 @@ class LateDayInfo extends AbstractModel {
         $this->id = $event_info['id'] ?? null;
         $this->graded_gradeable = $event_info['graded_gradeable'] ?? null;
         $this->late_days_allowed = $event_info['late_days_allowed'] ?? null;
-        $this->late_day_date = $event_info['late_day_date'];
+        $this->late_day_date = $event_info['late_day_date'] ?? null;
         $this->submission_days_late = $event_info['submission_days_late'] ?? null;
         $this->late_day_exceptions = $event_info['late_day_exceptions'] ?? null;
-        $this->late_days_remaining = $event_info['late_days_remaining'];
-        $this->late_days_change = $event_info['late_days_change'];
+        $this->late_days_remaining = $event_info['late_days_remaining']  ?? null;
+        $this->late_days_change = $event_info['late_days_change']  ?? null;
 
         // Set Autograded gradeable info
         $auto_graded_gradeable = $this->graded_gradeable !== null ? $this->graded_gradeable->getAutoGradedGradeable() : null;

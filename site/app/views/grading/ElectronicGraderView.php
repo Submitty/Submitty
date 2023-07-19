@@ -107,7 +107,6 @@ class ElectronicGraderView extends AbstractView {
             $total += $section['total_components'];
             $non_late_graded += $section['non_late_graded_components'];
             $non_late_total += $section['non_late_total_components'];
-            echo($section['non_late_total_components']);
             if ($gradeable->isTeamAssignment()) {
                 $no_team_total += $section['no_team'];
                 $team_total += $section['team'];
