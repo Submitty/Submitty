@@ -33,9 +33,9 @@ describe('Test cases for grading stats', () => {
             */
 
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
-
+            
+            cy.get('#submissions-on-time').should('contain', '59 / 101 (58.4%)');
             const text = cy.get('#left-grading-stats');
-            //text.should('contain', 'Students who have submitted on time: 59 / 101 (58.4%)');
             text.should('contain', 'Current percentage of TA grading done: 30 / 59 (50.8%)');
             text.should('contain', 'Section 1: 4 / 9 (44.4%)');
         });
@@ -51,8 +51,8 @@ describe('Test cases for grading stats', () => {
 
             cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
+            cy.get('#submissions-on-time').should('contain', '64 / 101 (63.4%)');
             const text = cy.get('#left-grading-stats');
-            //text.should('contain', 'Students who have submitted on time: 64 / 101 (63.4%)');
             text.should('contain', 'Current percentage of TA grading done: 64 / 64 (100.0%)');
             text.should('contain', 'Section 1: 10 / 10 (100.0%)');
             text.should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');

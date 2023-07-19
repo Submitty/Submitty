@@ -41,7 +41,7 @@
                             <br/>
                             <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
                         {% else %}
-                            <b>Students who have submitted on time:</b>  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
+                            <b>Students who have submitted on time:</b><p id="submissions-on-time">  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)</p>
                             <br/>
                             <br/>
                             <b>Current percentage of TA grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_total_grading_percentage }}%)
