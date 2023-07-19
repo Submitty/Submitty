@@ -680,11 +680,11 @@ class ElectronicGraderController extends AbstractController {
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $cookie_options);
-            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
             $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
             $null_sections_cookie = array_key_exists('include_null_sections', $_COOKIE) ? $_COOKIE['include_null_sections'] : 'omit';
+            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_sections_cookie);
+            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_sections_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
@@ -828,7 +828,7 @@ class ElectronicGraderController extends AbstractController {
                         $sections[$key]['no_team'] = $no_team_users[$key];
                         $sections[$key]['team'] = $team_users[$key];
                     }
-                    if (isset($graded_components[$key])) {
+                    if ( $key !== "NULL" && isset($graded_components[$key]) ) {
                         // Clamp to total components if unsubmitted assignment is graded for whatever reason
                         $sections[$key]['graded_components'] = $graded_components[$key];
                         $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_components[$key];

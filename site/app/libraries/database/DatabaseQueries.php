@@ -1463,42 +1463,6 @@ WHERE semester=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getLateDayCacheForUserGradeable($user_id, $g_id) {
-        $params = [$user_id, $g_id];
-        $query = "SELECT * FROM late_day_cache
-                    WHERE user_id=?
-                    AND g_id=?";
-        $this->course_db->query($query, $params);
-
-        $row = $this->course_db->row();
-
-        // If cache doesnt exist, generate it and query again
-        if (empty($row)) {
-            $this->generateLateDayCacheForUser($user_id);
-            $this->course_db->query($query, $params);
-            $row = $this->course_db->row();
-        }
-
-        // If cache still doesnt exist, the gradeable is not associated with
-        // LateDays OR there has been a computation error
-        if (empty($row)) {
-            return null;
-        }
-
-        return $row;
-    }
-
-    public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
-        $cache = $this->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
-        $cache['graded_gradeable'] = $graded_gradeable;
-        $ldi = null;
-
-        if ($cache !== null) {
-            $ldi = new LateDayInfo($this->core, $user, $cache);
-        }
-        return $ldi;
-    }
-
     /**
      * Calculates the remaining cache for all the users. If a g_id is procided,
      * it will only calculate the cache for the uses who DO NOT already have
@@ -1525,16 +1489,6 @@ WHERE semester=? AND course=? AND user_id=?",
                         existing_cache.user_id IS NULL
                     ) calculated_cache
                 );";
-
-        $this->course_db->query($query, $params);
-    }
-
-    public function generateLateDayCacheForUser($user_id) {
-        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
-        $params = [$user_id, $default_late_days];
-
-        $query = "INSERT INTO late_day_cache 
-                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
 
         $this->course_db->query($query, $params);
     }
@@ -1585,39 +1539,6 @@ WHERE semester=? AND course=? AND user_id=?",
         $query = "DELETE FROM late_day_cache
                     WHERE user_id=? AND late_day_date>=?";
         $this->course_db->query($query, $params);
-    }
-
-    public function flushLateDayCacheForUser(User $user) {
-        $params = [$user->getId()];
-        $query = "DELETE FROM late_day_cache
-                    WHERE user_id=?";
-        $this->course_db->query($query, $params);
-    }
-
-    public function flushAllLateDayCache() {
-        $query = "DELETE FROM late_day_cache";
-        $this->course_db->query($query);
-    }
-
-    public function getLateDayUpdateTimestamps() {
-        $query = "SELECT DISTINCT since_timestamp FROM late_days ORDER BY since_timestamp";
-        $this->course_db->query($query);
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new \DateTime($row['since_timestamp']);
-        }
-        return $return;
-    }
-
-    public function getLastLateDayUpdatesForUsers() {
-        $query = "SELECT user_id, max(since_timestamp) FROM late_days GROUP BY user_id";
-        $this->course_db->query($query);
-        $return = [];
-
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['user_id']] = new \DateTime($row['max']);
-        }
-        return $return;
     }
 
     public function bulkUploadLateDayCache(array $late_day_cache) {
@@ -1759,25 +1680,6 @@ WHERE semester=? AND course=? AND user_id=?",
     }
 
     /**
-     * Generate and update the late day cache for all of the students in the course
-     */
-    public function generateLateDayCacheForUsers(): void {
-        $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
-        $params = [$default_late_days];
-
-        $query = "INSERT INTO late_day_cache
-                    (SELECT (cache_row).*
-                    FROM
-                        (SELECT
-                            public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
-                        FROM users
-                        ) calculated_cache
-                    )";
-
-        $this->course_db->query($query, $params);
-    }
-
-    /**
      * Generate and update the late day cache for a student
      * @param string $user_id
      */
@@ -1797,6 +1699,13 @@ WHERE semester=? AND course=? AND user_id=?",
     public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
+    }
+
+    public function flushLateDayCacheForUser(User $user) {
+        $params = [$user->getId()];
+        $query = "DELETE FROM late_day_cache
+                    WHERE user_id=?";
+        $this->course_db->query($query, $params);
     }
 
     public function getLateDayUpdateTimestamps() {
@@ -1858,7 +1767,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $params = [];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = $sections;
         }
         if ($section_key === 'registration_section') {
@@ -1900,7 +1809,7 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
@@ -1957,7 +1866,7 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
@@ -2129,7 +2038,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2182,7 +2091,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         $params = [$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE ({$section_key} IN " . $this->createParamaterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
         }
         $this->course_db->query(
@@ -2229,7 +2138,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team, $options) {
+    public function getAverageComponentScores($g_id, $section_key, $is_team, $override, $bad_submissions, $null_sections) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2243,12 +2152,12 @@ ORDER BY {$u_or_t}.{$section_key}",
         }
 
         // Check if we want to include null sections within the average
-        if (!$options['null_section']) {
+        if ($null_sections != 'include') {
             $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
 
         // Check if we want to include late (bad) submissions into the average
-        if (!$options['late_submissions']) {
+        if ($bad_submissions != 'include') {
             $late_submissions = "INNER JOIN(
                 SELECT ldc.{$user_or_team_id}, ldc.late_day_status
                 FROM late_day_cache AS ldc
@@ -2486,11 +2395,11 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include') {
-            $late_submissions = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND AND ldc.submission_days_late>ldc.late_day_exceptions And ldc.late_days_change =0";
+            $late_submissions = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND ldc.submission_days_late>ldc.late_day_exceptions And ldc.late_days_change =0";
         } 
 
         // Check if we want to combine grade overridden marks within averages
-        if (!$is_team && $options['override']) {
+        if (!$is_team && $override == 'include') {
             $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
@@ -2554,7 +2463,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections)) . " IS NOT FALSE";
+            $sections_query = "{$grade_type}_section IN " . $this->createParameterList(count($sections)) . " IS NOT FALSE";
             $params = array_merge($sections, $params);
         }
 
@@ -3928,7 +3837,7 @@ ORDER BY {$section_key}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
@@ -3971,7 +3880,7 @@ ORDER BY {$section_key}",
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = $this->createParamaterList(count($sections_keys));
+            $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
