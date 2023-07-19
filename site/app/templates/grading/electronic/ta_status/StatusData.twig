@@ -1,6 +1,6 @@
 <div id="numerical-data" class="page-content">
     <div class = "row">
-        <div class = "box col-md-6">
+        <div class = "box col-md-6" id = "left-grading-stats" >
             {# LEFT CHUNK#}
             {% if warnings|length > 0 %}
                 <ul>
@@ -119,7 +119,7 @@
             {% endif %}
             {# LEFT CHUNK #}
         </div>
-        <div class = "box col-md-6">
+        <div class = "box col-md-6" id = "right-grading-stats">
             {# RIGHT CHUNK#}
 
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
