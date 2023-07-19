@@ -315,8 +315,6 @@ SET default_tablespace = '';
 
 CREATE TABLE public.banner_images (
     id integer NOT NULL,
-    release_date date NOT NULL,
-    closing_date date NOT NULL,
     name character varying(255) NOT NULL,
     extra_info character varying(255)
 );

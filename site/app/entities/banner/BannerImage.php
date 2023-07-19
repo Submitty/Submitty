@@ -27,18 +27,18 @@ class BannerImage {
      */
     protected $id;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime
-     */
-    protected $release_date;
+    // /**
+    //  * @ORM\Column(type="datetimetz")
+    //  * @var \DateTime
+    //  */
+    // protected $release_date;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime
-     */
+    // /**
+    //  * @ORM\Column(type="datetimetz")
+    //  * @var \DateTime
+    //  */
 
-    protected $closing_date;
+    // protected $closing_date;
     /**
      * @ORM\Column(type="string")
      * @var string
@@ -54,36 +54,39 @@ class BannerImage {
     public function __construct(string $name, string $extra_info_name) {
 
 
-        $dateString = "2023-07-18 12:45:30+0500";
+        // $dateString = "2023-07-18 12:45:30+0500";
 
-        // Create a DateTime object from the string using DateTime constructor
-        $dateTime = new DateTime($dateString);
+        // // Create a DateTime object from the string using DateTime constructor
+        // $dateTime = new DateTime($dateString);
 
-        // Get the timezone offset part from the string (e.g., "+0500")
-        $timezoneOffset = substr($dateString, -5);
+        // // Get the timezone offset part from the string (e.g., "+0500")
+        // $timezoneOffset = substr($dateString, -5);
 
-        // Create a DateTimeZone object from the timezone offset
-        $dateTimeZone = new DateTimeZone($timezoneOffset);
+        // // Create a DateTimeZone object from the timezone offset
+        // $dateTimeZone = new DateTimeZone($timezoneOffset);
 
         $this->setName($name);
         $this->setExtraInfo($extra_info_name);
     }
 
 
-    public function setReleaseDate(\DateTime $release_date): void {
-        // Convert the DateTime object to a string in the correct format
-        $this->release_date = $release_date->format('Y-m-d H:i:sO');
-    }
+    // public function setReleaseDate(\DateTime $release_date): void {
+    //     // Convert the DateTime object to a string in the correct format
+    //     $this->release_date = $release_date->format('Y-m-d H:i:sO');
+    // }
 
-    public function setClosingDate(\DateTime $closing_date): void {
-        // Convert the DateTime object to a string in the correct format
-        $this->closing_date = $closing_date->format('Y-m-d H:i:sO');
-    }
+    // public function setClosingDate(\DateTime $closing_date): void {
+    //     // Convert the DateTime object to a string in the correct format
+    //     $this->closing_date = $closing_date->format('Y-m-d H:i:sO');
+    // }
 
     public function setName(string $name): void {
         $this->name = $name;
     }
     public function setExtraInfo(string $name): void {
         $this->extra_info = $name;
+    }
+    public function getExtraInfo(): string {
+        return $this->extra_info;
     }
 }

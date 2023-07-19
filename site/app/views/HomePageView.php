@@ -59,9 +59,8 @@ class HomePageView extends AbstractView {
 
         $images_data_array = [];
         $error_image_data = '_NONE_';
-        $banner_item = $this->core->getBannerEntityManager()->getRepository(BannerImage::class)->findBy(['name' => "Beauty.png"]);
-        var_dump($banner_item);
-        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath());
+        $entity_manager = $this->core->getBannerEntityManager()->getRepository(BannerImage::class);
+        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath(), $entity_manager);
 
         $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -111,7 +110,7 @@ class HomePageView extends AbstractView {
 
 
 
-    public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path) {
+    public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path, &$entity_manager) {
         $base_course_material_path = FileUtils::joinPaths($submitty_path, 'banner_images');
 
         if (!file_exists($base_course_material_path)) {
@@ -134,13 +133,15 @@ class HomePageView extends AbstractView {
                     $expected_img_data = base64_encode(file_get_contents($expected_image));
 
                     $img_name = $fileInfo->getBasename('.png');
+                    $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
                     if ($img_name === "error_image") {
                         $error_image_data = $expected_img_data;
                     }
                     else {
                         $images_data_array[] = [
                             "name" => $img_name,
-                            "data" => $expected_img_data
+                            "data" => $expected_img_data,
+                            "extra_info" => $banner_item->getExtraInfo()
                         ];
                     }
                 }
