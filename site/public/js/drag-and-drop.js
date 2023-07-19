@@ -1293,7 +1293,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleUploadBanner(csrf_token) {
+function handleUploadBanner(csrf_token, closeTime, releaseTime) {
     const submit_course_url = buildCourseUrl(['banner', 'upload']);
     const submit_url = submit_course_url.replace('courses///', '');
 
@@ -1301,6 +1301,8 @@ function handleUploadBanner(csrf_token) {
     const return_url = return_course_url.replace('courses///', '');
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
+    formData.append('close_time', closeTime);
+    formData.append('release_time', releaseTime);
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") !== -1 ||

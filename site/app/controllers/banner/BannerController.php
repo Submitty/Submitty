@@ -52,6 +52,17 @@ class BannerController extends AbstractController {
     public function ajaxUploadBannerFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
 
+
+
+        if (isset($_POST['release_time'])) {
+            $release_date = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
+        }
+
+
+        if (isset($_POST['close_time'])) {
+            $close_date = DateUtils::parseDateTime($_POST['close_time'], $this->core->getDateTimeNow()->getTimezone());
+        }
+
         if (!isset($_FILES["files1"]) || empty($_FILES["files1"])) {
             return JsonResponse::getErrorResponse("No files were submitted.");
         }

@@ -17,11 +17,40 @@
                 </tr>
             </table>
         </div>
+
+
+
+
+
+
+        <label class="upload_dt" style="pointer-events:none;">
+            <span>
+                <strong>Choose a time to release the files being uploaded:</strong>
+            </span>
+            <input id = "release_date" class="upload_picker date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
+            <span>
+        </label>
+
+
+        <label class="upload_dt" style="pointer-events:none;">
+            <span>
+                <strong>Choose a time to close the files to be removed:</strong>
+            </span>
+            <input  id = "closing_date" class="upload_picker date_picker" type="text" size="26" value='9998-01-01 00:00:00' style="pointer-events:auto;"><br>
+            <span>
+        </label>
+
+
+
     </div>
 
     <script>
         function makeSubmission() {
-            handleUploadBanner("{{ csrf_token }}");
+            var releaseTime = document.getElementById("release_date").value;
+            var closeTime = document.getElementById("closing_date").value;
+            console.log(releaseTime);
+            console.log(closeTime);
+            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime);
         }
         $(function() {
             $("#submit-banner").click(function(e){ // Submit button
@@ -41,6 +70,65 @@
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
     </script>
 
+
+
+<script>
+
+    const upload_fp = flatpickr('.upload_picker', {
+                plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Beginning of time"
+                            },
+                            {
+                                label: "Now"
+                            },
+                            {
+                                label: "Tomorrow"
+                            },
+                            {
+                                label: "End of time"
+                            }
+                        ],
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date("1001-01-01 00:00:00");
+                                    break;
+                                case 1:
+                                    date = new Date();
+                                    break;
+                                case 2:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                                case 3:
+                                    date = new Date("9998-01-01 00:00:00");
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+                )],
+                appendTo: document.getElementById('upload-banner'),
+                allowInput: true,
+                enableTime: true,
+                enableSeconds: true,
+                time_24hr: true,
+                dateFormat: "Y-m-d H:i:S",
+                onReady: (a, b, fp) => {
+                  fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                  fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                }
+                });
+$('.form-body').on('scroll', function() {
+    upload_fp._positionCalendar();
+});
+
+
+</script>
 
 
 {% endblock %}
