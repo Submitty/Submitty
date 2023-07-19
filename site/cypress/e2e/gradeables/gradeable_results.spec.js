@@ -18,21 +18,21 @@ describe('Testing functionality of Autograder Results', () => {
     it('Should show and hide details', () => {
         //Open
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
-        cy.get('.loading-tools-show').eq(1).click();
-        cy.get('#testcase_1').should('be.visible');
+        cy.get('.loading-tools-show').scrollIntoView().eq(1).click();
+        cy.get('#testcase_1').scrollIntoView().should('be.visible');
         //Close
-        cy.get('.loading-tools-hide').eq(1).click();
+        cy.get('.loading-tools-hide').scrollIntoView().eq(1).click();
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
     });
 
     it('Should expand and collapse all test cases', () => {
         //Open all
         cy.get('.loading-tools-show').first().click();
-        cy.get('#testcase_1').should('be.visible');
-        cy.get('#testcase_2').should('be.visible');
-        cy.get('#testcase_3').should('be.visible');
-        cy.get('#testcase_6').should('be.visible');
-        cy.get('#testcase_8').should('be.visible');
+        cy.get('#testcase_1').scrollIntoView().should('be.visible');
+        cy.get('#testcase_2').scrollIntoView().should('be.visible');
+        cy.get('#testcase_3').scrollIntoView().should('be.visible');
+        cy.get('#testcase_6').scrollIntoView().should('be.visible');
+        cy.get('#testcase_8').scrollIntoView().should('be.visible');
         //Close all
         cy.get('.loading-tools-hide').first().click();
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
