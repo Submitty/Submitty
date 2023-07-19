@@ -1660,16 +1660,6 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, [json_encode($late_day_cache)]);
     }
 
-        // key: user, value: array of all cache available
-        foreach ($this->course_db->rows() as $row) {
-            $user_id = $row['user_id'] ?? $row['team_id'];
-            // title = g_title or event date
-            $title = $row['g_title'] ?? explode(" ", $row['late_day_date'])[0];
-            $return[$user_id][$title] = $row;
-        }
-        return $return;
-    }
-
     /**
      * Get the late day cache for a specific user
      * @param string $user_id
