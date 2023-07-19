@@ -226,11 +226,11 @@ function newDiscussionRender(discussion) {
     localStorage.setItem('selected_tab',`.component-${component_id}`);
 
     // TA (access grading)
-    if ($('#regradeBoxSection').length === 0) {
-        $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
+    if ($('#gradeInquiryBoxSection').length === 0) {
+        $('#grade_inquiry_inner_info').children().html(discussion).hide().fadeIn('slow');
     }
     // student
     else {
-        $('#regradeBoxSection').html(discussion).hide().fadeIn('slow');
+        $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }

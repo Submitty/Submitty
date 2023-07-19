@@ -12,26 +12,14 @@ class TestGradeInquiry(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def set_grade_inquiries_for_course(self, allowed):
-        # ensure that grade inquiries are enabled for the course
-        self.driver.find_element(By.ID, "nav-sidebar-course-settings").click()
-        regrade_enabled_checkbox = self.driver.find_element(By.ID, "regrade-enabled")
-
-        if not regrade_enabled_checkbox.is_selected() and allowed:
-            regrade_enabled_checkbox.click()
-        elif regrade_enabled_checkbox.is_selected() and not allowed:
-            regrade_enabled_checkbox.click()
-        # navigate back to gradeable page
-        self.driver.find_element(By.ID, 'nav-sidebar-submitty').click()
-
     def set_grade_inquiries_for_gradeable(self, gradeable_id, date=None, allowed=True):
         # ensure that grade inquiries are enabled for grades_released_homework gradeable
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//*[contains(@class, 'fa-pencil-alt')]").click()
 
         if allowed:
-            self.driver.find_element(By.ID, "yes_regrade_allowed").click()
+            self.driver.find_element(By.ID, "yes_grade_inquiry_allowed").click()
         else:
-            self.driver.find_element(By.ID, "no_regrade_allowed").click()
+            self.driver.find_element(By.ID, "no_grade_inquiry_allowed").click()
 
         # set deadline
         if date is not None:
@@ -61,7 +49,6 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
-        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id, date=grade_inquiry_deadline_date, allowed=True)
 
         # navigate to TA grading interface of student with normal submission
@@ -84,7 +71,6 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
-        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         # navigate to TA grading interface of student with no submission
@@ -93,7 +79,7 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element(By.XPATH, "//a[contains(@href,'grading/grade?who_id=lakinh')]").click()
 
         try:
-           self.driver.find_element(By.XPATH, "//div[@id='regrade_info']//*[text()='No Submission']")
+           self.driver.find_element(By.XPATH, "//div[@id='grade_inquiry_info']//*[text()='No Submission']")
         except NoSuchElementException:
            assert False
         assert True
@@ -110,7 +96,6 @@ class TestGradeInquiry(BaseTestCase):
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
-        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         # navigate to TA grading interface of student with no inquiry
@@ -135,7 +120,6 @@ class TestGradeInquiry(BaseTestCase):
 
         self.log_in(user_id='instructor')
         self.click_class('sample')
-        self.set_grade_inquiries_for_course(True)
         self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         self.log_out()
@@ -144,7 +128,7 @@ class TestGradeInquiry(BaseTestCase):
 
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(text(),'VIEW GRADE')]").click()
 
-        assert not self.driver.find_element(By.ID, "regradeBoxSection").is_displayed()
+        assert not self.driver.find_element(By.ID, "gradeInquiryBoxSection").is_displayed()
         open_grade_inquiry_button = self.driver.find_element(By.XPATH, "//button[contains(text(),'Open Grade Inquiry')]")
         open_grade_inquiry_button.click()
         assert not open_grade_inquiry_button.is_displayed()

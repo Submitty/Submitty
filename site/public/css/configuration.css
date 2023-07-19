@@ -57,7 +57,7 @@
     margin: 0;
 }
 
-@media (width >= 541px) {
+@media (min-width: 541px) {
     #room-seating-gradeable-id {
         flex: none;
     }

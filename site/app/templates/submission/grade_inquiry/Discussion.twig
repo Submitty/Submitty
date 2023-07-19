@@ -5,7 +5,7 @@
 {% if grade_inquiry_per_component_allowed %}
 <h3>Grade Inquiries</h3>
 {% endif %}
-<p>{{ regrade_message }}</p>
+<p>{{ grade_inquiry_message }}</p>
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
@@ -16,7 +16,7 @@
 {% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
-        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
+        {%  include "submission/grade_inquiry/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
     {% endif %}
     <div class='grade-inquiries'>
         {% for component in gradeable_components %}
@@ -41,7 +41,7 @@
                 </div>
                 {% if grade_inquiries[component.id] is defined and not grade_inquiries[component.id].posts is empty %}
                     {% for post in grade_inquiries[component.id].posts %}
-                        {% include "submission/regrade/Post.twig" with {"post": post} %}
+                        {% include "submission/grade_inquiry/Post.twig" with {"post": post} %}
                     {% endfor %}
                 {% elseif component.id == 0 %}
                     <p class="yellow-message no-post-warning" >No posts!</p>
@@ -76,7 +76,7 @@
                         <div id="grade-inquiry-actions" class="row" style="justify-content: flex-end">
                             {% if grade_inquiries[component.id] is not defined%}
                                 {# No request yet #}
-                                <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ grade_inquiry_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Submit Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == -1 and is_grading %}

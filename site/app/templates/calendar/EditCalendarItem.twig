@@ -5,11 +5,13 @@
     <p class="std-margin">
         Edit or delete this calendar item.
     </p>
+    <label for="calendar-item-course-edit">
+    <input type="hidden" id="calendar-item-semester-edit" name="semester">
+    <input type="hidden" id="calendar-item-course-edit" name="course">
     <label for="calendar-item-type-edit">Message Type</label>
     <select id="calendar-item-type-edit" name="type">
-        <option value="note">Note</option>
-        <option value="announcement">Announcement</option>
-        <option value="important">Important</option>
+        <option value="text">Note</option>
+        <option value="ann">Announcement</option>
     </select><br>
     <label for="calendar-item-text-edit">Message Text</label>
     <input type="text" id="calendar-item-text-edit" name="text"><br>
@@ -47,7 +49,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="calendar/items/{id}/edit">
+    <form method="post" action="/calendar/items/edit">
         {{ parent() }}
     </form>
 {% endblock %}

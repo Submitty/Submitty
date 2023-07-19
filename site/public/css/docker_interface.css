@@ -48,7 +48,7 @@
 }
 
 /* desktop view */
-@media (width >= 550px) {
+@media (min-width: 550px) {
     .docker-images-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));

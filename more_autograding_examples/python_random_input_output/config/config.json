@@ -4,9 +4,9 @@
     "testcases" : [
         {
             "title" : "Simple Test Case -- No Additional Input",
-            "details" : "python *.py",
-            "command" : "python *.py",
-            "solution_commands" : ["python solution.py 1> output.txt"],
+            "details" : "python3 *.py",
+            "command" : "python3 *.py",
+            "solution_commands" : ["python3 solution.py 1> output.txt"],
             "points" : 3,
             "validation" : [
                 {
@@ -19,9 +19,9 @@
         },
         {
             "title" : "Additional Input From File -- 1 2 3 4",
-            "details" : "python *.py input.txt",
-            "command" : "python *.py input.txt",
-            "solution_commands" : ["python solution.py input.txt 1> output.txt"],
+            "details" : "python3 *.py input.txt",
+            "command" : "python3 *.py input.txt",
+            "solution_commands" : ["python3 solution.py input.txt 1> output.txt"],
             "points" : 3,
             "validation" : [
                 {
@@ -35,10 +35,10 @@
         {
             "title" : "Random Input #1",
             "input_generation_commands": [
-                "python generator.py 1> randominput.txt"
+                "python3 generator.py 1> randominput.txt"
             ],
-            "command" : "python *.py randominput.txt",
-            "solution_commands" : ["python solution.py randominput.txt > output.txt"],
+            "command" : "python3 *.py randominput.txt",
+            "solution_commands" : ["python3 solution.py randominput.txt > output.txt"],
             "points" : 3,
             "validation" : [
                 {
@@ -52,10 +52,10 @@
         {
             "title" : "Random Input #2",
             "input_generation_commands": [
-                "python generator.py 1> randominput.txt"
+                "python3 generator.py 1> randominput.txt"
             ],
-            "command" : "python *.py randominput.txt",
-            "solution_commands" : ["python solution.py randominput.txt > output.txt"],
+            "command" : "python3 *.py randominput.txt",
+            "solution_commands" : ["python3 solution.py randominput.txt > output.txt"],
             "points" : 3,
             "validation" : [
                 {

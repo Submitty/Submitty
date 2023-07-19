@@ -320,11 +320,11 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @param array $uploaded_files
      * @return string
      */
-    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
+    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $grade_inquiry_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -500,8 +500,8 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
             'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
-            'regrade_available' => $regrade_available,
-            'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
+            'grade_inquiry_available' => $grade_inquiry_available,
+            'grade_inquiry_message' => $this->core->getConfig()->getGradeInquiryMessage(),
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
@@ -520,11 +520,11 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
-     * @param bool $regrade_available
+     * @param bool $grade_inquiry_available
      * @param array $uploaded_files
      * @return string
      */
-    public function showPeerResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
+    public function showPeerResults(TaGradedGradeable $ta_graded_gradeable, bool $grade_inquiry_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -754,8 +754,8 @@ class AutoGradingView extends AbstractView {
             'anon_grader_id_mapping' => $anon_grader_id_mapping,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
-            'regrade_available' => $regrade_available,
-            'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
+            'grade_inquiry_available' => $grade_inquiry_available,
+            'grade_inquiry_message' => $this->core->getConfig()->getGradeInquiryMessage(),
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
