@@ -92,7 +92,9 @@ class BannerController extends AbstractController {
 
             $banner_image = new BannerImage(
                 $uploaded_files["name"][$j],
-                "howdy"
+                "howdy",
+                $release_date,
+                $close_date
             );
             $this->core->getBannerEntityManager()->persist($banner_image);
             

@@ -21,7 +21,9 @@ def up(config, database):
         CREATE TABLE banner_images (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            extra_info VARCHAR(255)
+            extra_info VARCHAR(255),
+            release_date timestamptz,
+            closing_date timestamptz
         )
     """
 
