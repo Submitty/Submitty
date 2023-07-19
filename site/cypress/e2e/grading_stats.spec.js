@@ -6,7 +6,7 @@ describe('Test cases for grading stats', () => {
         });
         it(`${user} view should be accurate for teams.`, () => {
             cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/details"]').click();
-            
+
             /*
             if (user === 'ta' || user === 'grader') { // Close Grader Responsibilities popup.
                 cy.get('.popup-window .form-title .btn.btn-default.close-button.key_to_click').click();
@@ -14,7 +14,7 @@ describe('Test cases for grading stats', () => {
             */
 
             cy.get('a[href*="/sample/gradeable/grading_team_homework/grading/status"]').click();
-            
+
 
             const text = cy.get('#left-grading-stats');
             text.should('contain', 'Students on a team: 101/101 (100%)');
@@ -33,7 +33,7 @@ describe('Test cases for grading stats', () => {
             */
 
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
-            
+
             cy.get('#submissions-on-time').should('contain', '59 / 101 (58.4%)');
             const text = cy.get('#left-grading-stats');
             text.should('contain', 'Current percentage of TA grading done: 30 / 59 (50.8%)');
