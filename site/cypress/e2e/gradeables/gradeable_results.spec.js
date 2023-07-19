@@ -16,6 +16,7 @@ describe('Testing functionality of Autograder Results', () => {
     */
 
     it('Should show and hide details', () => {
+        cy.scrollTo('bottom');
         //Open
         cy.get('#testcase_1').scrollIntoView().should('not.be.visible');
         cy.get('.loading-tools-show').eq(1).scrollIntoView().click();
@@ -26,6 +27,7 @@ describe('Testing functionality of Autograder Results', () => {
     });
 
     it('Should expand and collapse all test cases', () => {
+        cy.scrollTo('bottom');
         //Open all
         cy.get('.loading-tools-show').first().click();
         cy.get('#testcase_1').scrollIntoView().should('be.visible');
@@ -43,6 +45,7 @@ describe('Testing functionality of Autograder Results', () => {
     });
 
     it('Should cancel loading', () => {
+        cy.scrollTo('bottom');
         //Open
         cy.get('#testcase_1').should('not.be.visible');
         cy.get('.loading-tools-show').eq(1).click();
