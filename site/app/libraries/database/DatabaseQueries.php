@@ -1463,29 +1463,6 @@ WHERE semester=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getLateDayCacheForUser($user_id) {
-        $params = [$user_id];
-        $query = "SELECT * FROM late_day_cache
-                    WHERE user_id=?
-                    ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST";
-        $this->course_db->query($query, $params);
-
-        $index = 1;
-        $late_day_events = [];
-        foreach ($this->course_db->rows() as $row) {
-            // Change string date to DateTime object
-            $row['late_day_date'] = new \DateTime($row['late_day_date']);
-
-            if (isset($row['g_id'])) { // Gradeable late day event
-                $late_day_events[$row['g_id']] = $row;
-            }
-            else { // Late day update event
-                $late_day_events[$index++] = $row;
-            }
-        }
-        return $late_day_events;
-    }
-
     public function getLateDayCacheForUserGradeable($user_id, $g_id) {
         $params = [$user_id, $g_id];
         $query = "SELECT * FROM late_day_cache
