@@ -433,9 +433,7 @@ class MiscController extends AbstractController {
                     "gradeable" => $gradeable, 
                     "graded_gradeable" => $graded_gradeable, 
                     "gradeable_version" => $gradeable_version->getVersion(),
-                    "file_name" => $file_name,
-                    "display_version" => intval($gradeable_version ?? '0'),
-                    "gradeable_id" => $gradeable_id
+                    "file_name" => $file_name
                     ])) {
                         $zip_stream->addFileFromPath(FileUtils::joinPaths($folder_name, $relative_path), $file_path);
                     }
