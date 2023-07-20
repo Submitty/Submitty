@@ -934,11 +934,10 @@ class Gradeable extends AbstractModel {
         if (!$this->student_download) {
             return false;
         }
-
         $autograding_config = $this->getAutogradingConfig();
         if ($autograding_config->isNotebookGradeable()) {
+            //Get notebook data to get list of notebook filenames
             $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
-
             $notebook = $notebook_model->getNotebook();
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                 $version,
@@ -947,19 +946,16 @@ class Gradeable extends AbstractModel {
                 intval($version ?? '0'),
                 $this->getId()
             );
-            foreach ($notebook_data as $note) {
+            //If the file name is in the list of notebook filenames, then exclude it
+            foreach ($notebook_data as $note) { 
                 if (array_key_exists('filename', $note)) {
                     if ($file_name == $note['filename']) {
                         return false;
                     }
                 }
             }
-
-            return true;
         }
-        else {
-            return true;
-        }
+        return true;
     }
 
     /**
