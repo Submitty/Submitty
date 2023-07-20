@@ -45,7 +45,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_email) || ', ' 
                         || quote_literal(user_row.user_email_secondary) || ', ' 
                         || quote_literal(user_row.user_email_secondary_notify) || ', ' 
-                        || quote_literal(user_row.user_updated) || ', ' ||
+                        || quote_literal(user_row.user_updated) || ', '
                         || quote_literal(user_row.instructor_updated) || ', '
                         || NEW.user_group || ', ' 
                         || quote_nullable(NEW.registration_section) || ', ' 
