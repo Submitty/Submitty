@@ -62,6 +62,7 @@ SCRIPT
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
+
 base_boxes.default         = "bento/ubuntu-20.04"
 base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2004"
@@ -168,7 +169,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "parallels" do |prl, override|
     unless custom_box
       if (arm || apple_silicon)
-        override.vm.box = base_boxes[:arm_parallels]
+        override.vm.box = base_boxes[:arm_bento]
       end
     end
 
@@ -179,6 +180,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "vmware_desktop" do |vmware, override|
+    unless custom_box
+      if (arm || apple_silicon)
+        override.vm.box = base_boxes[:arm_bento]
+      end
+    end
     vmware.vmx["memsize"] = "2048"
     vmware.vmx["numvcpus"] = "2"
 
