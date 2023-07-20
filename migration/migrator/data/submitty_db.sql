@@ -533,6 +533,7 @@ CREATE TABLE public.terms (
     name character varying(255) NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
+    CONSTRAINT term_id_validate CHECK (((term_id)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT terms_check CHECK ((end_date > start_date))
 );
 
