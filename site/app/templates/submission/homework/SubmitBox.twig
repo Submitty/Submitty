@@ -390,18 +390,21 @@
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
+        var days_past_deadline = checkDeadline();
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission(
+                {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
-                {{ days_past_deadline }},
-                {{ days_to_be_charged }},
+                days_past_deadline,
+                {{ late_day_exceptions }},
                 {{ allowed_late_days }},
-                {{ min_team_would_be_late_days_remaining }},
+                {{ is_team_assignment ? "true" : "false" }},
+                {{ min_team_member_late_days }},
                 {{ highest_version }},
                 {{ max_submissions }},
                 "{{ csrf_token }}",
@@ -420,12 +423,14 @@
         }
         else {
             handleSubmission(
+                {{ gradeable_status }},
                 {{ remaining_late_days_for_gradeable }},
                 {{ charged_late_days }},
-                {{ days_past_deadline }},
-                {{ days_to_be_charged }},
+                days_past_deadline,
+                {{ late_day_exceptions }},
                 {{ allowed_late_days }},
-                {{ min_team_would_be_late_days_remaining }},
+                {{ is_team_assignment ? "true" : "false" }},
+                {{ min_team_member_late_days }},
                 highest_version,
                 {{ max_submissions }},
                 "{{ csrf_token }}",
