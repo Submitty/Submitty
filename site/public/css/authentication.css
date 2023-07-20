@@ -34,7 +34,7 @@
     padding: 0.5em 1em;
 }
 
-@media (width >= 768px) {
+@media (min-width: 768px) {
     #login-box {
         margin: 30px auto;
         min-width: 450px;

@@ -51,11 +51,11 @@ function fillAllCheckboxes(val) {
 
 //Cookies (loading and storing)
 function saveColumns(selectedColumns) {
-    document.cookie = `active_columns=${selectedColumns.join('-')}`;
+    Cookies.set('active_student_columns', selectedColumns.join('-'), { expires: 365, path: '' });
 }
 
 function loadColumns() {
-    const cookie = getCookie('active_columns').split('-');
+    const cookie = Cookies.get('active_student_columns').split('-');
     for (let i = 0; i< cookie.length; i++) {
         if (cookie[i] === '1') {
             cookie[i] = 1;
@@ -65,20 +65,4 @@ function loadColumns() {
         }
     }
     return cookie;
-}
-
-function getCookie(cname) {
-    const name = `${cname}=`;
-    const decodedCookie = document.cookie;
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
 }

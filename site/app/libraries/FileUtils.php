@@ -175,6 +175,22 @@ class FileUtils {
     }
 
     /**
+     * checks to see if directory is empty, if so return true
+     */
+    public static function isEmptyDir(string $dir): bool {
+        if ($handle = opendir($dir)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file != '.' && $file != '..') {
+                    closedir($handle);
+                    return false;
+                }
+            }
+            closedir($handle);
+        }
+        return true;
+    }
+
+    /**
      * Create a directory if it doesn't already exist. If it's a file, delete the file, and then try to create
      * directory. Additionally, we can specify a certain mode for the directory as well as if we should recursively
      * create any folders specified in $dir if they don't all exist. The mkdir function takes into account the
@@ -316,14 +332,15 @@ class FileUtils {
      *
      * @return int
      */
-    public static function getZipSize($filename) {
+    public static function getZipSize(string $filename): int {
         $size = 0;
-        $zip = zip_open($filename);
-        if (is_resource($zip)) {
-            while ($inner_file = zip_read($zip)) {
-                $size += zip_entry_filesize($inner_file);
+        $zip = new \ZipArchive();
+        $res = $zip->open($filename);
+        if ($res === true) {
+            for ($i = 0; $i < $zip->count(); $i++) {
+                $size += $zip->statIndex($i)['size'];
             }
-            zip_close($zip);
+            $zip->close();
         }
         return $size;
     }
@@ -332,11 +349,12 @@ class FileUtils {
      * @param string $zipname
      * @return bool
      */
-    public static function checkFileInZipName($zipname) {
-        $zip = zip_open($zipname);
-        if (is_resource(($zip))) {
-            while ($inner_file = zip_read($zip)) {
-                $fname = zip_entry_name($inner_file);
+    public static function checkFileInZipName(string $zipname): bool {
+        $zip = new \ZipArchive();
+        $res = $zip->open($zipname);
+        if ($res === true) {
+            for ($i = 0; $i < $zip->count(); $i++) {
+                $fname = $zip->statIndex($i)['name'];
                 if (FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }

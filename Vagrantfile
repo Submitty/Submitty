@@ -62,10 +62,10 @@ SCRIPT
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-20.04"
-base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2004"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
+base_boxes.default         = "bento/ubuntu-22.04"
+base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
+base_boxes[:libvirt]       = "generic/ubuntu2204"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -74,13 +74,13 @@ def mount_folders(config, mount_options)
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp
 
   optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2'
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp
     end
   }
 end
@@ -116,13 +116,12 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.provision 'shell', inline: $worker_script
   end
 
-  # Our primary development target, RPI uses it as of Fall 2021
-  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: 1511   # site
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16442  # database
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: 7000   # saml
-    ubuntu.vm.network 'forwarded_port', guest: 22, host: 2222, id: 'ssh'
+  config.vm.define 'ubuntu-22.04', primary: true do |ubuntu|
+    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
+    ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
     ubuntu.vm.provision 'shell', inline: $script
   end
 
@@ -168,7 +167,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "parallels" do |prl, override|
     unless custom_box
       if (arm || apple_silicon)
-        override.vm.box = base_boxes[:arm_parallels]
+        override.vm.box = base_boxes[:arm_bento]
       end
     end
 
@@ -179,6 +178,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "vmware_desktop" do |vmware, override|
+    unless custom_box
+      if (arm || apple_silicon)
+        override.vm.box = base_boxes[:arm_bento]
+      end
+    end
     vmware.vmx["memsize"] = "2048"
     vmware.vmx["numvcpus"] = "2"
 
@@ -207,7 +211,8 @@ Vagrant.configure(2) do |config|
 
     qe.memory = "2G"
     qe.smp = 2
-    qe.ssh_port = 2222
+
+    qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
 
     mount_folders(override, [])
   end
