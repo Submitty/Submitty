@@ -8,6 +8,12 @@
  *
  * Usage: ./update_browscap.php
  */
+
+use BrowscapPHP\BrowscapUpdater;
+use Psr\Log\NullLogger;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
+
 require_once __DIR__ . "/../site/vendor/autoload.php";
 
 /* If some problem related to browscap-php is encountered then try removing all the contents of cache_dir and run .setup/install_submitty/install_site.sh.
@@ -16,13 +22,10 @@ require_once __DIR__ . "/../site/vendor/autoload.php";
 
 $cache_dir = __DIR__ . '/../site/vendor/browscap/browscap-php/resources';
 
-$file_cache = new \League\Flysystem\Local\LocalFilesystemAdapter($cache_dir);
-$filesystem = new \League\Flysystem\Filesystem($file_cache);
-$cache = new \MatthiasMullie\Scrapbook\Psr16\SimpleCache(
-    new \MatthiasMullie\Scrapbook\Adapters\Flysystem($filesystem)
-);
-$logger = new \Psr\Log\NullLogger();
-$bc = new \BrowscapPHP\BrowscapUpdater($cache, $logger);
+$fs_adapter = new FilesystemAdapter("", 0, $cache_dir);
+$cache = new Psr16Cache($fs_adapter);
+$logger = new NullLogger();
+$bc = new BrowscapUpdater($cache, $logger);
 // create an active/warm cache
-$bc->update(\BrowscapPHP\Helper\IniLoaderInterface::PHP_INI);
+$bc->update();
 ?>

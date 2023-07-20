@@ -16,12 +16,10 @@ use app\repositories\SessionRepository;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpFoundation\Request;
-use League\Flysystem\Local\LocalFilesystemAdapter;
-use League\Flysystem\Filesystem;
-use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
-use MatthiasMullie\Scrapbook\Adapters\Flysystem;
 use Psr\Log\NullLogger;
 use BrowscapPHP\Browscap;
 
@@ -559,14 +557,16 @@ class Core {
                 $user_id = $this->authentication->getUserId();
                 // Get information about user's browser
                 try {
-                    $file_cache = new LocalFilesystemAdapter(FileUtils::joinPaths(
+                    $path = FileUtils::joinPaths(
                         $this->getConfig()->getSubmittyInstallPath(),
-                        'site/vendor/browscap/browscap-php/resources'
-                    ));
-                    $filesystem = new Filesystem($file_cache);
-                    $cache = new SimpleCache(
-                        new Flysystem($filesystem)
+                        'site',
+                        'vendor',
+                        'browscap',
+                        'browscap-php',
+                        'resources'
                     );
+                    $fs_adapter = new FilesystemAdapter("", 0, $path);
+                    $cache = new Psr16Cache($fs_adapter);
                     $logger = new NullLogger();
                     $bc = new Browscap($cache, $logger);
                     $browser_info = $bc->getBrowser();
