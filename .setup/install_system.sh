@@ -495,7 +495,7 @@ EOF
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
 xdebug.output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
-            sed -i -e "s/debug/debug,profile/g"
+            sed -i -e "s/xdebug.mode=debug/xdebug.mode=debug,profile/g" /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
         fi
     fi
 
