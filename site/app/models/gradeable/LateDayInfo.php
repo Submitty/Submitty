@@ -93,6 +93,11 @@ class LateDayInfo extends AbstractModel {
      * @return LateDayInfo|null
      */
     public static function fromUser(Core $core, User $user, GradedGradeable $graded_gradeable): ?LateDayInfo {
+
+        $now = new \DateTime();
+        if ($user->getGroup() === User::GROUP_INSTRUCTOR && $graded_gradeable->getGradeable()->getSubmissionOpenDate() < $now) {
+            
+        }
         $ldc = $core->getQueries()->getLateDayCacheForUserGradeable($user->getId(), $graded_gradeable->getGradeableId());
         $ldi = null;
 
