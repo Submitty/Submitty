@@ -152,29 +152,102 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newDeleteCourseMaterialForm(id, file_name) {
-    let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
-    var current_y_offset = window.pageYOffset;
-    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
+    const url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
+    const current_y_offset = window.pageYOffset;
+    Cookies.set('jumpToScrollPosition', current_y_offset);
+
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
 
     $('[id^=div_viewer_]').each(function() {
-        var number = this.id.replace('div_viewer_', '').trim();
+        const cm_id = this.id.replace('div_viewer_', '').trim();
+        const elem = $('#div_viewer_' + cm_id);
+        if (!cm_id.length || !elem) {
+            return;
+        }
 
-        var elem = $('#div_viewer_' + number);
         if (elem.hasClass('open')) {
-            document.cookie = "cm_" +number+ "=1;";
+            if (!cm_ids.includes(cm_id)) {
+                cm_ids.push(cm_id);
+            }
         }
         else {
-            document.cookie = "cm_" +number+ "=0;";
+            if (cm_ids.includes(cm_id)) {
+                cm_ids.splice(cm_ids.indexOf(cm_id, 1));
+            }
         }
     });
+    
+    Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
-    var form = $("#delete-course-material-form");
-    $('.delete-course-material-message', form).text(file_name);
+    const form = $("#delete-course-material-form");
+    const deleteMessageElement = form.find('.delete-course-material-message')[0];
+    deleteMessageElement.innerHTML = '';
+
+    const cm_message = document.createElement('b');
+    cm_message.textContent = file_name;
+
+    if (str_id !== null) {
+        const files_or_links = $(`[id^=file_viewer_${str_id}]`);
+        const num_of_links = files_or_links.filter(function () {
+            return (($(this).siblings('.file-viewer').children('a[data-is-link="1"]').length) === 1);
+        }).length;
+        const num_of_files = files_or_links.length - num_of_links;
+        const file_s = (num_of_files > 1) ? 's' : '';
+        const link_s = (num_of_links > 1) ? 's' : '';
+        const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
+
+        const emElement = document.createElement('em');
+        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}` + num_links_txt;
+
+        cm_message.appendChild(emElement);
+    }
+
+    deleteMessageElement.appendChild(cm_message);
+
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
+}
+
+function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
+    const form = $('#overwrite-course-material-form');
+    form.css('display', 'block');
+    if (clashing_names.length === 1) {
+        const to_replace = [[' All', '']];
+        if (is_link) {
+            to_replace.push(['file', 'link']);
+        }
+        form.html((i, html) => {
+            to_replace.forEach((elem) => {
+                html = html.replaceAll(elem[0], elem[1]);
+            });
+            return html;
+        });
+    }
+    else {
+        const singular = ['Material', 'file', 'name', 'one'];
+        form.html((i, html) => {
+            singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
+                html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
+            });
+            return html;
+        });
+    }
+    const clash_list = $('#existing-names');
+    clash_list.html("");
+    clashing_names.forEach((elem) => {
+        clash_list.append($('<li>', {
+            text: elem
+        }));
+    });
+    captureTabInModal("overwrite-course-material-form");
+    if (is_edit_form) {
+        $('#overwrite-submit').attr('is-edit-form', 1);
+    }
     form.find('.form-body').scrollTop(0);
 }
 
@@ -210,7 +283,7 @@ function newUploadCourseMaterialsForm() {
     captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
-
+    $('#overwrite-materials-flag').remove();
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -343,6 +416,7 @@ function newEditCourseMaterialsForm(tag) {
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
+    $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -759,23 +833,6 @@ function openDiv(id) {
     return false;
 }
 
-function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
-}
-
 function markViewed(ids, redirect) {
     let data = new FormData();
     data.append("ids", ids);
@@ -789,30 +846,39 @@ function markViewed(ids, redirect) {
     });
 }
 
-function closeDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
-    elem.hide();
-    elem.removeClass('open');
-    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-    return 'closed';
-
-
-}
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
+function toggleCMFolder(id, open) {
+    const elem = $('#div_viewer_' + id);
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
+    } else {
+        elem.show();
+        elem.addClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return open;
+}
+
+function toggleCMFolders(open) {
+    const elem = $('[id^="div_viewer_"]');
+    if (typeof open === 'undefined') {
+        open = !elem.hasClass('open');
+    }
+    if (!open) {
+        elem.hide();
+        elem.removeClass('open');
+        elem.prev().find('.open-all-folder').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
+        elem.prev().find('.open-all-folder').removeClass('fa-folder').addClass('fa-folder-open');
     }
-    return false;
+    return open;
 }
 
 function openUrl(url) {
@@ -1208,16 +1274,6 @@ function deleteOverriddenGrades(user_id, g_id) {
     return false;
 }
 
-function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBoxSection");
-    if (element.style.display === 'block') {
-        element.style.display = 'none';
-    }
-    else {
-        element.style.display = 'block';
-    }
-
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
@@ -1315,11 +1371,11 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     if ($(document.body).width() < 1150) {
-        document.cookie = "collapse_sidebar=true;path=/";
+        Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;path=/";
+        Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1368,7 +1424,7 @@ function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
+    Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1738,3 +1794,34 @@ function addMarkdownCode(type){
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(Cookies.get("last_tz_warn_time"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        Cookies.set("last_tz_warn_time", Date.now());
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);

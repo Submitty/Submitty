@@ -7,7 +7,8 @@
     Should be added back eventually, ideally showing workers' version as well
     <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
     #}
-    <p>Updated on: {{last_updated}}</p>
+    <p>Docker info updated on: {{last_updated}}</p>
+    <p>System info updated on: {{ sysinfo_last_updated }}</p>
     {% if error_logs | length > 0 %}
         <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
         <pre class="error-log">
@@ -25,7 +26,7 @@
         <tr>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
-            <th rowspan=2 style="text-align: center; vertical-align: middle">OS Info</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">System Info</th>
             <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
             <th colspan={{capabilities|length}}>Capabilities</th>
         </tr>
@@ -38,12 +39,20 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th style="vertical-align: middle;">{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
-            <td>
-            {% if worker['name'] in machine_system_details|keys %}
-                {% for info in machine_system_details[worker['name']] %}
-                    {{info}} <br>
-                {% endfor %}
-            {% endif %}
+            <td>{% if worker['name'] in machine_system_details|keys %}
+                    {{ machine_system_details[worker['name']]['os'] }} <br />
+                    Disk Usage: {{ machine_system_details[worker['name']]['disk'] }} <br/>
+                    Load: {{ machine_system_details[worker['name']]['load'] }} <br />
+                    Worker: {{ machine_system_details[worker['name']]['worker'] }} <br/>
+                    {% if machine_system_details[worker['name']]['shipper'] is not null %}
+                        Shipper: {{ machine_system_details[worker['name']]['shipper'] }}<br/>
+                    {% endif %}
+                    {% if machine_system_details[worker['name']]['daemon'] is not null %}
+                        Daemon: {{ machine_system_details[worker['name']]['daemon'] }}
+                    {% endif %}
+                {% else %}
+                    Not yet retrieved
+                {% endif %}
             </td>
             <td>{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
@@ -73,7 +82,7 @@
             </div>
         </div>
     {% endif %}
-    
+
     <table class="table table-striped docker-table mobile-table">
         <thead>
             <tr>
@@ -171,7 +180,7 @@
     <div style="margin-bottom: 1em">
         <label for="capability-form" style="display: inline-block; margin-right: 1em; width: 5%;">
             Capability:
-        </label> 
+        </label>
         <select class="form-control form-control-lg" style="width:93%; display: inline-block;" id="capability-form">
             {% for capability in capabilities %}
                 <option>{{capability}}</option>
@@ -181,7 +190,7 @@
     <div>
         <label for="add-field" style="display: inline-block; margin-right: 1em; width: 5%">
             Image:
-        </label> 
+        </label>
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>

@@ -5,6 +5,21 @@ Evan Maicus 2016-current
 
 ## Developers  
 
+Eden Bendheim 2023-current  
+Jason Chen 2023-current  
+Anson Decker 2023-current  
+Jaeseok Kang 2023-current  
+Hanson Gu 2023-current  
+Sátvik Karanam 2023-current  
+Viane Matsibekker 2023-current  
+Jason Ng 2023-current  
+Mahi Pasarkar 2023-current  
+Hannah Rose 2023-current  
+Zachary Silverstein 2023-current  
+Adam Tuhacek 2023-current  
+Yanli Wang 2023-current  
+Kerui (Ray) Wu 2023-current  
+Bairong Zhang 2023-current  
 Jody Sunray 2022-current  
 Ryon Chan 2022-current  
 Kasja Arnold 2022-current  

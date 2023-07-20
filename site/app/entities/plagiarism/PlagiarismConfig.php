@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\exceptions\ValidationException;
+use app\exceptions\FileNotFoundException;
 use app\libraries\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
@@ -310,6 +311,9 @@ class PlagiarismConfig {
      */
     public function setOtherGradeablePaths(array $paths, int $user_group): void {
         foreach ($paths as $path) {
+            if (!file_exists($path)) {
+                throw new FileNotFoundException("Error: Unable to read file {$path}");
+            }
             if (filegroup($path) !== $user_group) {
                 throw new ValidationException("Error: Path {$path} does not share group '{$user_group}' with current user", []);
             }

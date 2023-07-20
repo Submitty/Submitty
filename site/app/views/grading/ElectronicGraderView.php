@@ -10,7 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
-use app\models\gradeable\RegradeRequest;
+use app\models\gradeable\GradeInquiry;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -30,7 +30,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $rotating_but_not_registered
      * @param int $viewed_grade
      * @param string $section_type
-     * @param int $regrade_requests
+     * @param int $grade_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
@@ -53,7 +53,7 @@ class ElectronicGraderView extends AbstractView {
         int $rotating_but_not_registered,
         int $viewed_grade,
         string $section_type,
-        int $regrade_requests,
+        int $grade_inquiries,
         bool $show_warnings,
         int $submissions_in_queue
     ) {
@@ -61,14 +61,19 @@ class ElectronicGraderView extends AbstractView {
         $peer = $gradeable->hasPeerComponent();
 
         $graded = 0;
+        $non_late_graded = 0;
         $total = 0;
+        $non_late_total = 0;
         $no_team_total = 0;
         $team_total = 0;
         $team_percentage = 0;
         $total_students = 0;
         $graded_total = 0;
+        $non_late_graded_total = 0;
         $submitted_total = 0;
+        $non_late_submitted_total = 0;
         $submitted_percentage = 0;
+        $non_late_submitted_percentage = 0;
         $submitted_percentage_peer = 0;
         $peer_total = 0;
         $peer_graded = 0;
@@ -76,6 +81,7 @@ class ElectronicGraderView extends AbstractView {
         $entire_peer_graded = 0;
         $entire_peer_total = 0;
         $total_grading_percentage = 0;
+        $non_late_total_grading_percentage = 0;
         $entire_peer_percentage = 0;
         $viewed_total = 0;
         $viewed_percent = 0;
@@ -97,11 +103,14 @@ class ElectronicGraderView extends AbstractView {
             }
             $graded += $section['graded_components'];
             $total += $section['total_components'];
+            $non_late_graded += $section['non_late_graded_components'];
+            $non_late_total += $section['non_late_total_components'];
             if ($gradeable->isTeamAssignment()) {
                 $no_team_total += $section['no_team'];
                 $team_total += $section['team'];
             }
         }
+
         if ($total === 0 && $no_team_total === 0) {
             $graded_percentage = -1;
         }
@@ -123,12 +132,21 @@ class ElectronicGraderView extends AbstractView {
             $num_non_peer_components = count($gradeable->getNonPeerComponents());
             $num_components = $num_peer_components + $num_non_peer_components;
             $submitted_total = $num_components > 0 ? $total : 0;
+            $non_late_submitted_total = $num_components > 0 ? $non_late_total : 0;
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
+            $non_late_graded_total = $num_components > 0 ? round($non_late_graded / $num_components, 2) : 0;
             if ($submitted_total > 0) {
                 $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
             }
             else {
                 $total_grading_percentage = 0;
+            }
+
+            if ($non_late_submitted_total > 0) {
+                $non_late_total_grading_percentage =  number_format(($non_late_graded_total / $non_late_submitted_total ) * 100, 1);
+            }
+            else {
+                $non_late_total_grading_percentage = 0;
             }
             if ($peer) {
                 $num_peer_components = count($gradeable->getPeerComponents());
@@ -139,6 +157,7 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
+                $non_late_submitted_percentage = $non_late_submitted_total > 0 ? round((($non_late_submitted_total) / $total_submissions) * 100, 1) : 0;
             }
             //Add warnings to the warnings array to display them to the instructor.
             if ($section_type === "rotating_section" && $show_warnings) {
@@ -165,7 +184,7 @@ class ElectronicGraderView extends AbstractView {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $submitted_percentage_peer = round((($total_students_submitted) / $total_submissions) * 100, 1);
                         $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
-                        $entire_peer_total =  floor(($sections['peer_stu_grad']['total_who_submitted']));
+                        $entire_peer_total =  floor(($sections['peer_stu_grad']['view_peer_components']));
                         $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
                     }
                     if ($entire_peer_total > 0) {
@@ -199,11 +218,22 @@ class ElectronicGraderView extends AbstractView {
                 $non_zero_non_peer_components_count = $non_peer_components_count != 0 ? $non_peer_components_count : 1;
                 $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
+                $section['non_late_graded'] = round($section['non_late_graded_components'] / $non_zero_non_peer_components_count, 1);
+                echo("\n");
+                $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
+
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
                 }
                 else {
                     $section['percentage'] = number_format(($section['graded'] / $section['total']) * 100, 1);
+                }
+
+                if ($section['non_late_total'] == 0) {
+                    $section['non_late_percentage'] = 0;
+                }
+                else {
+                    $section['non_late_percentage'] = number_format(($section['non_late_graded'] / $section['non_late_total']) * 100, 1);
                 }
             }
                 unset($section); // Clean up reference
@@ -245,7 +275,7 @@ class ElectronicGraderView extends AbstractView {
                     $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
                 }
             }
-            //This else encompasses the above calculations for Teamss
+            //This else encompasses the above calculations for Teams
             //END OF ELSE
         }
 
@@ -263,6 +293,7 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
+
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
@@ -281,15 +312,19 @@ class ElectronicGraderView extends AbstractView {
             "total_submissions" => $total_submissions,
             "no_team_total"   => $no_team_total,
             "submitted_total" => $submitted_total,
+            "non_late_submitted_total" => $non_late_submitted_total,
             "submitted_percentage" => $submitted_percentage,
+            "non_late_submitted_percentage" => $non_late_submitted_percentage,
             "submitted_percentage_peer" => $submitted_percentage_peer,
             "graded_total" => $graded_total,
+            "non_late_graded_total" => $non_late_graded_total,
             "graded_percentage" => $graded_percentage,
             "peer_total" => $peer_total,
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,
             "entire_peer_total" => $entire_peer_total,
             "total_grading_percentage" => $total_grading_percentage,
+            "non_late_total_grading_percentage" => $non_late_total_grading_percentage, //****
             "entire_peer_graded" => $entire_peer_graded,
             "entire_peer_percentage" => $entire_peer_percentage,
             "sections" => $sections,
@@ -310,15 +345,16 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_grade" => $individual_viewed_grade,
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
-            "regrade_requests" => $regrade_requests,
+            "grade_inquiries" => $grade_inquiries,
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "grade_inquiry_allowed" => false,
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
-            "include_overridden" => array_key_exists('include_overridden', $_COOKIE) ? $_COOKIE['include_overridden'] : 'omit',
             "histograms" => $histogram_data,
+            "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
+            "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -541,13 +577,14 @@ HTML;
             }
         }
 
+
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
             $info = [
-                "graded_gradeable" => $row
+                "graded_gradeable" => $row,
             ];
 
             if ($peer) {
@@ -600,7 +637,7 @@ HTML;
                 }
                 $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-                $team_name = addslashes($row->getSubmitter()->getTeam()->getTeamName());
+                $team_name = addslashes($row->getSubmitter()->getTeam()->getTeamName() ?? "");
                 $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}', '{$team_name}');";
                 $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"] ?? null;
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
@@ -633,7 +670,7 @@ HTML;
                     //non-peer not graded
                     $info["graded_groups"][] = "NULL";
                 }
-                elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == GradeInquiry::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
                     $info["graded_groups"][] = "grade-inquiry";
                 }
                 elseif (!$graded_component->getVerifier()) {
@@ -727,9 +764,11 @@ HTML;
 
         //sorts sections numerically, NULL always at the end
         usort($sections, function ($a, $b) {
-            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
+            if ($a['title'] === 'NULL' || $b['title'] === 'NULL') {
+                return $a['title'] === 'NULL' ? 1 : -1;
+            }
+            return strnatcmp($a['title'], $b['title']); // use strnatcmp to sort 9 before 10
         });
-
 
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
@@ -827,7 +866,7 @@ HTML;
             "is_team" => $gradeable->isTeamAssignment(),
             "is_vcs" => $gradeable->isVcs(),
             "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
-            "semester" => $this->core->getConfig()->getSemester(),
+            "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "blind_status" => $gradeable->getPeerBlind(),
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
@@ -877,7 +916,7 @@ HTML;
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
-        $isRegradePanel = false;
+        $isGradeInquiryPanel = false;
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -896,9 +935,7 @@ HTML;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
-        if ($this->core->getConfig()->isRegradeEnabled()) {
-            $isRegradePanel = true;
-        }
+        $isGradeInquiryPanel = true;
         $limimted_access_blind = false;
         if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limimted_access_blind = true;
@@ -997,7 +1034,7 @@ HTML;
                 $isPeerPanel,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
-                $isRegradePanel,
+                $isGradeInquiryPanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
                 $error_message['message']
@@ -1096,12 +1133,14 @@ HTML;
         CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+        $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
-        if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
+        if ($this->core->getUser()->getGroup() < 4) {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradeInquiryPanel', $graded_gradeable, $can_inquiry);
         }
 
         return $return . <<<HTML
@@ -1148,8 +1187,8 @@ HTML;
             "prev_student_url" => $prev_student_url,
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
-            'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4,
-            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
+            'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
+            'grade_inquiry_pending' => $graded_gradeable->hasActiveGradeInquiry(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -1157,12 +1196,12 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
-            'isRegradePanel' => $isRegradePanel,
+            'isGradeInquiryPanel' => $isGradeInquiryPanel,
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
             "error_color" => $error_color,
@@ -1172,14 +1211,14 @@ HTML;
 
     /**
      * Render the Autograding Testcases panel
-     * @param AutoGradedVersion $version_instance
+     * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden_cases
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
 
 
-    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
+    public function renderAutogradingPanel(?AutoGradedVersion $version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
@@ -1192,6 +1231,17 @@ HTML;
             $id = $graded_gradeable->getSubmitter()->getId();
         }
 
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function (AutoGradedVersion $version) {
+            return [
+                'points' => $version->getNonHiddenPoints(),
+            ];
+        }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
+
+        //sort array by version number after values have been mapped
+        ksort($version_data);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -1200,6 +1250,9 @@ HTML;
             "is_vcs" => $gradeable->isVcs(),
             "gradeable_id" => $gradeable->getId(),
             "user_id" => $id,
+            "active_version" => $active_version,
+            "versions" => $version_data,
+            'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "ta_grading" => $ta_grading
         ]);
@@ -1296,10 +1349,12 @@ HTML;
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    foreach (explode(",", $hidden_files) as $file_regex) {
-                        $file_regex = trim($file_regex);
-                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
-                            $skipping = true;
+                    if ($hidden_files !== null) {
+                        foreach (explode(",", $hidden_files) as $file_regex) {
+                            $file_regex = trim($file_regex);
+                            if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
+                                $skipping = true;
+                            }
                         }
                     }
                     if (!$skipping) {
@@ -1420,7 +1475,7 @@ HTML;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $new_version = $display_version === $active_version ? 0 : $display_version;
 
-        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
@@ -1643,8 +1698,8 @@ HTML;
      * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+    public function renderGradeInquiryPanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradeInquiryPanel.twig", [
             "graded_gradeable" => $graded_gradeable,
             "can_inquiry" => $can_inquiry
         ]);
@@ -1671,6 +1726,9 @@ HTML;
             "testcase_messages" => $testcase_messages,
             "image_data" => $image_data,
             'numberUtils' => new class () {
+                /**
+                 * @return array<int,int>
+                 */
                 //needed to show student multiple choices in random order
                 public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);

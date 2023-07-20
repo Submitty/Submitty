@@ -4,8 +4,9 @@ user_id: grader2
 anon_id: asdf8THGY4BNS93
 user_familyname: Grader
 user_numeric_id: 548466737
+user_pronouns: They/Them
 courses:
   sample:
     user_group: 3
   plagiarism:
-    user_group: 3  
+    user_group: 3

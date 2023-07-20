@@ -1,7 +1,7 @@
 {% import _self as self %}
 <script>
     let student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
-    let regrade_info = {% if isRegradePanel %} true {% else %} false {% endif %};
+    let grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
     let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
     let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
     let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
@@ -12,7 +12,7 @@
         submission_browser: true,
         solution_ta_notes: true,
         student_info,
-        regrade_info,
+        grade_inquiry_info,
         discussion_browser,
         peer_info,
         "notebook-view": is_notebook
@@ -25,6 +25,7 @@
             <button title="Show/Hide Autograding Testcases (Press A)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
+                    data-testid="show-autograding"
             >
                 <i class="fas fa-list"></i><span>Autograding</span>
             </button>
@@ -43,6 +44,7 @@
             <button title="Show/Hide Submission and Results Browser (Press O)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
+                    data-testid="show-submission"
             >
                 <i class="fas fa-folder-open"></i><span>Files</span>
             </button>
@@ -90,8 +92,8 @@
             {{ self.renderPanelPositionSelector('discussion_browser') }}
             </span>
         {% endif %}
-        {% if isRegradePanel and not student_grader %}
-            <span class="grade-panel" id="regrade_info_btn">
+        {% if isGradeInquiryPanel and not student_grader %}
+            <span class="grade-panel" id="grade_inquiry_info_btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -99,7 +101,7 @@
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
                 </button>
-            {{ self.renderPanelPositionSelector('regrade_info') }}
+            {{ self.renderPanelPositionSelector('grade_inquiry_info') }}
             </span>
         {% endif %}
         {% if is_notebook %}

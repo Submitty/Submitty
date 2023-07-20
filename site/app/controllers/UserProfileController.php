@@ -159,6 +159,34 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/update_last_initial_format", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateLastInitialFormat() {
+        $user = $this->core->getUser();
+        if (isset($_POST['format'])) {
+            $newVal = intval($_POST['format']);
+            // Handle the case where intval returns zero due to an invalid string
+            if ($newVal !== 0 || $_POST['format'] === '0' || $_POST['format'] === 0) {
+                try {
+                    $user->setLastInitialFormat($newVal);
+                    $user->setUserUpdated(true);
+                    $this->core->getQueries()->updateUser($user);
+                    return JsonResponse::getSuccessResponse([
+                        'message' => "Last initial format successfully updated!",
+                        'format' => $user->getLastInitialFormat(),
+                        'display_format' => $user->getDisplayLastInitialFormat(),
+                        'new_abbreviated_name' => $user->getDisplayAbbreviatedName()
+                    ]);
+                }
+                catch (\InvalidArgumentException $e) {
+                }
+            }
+        }
+        return JsonResponse::getErrorResponse("Invalid option for last initial format!");
+    }
+
+    /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException

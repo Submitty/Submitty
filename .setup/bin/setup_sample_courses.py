@@ -11,7 +11,23 @@ Usage: ./setup_sample_courses.py
 
 The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
-just the ones used for testing.
+just the ones used for testing.)
+
+Note about editing:
+If you make changes that use/alter random number generation, you may need to 
+edit the following files:
+    Peer Review:
+        students.txt
+        graders.txt
+    Office Hours Queue:
+        queue_data.json
+    Discussion Forum:
+        threads.txt
+        posts.txt
+        
+These files are manually written for a given set of users (the set is predetermined due to 
+the random's seed staying the same). If you make any changes that affects the contents of the 
+set these files will be outdated and result in failure of recreate_sample_courses.
 """
 from __future__ import print_function, division
 import argparse
@@ -33,6 +49,7 @@ import os.path
 import string
 import pdb
 import docker
+import random
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
@@ -56,6 +73,12 @@ DB_HOST = "localhost"
 DB_PORT = 5432
 DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
+
+# used for constructing the url to clone repos for vcs gradeables
+# with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
+#     submitty_config_json = json.load(submitty_config)
+SUBMISSION_URL = 'submitty_config_json["submission_url"]'
+VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -173,6 +196,7 @@ def main():
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_access_level=user.access_level,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -185,6 +209,7 @@ def main():
                               user_familyname=user.familyname,
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
+                              user_pronouns=user.pronouns,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
@@ -287,6 +312,19 @@ def generate_random_ta_note():
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
+def generate_pronouns():
+    pronoun_num = random.random()
+    if pronoun_num <= .05: 
+        pronoun_list = ["Ze/Zir","Xe/Xem", "Ne/Nem", "Vi/Vir", "Ne/Nir" "Nix/Nix", "Xy/Xyr", "Zhe/Zhim"]
+        return random.choice(pronoun_list)
+    elif pronoun_num <= .30:
+        return ""
+    elif pronoun_num <= .60:
+        return "She/Her"
+    elif pronoun_num <= .70:
+        return "They/Them"
+    else: return "He/Him"
+
 
 def generate_random_marks(default_value, max_value):
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
@@ -369,6 +407,7 @@ def generate_random_users(total, real_users):
                              "user_numeric_id": numeric_id,
                              "user_givenname": given_name,
                              "user_familyname": family_name,
+                             "user_pronouns": generate_pronouns(),
                              "user_group": 4,
                              "courses": dict()})
             new_user.create()
@@ -578,6 +617,40 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
     with open(os.path.join(dst, file_name), 'w') as f:
         json.dump(annotation_json, f, indent = 2)
 
+def commit_submission_to_repo(user_id, src_file, repo_path, vcs_subdirectory):
+    # a function to commit and push a file to a user's submitty-hosted repository
+    my_cwd = os.getcwd()
+    with TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+        os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
+        os.chdir(os.path.join(temp_dir, user_id))
+        os.system('git checkout main')
+        os.system('git pull')
+        # use the above function to copy the files into the git repo for us
+        dst = os.getcwd()
+        if vcs_subdirectory != '':
+            dst = os.path.join(dst, vcs_subdirectory)
+        
+        create_gradeable_submission(src_file, dst)
+        os.system('git add --all')
+        os.system(f"git config user.email '{user_id}@example.com'")
+        os.system(f"git config user.name '{user_id}'")
+        os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
+        os.system('git push')
+    os.chdir(my_cwd)
+
+def mimic_checkout(repo_path, checkout_path, vcs_subdirectory):
+    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {checkout_path}/tmp -b main')
+    if vcs_subdirectory != '':
+        if vcs_subdirectory[0] == '/':
+            vcs_subdirectory = vcs_subdirectory[1:]
+        file_path = os.path.join(f'{checkout_path}/tmp', vcs_subdirectory)
+    else:
+        file_path = os.path.join(f'{checkout_path}/tmp')
+
+    shutil.copytree(file_path, f'{checkout_path}', dirs_exist_ok=True)
+    shutil.rmtree(f'{checkout_path}/tmp')
+
 class User(object):
     """
     A basic object to contain the objects loaded from the users.json file. We use this to link
@@ -589,6 +662,7 @@ class User(object):
         password
         givenname
         familyname
+        pronouns
         email
         group
         preferred_givenname
@@ -605,6 +679,7 @@ class User(object):
         self.password = self.id
         self.givenname = user['user_givenname']
         self.familyname = user['user_familyname']
+        self.pronouns = user['user_pronouns']
         self.email = self.id + "@example.com"
         self.group = 4
         self.preferred_givenname = None
@@ -929,6 +1004,14 @@ class Course(object):
 
             # creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
+
+            checkout_path = os.path.join(self.course_path, "checkout", gradeable.id)
+
+            if gradeable.is_repository:
+                # generate the repos for the vcs gradeable
+                print(f"generating repositories for gradeable {gradeable.id}")
+                subprocess.check_call(f"sudo {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py {self.semester} {self.code} {gradeable.id}", stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
+
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
             submission_count = 0
@@ -968,6 +1051,12 @@ class Course(object):
                         submission_path = os.path.join(gradeable_path, user.id)
                         annotation_path = os.path.join(gradeable_annotation_path, user.id)
 
+                    # need to create the directories for the user/version in "checkout" too for git sunmissions
+                    if gradeable.is_repository:
+                        user_checkout_path = os.path.join(checkout_path, user.id)
+                    else:
+                        user_checkout_path = None
+
                     if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                         if user.id in gradeable.plagiarized_user:
                             # If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
@@ -989,6 +1078,13 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
+                            if gradeable.is_repository:
+                                if not os.path.exists(checkout_path):
+                                    os.makedirs(checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{checkout_path}"')
+                                if not os.path.exists(user_checkout_path):
+                                    os.makedirs(user_checkout_path)
+                                    os.system(f'chown submitty_daemon:{self.code}_tas_www "{user_checkout_path}"')
 
                             if gradeable.annotated_pdf is True:
                                 if not os.path.exists(gradeable_annotation_path):
@@ -1088,15 +1184,21 @@ class Course(object):
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
                                                 # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
                                                 annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
-                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
+                                                create_pdf_annotations(annotation_file_name, anon_dst, annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version), key)
-                                            create_gradeable_submission(src, dst)
+                                            # To mimic a 'checkout', the VCS gradeable files are cloned to the 'user_checkout_ folder
+                                            # They are also committed to the repository, so clicking regrade works. 
+                                            if gradeable.is_repository:
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
+                                            else:
+                                                create_gradeable_submission(src, dst)
                                     else:
                                         submission = random.choice(gradeable.submissions)
                                         if isinstance(submission, list):
@@ -1105,12 +1207,28 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            dst = os.path.join(submission_path, str(version))
-                                            create_gradeable_submission(src, dst)
+                                            # To mimic a 'checkout', the VCS gradeable files are cloned to the 'user_checkout_ folder
+                                            # They are also committed to the repository, so clicking regrade works. 
+                                            if gradeable.is_repository:
+                                                repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
+                                                commit_submission_to_repo(user.id, src, repo_path, gradeable.subdirectory)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), gradeable.subdirectory)
+                                            else:
+                                                dst = os.path.join(submission_path, str(version))
+                                                create_gradeable_submission(src, dst)
                                 random_days -= 0.5
+                            # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
+                            if gradeable.is_repository:
+                                with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
+                                    # the file contains info only if the git repos are non-submitty hosted
+                                    pass
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    open_file.write(dateutils.write_submitty_date(NOW))
 
-                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                                json.dump(json_history, open_file)
+                            else:  
+                                with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
+                                    json.dump(json_history, open_file)
+
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
@@ -1705,6 +1823,8 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
+        self.using_subdirectory = False
+        self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
         self.precision = 0.5
@@ -1821,8 +1941,10 @@ class Gradeable(object):
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
-            if self.is_repository and 'eg_subdirectory' in gradeable:
-                self.subdirectory = gradeable['eg_subdirectory']
+            if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
+                self.using_subdirectory = gradeable['eg_using_subdirectory'] is True
+                self.subdirectory = gradeable['eg_vcs_subdirectory']
+                self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
                 self.peer_grading = gradeable['eg_peer_grading']
             if 'eg_use_ta_grading' in gradeable:
@@ -1942,7 +2064,10 @@ class Gradeable(object):
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
-                         eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
+                         eg_is_repository=self.is_repository, 
+                         eg_using_subdirectory=self.using_subdirectory,
+                         eg_vcs_subdirectory=self.subdirectory,
+                         eg_vcs_partial_path=self.vcs_partial_path,
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,
                          eg_team_lock_date=self.team_lock_date,
@@ -1964,6 +2089,13 @@ class Gradeable(object):
         form_json['gradeable_id'] = self.id
         if self.type == 0:
             form_json['config_path'] = self.config_path
+        if self.is_repository:
+            form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+            form_json['upload_type'] = 'repository'
+            form_json['vcs_partial_path'] = self.vcs_partial_path
+            form_json['using_subdirectory'] = self.using_subdirectory
+            form_json['subdirectory'] = self.subdirectory
+            return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
@@ -1981,7 +2113,7 @@ class Gradeable(object):
             form_json['section_type'] = self.get_submission_type()
             form_json['eg_late_days'] = self.late_days
             form_json['upload_type'] = self.get_upload_type()
-            form_json['upload_repo'] = self.subdirectory
+            form_json['upload_repo'] = ''
             form_json['comment_title'] = []
             form_json['points'] = []
             form_json['eg_extra'] = []

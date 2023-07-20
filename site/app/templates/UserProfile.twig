@@ -13,7 +13,7 @@
                 {% endif %}
             </div>
             <span class="edit-user-img">
-                <button class="icon" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                <button class="icon" data-testid="upload-photo-button" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-upload"></i> Upload profile photo
                 </button>
             </span>
@@ -25,7 +25,7 @@
                     <span>Basic Information</span>
                 </div>
                 <div class="user-info">
-                    <div class="flex-row" id="username-row">
+                    <div class="flex-row" id="username-row" data-testid="username-row">
                         <span class="label">
                             Username:
                         </span>
@@ -33,7 +33,7 @@
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="givenname-row">
+                    <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
                             First Name:
                         </span>
@@ -41,7 +41,7 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="familyname-row">
+                    <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
                             Last Name:
                         </span>
@@ -49,7 +49,15 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="pronouns-row">
+                    <div class="flex-row" id="last-initial-format-row" data-testid="last-initial-format-row">
+                        <span class="label">
+                            Abbreviated Name:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
                         <span class="label">
                             Pronouns:
                         </span>
@@ -57,7 +65,7 @@
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="email-row">
+                    <div class="flex-row" id="email-row" data-testid="email-row">
                         <span class="label">
                             Primary Email:
                         </span>
@@ -119,7 +127,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="time_zone_drop_down">Select Timezone: </label>
-                        <select id="time_zone_drop_down"></select>
+                        <select id="time_zone_drop_down" data-testid="time-zone-dropdown"></select>
                     </div>
                 </div>
             </div>
@@ -130,7 +138,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown>
                             <option value="system">Follow Device Theme</option>
                             <option value="system_black">Follow Device Theme (Black)</option>
                             <option value="light">Light Mode</option>
@@ -149,6 +157,7 @@
     </div>
 </div>
 {% include 'EditNameForm.twig' %}
+{% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}

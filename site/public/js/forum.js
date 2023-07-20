@@ -1,3 +1,5 @@
+/* global displaySuccessMessage */
+
 // eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({
@@ -278,14 +280,34 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
         url: buildCourseUrl(['forum', 'posts', 'single']),
         data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
         success: function (response) {
+            let start_parse_index;
             try {
+                start_parse_index = response.indexOf('"status": "success"');
+                if (start_parse_index !==-1) {
+                    response = `{\n\t ${response.substring(start_parse_index)}`;
+                }
                 const new_post = JSON.parse(response).data;
-
+                const forum_display_setting = Cookies.get('forum_display_option');
                 if (!edit) {
                     const parent_id = $($(new_post)[0]).attr('data-parent_id');
                     const parent_post = $(`#${parent_id}`);
-                    if (parent_post.hasClass('first_post')) {
+                    if (forum_display_setting === 'reverse-time') {
+                        $(new_post).insertAfter('#currents-thread').hide().fadeIn();
+                    }
+                    else if (forum_display_setting === 'time') {
                         $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                    }
+                    else if (parent_post.hasClass('first_post')) {
+                        if (forum_display_setting === 'reverse-tree') {
+                            $(new_post).insertAfter('#current-thread').hide().fadeIn();
+                        }
+                        else if (forum_display_setting === 'alpha' || forum_display_setting === 'alpha_by_registration' || forum_display_setting === 'alpha_by_rotating') {
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                            displaySuccessMessage('Refresh for correct ordering');
+                        }
+                        else {
+                            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                        }
                     }
                     else {
                         const sibling_posts = $(`[data-parent_id="${parent_id}"]`);
@@ -295,9 +317,7 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit
                             });
                             if (parent_sibling_posts.length !== 0) {
                                 $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
-                            }
-                            else {
-                                $(new_post).insertBefore('#post-hr').hide().fadeIn();
+                                displaySuccessMessage('Refresh for correct ordering');
                             }
                         }
                         else {
@@ -372,15 +392,18 @@ function socketNewOrEditThreadHandler(thread_id, edit=false) {
                         }
                     }
                     else {
-                        const last_announcement = $('.thread-announcement').last().parent().parent();
-                        const last_bookmarked = $('.thread-favorite').last().parent().parent();
-                        const last = last_bookmarked.length === 0 ? last_announcement : last_bookmarked;
-
-                        if (last.length === 0) {
+                        let spot_after_announcements = $('.thread_box_link').first();
+                        if ($(new_thread).find('.thread-announcement-expiring').length === 1) {
                             $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn('slow');
                         }
                         else {
-                            $(new_thread).insertAfter(last.next()).hide().fadeIn('slow');
+                            while (spot_after_announcements.find('.thread-announcement-expiring').length !== 0) {
+                                spot_after_announcements = spot_after_announcements.next();
+                            }
+                            while (spot_after_announcements.find('.thread-favorite').length !== 0) {
+                                spot_after_announcements = spot_after_announcements.next();
+                            }
+                            $(new_thread).insertBefore(spot_after_announcements).hide().fadeIn('slow');
                         }
                     }
                 }
@@ -947,7 +970,7 @@ function cancelEditPostForum() {
 function changeDisplayOptions(option) {
     // eslint-disable-next-line no-undef
     thread_id = $('#current-thread').val();
-    document.cookie = `forum_display_option=${option};`;
+    Cookies.set('forum_display_option', option);
     // eslint-disable-next-line no-undef
     window.location.replace(`${buildCourseUrl(['forum', 'threads', thread_id])}?option=${option}`);
 }
@@ -1152,7 +1175,7 @@ function alterShowDeletedStatus(newStatus) {
     if (!checkAreYouSureForm()) {
         return;
     }
-    document.cookie = `show_deleted=${newStatus}; path=/;`;
+    Cookies.set('show_deleted', newStatus, { path: '/' });
     location.reload();
 }
 
@@ -1161,7 +1184,7 @@ function alterShowMergeThreadStatus(newStatus, course) {
     if (!checkAreYouSureForm()) {
         return;
     }
-    document.cookie = `${course}_show_merged_thread=${newStatus}; path=/;`;
+    Cookies.set(`${course}_show_merged_thread`, newStatus, { path: '/' });
     location.reload();
 }
 
@@ -1176,9 +1199,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     categories_value = (categories_value == null)?'':categories_value.join('|');
     // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null)?'':thread_status_value.join('|');
-    document.cookie = `${course}_forum_categories=${categories_value}; path=/;`;
-    document.cookie = `forum_thread_status=${thread_status_value}; path=/;`;
-    document.cookie = `unread_select_value=${unread_select_value}; path=/;`;
+    Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
+    Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
+    Cookies.set('unread_select_value', unread_select_value, { path: '/' });
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage?'1':'-1')}`;
     $.ajax({
@@ -1226,8 +1249,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
         },
         error: function() {
             window.alert('Something went wrong when trying to filter. Please try again.');
-            document.cookie = `${course}_forum_categories=; path=/;`;
-            document.cookie = 'forum_thread_status=; path=/;';
+            Cookies.remove(`${course}_forum_categories`, { path: '/' });
+            Cookies.remove('forum_thread_status', { path: '/' });
         },
     });
 }
@@ -1418,6 +1441,7 @@ function showHistory(post_id) {
 // eslint-disable-next-line no-unused-vars
 function addNewCategory(csrf_token) {
     const newCategory = $('#new_category_text').val();
+    const visibleDate = $('#category_visible_date').val();
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
@@ -1425,6 +1449,7 @@ function addNewCategory(csrf_token) {
         type: 'POST',
         data: {
             newCategory: newCategory,
+            visibleDate: visibleDate,
             rank: $('[id^="categorylistitem-').length,
             csrf_token: csrf_token,
         },
@@ -1519,8 +1544,8 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function editCategory(category_id, category_desc, category_color, changed, csrf_token) {
-    if (category_desc === null && category_color === null) {
+function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
+    if (category_desc === null && category_color === null && category_date === null) {
         return;
     }
     const data = {category_id: category_id, csrf_token: csrf_token};
@@ -1529,6 +1554,14 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
     }
     if (category_color !== null && changed === 'color') {
         data['category_color'] = category_color;
+    }
+    if (category_date !== null && changed === 'date') {
+
+        if (category_date.trim() === '') {
+            category_date = '    ';
+        }
+
+        data['visibleDate'] = category_date;
     }
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['forum', 'categories', 'edit']);
@@ -1563,6 +1596,10 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
+            if (category_date !== null) {
+                $(`#categorylistitem-${category_id}`).find('.categorylistitemdate-desc span').text(category_date);
+            }
+
             refreshCategories();
         },
         error: function() {
@@ -1570,6 +1607,7 @@ function editCategory(category_id, category_desc, category_color, changed, csrf_
         },
     });
 }
+
 
 function refreshCategories() {
     if ($('#ui-category-list').length) {
@@ -1846,7 +1884,7 @@ function toggleMarkdown(post_box_id, triggered) {
     // eslint-disable-next-line eqeqeq
     $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1':'0');
     $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-    document.cookie = `markdown_enabled=${$(`#markdown_input_${post_box_id}`).val()}; path=/;`;
+    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/' });
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -1982,7 +2020,7 @@ function loadThreadHandler() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function loadAllInlineImages() {
+function loadAllInlineImages(open_override = false) {
     const toggleButton = $('#toggle-attachments-button');
 
     const allShown = $('.attachment-well').filter(function() {
@@ -2007,7 +2045,7 @@ function loadAllInlineImages() {
         $(this).click();
 
         //overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all')) {
+        if (toggleButton.hasClass('show-all') || open_override) {
             $('.attachment-well').eq(i).show();
         }
         else {

@@ -109,13 +109,13 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
     }
 }
 function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
+    const scale = 3; // Define the scale factor here
     if (num < targetNum) {
-        // eslint-disable-next-line eqeqeq
-        if (num != 1) {
+        if (num !== 1) {
             doc.addPage();
         }
         pdf.getPage(num).then((page) => {
-            const viewport = page.getViewport({scale:1.5});
+            const viewport = page.getViewport({scale: scale});
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -132,30 +132,29 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     for (let an = 0; an < annotations.length; an++) {
                         const annotation = annotations[an];
                         if (annotation.type === 'drawing') {
-                            ctx.lineWidth = annotation.width;
+                            ctx.lineWidth = annotation.width * scale;
                             ctx.strokeStyle = annotation.color;
                             ctx.beginPath();
                             for (let line = 1; line < annotation.lines.length; line++) {
-                                ctx.moveTo(annotation.lines[line - 1][0], annotation.lines[line - 1][1]);
-                                ctx.lineTo(annotation.lines[line][0], annotation.lines[line][1]);
+                                ctx.moveTo(annotation.lines[line - 1][0] * scale, annotation.lines[line - 1][1] * scale);
+                                ctx.lineTo(annotation.lines[line][0] * scale, annotation.lines[line][1] * scale);
                                 ctx.stroke();
                             }
                         }
 
                         if (annotation.type === 'textbox') {
-                            ctx.font = `${annotation.size}px sans-serif`;
+                            ctx.font = `${annotation.size * scale}px sans-serif`;
                             ctx.fillStyle = annotation.color;
                             const text = annotation.content;
-                            // eslint-disable-next-line eqeqeq
-                            if (text != null) {
-                                ctx.fillText(text, annotation.x, annotation.y);
+                            if (text !== null) {
+                                ctx.fillText(text, annotation.x * scale, annotation.y * scale);
                             }
                         }
                     }
-                    const imgData = canvas.toDataURL('image/png');
+                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
                     const width = doc.internal.pageSize.getWidth();
                     const height = doc.internal.pageSize.getHeight();
-                    doc.addImage(imgData, 'PNG', 0, 0, width, height);
+                    doc.addImage(imgData, 'JPEG', 0, 0, width, height);
                     renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
                     //TODO: Get the saving and loading from annotated_pdfs working
                     /*console.log("CHECK2");
@@ -202,6 +201,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
+        updateAnnotations();
         let currentTool;
         let NUM_PAGES = 0;
 
@@ -271,7 +271,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
                                 if (initialPage.length) {
-                                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
+                                    $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
                                 }
                             }
                             document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
@@ -306,6 +306,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         // ignore the identifier error
     }
     repairPDF();
+    updateAnnotations();
 }
 
 
@@ -378,6 +379,36 @@ function toggleOtherAnnotations(hide_others) {
         }
     }
     render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+}
+
+function updateAnnotations() {
+    const elements = document.querySelectorAll('path, g');
+
+    elements.forEach((element) => {
+        let transform = element.getAttribute('transform');
+        let hasTranslate = false;
+
+        if (transform) {
+            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
+                hasTranslate = true;
+
+                x = x !== undefined ? parseFloat(x) : 0;
+                y = y !== undefined ? parseFloat(y) : 0;
+
+                return `translate(${x}, ${y})`;
+            });
+
+            transform = updatedTransform;
+        }
+
+        // Add translate(0, 0) if there's no translate transformation
+        if (!hasTranslate) {
+            transform = transform ? `${transform.trim()} translate(0, 0)` : 'translate(0, 0)';
+        }
+
+        // Update the transform attribute of the element, removing unnecessary spaces
+        element.setAttribute('transform', transform.replace(/\s+/g, ' '));
+    });
 }
 
 function repairPDF() {

@@ -1,8 +1,12 @@
-/* exported updateUserPronouns, showUpdatePrefNameForm, showUpdatePronounsForm,
-showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
-updateUserPreferredNames, updateUserProfilePhoto, updateUserSecondaryEmail,
-changeSecondaryEmail
+/* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
+showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
+changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl */
+
+//This variable is to store changes to the pronouns form that have not been submitted
+let pronounsLastVal = null;
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
@@ -13,11 +17,23 @@ function showUpdatePrefNameForm() {
     $('#user-givenname-change').focus();
 }
 
+function showUpdateLastInitialFormatForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-last-initial-format-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    const dropdown = $('#user-last-initial-format-change');
+    dropdown.val(dropdown.data().default || 0);
+}
+
 function showUpdatePronounsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-pronouns-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
+    if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
+        document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
 }
 
 function showUpdatePasswordForm() {
@@ -67,12 +83,22 @@ function getCurrentUTCOffset() {
     return `${sign + hours}:00`;
 }
 
+function clearPronounsBox() {
+    const pronounsInput = document.getElementById('user-pronouns-change');
+    if (pronounsLastVal === null || pronounsLastVal !== pronounsInput.value) {
+        pronounsLastVal = pronounsInput.value;
+    }
+    pronounsInput.value = '';
+}
+
 function updateUserPronouns(e) {
     e.preventDefault();
     const pronouns = $('#user-pronouns-change');
+    pronounsLastVal = pronouns.val();
     if (pronouns.data('current-pronouns') === pronouns.val()) {
         // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
+        $('#edit-pronouns-form').hide();
     }
     else {
         const data = new FormData();
@@ -161,6 +187,43 @@ function updateUserPreferredNames () {
             },
         });
     }
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
+function updateUserLastInitialFormat() {
+    const newVal = Number($('#user-last-initial-format-change').val());
+    if (isNaN(newVal)) {
+        return displayErrorMessage('Invalid option for last initial format!');
+    }
+    const data = new FormData();
+    data.append('csrf_token', $('#user-last-initial-format-csrf').val());
+    data.append('format', newVal);
+    const url = buildUrl(['user_profile', 'update_last_initial_format']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
+                $('#user-last-initial-format-change').data('default', data.format);
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
     // hide the form form view
     $('.popup-form').css('display', 'none');
     return false;
@@ -281,6 +344,13 @@ function changeSecondaryEmail() {
         checkbox.prop('disabled', true);
         checkbox.prop('checked', false);
     }
+}
+
+function previewUserLastInitialFormat() {
+    const format = Number($('#user-last-initial-format-change').val());
+    const preview = $('#user-last-initial-format-preview');
+    const options = preview.data('options').split('|');
+    preview.text(options[format]);
 }
 
 $(document).ready(() => {

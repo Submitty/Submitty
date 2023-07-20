@@ -8,9 +8,7 @@
             <th>Assignment submitted # of days after deadline</th>
             <th>Student granted # of days extension for this assignment</th>
             <th>Status</th>
-            {% if grade_inquiry_enabled %}
-                <th>Grade Inquiries</th>
-            {% endif %}
+            <th>Grade Inquiries</th>
             <th>Change in late days</th>
             <th>Late days remaining</th>
         </tr>
@@ -26,9 +24,7 @@
         <td data-before-content="Days Submitted Late"> {{ empty_late_day }} </td>
         <td data-before-content="Days From Extensions"> {{ empty_late_day }} </td>
         <td data-before-content="Status"> {{ empty_late_day }} </td>
-        {% if grade_inquiry_enabled %}
-            <td data-before-content="Regrade Inquiry Count"> {{ empty_late_day }} </td>
-        {% endif %}
+        <td data-before-content="Grade Inquiry Count"> {{ empty_late_day }} </td>
         <td data-before-content="Late Days Used Here"> {{ ((late_days.getDefaultLateDays() > 0) ? '+' : '') ~ late_days.getDefaultLateDays() }} </td>
         <td data-before-content="Late Days Remaining"> {{ late_days.getDefaultLateDays() }} </td>
     </tr>
@@ -49,9 +45,7 @@
             <td data-before-content="Days Submitted Late">{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : placeholder }}</td>
             <td data-before-content="Days From Extensions">{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : placeholder }}</td>
             <td data-before-content="Status" {{ id }}>{{ late_day_info.isLateDayUpdate() ? placeholder : late_day_info.getStatusMessage() }}</td>
-            {% if grade_inquiry_enabled %}
-                <td data-before-content="Regrade Inquiry Count" {{ id }}>{{ late_day_info.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
-            {% endif %}
+            <td data-before-content="Grade Inquiry Count" {{ id }}>{{ late_day_info.isGradeInquiryAllowed() ? late_day_info.getGradeInquiryCount() : placeholder }}</td>
             <td data-before-content="Late Days Used Here">{{ ((late_day_info.getLateDaysChange() > 0) ? '+' : '') ~ late_day_info.getLateDaysChange() }}</td>
             <td data-before-content="Late Days Remaining">{{ late_day_info.getLateDaysRemaining() }}</td>
         </tr>

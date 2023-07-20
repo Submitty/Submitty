@@ -151,7 +151,7 @@ class UserSpecificNotebook extends Notebook {
         $gid = $this->gradeable_id;
         $uid = $this->user_id;
 
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         $hash = hexdec(substr(md5("{$item_label}|{$gid}|{$uid}|{$semester}|{$course}"), 24, 8));

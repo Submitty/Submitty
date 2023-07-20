@@ -158,8 +158,8 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getTimeBeingHelped($time_out, $time_helped) {
         $diff = strtotime($time_out) - strtotime($time_helped);
-        $h = $diff / 3600 % 24;
-        $m = $diff / 60 % 60;
+        $h = intval($diff / 3600) % 24;
+        $m = intval($diff / 60) % 60;
         $s = $diff % 60;
         return $h . "h " . $m . "m " . $s . "s";
     }
@@ -171,8 +171,8 @@ class OfficeHoursQueueModel extends AbstractModel {
         else {
             $diff = strtotime($time_out) - strtotime($time_in);
         }
-        $h = $diff / 3600 % 24;
-        $m = $diff / 60 % 60;
+        $h = intval($diff / 3600) % 24;
+        $m = intval($diff / 60) % 60;
         $s = $diff % 60;
         return $h . "h " . $m . "m " . $s . "s";
     }
@@ -236,6 +236,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['time_paused_start'];
     }
 
+    public function getCurrentStarType(): ?string {
+        return $this->current_queue_state['star_type'];
+    }
+
     /**
      * function to return the name of the person who is currently helping the
      * student of a particular query row, if null is passed in, it will return
@@ -260,6 +264,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         $user_info["user_email_secondary"] = $query_row["helper_email_secondary"];
         $user_info["user_email_secondary_notify"] = $query_row["helper_email_secondary_notify"];
         $user_info["user_group"] = $query_row["helper_group"];
+        $user_info["user_pronouns"] = $query_row["helper_pronouns"];
 
         $user = new User($this->core, $user_info);
 
@@ -294,6 +299,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         $user_info["user_email_secondary"] = $query_row["remover_email_secondary"];
         $user_info["user_email_secondary_notify"] = $query_row["remover_email_secondary_notify"];
         $user_info["user_group"] = $query_row["remover_group"];
+        $user_info["user_pronouns"] = $query_row["remover_pronouns"];
 
         $user = new User($this->core, $user_info);
 

@@ -1403,6 +1403,7 @@ end of styles used in the admin gradeable page
     background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
     background-clip: text;
     color: transparent;
+    border-radius: 50%;
 
     /* chrome & safari */
     -webkit-text-fill-color: transparent;
