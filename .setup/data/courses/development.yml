@@ -545,10 +545,10 @@ gradeables:
     eg_submission_open_date: -1 days
     eg_submission_due_date: +29 days
     g_grade_start_date: +34 days
-    g_grade_due_date: +36 days
-    g_grade_released_date: +36 days
-    eg_grade_inquiry_start_date: +37 days
-    eg_grade_inquiry_due_date: +43 days
+    g_grade_due_date: +39 days
+    g_grade_released_date: +39 days
+    eg_grade_inquiry_start_date: +40 days
+    eg_grade_inquiry_due_date: +44 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
@@ -569,10 +569,10 @@ gradeables:
     eg_submission_open_date: -1 days
     eg_submission_due_date: +26 days
     g_grade_start_date: +31 days
-    g_grade_due_date: +33 days
-    g_grade_released_date: +33 days
-    eg_grade_inquiry_start_date: +34 days
-    eg_grade_inquiry_due_date: +39 days
+    g_grade_due_date: +36 days
+    g_grade_released_date: +36 days
+    eg_grade_inquiry_start_date: +37 days
+    eg_grade_inquiry_due_date: +41 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
@@ -593,10 +593,10 @@ gradeables:
     eg_submission_open_date: -1 days
     eg_submission_due_date: +25 days
     g_grade_start_date: +30 days
-    g_grade_due_date: +32 days
-    g_grade_released_date: +32 days
-    eg_grade_inquiry_start_date: +33 days
-    eg_grade_inquiry_due_date: +38 days
+    g_grade_due_date: +35 days
+    g_grade_released_date: +35 days
+    eg_grade_inquiry_start_date: +36 days
+    eg_grade_inquiry_due_date: +40 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
@@ -616,11 +616,11 @@ gradeables:
     g_ta_view_start_date: -2 days
     eg_submission_open_date: -1 days
     eg_submission_due_date: +23 days
-    g_grade_start_date: +29 days
-    g_grade_due_date: +31 days
-    g_grade_released_date: +31 days
-    eg_grade_inquiry_start_date: +32 days
-    eg_grade_inquiry_due_date: +36 days
+    g_grade_start_date: +28 days
+    g_grade_due_date: +33 days
+    g_grade_released_date: +33 days
+    eg_grade_inquiry_start_date: +34 days
+    eg_grade_inquiry_due_date: +38 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
@@ -663,11 +663,11 @@ gradeables:
             gcm_points: -5
     g_ta_view_start_date: -2 days
     eg_submission_open_date: -1 days
-    eg_submission_due_date: +17 days
+  eg_submission_due_date: +17 days
     g_grade_start_date: +22 days
-    g_grade_due_date: +24 days
-    g_grade_released_date: +24 days
-    eg_grade_inquiry_start_date: +25 days
+    g_grade_due_date: +27 days
+    g_grade_released_date: +27 days
+    eg_grade_inquiry_start_date: +28 days
     eg_grade_inquiry_due_date: +32 days
     eg_has_due_date: true
     eg_has_release_date: true
@@ -689,9 +689,9 @@ gradeables:
     eg_submission_open_date: -1 days
     eg_submission_due_date: +14 days
     g_grade_start_date: +19 days
-    g_grade_due_date: +21 days
-    g_grade_released_date: +21 days
-    eg_grade_inquiry_start_date: +22 days
+    g_grade_due_date: +24 days
+    g_grade_released_date: +24 days
+    eg_grade_inquiry_start_date: +25 days
     eg_grade_inquiry_due_date: +29 days
     eg_has_due_date: true
     eg_has_release_date: true
@@ -737,10 +737,10 @@ gradeables:
     eg_submission_open_date: -1 days
     eg_submission_due_date: +7 days
     g_grade_start_date: +12 days
-    g_grade_due_date: +15 days
-    g_grade_released_date: +15 days
-    eg_grade_inquiry_start_date: +16 days
-    eg_grade_inquiry_due_date: +20 days
+    g_grade_due_date: +17 days
+    g_grade_released_date: +17 days
+    eg_grade_inquiry_start_date: +18 days
+    eg_grade_inquiry_due_date: +22 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
@@ -760,11 +760,11 @@ gradeables:
     g_ta_view_start_date: -2 days
     eg_submission_open_date: -1 days
     eg_submission_due_date: +4 days
-    eg_has_due_date: true
-    eg_has_release_date: true
     g_grade_start_date: +9 days
     g_grade_due_date: +14 days
     g_grade_released_date: +14 days
     eg_grade_inquiry_start_date: +15 days
-    eg_grade_inquiry_due_date: +18 days
+    eg_grade_inquiry_due_date: +19 days
+    eg_has_due_date: true
+    eg_has_release_date: true
     eg_max_random_submissions: 0
