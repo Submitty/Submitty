@@ -35,7 +35,6 @@ class SessionRepository extends EntityRepository {
         return $qb->getQuery()->execute();
     }
 
-
     /**
      * Terminate all the sessions of a user except the one corresponding to the provided session_id
      * @param string $user_id
