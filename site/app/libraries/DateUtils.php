@@ -38,8 +38,8 @@ class DateUtils {
      * up to the nearest day in the positive direction. Thus if there's a difference of 2 days and 3 hours, then
      * the function would return 3 days. Likewise, if the difference was -3 hours, then 0 days would be returned.
      *
-     * @param string|\DateTime|null $date1
-     * @param string|\DateTime|null $date2
+     * @param string|\DateTime $date1
+     * @param string|\DateTime $date2
      *
      * @return int
      */

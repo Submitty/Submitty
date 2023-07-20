@@ -99,7 +99,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
- * @method bool hasLeaderboard()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -2237,7 +2236,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate()) : 0);
     }
 
     /**
