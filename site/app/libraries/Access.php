@@ -500,8 +500,7 @@ class Access {
                     if (!$gradeable->canStudentDownload()) {
                         return false;
                     }
-                    //TODO: Add a check in Gradeable.php, using the arg "dir","path" in the argument
-                    //to check if these are Notebook generated or not
+                    //Make sure notebook generated files can't be accessed
                     if (array_key_exists("file_name", $args)) {
                         return $gradeable->canStudentDownloadFile($args["gradeable_version"], $args["file_name"]);
                     }

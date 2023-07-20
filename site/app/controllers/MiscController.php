@@ -408,7 +408,6 @@ class MiscController extends AbstractController {
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false);
 
-        //TODO: In here for notebook answers remove the server-generated answers
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
         foreach ($folder_names as $folder_name) {
