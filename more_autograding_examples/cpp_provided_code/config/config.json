@@ -3,6 +3,10 @@
 
     "assignment_message" : "You should not modify the provided main.cpp",
 
+    "environment_variables": {
+        "FOO_1_PRINT": "Foo(1).value() = "
+    },
+
     "testcases" : [
 
         {
