@@ -127,7 +127,7 @@ gradeables:
     g_grade_start_date: +31 days
     g_grade_due_date: +33 days
     g_grade_released_date: +33 days
-    eg_grade_inquiry_start_date: +35 days
+    eg_grade_inquiry_start_date: +34 days
     eg_grade_inquiry_due_date: +40 days
     eg_has_due_date: true
     eg_has_release_date: true
@@ -149,7 +149,7 @@ gradeables:
     g_grade_start_date: +29 days
     g_grade_due_date: +31 days
     g_grade_released_date: +31 days
-    eg_grade_inquiry_start_date: +33 days
+    eg_grade_inquiry_start_date: +32 days
     eg_grade_inquiry_due_date: +38 days
     eg_has_due_date: true
     eg_has_release_date: true
@@ -171,7 +171,7 @@ gradeables:
     g_grade_start_date: +27 days
     g_grade_due_date: +29 days
     g_grade_released_date: +29 days
-    eg_grade_inquiry_start_date: +31 days
+    eg_grade_inquiry_start_date: +30 days
     eg_grade_inquiry_due_date: +36 days
     eg_has_due_date: true
     eg_has_release_date: true
@@ -193,7 +193,7 @@ gradeables:
     g_grade_start_date: +25 days
     g_grade_due_date: +27 days
     g_grade_released_date: +27 days
-    eg_grade_inquiry_start_date: +29 days
+    eg_grade_inquiry_start_date: +28 days
     eg_grade_inquiry_due_date: +34 days
     eg_has_due_date: true
     eg_has_release_date: true
