@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
-                        || quote_literal(user_row.user_familyname) || ', ' ||
+                        || quote_literal(user_row.user_familyname) || ', '
                         || quote_nullable(user_row.user_preferred_familyname) || ', ' 
                         || quote_literal(user_row.user_last_initial_format) || ', ' 
                         || quote_literal(user_row.user_email) || ', ' 
