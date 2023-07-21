@@ -100,8 +100,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
                     query_string := 'INSERT INTO users (
                         user_id,
-                        user_pronouns,
                         user_numeric_id,
+                        user_pronouns,
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -110,6 +110,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_email,
                         user_email_secondary,
                         user_email_secondary_notify,
+                        time_zone,
+                        display_image_state,
                         user_updated,
                         instructor_updated,
                         user_group,
@@ -118,8 +120,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         manual_registration
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
-                        || quote_literal(user_row.user_pronouns) || ', ' 
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
+                        || quote_literal(user_row.user_pronouns) || ', ' 
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
@@ -128,6 +130,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_email) || ', ' 
                         || quote_literal(user_row.user_email_secondary) || ', ' 
                         || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_literal(user_row.time_zone) || ', '
+                        || quote_literal(user_row.display_image_state) || ', '
                         || quote_literal(user_row.user_updated) || ', '
                         || quote_literal(user_row.instructor_updated) || ', '
                         || NEW.user_group || ', ' 
