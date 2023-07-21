@@ -516,7 +516,7 @@ def load_triggers(args, output=True):
                 'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course;'
             ).all()
             masterdb.close()
-            first_err = True # make sure first error appears on new line
+            first_err = True  # make sure first error appears on new line
             for course in courses:
                 db_config = deepcopy(args.config.database)
                 db_config['dbname'] = 'submitty_{}_{}'.format(course['semester'], course['course'])
@@ -525,7 +525,7 @@ def load_triggers(args, output=True):
                 except OperationalError as exc:
                     if not output and first_err:
                         print()
-                        first_out = False
+                        first_err = False
                     print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
                         db_config['dbname'],
                         str(exc.orig).split('\n')[0]
@@ -534,7 +534,7 @@ def load_triggers(args, output=True):
 
                 if output:
                     print('Loading trigger functions to {}.{}...'
-                        .format(course['semester'], course['course']))
+                          .format(course['semester'], course['course']))
                 for file, data in sql:
                     if output:
                         print('  ' + file.stem)
