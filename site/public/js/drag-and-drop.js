@@ -1247,9 +1247,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     let linkToBeAdded = false;
 
     if ($('#url_selection').is(':visible')) {
-        if ($('#url_title').val() !== '' && $('#url_url').val() !== '' ) {
+        if ($('#title').val() !== '' && $('#url_url').val() !== '' && window.isValidFileName($('#title').val())) {
             linkToBeAdded = true;
-            formData.append('url_title', $('#url_title').val());
+
+            let title = $('#title').val();
+            formData.append('original_title', title);
+            title = encodeURIComponent(`link-${title}`);
+
+            formData.append('title', title);
             formData.append('url_url', $('#url_url').val());
         }
     }
@@ -1295,7 +1300,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, link_title, overwrite) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, title, overwrite, file_path) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1332,9 +1337,27 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     if (link_url !== null) {
         formData.append('link_url', link_url);
     }
-    if (link_title !== null) {
-        formData.append('link_title', link_title);
+
+    if (file_path !== null && file_path !== '') {
+        const file_name = file_path.split('/').pop();
+        if (link_url !== null) {
+            const lastSlashIndex = file_path.lastIndexOf('/');
+            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
+            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
+        }
+        if (window.isValidFileName(file_name)) {
+            formData.append('file_path', file_path);
+        }
     }
+
+    if (title !== null && window.isValidFileName(title)) {
+        formData.append('original_title', title);
+        if (link_url !== null) {
+            title = encodeURIComponent(`link-${title}`);
+        }
+        formData.append('title', title);
+    }
+
     if (overwrite !== null) {
         formData.append('overwrite', overwrite);
     }
@@ -1362,6 +1385,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 else {
                     if (link_url !== null && jsondata['message'].indexOf('Name clash') !== -1) {
                         newOverwriteCourseMaterialForm(jsondata['data'], true, true);
+                    }
+                    else if (jsondata['message'].indexOf('Name clash') !== -1) {
+                        newOverwriteCourseMaterialForm(jsondata['data'], false, true);
                     }
                     else {
                         alert(jsondata['message']);
