@@ -281,7 +281,9 @@ def handle_migration(args):
         if missing_migration.exists():
             missing_migration.unlink()
 
-    load_triggers(args)
+    print('Loading trigger functions...', end='')
+    load_triggers(args, False)
+    print('DONE')
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -474,7 +476,7 @@ def dump(args):
         print('DONE')
 
 
-def load_triggers(args):
+def load_triggers(args, output=True):
     for environment in args.environments:
         if environment not in ('master', 'course'):
             continue
@@ -484,7 +486,8 @@ def load_triggers(args):
                if f.is_file() and f.suffix == '.sql']
 
         if len(sql) == 0:
-            print('Loading trigger functions to {}...DONE'.format(environment))
+            if output:
+                print('Loading trigger functions to {}...DONE'.format(environment))
             continue
 
         db_config = deepcopy(args.config.database)
@@ -497,36 +500,46 @@ def load_triggers(args):
             )
 
         if environment == 'master':
-            print('Loading trigger functions to master...')
+            if output:
+                print('Loading trigger functions to master...')
             for file, data in sql:
-                print('  ' + file.stem)
+                if output:
+                    print('  ' + file.stem)
                 masterdb.execute(data)
             masterdb.commit()
             masterdb.close()
-            print('DONE')
+            if output:
+                print('DONE')
 
         elif environment == 'course':
             courses = masterdb.execute(
                 'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course;'
             ).all()
             masterdb.close()
+            first_err = True # make sure first error appears on new line
             for course in courses:
                 db_config = deepcopy(args.config.database)
                 db_config['dbname'] = 'submitty_{}_{}'.format(course['semester'], course['course'])
                 try:
                     coursedb = db.Database(db_config, 'course')
                 except OperationalError as exc:
+                    if not output and first_err:
+                        print()
+                        first_out = False
                     print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
                         db_config['dbname'],
                         str(exc.orig).split('\n')[0]
                     ))
                     continue
 
-                print('Loading trigger functions to {}.{}...'
-                      .format(course['semester'], course['course']))
+                if output:
+                    print('Loading trigger functions to {}.{}...'
+                        .format(course['semester'], course['course']))
                 for file, data in sql:
-                    print('  ' + file.stem)
+                    if output:
+                        print('  ' + file.stem)
                     coursedb.execute(data)
                 coursedb.commit()
                 coursedb.close()
-                print('DONE')
+                if output:
+                    print('DONE')
