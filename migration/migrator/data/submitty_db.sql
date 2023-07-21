@@ -525,7 +525,11 @@ CREATE TABLE public.sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
+    session_expires timestamp(0) with time zone NOT NULL,
+    session_created timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
+    browser_name character varying(50) DEFAULT 'Unknown'::character varying,
+    browser_version character varying(15) DEFAULT ''::character varying,
+    platform character varying(50) DEFAULT 'Unknown'::character varying
 );
 
 
@@ -567,6 +571,7 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    enforce_single_session boolean DEFAULT false,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
