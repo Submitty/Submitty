@@ -496,6 +496,7 @@ def load_triggers(args, output=True):
             masterdb = db.Database(db_config, 'master')
         except OperationalError as exc:
             raise SystemExit(
+                '\n' * (not output) +  # make sure to appear on new line
                 'Error connecting to master database:\n  {}'.format(str(exc.orig).split('\n')[0])
             )
 

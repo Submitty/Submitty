@@ -150,13 +150,17 @@ class TestLoadTriggers(unittest.TestCase):
         args.config = SimpleNamespace()
         args.config.database = dict()
 
-        with patch.object(migrator.db, 'Database') as mock_class:
-            migrator.main.load_triggers(args)
+        for show_output in (True, False):
+            with patch.object(migrator.db, 'Database') as mock_class:
+                if show_output:
+                    migrator.main.load_triggers(args)
+                else:
+                    migrator.main.load_triggers(args, False)
 
-        self.assertFalse(mock_class.called)
+            self.assertFalse(mock_class.called)
 
-        self.assertEqual('Loading trigger functions to master...DONE\n'
-                         'Loading trigger functions to course...DONE\n', sys.stdout.getvalue())
+            self.assertEqual('Loading trigger functions to master...DONE\n'
+                             'Loading trigger functions to course...DONE\n', sys.stdout.getvalue())
 
         shutil.rmtree(migrator.TRIGGERS_PATH.absolute())
         migrator.TRIGGERS_PATH = trigger_path
@@ -167,13 +171,23 @@ class TestLoadTriggers(unittest.TestCase):
         args.config = SimpleNamespace()
         args.config.database = dict()
 
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = OperationalError(None, None, 'first\nsecond')
-            with self.assertRaises(SystemExit) as cm:
-                migrator.main.load_triggers(args)
+        for show_output in (True, False):
+            with patch.object(migrator.db, 'Database') as mock_class:
+                mock_class.side_effect = OperationalError(None, None,
+                                                          'first '
+                                                          + ('a' if show_output else 'b')
+                                                          + '\nsecond')
+                with self.assertRaises(SystemExit) as cm:
+                    if show_output:
+                        migrator.main.load_triggers(args)
+                    else:
+                        migrator.main.load_triggers(args, False)
 
-        self.assertTrue(mock_class.called)
-        self.assertEqual('Error connecting to master database:\n  first', cm.exception.args[0])
+            self.assertTrue(mock_class.called)
+            if show_output:
+                self.assertEqual('Error connecting to master database:\n  first a', cm.exception.args[0])
+            else:
+                self.assertEqual('\nError connecting to master database:\n  first b', cm.exception.args[0])
 
     def test_course_db_fail(self):
         args = Namespace()
@@ -181,33 +195,42 @@ class TestLoadTriggers(unittest.TestCase):
         args.config = SimpleNamespace()
         args.config.database = dict()
 
-        masterdb = Mock()
-        masterdb.execute.return_value.all.return_value = [
-            {
-                'semester': 'my_semester_1',
-                'course': 'my_course_1'
-            },
-            {
-                'semester': 'my_semester_2',
-                'course': 'my_course_2'
-            }
-        ]
-
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [
-                masterdb,
-                OperationalError(None, None, 'first\nsecond'),
-                OperationalError(None, None, 'third\nfourth')
+        for show_output in (True, False):
+            masterdb = Mock()
+            masterdb.execute.return_value.all.return_value = [
+                {
+                    'semester': 'my_semester_1',
+                    'course': 'my_course_1'
+                },
+                {
+                    'semester': 'my_semester_2',
+                    'course': 'my_course_2'
+                }
             ]
-            migrator.main.load_triggers(args)
 
-        self.assertEqual(3, mock_class.call_count)
-        self.assertEqual(0, mock_class.return_value.execute.call_count)
+            with patch.object(migrator.db, 'Database') as mock_class:
+                mock_class.side_effect = [
+                    masterdb,
+                    OperationalError(None, None, 'first ' + ('a' if show_output else 'b') + '\nsecond'),
+                    OperationalError(None, None, 'third ' + ('a' if show_output else 'b') + '\nfourth')
+                ]
+                if show_output:
+                    migrator.main.load_triggers(args)
+                else:
+                    migrator.main.load_triggers(args, False)
+
+            self.assertEqual(3, mock_class.call_count)
+            self.assertEqual(0, mock_class.return_value.execute.call_count)
 
         self.assertEqual(
             'Failed to connect to course db \'submitty_my_semester_1_my_course_1\'\n'
-            '  Error: first\n'
+            '  Error: first a\n'
             'Failed to connect to course db \'submitty_my_semester_2_my_course_2\'\n'
-            '  Error: third\n',
+            '  Error: third a\n'
+            '\n'
+            'Failed to connect to course db \'submitty_my_semester_1_my_course_1\'\n'
+            '  Error: first b\n'
+            'Failed to connect to course db \'submitty_my_semester_2_my_course_2\'\n'
+            '  Error: third b\n',
             sys.stdout.getvalue()
         )
