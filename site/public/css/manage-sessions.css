@@ -1,0 +1,30 @@
+.session-th {
+    vertical-align: middle;
+    padding: 8px 4px;
+}
+
+.sessions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.enforce-checkbox {
+    margin-left: 2px;
+}
+
+.ajax-load {
+    margin: 0 2px;
+    vertical-align: middle;
+}
+
+#current-session-row {
+    background: var(--background-blue);
+}
+
+.rounded-green {
+    color: var(--background-blue);
+    border: 2px solid var(--disabled-good-green);
+    border-radius: 20px;
+    background: var(--disabled-good-green);
+}

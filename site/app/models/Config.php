@@ -15,8 +15,8 @@ use app\libraries\FileUtils;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  *
- * @method string getSemester()
- * @method string getCourse()
+ * @method string|null getTerm()
+ * @method string|null getCourse()
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
@@ -68,7 +68,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
- * @method void setSemester(string $semester)
+ * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
@@ -91,8 +91,8 @@ class Config extends AbstractModel {
      */
     protected $debug = false;
 
-    /** @prop @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
-    protected $semester;
+    /** @prop @var string contains the term to use, generally from the $_REQUEST['semester'] global */
+    protected $term;
     /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
@@ -470,7 +470,7 @@ class Config extends AbstractModel {
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
-        $this->semester = $semester;
+        $this->term = $semester;
         $this->course = $course;
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
@@ -507,7 +507,7 @@ class Config extends AbstractModel {
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
-            $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
+            $this->vcs_base_url = $this->vcs_url . $this->term . '/' . $this->course;
         }
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";

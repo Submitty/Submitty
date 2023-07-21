@@ -504,7 +504,7 @@ CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
             team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
             
-            --- Remove all lade day cache for all gradeables past this submission die date
+            --- Remove all lade day cache for all gradeables past this submission due date
             --- for every user associated with the gradeable
             DELETE FROM late_day_cache ldc
             WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
@@ -655,7 +655,8 @@ CREATE TABLE public.categories_list (
     category_id integer NOT NULL,
     category_desc character varying NOT NULL,
     rank integer,
-    color character varying DEFAULT '#000080'::character varying NOT NULL
+    color character varying DEFAULT '#000080'::character varying NOT NULL,
+    visible_date date
 );
 
 
@@ -691,7 +692,7 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    url_title character varying(255)
+    title character varying(255)
 );
 
 
@@ -794,6 +795,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_depends_on_points integer,
     eg_has_release_date boolean DEFAULT true NOT NULL,
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
+    eg_using_subdirectory boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),

@@ -776,6 +776,7 @@ class GradeableListTester extends BaseUnitTest {
             'syllabus_bucket' => 'homework',
             'autograding_config_path' => '/path/to/autograding',
             'vcs' => false,
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
             'vcs_host_type' => -1,
