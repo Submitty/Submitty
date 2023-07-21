@@ -484,7 +484,7 @@ def load_triggers(args):
                if f.is_file() and f.suffix == '.sql']
 
         if len(sql) == 0:
-            print('Loading trigger functions to {}...DONE'.format(environment))
+            # print('Loading trigger functions to {}...DONE'.format(environment))
             continue
 
         db_config = deepcopy(args.config.database)
@@ -497,13 +497,13 @@ def load_triggers(args):
             )
 
         if environment == 'master':
-            print('Loading trigger functions to master...')
+            # print('Loading trigger functions to master...')
             for file, data in sql:
-                print('  ' + file.stem)
+                # print('  ' + file.stem)
                 masterdb.execute(data)
             masterdb.commit()
             masterdb.close()
-            print('DONE')
+            # print('DONE')
 
         elif environment == 'course':
             courses = masterdb.execute(
@@ -522,11 +522,11 @@ def load_triggers(args):
                     ))
                     continue
 
-                print('Loading trigger functions to {}.{}...'
-                      .format(course['semester'], course['course']))
+                # print('Loading trigger functions to {}.{}...'
+                #       .format(course['semester'], course['course']))
                 for file, data in sql:
-                    print('  ' + file.stem)
+                    # print('  ' + file.stem)
                     coursedb.execute(data)
                 coursedb.commit()
                 coursedb.close()
-                print('DONE')
+                # print('DONE')
