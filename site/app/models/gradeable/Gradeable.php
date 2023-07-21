@@ -256,11 +256,11 @@ class Gradeable extends AbstractModel {
     /** @prop @var string are a list of hidden files and the lowest_access_group that can see those files */
     protected $hidden_files = "";
     /** @prop @var bool will limited access graders grade the gradeable blindly*/
-    protected $limited_access_blind = 1;
+    protected $limited_access_blind = 2;
     /** @prop @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop @var bool will instructors have blind peer grading enabled*/
-    protected $instructor_blind = 1;
+    protected $instructor_blind = 2;
 
     /**
      * Gradeable constructor.

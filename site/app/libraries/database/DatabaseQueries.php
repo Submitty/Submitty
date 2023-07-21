@@ -5307,6 +5307,7 @@ AND gc_id IN (
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
+                  eg_instructor_blind AS instructor_blind,
                   eg_limited_access_blind AS limited_access_blind,
                   eg_peer_blind AS peer_blind,
                   eg_submission_open_date AS submission_open_date,

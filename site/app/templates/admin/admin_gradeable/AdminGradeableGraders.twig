@@ -68,6 +68,18 @@ Form
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
 <br />
+<fieldset>
+    <legend>
+        How should grading be anonymized for instructor?
+    </legend>
+    <input type="radio" name="InstructorBlind" value="1" id="unblind_instructor_grading"
+        {{ (gradeable.getInstructorBlind() == 1) ? 'checked' : '' }}> <label for="unblind_instructor_grading">Unblinded Grading</label>
+
+    <input type="radio" name="InstructorBlind" value="2" id="blind_instructor_grading"
+        {{ (gradeable.getInstructorBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_instructor_grading">Blinded Grading</label>
+
+</fieldset>
+<br />
 {% if electronic %}
 <fieldset>
     <legend>
@@ -270,7 +282,7 @@ Form
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
         $('#minimum_grading_group').change(onMinGraderChange);
-        
+
         // update "all" check boxes
         {% if 1 in graders_from_usertypes|keys %}
         {% for grader in graders_from_usertypes[1] %}
