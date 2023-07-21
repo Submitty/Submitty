@@ -17,8 +17,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
                     query_string := 'INSERT INTO users (
                         user_id,
-                        user_pronouns,
                         user_numeric_id,
+                        user_pronouns,
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -35,8 +35,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         manual_registration
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
-                        || quote_literal(user_row.user_pronouns) || ', ' 
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
+                        || quote_literal(user_row.user_pronouns) || ', ' 
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
