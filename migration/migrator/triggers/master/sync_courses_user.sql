@@ -27,6 +27,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_email,
                         user_email_secondary,
                         user_email_secondary_notify,
+                        time_zone,
+                        display_image_state,
                         user_updated,
                         instructor_updated,
                         user_group,
@@ -45,6 +47,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_email) || ', ' 
                         || quote_literal(user_row.user_email_secondary) || ', ' 
                         || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_literal(user_row.time_zone) || ', '
+                        || quote_literal(user_row.display_image_state) || ', '
                         || quote_literal(user_row.user_updated) || ', '
                         || quote_literal(user_row.instructor_updated) || ', '
                         || NEW.user_group || ', ' 
