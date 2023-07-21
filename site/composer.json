@@ -35,7 +35,7 @@
     "ramsey/uuid": "4.2.3",
     "symfony/cache": "6.3.1",
     "symfony/config": "5.4.21",
-    "symfony/http-foundation": "5.4.24",
+    "symfony/http-foundation": "6.3.1",
     "symfony/polyfill-php80": "1.27.0",
     "symfony/routing": "6.1.11",
     "textalk/websocket": "1.6.3",
