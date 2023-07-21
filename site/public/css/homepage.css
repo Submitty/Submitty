@@ -53,6 +53,8 @@
   border: none;
   color: white;
   cursor: pointer;
+  background-color: rgba(0,0,0,.5);
+  border-radius: 50%;
 }
 
 .prev-button,
@@ -65,6 +67,8 @@
   border: none;
   color: white;
   cursor: pointer;
+  background-color: rgba(0,0,0,.5);
+  border-radius: 50%;
 }
 
 
