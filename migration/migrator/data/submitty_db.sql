@@ -94,6 +94,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                 query_string text;
             BEGIN
                 db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
@@ -101,7 +102,6 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_id,
                         user_numeric_id,
                         user_pronouns,
-                        display_pronouns
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -122,7 +122,6 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
                         || quote_literal(user_row.user_pronouns) || ', ' 
-                        || quote_literal(user_row.display_pronouns) || ', '
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
@@ -160,6 +159,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                     END IF;
                     PERFORM dblink_exec(db_conn, query_string);
                 END IF;
+
                 -- All done.
                 RETURN NULL;
             END;
@@ -338,7 +338,6 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                 query_string := 'UPDATE users SET '
                     || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
                     || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
-                    || 'display_pronouns=' || quote_literal(NEW.display_pronouns) || ', '
                     || 'user_givenname=' || quote_literal(NEW.user_givenname) || ', '
                     || 'user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', '
                     || 'user_familyname=' || quote_literal(NEW.user_familyname) || ', '
@@ -358,6 +357,7 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                 END IF;
                 PERFORM dblink_exec(db_conn, query_string);
             END LOOP;
+
             -- All done.
             RETURN NULL;
         END;
