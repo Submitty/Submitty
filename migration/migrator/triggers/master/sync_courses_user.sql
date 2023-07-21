@@ -19,6 +19,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_id,
                         user_numeric_id,
                         user_pronouns,
+                        display_pronouns,
                         user_givenname,
                         user_preferred_givenname,
                         user_familyname,
@@ -39,6 +40,7 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
                         || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_literal(user_row.display_pronouns) || ', '
                         || quote_literal(user_row.user_givenname) || ', ' 
                         || quote_nullable(user_row.user_preferred_givenname) || ', ' 
                         || quote_literal(user_row.user_familyname) || ', '
