@@ -16,7 +16,7 @@ CREATE OR REPLACE FUNCTION public.gradeable_version_change() RETURNS trigger
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
             team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
             
-            --- Remove all lade day cache for all gradeables past this submission die date
+            --- Remove all lade day cache for all gradeables past this submission due date
             --- for every user associated with the gradeable
             DELETE FROM late_day_cache ldc
             WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
