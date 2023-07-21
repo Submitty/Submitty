@@ -794,8 +794,11 @@ class FileUtils {
             }
         }
 
-        if (substr($path, 0, 2) === '..' || substr($path, -2) === '..') {
-            return false;
+        $pathArray = explode('/', $path);
+        foreach ($pathArray as $piece) {
+            if ($piece === '..') {
+                return false;
+            }
         }
 
         return true;
