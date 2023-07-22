@@ -104,7 +104,7 @@ class ForumThreadView extends AbstractView {
                 $family_name = trim($user_info["family_name"]);
                 $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
                 $pronouns = trim($user_info["pronouns"]);
-                $display_pronouns = trim($user_info["display_pronouns"]);
+                $display_pronouns = $user_info["display_pronouns"];
 
                 if ($is_instructor_full_access[$post["p_author"]]) {
                     $visible_username = $given_name . " " . $family_name;
@@ -894,7 +894,7 @@ class ForumThreadView extends AbstractView {
                 $family_name = trim($user_info["family_name"]);
                 $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
                 $pronouns = trim($user_info["pronouns"]);
-                $display_pronouns = trim($user_info["display_pronouns"]);
+                $display_pronouns = $user_info["display_pronouns"];
 
                 if ($is_instructor_full_access[$first_post["author_user_id"]]) {
                     $visible_username = $given_name . " " . $family_name;
@@ -1004,7 +1004,7 @@ class ForumThreadView extends AbstractView {
         $family_name = trim($user_info["family_name"]);
         $visible_username = $given_name . " " . substr($family_name, 0, 1) . ".";
         $pronouns = trim($user_info["pronouns"]);
-        $display_pronouns = trim($user_info["display_pronouns"]);
+        $display_pronouns = $user_info["display_pronouns"];
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
         if ($display_option != 'tree') {
@@ -1062,7 +1062,7 @@ class ForumThreadView extends AbstractView {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($user_info["pronouns"]);
-            $display_pronouns = trim($user_info["display_pronouns"]);
+            $display_pronouns = $user_info["display_pronouns"];
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
             $jscriptAnonFix = json_encode($jscriptAnonFix);
@@ -1130,7 +1130,7 @@ class ForumThreadView extends AbstractView {
             $info_name = $given_name . " " . $family_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $pronouns = trim($user_info["pronouns"]);
-            $display_pronouns = trim($user_info["display_pronouns"]);
+            $display_pronouns = $user_info["display_pronouns"];
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
             $jscriptAnonFix = json_encode($jscriptAnonFix);

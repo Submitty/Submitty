@@ -354,7 +354,7 @@ class UsersController extends AbstractController {
 
         $user->setPronouns(trim($_POST['user_pronouns']));
 
-        $user->setDisplayPronouns(trim($_POST['display_pronouns']));
+        $user->setDisplayPronouns($_POST['display_pronouns']);
 
         $user->setEmail(trim($_POST['user_email']));
 
@@ -438,7 +438,7 @@ class UsersController extends AbstractController {
     public function deleteUser(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
-            $displayed_fullname = trim($_POST['displayed_fullname']);
+            $displayed_fullname = $_POST['displayed_fullname'];
             $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
