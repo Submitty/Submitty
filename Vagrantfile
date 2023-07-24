@@ -61,10 +61,10 @@ end
 base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
-base_boxes.default         = "bento/ubuntu-20.04"
-base_boxes[:arm_parallels] = "bento/ubuntu-20.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2004"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-20.04-arm64"
+base_boxes.default         = "bento/ubuntu-22.04"
+base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
+base_boxes[:libvirt]       = "generic/ubuntu2204"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
 def mount_folders(config, mount_options)
   # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -143,8 +143,7 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  # Our primary development target, RPI uses it as of Fall 2021
-  config.vm.define 'ubuntu-20.04', primary: true do |ubuntu|
+  config.vm.define 'ubuntu-22.04', primary: true do |ubuntu|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
@@ -195,7 +194,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "parallels" do |prl, override|
     unless custom_box
       if (arm || apple_silicon)
-        override.vm.box = base_boxes[:arm_parallels]
+        override.vm.box = base_boxes[:arm_bento]
       end
     end
 
@@ -206,6 +205,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider "vmware_desktop" do |vmware, override|
+    unless custom_box
+      if (arm || apple_silicon)
+        override.vm.box = base_boxes[:arm_bento]
+      end
+    end
     vmware.vmx["memsize"] = "2048"
     vmware.vmx["numvcpus"] = "2"
 
