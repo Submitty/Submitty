@@ -117,7 +117,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_group,
                         registration_section,
                         registration_type,
-                        manual_registration
+                        manual_registration,
+                        display_name_order
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
@@ -137,7 +138,8 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || NEW.user_group || ', ' 
                         || quote_nullable(NEW.registration_section) || ', ' 
                         || quote_literal(NEW.registration_type) || ', '
-                        || NEW.manual_registration
+                        || NEW.manual_registration || ', '
+                        || quote_literal(user_row.display_name_order)
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
@@ -348,6 +350,7 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                     || 'user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', '
                     || 'time_zone=' || quote_literal(NEW.time_zone) || ', '
                     || 'display_image_state=' || quote_literal(NEW.display_image_state) || ', '
+                    || 'display_name_order=' || quote_literal(NEW.display_name_order)  || ', '
                     || 'user_updated=' || quote_literal(NEW.user_updated) || ', '
                     || 'instructor_updated=' || quote_literal(NEW.instructor_updated)
                 || ' WHERE user_id=' || quote_literal(NEW.user_id);
@@ -571,6 +574,7 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     enforce_single_session boolean DEFAULT false,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
