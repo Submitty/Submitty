@@ -64,6 +64,13 @@ PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 
+for arg in "$@"
+do
+    if [ "$arg" == "browscap" ]; then
+        BROWSCAP=true
+    fi
+done
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
 pushd /tmp > /dev/null
@@ -209,8 +216,17 @@ else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
+    echo -e "Checking for and fetching latest browscap.ini if needed"
+    # browscap.ini is needed for users' browser identification, this information is shown on session management page
+    # fetch and convert browscap.ini to cache, may take some time on initial setup or if there's an update
+    ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/browscap/browscap-php/resources
+fi
 
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
