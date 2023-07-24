@@ -807,7 +807,7 @@ class ForumThreadView extends AbstractView {
             $titleDisplay = $thread['title'];
 
             //replace tags from displaying in sidebar
-            $first_post_content = str_replace("```", "", strip_tags($first_post["content"]));
+            $first_post_content = str_replace("`", "", strip_tags($first_post["content"]));
             $temp_first_post_content = preg_replace('#\[(.*?)\]\((.*?)\)#', '$2', $first_post_content);
 
             if (!empty($temp_first_post_content)) {
