@@ -426,12 +426,11 @@ class MiscController extends AbstractController {
                     $file_path = $file->getRealPath();
                     $file_name = $file->getFilename();
                     $relative_path = substr($file_path, strlen($path) + 1);
-                    if ($this->core->getAccess()->canI(
-                        "path.read",
-                        ["dir" => $folder_name, 
-                        "path" => $file_path, 
-                        "gradeable" => $gradeable, 
-                        "graded_gradeable" => $graded_gradeable, 
+                    if ($this->core->getAccess()->canI("path.read",
+                        ["dir" => $folder_name,
+                        "path" => $file_path,
+                        "gradeable" => $gradeable,
+                        "graded_gradeable" => $graded_gradeable,
                         "gradeable_version" => $gradeable_version->getVersion(),
                         "file_name" => $file_name
                     ])) {
