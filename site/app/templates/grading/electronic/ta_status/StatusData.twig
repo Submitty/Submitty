@@ -64,9 +64,17 @@
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
                                 {% if include_bad_submissions  == 'include'  %}
-                                Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
-                            {% else %}
-                                Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
+                                    {% if key == "NULL" and include_null_sections != 'include' %}
+                                        {# Skip rendering this section #}
+                                     {% else %}
+                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% endif %}
+                                {% else %}
+                                    {% if key == "NULL" and include_null_sections != 'include' %}
+                                        {# Skip rendering this section #}
+                                     {% else %}
+                                        Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
+                                    {% endif %}    
                             {% endif %}
                         {% endif %}
                     {% endfor %}
