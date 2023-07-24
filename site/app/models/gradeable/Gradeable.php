@@ -947,7 +947,7 @@ class Gradeable extends AbstractModel {
                 $this->getId()
             );
             //If the file name is in the list of notebook filenames, then exclude it
-            foreach ($notebook_data as $note) { 
+            foreach ($notebook_data as $note) {
                 if (array_key_exists('filename', $note)) {
                     if ($file_name == $note['filename']) {
                         return false;
