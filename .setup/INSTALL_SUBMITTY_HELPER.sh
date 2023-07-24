@@ -645,7 +645,7 @@ popd > /dev/null
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh"
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap
 fi
 
 ################################################################################################################

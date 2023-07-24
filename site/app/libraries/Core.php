@@ -11,11 +11,17 @@ use app\libraries\database\DatabaseQueries;
 use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
+use app\entities\Session;
+use app\repositories\SessionRepository;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Log\NullLogger;
+use BrowscapPHP\Browscap;
 
 /**
  * Class Core
@@ -485,6 +491,19 @@ class Core {
     }
 
     /**
+     * Get the session id of the current session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        $session_id = $this->session_manager->getCurrentSessionId();
+        if ($session_id) {
+            return $session_id;
+        }
+        return false;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager, returning bool
      * on whether this was done or not
      *
@@ -536,9 +555,43 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $user_id = $this->authentication->getUserId();
+                // Get information about user's browser
+                try {
+                    $path = FileUtils::joinPaths(
+                        $this->getConfig()->getSubmittyInstallPath(),
+                        'site',
+                        'vendor',
+                        'browscap',
+                        'browscap-php',
+                        'resources'
+                    );
+                    $fs_adapter = new FilesystemAdapter("", 0, $path);
+                    $cache = new Psr16Cache($fs_adapter);
+                    $logger = new NullLogger();
+                    $bc = new Browscap($cache, $logger);
+                    $browser_info = $bc->getBrowser();
+                    $browser_info = [
+                        'browser' => $browser_info->browser,
+                        'version' => $browser_info->version,
+                        'platform' => $browser_info->platform,
+                    ];
+                }
+                catch (\Exception $e) {
+                    $browser_info = [
+                        'browser' => 'Unknown',
+                        'version' => '',
+                        'platform' => 'Unknown',
+                    ];
+                }
+                $new_session_id = $this->session_manager->newSession($user_id, $browser_info);
+                if ($this->database_queries->getSingleSessionSetting($user_id)) {
+                    /** @var SessionRepository $repo */
+                    $repo = $this->getSubmittyEntityManager()->getRepository(Session::class);
+                    $repo->removeUserSessionsExcept($user_id, $new_session_id);
+                }
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
-                    $this->session_manager->newSession($user_id),
+                    $new_session_id,
                     $user_id,
                     $persistent_cookie
                 );
