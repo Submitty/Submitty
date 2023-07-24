@@ -82,6 +82,7 @@ args = parser.parse_args()
 # (this command works even if we run configure from a different directory)
 SETUP_SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
+RAINBOW_REPOSITORY = os.path.join(SUBMITTY_REPOSITORY, 'GIT_CHECKOUT', 'RainbowGrades')
 
 # recommended (default) directory locations
 # FIXME: Check that directories exist and are readable/writeable?
@@ -401,6 +402,7 @@ config = OrderedDict()
 
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
+config['rainbow_repository'] = RAINBOW_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
@@ -614,6 +616,7 @@ if not args.worker:
 config = OrderedDict()
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
+config['rainbow_repository'] = RAINBOW_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
 if not args.worker:
