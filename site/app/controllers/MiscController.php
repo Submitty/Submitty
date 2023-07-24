@@ -246,6 +246,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
+                $title = $cm->getTitle();
             }
         }
 
@@ -271,7 +272,12 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        $filename = pathinfo($path, PATHINFO_BASENAME);
+        if (isset($title) && $title !== "") {
+            $filename = $title;
+        }
+        else {
+            $filename = pathinfo($path, PATHINFO_BASENAME);
+        }
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
