@@ -78,7 +78,9 @@
                         </div>
                     </div>
                     {% for button in g_info.buttons %}
+                        {% if button is not null %}
                         <div class="course-button">{{ self.renderButton(button, date_time_format) }}</div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endfor %}
@@ -93,6 +95,7 @@
 </div>
 
 {% macro renderButton(button, date_format) %}
+
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
