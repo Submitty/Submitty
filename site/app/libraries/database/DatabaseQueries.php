@@ -2069,6 +2069,10 @@ ORDER BY {$u_or_t}.{$section_key}",
             }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
+
+        if (!array_key_exists('NULL', $return)) {
+            $return['NULL'] = 0;
+        }
         return $return;
     }
 
@@ -2301,7 +2305,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
+    public function getAverageAutogradedScores($g_id, $section_key, $is_team, $bad_submissions, $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2310,6 +2314,38 @@ ORDER BY gc_order
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
+        $null_section_condition = '';
+        if ($null_section != 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+    $this->course_db->query(
+    "SELECT COUNT(*) as cnt
+    FROM gradeable_component AS gc, users AS u
+    WHERE gc.g_id=? {$null_section_condition}
+    AND EXISTS (
+        SELECT 1
+        FROM late_day_cache AS ldc
+        WHERE ldc.{$user_or_team_id} = u.{$user_or_team_id}
+        AND ldc.g_id=gc.g_id
+        AND ldc.submission_days_late > ldc.late_day_exceptions
+        AND ldc.late_days_change = 0
+    )",
+    [$g_id]
+);
+        $bad_submission_count = $this->course_db->row()['cnt'];
+
+        $bad_submissions_condition = '';
+    if ($bad_submissions != 'include' && $bad_submission_count > 0) {
+        $bad_submissions_condition = "AND NOT EXISTS (
+            SELECT 1
+            FROM late_day_cache AS ldc
+            WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+            AND ldc.g_id = egd.g_id
+            AND ldc.submission_days_late > ldc.late_day_exceptions
+            AND ldc.late_days_change = 0
+        )";
+    }
+
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
@@ -2322,12 +2358,13 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
          WHERE active_version > 0
       ) AS egv
       ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
-      WHERE egd.g_version=egv.active_version AND egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+      WHERE egd.g_version=egv.active_version AND egd.g_id=? {$null_section_condition} {$bad_submissions_condition}
    )g
 ) as individual;
           ", [$g_id]);
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
+
     public function getScoresForGradeable($g_id, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";
