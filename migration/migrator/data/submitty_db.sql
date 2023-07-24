@@ -117,8 +117,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_group,
                         registration_section,
                         registration_type,
-                        manual_registration,
-                        display_name_order
+                        manual_registration
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
                         || quote_nullable(user_row.user_numeric_id) || ', ' 
@@ -138,8 +137,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || NEW.user_group || ', ' 
                         || quote_nullable(NEW.registration_section) || ', ' 
                         || quote_literal(NEW.registration_type) || ', '
-                        || NEW.manual_registration || ', '
-                        || quote_literal(user_row.display_name_order)
+                        || NEW.manual_registration
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
@@ -350,7 +348,6 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                     || 'user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', '
                     || 'time_zone=' || quote_literal(NEW.time_zone) || ', '
                     || 'display_image_state=' || quote_literal(NEW.display_image_state) || ', '
-                    || 'display_name_order=' || quote_literal(NEW.display_name_order)  || ', '
                     || 'user_updated=' || quote_literal(NEW.user_updated) || ', '
                     || 'instructor_updated=' || quote_literal(NEW.instructor_updated)
                 || ' WHERE user_id=' || quote_literal(NEW.user_id);
@@ -380,7 +377,6 @@ CREATE TABLE public.courses (
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
-    CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
 );
@@ -545,7 +541,6 @@ CREATE TABLE public.terms (
     name character varying(255) NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
-    CONSTRAINT term_id_validate CHECK (((term_id)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT terms_check CHECK ((end_date > start_date))
 );
 
@@ -574,7 +569,6 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
-    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     enforce_single_session boolean DEFAULT false,
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
