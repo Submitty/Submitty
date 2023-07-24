@@ -930,7 +930,7 @@ class Gradeable extends AbstractModel {
         return $this->student_download;
     }
 
-    public function canStudentDownloadFile(int $version, string $file_name) {
+    public function canStudentDownloadFile(int $version, string $file_name): bool {
         if (!$this->student_download) {
             return false;
         }
@@ -943,7 +943,7 @@ class Gradeable extends AbstractModel {
                 $version,
                 $notebook,
                 $this->core->getUser()->getId(),
-                intval($version ?? '0'),
+                $version,
                 $this->getId()
             );
             //If the file name is in the list of notebook filenames, then exclude it
