@@ -2158,13 +2158,20 @@ ORDER BY {$u_or_t}.{$section_key}",
         $user_or_team_id = "user_id";
         $null_section = "";
         $late_submissions = "";
+        $bad_submission_count = 0;
         $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
-           $this->course_db->query(
+
+        // Check if we want to include null sections within the average
+        if ($null_sections != 'include') {
+            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+        if (!$is_team) {
+    $this->course_db->query(
     "SELECT COUNT(*) as cnt
     FROM gradeable_component AS gc, users AS u
     WHERE gc.g_id=? {$null_section}
@@ -2179,12 +2186,7 @@ ORDER BY {$u_or_t}.{$section_key}",
     [$g_id]
 );
 $bad_submission_count = $this->course_db->row()['cnt'];
-
-        // Check if we want to include null sections within the average
-        if ($null_sections != 'include') {
-            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
-        }
-
+}
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0 ) {
             $late_submissions = "INNER JOIN(
@@ -2309,6 +2311,7 @@ ORDER BY gc_order
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
+        $bad_submission_count = 0;
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2318,6 +2321,7 @@ ORDER BY gc_order
         if ($null_section != 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
+        if (!$is_team) {
     $this->course_db->query(
     "SELECT COUNT(*) as cnt
     FROM gradeable_component AS gc, users AS u
@@ -2333,7 +2337,7 @@ ORDER BY gc_order
     [$g_id]
 );
         $bad_submission_count = $this->course_db->row()['cnt'];
-
+}
         $bad_submissions_condition = '';
     if ($bad_submissions != 'include' && $bad_submission_count > 0) {
         $bad_submissions_condition = "AND NOT EXISTS (
@@ -2424,6 +2428,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
+        $bad_submission_count = 0;
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2443,7 +2448,20 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $late_submissions = '';
         $params = [$g_id, $count];
 
-        $this->course_db->query(
+        // Check if we want to exclude grade overridden gradeables
+        if (!$is_team && $override == 'include') {
+            $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
+                        WHERE u.user_id = grade_override.user_id
+                        AND grade_override.g_id=gc.g_id)";
+        }
+
+        // Check if we want to include null sections within the average
+        if ($null_sections != 'include') {
+            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+                if (! $is_team) {
+
+    $this->course_db->query(
     "SELECT COUNT(*) as cnt
     FROM gradeable_component AS gc, users AS u
     WHERE gc.g_id=? {$null_section}
@@ -2459,18 +2477,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 );
 $bad_submission_count = $this->course_db->row()['cnt'];
 
-        // Check if we want to exclude grade overridden gradeables
-        if (!$is_team && $override == 'include') {
-            $exclude = "AND NOT EXISTS (SELECT * FROM grade_override
-                        WHERE u.user_id = grade_override.user_id
-                        AND grade_override.g_id=gc.g_id)";
-        }
-
-        // Check if we want to include null sections within the average
-        if ($null_sections != 'include') {
-            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
-        }
-
+}
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include'  && $bad_submission_count > 0 ) {
             $late_submissions = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
