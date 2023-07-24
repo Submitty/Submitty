@@ -111,7 +111,7 @@
     {% endif %}
 
 </head>
-<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
     {% if not content_only %}
         {% if wrapper_urls['top_bar.html'] is defined %}
@@ -244,6 +244,10 @@
             Warning: Failed to connect to websocket server. This page will not dynamically update.
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
+        </div>
+        <div class="system-message warning" id="performance-warning-system-message" style="display: none;">
+            <span id="performance-warning-system-message-text"></span>
+            <i id="close-performance-warning-system-message" class="fa fa-times" style="padding: 4px; cursor: pointer;"></i>
         </div>
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->

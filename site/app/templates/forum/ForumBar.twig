@@ -68,7 +68,7 @@
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					More
 				</button>
-				<div class="dropdown-menu">
+				<div class="dropdown-menu dropdown-menu-right">
 					{% for more in more_data|slice(1) %}
 						{% if user_group <= more.required_rank %}
 							{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
@@ -86,13 +86,13 @@
 							Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
 						</a>
 						<div class="dropdown-divider"></div>
-						<a class="key_to_click dropdown-item"  id="tree" title="Sort posts by reply hierarchy" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a>
-						<a href="#" id="time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by ascending chronological order" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a>
-						<a href="#" id="reverse-time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by descending chronological order" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological <i class="fas fa-angle-down"></i> </a>
+						<a class="key_to_click dropdown-item"  id="tree" title="Sort posts by reply hierarchy" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical Post Order</a>
+						<a href="#" id="time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by ascending chronological order" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological Post Order  <i class="fas fa-angle-up"></i> </a>
+						<a href="#" id="reverse-time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by descending chronological order" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological Post Order  <i class="fas fa-angle-down"></i> </a>
 						{% if user_group <= core.getUser().accessGrading() %}
-							<a href="#" id="alpha" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's last name" onclick="changeDisplayOptions('alpha')">Alphabetical</a>
-							<a href="#" id="alpha_by_registration" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's registration section then last name" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a>
-							<a href="#" id="alpha_by_rotating" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's rotating section then last name" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a>
+							<a href="#" id="alpha" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's last name" onclick="changeDisplayOptions('alpha')">Alphabetical Post Order</a>
+							<a href="#" id="alpha_by_registration" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's registration section then last name" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration Post Order</a>
+							<a href="#" id="alpha_by_rotating" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's rotating section then last name" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating Post Order</a>
 						{% endif %}
 					{% endif %}
 				</div>

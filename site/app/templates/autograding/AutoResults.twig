@@ -1,5 +1,14 @@
 {% import 'functions/Badge.twig' as Badge %}
 
+{% if in_queue %}
+    <p class="red-message" id="auto-results-queue-msg">
+        This submission is currently in the autograding queue at position {{ queue_pos }} of {{ queue_total }}.
+    </p>
+    <script>
+        checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
+    </script>
+{% endif %}
+
 {% if num_visible_testcases == 0 %}
    {% if incomplete_autograding %}
       <h4>Autograding Results Incomplete</h4>

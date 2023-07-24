@@ -33,6 +33,7 @@
                             <div class="name">
                                 <br /><br />{{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}
                                 <br />{{student.getId()}}
+                                <br />{{student.getPronouns()}}
                                 {% if has_full_access %}
                                     {% if student.getDisplayImageState() == 'preferred' %}
                                         <a href="javascript:flagUserImage('{{ student.getId() }}', true)">{{ constant('app\\views\\grading\\ImagesView::FLAG_ICON_HTML') | raw  }}</a>

@@ -579,6 +579,7 @@ class ElectronicGraderController extends AbstractController {
         $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
+        $peer_components = 0;
         $total_users_who_submitted = [];
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
@@ -597,6 +598,7 @@ class ElectronicGraderController extends AbstractController {
             }
             foreach ($student_array as $student) {
                 $peer_graded_components += $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $student);
+                $peer_components += count($this->core->getQueries()->getPeerAssignment($gradeable_id, $student));
             }
         }
         if ($peer) {
@@ -705,6 +707,7 @@ class ElectronicGraderController extends AbstractController {
                    'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
                    'graded_components' => 0,
                    'view_peer_graded_components' => $peer_graded_components,
+                   'view_peer_components' => $peer_components,
                    'ta_graded_components' => 0,
                    'num_gradeables' => $num_gradeables,
                    'graders' => [],
@@ -862,7 +865,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails(string $gradeable_id, string $direction = "ASC") {
+    public function showDetails(string $gradeable_id) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -888,6 +891,7 @@ class ElectronicGraderController extends AbstractController {
         }
         $anon_mode = isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on';
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
+        $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
@@ -929,7 +933,11 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $graded_gradeables = [];
-        $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
+        $user_ids = [];
+        if ($gradeable->isTeamAssignment()) {
+            $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable);
+            // Collect user ids so we know who isn't on a team
+        }
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
@@ -1248,7 +1256,7 @@ class ElectronicGraderController extends AbstractController {
                 unlink($csv_file);
             }
         );
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($contents === false) {
@@ -1623,7 +1631,6 @@ class ElectronicGraderController extends AbstractController {
             }
 
             // Get the graded gradeable for the $from user
-            $from_graded_gradeable = false;
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from, $gradeable_id);
             if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
@@ -1788,7 +1795,7 @@ class ElectronicGraderController extends AbstractController {
             $late_days_user = $graded_gradeable->getSubmitter()->getUser();
         }
 
-        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+        $ldi = (new LateDays($this->core, $late_days_user, [$graded_gradeable]))->getLateDayInfoByGradeable($gradeable);
         if ($ldi === null) {
             $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
         }

@@ -203,16 +203,6 @@
         </label>
         <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
 
-        <div class="config-row checkbox-row">
-            <input type="checkbox" name="regrade_enabled" id="regrade-enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} />
-            <label for="regrade-enabled">
-                <span class="option-title">Grade Inquiries Allowed</span>
-                <br>
-                <span class="option-alt">Allow students to submit grade inquiries for assignments.<br>
-                Note: Grade inquiry dates and details configured per assignment.</span>
-            </label>
-        </div>
-
         <label for="regrade-message" class="config-row">
             <span class="option-title">Grade Inquiry Warning Message</span>
             <br>

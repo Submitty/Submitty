@@ -130,12 +130,29 @@ fi
 # create routes cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
 
+# clear old doctrine cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
+fi
+# create doctrine cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
+
 # clear old access control cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
     rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
 fi
 # create access control cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
+
+# clear old doctrine proxy classes
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
+fi
+# create doctrine proxy classes directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -186,7 +203,7 @@ done
 
 if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
-    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader --no-suggest"
+    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
@@ -245,9 +262,27 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.js ${VENDOR_FOLDER}/codemirror-spell-checker
     cp ${NODE_FOLDER}/codemirror-spell-checker/dist/spell-checker.min.css ${VENDOR_FOLDER}/codemirror-spell-checker
+    #codemirror6
+    mkdir ${VENDOR_FOLDER}/codemirror6
+    mkdir ${VENDOR_FOLDER}/codemirror6/view
+    mkdir ${VENDOR_FOLDER}/codemirror6/state
+    mkdir ${VENDOR_FOLDER}/codemirror6/commands
+    mkdir ${VENDOR_FOLDER}/codemirror6/language
+    mkdir ${VENDOR_FOLDER}/codemirror6/autocomplete
+    cp -R ${NODE_FOLDER}/@codemirror/view/dist ${VENDOR_FOLDER}/codemirror6/view
+    cp -R ${NODE_FOLDER}/@codemirror/state/dist ${VENDOR_FOLDER}/codemirror6/state
+    cp -R ${NODE_FOLDER}/@codemirror/commands/dist ${VENDOR_FOLDER}/codemirror6/commands
+    cp -R ${NODE_FOLDER}/@codemirror/language/dist ${VENDOR_FOLDER}/codemirror6/language
+    cp -R ${NODE_FOLDER}/@codemirror/autocomplete/dist ${VENDOR_FOLDER}/codemirror6/autocomplete
     # flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr
     cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+    # select2
+    mkdir ${VENDOR_FOLDER}/select2
+    cp -R ${NODE_FOLDER}/select2/dist/* ${VENDOR_FOLDER}/select2
+    # select2-theme-bootstrap5
+    mkdir ${VENDOR_FOLDER}/select2/bootstrap5-theme
+    cp -R ${NODE_FOLDER}/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css ${VENDOR_FOLDER}/select2/bootstrap5-theme
     # shortcut-buttons-flatpickr
     mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
     cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
@@ -271,10 +306,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
-
+    # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-
     # pdf-annotate.js
     cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
@@ -284,6 +318,12 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jspdf
     cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
     cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
+    # highlight.js
+    mkdir ${VENDOR_FOLDER}/highlight.js
+    cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/
+    # js-cookie
+    mkdir ${VENDOR_FOLDER}/js-cookie
+    cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

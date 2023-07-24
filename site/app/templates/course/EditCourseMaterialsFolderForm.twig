@@ -42,11 +42,11 @@
         <p style="margin: 0px;">
             <em>Note: Gray colored sections (if any) represent that some (but not all) materials inside this folder are restricted to those sections.</em>
         </p>
-        <label>
+        <label style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()"><br>
+            <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" style="pointer-events:auto;" ><br>
             <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
@@ -110,7 +110,7 @@
             submit.attr('disabled', true);
         }
 
-        flatpickr('.edit-folder-picker', {
+        let edit_folder_fp = flatpickr('.edit-folder-picker', {
             plugins: [ShortcutButtonsPlugin(
                     {
                         button: [
@@ -149,6 +149,8 @@
                         }
                     }
             )],
+            appendTo: document.getElementById('edit-course-materials-folder-form'),
+            position: "above right",
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -159,6 +161,9 @@
                 fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
+    $('.form-body').on('scroll', function() {
+        edit_folder_fp._positionCalendar();
+    });
     </script>
 {% endblock %}
 {% block buttons %}

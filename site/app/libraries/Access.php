@@ -153,7 +153,7 @@ class Access {
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
-        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
+        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE | self::ALLOW_LIMITED_ACCESS_GRADER;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -772,6 +772,9 @@ class Access {
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
+        if ($path === false) {
+            return false;
+        }
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't read it
@@ -880,7 +883,7 @@ class Access {
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path
-     * @return bool|string Absolute path of the file in that directory
+     * @return bool|string Absolute path of the file in that directory or false if unsafe
      */
     public function resolveDirPath(string $dir, string $path) {
         if ($this->directories === null) {
@@ -895,7 +898,10 @@ class Access {
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
         $parts = [];
         foreach ($orig_parts as $part) {
-            if ($part !== ".." && $part !== ".") {
+            if ($part === "..") {
+                return false;
+            }
+            if ($part !== ".") {
                 $parts[] = $part;
             }
         }

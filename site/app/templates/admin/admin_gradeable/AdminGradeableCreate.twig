@@ -142,23 +142,21 @@
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
 
-            {% if regrade_enabled %}
-                <fieldset id="regrade_request_enable_container">
-                    <legend>Should grade inquiries be enabled for this assignment?</legend>
-                    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
-                    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
-                </fieldset>
+            <fieldset id="regrade_request_enable_container">
+                <legend>Should grade inquiries be enabled for this assignment?</legend>
+                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
+                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
+            </fieldset>
 
-                <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
-                    <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
-                    <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
-                            {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
-                    <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
-                            {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
-                </fieldset>
-            {% endif %}
+            <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
+                <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
+                <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
+                        {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
+                <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
+                        {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
+            </fieldset>
 
             {% if forum_enabled %}
                 <div>
@@ -168,12 +166,13 @@
                                 {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
                         <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
                                 {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
-                    </fieldset>
-                    <div class="discussion_id_wrapper">
+
+                        <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
-                            <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
-                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
-                    </div>
+                            <input style="width: 85px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}" placeholder="(Required)"/>
+                        </div>
+                    </fieldset>
                 </div>
             {% endif %}
 
@@ -230,7 +229,6 @@
                         <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
                             {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
-
                         <div id="vcs_submitty_url_content" style="margin-left: 5%">
                             <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
@@ -245,23 +243,56 @@
                         <div id="vcs_submitty_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
                                 <kbd>{{ vcs_base_url }}</kbd>
-                                <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
+                                <input style='width: 30%' type='text' name="vcs_path" id="vcs_path" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd>{{ gradeable.getVcsSubdirectory() }}</kbd>
+                                <kbd>{{ vcs_base_url }}{{ gradeable.getVcsPartialPath() }}</kbd>
                             {% endif %}
                         </div>
                     </div>
 
                     <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Github hosted - public repository, students will provide URL</label> <br />
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Externally hosted - public repository, students will provide URL</label> <br />
 
                     <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                         {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Externally hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+
                 </fieldset>
+
+            <div id="subdirectory-settings-container">
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
+                    <fieldset><legend>Are the student's files for this gradeable expected to 
+                    be in a specific subdirectory of their VCS repository?</legend>
+                {% else %}
+                    {% if gradeable.getVcsSubdirectory() != '' %}
+                    Path to students files within the repository: <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="auto_save"
+                                    aria-label="repository name" value="{{ gradeable.getVcsSubdirectory() }}" /><br />
+                    {% endif %}
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id="subdir_yes_radio" name="subdirectory_gradeable" value="true"
+                            {{ action != 'new' and (gradeable.getVcsSubdirectory() != '') ? 'checked' : '' }}/> <label for="subdir_yes_radio">Yes</label>
+
+                    <input type="radio" id="subdir_no_radio" name="subdirectory_gradeable" value ="false"
+                            {{ action == 'new' ? 'checked' :  '' }}/> <label for="subdir_no_radio">No</label>
+                </div>
+                {# (VPAT) Closes fieldset for subdirectory radio group #}
+                </fieldset>
+                
+            </div>
+            <div class="subdirectory_yes" id="subdir_yes">
+               {% if action == 'new' %}
+                <label for="vcs_subdirectory">What is the path to the 
+                    student's files within the VCS repository?
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory" class="required auto_save" placeholder="(Required)"
+                                    aria-label="repository name" value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" required /><br />
+                    <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
+                {% endif %}
+            </div>
             </div>
         </div>
     </div>
@@ -413,12 +444,25 @@
         }
     }
 
+    function onSubdirectoryChange() {
+        if($('#subdir_yes_radio').is(':checked')) {
+            disableElementChildren('.subdirectory_yes', false);
+            $('#vcs_subdirectory').prop('required', true);
+        }
+        else {
+            disableElementChildren('.subdirectory_yes', true);
+            $('#vcs_subdirectory').prop('required', false);
+        }
+    }
+
     function onDiscussionChange() {
         if($('#yes_discussion').is(':checked')) {
             disableElementChildren('.discussion_id_wrapper', false);
+            $("#discussion_thread_id").attr('required', '');
         }
         else {
             disableElementChildren('.discussion_id_wrapper', true);
+            $("#discussion_thread_id").removeAttr('required');
         }
     }
 
@@ -434,8 +478,13 @@
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
+            $("#yes_discussion").prop('checked', false);
+            $("#no_discussion").prop('checked', true);
             $('#regrade_request_enable_container').hide();
             $('#discussion_grading_enable_container').hide();
+            {% if forum_enabled %}
+            document.getElementById("no_discussion").checked = true;
+            {% endif %}
         }
         updateDateDisplay();
     }
@@ -450,10 +499,10 @@
 
         if($('#vcs_radio_submitty_hosted_set_url').is(':checked')) {
             disableElementChildren('#vcs_submitty_set_url_content', false);
-            $('#vcs_submitty_url').prop('required', true);
+            $('#vcs_path').prop('required', true);
         }
         else {
-            $('#vcs_submitty_url').prop('required', false);
+            $('#vcs_path').prop('required', false);
         }
     }
 
@@ -517,6 +566,7 @@
 
         onManualGradingChange();
         $('[name="ta_grading"]').change(onManualGradingChange);
+        $('[name="ta_grading"]').change(onDiscussionChange);
 
         //
         // Template Selector Box Events
@@ -557,6 +607,10 @@
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
 
+        // Hide the subdirectory field if not selected
+        onSubdirectoryChange();
+        $('[name="subdirectory_gradeable"]').change(onSubdirectoryChange);
+
         // Hide VCS settings depending on different radio buttons
         onVCSTypeChange();
         $('[name="vcs_radio_buttons"]').change(onVCSTypeChange);
@@ -565,6 +619,7 @@
         $('[name="discussion_based"]').change(onDiscussionChange);
 
         disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
+        disableElementChildren('#subdirectory-settings-container', $('input[name=vcs]').val() === 'false');
 
         // Update the electronic file subtype
         $('input[name=electronic_gradeable_presets]').change(function() {
@@ -575,6 +630,7 @@
 
             vcs.val('false');
             $('#repository').hide();
+            $('#subdirectory-settings-container').hide();
             if ($(this).val() === 'bulk_upload') {
                 bulkUpload.val('true');
             }
@@ -583,6 +639,7 @@
                 if ($(this).val() === 'vcs') {
                     vcs.val('true');
                     $('#repository').show();
+                    $('#subdirectory-settings-container').show();
                 }
                 else {
                 }

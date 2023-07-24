@@ -1088,7 +1088,7 @@ class Course(object):
                                                 encoded_path = hashlib.md5(anon_dst.encode()).hexdigest()
                                                 # the file name has the format of ENCODED-ANON-SUBMISSION-PATH_GRADER.json
                                                 annotation_file_name = f"{str(encoded_path)}_{graders[i]}.json"
-                                                create_pdf_annotations(annotation_file_name, os.path.join(anon_dst, submission), annotation_src, annotation_dst, graders[i])
+                                                create_pdf_annotations(annotation_file_name, anon_dst, annotation_src, annotation_dst, graders[i])
                                 else:
                                     if isinstance(gradeable.submissions, dict):
                                         for key in sorted(gradeable.submissions.keys()):
@@ -1415,7 +1415,6 @@ class Course(object):
                               release_histogram=poll["release_histogram"])
             for i in range(len(poll["responses"])):
                 self.conn.execute(poll_options_table.insert(),
-                                  option_id=i,
                                   order_id=i,
                                   poll_id=poll["id"],
                                   response=poll["responses"][i],
@@ -1431,7 +1430,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[0]["id"],
                     "student_id": user.id,
-                    "option_id": response_id
+                    "option_id": response_id+1
                 })
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
@@ -1439,7 +1438,7 @@ class Course(object):
                 poll_responses_data.append({
                     "poll_id": polls_data[1]["id"],
                     "student_id": user.id,
-                    "option_id": random.randint(0, len(polls_data[1]['responses']) - 1)
+                    "option_id": random.randint(1, len(polls_data[1]['responses'])) + len(polls_data[0]['responses']) # Must offset by number of options for poll 1
                 })
 
         # add responses to DB
@@ -1706,6 +1705,7 @@ class Gradeable(object):
         self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
+        self.vcs_partial_path = ""
         self.use_ta_grading = True
         self.late_days = 2
         self.precision = 0.5
@@ -1817,12 +1817,14 @@ class Gradeable(object):
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
+            self.student_view_after_grades = False
             self.student_download = True
             self.student_submit = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
-            if self.is_repository and 'eg_subdirectory' in gradeable:
-                self.subdirectory = gradeable['eg_subdirectory']
+            if self.is_repository and 'eg_vcs_subdirectory' in gradeable:
+                self.subdirectory = gradeable['eg_vcs_subdirectory']
+                self.vcs_partial_path = gradeable['eg_vcs_partial_path']
             if 'eg_peer_grading' in gradeable:
                 self.peer_grading = gradeable['eg_peer_grading']
             if 'eg_use_ta_grading' in gradeable:
@@ -1848,6 +1850,9 @@ class Gradeable(object):
             if 'eg_annotated_pdf' in gradeable:
                 self.annotated_pdf = gradeable['eg_annotated_pdf'] is True
                 self.annotation_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "annotation")
+            if 'eg_bulk_test' in gradeable:
+                self.student_view = gradeable['eg_bulk_test'] is True
+                self.student_view_after_grades = gradeable['eg_bulk_test'] is True
 
             self.has_due_date = gradeable['eg_has_due_date'] if 'eg_has_due_date' in gradeable else True
             self.has_release_date = gradeable['eg_has_release_date'] if 'eg_has_release_date' in gradeable else True
@@ -1939,12 +1944,15 @@ class Gradeable(object):
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
-                         eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
+                         eg_is_repository=self.is_repository, 
+                         eg_vcs_subdirectory=self.subdirectory,
+                         eg_vcs_partial_path=self.vcs_partial_path,
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
+                         eg_student_view_after_grades=self.student_view_after_grades,
                          eg_student_download=self.student_download,
                          eg_student_submit=self.student_submit,
                          eg_config_path=self.config_path,

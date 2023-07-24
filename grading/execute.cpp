@@ -93,10 +93,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python3.5",               "/usr/bin/python3.5" },
     { "python3.6",               "/usr/bin/python3.6" },
     { "pylint",                  "/usr/local/bin/pylint" },
+    { "pytest",                  "/usr/local/bin/pytest" },
 
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
     { "clang++",                 "/usr/bin/clang++" },
+    { "clang-format",            "/usr/bin/clang-format" },
     { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
     { "valgrind",                "/usr/bin/valgrind" },
 

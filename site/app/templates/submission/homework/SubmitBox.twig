@@ -64,21 +64,21 @@
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
     {# Admin submission type selector #}
-    {% if core.getUser().accessFullGrading() %}
+    {% if core.getUser().accessFullGrading() and bulk_upload_access %}
         <form id="submission-form" method="post">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission-type" checked="checked">
+                    <input type='radio' id="radio-normal" name="submission-type">
                     Normal Submission
                 </label>
                 <label for="radio-student">
                     <input type='radio' id="radio-student" name="submission-type">
                     Make Submission for a Student
                 </label>
-                {% if part_names|length == 1 and not is_vcs %}
+                {% if is_bulk_upload %}
                     <label for="radio-bulk">
-                        <input type='radio' id="radio-bulk" name="submission-type">
+                        <input type='radio' id="radio-bulk" name="submission-type" checked="checked">
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
@@ -172,6 +172,9 @@
         {% endif %}
 
         <h3>Grade your repository:</h3>
+        {% if vcs_subdirectory != '' %}
+        <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
+        {% endif %}
         <div class="upload-message">
             {% include "misc/Markdown.twig" with {
                 "content" : upload_message
@@ -258,6 +261,9 @@
             <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
+            {% if is_notebook %}
+            <button class = "btn btn-default" id = "printing" onclick="window.print()">Print Quiz as PDF</button>
+            {% endif %}
             {% if viewing_inactive_version %}
                 <a href="{{ recent_version_url }}" class="btn btn-primary">
                     Switch to Most Recent Version
@@ -279,8 +285,9 @@
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
-                        const selected_radio_id = document.querySelector('input[name="submission-type"]:checked').id;
-                        if(selected_radio_id !== 'radio-normal'){
+                        const getSubmissionType = document.querySelector('input[name="submission-type"]:checked');
+                        const selected_radio_id = getSubmissionType === null ? null : getSubmissionType.id;
+                        if(selected_radio_id !== null && selected_radio_id !== 'radio-normal'){
                             for(let idx = 1; idx <= window.num_submission_boxes; idx++){
                                 window.deleteFiles(idx);
                             }
@@ -356,7 +363,7 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}
-    {% if not is_vcs and not is_notebook %}
+    {% if is_bulk_upload %}
         {% include 'submission/homework/BulkUploadProgressBox.twig' %}
     {% endif %}
 {% endif %}
@@ -429,6 +436,11 @@
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
                 user_id = $("#user_id").val();
+                //Adds a confirm box to prevent accidental submission as student
+                if (!confirm("Are you sure you want to submit as student " + user_id)){
+                    $(".submit-gradeable").prop('disabled',false);
+                    return;
+                }
             };
             if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();

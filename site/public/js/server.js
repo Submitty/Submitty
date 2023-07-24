@@ -155,19 +155,30 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
 function newDeleteCourseMaterialForm(id, file_name) {
     let url = buildCourseUrl(["course_materials", "delete"]) + "?id=" + id;
     var current_y_offset = window.pageYOffset;
-    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+    Cookies.set('jumpToScrollPosition', current_y_offset);
+
+    const cm_ids = (Cookies.get('cm_data') || '').split('|').filter(n=>n.length);
 
     $('[id^=div_viewer_]').each(function() {
-        var number = this.id.replace('div_viewer_', '').trim();
+        const cm_id = this.id.replace('div_viewer_', '').trim();
+        const elem = $('#div_viewer_' + cm_id);
+        if (!cm_id.length || !elem) {
+            return;
+        }
 
-        var elem = $('#div_viewer_' + number);
         if (elem.hasClass('open')) {
-            document.cookie = "cm_" +number+ "=1;";
+            if (!cm_ids.includes(cm_id)) {
+                cm_ids.push(cm_id);
+            }
         }
         else {
-            document.cookie = "cm_" +number+ "=0;";
+            if (cm_ids.includes(cm_id)) {
+                cm_ids.splice(cm_ids.indexOf(cm_id, 1));
+            }
         }
     });
+    
+    Cookies.set('cm_data', cm_ids.join('|'));
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
@@ -175,6 +186,45 @@ function newDeleteCourseMaterialForm(id, file_name) {
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
+}
+
+function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
+    const form = $('#overwrite-course-material-form');
+    form.css('display', 'block');
+    if (clashing_names.length === 1) {
+        const to_replace = [[' All', '']];
+        if (is_link) {
+            to_replace.push(['file', 'link']);
+        }
+        form.html((i, html) => {
+            to_replace.forEach((elem) => {
+                html = html.replaceAll(elem[0], elem[1]);
+            });
+            return html;
+        });
+    }
+    else {
+        const singular = ['Material', 'file', 'name', 'one'];
+        form.html((i, html) => {
+            singular.forEach((elem) => {
+                // replace singular words with plural by appending 's', taking care of the occurrences ending with . and :
+                html = html.replaceAll(RegExp(`( a){0,1}( ${elem})([ .:])`, 'g'), '$2s$3');
+            });
+            return html;
+        });
+    }
+    const clash_list = $('#existing-names');
+    clash_list.html("");
+    clashing_names.forEach((elem) => {
+        clash_list.append($('<li>', {
+            text: elem
+        }));
+    });
+    captureTabInModal("overwrite-course-material-form");
+    if (is_edit_form) {
+        $('#overwrite-submit').attr('is-edit-form', 1);
+    }
     form.find('.form-body').scrollTop(0);
 }
 
@@ -210,7 +260,7 @@ function newUploadCourseMaterialsForm() {
     captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
-
+    $('#overwrite-materials-flag').remove();
 }
 
 function newEditCourseMaterialsFolderForm(tag) {
@@ -320,11 +370,9 @@ function newEditCourseMaterialsForm(tag) {
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
+    const title_label = $("#edit-url-title-label", form);
+    const url_label = $("#edit-url-url-label", form);
     if (is_link === 1) {
-        const title_label = $("#edit-url-title-label", form);
-        const url_label = $("#edit-url-url-label", form);
-        title_label.prop('hidden', false);
-        url_label.prop('hidden', false);
         title_label.css('display', 'block');
         url_label.css('display', 'block');
         const title = $("#edit-url-title");
@@ -334,9 +382,18 @@ function newEditCourseMaterialsForm(tag) {
         url.prop('disabled', false);
         url.val(link_url);
     }
+    else {
+        if (title_label.css('display') !== 'none') {
+            title_label.css('display', 'none');
+        }
+        if (url_label.css('display') !== 'none') {
+            url_label.css('display', 'none');
+        }
+    }
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
+    $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
@@ -797,13 +854,19 @@ function openAllDivForCourseMaterials() {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        }
         return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        for (let i = 0; i < elem.length; i++) {
+          const ele_each = elem[i];
+          $($($($(ele_each).parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        }
         return 'open';
     }
     return false;
@@ -1090,6 +1153,12 @@ function enableTabsInTextArea(jQuerySelector) {
     });
 }
 
+function confirmBypass(str, redirect) {
+    if (confirm(str)){
+        location.href = redirect;
+    }
+}
+
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
     var url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);
@@ -1303,11 +1372,11 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     if ($(document.body).width() < 1150) {
-        document.cookie = "collapse_sidebar=true;path=/";
+        Cookies.set('collapse_sidebar', 'true', { path: '/' });
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        document.cookie = "collapse_sidebar=false;path=/";
+        Cookies.set('collapse_sidebar', 'false', { path: '/' });
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1356,7 +1425,7 @@ function toggleSidebar() {
     const sidebar = $("aside");
     const shown = sidebar.hasClass("collapsed");
 
-    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";path=/";
+    Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1726,3 +1795,34 @@ function addMarkdownCode(type){
     $(this).focus();
     $(this)[0].setSelectionRange(cursor + insert.length, cursor + insert.length);
 }
+
+/**
+ * Check local timezone against user timezone and show warning if they are different
+ */
+function tzWarn() {
+    const user_offstr = $(document.body).data('user-tz-off');
+    if (!user_offstr) {
+        return;
+    }
+    const [ h, m ] = user_offstr.match(/\d+/g)?.map(n => +n) || [ NaN, NaN ];
+    if (isNaN(h) || isNaN(m)) {
+        return;
+    }
+
+    const user_off = (h + m / 60) * (user_offstr[0] === '-' ? -1 : 1);
+
+    const local_off = new Date().getTimezoneOffset() / -60;
+    if (user_off === local_off) {
+        return;
+    }
+
+    const THRESHOLD = 60*60*1000; // will wait one hour after each warning
+    // retrieve timestamp cookie
+    const last = Number(Cookies.get("last_tz_warn_time"));
+    const elapsed = isNaN(last) ? Infinity : Date.now() - last;
+    if (elapsed > THRESHOLD) {
+        displayWarningMessage("Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.");
+        Cookies.set("last_tz_warn_time", Date.now());
+    }
+}
+document.addEventListener('DOMContentLoaded', tzWarn);

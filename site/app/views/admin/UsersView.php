@@ -13,14 +13,17 @@ class UsersView extends AbstractView {
      * @param array  $download_info user information for downloading
      * @param array  $formatted_tzs array containing a formatted time zone string for each user
      * @param bool   $use_database
+     * @param string  $active_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
-    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false) {
+    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_columns = '1-1-1-1-1-1-1-1-1-1-1-1') {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalJs('userform.js');
+        $this->core->getOutput()->addInternalJs('manage-students.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -34,10 +37,12 @@ class UsersView extends AbstractView {
             "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
             "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             'view_grades_url' => $this->core->buildCourseUrl() . '/users/view_grades',
+            'view_latedays_url' => $this->core->buildCourseUrl(['users', 'view_latedays']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
-            "semester" => $this->core->getConfig()->getSemester()
+            "semester" => $this->core->getConfig()->getSemester(),
+            "active_columns" => explode('-', $active_columns)
         ]);
     }
 

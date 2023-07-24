@@ -35,6 +35,13 @@ function closeAllAutoGrading() {
     $("[id^='details_tc_']").find('.loading-tools-show').show();
 }
 
+function autogradingRegradeVersion(SELECTED_VERSION: number) {
+    const autogradingResultsJQuery: JQuery = $('#autograding_results');
+    const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
+    const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
+    regrade(1, SELECTED_VERSION, GRADEABLE_ID, USER_ID);
+}
+
 $(() => {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
     const HIGHEST_VERSION = parseInt(autogradingResultsJQuery.attr('data-highest-version')!);
@@ -52,6 +59,12 @@ $(() => {
     });
     $('#autograding-results-regrade-all').on('click', () => {
         regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
+    });
+    $('.autograding-panel-regrade').on('click', () => {
+        const idValue = $('.autograding-panel-regrade').attr('id');
+        if (idValue) {
+            autogradingRegradeVersion(parseInt(idValue));
+        }
     });
 });
 

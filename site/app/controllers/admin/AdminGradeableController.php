@@ -68,6 +68,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'bootstrap5-theme', 'select2-bootstrap-5-theme.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -76,7 +79,6 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken()
@@ -152,7 +154,7 @@ class AdminGradeableController extends AbstractController {
             $repo_id_number++;
         }
         usort($all_repository_config_paths, function ($a, $b) {
-            return $a[0] > $b[0];
+            return strcmp($a[0], $b[0]);
         });
 
         $type_string = 'UNKNOWN';
@@ -231,6 +233,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('select2', 'bootstrap5-theme', 'select2-bootstrap-5-theme.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -243,7 +248,6 @@ class AdminGradeableController extends AbstractController {
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
             // Non-Gradeable-model data
@@ -856,23 +860,25 @@ class AdminGradeableController extends AbstractController {
         }
 
         $repo_name = '';
-
+        $subdir = '';
+        if ($details['subdirectory_gradeable'] === 'true') {
+            $subdir = $details['vcs_subdirectory'];
+        }
+        $vcs_partial_path = '';
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
-            $subdir = '';
-
             $host_type = -1;
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
                 $repo_name = $details['id'];
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+                $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
-                $repo_name = $details['vcs_url'];
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
+                $repo_name = $details['vcs_path'];
+                $vcs_partial_path = $details['vcs_path'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -880,19 +886,20 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'private-github') {
                 $host_type = 3;
             }
-
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
-                'vcs_host_type' => $host_type
+                'vcs_host_type' => $host_type,
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
         else {
             $non_vcs_property_values = [
                 'vcs' => false,
-                'vcs_subdirectory' => '',
-                'vcs_host_type' => -1
+                'vcs_subdirectory' => $subdir,
+                'vcs_host_type' => -1,
+                'vcs_partial_path' => $vcs_partial_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
@@ -949,6 +956,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'vcs_partial_path' => '',
                 'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
@@ -1127,7 +1135,7 @@ class AdminGradeableController extends AbstractController {
                             $gradeable->setDependsOnPoints(0);
                         }
                         else {
-                            if ($depends_on_points < 0 || $depends_on_points > $temp_gradeable->getDependsOnPoints()) {
+                            if ($depends_on_points < 0 || ($depends_on_points > $temp_gradeable->getDependsOnPoints() && $temp_gradeable->getDependsOnPoints() !== null)) {
                                 $errors['depends_on_points'] = "Invalid depends on points!";
                             }
                         }
@@ -1262,6 +1270,7 @@ class AdminGradeableController extends AbstractController {
             'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
@@ -1339,14 +1348,12 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
     public function getBuildLogs(string $gradeable_id): JsonResponse {
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
-        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
-        $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output,$make_output]);
+        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output]);
     }
 
     /**

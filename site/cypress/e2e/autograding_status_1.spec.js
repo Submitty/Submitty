@@ -66,7 +66,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
 
             cy.visit(`/courses/${getCurrentSemester()}/sample/gradeable/future_no_tas_homework`);
             cy.wait(500);
-            cy.get('.upload-box').attachFile('sample_upload.py', { subjectType: 'drag-n-drop' });
+            cy.get('.upload-box').selectFile('cypress/fixtures/sample_upload.py', { action: 'drag-drop' });
             cy.get('#submit').click();
             cy.wait(500);
 

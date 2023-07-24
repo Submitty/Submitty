@@ -4,6 +4,7 @@ namespace tests\app\libraries;
 
 use app\libraries\Access;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\Team;
@@ -170,5 +171,28 @@ class AccessTester extends BaseUnitTest {
         self::assertTrue($this->access->isGradedGradeableBySubmitter($gg2, $su2));
         self::assertFalse($this->access->isGradedGradeableBySubmitter($gg2, $su3));
         self::assertTrue($this->access->isGradedGradeableBySubmitter($gg2, $st1));
+    }
+
+    public function testCanUserPathWrite() {
+        $user1 = $this->createMockModel(User::class);
+        $user1->method("getId")->willReturn("user1");
+
+        self::assertFalse($this->access->canUser($user1, "path.write", [
+            "path" => "",
+            "dir" => "course_materials"
+        ]));
+
+        FileUtils::createDir(".access_tester");
+        self::assertTrue(FileUtils::writeFile(".access_tester/test.txt", "data"));
+        self::assertTrue($this->access->canUser($user1, "path.write", [
+            "path" => ".access_tester/test.txt",
+            "dir" => "course_materials"
+        ]));
+
+        self::assertFalse($this->access->canUser($user1, "path.write", [
+            "path" => ".access_tester/../.access_tester/test.txt",
+            "dir" => "course_materials"
+        ]));
+        FileUtils::recursiveRmdir(".access_tester");
     }
 }

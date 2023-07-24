@@ -30,11 +30,11 @@
                 }
             </script>
         </fieldset>
-        <label>
+        <label id="edit_dt" style="pointer-events:none;">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
-            <input id="edit-picker" class="edit-picker" type="text" size="26"><br>
+            <input id="edit-picker" class="edit-picker" type="text" size="26" style="pointer-events:auto;"><br>
             <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
         </label>
         <label>
@@ -90,10 +90,15 @@
                 let url_url = document.getElementById("edit-url-url");
                 let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val);
+                let overwrite = false;
+                let overwrite_elem = $('#overwrite-submit');
+                if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
+                    overwrite = true;
+                }
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val, overwrite);
         };
 
-        flatpickr('.edit-picker', {
+        const edit_fp = flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
                     button: [
@@ -132,6 +137,7 @@
                     }
                 }
             )],
+            appendTo: document.getElementById('edit-course-materials-form'),
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -142,6 +148,9 @@
               fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
+    $('.form-body').on('scroll', function() {
+        edit_fp._positionCalendar();
+    });
     </script>
 {% endblock %}
 {% block buttons %}
