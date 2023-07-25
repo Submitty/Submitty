@@ -117,7 +117,7 @@ class UserProfileController extends AbstractController {
                 return JsonResponse::getSuccessResponse([
                     'message' => "Pronouns updated successfully",
                     'pronouns' => $newPronouns,
-                    'display_pronouns' => $user->getDisplayPronouns(),
+                    'display_pronouns' => $newDisplayPronouns,
                 ]);
             }
             else {
