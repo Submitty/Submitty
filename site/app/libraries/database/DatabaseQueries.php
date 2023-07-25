@@ -2152,12 +2152,12 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team, $override, $bad_submissions, $null_sections) {
+    public function getAverageComponentScores($g_id, $section_key, $is_team, $override, $bad_submissions, $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
-        $null_section = "";
-        $late_submissions = "";
+        $null_section_condition = "";
+        $bad_submissions_condition = "";
         $bad_submission_count = 0;
         $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
@@ -2167,14 +2167,14 @@ ORDER BY {$u_or_t}.{$section_key}",
         }
 
         // Check if we want to include null sections within the average
-        if ($null_sections != 'include') {
-            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        if ($null_section != 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         if (!$is_team) {
     $this->course_db->query(
     "SELECT COUNT(*) as cnt
     FROM gradeable_component AS gc, users AS u
-    WHERE gc.g_id=? {$null_section}
+    WHERE gc.g_id=? {$null_section_condition}
     AND EXISTS (
         SELECT 1
         FROM late_day_cache AS ldc
@@ -2189,7 +2189,7 @@ $bad_submission_count = $this->course_db->row()['cnt'];
 }
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0 ) {
-            $late_submissions = "INNER JOIN(
+            $bad_submissions_condition = "INNER JOIN(
                 SELECT ldc.{$user_or_team_id}, ldc.late_day_status
                 FROM late_day_cache AS ldc
                 WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
@@ -2230,8 +2230,8 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
       FROM electronic_gradeable_version AS egv
       WHERE egv.g_id=? AND egv.active_version>0
     ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    {$late_submissions}
-    WHERE g_id=? {$null_section}
+    {$bad_submissions_condition}
+    WHERE g_id=? {$null_section_condition}
   )AS parts_of_comp
 )AS comp
 LEFT JOIN (
@@ -2308,16 +2308,19 @@ ORDER BY gc_order
     }
 
     public function getAverageAutogradedScores($g_id, $section_key, $is_team, $bad_submissions, $null_section) {
+
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $bad_submission_count = 0;
+        $bad_submissions_condition = '';
+        $null_section_condition = '';
+
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
-        $null_section_condition = '';
         if ($null_section != 'include') {
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
@@ -2338,7 +2341,6 @@ ORDER BY gc_order
 );
         $bad_submission_count = $this->course_db->row()['cnt'];
 }
-        $bad_submissions_condition = '';
     if ($bad_submissions != 'include' && $bad_submission_count > 0) {
         $bad_submissions_condition = "AND NOT EXISTS (
             SELECT 1
@@ -2423,29 +2425,28 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable($g_id, $section_key, $is_team, $override, $bad_submissions, $null_sections) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team, $override, $bad_submissions, $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $bad_submission_count = 0;
+        $exclude = '';
+        $include = '';
+        $null_section_condition = '';
+        $bad_submissions_condition = '';
+
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
         }
-
         // Get count
         $this->course_db->query(
             "SELECT COUNT(*) as cnt from gradeable_component where g_id=?",
             [$g_id]
         );
         $count = $this->course_db->row()['cnt'];
-
-        $exclude = '';
-        $include = '';
-        $null_section = '';
-        $late_submissions = '';
         $params = [$g_id, $count];
 
         // Check if we want to exclude grade overridden gradeables
@@ -2456,15 +2457,15 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         }
 
         // Check if we want to include null sections within the average
-        if ($null_sections != 'include') {
-            $null_section = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        if ($null_section != 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
-                if (! $is_team) {
 
+        if (! $is_team) {
     $this->course_db->query(
     "SELECT COUNT(*) as cnt
     FROM gradeable_component AS gc, users AS u
-    WHERE gc.g_id=? {$null_section}
+    WHERE gc.g_id=? {$null_section_condition}
     AND EXISTS (
         SELECT 1
         FROM late_day_cache AS ldc
@@ -2475,12 +2476,12 @@ SELECT COUNT(*) from gradeable_component where g_id=?
     )",
     [$g_id]
 );
-$bad_submission_count = $this->course_db->row()['cnt'];
+        $bad_submission_count = $this->course_db->row()['cnt'];
 
 }
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include'  && $bad_submission_count > 0 ) {
-            $late_submissions = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
+            $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
         (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)"; 
         } 
 
@@ -2525,8 +2526,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           )AS auto
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
-        {$late_submissions}
-        WHERE gc.g_id=? {$null_section}
+        {$bad_submissions_condition}
+        WHERE gc.g_id=? {$null_section_condition}
         " . $exclude . "
       )AS parts_of_comp
     )AS comp

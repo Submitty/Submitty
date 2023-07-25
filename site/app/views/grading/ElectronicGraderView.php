@@ -100,7 +100,7 @@ class ElectronicGraderView extends AbstractView {
         foreach ($sections as $key => $section) {
             // If we allow NULL sections, use any.
             // If not, make sure $key is not NULL
-            if ($key === "NULL" && (!array_key_exists('include_null_sections', $_COOKIE) || $_COOKIE['include_null_sections'] === 'omit')) {
+            if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
                 continue;
             }
             $graded += $section['graded_components'];
@@ -355,7 +355,7 @@ class ElectronicGraderView extends AbstractView {
             "histograms" => $histogram_data,
             "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
             "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
-            "include_null_sections" => array_key_exists('include_null_sections', $_COOKIE) ? $_COOKIE['include_null_sections'] : 'omit',
+            "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])

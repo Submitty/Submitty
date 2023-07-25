@@ -369,13 +369,13 @@
         }
     }
 
-    function filter_null_sections() {
-        var bad_submissions_status = '{{ include_null_sections }}';
+    function filter_null_section() {
+        var bad_submissions_status = '{{ include_null_section }}';
         if (bad_submissions_status == 'omit') {
-            document.cookie = "include_null_sections=include;";
+            document.cookie = "include_null_section=include;";
         }
         else {
-            document.cookie = "include_null_sections=omit;";
+            document.cookie = "include_null_section=omit;";
         }
     }    
 

@@ -677,13 +677,13 @@ class ElectronicGraderController extends AbstractController {
             }
             $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
             $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
-            $null_sections_cookie = array_key_exists('include_null_sections', $_COOKIE) ? $_COOKIE['include_null_sections'] : 'omit';
+            $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_sections_cookie);
-            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(),$bad_submissions_cookie, $null_sections_cookie);
-            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_sections_cookie);
+            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
+            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(),$bad_submissions_cookie, $null_section_cookie);
+            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -699,7 +699,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_sections', $_COOKIE) || $_COOKIE['include_null_sections'] === 'omit')) {
+                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
                 continue;
                 }
                 $total_submissions += $value;
@@ -707,7 +707,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users_who_submitted as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_sections', $_COOKIE) || $_COOKIE['include_null_sections'] === 'omit')) {
+                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
                 continue;
                 }
                 $total_who_submitted += $value;
