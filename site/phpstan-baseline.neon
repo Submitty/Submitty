@@ -13877,11 +13877,6 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollback_submission with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$solution_ta_notes with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
