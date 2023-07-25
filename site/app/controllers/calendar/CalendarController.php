@@ -36,12 +36,42 @@ class CalendarController extends AbstractController {
 
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
 
-        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $courses, $calendar_messages);
+        //Get which courses are set visible
+        $visible_courses = '';
+        $num_courses = count($courses);
+        //Checks if courses cookie exists
+        //Second argument in if statement checks if cookie has correct # of classes (to clear outdated lengths)
+        //TODO: fix second argument to look at which classes are there and if they are the same
+        if (isset($_COOKIE['visible_courses']) && count(explode('-', $_COOKIE['visible_courses'])) == $num_courses) {
+            $visible_courses = explode('-', $_COOKIE['visible_courses']);
+        }
+        //If no cookie, make new cookie
+        else {
+            //Get course names 
+            $course_names = array();
+            foreach ($courses as $course){
+                array_push($course_names, $course->getTitle());
+            }
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('visible_courses', implode('-', $course_names), time() + (10 * 365 * 24 * 60 * 60))) {
+                $visible_courses = $course_names;
+            }
+        }
+
+        //Filter the courses
+        $filtered_courses = [];
+        foreach ($courses as $course) {
+            if (in_array($course->getTitle(), $visible_courses)){
+                array_push($filtered_courses, $course);
+            }
+        }
+
+        $gradeables_of_user = GradeableUtils::getAllGradeableListFromUserId($this->core, $user, $filtered_courses, $calendar_messages);
 
         return new WebResponse(
             CalendarView::class,
             'showCalendar',
-            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $courses, $calendar_messages)
+            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages)
         );
     }
 

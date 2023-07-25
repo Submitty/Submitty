@@ -1,0 +1,12 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}filter-calendar-form{% endblock %}
+{% block title %}Filter Calendar Data{% endblock %}
+{% block body %}
+    <p class="filter-classes">
+        Select Classes
+    </p>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

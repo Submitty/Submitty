@@ -53,7 +53,7 @@ class CalendarView extends AbstractView {
             "curr_month" => date("n"), // the current month
             "curr_day" => date("d"),   // the current date
             'date_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
-            "gradeables_by_date" => $info->getItemsByDate(),
+            "gradeables_by_date" => $info->getItemsByDateInCourses(),
             "gradeables_by_section" => $info->getItemsBySections(),
             "empty_message" => $info->getEmptyMessage(),
             "in_course" => $in_course,

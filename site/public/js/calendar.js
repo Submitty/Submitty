@@ -694,3 +694,7 @@ function loadFullCalendar(start, end, semester_name) {
 function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
+
+function openFilterModal() {
+    $('#filter-calendar-form').css('display', 'block');
+}
