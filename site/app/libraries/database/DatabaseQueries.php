@@ -9,7 +9,6 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -3377,53 +3376,24 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * @todo: write phpdoc
-     *
-     * @param string $session_id
-     *
-     * @return array
-     */
-    public function getSession($session_id) {
-        // We only ever want to get sessions which aren't expired.  Don't rely upon other PHP code checking for this...
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=? AND session_expires > current_timestamp", [$session_id]);
-        return $this->submitty_db->row();
-    }
-
-    /**
-     * @todo: write phpdoc
-     *
-     * @param string $session_id
+     * Update the boolean determining whether the user can have only one active session at a time
      * @param string $user_id
-     * @param string $csrf_token
+     * @param bool $to_set
+     *
      */
-    public function newSession($session_id, $user_id, $csrf_token) {
-        $this->submitty_db->query(
-            "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?, ?, ?, current_timestamp + ?::interval)",
-            [$session_id, $user_id, $csrf_token, SessionManager::SESSION_EXPIRATION]
-        );
+    public function updateSingleSessionSetting(string $user_id, bool $to_set = false): void {
+        $this->submitty_db->query("UPDATE users SET enforce_single_session=? WHERE user_id=?", [$to_set, $user_id]);
     }
 
     /**
-     * Updates a given session by setting its expiration date to be 2 weeks into the future
+     * Get the enforce_single_session boolean of a user
+     * @param string $user_id
      *
-     * @param string $session_id
+     * @return bool
      */
-    public function updateSessionExpiration($session_id) {
-        $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + ?::interval)
-                                   WHERE session_id=?",
-            [SessionManager::SESSION_EXPIRATION, $session_id]
-        );
-    }
-
-    /**
-     * Remove a session associated with a given session_id
-     *
-     * @param string $session_id
-     */
-    public function removeSessionById($session_id) {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_id=?", [$session_id]);
+    public function getSingleSessionSetting(string $user_id): bool {
+        $this->submitty_db->query("SELECT enforce_single_session FROM users WHERE user_id=?", [$user_id]);
+        return $this->submitty_db->rows()[0]['enforce_single_session'];
     }
 
     public function getAllGradeablesIdsAndTitles() {
