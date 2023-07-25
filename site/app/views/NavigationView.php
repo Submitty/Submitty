@@ -232,7 +232,7 @@ class NavigationView extends AbstractView {
         $buttons[] = $this->hasTeamButton($gradeable) ? NavigationView::getTeamButton($this->core, $gradeable, $graded_gradeable) : null;
 
         $alphaSubmitBeforeTeamMade = $gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin() && !($this->core->getUser()->onTeam($gradeable->getId()) );
-        $buttons[] = ( $this->hasSubmitButton($gradeable) && !($alphaSubmitBeforeTeamMade) )? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
+        $buttons[] = ( $this->hasSubmitButton($gradeable) && !($alphaSubmitBeforeTeamMade) ) ? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
