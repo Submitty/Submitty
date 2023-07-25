@@ -535,9 +535,9 @@ if not args.worker:
 
         if args.worker_pair:
             with open(os.path.join(SUBMITTY_REPOSITORY, '.vagrant-workers.json')) as f:
-                vagrant_workers = json.load(f)
+                vagrant_workers = json.load(f, object_hook=OrderedDict)
  
-            for worker, data in vagrant_workers:
+            for worker, data in vagrant_workers.items():
                 worker_dict[worker] = {
                     "capabilities": capabilities,
                     "address": data["ip_addr"],
