@@ -230,11 +230,7 @@ class NavigationView extends AbstractView {
     private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? NavigationView::getTeamButton($this->core, $gradeable, $graded_gradeable) : null;
-
-        $alphaSubmitBeforeTeamMade = $gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin() && !($this->core->getUser()->onTeam($gradeable->getId()) );
-        if (!$alphaSubmitBeforeTeamMade) {
-            $buttons[] = $this->hasSubmitButton($gradeable) ? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
-        }
+        $buttons[] = $this->hasSubmitButton($gradeable) ? NavigationView::getSubmitButton($this->core, $gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
         }
@@ -579,11 +575,8 @@ class NavigationView extends AbstractView {
         else {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
-                // team assignment, no team
-                if (!$submit_everyone) {
-                    $title = "MUST BE ON A TEAM TO SUBMIT";
-                    $disabled = true;
-                }
+                $title = "MUST BE ON A TEAM TO SUBMIT";
+                $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
                     if ($submit_everyone) {
@@ -594,6 +587,7 @@ class NavigationView extends AbstractView {
                 }
             }
         }
+
         $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
