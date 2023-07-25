@@ -438,7 +438,7 @@ class UsersController extends AbstractController {
     public function deleteUser(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
-            $displayed_fullname = $_POST['displayed_fullname'];
+            $displayed_fullname = trim($_POST['displayed_fullname']);
             $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
