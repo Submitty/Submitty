@@ -460,7 +460,7 @@
         {% set btn_class = "btn-default" %}
 
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
-        {% set contents = "Canceasdlled Submission" %}
+        {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
 
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays() %}
@@ -517,7 +517,7 @@
         {% set contents = "No Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
-        {% set contents = "Casdancelled Submission" %}
+        {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
