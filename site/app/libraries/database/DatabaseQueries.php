@@ -1696,7 +1696,6 @@ WHERE semester=? AND course=? AND user_id=?",
                 }
             }
         }
-
         else {
             $version = $this->course_db->row()['g_version'] ?? 0;
         }
