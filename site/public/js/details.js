@@ -1,5 +1,5 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections grade_inquiry_only*/
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only*/
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -96,9 +96,6 @@ function expandAllSections() {
         $(this).addClass('panel-head-active');
         $(this).next().show();
     });
-    $('[data-testid=grade-button]').each(function() {
-        $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
-    });
     collapseItems.clear();
     updateCollapsedSections();
 }
@@ -122,5 +119,11 @@ function grade_inquiry_only() {
         else {
             $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
         }
+    });
+}
+
+function reverse_inquiry_only() {
+    $('[data-testid=grade-button]').each(function() {
+        $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
     });
 }
