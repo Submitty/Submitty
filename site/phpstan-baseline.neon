@@ -13877,7 +13877,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollbackSubmission with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollback_submission with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
