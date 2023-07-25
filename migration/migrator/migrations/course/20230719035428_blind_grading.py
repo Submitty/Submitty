@@ -16,18 +16,10 @@ def up(config, database, semester, course):
     # Modify table structure
     sql_alter_table = """
     ALTER TABLE electronic_gradeable
-    ALTER COLUMN eg_limited_access_blind SET DEFAULT 2,
-    ADD COLUMN IF NOT EXISTS eg_instructor_blind integer DEFAULT 2;
+    ALTER COLUMN eg_limited_access_blind SET DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS eg_instructor_blind integer DEFAULT 1;
     """
     database.execute(sql_alter_table)
-
-    # Update existing data
-    sql_update_data = """
-    UPDATE electronic_gradeable
-    SET eg_limited_access_blind = 2;
-    """
-    database.execute(sql_update_data)
-
 
 
 def down(config, database, semester, course):
