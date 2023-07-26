@@ -60,11 +60,11 @@
     </div>
     <script>
         window.onload = function() {
-            var inquiry_only = Cookies.get('inquiry_only');
-            if (inquiry_only === 'on') {
-                reverse_inquiry_only();
-            } else {
+            var status = Cookies.get('inquiry_after_refreash') === 'on';
+            if (status) {
                 grade_inquiry_only();
+            } else {
+                reverse_inquiry_only();
             }
         }
     </script>
@@ -758,10 +758,12 @@
         var status = Cookies.get('inquiry_only') === 'on';
         if(status) {
             Cookies.set('inquiry_only', 'off');
+            Cookies.set('inquiry_after_refreash', 'on');
             grade_inquiry_only();
             button.innerHTML = "Grade Inquiry Only: On";
         } else {
             Cookies.set('inquiry_only', 'on');
+            Cookies.set('inquiry_after_refreash', 'off');
             reverse_inquiry_only();
             button.innerHTML = "Grade Inquiry Only: Off";
         }
