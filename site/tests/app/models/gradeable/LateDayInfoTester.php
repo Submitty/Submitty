@@ -1,4 +1,4 @@
-x<?php
+<?php
 
 namespace tests\app\models\gradeable;
 
