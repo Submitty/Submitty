@@ -316,8 +316,12 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
-            $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            if ($this->getConfig()->getTerm() !== null) {
+                $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
+            }
+            if ($this->getConfig()->getCourse() !== null) {
+                $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            }
             $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
             if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
                 return; // this route matches an ignore rule
