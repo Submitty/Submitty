@@ -19,6 +19,8 @@ use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
 
 class ElectronicGraderView extends AbstractView {
+    private $user_id_to_User_cache = [];
+
     /**
      * @param Gradeable $gradeable
      * @param array[] $sections
@@ -31,13 +33,11 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $grade_inquiries
+     * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
      * @return string
      */
-
-    private $user_id_to_User_cache = [];
-
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -54,6 +54,7 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $grade_inquiries,
+        array $graders_of_inquiries,
         bool $show_warnings,
         int $submissions_in_queue
     ) {
@@ -346,11 +347,12 @@ class ElectronicGraderView extends AbstractView {
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "grade_inquiries" => $grade_inquiries,
+            "graders_of_inquiries" => $graders_of_inquiries,
             "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
-            "grade_inquiry_allowed" => false,
+            "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
             "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
