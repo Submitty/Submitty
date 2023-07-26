@@ -2,11 +2,21 @@
 {% block popup_id %}filter-calendar-form{% endblock %}
 {% block title %}Filter Calendar Data{% endblock %}
 {% block body %}
-    <p class="filter-classes">
-        Select Classes
-    </p>
+    <div class="filter-courses-label section-row">
+        <h2>Select Courses</h2>
+    </div>
+    <div class="filter-courses-menu">
+        <a href="javascript:fillAllCheckboxes('toggle-courses-box',true)" class="btn btn-primary">All On</a>
+        <a href="javascript:fillAllCheckboxes('toggle-courses-box',false)" class="btn btn-primary">All Off</a>
+        {% for course in course_names %}
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-courses-box" id="{{course}}">
+            <label>{{course}}</label>
+        </div>
+        {% endfor %}
+    </div>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" onclick="updateCalendarFilters()"/>
 {% endblock %}

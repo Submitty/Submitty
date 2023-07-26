@@ -695,6 +695,59 @@ function openNewItemModal() {
     $('#new-calendar-item-form').css('display', 'block');
 }
 
+function fillAllCheckboxes(class_name, val) {
+    const checkboxes = document.getElementsByClassName(class_name);
+    for (let i = 0; i<checkboxes.length; i++) {
+        checkboxes[i].checked = val;
+    }
+}
+
 function openFilterModal() {
     $('#filter-calendar-form').css('display', 'block');
+    checkFilterTicks();
+}
+
+//checks proper tick marks in modal
+function checkFilterTicks() {
+    const selectedColumns = loadCoursesCookie();
+    const checkboxes = document.getElementsByClassName('toggle-courses-box');
+    for (let i = 0; i<checkboxes.length; i++) {
+        if (selectedColumns[i] === 1) {
+            checkboxes[i].checked = true;
+        }
+        else {
+            checkboxes[i].checked = false;
+        }
+    }
+}
+
+function loadCoursesCookie() {
+    const cookie = Cookies.get('visible_courses').split(' ');
+    for (let i = 0; i< cookie.length; i++) {
+        if (cookie[i] === '') {
+            cookie[i] = 0;
+        }
+        else {
+            cookie[i] = 1;
+        }
+    }
+    return cookie;
+}
+
+function updateCalendarFilters() {
+    saveFilterValues();
+    location.reload();
+}
+
+function saveFilterValues() {
+    const cookie = Cookies.get('visible_courses').split(' ');
+    for (let i = 0; i<checkboxes.length; i++) {
+        if (checkboxes[i].checked === true) {
+            selectedColumns[i] = 1;
+        }
+        else {
+            selectedColumns[i] = 0;
+        }
+    }
+    saveColumns(selectedColumns);
 }

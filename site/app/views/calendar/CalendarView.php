@@ -19,7 +19,7 @@ class CalendarView extends AbstractView {
      * @return string
      * @see NavigationView::gradeableSections
      */
-    public function showCalendar(CalendarInfo $info, bool $in_course = false): string {
+    public function showCalendar(CalendarInfo $info, array $courses, bool $in_course = false): string {
 
         $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
         $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
@@ -33,6 +33,12 @@ class CalendarView extends AbstractView {
         }
         if ($year < 1970 || $year > 2100) {
             $year = (int) date("Y");
+        }
+
+        //Get course names
+        $course_names = array();
+        foreach ($courses as $course){
+            array_push($course_names, $course->getTitle());
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
@@ -60,7 +66,8 @@ class CalendarView extends AbstractView {
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
-            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month"
+            "view_cookie" => isset($_COOKIE['view']) ? $_COOKIE['view'] : "month",
+            "course_names" => $course_names
         ]);
     }
 }

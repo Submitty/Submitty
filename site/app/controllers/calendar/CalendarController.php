@@ -42,8 +42,8 @@ class CalendarController extends AbstractController {
         //Checks if courses cookie exists
         //Second argument in if statement checks if cookie has correct # of classes (to clear outdated lengths)
         //TODO: fix second argument to look at which classes are there and if they are the same
-        if (isset($_COOKIE['visible_courses']) && count(explode('-', $_COOKIE['visible_courses'])) == $num_courses) {
-            $visible_courses = explode('-', $_COOKIE['visible_courses']);
+        if (isset($_COOKIE['visible_courses']) && count(explode(' ', $_COOKIE['visible_courses'])) == $num_courses) {
+            $visible_courses = explode(' ', $_COOKIE['visible_courses']);
         }
         //If no cookie, make new cookie
         else {
@@ -53,7 +53,7 @@ class CalendarController extends AbstractController {
                 array_push($course_names, $course->getTitle());
             }
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('visible_courses', implode('-', $course_names), time() + (10 * 365 * 24 * 60 * 60))) {
+            if (setcookie('visible_courses', implode(' ', $course_names), time() + (10 * 365 * 24 * 60 * 60))) {
                 $visible_courses = $course_names;
             }
         }
@@ -71,7 +71,8 @@ class CalendarController extends AbstractController {
         return new WebResponse(
             CalendarView::class,
             'showCalendar',
-            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages)
+            CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages),
+            $courses
         );
     }
 
