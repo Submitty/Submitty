@@ -9,7 +9,7 @@
 # Submitty util module depends on:
 
 # For QR bulk upload
-opencv-python-headless==4.6.0.66
+opencv-python-headless==4.8.0.74
 
 # jsonschema & jsonref & pytz & tzlocal
 pytz==2022.7.1 # Submitty-util specific.
