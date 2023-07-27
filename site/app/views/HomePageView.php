@@ -57,20 +57,12 @@ class HomePageView extends AbstractView {
             
         }
 
-        $images_data_array = [];
-        $error_image_data = '_NONE_';
-        $entity_manager = $this->core->getBannerEntityManager()->getRepository(BannerImage::class);
-        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath(), $entity_manager);
-
         $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "statuses" => $statuses,
-            "imageDataArray" => $images_data_array,
-            "errorImageData" => $error_image_data,
-
         ]);
 
 
@@ -107,48 +99,4 @@ class HomePageView extends AbstractView {
 
 
 
-
-
-
-    public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path, &$entity_manager) {
-        $base_course_material_path = FileUtils::joinPaths($submitty_path, 'banner_images');
-
-        if (!file_exists($base_course_material_path)) {
-            return;
-        }
-
-        // Create a DirectoryIterator for the base course material path
-        $directoryIterator = new \DirectoryIterator($base_course_material_path);
-        foreach ($directoryIterator as $fileInfo) {
-            // Exclude directories and dot files
-            if ($fileInfo->isFile() && !$fileInfo->isDot()) {
-                if (!$fileInfo->valid()) {
-                    continue;
-                }
-
-                $expected_image = $fileInfo->getPathname();
-                $content_type = FileUtils::getContentType($expected_image);
-                if (substr($content_type, 0, 5) === "image") {
-                    // Read image path, convert to base64 encoding
-                    $expected_img_data = base64_encode(file_get_contents($expected_image));
-
-                    $img_name = $fileInfo->getBasename('.png');
-                    $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
-                    if ($img_name === "error_image") {
-                        $error_image_data = $expected_img_data;
-                    }
-                    else {
-                        $date_now = new \DateTime();
-                        if ($banner_item->getReleaseDate() <= $date_now && $date_now <= $banner_item->getClosingDate()) {
-                            $images_data_array[] = [
-                                "name" => $img_name,
-                                "data" => $expected_img_data,
-                                "extra_info" => $banner_item->getExtraInfo()
-                            ];
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

@@ -1,7 +1,14 @@
 <?php
 
 namespace app\views;
+use app\models\User;
+use app\libraries\FileUtils;
+use DirectoryIterator;
 
+use app\entities\banner\BannerImage;
+use app\repositories\banner\BannerImageRepository;
+
+use app\libraries\Core;
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only) {
         $messages = [];
@@ -34,6 +41,11 @@ class GlobalView extends AbstractView {
             $page_title = $page_name;
         }
 
+        $images_data_array = [];
+        $error_image_data = '_NONE_';
+        $entity_manager = $this->core->getBannerEntityManager()->getRepository(BannerImage::class);
+        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath(), $entity_manager);
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -57,7 +69,9 @@ class GlobalView extends AbstractView {
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
             "manifast_path" => $this->core->getOutput()->getManifastPath(),
-            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath(),
+            "imageDataArray" => $images_data_array,
+            "errorImageData" => $error_image_data,
         ]);
     }
 
@@ -77,4 +91,63 @@ class GlobalView extends AbstractView {
             "performance_warning" => $performance_warning
         ]);
     }
+
+public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path, &$entity_manager) {
+    $base_course_material_path = FileUtils::joinPaths($submitty_path, 'banner_images');
+
+    if (!file_exists($base_course_material_path)) {
+        return;
+    }
+
+    // Get the current year and month
+    $currentYear = intval(date('Y'));
+
+    // Create a DirectoryIterator for the base course material path
+    $directoryIterator = new \DirectoryIterator($base_course_material_path);
+    foreach ($directoryIterator as $fileInfo) {
+        // Check if the item is a directory and matches the format "yyyy-mm"
+        if ($fileInfo->isDir() && preg_match('/^\d{4}$/', $fileInfo->getBasename())) {
+
+            // Convert to integers for comparison
+            $year = $fileInfo->getBasename();
+
+            // Check if the folder's year and month are same or later than today
+            if ($year <= $currentYear) {
+                // Loop through each file in the directory
+                $directoryPath = $fileInfo->getPathname();
+                $monthDirectoryIterator = new \DirectoryIterator($directoryPath);
+                foreach ($monthDirectoryIterator as $monthFileInfo) {
+                    // Exclude directories and dot files
+                    if ($monthFileInfo->isFile() && !$monthFileInfo->isDot()) {
+                        if (!$monthFileInfo->valid()) {
+                            continue;
+                        }
+
+                        $expected_image = $monthFileInfo->getPathname();
+                        $content_type = FileUtils::getContentType($expected_image);
+                        if (substr($content_type, 0, 5) === "image") {
+                            // Read image path, convert to base64 encoding
+                            $expected_img_data = base64_encode(file_get_contents($expected_image));
+
+                            $img_name = $monthFileInfo->getBasename('.png');
+                            $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
+                            if ($img_name === "error_image") {
+                                $error_image_data = $expected_img_data;
+                            } else {
+                                $date_now = new \DateTime();
+                                if ($banner_item->getReleaseDate() <= $date_now && $date_now <= $banner_item->getClosingDate()) {
+                                    $images_data_array[] = [
+                                        "name" => $img_name,
+                                        "data" => $expected_img_data,
+                                        "extra_info" => $banner_item->getExtraInfo()
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 }
