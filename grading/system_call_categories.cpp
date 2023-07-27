@@ -291,6 +291,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(lsetxattr);
     ALLOW_SYSCALL(removexattr);
     ALLOW_SYSCALL(setxattr);
+    ALLOW_SYSCALL(statx);
   }
 
   // RESTRICTED : FILE_MANAGEMENT_RARE
