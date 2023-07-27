@@ -2170,8 +2170,8 @@ ORDER BY {$u_or_t}.{$section_key}",
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
         if (!$is_team) {
-            $this->course_db->query("
-        SELECT COUNT(*) as cnt
+            $this->course_db->query(
+        "SELECT COUNT(*) as cnt
         FROM gradeable_component AS gc, users AS u
         WHERE gc.g_id=? {$null_section_condition}
         AND EXISTS (
@@ -2182,7 +2182,7 @@ ORDER BY {$u_or_t}.{$section_key}",
             AND ldc.submission_days_late > ldc.late_day_exceptions
             AND ldc.late_days_change = 0
         )",
-        [$g_id]
+                [$g_id]
             );
             $bad_submission_count = $this->course_db->row()['cnt'];
         }
@@ -2325,19 +2325,19 @@ ORDER BY gc_order
         }
         if (!$is_team) {
             $this->course_db->query(
-        "SELECT COUNT(*) as cnt
-        FROM gradeable_component AS gc, users AS u
-        WHERE gc.g_id=? {$null_section_condition}
-        AND EXISTS (
-            SELECT 1
-            FROM late_day_cache AS ldc
-            WHERE ldc.{$user_or_team_id} = u.{$user_or_team_id}
-            AND ldc.g_id=gc.g_id
-            AND ldc.submission_days_late > ldc.late_day_exceptions
-            AND ldc.late_days_change = 0
+                "SELECT COUNT(*) as cnt
+                FROM gradeable_component AS gc, users AS u
+                WHERE gc.g_id=? {$null_section_condition}
+                AND EXISTS (
+                    SELECT 1
+                    FROM late_day_cache AS ldc
+                    WHERE ldc.{$user_or_team_id} = u.{$user_or_team_id}
+                    AND ldc.g_id=gc.g_id
+                    AND ldc.submission_days_late > ldc.late_day_exceptions
+                    AND ldc.late_days_change = 0
         )",
-        [$g_id]
-                );
+                [$g_id]
+            );
             $bad_submission_count = $this->course_db->row()['cnt'];
         }
 
@@ -2463,18 +2463,18 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         if (!$is_team) {
             $this->course_db->query(
-            "SELECT COUNT(*) as cnt
-            FROM gradeable_component AS gc, users AS u
-            WHERE gc.g_id=? {$null_section_condition}
-            AND EXISTS (
-                SELECT 1
-                FROM late_day_cache AS ldc
-                WHERE ldc.{$user_or_team_id} = u.{$user_or_team_id}
-                AND ldc.g_id=gc.g_id
-                AND ldc.submission_days_late > ldc.late_day_exceptions
-                AND ldc.late_days_change = 0
+                "SELECT COUNT(*) as cnt
+                FROM gradeable_component AS gc, users AS u
+                WHERE gc.g_id=? {$null_section_condition}
+                AND EXISTS (
+                    SELECT 1
+                    FROM late_day_cache AS ldc
+                    WHERE ldc.{$user_or_team_id} = u.{$user_or_team_id}
+                    AND ldc.g_id=gc.g_id
+                    AND ldc.submission_days_late > ldc.late_day_exceptions
+                    AND ldc.late_days_change = 0
                 )",
-            [$g_id]
+                [$g_id]
             );
             $bad_submission_count = $this->course_db->row()['cnt'];
         }

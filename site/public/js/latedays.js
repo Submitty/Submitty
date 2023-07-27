@@ -1,5 +1,3 @@
-/* exported calculateLateDayCache */
-/* exported flushLateDayCache */
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
     if (select_menu.selectedIndex === 0) {
@@ -130,15 +128,17 @@ function updateCacheBuildStatus(url, confirm_message, status) {
         });
     }
 }
-
+// eslint-disable-next-line no-unused-vars
 function calculateLateDayCache() {
+    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['bulk_late_days', 'calculate']);
     const confirm_message = 'Are you sure you want to recalculate the cache? Calculating the remaining late day information for every user may take a while.';
     const status = 'Recaclulating...';
     updateCacheBuildStatus(url, confirm_message, status);
 }
-
+// eslint-disable-next-line no-unused-vars
 function flushLateDayCache() {
+    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['bulk_late_days', 'flush']);
     const confirm_message = 'Are you sure you want to flush the cache? This will remove the late day cache for every user.';
     const status = 'Flushing...';
