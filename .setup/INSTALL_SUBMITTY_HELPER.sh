@@ -164,7 +164,7 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-cp -r "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
+rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
 pip3 install .
