@@ -589,9 +589,32 @@ HTML;
         $sections = [];
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
+
+            $late_day_info = $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row);
+            $on_time_submission = true;
+            if ($late_day_info !== null) {
+
+                if (!$gradeable->isTeamAssignment()) {
+                    $on_time_submission = $late_day_info->isOnTimeSubmission();
+                }
+                else { //A Team gradeable submission is bad only when all team members have a bad submission
+
+                    foreach ($late_day_info as $member_submission) {
+
+                        if ($member_submission->isOnTimeSubmission()) {
+                            $on_time_submission = true;
+                            break; 
+                        }
+                        else {
+                            $on_time_submission = false;
+                        }
+                    }
+                }
+            }
+    
             $info = [
                 "graded_gradeable" => $row,
-                "late_day_info" => $this->core->getQueries()->getLateDayInfoForUserGradeable($row->getSubmitter()->getUser(), $row)
+                "on_time_submission" => $on_time_submission
             ];
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
@@ -881,6 +904,7 @@ HTML;
             "message_warning" => $message_warning,
             "overrides" => $overrides,
             "anon_ids" => $anon_ids
+
         ]);
     }
 

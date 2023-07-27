@@ -435,7 +435,7 @@
 {% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
     {% set badge_count = 0 %}
 
-    {% if  graded_gradeable.getSubmitter().getId() in overrides %}
+    {% if graded_gradeable.getSubmitter().getId() in overrides %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
 
@@ -448,7 +448,7 @@
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
 
-    {% elseif not info.late_day_info == null and info.late_day_info.isOnTimeSubmission() == false %}
+    {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
     

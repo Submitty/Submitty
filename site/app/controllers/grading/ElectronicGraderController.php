@@ -658,6 +658,14 @@ class ElectronicGraderController extends AbstractController {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, $section_key);
 
             $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
+
+            echo($section_key);
+            foreach ($num_submitted as $section => $submitted_count) {
+    echo "Section: " . $section . ", Submitted Team Count: " . $submitted_count . "<br>";
+}
+foreach ($late_submitted as $section => $submitted_count) {
+    echo "Section: " . $section . ", Submitted Late Team Count: " . $submitted_count . "<br>";
+}
         }
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);

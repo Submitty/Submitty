@@ -1675,6 +1675,9 @@ WHERE semester=? AND course=? AND user_id=?",
         if ($submitter->isTeam()) {
             $late_day_info = [];
             foreach ($submitter->getTeam()->getMemberUsers() as $member) {
+                if ($member === null) {
+                    return null;
+                }
                 $late_day_info[$member->getId()] = $this->getLateDayInfoForUserGradeable($member, $graded_gradeable);
             }
             return $late_day_info;
