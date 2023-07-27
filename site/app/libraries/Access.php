@@ -489,6 +489,11 @@ class Access {
                 return false;
             }
 
+            //Make sure notebook generated files can't be accessed
+            if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD) && array_key_exists("file_name", $args)) {
+                return $gradeable->canStudentDownloadFile($args["gradeable_version"], $args["file_name"]);
+            }
+
             //As these are not grading-related they can return false immediately
             if ($group === User::GROUP_STUDENT) {
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW)) {
@@ -499,10 +504,6 @@ class Access {
                 if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD)) {
                     if (!$gradeable->canStudentDownload()) {
                         return false;
-                    }
-                    //Make sure notebook generated files can't be accessed
-                    if (array_key_exists("file_name", $args)) {
-                        return $gradeable->canStudentDownloadFile($args["gradeable_version"], $args["file_name"]);
                     }
                 }
             }
