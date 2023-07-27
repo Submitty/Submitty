@@ -119,6 +119,20 @@ class BannerController extends AbstractController {
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
+    /**
+     * @Route("/banner/delete", methods={"POST"})
+     */ 
+    public function ajaxDeleteBannerFiles(): JsonResponse {
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", "bro");
+        if (!is_dir($full_path)) {
+            // Create a new folder for the current month
+            if (!mkdir($full_path, 0755, true)) {
+                return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
+            }
+        }
+        return JsonResponse::getSuccessResponse("Successfully uploaded!");
+    }
+
 
 
 }

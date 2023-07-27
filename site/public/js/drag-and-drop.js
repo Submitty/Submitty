@@ -1,4 +1,4 @@
-/* exported initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported deleteBannerImage, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
@@ -1287,6 +1287,42 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     });
 }
 
+
+/**
+ * @param csrf_token
+ */
+
+function deleteBannerImage(csrf_token) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    $.ajax({
+        url: buildUrl(['banner', 'delete']),
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                const jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = buildUrl(['banner']);
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
+                    'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+                console.log(data);
+            }
+        },
+        error: function() {
+            window.location.href = buildUrl(['banner']);
+        },
+    });
+}
 
 
 /**
