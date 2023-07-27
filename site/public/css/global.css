@@ -266,3 +266,30 @@ footer .footer-separator {
 .next-button {
   right: 10px;
 }
+
+
+/* Styling for the speech bubble */
+.speech-bubble {
+  position: relative;
+  display: inline-block;
+  background-color: #FFF;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Styling for the speech pointer (triangle) on the right */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -20px; /* Adjust the distance from the right side */
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 10px 0 10px 20px;
+  border-color: transparent transparent transparent #FFF; /* White triangle */
+  transform: translateY(-50%);
+}

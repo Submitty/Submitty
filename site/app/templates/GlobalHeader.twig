@@ -199,6 +199,11 @@
 
 
                 <div style="display: flex">
+
+<button class="speech-bubble" onclick = "changeDisplayBanner()">
+  Click Me!
+</button >
+
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
                     <a id="duck-desktop"
@@ -357,7 +362,6 @@
 
 
 
-
     var hiddenImages = getHiddenImages();
     var images = document.getElementsByClassName('club_banners');
     images[currentImageIndex].classList.add("active");
@@ -368,6 +372,16 @@
             images[i].style.display = 'none';
         }
     }
+
+
+function changeDisplayBanner() {
+  var bradElement = document.getElementById("banner");
+  if (bradElement.style.display === "none") {
+    bradElement.style.display = "block";
+  } else {
+    bradElement.style.display = "none";
+  }
+}
 
     function changeImage(n) {
       var originalIndex = currentImageIndex;
