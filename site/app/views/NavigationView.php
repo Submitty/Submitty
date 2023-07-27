@@ -579,10 +579,6 @@ class NavigationView extends AbstractView {
                 $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($submit_everyone) {
-                        // team assignment, no team
-                        $title = "OVERDUE SUBMISSION";
-                    }
                 }
             }
         }
