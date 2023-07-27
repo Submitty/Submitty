@@ -5,6 +5,7 @@
 <br>
 <br>
 
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 {% for bannerImage in banners %}
     {% set imageName = bannerImage.getName() %}
     {% set imagePath = bannerImage.getPath() %}
@@ -16,8 +17,7 @@
     <div>
 		<div class="image-info" style="display: inline-flex; align-items: center;">
 		  <h3 style="margin-right: 10px;">{{ imageName }}</h3>
-		  <a onclick='deleteItem("{{ bannerImage.getId() }}");' >
-
+		  <a onclick='deleteBannerImage("{{ csrf_token }}", "{{ imageName }}", "{{ imagePath }}", "{{ description }}", "{{ releaseDate }}", "{{ closeDate }}");'>
 		  <i class="fas fa-trash" style="font-size: 16px;"></i>
 
 		  </a>
@@ -29,23 +29,7 @@
     </div>
 {% endfor %}
 </div>
-    <script>
-        function deleteItem(itemId) {
-            // Send an asynchronous request to the PHP controller function
-            fetch(`/delete_item.php?id=${itemId}`, {
-                method: 'POST',
-            }).then(response => {
-                if (response.ok) {
-                    // If successful, reload the page to update the item list
-                    window.location.reload();
-                } else {
-                    // Handle any error, e.g., show an error message
-                    console.error('Error deleting item.');
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-        }
-    </script>
+
+
 
 {{ include('banner/UploadBannerPopup.twig') }}

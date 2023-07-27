@@ -119,6 +119,46 @@ class BannerController extends AbstractController {
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
 
+    /**
+     * @Route("/banner/delete", methods={"POST"})
+     */ 
+    public function ajaxDeleteBannerFiles(): JsonResponse {
+
+        $entity_manager = $this->core->getBannerEntityManager();
+
+        $banner_repository = $entity_manager->getRepository(BannerImage::class);
+
+        $banner_items = $banner_repository->findBy(['name' => $_POST['name'] ]);
+        if (empty($banner_items)) {
+            $error_message = "Banner item with name '" . $_POST['name'] . "' not found in the database.";
+            return JsonResponse::getErrorResponse($error_message);
+        }
+
+        $banner_item = $banner_items[0];
+        $entity_manager->remove($banner_item);
+        $entity_manager->flush();
+
+        $full_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
+
+        $folder_name = $_POST['path'];
+        $banner_name = $_POST['name'];
+
+        $full_path = FileUtils::joinPaths($full_path, $folder_name, $banner_name);
+
+
+        if (is_file($full_path)) {
+            // Check if the file exists before attempting to delete it
+            if (!unlink($full_path)) {
+                return JsonResponse::getErrorResponse("Failed to delete the file.");
+            }
+        } else {
+            return JsonResponse::getErrorResponse("File not found.");
+        }
+
+
+        return JsonResponse::getSuccessResponse("Successfully uploaded!");
+    }
+
 
 
 }

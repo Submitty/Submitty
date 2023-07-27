@@ -112,7 +112,7 @@ public static function addBannerImage(&$images_data_array, &$error_image_data, $
             $year = $fileInfo->getBasename();
 
             // Check if the folder's year and month are same or later than today
-            if ($year <= $currentYear) {
+            if ($year >= $currentYear) {
                 // Loop through each file in the directory
                 $directoryPath = $fileInfo->getPathname();
                 $monthDirectoryIterator = new \DirectoryIterator($directoryPath);
