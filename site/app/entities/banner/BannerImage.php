@@ -65,11 +65,15 @@ class BannerImage {
 
     }
 
+    public function getId(): int {
+        return $this->id;
+    }
+
     public function setPath(string $path) {
         $this->path_date = $path;
     }
 
-    public function getPath() : void {
+    public function getPath() : string {
         return $this->path_date;
     }
 

@@ -69,7 +69,7 @@ class BannerController extends AbstractController {
 
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
-        $specificPath = $close_date->format("y");
+        $specificPath = $close_date->format("Y");
         $full_path = FileUtils::joinPaths($upload_path, $specificPath);
 
 

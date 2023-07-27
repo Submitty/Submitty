@@ -30,7 +30,7 @@ class BannerView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
-        $bannerImages = $this->core->getBannerEntityMannager()->getRepository(BannerImage::class) ->findall();
+        $bannerImages = $this->core->getBannerEntityManager()->getRepository(BannerImage::class) ->findall();
 
         return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", [
             "csrf_token" => $this->core->getCsrfToken(),
