@@ -60,6 +60,7 @@ function createArray(num_parts) {
             previous_files.push([]);
             label_array.push([]);
         }
+        console.log(file_array);
     }
 }
 
@@ -1335,11 +1336,6 @@ function deleteBannerImage(csrf_token, imageName, imagePath, description, releas
  */
 
 function handleUploadBanner(csrf_token, closeTime, releaseTime) {
-    const submit_course_url = buildCourseUrl(['banner', 'upload']);
-    const submit_url = submit_course_url.replace('courses///', '');
-
-    const return_course_url = buildCourseUrl(['banner']);
-    const return_url = return_course_url.replace('courses///', '');
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('close_time', closeTime);

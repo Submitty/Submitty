@@ -8,7 +8,7 @@
     <div id="upload-boxes">
         {# upload1 and input-file1 required for drag-and-drop.js #}
         <div id="upload1" class="file-input">
-            <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
+            <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file here or click to open file browser"</label>
             <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
             <table class="file-upload-table" id="file-upload-table-1">
                 <tr style="background:transparent; display:none;">
@@ -17,9 +17,6 @@
                 </tr>
             </table>
         </div>
-
-
-
 
 
 
@@ -40,11 +37,46 @@
             <span>
         </label>
 
+            <label class = "radio" for="file_selection_radio">
+                <input id="file_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').show();$('#url_selection').hide();$('#url_link_address').hide(); " checked>
+                File
+            </label>
+            <label class = "radio" for="url_selection_radio">
+                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show();$('#url_link_address').show();">
+                External URL
+            </label>
+            <label class = "radio" for="image_selection_radio">
+                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show(); $('#url_link_address').hide();">
+                Image
+            </label>
 
+        <br>
+        <br>
+        <label id="cm_path">
+            <span>
+                <strong>Name of additional Information</strong><br />
+                Only required if you are adding an additional file:<br />
+            </span>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+            <span><em>Note: if you provided a file or an png image the name has to match this input.</em></span
+        </label>
+
+
+        <br>
+        <label id="url_link_address">
+            <span>
+                <strong>Name of additional Information</strong><br />
+                Only required if you are adding an additional file:<br />
+            </span>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+            <span><em>Note: if you provided a file or an png image the name has to match this input.</em></span
+        </label>
 
     </div>
 
+
     <script>
+        $('#url_link_address').hide();
         function makeSubmission() {
             var releaseTime = document.getElementById("release_date").value;
             var closeTime = document.getElementById("closing_date").value;
@@ -59,6 +91,10 @@
             });
         });
         
+
+
+
+
     </script>
 
     <script>
@@ -68,6 +104,8 @@
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
+
+
     </script>
 
 
