@@ -582,7 +582,6 @@ class NavigationView extends AbstractView {
                     if ($submit_everyone) {
                         // team assignment, no team
                         $title = "OVERDUE SUBMISSION";
-                        $disabled = false;
                     }
                 }
             }
