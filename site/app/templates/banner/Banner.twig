@@ -3,6 +3,26 @@
 <button class="Upload_Banner" onclick="newUploadBanner()"> Upload a Banner </button>
 
 </div>
+<br>
+<br>
 
+{% for bannerImage in banners %}
+    {% set imageName = bannerImage.getName() %}
+    {$ set imagePath = bannerImage.getPath() %}
+    {% set description = bannerImage.getExtraInfo() %}
+    {% set releaseDate = bannerImage.getReleaseDate().format('Y-m-d') %}
+    {% set closeDate = bannerImage.getClosingDate().format('Y-m-d') %}
+
+    {# Do something with the attributes... #}
+    <div>
+		<div class="image-info" style="display: inline-flex; align-items: center;">
+		  <h3 style="margin-right: 10px;">{{ imageName }}</h3>
+		  <i class="fas fa-trash" style="font-size: 16px;"></i>
+		</div>
+        <p> {{ imagePath}} </p>
+        <p>{{ description }}</p>
+        <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
+        <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
+    </div>
 
 {{ include('banner/UploadBannerPopup.twig') }}

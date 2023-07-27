@@ -42,6 +42,12 @@ class BannerImage {
      * @var string
      */
     protected $name;
+
+    /**
+     * @ORM\Column(type="string")
+     * @var string
+     */
+    protected $path_date;
     /**
      * @ORM\Column(type="string")
      * @var string
@@ -49,14 +55,23 @@ class BannerImage {
     protected $extra_info;
 
 
-    public function __construct(string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
+    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
 
         $this->setReleaseDate($release_date);
         $this->setClosingDate($close_date);
         $this->setName($name);
         $this->setExtraInfo($extra_info_name);
+        $this->setPath($path);
+
     }
 
+    public function setPath(string $path) {
+        $this->path_date = $path;
+    }
+
+    public function getPath() : void {
+        return $this->path_date;
+    }
 
     public function setReleaseDate(\DateTime $release_date): void {
         // Convert the DateTime object to a string in the correct format

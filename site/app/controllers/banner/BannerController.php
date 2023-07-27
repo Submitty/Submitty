@@ -69,10 +69,21 @@ class BannerController extends AbstractController {
 
         $uploaded_files = $_FILES["files1"];
         $count_item = count($uploaded_files["name"]);
+        $specificPath = $close_date->format("y");
+        $full_path = FileUtils::joinPaths($upload_path, $specificPath);
+
+
+
+    if (!is_dir($full_path)) {
+        // Create a new folder for the current month
+        if (!mkdir($full_path, 0755, true)) {
+            return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
+        }
+    }
 
         for ($j = 0; $j < $count_item; $j++) {
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
-                $dst = FileUtils::joinPaths($upload_path, $uploaded_files["name"][$j]);
+                $dst = FileUtils::joinPaths($full_path, $uploaded_files["name"][$j]);
 
                 if (strlen($dst) > 255) {
                     return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
@@ -91,6 +102,7 @@ class BannerController extends AbstractController {
 
 
             $banner_image = new BannerImage(
+                $specificPath,
                 $uploaded_files["name"][$j],
                 "howdy",
                 $release_date,

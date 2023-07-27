@@ -20,6 +20,7 @@ def up(config, database):
     query = """
         CREATE TABLE banner_images (
             id SERIAL PRIMARY KEY,
+            path_date VARCHAR(255) NOT NULL,
             name VARCHAR(255) NOT NULL,
             extra_info VARCHAR(255),
             release_date timestamp(6),

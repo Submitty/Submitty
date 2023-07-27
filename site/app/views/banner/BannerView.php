@@ -8,6 +8,10 @@ use app\libraries\FileUtils;
 use app\models\User;
 use app\views\AbstractView;
 use app\views\NavigationView;
+use app\libraries\Core;
+
+use app\entities\banner\BannerImage;
+use app\repositories\banner\BannerImageRepository;
 
 class BannerView extends AbstractView {
     /**
@@ -26,6 +30,12 @@ class BannerView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
-        return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", ["csrf_token" => $this->core->getCsrfToken()]);
+        $bannerImages = $this->core->getBannerEntityMannager()->getRepository(BannerImage::class) ->findall();
+
+        return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", [
+            "csrf_token" => $this->core->getCsrfToken(),
+            "banners" => $bannerImages,
+
+    ]);
     }
 }
