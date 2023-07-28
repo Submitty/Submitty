@@ -69,22 +69,27 @@ export WORKER_PAIR=0
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
 # don't recognize as a flag
+echo ""
+echo "Running setup:"
 while :; do
     case $1 in
         --utm)
             export UTM=1
             export DEV_VM=1
+            echo "utm"
             ;;
         --vagrant)
             export VAGRANT=1
             export DEV_VM=1
+            echo "vagrant"
             ;;
         --worker)
             export WORKER=1
+            echo "worker"
             ;;
         --no_submissions)
             export NO_SUBMISSIONS=1
-            echo 'no_submissions'
+            echo "no_submissions"
             ;;
         --worker-pair)
             export WORKER_PAIR=1
