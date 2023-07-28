@@ -2335,7 +2335,10 @@ class Gradeable extends AbstractModel {
      *
      * @return int Number of minutes allowed
      */
-    public function getUserAllowedTime(User $user): ?int {
+    public function getUserAllowedTime(?User $user): ?int {
+        if ($user === null) {
+            return null;
+        }
         if ($this->allowed_minutes === null) {
             return null;
         }

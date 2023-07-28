@@ -9,7 +9,6 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
-use app\libraries\SessionManager;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -3226,53 +3225,24 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * @todo: write phpdoc
-     *
-     * @param string $session_id
-     *
-     * @return array
-     */
-    public function getSession($session_id) {
-        // We only ever want to get sessions which aren't expired.  Don't rely upon other PHP code checking for this...
-        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=? AND session_expires > current_timestamp", [$session_id]);
-        return $this->submitty_db->row();
-    }
-
-    /**
-     * @todo: write phpdoc
-     *
-     * @param string $session_id
+     * Update the boolean determining whether the user can have only one active session at a time
      * @param string $user_id
-     * @param string $csrf_token
+     * @param bool $to_set
+     *
      */
-    public function newSession($session_id, $user_id, $csrf_token) {
-        $this->submitty_db->query(
-            "INSERT INTO sessions (session_id, user_id, csrf_token, session_expires)
-                                   VALUES(?, ?, ?, current_timestamp + ?::interval)",
-            [$session_id, $user_id, $csrf_token, SessionManager::SESSION_EXPIRATION]
-        );
+    public function updateSingleSessionSetting(string $user_id, bool $to_set = false): void {
+        $this->submitty_db->query("UPDATE users SET enforce_single_session=? WHERE user_id=?", [$to_set, $user_id]);
     }
 
     /**
-     * Updates a given session by setting its expiration date to be 2 weeks into the future
+     * Get the enforce_single_session boolean of a user
+     * @param string $user_id
      *
-     * @param string $session_id
+     * @return bool
      */
-    public function updateSessionExpiration($session_id) {
-        $this->submitty_db->query(
-            "UPDATE sessions SET session_expires=(current_timestamp + ?::interval)
-                                   WHERE session_id=?",
-            [SessionManager::SESSION_EXPIRATION, $session_id]
-        );
-    }
-
-    /**
-     * Remove a session associated with a given session_id
-     *
-     * @param string $session_id
-     */
-    public function removeSessionById($session_id) {
-        $this->submitty_db->query("DELETE FROM sessions WHERE session_id=?", [$session_id]);
+    public function getSingleSessionSetting(string $user_id): bool {
+        $this->submitty_db->query("SELECT enforce_single_session FROM users WHERE user_id=?", [$user_id]);
+        return $this->submitty_db->rows()[0]['enforce_single_session'];
     }
 
     public function getAllGradeablesIdsAndTitles() {
@@ -5215,12 +5185,93 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
 
+    /**
+     * get the grader and the count of the gradeable component for inquiry
+     * If the grade is not-by component, function will return all graders who were involved in grading the student
+     * @return array<string, int> of gcd_grader_id and count of unresolved grade inquiries of the grader
+     */
+    public function getGraderofGradeInquiry(string $gradeable_id, bool $is_grade_inquiry_per_component_allowed = true): array {
+        $return = [];
+        if ($is_grade_inquiry_per_component_allowed) {
+            $this->course_db->query("
+                SELECT
+                    count(gcd.*),
+                    gcd.gcd_grader_id
+                FROM grade_inquiries gi
+                INNER JOIN gradeable_component_data gcd ON (
+                    gi.gc_id = gcd.gc_id
+                )
+                INNER JOIN gradeable_data gd ON (
+                    gcd.gd_id = gd.gd_id
+                    AND gi.user_id = gd.gd_user_id
+                )
+                WHERE
+                    gi.status = -1
+                    AND gi.g_id = ?
+                GROUP BY gcd.gcd_grader_id
+            ", [$gradeable_id]);
+            foreach ($this->course_db->rows() as $row) {
+                $return[$row['gcd_grader_id']] = $row['count'];
+            }
+            return $return;
+        }
+        else {
+            $this->course_db->query("
+                SELECT
+                    count(result.*),
+                    result.gcd_grader_id
+                FROM (
+                    SELECT
+                        DISTINCT gi.user_id,
+                        gcd.gcd_grader_id
+                    FROM grade_inquiries gi
+                    INNER JOIN gradeable_data gd ON (
+                        gi.g_id = gd.g_id
+                        AND gi.user_id = gd.gd_user_id
+                    )
+                    INNER JOIN gradeable_component_data gcd ON (
+                        gd.gd_id = gcd.gd_id
+                    )
+                    WHERE 
+                        gi.status = -1 
+                        AND gi.g_id = ?
+                ) AS result
+                GROUP BY result.gcd_grader_id
+            ", [$gradeable_id]);
+            foreach ($this->course_db->rows() as $row) {
+                $return[$row['gcd_grader_id']] = $row['count'];
+            }
+            return $return;
+        }
+    }
+
     /*
-     * This is used to convert one of the by component inquiries per student for a gradeable to a non-component inquiry.
+     * This is used to convert one of the by-component inquiries per student for a gradeable to a non-component inquiry.
      * This allows graders to still respond to by component inquiries if in no-component mode.
      */
     public function convertInquiryComponentId($gradeable) {
         $this->course_db->query("UPDATE grade_inquiries SET gc_id=NULL WHERE id IN (SELECT a.id FROM (SELECT DISTINCT ON (t.user_id) user_id, t.id FROM (SELECT * FROM grade_inquiries ORDER BY id) t WHERE t.g_id=?) a);", [$gradeable->getId()]);
+    }
+
+    /**
+     * This is used to revert non-component inquiries back to by-component inquiries
+     * convertInquiryComponentId function modifies the lowest gc_id of each student of the gradeable to null.
+     * If instructor decides to switch to non-component from by-component then switch back to by-component,
+     * this revertInquiryComponentId function will fetch the gc_id from grade_inquiry_discussion and update accordingly.
+     * @param Gradeable $gradeable
+     */
+    public function revertInquiryComponentId(Gradeable $gradeable): void {
+        $this->course_db->query("
+            UPDATE grade_inquiries
+            SET gc_id = (
+                SELECT gid.gc_id
+                FROM grade_inquiry_discussion gid
+                WHERE grade_inquiries.id = gid.grade_inquiry_id
+            )
+            WHERE
+                grade_inquiries.gc_id IS NULL
+                AND grade_inquiries.g_id = ?
+        ", [$gradeable->getId()]);
     }
 
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
@@ -5270,6 +5321,7 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM grade_inquiry_discussion WHERE grade_inquiry_id = ?", [$grade_inquiry_id]);
         $this->course_db->query("DELETE FROM grade_inquiries WHERE id = ?", [$grade_inquiry_id]);
     }
+
 
     public function deleteGradeable($g_id) {
         $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
