@@ -259,7 +259,6 @@ class CourseMaterialsView extends AbstractView {
         return $folder_paths;
     }
 
-
     /**
      * Recurses through folders and compiles an array of all the paths to folders.
      * Helper recursive function.
@@ -271,7 +270,13 @@ class CourseMaterialsView extends AbstractView {
     private function compileAllFolderPathsR(array $course_materials, array &$folder_paths, string $full_path) {
         foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
-                $inner_full_path = $full_path . $name . '/';
+                $inner_full_path = "";
+                if (empty($full_path)) {
+                    $inner_full_path = $name;
+                }
+                else {
+                    $inner_full_path = $full_path . '/' . $name;
+                }
                 array_push($folder_paths, $inner_full_path);
                 $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
             }
