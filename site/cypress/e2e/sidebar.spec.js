@@ -11,7 +11,6 @@ function sidebarContains(title, extension, header = title) {
 function baseSidebar() {
     sidebarContains('My Courses', '/home');
     sidebarContains('My Profile', '/user_profile');
-    sidebarContains('Authentication Tokens', '/authentication_tokens');
     sidebarContains('Calendar', '/calendar');
     cy.get('[data-testid="sidebar"]').contains('Collapse Sidebar').should('exist');
     cy.get('[data-testid="sidebar"]').contains('Logout').should('exist');

@@ -2347,21 +2347,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:createMainRubricGraderPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setCurrentGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\grading\\\\popup_refactor\\\\RubricGraderController\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\pdf\\\\PDFController\\:\\:showGraderPDFEmbedded\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
@@ -4224,11 +4209,6 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\SamlSettings\\:\\:getSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/SamlSettings.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\SessionManager\\:\\:\\$session has no type specified\\.$#"
-			count: 1
-			path: app/libraries/SessionManager.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
@@ -6266,11 +6246,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSession\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getSimilarNumericIdMatches\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6846,11 +6821,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:openQueue\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6907,11 +6877,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removePeerAssignmentsForGrader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:removeSessionById\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7187,11 +7152,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSeekingTeamMessageById\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:updateSessionExpiration\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -12232,6 +12192,11 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
+			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
+			count: 1
+			path: app/repositories/SessionRepository.php
+
+		-
 			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: T$#"
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
@@ -14002,27 +13967,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$autograded_average with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$component_averages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$histogram_data with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:statusPage\\(\\) has parameter \\$overall_average with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -14090,21 +14035,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\grading\\\\SimpleGraderView\\:\\:simpleDisplay\\(\\) has parameter \\$student_full with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createBreadcrumbHeader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:createRubricGradeableView\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\popup_refactor\\\\RubricGraderView\\:\\:setMemberVariables\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/grading/popup_refactor/RubricGraderView.php
 
 		-
 			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
