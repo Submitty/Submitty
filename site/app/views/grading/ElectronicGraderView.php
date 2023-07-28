@@ -601,12 +601,9 @@ HTML;
 
                     foreach ($late_day_info as $member_submission) {
 
-                        if ($member_submission->isOnTimeSubmission()) {
-                            $on_time_submission = true;
-                            break; 
-                        }
-                        else {
+                        if (!$member_submission->isOnTimeSubmission()) {
                             $on_time_submission = false;
+                            break; 
                         }
                     }
                 }
