@@ -280,6 +280,6 @@ class CourseMaterialsView extends AbstractView {
                 array_push($folder_paths, $inner_full_path);
                 $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
             }
-        } 
+        }
     }
 }
