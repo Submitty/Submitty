@@ -271,8 +271,8 @@ class CourseMaterialsView extends AbstractView {
         array $course_materials,
         array &$folder_paths,
         string $full_path
-    ) {
-        foreach ($course_materials as $name => $course_material): void {
+    ): void {
+        foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
                 $inner_full_path = "";
                 if (empty($full_path)) {
