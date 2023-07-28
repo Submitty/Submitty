@@ -3,16 +3,16 @@
 {% block title %}Calendar Options{% endblock %}
 {% block body %}
     <div class="filter-courses-label section-row">
-        <h2>Filter Courses</h2>
+        <h2>Select Course</h2>
     </div>
     <form>
         <div class="filter-courses-menu">
             {% if course_names|length > 1 %}
-            <input type="radio" class="toggle-courses-box" name="filter-course" value="show all">
+            <input type="radio" class="toggle-courses-box" name="filter-course" id="show-all" value="show all">
             <label>All Courses</label>
             {% endif %}
             {% for course in course_names %}
-            <input type="radio" class="toggle-courses-box" name="filter-course" value="{{course}}">
+            <input type="radio" class="toggle-courses-box" name="filter-course" id="course-{{course|replace({' ': ''})}}" value="{{course}}">
             <label>{{course}}</label>
             {% endfor %}
         </div>

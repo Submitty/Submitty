@@ -704,21 +704,28 @@ function fillAllCheckboxes(class_name, val) {
 
 function openOptionsModal() {
     $('#calendar-options-form').css('display', 'block');
-    checkFilterTicks();
+    checkProperOptions();
 }
 
 //checks proper tick marks in modal
-function checkFilterTicks() {
-    const selectedColumns = loadCoursesCookie();
-    const checkboxes = document.getElementsByClassName('toggle-courses-box');
-    for (let i = 0; i<checkboxes.length; i++) {
-        if (selectedColumns[i] === 1) {
-            checkboxes[i].checked = true;
-        }
-        else {
-            checkboxes[i].checked = false;
-        }
+function checkProperOptions() {
+    const showAll = loadShowAllCoursesCookie();
+    if (showAll) { //if show all is true, tick off show all
+        $("#show-all").prop("checked", true);
     }
+    else { //if show all if false, select a specific course
+        console.log(`#course-${loadCurrentCourseCookie().replace(" ", "")}`);
+        $(`#course-${loadCurrentCourseCookie().replace(" ", "")}`).prop("checked", true);
+    }
+}
+
+function loadShowAllCoursesCookie() {
+    const cookie = Cookies.get('calendar_show_all');
+    return cookie == '1' ? true : false;
+}
+
+function loadCurrentCourseCookie() {
+    return Cookies.get('calendar_course');
 }
 
 function loadCoursesCookie() {
