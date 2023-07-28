@@ -111,6 +111,14 @@
                 <br/>
                 <br/>
                 <p><b>Number of unresolved grade inquiries:</b> {{ grade_inquiries }}</p>
+                <br/>
+                <p><b>Number of unresolved grade inquiries per grader</b></p>
+                <div style="margin-left: 20px">
+                {% for key, value in graders_of_inquiries %}
+                    <p>{{ key }}: {{ value }} </p>
+                {% endfor %}
+                </div>
+                <br/>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
                         <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
