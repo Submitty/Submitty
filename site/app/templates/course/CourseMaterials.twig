@@ -1,11 +1,5 @@
 <div class="content">
 
-    <script type="text/javascript">
-        // Convert folder into javascript.
-        const js_folder_paths = JSON.parse('{{ folder_paths | json_encode | raw }}');
-        setFolderPaths(js_folder_paths);
-    </script>
-
     <script>
         green = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-green');
         yellow = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-yellow');
