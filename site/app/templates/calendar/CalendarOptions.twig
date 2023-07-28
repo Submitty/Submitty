@@ -5,16 +5,18 @@
     <div class="filter-courses-label section-row">
         <h2>Filter Courses</h2>
     </div>
-    <div class="filter-courses-menu">
-        <a href="javascript:fillAllCheckboxes('toggle-courses-box',true)" class="btn btn-primary">All On</a>
-        <a href="javascript:fillAllCheckboxes('toggle-courses-box',false)" class="btn btn-primary">All Off</a>
-        {% for course in course_names %}
-        <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-courses-box" id="{{course}}">
+    <form>
+        <div class="filter-courses-menu">
+            {% if course_names|length > 1 %}
+            <input type="radio" class="toggle-courses-box" name="filter-course" value="show all">
+            <label>All Courses</label>
+            {% endif %}
+            {% for course in course_names %}
+            <input type="radio" class="toggle-courses-box" name="filter-course" value="{{course}}">
             <label>{{course}}</label>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+    </form>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}

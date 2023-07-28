@@ -279,6 +279,12 @@ div.calendar-submit {
 div.calendar-submit label { text-align: "right"; }
 div.calendar-submit label::after { content: ":"; }
 
+/* Calendar Options Menu */
+div.filter-courses-menu {
+    display: table-cell;
+    vertical-align: middle;
+}
+
 @media (max-width: 800px) {
     #calendar-list {
         margin: 0;
