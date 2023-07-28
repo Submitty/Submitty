@@ -21,11 +21,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_preferred_givenname' => null,
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
+            'user_pronouns' => '',
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
+            'course_section_id' => null,
             'rotating_section' => null,
             'manual_registration' => false,
             'grading_registration_sections' => [1, 2]
@@ -41,6 +43,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['user_email'], $user->getEmail());
         $this->assertEquals($details['user_group'], $user->getGroup());
         $this->assertEquals($details['registration_section'], $user->getRegistrationSection());
+        $this->assertEquals($details['course_section_id'], $user->getCourseSectionId());
         $this->assertEquals($details['rotating_section'], $user->getRotatingSection());
         $this->assertEquals($details['manual_registration'], $user->isManualRegistration());
         $this->assertEquals([1,2], $user->getGradingRegistrationSections());
@@ -59,11 +62,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_preferred_givenname' => "Paul",
             'user_familyname' => "Tester",
             'user_preferred_familyname' => "Bunyan",
+            'user_pronouns' => '',
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
+            'course_section_id' => null,
             'rotating_section' => null,
             'manual_registration' => false,
             'grading_registration_sections' => [1,2],
@@ -90,11 +95,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_preferred_givenname' => null,
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
+            'user_pronouns' => '',
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
+            'course_section_id' => null,
             'rotating_section' => null,
             'manual_registration' => false,
             'grading_registration_sections' => [1,2]
@@ -116,12 +123,14 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_preferred_givenname' => null,
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
+            'user_pronouns' => '',
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
             'user_group' => User::GROUP_INSTRUCTOR,
             'user_access_level' => User::LEVEL_FACULTY,
             'registration_section' => 1,
+            'course_section_id' => null,
             'rotating_section' => null,
             'manual_registration' => false,
             'grading_registration_sections' => [1,2]
@@ -134,10 +143,12 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $expected = [
             'displayed_given_name' => 'User',
             'displayed_family_name' => 'Tester',
+            'pronouns' => '',
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
             'legal_given_name' => 'User',
+            'last_initial_format' => 0,
             'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,
@@ -150,6 +161,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'numeric_id' => '123456789',
             'registration_section' => 1,
             'registration_type' => 'staff',
+            'course_section_id' => null,
             'rotating_section' => null,
             'modified' => true,
             'user_updated' => false,
@@ -175,7 +187,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
             ],
-            'registration_subsection' => null
+            'registration_subsection' => null,
+            'enforce_single_session' => false
         ];
         $this->assertEquals($expected, $actual);
     }
@@ -191,6 +204,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => 'test',
             'user_givenname' => 'test',
             'user_familyname' => 'test',
+            'user_pronouns' => '',
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -204,12 +218,30 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_id' => 'test',
             'user_givenname' => 'test',
             'user_familyname' => 'test',
+            'user_pronouns' => '',
             'user_email' => 'user@email.com',
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
             'time_zone' => 'NOT_SET/NOT_SET'
         ]);
         $this->assertEquals('NOT SET', $user->getUTCOffset());
+    }
+
+    public function testLastInitialFormat() {
+        $formats = [ 'John S.', 'John S.W.', 'John S-J.W.', 'John' ];
+        foreach ($formats as $format => $expected) {
+            $user = new User($this->core, [
+                'user_id' => 'test',
+                'user_givenname' => 'John',
+                'user_familyname' => 'Smith-Jones Warren',
+                'user_pronouns' => '',
+                'user_email' => 'user@email.com',
+                'user_email_secondary' => 'test@exampletwo.com',
+                'user_email_secondary_notify' => false,
+                'user_last_initial_format' => $format
+            ]);
+            $this->assertEquals($expected, $user->getDisplayAbbreviatedName());
+        }
     }
 
 

@@ -96,6 +96,7 @@ function changeSubmissionMode(event: Event) {
     const useQRCheckBox = document.getElementById('use-qr') as HTMLInputElement;
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
+    const SubmitButton = document.getElementById('submit');
 
     [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach(element => element!.style.display = 'none');
     useQRCheckBox.checked = false;
@@ -122,14 +123,17 @@ function changeSubmissionMode(event: Event) {
             window.loadPreviousFilesOnDropBoxes();
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'normal');
             message = '';
+            SubmitButton!.innerText = 'Submit';
             break;
         case 'radio-student':
             submitForStudentOpts!.style.display = 'block';
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'for-student');
             message = 'Warning: Submitting files for a student!';
+            SubmitButton!.innerText = 'Submit';
             break;
         case 'radio-bulk':
             bulkUploadOpts!.style.display = 'block';
+            SubmitButton!.innerText = 'Bulk Upload';
 
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
             message = 'Warning: Submitting files for bulk upload!';

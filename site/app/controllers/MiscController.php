@@ -211,13 +211,13 @@ class MiscController extends AbstractController {
 
         $mime_type = mime_content_type($path);
         if ($mime_type === 'text/plain') {
-            if (substr($path, '-3') === '.js') {
+            if (str_ends_with($path, '.js')) {
                 $mime_type = 'application/javascript';
             }
-            elseif (substr($path, '-4') === '.css') {
+            elseif (str_ends_with($path, '.css')) {
                 $mime_type = 'text/css';
             }
-            elseif (substr($path, '-5') === '.html') {
+            elseif (str_ends_with($path, '.html')) {
                 $mime_type = 'text/html';
             }
         }
@@ -246,6 +246,7 @@ class MiscController extends AbstractController {
             if ($cm !== null) {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
+                $title = $cm->getTitle();
             }
         }
 
@@ -271,7 +272,12 @@ class MiscController extends AbstractController {
             CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
-        $filename = pathinfo($path, PATHINFO_BASENAME);
+        if (isset($title) && $title !== "") {
+            $filename = $title;
+        }
+        else {
+            $filename = pathinfo($path, PATHINFO_BASENAME);
+        }
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
@@ -408,6 +414,7 @@ class MiscController extends AbstractController {
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false);
 
+        //TODO: In here for notebooks remove the server-generated answers
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
         foreach ($folder_names as $folder_name) {

@@ -139,6 +139,6 @@ class GradeableAutocheck extends AbstractModel {
             $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
 
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $expected_string, $difference_file, $image_difference, $this->index);
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $expected_string, $difference_file, $image_difference, strval($this->index));
     }
 }

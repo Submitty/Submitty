@@ -3,12 +3,41 @@
 Script to trigger the generate grade summaries.
 
 Usage:
-./generate_grade_summaries.py <semester> <course> <base_url> <token>
+./generate_grade_summaries.py <semester> <course>
 """
 
 import argparse
 import requests
+import os
+import json
 from sys import stderr
+
+# Get path to current file directory
+current_dir = os.path.dirname(__file__)
+
+# Collect submission url
+submitty_json_config = os.path.join(current_dir, '..', 'config', 'submitty.json')
+
+if not os.path.exists(submitty_json_config):
+    raise Exception('Unable to locate submitty.json configuration file')
+
+with open(submitty_json_config, 'r') as file:
+    data = json.load(file)
+    base_url = data['submission_url'].rstrip('/')
+    install_dir = data['submitty_install_dir']
+
+# Collect submitty admin token
+submitty_creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
+
+if not os.path.exists(submitty_creds_file):
+    raise Exception('Unable to locate submitty_admin.json credentials file')
+
+# Load credentials out of admin file
+with open(submitty_creds_file, 'r') as file:
+    creds = json.load(file)
+
+if 'token' not in creds or not creds['token']:
+    raise Exception('Unable to read credentials from submitty_admin.json')
 
 
 def main():
@@ -18,14 +47,11 @@ def main():
     )
     parser.add_argument('semester')
     parser.add_argument('course')
-    parser.add_argument('base_url')
-    parser.add_argument('token')
     args = parser.parse_args()
 
     semester = args.semester
     course = args.course
-    base_url = args.base_url.rstrip('/')
-    token = args.token
+    token = creds['token']
 
     try:
         grade_generation_response = requests.post(

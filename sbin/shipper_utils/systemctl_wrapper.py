@@ -163,7 +163,7 @@ def parse_arguments():
   parser.add_argument("--target", metavar="TARGET", type=str, help="Optional. Give the id of a machine in the \
     autograding_workers json and this script will perform the desired function on that machine. If perform_on_all_workers is\
     specified, the command will be processed on all worker machines. If not specified, the status of this machine is checked.")
-  parser.add_argument("mode", metavar="MODE", type=str.lower, help="Valid modes are status, start, restart, and stop", 
+  parser.add_argument("mode", metavar="MODE", type=str.lower, help="Valid modes are status, start, restart, and stop",
     choices=VALID_MODES)
 
   return parser.parse_args()

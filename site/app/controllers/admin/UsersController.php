@@ -57,6 +57,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $student->getDisplayedGivenName(),
                 'family_name' => $student->getDisplayedFamilyName(),
+                'pronouns' => $student->getPronouns(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
@@ -66,6 +67,19 @@ class UsersController extends AbstractController {
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
+        }
+
+        //Get Active student Columns
+        $active_student_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 12) {
+            $active_student_columns = $_COOKIE['active_student_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_student_columns', implode('-', array_fill(0, 12, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_student_columns = implode('-', array_fill(0, 12, true));
+            }
         }
 
         return new MultiResponse(
@@ -78,7 +92,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
                 $formatted_tzs,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_student_columns
             )
         );
     }
@@ -124,6 +139,7 @@ class UsersController extends AbstractController {
             array_push($download_info, [
                 'given_name' => $grader->getDisplayedGivenName(),
                 'family_name' => $grader->getDisplayedFamilyName(),
+                'pronouns' => $grader->getPronouns(),
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
@@ -131,6 +147,19 @@ class UsersController extends AbstractController {
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
+        }
+
+        //Get Active grader Columns
+        $active_grader_columns = '';
+        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 7) {
+            $active_grader_columns = $_COOKIE['active_grader_columns'];
+        }
+        else {
+            //Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_grader_columns', implode('-', array_fill(0, 7, true)), time() + (10 * 365 * 24 * 60 * 60))) {
+                $active_grader_columns = implode('-', array_fill(0, 7, true));
+            }
         }
 
         return new MultiResponse(
@@ -142,7 +171,8 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $active_grader_columns
             )
         );
     }
@@ -172,7 +202,7 @@ class UsersController extends AbstractController {
             else {
                 $grader->setGradingRegistrationSections([]);
             }
-            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
         }
 
         $this->core->redirect($return_url);
@@ -191,10 +221,12 @@ class UsersController extends AbstractController {
             'user_familyname' => $user->getLegalFamilyName(),
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
+            'user_pronouns' => $user->getPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
+            'course_section_id' => $user->getCourseSectionId(),
             'rotating_section' => $user->getRotatingSection(),
             'user_updated' => $user->isUserUpdated(),
             'instructor_updated' => $user->isInstructorUpdated(),
@@ -224,10 +256,12 @@ class UsersController extends AbstractController {
                 'user_familyname' => $user->getLegalFamilyName(),
                 'user_preferred_givenname' => $user->getPreferredGivenName() ?? '',
                 'user_preferred_familyname' => $user->getPreferredFamilyName() ?? '',
+                'user_pronouns' => $user->getPronouns() ?? '',
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
                 'user_group' => $user->getGroup(),
                 'registration_section' => $user->getRegistrationSection(),
+                'course_section_id' => $user->getCourseSectionId(),
                 'rotating_section' => $user->getRotatingSection(),
                 'user_updated' => $user->isUserUpdated(),
                 'instructor_updated' => $user->isInstructorUpdated(),
@@ -246,7 +280,7 @@ class UsersController extends AbstractController {
         $authentication = $this->core->getAuthentication();
         $use_database = $authentication instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
@@ -264,6 +298,8 @@ class UsersController extends AbstractController {
                 $error_message .= "User ID must be a valid SAML username.\n";
             }
         }
+        //Pronouns must be less than 12 characters.
+        $error_message .= User::validateUserData('user_pronouns', trim($_POST['user_pronouns'])) ? "" : "Error in pronouns: \"" . strip_tags($_POST['user_pronouns']) . "\"<br>";
         //Given and Family name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_legal_givenname', trim($_POST['user_givenname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_givenname']) . "\"<br>";
         $error_message .= User::validateUserData('user_legal_familyname', trim($_POST['user_familyname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_familyname']) . "\"<br>";
@@ -312,6 +348,8 @@ class UsersController extends AbstractController {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
 
+        $user->setPronouns(trim($_POST['user_pronouns']));
+
         $user->setEmail(trim($_POST['user_email']));
 
         $user->setSecondaryEmail(trim($_POST['user_email_secondary']));
@@ -355,7 +393,8 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
+            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
@@ -365,8 +404,9 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -393,7 +433,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -421,7 +461,7 @@ class UsersController extends AbstractController {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
             $displayed_fullname = trim($_POST['displayed_fullname']);
-            $semester = $this->core->getConfig()->getSemester();
+            $semester = $this->core->getConfig()->getTerm();
             $course = $this->core->getConfig()->getCourse();
 
             if ($user_id === $this->core->getUser()->getId()) {
@@ -610,7 +650,7 @@ class UsersController extends AbstractController {
             // TODO: why don't we have to do all the checks that we did for setRotatingGraderSections?
             foreach ($gradeables_section_assignment_counts as $g_id => $counts) {
                 for ($i = 0; $i < $num_rotating_sections; $i++) {
-                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, $gradeables_section_assignment_counts[$g_id][$i]);
+                    $update_teams = array_splice($unassigned_gradeable_teams[$g_id], 0, intval($counts[$i]));
                     $this->core->getQueries()->updateTeamsRotatingSection($update_teams, $i + 1, $g_id);
                 }
             }
@@ -625,6 +665,16 @@ class UsersController extends AbstractController {
                     registered students into rotating section with fewest members");
                 $this->core->redirect($return_url);
             }
+
+            //Gets all the ids of the excluded sections
+            $excluded_registration_sections = $_POST["excluded_registration_sections"] ?? [];
+            $excluded_users = $this->core->getQueries()->getUsersByRegistrationSections($excluded_registration_sections);
+            $excluded_user_ids = array_map(function (User $user) {
+                return $user->getId();
+            }, $excluded_users);
+
+            $unassigned_user_ids = array_values(array_diff($unassigned_user_ids, $excluded_user_ids));
+
             // 'fewest' rotating section setup option can only use random sort
             shuffle($unassigned_user_ids);
             // distribute newly registered users ($unassigned_user_ids) to rotating sections and create $section_assignment_counts array
@@ -636,12 +686,12 @@ class UsersController extends AbstractController {
             }
             $curr_section_sizes = $this->core->getQueries()->getUsersCountByRotatingSections();
             $section_assignment_counts = array_map(function ($expected_size, $curr_size) {
-                return $expected_size - $curr_size['count'];
+                return $curr_size === null ? $expected_size : $expected_size - $curr_size['count'];
             }, $expected_section_sizes, $curr_section_sizes);
         }
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
-            $update_users = array_splice($unassigned_user_ids, 0, $section_assignment_counts[$section]);
+            $update_users = array_splice($unassigned_user_ids, 0, intval($section_assignment_counts[$section]));
             if (count($update_users) == 0) {
                 continue;
             }
@@ -759,7 +809,7 @@ class UsersController extends AbstractController {
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
-        ini_set("auto_detect_line_endings", true);
+        ini_set("auto_detect_line_endings", '1');
 
         // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
@@ -1104,7 +1154,7 @@ class UsersController extends AbstractController {
         }
 
         // Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $users_not_found = []; // track wrong user_ids given
 

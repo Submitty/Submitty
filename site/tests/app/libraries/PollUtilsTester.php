@@ -32,6 +32,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "single-response",
                 new DateTime("2020-01-11"),
                 "never",
+                "never",
                 "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             ),
             new Poll(
@@ -39,6 +40,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Is this the second poll?",
                 "single-response",
                 new DateTime("2020-01-12"),
+                "always",
                 "always"
             ),
             new Poll(
@@ -46,6 +48,7 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "Is this the fourth poll?",
                 "multiple-response",
                 new DateTime("2020-01-13"),
+                "when_ended",
                 "when_ended"
             ),
         ];
@@ -103,8 +106,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0, 2],
                 "release_date" => "2020-01-11",
                 "status" => "closed",
-                "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png",
-                "release_histogram" => "never"
+                "release_histogram" => "never",
+                "release_answer" => "never",
+                "image_path" => "/var/local/submitty/courses/s21/sample/uploads/polls/poll_image_3_colors.png"
             ],
             [
                 "id" => 1,
@@ -115,8 +119,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [0],
                 "release_date" => "2020-01-12",
                 "status" => "open",
-                "image_path" => null,
-                "release_histogram" => "always"
+                "release_histogram" => "always",
+                "release_answer" => "always",
+                "image_path" => null
             ],
             [
                 "id" => 2,
@@ -127,8 +132,9 @@ class PollUtilsTester extends \PHPUnit\Framework\TestCase {
                 "correct_responses" => [1],
                 "release_date" => "2020-01-13",
                 "status" => "ended",
-                "image_path" => null,
-                "release_histogram" => "when_ended"
+                "release_histogram" => "when_ended",
+                "release_answer" => "when_ended",
+                "image_path" => null
             ]
         ];
         $actual_data = PollUtils::getPollExportData($polls);

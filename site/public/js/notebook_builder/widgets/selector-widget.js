@@ -1,3 +1,6 @@
+/* global Widget */
+/* exported SelectorWidget */
+
 class SelectorWidget extends Widget {
     /**
      * Instantiate a selector widget.

@@ -211,6 +211,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
             'user_id' => 'test',
             'user_givenname' => 'test',
             'user_familyname' => 'person',
+            'user_pronouns' => '',
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,

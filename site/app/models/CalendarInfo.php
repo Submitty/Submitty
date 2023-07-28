@@ -38,14 +38,21 @@ class CalendarInfo extends AbstractModel {
     /**
      * @see GradeableList for constant integers used as keys
      * @var array<int, array>
-     * the structure of the array is a integer as key, and value
+     * the structure of the array is an integer as key, and value
      * contains an array with a structure of
      * "title"      => string (title shown at the top of the table),
      * "subtitle"   => string (title shown at the top of the table, if any. Can be empty),
      * "section_id" => string (the id of the section. Will be used as the HTML id)
-     * "gradeables" => array. The structure of this array is same as the element of value of $items_by_date
+     * "gradeables" => array. The structure of this array is same as the element of value of $gradeables_by_date
      */
     private $items_by_sections = [];
+
+    /**
+     * @var array<string, string>
+     * the structure is a string as the key and a string as the value
+     * the value is the color given to a specific course at a given semester
+     */
+    private $colors = [];
 
     /** @var string */
     private $empty_message = "";
@@ -59,13 +66,22 @@ class CalendarInfo extends AbstractModel {
      * @param array $gradeables_of_user container of gradeables in the system
      * @return CalendarInfo
      */
-    public static function loadGradeableCalendarInfo(Core $core, array $gradeables_of_user): CalendarInfo {
+    public static function loadGradeableCalendarInfo(Core $core, array $gradeables_of_user, array $courses, array $calendar_items): CalendarInfo {
         $info = new CalendarInfo($core);
         $date_format = $core->getConfig()->getDateTimeFormat()->getFormat('gradeable');
 
         $gradeable_list = new GradeableList($core, $core->getUser(), $gradeables_of_user["gradeables"]);
 
-        // get the gradeables from the GradeableList and group them by section
+        $i = 1;
+        /** @var Course $course */
+        foreach ($courses as $course) {
+            $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
+            if ($i < 21) {
+                $i++;
+            }
+        }
+
+        // Get the gradeables from the GradeableList and group them by section
         $gradeable_list_sections = [
             GradeableList::OPEN => $gradeable_list->getOpenGradeables(),
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
@@ -102,10 +118,12 @@ class CalendarInfo extends AbstractModel {
                     'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
-                    'class' => ($submit_btn === null) ? "" : explode(' ', $submit_btn->getClass())[1],
+                    'class' => 'btn-nav',
                     'disabled' => !($submit_btn === null) && $submit_btn->isDisabled(),
                     'show_due' => true,
                     'icon' => '',
+                    'color' => $info->colors[$semester . $course_title],
+                    'type' => 'gradeable'
                 ];
 
                 // Put gradeables in current section by their id which consists of semester, course title and gradeable id
@@ -119,21 +137,47 @@ class CalendarInfo extends AbstractModel {
             // Put data of current section into the by-section map
             $info->items_by_sections[] = $curr_section;
         }
+        foreach ($courses as $course) {
+            $cal_items = $calendar_items[$course->getTitle()];
+            foreach ($cal_items as $cal_item) {
+                $date = $cal_item->getDate()->format('Y-m-d');
+                $curItem = [
+                    'title' => htmlspecialchars($cal_item->getText()),
+                    'status' => $cal_item->getTypeString(),
+                    'course' => $course->getTitle(),
+                    'semester' => $course->getTerm(),
+                    'icon' => '',
+                    'url' => '',
+                    'show_due' => false,
+                    'submission' => '',
+                    'status_note' => '',
+                    'color' => $info->colors[$course->getTerm() . $course->getTitle()],
+                    'type' => 'item',
+                    'date' => $date,
+                    'id' => $cal_item->getId()
+                ];
+                $info->items_by_date[$date][] = $curItem;
+            }
+        }
 
         $info->empty_message = "There are currently no assignments posted.  Please check back later.";
 
         return $info;
     }
 
-    public function getInfoByDate(): array {
+    public function getItemsByDate(): array {
         return $this->items_by_date;
     }
 
-    public function getInfoBySections(): array {
+    public function getItemsBySections(): array {
         return $this->items_by_sections;
     }
 
     public function getEmptyMessage(): string {
         return $this->empty_message;
+    }
+
+    public function getColors(): array {
+        return $this->colors;
     }
 }
