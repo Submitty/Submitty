@@ -39,8 +39,8 @@
                 </button>
             {% endif %}
 
-                <button type="button" onclick="openFilterModal()" class="btn btn-primary">
-                    <i class="fas fa-filter"></i> Filter
+                <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
+                    <i class="fas fa-sliders"></i> Options
                 </button>
                 <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
@@ -102,4 +102,4 @@
 
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
-{{ include('calendar/FilterCalendar.twig') }}
+{{ include('calendar/CalendarOptions.twig') }}

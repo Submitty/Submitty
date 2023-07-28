@@ -702,8 +702,8 @@ function fillAllCheckboxes(class_name, val) {
     }
 }
 
-function openFilterModal() {
-    $('#filter-calendar-form').css('display', 'block');
+function openOptionsModal() {
+    $('#calendar-options-form').css('display', 'block');
     checkFilterTicks();
 }
 
@@ -739,8 +739,10 @@ function updateCalendarFilters() {
     location.reload();
 }
 
+//Fix this
 function saveFilterValues() {
     const cookie = Cookies.get('visible_courses').split(' ');
+    console.log(cookie.length);
     for (let i = 0; i<checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
             selectedColumns[i] = 1;

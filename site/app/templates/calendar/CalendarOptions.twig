@@ -1,9 +1,9 @@
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}filter-calendar-form{% endblock %}
-{% block title %}Filter Calendar Data{% endblock %}
+{% block popup_id %}calendar-options-form{% endblock %}
+{% block title %}Calendar Options{% endblock %}
 {% block body %}
     <div class="filter-courses-label section-row">
-        <h2>Select Courses</h2>
+        <h2>Filter Courses</h2>
     </div>
     <div class="filter-courses-menu">
         <a href="javascript:fillAllCheckboxes('toggle-courses-box',true)" class="btn btn-primary">All On</a>
@@ -18,5 +18,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" onclick="updateCalendarFilters()"/>
+    <input class="btn btn-primary" type="submit" value="Submit" onclick="javascript:updateCalendarFilters()"/>
 {% endblock %}
