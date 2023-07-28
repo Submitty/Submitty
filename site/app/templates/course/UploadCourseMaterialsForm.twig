@@ -13,7 +13,7 @@
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ base_course_material_path }}/optional/subdirectory
             </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory" oninput="updatePossiblePaths(this.value)"/>
         </label>
         <fieldset>
             <legend class="black-message">

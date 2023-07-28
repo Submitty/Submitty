@@ -17,6 +17,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalJs("course-materials-folders-list.js");
 
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
@@ -138,6 +139,8 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
 
+        $folder_paths = $this->compileAllFolderPaths($final_structure);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -153,7 +156,8 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
-            "links" => $links
+            "links" => $links,
+            "folder_paths" => $folder_paths
         ]);
     }
 
@@ -242,5 +246,36 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $folder_visibilities[$current_path] = $cur_visibility;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @return array List of folders paths.
+     */
+    private function compileAllFolderPaths(array $course_materials) {
+        $folder_paths = [];
+        $this->compileAllFolderPathsR($course_materials, $folder_paths, "");
+        return $folder_paths;
+    }
+
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     * Helper recursive function.
+     *
+     * @param array $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array  $folder_paths - List we append
+     * @param string $full_path - Current path we are examining files in.
+     */
+    private function compileAllFolderPathsR(array $course_materials, array &$folder_paths, string $full_path) {
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                $inner_full_path = $full_path . $name . '/';
+                array_push($folder_paths, $inner_full_path);
+                $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
+            }
+        } 
     }
 }
