@@ -52,7 +52,7 @@
 
         <br>
         <br>
-        <label id="cm_path">
+        <label id="extra_name">
             <span>
                 <strong>Name of additional Information</strong><br />
                 Only required if you are adding an additional file:<br />
@@ -65,11 +65,9 @@
         <br>
         <label id="url_link_address">
             <span>
-                <strong>Name of additional Information</strong><br />
-                Only required if you are adding an additional file:<br />
+                <strong>Address link</strong><br />
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
-            <span><em>Note: if you provided a file or an png image the name has to match this input.</em></span
         </label>
 
     </div>
@@ -80,9 +78,8 @@
         function makeSubmission() {
             var releaseTime = document.getElementById("release_date").value;
             var closeTime = document.getElementById("closing_date").value;
-            console.log(releaseTime);
-            console.log(closeTime);
-            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime);
+            var extraName = document.getElement.ById("extra_name").value;
+            handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName);
         }
         $(function() {
             $("#submit-banner").click(function(e){ // Submit button

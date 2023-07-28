@@ -1335,11 +1335,12 @@ function deleteBannerImage(csrf_token, imageName, imagePath, description, releas
  * @param csrf_token
  */
 
-function handleUploadBanner(csrf_token, closeTime, releaseTime) {
+function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName) {
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('close_time', closeTime);
     formData.append('release_time', releaseTime);
+    formData.append('extra_name', extraName);
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") !== -1 ||
