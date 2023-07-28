@@ -253,7 +253,7 @@ class CourseMaterialsView extends AbstractView {
      * @param array $course_materials - Dictionary: path name => CourseMaterial.
      * @return array List of folders paths.
      */
-    private function compileAllFolderPaths(array(string) $course_materials): array(string) {
+    private function compileAllFolderPaths(array[string] $course_materials): array[string] {
         $folder_paths = [];
         $this->compileAllFolderPathsR($course_materials, $folder_paths, "");
         return $folder_paths;
@@ -268,8 +268,8 @@ class CourseMaterialsView extends AbstractView {
      * @param string $full_path - Current path we are examining files in.
      */
     private function compileAllFolderPathsR(
-        array(string) $course_materials,
-        array(string) &$folder_paths,
+        array[string] $course_materials,
+        array[string] &$folder_paths,
         string $full_path
     ) {
         foreach ($course_materials as $name => $course_material): void {
