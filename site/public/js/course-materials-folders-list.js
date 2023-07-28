@@ -50,22 +50,26 @@ function setFolderPaths(folders) {
 }
 
 function updatePossiblePaths(current_text) {
-	if (!current_inquiry || current_text.length < current_inquiry.length) {
-        current_inquiry = current_text;
-        recalculatePossiblePaths();
-    }
-    else {
+    if (current_inquiry
+        && current_text.length == current_inquiry.length+1
+        && current_text.substr(0, current_text.length-1) == current_inquiry) {
+
         current_inquiry = current_text;
         var newChar = current_inquiry.charAt(current_inquiry.length - 1);
         narrowPossiblePaths(newChar);
+        console.log("narrow");
+    } else {
+        current_inquiry = current_text;
+        recalculatePossiblePaths();
+        console.log("all");
     }
-    console.log(all_paths)
     console.log(current_text);
     console.log(current_possible_paths);
 }
 
 
 function recalculatePossiblePaths() {
+    current_possible_paths.clear();
     for (path of all_paths) {
         var pathStart = path.substr(0, current_inquiry.length);
         if (pathStart == current_inquiry) {
