@@ -164,7 +164,9 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-pushd "${SUBMITTY_REPOSITORY}/python_submitty_utils"
+rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
+pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
+
 pip3 install .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
