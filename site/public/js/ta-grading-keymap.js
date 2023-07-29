@@ -11,14 +11,7 @@ var remapping = {
     active: false,
     index: 0
 };
-//get inquiry status from Details.twig
-var inquiry = localStorage.getItem('inquiry_status');
-if (inquiry === 'on') {
-    var default_option =  "Prev/Next Grade Inquiry";
-}
-else{
-    var default_option = "Prev/Next Student";
-}
+
 let settingsData = [
     {
         id: "general-setting-list",
@@ -35,7 +28,7 @@ let settingsData = [
                     "Prev/Next Grade Inquiry": "inquiry",
                     "Prev/Next Active Grade Inquiry": "active-inquiry",
                 }, 
-                default: default_option
+                default: "Prev/Next Student"
             },
             {
                 name: "Prev/Next buttons navigate through",
@@ -201,11 +194,16 @@ function loadTAGradingSettingData() {
             }
             var inquiry = localStorage.getItem('inquiry_status');
             if (inquiry === 'on') {
-                settingsData[i].values[x].currValue =  "Prev/Next Grade Inquiry";
-                
+                settingsData[i].values[x].currValue =  "inquiry";   
             }
             else{
-                settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+                
+                if (localStorage.getItem(settingsData[i].values[x].storageCode) != "default" && localStorage.getItem(settingsData[i].values[x].storageCode) != "inquiry") {
+                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+                }
+                else{
+                    settingsData[i].values[x].currValue = "default";
+                }
             }
             if(settingsData[i].values[x].currValue === null) {
                 localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);

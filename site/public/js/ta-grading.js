@@ -114,6 +114,15 @@ $(function () {
       localStorage.setItem(storageCode, this.value);
       if(settingsCallbacks && settingsCallbacks.hasOwnProperty(storageCode)) {
         settingsCallbacks[storageCode](this.value);
+        if(this.value != "inquiry") {
+          //if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_only to off in grading index page
+          localStorage.setItem('inquiry_status','off');
+          localStorage.setItem('inquiry_only','off');
+        }
+        else {
+          localStorage.setItem('inquiry_status','on');
+          localStorage.setItem('inquiry_only','on');
+        }
       }
     }
   })
