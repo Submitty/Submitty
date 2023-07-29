@@ -35,7 +35,9 @@ def up(config, database, semester, course):
     # Update Course Config
     path = course_config_location(semester, course)
     if not os.path.isfile(path) or os.path.getsize(path) == 0: # Empty file
-        raise Exception(f"ERROR: course config path: '{path}' does not exist")
+        # NOTE: unfortunately cannot throw an exception, breaks the database github action
+        print(f"ERROR: course config path: '{path}' does not exist")
+        pass
 
     with open(path, "r") as config_file:
         # Get regrade_message
