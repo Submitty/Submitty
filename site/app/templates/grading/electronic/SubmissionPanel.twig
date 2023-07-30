@@ -3,7 +3,6 @@
         <div id="directory_view">
             <span style="line-height: 40px;">
                 <span class="grading_label">Submissions and Results Browser</span>
-
                 <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
                 {# check if there are vcs files, if yes display the toggle button, else don't display it #}
@@ -11,9 +10,7 @@
                     <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
                 {% endif %}
 
-               
                 <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
-                
 
                 <script>
                     $(document).ready(function(){
