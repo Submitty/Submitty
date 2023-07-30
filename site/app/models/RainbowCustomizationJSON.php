@@ -71,6 +71,17 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->benchmark_percent;
     }
 
+
+    /**
+     * Gets an array of display
+     *
+     * @return array The display
+     */
+    public function getDisplay() {
+        return $this->display;
+    }
+
+
     /**
      * Adds a benchmark to the display_benchmarks
      * If it already exists in the array no changes are made
