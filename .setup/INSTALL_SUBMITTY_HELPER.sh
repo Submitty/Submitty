@@ -164,7 +164,7 @@ fi
 
 echo -e "Install python_submitty_utils"
 
-cp -r "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
+rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
 pip3 install .
@@ -528,7 +528,8 @@ fi
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-if [ -x "$(command -v javac)" ]; then
+if [ -x "$(command -v javac)" ] &&
+   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo
@@ -553,6 +554,8 @@ if [ -x "$(command -v javac)" ]; then
     # fix all java_tools permissions
     chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
     chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
+else
+    echo -e "Skipping build of the junit test runner"
 fi
 
 
