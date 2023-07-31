@@ -8,6 +8,12 @@ fi
 
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 
+# Check if there are workers configured
+WORKER_ARG=""
+if [ -d ${SUBMITTY_REPOSITORY}/.vagrant-workers.json ]; then
+    WORKER_ARG="--worker-pair"
+fi
+
 # We only need to reset the system only if we've installed pip3,
 # which only happens after we've installed the system
 if [ -x "$(command -v pip3)" ]; then
@@ -20,7 +26,7 @@ resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 
 # Start installation
 # shellcheck disable=2068
-if ! sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}; then
+if ! sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${WORKER_ARG} ${@}; then
     DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
     VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
     >&2 echo -e "
