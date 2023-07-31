@@ -251,6 +251,26 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     form.find('.form-body').scrollTop(0);
 }
 
+function newShowImage(base64Data) {
+    // Create a new popup
+    var popup = window.open("", "_blank", "width=500,height=400");
+
+    // Hide existing popup-forms
+    $('.popup-form').css('display', 'none');
+
+    // Create a new form element
+    var form = $('<form>').addClass('popup-form');
+
+    // Create an img element with the base64Data as its source
+    var img = $('<img>').attr('src', base64Data).appendTo(form);
+
+    // Append the form to the popup
+    form.appendTo(popup.document.body);
+    
+    // Display the popup
+    popup.focus();
+}
+
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");

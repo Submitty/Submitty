@@ -188,7 +188,7 @@
   {% for imageData in imageDataArray %}
       <div>
       {% set imgName = "{{imageData.name}}" %}
-        <img id="club_banners_{{imageData.extra_info}}" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+        <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('data:imgName/png;base64,{{ imageData.extra_info }}')" />
         <button class="delete-button" onclick="toggleImage(this)">x</button>
       </div>
   {% endfor %}

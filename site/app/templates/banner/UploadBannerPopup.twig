@@ -78,7 +78,7 @@
         function makeSubmission() {
             var releaseTime = document.getElementById("release_date").value;
             var closeTime = document.getElementById("closing_date").value;
-            var extraName = document.getElement.ById("extra_name").value;
+            var extraName = document.getElementById("extra_name").value;
             handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName);
         }
         $(function() {
@@ -158,9 +158,9 @@
                   fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
                 }
                 });
-$('.form-body').on('scroll', function() {
-    upload_fp._positionCalendar();
-});
+    $('.form-body').on('scroll', function() {
+        upload_fp._positionCalendar();
+    });
 
 
 </script>

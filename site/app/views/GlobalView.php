@@ -128,9 +128,18 @@ public static function addBannerImage(&$images_data_array, &$error_image_data, $
                         if (substr($content_type, 0, 5) === "image") {
                             // Read image path, convert to base64 encoding
                             $expected_img_data = base64_encode(file_get_contents($expected_image));
-
                             $img_name = $monthFileInfo->getBasename('.png');
                             $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
+                            $extra_info_name = $banner_item->getExtraInfo();
+                            $extra_info_name = "man.png";
+                            $lastSlashPos = strrpos($expected_image, '/');
+                            if ($lastSlashPos !== false) {
+                                $extra_file_path = substr_replace($expected_image, $extra_info_name, $lastSlashPos + 1);
+                            }
+                            echo $extra_file_path;
+                            $extra_img_data = base64_encode(file_get_contents($extra_file_path));
+
+
                             if ($img_name === "error_image") {
                                 $error_image_data = $expected_img_data;
                             } else {
@@ -139,7 +148,7 @@ public static function addBannerImage(&$images_data_array, &$error_image_data, $
                                     $images_data_array[] = [
                                         "name" => $img_name,
                                         "data" => $expected_img_data,
-                                        "extra_info" => $banner_item->getExtraInfo()
+                                        "extra_info" => $extra_img_data
                                     ];
                                 }
                             }
