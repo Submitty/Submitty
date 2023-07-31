@@ -3905,7 +3905,6 @@ ORDER BY {$orderby}",
                 $return[$section] = 0;
             }
         }
-        ksort($return);
         return $return;
     }
 
