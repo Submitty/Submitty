@@ -2093,10 +2093,12 @@ ORDER BY {$u_or_t}.{$section_key}",
          $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
+        $team_condition = "";
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
+            $team_condition = "AND SPLIT_PART(ldc.team_id, '_', 2) = ldc.user_id";
         }
         $return = [];
         $params = [$g_id,$g_id];
@@ -2127,8 +2129,8 @@ ORDER BY {$u_or_t}.{$section_key}",
             AND eg.eg_submission_due_date IS NOT NULL
         INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=eg.g_id
-            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}  
-            AND SPLIT_PART(ldc.team_id, '_', 2) = ldc.user_id
+            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+            {$team_condition}
             AND ldc.submission_days_late>ldc.late_day_exceptions 
             And ldc.late_days_change =0
             {$where}
