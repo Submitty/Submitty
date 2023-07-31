@@ -281,7 +281,8 @@ div.calendar-submit label::after { content: ":"; }
 
 /* Calendar Options Menu */
 div.filter-courses-menu {
-    display:block;
+    display: inline-grid;
+    line-height: 1.5;
 }
 
 @media (max-width: 800px) {

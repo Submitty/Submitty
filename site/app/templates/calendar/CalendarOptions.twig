@@ -2,23 +2,17 @@
 {% block popup_id %}calendar-options-form{% endblock %}
 {% block title %}Calendar Options{% endblock %}
 {% block body %}
-    <div class="filter-courses-label section-row">
-        <h2>Select Course</h2>
-    </div>
-    <form>
-        <div class="filter-courses-menu">
-            {% if course_names|length > 1 %}
-            <input type="radio" class="toggle-courses-box" name="filter-course" id="show-all" value="show all">
-            <label>All Courses</label>
-            {% endif %}
-            {% for course in course_names %}
-            <input type="radio" class="toggle-courses-box" name="filter-course" id="course-{{course|replace({' ': ''})}}" value="{{course}}">
-            <label>{{course}}</label>
-            {% endfor %}
-        </div>
-    </form>
+    <label for="filter-courses-menu">Select Course: </label>
+    <select name="filter-courses-menu" id="filter-courses-menu">
+        {% if course_names|length > 1 %}
+        <option value="show all">All Courses</option>
+        {% endif %}
+        {% for course in course_names %}
+        <option value="{{course}}">{{course}}</option>
+        {% endfor %}
+    </select>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" onclick="javascript:updateCalendarFilters()"/>
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateCalendarFilters()"/>
 {% endblock %}

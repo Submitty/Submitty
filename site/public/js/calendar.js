@@ -711,11 +711,10 @@ function openOptionsModal() {
 function checkProperOptions() {
     const showAll = loadShowAllCoursesCookie();
     if (showAll) { //if show all is true, tick off show all
-        $("#show-all").prop("checked", true);
+        $('#filter-courses-menu').value = 'show all';
     }
     else { //if show all if false, select a specific course
-        console.log(`#course-${loadCurrentCourseCookie().replace(" ", "")}`);
-        $(`#course-${loadCurrentCourseCookie().replace(" ", "")}`).prop("checked", true);
+        $('#filter-courses-menu').value = loadCurrentCourseCookie();
     }
 }
 
@@ -728,19 +727,6 @@ function loadCurrentCourseCookie() {
     return Cookies.get('calendar_course');
 }
 
-function loadCoursesCookie() {
-    const cookie = Cookies.get('visible_courses').split(' ');
-    for (let i = 0; i< cookie.length; i++) {
-        if (cookie[i] === '') {
-            cookie[i] = 0;
-        }
-        else {
-            cookie[i] = 1;
-        }
-    }
-    return cookie;
-}
-
 function updateCalendarFilters() {
     saveFilterValues();
     location.reload();
@@ -748,15 +734,13 @@ function updateCalendarFilters() {
 
 //Fix this
 function saveFilterValues() {
-    const cookie = Cookies.get('visible_courses').split(' ');
-    console.log(cookie.length);
-    for (let i = 0; i<checkboxes.length; i++) {
-        if (checkboxes[i].checked === true) {
-            selectedColumns[i] = 1;
-        }
-        else {
-            selectedColumns[i] = 0;
-        }
+    //Courses Filter
+    const courses_val = $('#filter-courses-menu').value;
+    if (courses_val === 'show all') {
+        Cookies.set('calendar_show_all', '1', { expires: 365 });
     }
-    saveColumns(selectedColumns);
+    else {
+        Cookies.set('calendar_show_all', '0', { expires: 365 });
+        Cookies.set('calendar_course', courses_val, { expires: 365 });
+    }
 }
