@@ -593,22 +593,19 @@ HTML;
             $late_day_info = $this->core->getQueries()->getLateDayInfoForSubmitterGradeable($row->getSubmitter(), $row);
             $on_time_submission = true;
             if ($late_day_info !== null) {
-
                 if (!$gradeable->isTeamAssignment()) {
                     $on_time_submission = $late_day_info->isOnTimeSubmission();
                 }
                 else { //A Team gradeable submission is bad only when all team members have a bad submission
-
                     foreach ($late_day_info as $member_submission) {
-
                         if (!$member_submission->isOnTimeSubmission()) {
                             $on_time_submission = false;
-                            break; 
+                            break;
                         }
                     }
                 }
             }
-    
+
             $info = [
                 "graded_gradeable" => $row,
                 "on_time_submission" => $on_time_submission

@@ -2179,16 +2179,16 @@ ORDER BY {$u_or_t}.{$section_key}",
             $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
         }
             $this->course_db->query(
-        "SELECT COUNT(*) as cnt
-        FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
-        WHERE gc.g_id=? {$null_section_condition}
-        AND EXISTS (
-            SELECT 1
-            FROM late_day_cache AS ldc
-            WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-            AND ldc.g_id=gc.g_id
-            AND ldc.submission_days_late > ldc.late_day_exceptions
-            AND ldc.late_days_change = 0
+                "SELECT COUNT(*) as cnt
+                FROM gradeable_component AS gc, {$users_or_teams} AS {$u_or_t}
+                WHERE gc.g_id=? {$null_section_condition}
+                AND EXISTS (
+                    SELECT 1
+                    FROM late_day_cache AS ldc
+                    WHERE ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+                    AND ldc.g_id=gc.g_id
+                    AND ldc.submission_days_late > ldc.late_day_exceptions
+                    AND ldc.late_days_change = 0
         )",
                 [$g_id]
             );
@@ -2347,7 +2347,6 @@ ORDER BY gc_order
                 [$g_id]
             );
             $bad_submission_count = $this->course_db->row()['cnt'];
-        
 
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
             $bad_submissions_condition = "AND NOT EXISTS (
@@ -2483,19 +2482,18 @@ SELECT COUNT(*) from gradeable_component where g_id=?
                 )",
                 [$g_id]
             );
-            $bad_submission_count = $this->course_db->row()['cnt'];
-        
+            $bad_submission_count = $this->course_db->row()['cnt']; 
 
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
             if ($is_team) {
                 $bad_submissions_condition = "LEFT JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
             }
-        else {
-            $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
-        (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
-        }
-        
+            else {
+                $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
+                    (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
+            }
+
         }
 
         // Check if we want to combine grade overridden marks within averages
@@ -3868,7 +3866,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  int[]  $sections
      * @param  string $section_key
      * @return int[] $return
-     * 
+     *
      */
     public function getTotalTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = [];
@@ -3988,7 +3986,7 @@ ORDER BY {$section_key}",
             And ldc.late_days_change =0
             {$where}
             GROUP BY {$section_key}
-            ORDER BY {$section_key}",            
+            ORDER BY {$section_key}",
             $params
         );
 
@@ -4081,7 +4079,7 @@ ORDER BY {$orderBy}",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
-             if ($row[$section_key] === null) {
+            if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
             }
             $return[$row[$section_key]] = intval($row['cnt']);
