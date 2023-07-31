@@ -528,7 +528,8 @@ fi
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-if [ -x "$(command -v javac)" ]; then
+if [ -x "$(command -v javac)" ] &&
+   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo
