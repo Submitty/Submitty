@@ -36,7 +36,7 @@ require 'json'
 
 def gen_scripts()
   extra_command = [
-    ENV.has_key?('WORKERS') ? '--worker-pair' : '',
+    ENV.fetch('WORKERS', 0) > 0 ? '--worker-pair' : '',
     ENV.has_key?('NO_SUBMISSIONS') ? '--no_submissions' : '',
     ENV.fetch('EXTRA', '')
   ].join(' ')
