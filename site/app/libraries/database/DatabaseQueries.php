@@ -2197,7 +2197,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
             $bad_submissions_condition = "INNER JOIN(
-                SELECT ldc.{$user_or_team_id}, ldc.late_day_status
+                SELECT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
                 WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
