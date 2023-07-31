@@ -1,0 +1,6 @@
+{
+  "submitty-worker-1": {
+    "ssh_port": 2241,
+    "ip_addr": "192.168.56.201"
+  }
+}
