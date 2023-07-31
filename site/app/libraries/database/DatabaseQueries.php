@@ -2482,7 +2482,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
                 )",
                 [$g_id]
             );
-            $bad_submission_count = $this->course_db->row()['cnt']; 
+            $bad_submission_count = $this->course_db->row()['cnt'];
 
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
@@ -2493,7 +2493,6 @@ SELECT COUNT(*) from gradeable_component where g_id=?
                 $bad_submissions_condition = "INNER JOIN late_day_cache AS ldc ON ldc.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND ldc.g_id=gc.g_id AND 
                     (ldc.submission_days_late = 0 OR ldc.late_days_change != 0)";
             }
-
         }
 
         // Check if we want to combine grade overridden marks within averages
