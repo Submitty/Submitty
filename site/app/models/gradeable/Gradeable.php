@@ -930,7 +930,7 @@ class Gradeable extends AbstractModel {
         return $this->student_download;
     }
 
-    public function canStudentDownloadFile(int $version, string $file_name): bool {
+    public function canStudentDownloadFile(int $version, string $file_path, string $root_path): bool {
         if (!$this->student_download) {
             return false;
         }
@@ -946,14 +946,50 @@ class Gradeable extends AbstractModel {
                 $version,
                 $this->getId()
             );
+            //get the folder it is contained in
+            $path_array = explode("/", $file_path);
+            $outside_folder = $path_array[count($path_array)-2];
+            $file_name = $path_array[count($path_array)-1];
+
+            $root_path_array = explode("/", $root_path);
+            $root_folder = $path_array[count($root_path_array)-1];
+
+            setcookie($file_path, sprintf("%s-%s-%s",$root_folder, $outside_folder, $file_name), time()+3600);
+
+            if($outside_folder === $root_folder) {
+                return false;
+            }
+            
+            /*
+            $file_in_notebook = false;
+            $outside_folder_in_notebook = false;
             //If the file name is in the list of notebook filenames, then exclude it
+            $x = 0;
             foreach ($notebook_data as $note) {
                 if (array_key_exists('filename', $note)) {
+                    $cname = sprintf("notebook%s",$x);
+                    setcookie($cname,$note['filename'],time()+3600);
+                    $x+=1;
                     if ($file_name == $note['filename']) {
-                        return false;
+                        $file_in_notebook = true;
+                    }
+                    if ($outside_folder == $note['filename']) {
+                        $outside_folder_in_notebook = true;
                     }
                 }
             }
+            $cname = sprintf("%s-%s",$file_name,$outside_folder);
+            $cval = sprintf("%s-%s",$file_in_notebook,$outside_folder_in_notebook);
+            setcookie($cname,$cval,time()+3600);
+            if ($outside_folder_in_notebook && $file_in_notebook) {
+                if ($file_name == $outside_folder) {
+                    return false;
+                }
+            }
+            elseif ($file_in_notebook && !$outside_folder_in_notebook) {
+                return false;
+            }
+            */
         }
         return true;
     }

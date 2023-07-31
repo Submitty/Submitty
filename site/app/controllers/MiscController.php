@@ -414,10 +414,38 @@ class MiscController extends AbstractController {
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false);
 
+        /*
+        $autograding_config = $gradeable->getAutogradingConfig();
+        if ($autograding_config->isNotebookGradeable()) {
+            $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
+            $notebook = $notebook_model->getNotebook();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $version,
+                $notebook,
+                $this->core->getUser()->getId(),
+                $version,
+                $gradeable_id
+            );
+
+            $x = 0;
+            foreach ($notebook_data as $note) {
+                if (array_key_exists('filename', $note)) {
+                    $cname = sprintf("notebook%s",$x);
+                    setcookie($cname,$note['filename'],time()+3600);
+                    $x+=1;
+                }
+            }
+        }
+        */
+
+        
+
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
+            //setcookie($path, "gradeable_path", time()+3600);
+            
             if (is_dir($path)) {
                 $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($path),
@@ -431,6 +459,7 @@ class MiscController extends AbstractController {
                     }
                     $file_path = $file->getRealPath();
                     $file_name = $file->getFilename();
+                    setcookie($file_path, $file_name, time()+3600);
                     $relative_path = substr($file_path, strlen($path) + 1);
                     if (
                         $this->core->getAccess()->canI(
@@ -441,7 +470,8 @@ class MiscController extends AbstractController {
                                 "gradeable" => $gradeable,
                                 "graded_gradeable" => $graded_gradeable,
                                 "gradeable_version" => $gradeable_version->getVersion(),
-                                "file_name" => $file_name
+                                "file_name" => $file_name,
+                                "root_path" => $path
                             ]
                         )
                     ) {
