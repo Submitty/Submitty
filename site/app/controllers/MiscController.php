@@ -412,33 +412,7 @@ class MiscController extends AbstractController {
 
         $options = new \ZipStream\Option\Archive();
         $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false);
-
-        /*
-        $autograding_config = $gradeable->getAutogradingConfig();
-        if ($autograding_config->isNotebookGradeable()) {
-            $notebook_model = $autograding_config->getUserSpecificNotebook($this->core->getUser()->getId());
-            $notebook = $notebook_model->getNotebook();
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
-                $version,
-                $notebook,
-                $this->core->getUser()->getId(),
-                $version,
-                $gradeable_id
-            );
-
-            $x = 0;
-            foreach ($notebook_data as $note) {
-                if (array_key_exists('filename', $note)) {
-                    $cname = sprintf("notebook%s",$x);
-                    setcookie($cname,$note['filename'],time()+3600);
-                    $x+=1;
-                }
-            }
-        }
-        */
-
-        
+        $options->setEnableZip64(false);        
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
@@ -459,7 +433,6 @@ class MiscController extends AbstractController {
                     }
                     $file_path = $file->getRealPath();
                     $file_name = $file->getFilename();
-                    setcookie($file_path, $file_name, time()+3600);
                     $relative_path = substr($file_path, strlen($path) + 1);
                     if (
                         $this->core->getAccess()->canI(
