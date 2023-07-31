@@ -1916,7 +1916,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE {$section_key} IN {$placeholders}";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -1931,7 +1931,6 @@ ORDER BY {$orderby}",
             FROM gradeable_teams
             INNER JOIN electronic_gradeable_version
                     ON gradeable_teams.team_id = electronic_gradeable_version.team_id
-                   AND gradeable_teams.{$section_key} IS NOT NULL
                    AND electronic_gradeable_version.active_version>0
                    AND electronic_gradeable_version.g_id=?
             {$where}
@@ -1942,6 +1941,10 @@ ORDER BY {$orderby}",
         );
 
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+
             $return[$row[$section_key]] = intval($row['cnt']);
         }
 
@@ -3861,28 +3864,40 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param  int[]  $sections
      * @param  string $section_key
      * @return int[] $return
+     * 
      */
     public function getTotalTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = [];
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
+            $sections_query = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE AND";
             $params = array_merge($sections, $params);
         }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
+
         $this->course_db->query(
             "
 SELECT count(*) as cnt, {$section_key}
 FROM gradeable_teams
-WHERE {$sections_query} g_id=? AND team_id IN (
+{$sections_query} g_id=? AND team_id IN (
   SELECT team_id
   FROM teams
 )
 GROUP BY {$section_key}
-ORDER BY {$section_key}",
+ORDER BY {$orderby}",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+
             $return[$row[$section_key]] = intval($row['cnt']);
         }
         foreach ($sections as $section) {
@@ -3951,7 +3966,7 @@ ORDER BY {$section_key}",
 
         $this->course_db->query(
             "
-            SELECT gradeable_teams.team_id, count(*) as cnt, {$section_key}
+            SELECT count(*) as cnt, {$section_key}            
             FROM gradeable_teams
             INNER JOIN electronic_gradeable_version
             ON
@@ -3965,41 +3980,23 @@ ORDER BY {$section_key}",
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.team_id=gradeable_teams.team_id
-            AND ldc.submission_days_late>0
+            AND SPLIT_PART(ldc.team_id, '_', 2) = ldc.user_id
             AND ldc.submission_days_late>ldc.late_day_exceptions 
             And ldc.late_days_change =0
             {$where}
-        GROUP BY gradeable_teams.team_id, {$section_key}  -- Include team_id in GROUP BY
-        ORDER BY gradeable_teams.team_id, {$section_key}",
+            GROUP BY {$section_key}
+            ORDER BY {$section_key}",            
             $params
         );
 
-        $teamsCounted = [];
-    foreach ($this->course_db->rows() as $row) {
-        $teamId = $row['team_id'];
-        $section = $row[$section_key];
-        $count = intval($row['cnt']);
-        
-        if (!isset($teamsCounted[$teamId])) {
-            $teamsCounted[$teamId] = [];
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
         }
-        $teamsCounted[$teamId][$section] = $count;
-    }
 
-    foreach ($this->course_db->rows() as $row) {
-        $teamId = $row['team_id'];
-        $section = $row[$section_key];
 
-    // Check if the team exists in $teamsCounted for this section
-        if (isset($teamsCounted[$teamId][$section])) {
-        // Increment the count for this section in $return
-        if (!isset($return[$section])) {
-            $return[$section] = 1;
-        } else {
-            $return[$section]++;
-        }
-    }
-}
         return $return;
     }
 
@@ -4008,7 +4005,9 @@ ORDER BY {$section_key}",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParameterList(count($sections_keys));
+            $sections_query = "({$section_key} IN {$placeholders}) IS NOT FALSE AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
@@ -4033,6 +4032,9 @@ ORDER BY {$orderBy}",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
         foreach ($sections as $section) {
@@ -4048,7 +4050,9 @@ ORDER BY {$orderBy}",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN " . $this->createParameterList(count($sections)) . " AND";
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParameterList(count($sections_keys));
+            $sections_query = "({$section_key} IN {$placeholders}) IS NOT FALSE AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
@@ -4074,6 +4078,9 @@ ORDER BY {$orderBy}",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
+             if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
             $return[$row[$section_key]] = intval($row['cnt']);
         }
         foreach ($sections as $section) {
