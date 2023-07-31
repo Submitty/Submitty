@@ -131,12 +131,10 @@ public static function addBannerImage(&$images_data_array, &$error_image_data, $
                             $img_name = $monthFileInfo->getBasename('.png');
                             $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
                             $extra_info_name = $banner_item->getExtraInfo();
-                            $extra_info_name = "man.png";
                             $lastSlashPos = strrpos($expected_image, '/');
                             if ($lastSlashPos !== false) {
                                 $extra_file_path = substr_replace($expected_image, $extra_info_name, $lastSlashPos + 1);
                             }
-                            echo $extra_file_path;
                             $extra_img_data = base64_encode(file_get_contents($extra_file_path));
 
 

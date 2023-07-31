@@ -57,7 +57,7 @@
                 <strong>Name of additional Information</strong><br />
                 Only required if you are adding an additional file:<br />
             </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+            <input type="text" id="input-provide-name" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
             <span><em>Note: if you provided a file or an png image the name has to match this input.</em></span
         </label>
 
@@ -78,7 +78,7 @@
         function makeSubmission() {
             var releaseTime = document.getElementById("release_date").value;
             var closeTime = document.getElementById("closing_date").value;
-            var extraName = document.getElementById("extra_name").value;
+            var extraName = document.getElementById("input-provide-name").value;
             handleUploadBanner("{{ csrf_token }}", closeTime, releaseTime, extraName);
         }
         $(function() {
