@@ -656,16 +656,7 @@ class ElectronicGraderController extends AbstractController {
         //Check if this is a team project or a single-user project
         if ($gradeable->isTeamAssignment()) {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, $section_key);
-
             $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
-
-            echo($section_key);
-            foreach ($num_submitted as $section => $submitted_count) {
-    echo "Section: " . $section . ", Submitted Team Count: " . $submitted_count . "<br>";
-}
-foreach ($late_submitted as $section => $submitted_count) {
-    echo "Section: " . $section . ", Submitted Late Team Count: " . $submitted_count . "<br>";
-}
         }
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
@@ -690,6 +681,10 @@ foreach ($late_submitted as $section => $submitted_count) {
             $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+                foreach ($late_components as $key => $value) {
+        echo "Key: " . $key . ", Value: " . $value . "<br>";
+    }
+
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
