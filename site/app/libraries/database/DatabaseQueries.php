@@ -1625,7 +1625,7 @@ WHERE semester=? AND course=? AND user_id=?",
      */
     public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
 
-        if ($user === null) {
+        if ($user == null) {
             return null;
         }
 
