@@ -71,11 +71,17 @@ class GlobalView extends AbstractView {
             }
 
 
+            $extraFile = "";
+            if (is_file($extraPathName)) {
+                $type = "link";
+                $extraFile = base64_encode(file_get_contents($extraPathName));
+            }
+
             $images_data_array[] = [
                 "name" => $banner->getName(),
                 "data" => base64_encode(file_get_contents($pathName)),
                 "type" => $type,
-                "extra_info" => base64_encode(file_get_contents($extraPathName))
+                "extra_info" => $extraFile
             ];
         }
 
