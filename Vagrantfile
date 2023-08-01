@@ -48,7 +48,7 @@ def gen_script(machine_name, worker: false)
   unless extra.empty?
     setup_cmd += " #{extra}"
   end
-  setup_cmd += " | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
+  setup_cmd += " 2>&1 | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
 
   script = <<SCRIPT
     GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
