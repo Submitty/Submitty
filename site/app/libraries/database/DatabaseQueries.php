@@ -3982,7 +3982,7 @@ ORDER BY {$section_key}",
                     $return[$section] = 1;
                 }
                 else {
-                $return[$section]++;
+                    $return[$section]++;
                 }
             }
         }
