@@ -711,10 +711,10 @@ function openOptionsModal() {
 function checkProperOptions() {
     const showAll = loadShowAllCoursesCookie();
     if (showAll) { //if show all is true, tick off show all
-        $('#filter-courses-menu').value = 'show all';
+        document.getElementById('filter-courses-menu').value = 'show all';
     }
     else { //if show all if false, select a specific course
-        $('#filter-courses-menu').value = loadCurrentCourseCookie();
+        document.getElementById('filter-courses-menu').value = loadCurrentCourseCookie();
     }
 }
 
@@ -735,11 +735,13 @@ function updateCalendarFilters() {
 //Fix this
 function saveFilterValues() {
     //Courses Filter
-    const courses_val = $('#filter-courses-menu').value;
+    const courses_val = document.getElementById('filter-courses-menu').value;
     if (courses_val === 'show all') {
+        console.log("show all");
         Cookies.set('calendar_show_all', '1', { expires: 365 });
     }
     else {
+        console.log(`courses_val: ${courses_val}`);
         Cookies.set('calendar_show_all', '0', { expires: 365 });
         Cookies.set('calendar_course', courses_val, { expires: 365 });
     }
