@@ -62,7 +62,7 @@ class BannerImage {
         return $this->id;
     }
 
-    public function setPath(string $path) {
+    public function setPath(string $path): string {
         $this->path_date = $path;
     }
 
