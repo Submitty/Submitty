@@ -1960,7 +1960,7 @@ ORDER BY {$orderby}",
         }
         $this->course_db->query(
             "
-SELECT {$section_key}, SUM(cnt)
+SELECT merged_data.{$section_key}, SUM(cnt) as cnt
 FROM (
     SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
     FROM {$users_or_teams} AS {$u_or_t}
@@ -1981,20 +1981,19 @@ FROM (
         ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
     {$where}
     GROUP BY {$u_or_t}.{$section_key}
-    ORDER BY {$u_or_t}.{$section_key}
     UNION ALL
-    SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) * component_count.num AS cnt
+    SELECT {$users_or_teams}.{$section_key}, count({$users_or_teams}.*) * component_count.num AS cnt
     FROM grade_override AS go
-               INNER JOIN {$u_or_t} ON go.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND go.g_id=?
+               INNER JOIN {$users_or_teams} ON go.{$user_or_team_id} = {$users_or_teams}.{$user_or_team_id} AND go.g_id=?
                INNER JOIN (
                     SELECT gc.g_id, count(*) AS num
                     FROM gradeable_component AS gc
                     GROUP BY gc.g_id
                    ) AS component_count ON go.g_id = component_count.g_id
-      GROUP BY {$u_or_t}.{$section_key}, component_count.num
+      GROUP BY {$users_or_teams}.{$section_key}, component_count.num
     ) AS merged_data
-GROUP BY {$section_key}
-ORDER BY {$section_key}
+GROUP BY merged_data.{$section_key}
+ORDER BY merged_data.{$section_key}
     ",
             $params
         );
