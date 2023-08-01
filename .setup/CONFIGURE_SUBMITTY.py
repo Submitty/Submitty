@@ -65,12 +65,6 @@ parser.add_argument('--setup-for-sample-courses', action='store_true', default=F
                     help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
                          "flag and should not be used in production!")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
-parser.add_argument(
-    '--worker-pair',
-    default=False,
-    action=StrToBoolAction,
-    help='Configure Submitty alongside a worker VM. This should only be used during development using Vagrant.'
-)
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
@@ -533,8 +527,9 @@ if not args.worker:
             }
         }
 
-        if args.worker_pair:
-            with open(os.path.join(SUBMITTY_REPOSITORY, '.vagrant-workers.json')) as f:
+        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant-workers.json')
+        if os.path.isfile(vagrant_workers_json):
+            with open(vagrant_workers_json) as f:
                 vagrant_workers = json.load(f, object_hook=OrderedDict)
  
             for worker, data in vagrant_workers.items():

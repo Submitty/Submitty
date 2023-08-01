@@ -35,24 +35,20 @@ $stderr.sync = true
 require 'json'
 
 def gen_scripts()
-  extra_command = [
-    Integer(ENV.fetch('WORKERS', '0')) > 0 ? '--worker-pair' : '',
-    ENV.has_key?('NO_SUBMISSIONS') ? '--no_submissions' : '',
-    ENV.fetch('EXTRA', '')
-  ].join(' ')
+  extra = ENV.fetch('EXTRA', '')
 
   script = <<SCRIPT
   GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
   DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
   VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-  bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
+  bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV.has_key?('NO_SUBMISSIONS') ? '--no_submissions' : ''} #{extra} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
 SCRIPT
 
   worker_script = <<SCRIPT
   GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
   DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
   VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-  bash ${GIT_PATH}/.setup/install_worker.sh #{ENV.fetch('EXTRA','')} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
+  bash ${GIT_PATH}/.setup/install_worker.sh #{extra} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
 SCRIPT
 
   return script, worker_script
