@@ -95,7 +95,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         $max_size = 1000000; // 1 MB
 
         if (empty(static::$annotations)) {
-            static::$annotations = Test::parseTestMethodAnnotations(get_class($this), $this->getName());
+            $registry = Registry::getInstance();
+            $className = (get_class($this));
+            $methodName =  $this->getName();
+            if ($methodName !== null) {
+                try {
+                    static::$annotations =  [
+                        'method' => $registry->forMethod($className, $methodName)->symbolAnnotations(),
+                        'class'  => $registry->forClassName($className)->symbolAnnotations(),
+                    ];
+                } catch (Exception $methodNotFound) {
+                    // ignored
+                }
+            }
+    
+            static::$annotations =  [
+                'method' => null,
+                'class'  => $registry->forClassName($className)->symbolAnnotations(),
+            ];
         }
         if (isset(static::$annotations['method']['highestVersion'][0])) {
             $highest_version = intval(static::$annotations['method']['highestVersion'][0]);

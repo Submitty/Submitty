@@ -157,7 +157,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         /** @var Output&\PHPUnit\Framework\MockObject\MockObject $output */
         $output = $this->getMockBuilder(Output::class)
             ->setConstructorArgs([$core])
-            ->setMethods(['addBreadcrumb'])
+            ->onlyMethods(['addBreadcrumb'])
             ->getMock();
         $output->method('addBreadcrumb')->willReturn(true);
         $output->disableRender();
@@ -171,7 +171,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * Utility function that helps us mock Models from our system. Because they rely on the magic __call() function,
      * we cannot directly mock these as we would any other object as then we won't have access to any methods that
      * require the __call() magic function. However, PHPUnit allows us to specify functions that are mockable (even
-     * if they are not directly defined) via setMethods(), so we use reflection on our given class to get all methods
+     * if they are not directly defined) via onlyMethods(), so we use reflection on our given class to get all methods
      * that are documented in the PHPDoc via the "@method" tag, and then also the defined functions. Kind of hacky,
      * and does slow testing down some, but it's easier than having to manually update a list of needed functions
      * when mocking these things.
@@ -205,7 +205,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                     $methods[] = $method->getName();
                 }
             }
-            $builder->setMethods(array_unique($methods));
+            $builder->onlyMethods(array_unique($methods));
             static::$mock_builders[$class] = $builder;
         }
         return static::$mock_builders[$class]->getMock();
