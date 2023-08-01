@@ -378,7 +378,9 @@
 
     var hiddenImages = getHiddenImages();
     var images = document.getElementsByClassName('club-banners');
-    images[currentImageIndex].classList.add("active");
+    if (images.length >0 ) {
+        images[currentImageIndex].classList.add("active");
+    }
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];
         if (hiddenImages.includes(className)) {
