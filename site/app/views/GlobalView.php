@@ -69,11 +69,11 @@ class GlobalView extends AbstractView {
 
             $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getExtraInfo());
 
-            if (strpos($banner->getExtraInfo(), "png") !== false){
-                $type = "image";
+            if (strpos($banner->getExtraInfo(), "pdf") !== false){
+                $type = "pdf";
             }
             else {
-                $type = "file";
+                $type = "image";
             }
 
 

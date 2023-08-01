@@ -259,7 +259,7 @@ function newShowImage(information, type) {
     }
 
     // Create a new popup
-    var popup = window.open("", "_blank", "width=500,height=400");
+    var popup = window.open("", "_blank", "width=800,height=600");
 
     // Hide existing popup-forms
     $('.popup-form').css('display', 'none');
@@ -267,13 +267,17 @@ function newShowImage(information, type) {
     // Create a new form element
     var form = $('<form>').addClass('popup-form');
 
-    if (type === "image") {
-        // For "image" type, create an img element with the base64Data as its source
+    if (type === "pdf") {
+        // For "pdf" type, create an <embed> element to display the PDF content
+        var pdfEmbed = $('<embed>').attr({
+            'src': information,
+            'width': '100%',
+            'height': '100%',
+            'type': 'application/pdf'
+        }).appendTo(form);
+    } else {
+        // For other types, assume "information" is an image URL
         var img = $('<img>').attr('src', information).appendTo(form);
-    } else if (type === "file") {
-        // For "file" type, create a pre element to display the text content of the file
-        var textContent = atob(information); // Decode base64-encoded text content
-        var pre = $('<pre>').text(textContent).appendTo(form);
     }
 
     // Append the form to the popup
@@ -282,6 +286,7 @@ function newShowImage(information, type) {
     // Display the popup
     popup.focus();
 }
+
 
 
 
