@@ -6,7 +6,12 @@
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <label id="file-path-label">
             <span><strong>File Path / URL </strong></span>
-            <input type="text" id="new-file-name" class="full-width" />
+            <input type="text" id="new-file-name" class="full-width" list="change_folder_paths"/>
+            <datalist id="change_folder_paths">
+                {% for folder_path in folder_paths %}
+                    <option value="{{ folder_path }}/">
+                {% endfor %}
+            </datalist>
         </label>
 
         <label id="edit-title-label">
