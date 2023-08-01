@@ -81,7 +81,7 @@ def mount_folders(config, mount_options)
 end
 
 def configure_workers()
-  worker_file = File.join(__dir__, '.vagrant-workers.json')
+  worker_file = File.join(__dir__, '.vagrant', 'workers.json')
   if ENV.has_key?('WORKERS')
     unless Dir.glob(File.join(__dir__, '.vagrant/machines/*/*/action_provision')).empty?
       puts("You have provided the 'WORKERS' variable.\nPlease ensure that all existing machines are destroyed prior to recreating the worker configuration.")

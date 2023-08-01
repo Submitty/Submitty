@@ -527,7 +527,7 @@ if not args.worker:
             }
         }
 
-        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant-workers.json')
+        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
         if os.path.isfile(vagrant_workers_json):
             with open(vagrant_workers_json) as f:
                 vagrant_workers = json.load(f, object_hook=OrderedDict)

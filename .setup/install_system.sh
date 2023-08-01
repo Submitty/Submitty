@@ -319,7 +319,7 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
-    if [ -f ${SUBMITTY_REPOSITORY}/.vagrant-workers.json ]; then
+    if [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
@@ -328,7 +328,7 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
         while read -r IP
         do
             su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
-        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant-workers.json")"
+        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
         echo "DONE"
     fi
 fi
