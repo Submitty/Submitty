@@ -53,7 +53,6 @@ class BannerController extends AbstractController {
         else {
             return JsonResponse::getErrorResponse("No release date.");
         }
-        
         if (!isset($_FILES["files1"]) || empty($_FILES["files1"])) {
             return JsonResponse::getErrorResponse("No files were submitted.");
         }
