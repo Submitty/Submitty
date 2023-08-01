@@ -203,7 +203,7 @@
 
 
 
-        <button class="delete-button" onclick="toggleImage(this)">x</button>
+        <button class="delete-button" onclick="removeImage(this)">x</button>
       </div>
   {% endfor %}
   <button class="prev-button" onclick="changeImage(-1)">&#10094;</button>
@@ -214,7 +214,7 @@
 
                 <div style="display: flex">
 
-<button class="speech-bubble" id="speech-bubble" onclick = "changeDisplayBanner()">
+<button class="speech-bubble" id="speech-bubble" onclick = "showBanners()">
   Click Me!
 </button >
 
@@ -373,83 +373,71 @@
 <script>
 
     var currentImageIndex = 0;
-
-
-
     var hiddenImages = getHiddenImages();
     var images = document.getElementsByClassName('club-banners');
-    if (images.length >0 ) {
-        images[currentImageIndex].classList.add("active");
-    }
-    else {
-        document.getElementById("speech-bubble").style.display = 'none';
-    }
+    document.getElementById("banner").display = 'none';
+
+    var currentImages = [];
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];
-        if (hiddenImages.includes(className)) {
-            console.log(hiddenImages);
+        if (!hiddenImages.includes(className)) {
+            currentImages.push(images[i]);
+        }
+        else {
             images[i].style.display = 'none';
         }
     }
 
 
-function changeDisplayBanner() {
-    var bannerElement = document.getElementById("banner");
-    if (bannerElement.style.display === "none") {
-        bannerElement.style.display = "block";
-    } 
-    else {
-        bannerElement.style.display = "none";
+    if (currentImages.length >0 ) {
+        document.getElementById("speech-bubble").style.display = 'block';
     }
-}
+    else {
+        document.getElementById("speech-bubble").style.display = 'none';
+    }
+
+    function showBanners() {
+        var bannerElement = document.getElementById("banner");
+        if (bannerElement.style.display === "none") {
+            currentImages[currentImageIndex].classList.add("active");
+            bannerElement.style.display = "block";
+        } 
+        else {
+            currentImages[currentImageIndex].classList.remove("active");
+            bannerElement.style.display = "none";
+        }
+    }
 
     function changeImage(n) {
       var originalIndex = currentImageIndex;
 
-      if (images[currentImageIndex].style.display !== 'none') {
-        images[currentImageIndex].classList.remove("active");
-      }
+      currentImages[currentImageIndex].classList.remove("active");
       currentImageIndex += n;
       if (currentImageIndex < 0) {
-        currentImageIndex = images.length - 1;
-      } else if (currentImageIndex >= images.length) {
+        currentImageIndex = currentImages.length - 1;
+      } else if (currentImageIndex >= currentImages.length) {
         currentImageIndex = 0;
       }
 
-
-      // Wrap around to the first or last image if the index goes out of bounds
-      while (images[currentImageIndex].style.display === 'none' && currentImageIndex !== originalIndex) {
-        currentImageIndex += n;
-              if (currentImageIndex < 0) {
-                 currentImageIndex = images.length - 1;
-              } else if (currentImageIndex >= images.length) {
-                 currentImageIndex = 0;
-               }
-      }
-
-      images[currentImageIndex].classList.add("active");
-      if (images[currentImageIndex].style.display === 'none' && currentImageIndex === originalIndex) {
-        document.querySelector(".banner").style.display = 'none';
-      }
+      currentImages[currentImageIndex].classList.add("active");
     }
 
 
 
 
-    function toggleImage(button) {
+    function removeImage(button) {
         alert(`You are removing this image from display`);
-        image = images[currentImageIndex];
-        console.log(button);
-        console.log(image);
+        image = currentImages[currentImageIndex];
         var className = image.className.split(' ')[1]; 
         var hiddenImages = getHiddenImages();
         var imageIndex = hiddenImages.indexOf(className);
         if (imageIndex === -1) {
             image.style.display = 'none'; 
             hiddenImages.push(className);  
+            currentImages.splice(currentImageIndex, 1);
         } 
         setCookie('hiddenImages', JSON.stringify(hiddenImages));
-        changeImage(1);
+        changeImage(0);
     }
 
     function getHiddenImages() {
