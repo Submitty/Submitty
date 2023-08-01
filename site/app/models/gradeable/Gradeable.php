@@ -934,6 +934,19 @@ class Gradeable extends AbstractModel {
         if (!$this->student_download) {
             return false;
         }
+        //get the folder it is contained in
+        $path_array = explode("/", $file_path);
+        $outside_folder = $path_array[count($path_array) - 2];
+        $file_name = $path_array[count($path_array) - 1];
+        //Automatically remove these special files
+        if (
+            $file_name === ".submit.timestamp"
+            || $file_name === ".submit.notebook"
+            || $file_name === ".user_assignment_access.json"
+        ) {
+            return false;
+        }
+
         $autograding_config = $this->getAutogradingConfig();
         if ($autograding_config->isNotebookGradeable()) {
             //Get notebook data to get list of notebook filenames
@@ -946,13 +959,11 @@ class Gradeable extends AbstractModel {
                 $version,
                 $this->getId()
             );
-            //get the folder it is contained in
-            $path_array = explode("/", $file_path);
-            $outside_folder = $path_array[count($path_array) - 2];
 
+            //get the root folder
             $root_path_array = explode("/", $root_path);
             $root_folder = $path_array[count($root_path_array) - 1];
-
+            //all notebook generated submissions reside in the root folder
             if ($outside_folder === $root_folder) {
                 return false;
             }
