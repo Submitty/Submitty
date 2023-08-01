@@ -55,6 +55,7 @@ class BannerImage {
     protected $extra_info;
 
 
+
     public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
 
         $this->setReleaseDate($release_date);

@@ -84,9 +84,6 @@ class BannerController extends AbstractController {
         for ($j = 0; $j < $count_item; $j++) {
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
                 $dst = FileUtils::joinPaths($full_path, $uploaded_files["name"][$j]);
-                if ($uploaded_files["tmp_name"][$j] == $extra_name) {
-                    continue;
-                }
                 if (strlen($dst) > 255) {
                     return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
                 }
@@ -102,6 +99,24 @@ class BannerController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to delete the uploaded file '{$uploaded_files['name'][$j]}' from temporary storage.");
             }
 
+            // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
+            $all_match = true; 
+            for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
+
+                if (strlen($uploaded_files['name'][$j]) != strlen($extra_name)) {
+                    $all_match = false;
+                    break;
+                }
+
+                if ($uploaded_files['name'][$j][$i] != $extra_name[$i]) {
+                    $all_match = false;
+                    break;
+                }
+            }
+
+            if ($all_match) {
+                continue;
+            }
 
             $banner_image = new BannerImage(
                 $specificPath,

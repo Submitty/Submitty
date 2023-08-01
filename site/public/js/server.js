@@ -252,6 +252,12 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
 }
 
 function newShowImage(information, type) {
+    if (type === "link") {
+        // For "link" type, open the provided link in a new tab directly
+        window.location.href = information;
+        return;
+    }
+
     // Create a new popup
     var popup = window.open("", "_blank", "width=500,height=400");
 
@@ -268,10 +274,6 @@ function newShowImage(information, type) {
         // For "file" type, create a pre element to display the text content of the file
         var textContent = atob(information); // Decode base64-encoded text content
         var pre = $('<pre>').text(textContent).appendTo(form);
-    } else if (type === "link") {
-        // For "link" type, open the provided link in a new tab
-        popup.location.href = information;
-        return;
     }
 
     // Append the form to the popup
@@ -280,6 +282,7 @@ function newShowImage(information, type) {
     // Display the popup
     popup.focus();
 }
+
 
 
 function newUploadImagesForm() {

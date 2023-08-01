@@ -191,13 +191,14 @@
 
         {% if imageData.type != "link" %}
             {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
+            <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
         {% else %}
             {% set extraStuff = imageData.extra_info %}
+            <a href="{{ extraStuff }}" target="_blank">
+            <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+            </a>
         {% endif %}
 
-
-
-        <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
 
 
 
