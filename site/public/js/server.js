@@ -435,18 +435,15 @@ function editFilePathRecommendations() {
     // Get options
     const dataList = $("#change_folder_paths");
     const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
-    console.log(optionsArray.length)
 
     optionsArray.forEach((option) => {
         const optionString = option.val();
-        console.log(optionString);
         const lastSlash = optionString.lastIndexOf('/');
         const currentOptionMinusFile = optionString.substring(0, lastSlash);
 
         const newOption = `${currentOptionMinusFile}/${fileName}`;
         option.val(newOption);
     })
-
 }
 
 var lastActiveElement = null;
