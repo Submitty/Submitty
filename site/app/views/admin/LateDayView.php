@@ -133,9 +133,7 @@ class LateDayView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
-    /**
-     * @param array<LateDays> $initial_late_days
-     */
+
     public function displayLateDayCache($students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
