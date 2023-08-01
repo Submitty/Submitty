@@ -43,8 +43,33 @@ class GlobalView extends AbstractView {
 
         $images_data_array = [];
         $error_image_data = '_NONE_';
-        $entity_manager = $this->core->getBannerEntityManager()->getRepository(BannerImage::class);
-        self::addBannerImage($images_data_array, $error_image_data, $this->core->getConfig()->getSubmittyPath(), $entity_manager);
+
+        //NEW WAY -----------------------------------
+
+        $bannerImages = $this->core->getBannerEntityManager()->getRepository(BannerImage::class) ->findall();
+        $currentDate = new \DateTime();;
+        foreach ($bannerImages as $banner) {
+
+            if ($banner->getReleaseDate() > $currentDate || $currentDate > $banner->getClosingDate()) {
+                continue;
+            }
+            
+            //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
+            $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getName());
+
+            $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getExtraInfo());
+            $images_data_array[] = [
+                "name" => $banner->getName(),
+                "data" => base64_encode(file_get_contents($pathName)),
+                "extra_info" => base64_encode(file_get_contents($extraPathName))
+            ];
+            
+        }
+
+
+        // ---------------------------
+
+
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
@@ -91,70 +116,4 @@ class GlobalView extends AbstractView {
             "performance_warning" => $performance_warning
         ]);
     }
-
-public static function addBannerImage(&$images_data_array, &$error_image_data, $submitty_path, &$entity_manager) {
-    $base_course_material_path = FileUtils::joinPaths($submitty_path, 'banner_images');
-
-    if (!file_exists($base_course_material_path)) {
-        return;
-    }
-
-    // Get the current year and month
-    $currentYear = intval(date('Y'));
-
-    // Create a DirectoryIterator for the base course material path
-    $directoryIterator = new \DirectoryIterator($base_course_material_path);
-    foreach ($directoryIterator as $fileInfo) {
-        // Check if the item is a directory and matches the format "yyyy-mm"
-        if ($fileInfo->isDir() && preg_match('/^\d{4}$/', $fileInfo->getBasename())) {
-
-            // Convert to integers for comparison
-            $year = $fileInfo->getBasename();
-
-            // Check if the folder's year and month are same or later than today
-            if ($year >= $currentYear) {
-                // Loop through each file in the directory
-                $directoryPath = $fileInfo->getPathname();
-                $monthDirectoryIterator = new \DirectoryIterator($directoryPath);
-                foreach ($monthDirectoryIterator as $monthFileInfo) {
-                    // Exclude directories and dot files
-                    if ($monthFileInfo->isFile() && !$monthFileInfo->isDot()) {
-                        if (!$monthFileInfo->valid()) {
-                            continue;
-                        }
-
-                        $expected_image = $monthFileInfo->getPathname();
-                        $content_type = FileUtils::getContentType($expected_image);
-                        if (substr($content_type, 0, 5) === "image") {
-                            // Read image path, convert to base64 encoding
-                            $expected_img_data = base64_encode(file_get_contents($expected_image));
-                            $img_name = $monthFileInfo->getBasename('.png');
-                            $banner_item = $entity_manager->findBy(['name' => $img_name . ".png"])[0];
-                            $extra_info_name = $banner_item->getExtraInfo();
-                            $lastSlashPos = strrpos($expected_image, '/');
-                            if ($lastSlashPos !== false) {
-                                $extra_file_path = substr_replace($expected_image, $extra_info_name, $lastSlashPos + 1);
-                            }
-                            $extra_img_data = base64_encode(file_get_contents($extra_file_path));
-
-
-                            if ($img_name === "error_image") {
-                                $error_image_data = $expected_img_data;
-                            } else {
-                                $date_now = new \DateTime();
-                                if ($banner_item->getReleaseDate() <= $date_now && $date_now <= $banner_item->getClosingDate()) {
-                                    $images_data_array[] = [
-                                        "name" => $img_name,
-                                        "data" => $expected_img_data,
-                                        "extra_info" => $extra_img_data
-                                    ];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 }
