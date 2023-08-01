@@ -79,15 +79,9 @@ class CourseMaterial {
      * @ORM\Column(type="string")
      * @var string
      */
-    protected $url_title;
+    protected $title;
 
-    /**
-     * @ORM\Column(type="boolean")
-     * @var bool
-     */
-    protected $banner_closed;
-
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $url_title) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -95,17 +89,7 @@ class CourseMaterial {
         $this->setPriority($priority);
         $this->sections = new ArrayCollection();
         $this->url = $url;
-        $this->url_title = $url_title;
-        $this->banner_closed = false;
-
-    }
-
-    public function closeBanner() {
-        $this->banner_closed = true;
-    }
-
-    public function checkBannerOpen() : bool {
-        return $this->banner_closed;
+        $this->title = $title;
     }
 
     /**
@@ -209,15 +193,15 @@ class CourseMaterial {
         return $this->url;
     }
 
-    public function getUrlTitle(): string {
-        return $this->url_title;
+    public function getTitle(): ?string {
+        return $this->title;
     }
 
     public function setUrl(string $url): void {
         $this->url = $url;
     }
 
-    public function setUrlTitle(string $url_title): void {
-        $this->url_title = $url_title;
+    public function setTitle(string $title): void {
+        $this->title = $title;
     }
 }

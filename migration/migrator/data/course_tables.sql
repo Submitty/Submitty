@@ -504,7 +504,7 @@ CREATE FUNCTION public.gradeable_version_change() RETURNS trigger
             user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
             team_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.team_id ELSE NEW.team_id END;
             
-            --- Remove all lade day cache for all gradeables past this submission die date
+            --- Remove all lade day cache for all gradeables past this submission due date
             --- for every user associated with the gradeable
             DELETE FROM late_day_cache ldc
             WHERE late_day_date >= (SELECT eg.eg_submission_due_date 
@@ -692,8 +692,7 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    url_title character varying(255),
-    banner_closed boolean DEFAULT false NOT NULL
+    title character varying(255)
 );
 
 
@@ -1807,6 +1806,7 @@ CREATE TABLE public.users (
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))

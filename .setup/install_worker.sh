@@ -4,7 +4,7 @@
 #   install_worker.sh [<extra> <extra> ...]
 
 # This script is used to set up the worker machine in a vagrant worker pair
-# made by running WORKER_PAIR=1 vagrant up
+# made by running WORKERS=n vagrant up
 
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUPERVISOR_USER=submitty
@@ -15,7 +15,7 @@ echo "checking ${SUPERVISOR_USER} user"
 if ! cut -d ':' -f 1 /etc/passwd | grep -q "${SUPERVISOR_USER}" ; then
     echo "attempting to add ${SUPERVISOR_USER} user"
     #set up submitty user with password 'submitty'
-    useradd -m -p "$(openssl passwd -crypt submitty)" -c "First Last,RoomNumber,WorkPhone,HomePhone" "${SUPERVISOR_USER}"
+    useradd -m -p "$(openssl passwd -1 submitty)" -c "First Last,RoomNumber,WorkPhone,HomePhone" "${SUPERVISOR_USER}"
     [ -d "/home/${SUPERVISOR_USER}" ] && echo "Directory /home/${SUPERVISOR_USER} exists." || echo "Error: Directory /home/${SUPERVISOR_USER} does not exists."
 fi
 

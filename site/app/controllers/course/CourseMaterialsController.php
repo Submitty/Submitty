@@ -454,30 +454,105 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
         if (isset($_POST['sort_priority'])) {
             $course_material->setPriority($_POST['sort_priority']);
         }
-        if (isset($_POST['link_url']) && isset($_POST['link_title']) && $course_material->isLink()) {
-            if ($_POST['link_title'] !== $course_material->getUrlTitle()) {
-                $path = $course_material->getPath();
-                $dirs = explode("/", $path);
-                array_pop($dirs);
-                $path = implode("/", $dirs);
-                $file_name = urlencode("link-" . $_POST['link_title']);
+
+
+
+        if (isset($_POST['file_path']) || isset($_POST['title'])) {
+            $path = $course_material->getPath();
+            $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+            $requested_path = $_POST['file_path'];
+            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+
+            if (isset($_POST['title'])) {
+                $file_name = $_POST['title'];
+                $directory = dirname($new_path);
+                $new_path = FileUtils::joinPaths($directory, $file_name);
+            }
+            else {
+                $file_name = basename($new_path);
+            }
+            if ($path !== $new_path) {
+                if (!FileUtils::ValidPath($new_path)) {
+                    return JsonResponse::getErrorResponse("Invalid path or filename");
+                }
+
+                $requested_path = explode("/", $requested_path);
+                if (count($requested_path) > 1) {
+                    $requested_path_directories = $requested_path;
+                    array_pop($requested_path_directories);
+                    $requested_path_directories = implode("/", $requested_path_directories);
+                    $full_dir_path = explode("/", $new_path);
+                    array_pop($full_dir_path);
+                    $full_dir_path = implode("/", $full_dir_path);
+
+
+
+                    //ADD IN NEW DIRECTORIES IF IT DOESN'T EXIST
+
+
+                    if (!FileUtils::createDir($full_dir_path, true)) {
+                        return JsonResponse::getErrorResponse("Invalid requested path");
+                    }
+
+
+                    $dirs_to_make = [];
+                    $this->addDirs($requested_path_directories, $upload_path, $dirs_to_make);
+
+
+                    if ($dirs_to_make != null) {
+                        $new_paths = [];
+                        foreach ($dirs_to_make as $dir) {
+                            $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
+                                ['path' => $dir]
+                            );
+                            if ($cm === null && !in_array($dir, $new_paths)) {
+                                $course_material_dir = new CourseMaterial(
+                                    2,
+                                    $dir,
+                                    $course_material->getReleaseDate(),
+                                    $course_material->isHiddenFromStudents(),
+                                    $course_material->getPriority(),
+                                    null,
+                                    null
+                                );
+                                $this->core->getCourseEntityManager()->persist($course_material_dir);
+                                $all_sections = $course_material->getSections()->getValues();
+
+                                if (count($all_sections) > 0) {
+                                    foreach ($all_sections as $section) {
+                                        $course_material_section = new CourseMaterialSection($section->getSectionID(), $course_material_dir);
+                                        $course_material_dir->addSection($course_material_section);
+                                    }
+                                }
+                                $new_paths[] = $dir;
+                            }
+                        }
+                    }
+                }
                 $overwrite = false;
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
                 }
-                $clash_resolution = $this->resolveClashingMaterials($path, [$file_name], $overwrite);
+
+                $dir = dirname($new_path);
+                $clash_resolution = $this->resolveClashingMaterials($dir, [$file_name], $overwrite);
                 if ($clash_resolution !== true) {
                     return JsonResponse::getErrorResponse(
                         'Name clash',
                         $clash_resolution
                     );
                 }
-                $path = FileUtils::joinPaths($path, $file_name);
-                FileUtils::writeFile($path, "");
-                unlink($course_material->getPath());
-                $course_material->setUrlTitle($_POST['link_title']);
-                $course_material->setPath($path);
+
+                rename($course_material->getPath(), $new_path);
+                $course_material->setPath($new_path);
+                if (isset($_POST['original_title'])) {
+                    $course_material->setTitle($_POST['original_title']);
+                }
             }
+        }
+
+
+        if (isset($_POST['link_url']) && isset($_POST['title']) && $course_material->isLink()) {
             $course_material->setUrl($_POST['link_url']);
         }
 
@@ -499,7 +574,6 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
      */
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         $details = [];
-
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
             $expand_zip = $_POST['expand_zip'];
@@ -560,11 +634,15 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
             return JsonResponse::getErrorResponse("Invalid filepath.");
         }
 
-        $url_title = null;
-        if (isset($_POST['url_title'])) {
-            $url_title = $_POST['url_title'];
+        $title = null;
+        if (isset($_POST['title'])) {
+            $title = $_POST['title'];
         }
 
+        $title_name = $title;
+        if (isset($_POST['original_title'])) {
+            $title_name = $_POST['original_title'];
+        }
         $dirs_to_make = [];
 
         $url_url = null;
@@ -578,7 +656,7 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
             }
         }
 
-        if (isset($url_title) && isset($url_url)) {
+        if (isset($title) && isset($url_url)) {
             $details['type'][0] = CourseMaterial::LINK;
             $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             if (!empty($requested_path)) {
@@ -587,7 +665,7 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
                     return JsonResponse::getErrorResponse("Failed to make path.");
                 }
             }
-            $file_name = urlencode("link-" . $url_title);
+            $file_name = $title;
             $clash_resolution = $this->resolveClashingMaterials($final_path, [$file_name], $overwrite_all);
             if ($clash_resolution !== true) {
                 return JsonResponse::getErrorResponse(
@@ -604,7 +682,7 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
                 $uploaded_files[1] = $_FILES["files1"];
             }
 
-            if (empty($uploaded_files) && !(isset($url_url) && isset($url_title))) {
+            if (empty($uploaded_files) && !(isset($url_url) && isset($title))) {
                 return JsonResponse::getErrorResponse("No files were submitted.");
             }
 
@@ -796,7 +874,7 @@ if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
                 $details['hidden_from_students'],
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
-                $value === CourseMaterial::LINK ? $url_title : null
+                $value === CourseMaterial::LINK ? $title_name : null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {
