@@ -82,13 +82,11 @@ class BannerController extends AbstractController {
     }
 
         for ($j = 0; $j < $count_item; $j++) {
-            //Just ignore this so that we can upload stuff for now
-            // if ($uploaded_files["tmp_name"][$j] == $extra_name) {
-            //     continue;
-            // }
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
                 $dst = FileUtils::joinPaths($full_path, $uploaded_files["name"][$j]);
-
+                if ($uploaded_files["tmp_name"][$j] == $extra_name) {
+                    continue;
+                }
                 if (strlen($dst) > 255) {
                     return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
                 }
