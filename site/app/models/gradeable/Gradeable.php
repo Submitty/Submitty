@@ -953,7 +953,7 @@ class Gradeable extends AbstractModel {
             $root_path_array = explode("/", $root_path);
             $root_folder = $path_array[count($root_path_array) - 1];
 
-            if($outside_folder === $root_folder) {
+            if ($outside_folder === $root_folder) {
                 return false;
             }
         }

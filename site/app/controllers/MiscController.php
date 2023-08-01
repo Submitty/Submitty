@@ -412,12 +412,12 @@ class MiscController extends AbstractController {
 
         $options = new \ZipStream\Option\Archive();
         $options->setSendHttpHeaders(true);
-        $options->setEnableZip64(false);   
+        $options->setEnableZip64(false);
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
         foreach ($folder_names as $folder_name) {
-            $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);   
+            $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
                 $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($path),
@@ -441,7 +441,6 @@ class MiscController extends AbstractController {
                                 "gradeable" => $gradeable,
                                 "graded_gradeable" => $graded_gradeable,
                                 "gradeable_version" => $gradeable_version->getVersion(),
-                                "file_name" => $file_name,
                                 "root_path" => $path
                             ]
                         )

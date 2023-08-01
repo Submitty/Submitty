@@ -490,7 +490,7 @@ class Access {
             }
 
             //Make sure notebook generated files can't be accessed
-            if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD) && array_key_exists("file_name", $args)) {
+            if (self::checkBits($checks, self::CHECK_STUDENT_DOWNLOAD) && array_key_exists("root_path", $args)) {
                 return $gradeable->canStudentDownloadFile($args["gradeable_version"], $args["path"], $args["root_path"]);
             }
 
