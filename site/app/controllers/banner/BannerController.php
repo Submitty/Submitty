@@ -7,27 +7,12 @@ namespace app\controllers\banner;
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\response\ResponseInterface;
-use app\models\gradeable\GradeableUtils;
 use app\views\banner\BannerView;
 use Symfony\Component\Routing\Annotation\Route;
-
 use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
-
-
-use app\controllers\MiscController;
-use app\libraries\Core;
-use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
-use app\views\ErrorView;
-use app\views\MiscView;
-
-use app\libraries\routers\AccessControl;
 
 class BannerController extends AbstractController {
     /**
@@ -39,7 +24,6 @@ class BannerController extends AbstractController {
      * @see BannerView::showBanner
      */
     public function viewBanner(): WebResponse {
-        
         return new WebResponse(BannerView::class, 'showBanner');
         //EVEN WHEN I REPLACE BannerView::class with 'app\views\banner\BannerView', webresponse still treats the parameter as 'app\\controllers\\Banner\\BannerView'
     }
@@ -48,7 +32,7 @@ class BannerController extends AbstractController {
 
     /**
      * @Route("/banner/upload", methods={"POST"})
-     */ 
+     */
     public function ajaxUploadBannerFiles(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images");
 
@@ -74,12 +58,12 @@ class BannerController extends AbstractController {
 
 
 
-    if (!is_dir($full_path)) {
-        // Create a new folder for the current month
-        if (!mkdir($full_path, 0755, true)) {
-            return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
+        if (!is_dir($full_path)) {
+            // Create a new folder for the current month
+            if (!mkdir($full_path, 0755, true)) {
+                return JsonResponse::getErrorResponse("Failed to create a new folder for the current year.");
+            }
         }
-    }
 
         for ($j = 0; $j < $count_item; $j++) {
             if (is_uploaded_file($uploaded_files["tmp_name"][$j])) {
@@ -91,7 +75,8 @@ class BannerController extends AbstractController {
                 if (!@copy($uploaded_files["tmp_name"][$j], $dst)) {
                     return JsonResponse::getErrorResponse("Failed to copy uploaded file '{$uploaded_files['name'][$j]}' to current location.");
                 }
-            } else {
+            } 
+            else {
                 return JsonResponse::getErrorResponse("The temporary file '{$uploaded_files['name'][$j]}' was not properly uploaded.");
             }
 
@@ -100,9 +85,8 @@ class BannerController extends AbstractController {
             }
 
             // for some reason why I try to simply use a condition to compare two strings, I always get false?!? So I have to loop through each character now
-            $all_match = true; 
+            $all_match = true;
             for ($i = 0; $i < strlen($uploaded_files['name'][$j]); $i++) {
-
                 if (strlen($uploaded_files['name'][$j]) != strlen($extra_name)) {
                     $all_match = false;
                     break;
@@ -126,11 +110,7 @@ class BannerController extends AbstractController {
                 $close_date
             );
             $this->core->getBannerEntityManager()->persist($banner_image);
-            
-        
             $this->core->getBannerEntityManager()->flush();
-
-
         }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
@@ -138,7 +118,7 @@ class BannerController extends AbstractController {
 
     /**
      * @Route("/banner/delete", methods={"POST"})
-     */ 
+     */
     public function ajaxDeleteBannerFiles(): JsonResponse {
 
         $entity_manager = $this->core->getBannerEntityManager();
@@ -168,20 +148,12 @@ class BannerController extends AbstractController {
             if (!unlink($full_path)) {
                 return JsonResponse::getErrorResponse("Failed to delete the file.");
             }
-        } else {
+        } 
+        else {
             return JsonResponse::getErrorResponse("File not found.");
         }
 
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
     }
-
-
-
 }
-
-
-
-
-
-
