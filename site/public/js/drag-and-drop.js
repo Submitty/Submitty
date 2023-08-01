@@ -1,8 +1,8 @@
-/* exported deleteBannerImage, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported deleteBannerImage, handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
 
 /*
 References:
@@ -1371,12 +1371,11 @@ function handleUploadBanner(csrf_token, closeTime, releaseTime, extraName) {
             const k = fileExists(`/${file_array[i][j].name}`, 1);
             // Check conflict here
             if ( k[0] === 1 ) {
-                if (!skip_confirmation && !confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
+                if (!confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
                     continue;
                 }
             }
             formData.append(`files${i + 1}[]`, file_array[i][j], file_array[i][j].name);
-            filesToBeAdded = true;
         }
     }
     $.ajax({
