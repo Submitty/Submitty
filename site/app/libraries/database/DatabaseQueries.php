@@ -1936,6 +1936,12 @@ ORDER BY {$orderby}",
         return intval($this->course_db->row()['cnt']);
     }
 
+
+    /**
+     * Below Query removes all graded component count of overridden student with first half of the query
+     * Second half will count the number of component and multiply with number of students overridden in each section
+     * Then, the data will get merged
+     */
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
          $u_or_t = "u";
         $users_or_teams = "users";
@@ -1946,7 +1952,7 @@ ORDER BY {$orderby}",
             $user_or_team_id = "team_id";
         }
         $return = [];
-        $params = [$g_id];
+        $params = [$g_id, $g_id];
         $where = "";
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND {$section_key} IN " . $this->createParameterList(count($sections));
@@ -1954,19 +1960,42 @@ ORDER BY {$orderby}",
         }
         $this->course_db->query(
             "
-SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
-FROM {$users_or_teams} AS {$u_or_t}
-INNER JOIN (
-  SELECT * FROM gradeable_data AS gd
-  INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) as active_version FROM electronic_gradeable_version GROUP BY g_id, $user_or_team_id) AS egd on egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-  LEFT JOIN (
-  gradeable_component_data AS gcd
-  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
-) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-{$where}
-GROUP BY {$u_or_t}.{$section_key}
-ORDER BY {$u_or_t}.{$section_key}",
+SELECT {$section_key}, SUM(cnt)
+FROM (
+    SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+    FROM {$users_or_teams} AS {$u_or_t}
+        INNER JOIN (
+                SELECT * 
+                FROM gradeable_data AS gd
+                    INNER JOIN (SELECT g_id, $user_or_team_id, max(active_version) AS active_version 
+                                FROM electronic_gradeable_version 
+                                GROUP BY g_id, $user_or_team_id) AS egd 
+                                ON egd.g_id = gd.g_id AND egd.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+                    LEFT JOIN grade_override AS go ON gd.g_id = go.g_id AND gd.gd_{$user_or_team_id} = go.{$user_or_team_id}
+                    LEFT JOIN (
+                        gradeable_component_data AS gcd
+                        INNER JOIN gradeable_component AS gc 
+                        ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+                    )AS gcd ON gcd.gd_id = gd.gd_id 
+                WHERE gcd.g_id=? AND go.g_id IS NULL AND go.user_id IS NULL
+        ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+    {$where}
+    GROUP BY {$u_or_t}.{$section_key}
+    ORDER BY {$u_or_t}.{$section_key}
+    UNION ALL
+    SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) * component_count.num AS cnt
+    FROM grade_override AS go
+               INNER JOIN {$u_or_t} ON go.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id} AND go.g_id=?
+               INNER JOIN (
+                    SELECT gc.g_id, count(*) AS num
+                    FROM gradeable_component AS gc
+                    GROUP BY gc.g_id
+                   ) AS component_count ON go.g_id = component_count.g_id
+      GROUP BY {$u_or_t}.{$section_key}, component_count.num
+    ) AS merged_data
+GROUP BY {$section_key}
+ORDER BY {$section_key}
+    ",
             $params
         );
         foreach ($this->course_db->rows() as $row) {
