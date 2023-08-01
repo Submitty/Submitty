@@ -101,7 +101,7 @@ class LateDays extends AbstractModel {
     /**
      * Sort the graded gradeables and late day updates by due date
      * @param GradedGradeable[] $graded_gradeables
-     * @return array<string, GradedGradeable>
+     * @return array<array<string, mixed>>
      */
     private function createLateDayEvents($graded_gradeables) {
         $late_day_events = array_merge(
