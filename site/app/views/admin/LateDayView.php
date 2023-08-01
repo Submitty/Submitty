@@ -133,3 +133,4 @@ class LateDayView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
+}
