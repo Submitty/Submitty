@@ -6,7 +6,6 @@ use app\controllers\AbstractController;
 use app\controllers\MiscController;
 use app\entities\course\CourseMaterialAccess;
 use app\entities\course\CourseMaterialSection;
-use app\libraries\Core;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -171,21 +170,6 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
         }
-
-$bannerImagesPath = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials/banner_images";
-
-// Check if the "banner_images" folder exists
-if (!file_exists($bannerImagesPath) || !is_dir($bannerImagesPath)) {
-    // The folder doesn't exist or is not a directory, recreate it
-    if (!mkdir($bannerImagesPath, 0777, true)) {
-        // Failed to recreate the folder
-        // Handle the error or log a message
-        echo 'Failed to recreate the "banner_images" folder.';
-    }
-
-}
-
-
         $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");

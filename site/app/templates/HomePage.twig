@@ -1,5 +1,4 @@
 <div id="courses" class="content">
-
     {% for ranks in statuses %}
         {% if loop.index == 1 or ranks|length > 0 %}
             <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
