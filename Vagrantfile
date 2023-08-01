@@ -80,29 +80,12 @@ def mount_folders(config, mount_options)
   }
 end
 
-def configure_workers()
+def get_workers()
   worker_file = File.join(__dir__, '.vagrant', 'workers.json')
-  if ENV.has_key?('WORKERS')
-    unless Dir.glob(File.join(__dir__, '.vagrant/machines/*/*/action_provision')).empty?
-      puts("You have provided the 'WORKERS' variable.\nPlease ensure that all existing machines are destroyed prior to recreating the worker configuration.")
-      exit
-    end
-    worker_data = Hash[]
-    n = Integer(ENV['WORKERS'])
-    for i in 1..n do
-      worker_data["submitty-worker-#{i}"] = {
-        :ssh_port => Integer(ENV.fetch('VM_WORKER_BASE_PORT', '224X').gsub('X', '0')) + i,
-        :ip_addr => ENV.fetch('VM_WORKER_BASE_IP', '192.168.56.2XX').gsub(/X+/) {|s| i.to_s.rjust(s.length, '0')}
-      }
-    end
-    File.write(worker_file, JSON.pretty_generate(worker_data))
-    return worker_data
+  if File.file?(worker_file)
+    return JSON.parse(File.read(worker_file), symbolize_names: true)
   else
-    if File.file?(worker_file)
-      return JSON.parse(File.read(worker_file), symbolize_names: true)
-    else
-      return Hash[]
-    end
+    return Hash[]
   end
 end
 
@@ -131,7 +114,7 @@ Vagrant.configure(2) do |config|
 
   script, worker_script = gen_scripts()
 
-  configure_workers.map do |worker, data|
+  get_workers.map do |worker, data|
     config.vm.define worker do |ubuntu|
       ubuntu.vm.network 'private_network', ip: data[:ip_addr]
       ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
