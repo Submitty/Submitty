@@ -191,11 +191,11 @@
 
         {% if imageData.type != "link" %}
             {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
-            <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
+            <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
         {% else %}
             {% set extraStuff = imageData.extra_info %}
             <a href="{{ extraStuff }}" target="_blank">
-            <img id="club_banners_" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+            <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
             </a>
         {% endif %}
 
@@ -377,7 +377,7 @@
 
 
     var hiddenImages = getHiddenImages();
-    var images = document.getElementsByClassName('club_banners');
+    var images = document.getElementsByClassName('club-banners');
     images[currentImageIndex].classList.add("active");
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];

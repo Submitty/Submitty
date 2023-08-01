@@ -192,7 +192,7 @@ footer .footer-separator {
 
 
 
-#club_banners {
+#club-banners {
     border-style: double;
     border-width: 5px;
     width: 800px;
@@ -239,7 +239,7 @@ footer .footer-separator {
     border: none;
     color: white;
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 50%);
+    background-color: rgba(0 0 0 / 50%);
     border-radius: 50%;
 }
 
@@ -253,7 +253,7 @@ footer .footer-separator {
     border: none;
     color: white;
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 50%);
+    background-color: rgba(0 0 0 / 50%);
     border-radius: 50%;
 }
 
