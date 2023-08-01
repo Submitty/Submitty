@@ -188,7 +188,21 @@
   {% for imageData in imageDataArray %}
       <div>
       {% set imgName = "{{imageData.name}}" %}
-        <img id="club_banners_{{imageData.extra_info}}" class="club_banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+
+        {% if imageData.type != "link" %}
+            {% set extraStuff = "data:image/png;base64," ~ imageData.extra_info %}
+            <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" onclick="newShowImage('{{extraStuff}}', '{{imageData.type}}' )" />
+        {% else %}
+            {% set extraStuff = imageData.extra_info %}
+            <a href="{{ extraStuff }}" target="_blank">
+            <img id="club-banners_" class="club-banners {{imageData.name}}" src="data:imgName/png;base64,{{ imageData.data }}" />
+            </a>
+        {% endif %}
+
+
+
+
+
         <button class="delete-button" onclick="toggleImage(this)">x</button>
       </div>
   {% endfor %}
@@ -363,7 +377,7 @@
 
 
     var hiddenImages = getHiddenImages();
-    var images = document.getElementsByClassName('club_banners');
+    var images = document.getElementsByClassName('club-banners');
     images[currentImageIndex].classList.add("active");
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];
@@ -375,12 +389,13 @@
 
 
 function changeDisplayBanner() {
-  var bradElement = document.getElementById("banner");
-  if (bradElement.style.display === "none") {
-    bradElement.style.display = "block";
-  } else {
-    bradElement.style.display = "none";
-  }
+    var bannerElement = document.getElementById("banner");
+    if (bannerElement.style.display === "none") {
+        bannerElement.style.display = "block";
+    } 
+    else {
+        bannerElement.style.display = "none";
+    }
 }
 
     function changeImage(n) {

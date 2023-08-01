@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace app\entities\banner;
 
-use app\libraries\DateUtils;
-use app\libraries\Core;
-use app\models\User;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,7 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="banner_images")
  */
 class BannerImage {
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -55,14 +49,13 @@ class BannerImage {
     protected $extra_info;
 
 
-    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
 
+    public function __construct(string $path, string $name, string $extra_info_name, \DateTime $release_date, \DateTime $close_date) {
         $this->setReleaseDate($release_date);
         $this->setClosingDate($close_date);
         $this->setName($name);
         $this->setExtraInfo($extra_info_name);
         $this->setPath($path);
-
     }
 
     public function getId(): int {
@@ -73,7 +66,7 @@ class BannerImage {
         $this->path_date = $path;
     }
 
-    public function getPath() : string {
+    public function getPath(): string {
         return $this->path_date;
     }
 
@@ -99,7 +92,7 @@ class BannerImage {
         return $this->closing_date;
     }
 
-    public function getName(): string  {
+    public function getName(): string {
         return $this->name;
     }
 
