@@ -251,7 +251,7 @@ function newOverwriteCourseMaterialForm(clashing_names, is_link, is_edit_form) {
     form.find('.form-body').scrollTop(0);
 }
 
-function newShowImage(base64Data) {
+function newShowImage(information, type) {
     // Create a new popup
     var popup = window.open("", "_blank", "width=500,height=400");
 
@@ -261,15 +261,26 @@ function newShowImage(base64Data) {
     // Create a new form element
     var form = $('<form>').addClass('popup-form');
 
-    // Create an img element with the base64Data as its source
-    var img = $('<img>').attr('src', base64Data).appendTo(form);
+    if (type === "image") {
+        // For "image" type, create an img element with the base64Data as its source
+        var img = $('<img>').attr('src', information).appendTo(form);
+    } else if (type === "file") {
+        // For "file" type, create a pre element to display the text content of the file
+        var textContent = atob(information); // Decode base64-encoded text content
+        var pre = $('<pre>').text(textContent).appendTo(form);
+    } else if (type === "link") {
+        // For "link" type, open the provided link in a new tab
+        popup.location.href = information;
+        return;
+    }
 
     // Append the form to the popup
     form.appendTo(popup.document.body);
-    
+
     // Display the popup
     popup.focus();
 }
+
 
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');

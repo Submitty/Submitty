@@ -57,10 +57,30 @@ class GlobalView extends AbstractView {
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getName());
 
+            if (strpos($banner->getExtraInfo(), "http") !== false) {
+                $images_data_array[] = [
+                    "name" => $banner->getName(),
+                    "data" => base64_encode(file_get_contents($pathName)),
+                    "type" => "link",
+                    "extra_info" => base64_encode(file_get_contents($extraPathName))
+                ];
+                continue;
+            }
+
             $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getExtraInfo());
+
+            if (strpos($banner->getExtraInfo(), "png") !== false){
+                $type = "image";
+            }
+            else {
+                $type = "file";
+            }
+
+
             $images_data_array[] = [
                 "name" => $banner->getName(),
                 "data" => base64_encode(file_get_contents($pathName)),
+                "type" => $type,
                 "extra_info" => base64_encode(file_get_contents($extraPathName))
             ];
             

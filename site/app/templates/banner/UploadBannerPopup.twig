@@ -38,20 +38,30 @@
         </label>
 
             <label class = "radio" for="file_selection_radio">
-                <input id="file_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').show();$('#url_selection').hide();$('#url_link_address').hide(); " checked>
+                <input id="file_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').show();$('#url_selection').hide();$('#url_link_address').hide();$('#extra_name').show(); " checked>
                 File
             </label>
             <label class = "radio" for="url_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show();$('#url_link_address').show();">
+                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show();$('#extra_name').hide();$('#url_link_address').show();">
                 External URL
             </label>
             <label class = "radio" for="image_selection_radio">
-                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show(); $('#url_link_address').hide();">
+                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show(); $('#url_link_address').hide();$('#extra_name').show();">
                 Image
             </label>
 
         <br>
         <br>
+
+        <label id="url_link_address">
+            <span>
+                <strong>Address link</strong><br />
+            </span>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+        </label>
+
+<br>
+
         <label id="extra_name">
             <span>
                 <strong>Name of additional Information</strong><br />
@@ -62,13 +72,7 @@
         </label>
 
 
-        <br>
-        <label id="url_link_address">
-            <span>
-                <strong>Address link</strong><br />
-            </span>
-            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
-        </label>
+        
 
     </div>
 
