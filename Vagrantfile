@@ -34,24 +34,33 @@ $stderr.sync = true
 
 require 'json'
 
-def gen_scripts()
+def gen_script(machine_name, worker: false)
+  no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
   extra = ENV.fetch('EXTRA', '')
 
+  setup_cmd = 'bash ${GIT_PATH}/.setup/'
+  if worker
+    setup_cmd += 'install_worker.sh'
+  else
+    setup_cmd += 'vagrant/setup_vagrant.sh'
+    if no_submissions
+      setup_cmd += ' --no_submissions'
+    end
+  end
+  unless extra.empty?
+    setup_cmd += " #{extra}"
+  end
+  setup_cmd += " | tee ${GIT_PATH}/.vagrant/logs/#{machine_name}.log"
+
   script = <<SCRIPT
-  GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-  DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-  VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-  bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV.has_key?('NO_SUBMISSIONS') ? '--no_submissions' : ''} #{extra} 2>&1 | tee ${GIT_PATH}/.vagrant/install_${DISTRO}_${VERSION}.log
+    GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
+    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
+    mkdir -p ${GIT_PATH}/.vagrant/logs
+    #{setup_cmd}
 SCRIPT
 
-  worker_script = <<SCRIPT
-  GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
-  DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-  VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
-  bash ${GIT_PATH}/.setup/install_worker.sh #{extra} 2>&1 | tee ${GIT_PATH}/.vagrant/install_worker.log
-SCRIPT
-
-  return script, worker_script
+  return script
 end
 
 base_boxes = Hash[]
@@ -112,23 +121,22 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  script, worker_script = gen_scripts()
-
-  get_workers.map do |worker, data|
-    config.vm.define worker do |ubuntu|
+  get_workers.map do |worker_name, data|
+    config.vm.define worker_name do |ubuntu|
       ubuntu.vm.network 'private_network', ip: data[:ip_addr]
       ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
-      ubuntu.vm.provision 'shell', inline: worker_script
+      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true)
     end
   end
 
-  config.vm.define 'ubuntu-22.04', primary: true do |ubuntu|
+  vm_name = 'ubuntu-22.04'
+  config.vm.define vm_name, primary: true do |ubuntu|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
     ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
     ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: script
+    ubuntu.vm.provision 'shell', inline: gen_script(vm_name)
   end
 
   config.vm.provider 'virtualbox' do |vb, override|

@@ -27,6 +27,6 @@ if ! sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}; t
 For whatever reason, Vagrant has failed to build. If reporting
 an error to the developers, please be sure to also send the
 build log of Vagrant located at:
-.vagrant/install_${DISTRO}_${VERSION}.log.
+.vagrant/logs/${DISTRO}_${VERSION}.log.
 "
 fi
