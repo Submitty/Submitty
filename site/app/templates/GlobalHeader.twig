@@ -214,7 +214,7 @@
 
                 <div style="display: flex">
 
-<button class="speech-bubble" onclick = "changeDisplayBanner()">
+<button class="speech-bubble" id="speech-bubble" onclick = "changeDisplayBanner()">
   Click Me!
 </button >
 
@@ -380,6 +380,9 @@
     var images = document.getElementsByClassName('club-banners');
     if (images.length >0 ) {
         images[currentImageIndex].classList.add("active");
+    }
+    else {
+        document.getElementById("speech-bubble").style.display = 'none';
     }
     for (var i = 0; i < images.length; i++) {
         var className = images[i].className.split(' ')[1];
