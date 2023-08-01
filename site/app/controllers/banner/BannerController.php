@@ -75,7 +75,7 @@ class BannerController extends AbstractController {
                 if (!@copy($uploaded_files["tmp_name"][$j], $dst)) {
                     return JsonResponse::getErrorResponse("Failed to copy uploaded file '{$uploaded_files['name'][$j]}' to current location.");
                 }
-            } 
+            }
             else {
                 return JsonResponse::getErrorResponse("The temporary file '{$uploaded_files['name'][$j]}' was not properly uploaded.");
             }
@@ -148,7 +148,7 @@ class BannerController extends AbstractController {
             if (!unlink($full_path)) {
                 return JsonResponse::getErrorResponse("Failed to delete the file.");
             }
-        } 
+        }
         else {
             return JsonResponse::getErrorResponse("File not found.");
         }

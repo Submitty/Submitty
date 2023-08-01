@@ -5,13 +5,8 @@ declare(strict_types=1);
 namespace app\views\banner;
 
 use app\libraries\FileUtils;
-use app\models\User;
 use app\views\AbstractView;
-use app\views\NavigationView;
-use app\libraries\Core;
-
 use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
 
 class BannerView extends AbstractView {
     /**
@@ -36,6 +31,6 @@ class BannerView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "banners" => $bannerImages,
 
-    ]);
+        ]);
     }
 }

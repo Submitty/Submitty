@@ -1,14 +1,9 @@
 <?php
 
 namespace app\views;
-use app\models\User;
+
 use app\libraries\FileUtils;
-use DirectoryIterator;
-
 use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
-
-use app\libraries\Core;
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only) {
         $messages = [];
@@ -47,13 +42,11 @@ class GlobalView extends AbstractView {
         //NEW WAY -----------------------------------
 
         $bannerImages = $this->core->getBannerEntityManager()->getRepository(BannerImage::class) ->findall();
-        $currentDate = new \DateTime();;
+        $currentDate = new \DateTime();
         foreach ($bannerImages as $banner) {
-
             if ($banner->getReleaseDate() > $currentDate || $currentDate > $banner->getClosingDate()) {
                 continue;
             }
-            
             //FUTURE MIGHT NEED TO FIX SO WE ADD MID PATH
             $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getName());
 
@@ -69,7 +62,7 @@ class GlobalView extends AbstractView {
 
             $extraPathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "banner_images", $banner->getClosingDate()->format('Y'), $banner->getExtraInfo());
 
-            if (strpos($banner->getExtraInfo(), "pdf") !== false){
+            if (strpos($banner->getExtraInfo(), "pdf") !== false) {
                 $type = "pdf";
             }
             else {
@@ -83,7 +76,6 @@ class GlobalView extends AbstractView {
                 "type" => $type,
                 "extra_info" => base64_encode(file_get_contents($extraPathName))
             ];
-            
         }
 
 

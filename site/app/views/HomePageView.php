@@ -3,13 +3,6 @@
 namespace app\views;
 
 use app\models\User;
-use app\libraries\FileUtils;
-use DirectoryIterator;
-
-use app\entities\banner\BannerImage;
-use app\repositories\banner\BannerImageRepository;
-
-use app\libraries\Core;
 
 class HomePageView extends AbstractView {
     /**
@@ -30,8 +23,6 @@ class HomePageView extends AbstractView {
             User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
             User::GROUP_STUDENT                 => "Student:"
         ];
-
-
 
         foreach ($course_types as $course_type) {
             $ranks = [];
@@ -54,7 +45,6 @@ class HomePageView extends AbstractView {
                 return count($rank["courses"]) > 0;
             });
             $statuses[] = $ranks;
-            
         }
 
         $this->output->addInternalCss('homepage.css');
@@ -64,8 +54,6 @@ class HomePageView extends AbstractView {
             "user" => $user,
             "statuses" => $statuses,
         ]);
-
-
     }
 
     public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
@@ -96,7 +84,4 @@ class HomePageView extends AbstractView {
             "latest_tag" => $this->core->getConfig()->getLatestTag()
         ]);
     }
-
-
-
 }
