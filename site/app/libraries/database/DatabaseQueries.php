@@ -3935,7 +3935,7 @@ ORDER BY {$section_key}",
 
         $this->course_db->query(
             "
-            SELECT count(*) as cnt, {$section_key}            
+            SELECT gradeable_teams.team_id, count(*) as cnt, {$section_key}
             FROM gradeable_teams
             INNER JOIN electronic_gradeable_version
             ON
@@ -3949,23 +3949,43 @@ ORDER BY {$section_key}",
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.team_id=gradeable_teams.team_id
-            AND SPLIT_PART(ldc.team_id, '_', 2) = ldc.user_id
+            AND ldc.submission_days_late>0
             AND ldc.submission_days_late>ldc.late_day_exceptions 
             And ldc.late_days_change =0
             {$where}
-            GROUP BY {$section_key}
-            ORDER BY {$section_key}",
+            GROUP BY gradeable_teams.team_id, {$section_key}
+            ORDER BY gradeable_teams.team_id, {$section_key}",
             $params
         );
 
+        $teamsCounted = [];
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
             }
-            $return[$row[$section_key]] = intval($row['cnt']);
+            $teamId = $row['team_id'];
+            $section = $row[$section_key];
+            $count = intval($row['cnt']);
+            if (!isset($teamsCounted[$teamId])) {
+                $teamsCounted[$teamId] = [];
+            }
+            $teamsCounted[$teamId][$section] = $count;
         }
 
-
+        foreach ($this->course_db->rows() as $row) {
+            $teamId = $row['team_id'];
+            $section = $row[$section_key];
+            // Check if the team exists in $teamsCounted for this section
+            if (isset($teamsCounted[$teamId][$section])) {
+                // Increment the count for this section in $return
+                if (!isset($return[$section])) {
+                    $return[$section] = 1;
+                }
+                else {
+                $return[$section]++;
+                }
+            }
+        }
         return $return;
     }
 
