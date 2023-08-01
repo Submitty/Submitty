@@ -100,8 +100,8 @@ class LateDays extends AbstractModel {
 
     /**
      * Sort the graded gradeables and late day updates by due date
-     * @param array $graded_gradeables Collection of GradedGradeable objects
-     * @return array<string,DateTime>|array<string,GradedGradeable> The information for each late day update/graded gradeable
+     * @param GradedGradeable[] $graded_gradeables 
+     * @return array<string,GradedGradeable>
      */
     private function createLateDayEvents($graded_gradeables) {
         $late_day_events = array_merge(
@@ -272,7 +272,7 @@ class LateDays extends AbstractModel {
 
     /**
      * Create event information for a given late day event
-     * @param array<string,DateTime>|array<string,GradedGradeable> The information about this late day update/graded gradeable
+     * @param array<string,GradedGradeable> $event
      * @param int $late_days_remaining late days remaining after this event took place
      * @param int $late_days_change the increase or decrease of late days from this event
      * @return array<string,int> Information needed in order to construct a LateDayInfo object
@@ -304,7 +304,7 @@ class LateDays extends AbstractModel {
      * Gets the number of late days remaining from the previous number
      * of late days remaining.
      * @param int $prev_late_days_available The number of late days availabe at the prev time stamp
-     * @param array<string,DateTime>|array<string,GradedGradeable> The information about this late day update/graded gradeable
+     * @param array<string,GradedGradeable> $event
      * @return LateDayInfo
      */
     public function getLateDayInfoFromPrevious($prev_late_days_available, $event) {
