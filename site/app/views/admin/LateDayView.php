@@ -134,9 +134,9 @@ class LateDayView extends AbstractView {
         ]);
     }
     /**
-         * @param array<Student> $students 
-         * @param array<LateDays>$ initial_late_days
-         */
+     * @param array<Student> $students 
+     * @param array<LateDays>$ initial_late_days
+     */
     public function displayLateDayCache($students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
