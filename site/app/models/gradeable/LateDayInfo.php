@@ -378,14 +378,6 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
-     * Returns true if this event is a graded gradeable charge with regrades allowed
-     * @return bool
-     */
-    public function isRegradeAllowed() {
-        return $this->graded_gradeable !== null && $this->graded_gradeable->getGradeable()->isRegradeAllowed();
-    }
-
-    /*
      * Returns true if this event is a graded gradeable charge with grade inquiries allowed
      * @return bool
      */

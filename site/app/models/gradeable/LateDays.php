@@ -30,6 +30,7 @@ class LateDays extends AbstractModel {
      * @param Core $core
      * @param User $user
      * @param GradedGradeable[] $graded_gradeables An array of only GradedGradeables
+     * @param bool $reCache
      * @param array|null $late_day_updates
      */
     public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null, $reCache = false) {
@@ -100,7 +101,7 @@ class LateDays extends AbstractModel {
     /**
      * Sort the graded gradeables and late day updates by due date
      * @param array $graded_gradeables Collection of GradedGradeable objects
-     * @return array The information for each late day update/graded gradeable
+     * @return array<string,DateTime>|array<string,GradedGradeable>|array<string,LateDayUpdate> The information for each late day update/graded gradeable
      */
     private function createLateDayEvents($graded_gradeables) {
         $late_day_events = array_merge(
@@ -271,10 +272,10 @@ class LateDays extends AbstractModel {
 
     /**
      * Create event information for a given late day event
-     * @param array $event The information about this late day update/graded gradeable
+     * @param array<string,DateTime>|array<string,GradedGradeable>|array<string,LateDayUpdate> $event The information about this late day update/graded gradeable
      * @param int $late_days_remaining late days remaining after this event took place
      * @param int $late_days_change the increase or decrease of late days from this event
-     * @return array Information needed in order to construct a LateDayInfo object
+     * @return array<string,int> Information needed in order to construct a LateDayInfo object
      */
     private function createEventInfo($event, $late_days_remaining, $late_days_change) {
         $event_info = [
@@ -303,7 +304,7 @@ class LateDays extends AbstractModel {
      * Gets the number of late days remaining from the previous number
      * of late days remaining.
      * @param int $prev_late_days_available The number of late days availabe at the prev time stamp
-     * @param array $event The information about this late day update/graded gradeable
+     * @param array<string,DateTime>|array<string,GradedGradeable>|array<string,LateDayUpdate> $event The information about this late day update/graded gradeable
      * @return LateDayInfo
      */
     public function getLateDayInfoFromPrevious($prev_late_days_available, $event) {

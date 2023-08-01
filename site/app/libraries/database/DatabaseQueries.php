@@ -1467,7 +1467,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * it will only calculate the cache for the uses who DO NOT already have
      * late day cache calculated
      */
-    public function generateLateDayCacheForUsers($g_id = null) {
+    public function generateLateDayCacheForUsers(string $g_id = null): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$g_id, $default_late_days];
 
@@ -1492,7 +1492,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
-    public function addLateDayCacheForGradeable(string $user_id, LateDayInfo $late_day_info) {
+    public function addLateDayCacheForGradeable(string $user_id, LateDayInfo $late_day_info): void {
         $params = [$user_id];
         $params[] = $late_day_info->getId();
         $params[] = $late_day_info->getEventTitle();
@@ -1512,7 +1512,7 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
-    public function addLateDayCacheForLateDayUpdate(string $user_id, LateDayInfo $late_day_info) {
+    public function addLateDayCacheForLateDayUpdate(string $user_id, LateDayInfo $late_day_info): void {
         $params = [$user_id];
         $params[] = $late_day_info->getLateDayEventTime();
         $params[] = $late_day_info->getLateDaysRemaining();
@@ -1524,37 +1524,13 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query($query, $params);
     }
 
-    public function addLateDayCacheForUser(User $user, LateDayInfo $late_day_info) {
+    public function addLateDayCacheForUser(User $user, LateDayInfo $late_day_info): void {
         if ($late_day_info->isLateDayUpdate()) {
             $this->addLateDayCacheForLateDayUpdate($user->getId(), $late_day_info);
         }
         else {
             $this->addLateDayCacheForGradeable($user->getId(), $late_day_info);
         }
-    }
-
-    public function flushLateDayCacheForUserFromContext(User $user, \DateTime $context) {
-        $params = [$user->getId(), $context];
-        $query = "DELETE FROM late_day_cache
-                    WHERE user_id=? AND late_day_date>=?";
-        $this->course_db->query($query, $params);
-    }
-
-    public function bulkUploadLateDayCache(array $late_day_cache) {
-        $query = "INSERT INTO late_day_cache 
-                    (SELECT 
-                      (value->>'g_id') AS g_id,
-                      (value->>'user_id') AS user_id,
-                      (value->>'team_id') AS team_id,
-                      (value->>'late_day_date')::timestamp AS late_day_date,
-                      (value->>'late_days_remaining')::integer AS late_days_remaining,
-                      (value->>'late_days_allowed')::integer AS late_days_allowed,
-                      (value->>'submission_days_late')::integer AS submission_days_late,
-                      (value->>'late_day_exceptions')::integer AS late_day_exceptions,
-                      (value->>'late_day_status')::integer AS late_day_status,
-                      (value->>'late_days_change')::integer AS late_days_change
-                    FROM json_array_elements(?))";
-        $this->course_db->query($query, [json_encode($late_day_cache)]);
     }
 
     /**
@@ -1645,7 +1621,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Get the Late Day Info for each user associated with a user and gradeable
      * @param User $user
      * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo
+     * @return LateDayInfo|null
      */
     public function getLateDayInfoForUserGradeable($user, $graded_gradeable) {
 
@@ -1668,7 +1644,7 @@ WHERE semester=? AND course=? AND user_id=?",
      * Get the Late Day Info for each user associated with a submitter and gradeable
      * @param Submitter $submitter
      * @param GradedGradeable $graded_gradeable
-     * @return LateDayInfo|array<string,LateDayInfo>
+     * @return LateDayInfo|array<string,LateDayInfo>|null
      */
     public function getLateDayInfoForSubmitterGradeable($submitter, $graded_gradeable) {
         // Collect Late Day Info for each user associated with the submitter
@@ -1707,13 +1683,6 @@ WHERE semester=? AND course=? AND user_id=?",
     public function flushAllLateDayCache() {
         $query = "DELETE FROM late_day_cache";
         $this->course_db->query($query);
-    }
-
-    public function flushLateDayCacheForUser(User $user) {
-        $params = [$user->getId()];
-        $query = "DELETE FROM late_day_cache
-                    WHERE user_id=?";
-        $this->course_db->query($query, $params);
     }
 
     public function getLateDayUpdateTimestamps() {
@@ -2160,7 +2129,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         return $return;
     }
 
-    public function getAverageComponentScores($g_id, $section_key, $is_team, $override, $bad_submissions, $null_section) {
+    public function getAverageComponentScores($g_id, $section_key, $is_team, string $override, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2314,7 +2283,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores($g_id, $section_key, $is_team, $bad_submissions, $null_section) {
+    public function getAverageAutogradedScores($g_id, $section_key, $is_team, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2432,7 +2401,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable($g_id, $section_key, $is_team, $override, $bad_submissions, $null_section) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team, string $override, string $bad_submissions, string $null_section) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
