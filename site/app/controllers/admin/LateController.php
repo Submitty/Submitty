@@ -64,6 +64,7 @@ class LateController extends AbstractController {
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
+
         return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
     }
 
@@ -73,7 +74,9 @@ class LateController extends AbstractController {
      */
     public function calculateLateDayCache() {
         $this->core->getQueries()->generateLateDayCacheForUsers();
+
         $this->core->addSuccessMessage("Late day cache calculated!");
+
         return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
     }
 
@@ -95,8 +98,6 @@ class LateController extends AbstractController {
                 );
             }
             else {
-                $late_day_status = null;
-
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
@@ -131,8 +132,6 @@ class LateController extends AbstractController {
 
             $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
 
-            $late_day_status = null;
-
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
@@ -164,8 +163,6 @@ class LateController extends AbstractController {
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
         $this->core->addSuccessMessage("Late days entry removed");
 
-        $late_day_status = null;
-
         return $this->getLateDays();
     }
 
@@ -185,7 +182,6 @@ class LateController extends AbstractController {
                 );
             }
             else {
-                $late_day_status = null;
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
@@ -248,8 +244,6 @@ class LateController extends AbstractController {
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if ($team != null && $team->getSize() > 1) {
-                $return = null;
-
                 if ($option == 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
@@ -261,7 +255,7 @@ class LateController extends AbstractController {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
-                    $return = MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                    return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
@@ -274,18 +268,12 @@ class LateController extends AbstractController {
                         "admin/users/MoreExtensions.twig",
                         ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
                     );
-                    $return = MultiResponse::JsonOnlyResponse(
+                    return MultiResponse::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
                 }
-
-                $late_day_status = null;
-
-                return $return;
             }
             else {
-                $late_day_status = null;
-
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
