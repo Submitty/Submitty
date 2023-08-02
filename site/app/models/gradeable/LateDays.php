@@ -304,7 +304,7 @@ class LateDays extends AbstractModel {
      * Gets the number of late days remaining from the previous number
      * of late days remaining.
      * @param int $prev_late_days_available The number of late days availabe at the prev time stamp
-     * @param array<string, DateTime> $event | array<string, GradedGradeable> $event
+     * @param array<string, mixed> $event
      * @return LateDayInfo
      */
     public function getLateDayInfoFromPrevious($prev_late_days_available, $event) {
