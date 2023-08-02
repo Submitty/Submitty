@@ -2533,7 +2533,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $params = array_merge($sections, $params);
         }
         if ($null_section == 'include') {
-           $null_section_condition = " IS NOT FALSE";
+            $null_section_condition = " IS NOT FALSE";
         }
 
         $this->course_db->query(
