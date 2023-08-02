@@ -55,6 +55,7 @@ describe('Test cases for grading stats', () => {
             text.should('contain', 'Students who have submitted on time: 64 / 101 (63.4%)');
             text.should('contain', 'Current percentage of TA grading done: 64 / 64 (100.0%)');
             text.should('contain', 'Section 1: 10 / 10 (100.0%)');
+            text.should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');
         });
     });
 });
