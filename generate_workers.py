@@ -25,7 +25,7 @@ def get_args():
 def main():
     args = get_args()
     workers = OrderedDict()
-    workerfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.vagrant', 'workers')
+    workerfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.vagrant', 'workers.json')
 
     if os.path.isfile(workerfile):
         if input('Overwrite existing worker configuration? [y/N] ').lower() != 'y':
