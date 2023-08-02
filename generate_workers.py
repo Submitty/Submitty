@@ -14,7 +14,7 @@ def get_args():
 
     parser.add_argument('-n', '--num', default=1, type=int,
                         help='Number of worker machines to configure')
-    parser.add_argument('--ip-range', default='192.168.56.0/24', type=ipaddress.ip_interface,
+    parser.add_argument('--ip-range', default='192.168.56.0/24', type=ipaddress.ip_network,
                         help='IP address range for workers')
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
@@ -31,10 +31,15 @@ def main():
         if input('Overwrite existing worker configuration? [y/N] ').lower() != 'y':
             return
 
-    ips = args.base_ip.network.hosts()
-    for i in range(1, args.n+1):
+    ips = args.ip_range.hosts()
+    if type(ips) == list:
+        ips = iter(ips)
+    for i in range(1, args.num+1):
+        ip = next(ips, None)
+        if ip is None:
+            raise IndexError("IP range insufficient for requested number of workers")
         data = OrderedDict()
-        data['ip_addr'] = str(next(ips))
+        data['ip_addr'] = str(ip)
         data['base_port'] = args.base_port + i
         workers[f'worker-{i}'] = data
 
