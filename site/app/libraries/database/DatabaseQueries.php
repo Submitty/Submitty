@@ -2065,15 +2065,13 @@ ORDER BY {$u_or_t}.{$section_key}",
          $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
-        $team_condition = "";
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
             $user_or_team_id = "team_id";
-            $team_condition = "AND SPLIT_PART(ldc.team_id, '_', 2) = ldc.user_id";
         }
         $return = [];
-        $params = [$g_id,$g_id];
+        $params = [$g_id,$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
@@ -2099,18 +2097,16 @@ ORDER BY {$u_or_t}.{$section_key}",
             ON 
             eg.g_id=egv.g_id
             AND eg.eg_submission_due_date IS NOT NULL
-        INNER JOIN late_day_cache AS ldc
-            ON ldc.g_id=eg.g_id
-            AND ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-            {$team_condition}
+            INNER JOIN (SELECT DISTINCT ldc.{$user_or_team_id}
+            FROM late_day_cache AS ldc
+            WHERE ldc.g_id=? 
             AND ldc.submission_days_late>ldc.late_day_exceptions 
-            And ldc.late_days_change =0
+            And ldc.late_days_change =0) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
             ORDER BY {$u_or_t}.{$section_key}",
             $params
         );
-
         foreach ($sections as $val) {
             $return[$val] = 0;
         }
