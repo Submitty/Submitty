@@ -2520,17 +2520,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {
+    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section) {
         $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
         $type = $gradeable->isTeamAssignment() ? 'team' : 'user';
-
+        $null_section_condition = "";
         $params = [$gradeable->getId()];
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$grade_type}_section IN " . $this->createParameterList(count($sections)) . " IS NOT FALSE";
+            $sections_query = "{$grade_type}_section IN " . $this->createParameterList(count($sections));
             $params = array_merge($sections, $params);
+        }
+        if ($null_section == 'include') {
+           $null_section_condition = " IS NOT FALSE";
         }
 
         $this->course_db->query(
@@ -2539,7 +2542,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             FROM gradeable_data AS gd
             INNER JOIN (
                 SELECT u.{$type}_id, u.{$grade_type}_section FROM {$table} AS u
-                WHERE u.{$sections_query}
+                WHERE u.{$sections_query} {$null_section_condition}
             ) AS u
             ON gd.gd_{$type}_id=u.{$type}_id
             WHERE gd.g_id = ? AND gd.gd_user_viewed_date IS NOT NULL
