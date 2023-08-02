@@ -70,7 +70,9 @@ Form
 <br />
 <fieldset>
     <legend>
-        How should grading be anonymized for instructors and full access graders?
+        What should the default anonymization of students be for instructors and full access graders? </br>
+        <em>(Individual instructors and full access graders can override this setting for themselves on the
+        gradeable's index page.)<em>
     </legend>
     <input type="radio" name="instructor_blind" value="1" id="unblind_instructor_grading"
         {{ (gradeable.getInstructorBlind() == 1) ? 'checked' : '' }}> <label for="unblind_instructor_grading">Unblinded Grading</label>
