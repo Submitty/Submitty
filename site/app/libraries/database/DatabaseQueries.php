@@ -2520,7 +2520,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections, $null_section) {
+    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections, string $null_section) {
         $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
         $type = $gradeable->isTeamAssignment() ? 'team' : 'user';
