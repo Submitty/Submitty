@@ -676,6 +676,11 @@ function loadCalendar(month_, year_, day_, type) {
     else {
         calendar.appendChild(generateCalendarOfMonthWeek(year_, month_, day_));
     }
+    console.log(`calendar year: ${year_} month: ${month_}`);
+    Cookies.remove('calendar_year');
+    Cookies.set('calendar_year', year_);
+    Cookies.remove('calendar_month');
+    Cookies.set('calendar_month', month_);
 }
 
 /**
