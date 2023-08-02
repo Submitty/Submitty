@@ -62,13 +62,7 @@
     <script>
         window.onload = function() {
             var button = document.getElementById('inquiryButton');
-            var inquiry = localStorage.getItem('inquiry_status');
-            if (inquiry != null){
-                status = inquiry ==='on';
-            }
-            else{
-                var status = Cookies.get('inquiry_status') === 'on';
-            }
+            var status = Cookies.get('inquiry_status') === 'on';
             if (status) {
                 grade_inquiry_only();
                 button.innerHTML = "Grade Inquiry Only: On";

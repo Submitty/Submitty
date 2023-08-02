@@ -200,6 +200,10 @@ $(function () {
 });
 
 function changeStudentArrowTooltips(data) {
+  let inquiry_status = localStorage.getItem('inquiry_status');
+  if (inquiry_status === 'on'){
+    data = 'inquiry';
+  }
   let component_id = NO_COMPONENT_ID;
   switch(data) {
     case "ungraded":
@@ -622,6 +626,11 @@ function gotoPrevStudent() {
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
+  let inquiry_status = localStorage.getItem('inquiry_status');
+  if (inquiry_status === 'on'){
+    filter = 'inquiry';
+  }
+
   let selector = "#prev-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
@@ -669,6 +678,11 @@ function gotoNextStudent() {
   let filter = localStorage.getItem("general-setting-arrow-function") || "default";
   let navigate_assigned_students_only = localStorage.getItem("general-setting-navigate-assigned-students-only") !== "false";
 
+  let inquiry_status = localStorage.getItem('inquiry_status');
+  if (inquiry_status === 'on'){
+    filter = 'inquiry';
+  }
+  
   let selector = "#next-student";
   let window_location = $(selector)[0].dataset.href + "&filter=" + filter;
 
