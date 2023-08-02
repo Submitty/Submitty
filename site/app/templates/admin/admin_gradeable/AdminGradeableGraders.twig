@@ -72,10 +72,10 @@ Form
     <legend>
         How should grading be anonymized for instructors and full access graders?
     </legend>
-    <input type="radio" name="InstructorBlind" value="1" id="unblind_instructor_grading"
+    <input type="radio" name="instructor_blind" value="1" id="unblind_instructor_grading"
         {{ (gradeable.getInstructorBlind() == 1) ? 'checked' : '' }}> <label for="unblind_instructor_grading">Unblinded Grading</label>
 
-    <input type="radio" name="InstructorBlind" value="2" id="blind_instructor_grading"
+    <input type="radio" name="instructor_blind" value="2" id="blind_instructor_grading"
         {{ (gradeable.getInstructorBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_instructor_grading">Blinded Grading</label>
 
 </fieldset>
