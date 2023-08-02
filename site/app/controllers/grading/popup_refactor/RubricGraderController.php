@@ -222,7 +222,6 @@ class RubricGraderController extends AbstractController {
     ): string {
         // Blind Settings for Instructors and Full Access Graders:
         if ($user_group === User::GROUP_INSTRUCTOR || $user_group === User::GROUP_FULL_ACCESS_GRADER) {
-            
             $anon_mode = $gradeable->getInstructorBlind() - 1;
             $anon_mode_enabled = "anon_mode_" . $gradeable->getId();
             $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
