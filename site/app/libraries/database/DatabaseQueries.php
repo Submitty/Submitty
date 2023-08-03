@@ -2162,7 +2162,7 @@ ORDER BY {$u_or_t}.{$section_key}",
         // Check if we want to include late (bad) submissions into the average
         if ($bad_submissions != 'include' && $bad_submission_count > 0) {
             $bad_submissions_condition = "INNER JOIN(
-                SELECT ldc.{$user_or_team_id}
+                SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
                 WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
@@ -3840,7 +3840,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE AND";
+            $sections_query = " ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE AND";
             $params = array_merge($sections, $params);
         }
         if ($section_key === 'registration_section') {
@@ -3854,7 +3854,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             "
 SELECT count(*) as cnt, {$section_key}
 FROM gradeable_teams
-{$sections_query} g_id=? AND team_id IN (
+WHERE {$sections_query} g_id=? AND team_id IN (
   SELECT team_id
   FROM teams
 )
