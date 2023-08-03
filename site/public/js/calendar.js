@@ -681,6 +681,8 @@ function loadCalendar(month_, year_, day_, type) {
     Cookies.set('calendar_year', year_);
     Cookies.remove('calendar_month');
     Cookies.set('calendar_month', month_);
+    Cookies.remove('calendar_day');
+    Cookies.set('calendar_day', day_);
 }
 
 /**

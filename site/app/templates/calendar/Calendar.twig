@@ -15,6 +15,7 @@
 
         cookie_year = parseInt(Cookies.get('calendar_year'));
         cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
         if (isNaN(cookie_year)) {
             cookie_year = curr_year;
             //Cookies.set('calendar_year', curr_year);
@@ -25,7 +26,10 @@
             //Cookies.set('calendar_month', curr_month);
             //console.log(`month undefined. cookie_month: ${cookie_month} cookie(calendar_month): ${Cookies.get('calendar_month')}`);
         }
-        loadCalendar(cookie_month, cookie_year, curr_day, type);
+        if (isNaN(cookie_day)) {
+            cookie_day = curr_day;
+        }
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
 
         //loadCalendar(curr_month, curr_year, curr_day, type);
     });
