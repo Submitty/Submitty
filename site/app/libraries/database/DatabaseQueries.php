@@ -1674,16 +1674,7 @@ WHERE semester=? AND course=? AND user_id=?",
                 ) != 3";
         $this->course_db->query($query, $params);
 
-//        $version = 0;
-//        // Get gradeable version where all submitters have a good status
-//        if ($gg->getGradeable()->isTeamAssignment()) {
-//            // Check if all members have a valid instance
-//            if ($this->course_db->getRowCount() === count($gg->getSubmitter()->getTeam()->getMemberUsers())) {
-//                foreach ($this->course_db->rows() as $row) {
-//                    $version = min($row['g_version']);
-//                }
-//            }
-//        }
+
         $version = 0;
 // Get gradeable version where all submitters have a good status
         if ($gg->getGradeable()->isTeamAssignment()) {
