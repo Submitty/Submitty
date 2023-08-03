@@ -32,7 +32,7 @@ def main():
             return
 
     ips = args.ip_range.hosts()
-    if type(ips) == list:
+    if isinstance(ips, list):
         ips = iter(ips)
     for i in range(1, args.num+1):
         ip = next(ips, None)
