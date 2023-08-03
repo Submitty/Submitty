@@ -19,8 +19,8 @@ describe('Test cases for grading stats', () => {
             const text = cy.get('#left-grading-stats');
             text.should('contain', 'Students on a team: 101/101 (100%)');
             text.should('contain', 'Number of teams: 36');
-            text.should('contain', 'Teams who have submitted on time: 27 / 36 (69.4%)');
-            text.should('contain', 'Section 1: 3 / 4 (33.3%)');
+            text.should('contain', 'Teams who have submitted on time: 27 / 36 (75%)');
+            text.should('contain', 'Section 1: 2 / 4 (50.0%)');
         });
 
         it(`${user} view should be accurate for grades.`, () => {
@@ -35,8 +35,8 @@ describe('Test cases for grading stats', () => {
             cy.get('a[href*="/sample/gradeable/grading_homework/grading/status"]').click();
 
             const text = cy.get('#left-grading-stats');
-            text.should('contain', 'Students who have submitted on time: 68 / 101 (58.4%)');
-            text.should('contain', 'Current percentage of TA grading done: 33 / 68 (50.8%)');
+            text.should('contain', 'Students who have submitted on time: 68 / 101 (67.3%)');
+            text.should('contain', 'Current percentage of TA grading done: 33 / 68 (48.5%)');
             text.should('contain', 'Section 1: 4 / 9 (44.4%)');
         });
 
@@ -52,7 +52,7 @@ describe('Test cases for grading stats', () => {
             cy.get('a[href*="/sample/gradeable/grades_released_homework/grading/status"]').click();
 
             const text = cy.get('#left-grading-stats');
-            text.should('contain', 'Students who have submitted on time: 71 / 101 (63.4%)');
+            text.should('contain', 'Students who have submitted on time: 71 / 101 (70.3%)');
             text.should('contain', 'Current percentage of TA grading done: 71 / 71 (100.0%)');
             text.should('contain', 'Section 1: 10 / 10 (100.0%)');
             text.should('contain', 'Number of students who have viewed their grade: 49 / 71 (69.0%)');
