@@ -983,22 +983,28 @@ HTML;
         elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE && $rollback_submission > 0) {
             $error_message = [
                 "color" => "var(--standard-creamsicle-orange)",
-                "message" => "Late Submission (Rollback to on-time submission - Version #" . $rollback_submission . ")"
+                "message" => "Bad Submission (Rollback to valid submission - Version #" . $rollback_submission . ")"
             ];
         }
         elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
             if ($gradeable->isTeamAssignment()) {
                 $error_message = [
                     "color" => "var(--standard-red-orange)",
-                    "message" => "Late Submission (At least 1 team member has no on-time submission)"
+                    "message" => "Bad Submission (At least 1 team member has no valid submission)"
                 ];
             }
             else {
                 $error_message = [
                     "color" => "var(--standard-red-orange)", // fire engine red
-                    "message" => "Late Submission (No on time submission available)"
+                    "message" => "Bad Submission (No valid submission available)"
                 ];
             }
+        }
+        elseif ($late_status === LateDayInfo::STATUS_LATE) {
+            $error_message = [
+                "color" => "var(--standard-medium-orange)", // fire engine red
+                "message" => "Late Submission (Using one or more late days)"
+            ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
             $pattern1 = "upload.pdf";
