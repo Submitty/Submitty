@@ -807,8 +807,8 @@ class ForumThreadView extends AbstractView {
             $titleDisplay = $thread['title'];
 
             //replace tags from displaying in sidebar
-            $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-            $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+            $first_post_content = str_replace("`", "", strip_tags($first_post["content"]));
+            $temp_first_post_content = preg_replace('#\[(.*?)\]\((.*?)\)#', '$2', $first_post_content);
 
             if (!empty($temp_first_post_content)) {
                 $first_post_content = $temp_first_post_content;
@@ -1003,7 +1003,7 @@ class ForumThreadView extends AbstractView {
             $reply_level = 1;
         }
 
-        if ($post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
+        if (isset($post["author_user_group"]) && $post["author_user_group"] <= User::GROUP_FULL_ACCESS_GRADER) {
             $visible_username = $given_name . " " . $family_name;
         }
 
