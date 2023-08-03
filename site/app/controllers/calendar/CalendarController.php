@@ -47,10 +47,11 @@ class CalendarController extends AbstractController {
         }
 
         $filtered_courses = [];
-        if ($show_all_courses === '1'){
+        if ($show_all_courses === '1') {
             $filtered_courses = $courses;
-        } 
-        else { //If can't see all courses, see specific course
+        }
+        else {
+            //If can't see all courses, see specific course
             if (isset($_COOKIE['calendar_course'])) { //if cookie exists, find matching course
                 $found_course = false;
                 foreach ($courses as $course) {

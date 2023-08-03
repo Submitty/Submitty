@@ -36,7 +36,7 @@ class CalendarView extends AbstractView {
         }
 
         //Create list of courses and their term
-        $formatted_courses = array();
+        $formatted_courses = [];
         foreach ($courses as $course) {
             $course_string = sprintf("%s %s", $course->getTitle(), $course->getTerm());
             array_push($formatted_courses, $course_string);

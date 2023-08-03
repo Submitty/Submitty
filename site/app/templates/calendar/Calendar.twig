@@ -10,28 +10,21 @@
     $( document ).ready(function() {
         // Get value of the type dropdown
         const type = $("#calendar-item-type-edit").val();
-        //get cookie for curr the viewed month and year
-        console.log(`curr_year: ${curr_year}, curr_month: ${curr_month}`);
-
+        // Get cookie for curr the viewed day, month, and year
         cookie_year = parseInt(Cookies.get('calendar_year'));
         cookie_month = parseInt(Cookies.get('calendar_month'));
         cookie_day = parseInt(Cookies.get('calendar_day'));
         if (isNaN(cookie_year)) {
             cookie_year = curr_year;
-            //Cookies.set('calendar_year', curr_year);
-            //console.log(`year undefined. cookie_year: ${cookie_year} cookie(calendar_year): ${Cookies.get('calendar_year')}`);
         }
         if (isNaN(cookie_month)) {
             cookie_month = curr_month;
-            //Cookies.set('calendar_month', curr_month);
-            //console.log(`month undefined. cookie_month: ${cookie_month} cookie(calendar_month): ${Cookies.get('calendar_month')}`);
         }
         if (isNaN(cookie_day)) {
             cookie_day = curr_day;
         }
+        // Load the calendar to the correct day
         loadCalendar(cookie_month, cookie_year, cookie_day, type);
-
-        //loadCalendar(curr_month, curr_year, curr_day, type);
     });
 
     function changeView(x) {
