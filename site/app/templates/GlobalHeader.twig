@@ -375,7 +375,9 @@
     var currentImageIndex = 0;
     var hiddenImages = getHiddenImages();
     var images = document.getElementsByClassName('club-banners');
-    document.getElementById("banner").display = 'none';
+    bannerElement = document.getElementById("banner");
+    bannerElement.style.display = 'none';
+    bannerElement.style.width = "1%";
 
     var currentImages = [];
     for (var i = 0; i < images.length; i++) {
@@ -400,10 +402,12 @@
         var bannerElement = document.getElementById("banner");
         if (bannerElement.style.display === "none") {
             currentImages[currentImageIndex].classList.add("active");
+            bannerElement.style.width = "100%";
             bannerElement.style.display = "block";
         } 
         else {
             currentImages[currentImageIndex].classList.remove("active");
+            bannerElement.style.width = "1%";
             bannerElement.style.display = "none";
         }
     }
