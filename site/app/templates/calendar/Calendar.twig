@@ -13,14 +13,14 @@
         //get cookie for curr the viewed month and year
         console.log(`curr_year: ${curr_year}, curr_month: ${curr_month}`);
 
-        cookie_year = Cookies.get('calendar_year');
-        cookie_month = Cookies.get('calendar_month');
-        if (cookie_year === undefined) {
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        if (isNaN(cookie_year)) {
             cookie_year = curr_year;
             //Cookies.set('calendar_year', curr_year);
             //console.log(`year undefined. cookie_year: ${cookie_year} cookie(calendar_year): ${Cookies.get('calendar_year')}`);
         }
-        if (cookie_month === undefined) {
+        if (isNaN(cookie_month)) {
             cookie_month = curr_month;
             //Cookies.set('calendar_month', curr_month);
             //console.log(`month undefined. cookie_month: ${cookie_month} cookie(calendar_month): ${Cookies.get('calendar_month')}`);
