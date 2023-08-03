@@ -206,6 +206,8 @@ class User extends AbstractModel {
 
         $this->setPronouns($details['user_pronouns']);
 
+        $this->setDisplayPronouns($details['display_pronouns']);
+        
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
