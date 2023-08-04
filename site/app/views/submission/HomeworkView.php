@@ -1034,6 +1034,7 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
+            /*
             $notebook_data = null;
             $hidefiles = [];
             if ($autograding_config->isNotebookGradeable()) {
@@ -1055,6 +1056,13 @@ class HomeworkView extends AbstractView {
                     }
                 }
             }
+            */
+            $downloadable_files = [];
+            foreach (array_merge($files['submissions'], $files['checkout']) as $current_file) {
+                $file_path = $current_file->getRealPath();
+                
+            }
+
             $param = array_merge($param, [
                 'notebook' => $hidefiles,
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
