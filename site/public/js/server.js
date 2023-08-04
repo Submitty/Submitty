@@ -413,12 +413,37 @@ function newEditCourseMaterialsForm(tag) {
             url_label.css('display', 'none');
         }
     }
+
+    editFilePathRecommendations();
+
     $("#material-edit-form", form).attr('data-id', id);
     $("#edit-picker", form).attr('value', release_time);
     $("#edit-sort", form).attr('value', dir);
     $('#overwrite-materials-flag').remove();
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
+}
+
+/**
+ * Edits the suggested options for the Edit Course Materials Popup so that
+ * they use the current file name.
+ */
+function editFilePathRecommendations() {
+    const fileNameInput = $("#edit-title");
+    const fileName = fileNameInput.val();
+
+    // Get options
+    const dataList = $("#change_folder_paths");
+    const optionsArray = dataList.find('option').map(function () {return $(this);}).get();
+
+    optionsArray.forEach((option) => {
+        const optionString = option.val();
+        const lastSlash = optionString.lastIndexOf('/');
+        const currentOptionMinusFile = optionString.substring(0, lastSlash);
+
+        const newOption = `${currentOptionMinusFile}/${fileName}`;
+        option.val(newOption);
+    })
 }
 
 var lastActiveElement = null;

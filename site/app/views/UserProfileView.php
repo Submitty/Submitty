@@ -47,6 +47,7 @@ class UserProfileView extends AbstractView {
             "user_given" => $autofill_preferred_name[0],
             "user_family" => $autofill_preferred_name[1],
             "user_pronouns" => $user->getPronouns(),
+            "display_pronouns" => $user->getDisplayPronouns(),
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,
             "access_level" => Access::ACCESS_LEVELS[$user->getAccessLevel()],
