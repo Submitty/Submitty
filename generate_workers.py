@@ -43,7 +43,7 @@ def main():
                and (ip.is_reserved or isinstance(ip, ipaddress.IPv4Address)
                     and str(ip).endswith('.1'))):
             ip = next(ips, None)
- 
+
         if ip is None:
             raise IndexError("IP range insufficient for requested number of workers")
 
