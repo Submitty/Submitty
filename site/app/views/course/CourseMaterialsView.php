@@ -138,6 +138,8 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
 
+        $folder_paths = $this->compileAllFolderPaths($final_structure);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -153,7 +155,8 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
-            "links" => $links
+            "links" => $links,
+            "folder_paths" => $folder_paths
         ]);
     }
 
@@ -242,5 +245,45 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $folder_visibilities[$current_path] = $cur_visibility;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @return array<string> List of folders paths.
+     */
+    private function compileAllFolderPaths(array $course_materials): array {
+        $folder_paths = [];
+        $this->compileAllFolderPathsR($course_materials, $folder_paths, "");
+        return $folder_paths;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     * Helper recursive function.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array<string>  $folder_paths - List we append
+     * @param string $full_path - Current path we are examining files in.
+     */
+    private function compileAllFolderPathsR(
+        array $course_materials,
+        array &$folder_paths,
+        string $full_path
+    ): void {
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                $inner_full_path = "";
+                if (empty($full_path)) {
+                    $inner_full_path = $name;
+                }
+                else {
+                    $inner_full_path = $full_path . '/' . $name;
+                }
+                array_push($folder_paths, $inner_full_path);
+                $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
+            }
+        }
     }
 }

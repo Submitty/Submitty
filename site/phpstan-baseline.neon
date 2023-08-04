@@ -5356,11 +5356,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$override with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageForGradeable\\(\\) has parameter \\$section_key with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -13838,11 +13833,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$from with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:hwGradingPage\\(\\) has parameter \\$rollbackSubmission with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
