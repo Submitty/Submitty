@@ -27,7 +27,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
 
-    const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'iclicker', 'final_grade',
+    const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'final_grade',
         'exam_seating', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
         'final_cutoff', 'manual_grade', 'warning'];
 
