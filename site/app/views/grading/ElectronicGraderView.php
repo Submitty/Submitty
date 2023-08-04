@@ -43,8 +43,6 @@ class ElectronicGraderView extends AbstractView {
      * @var int
      */
     public $anon_status = 0;
-
-    private $user_id_to_User_cache = [];
   
     public function statusPage(
         Gradeable $gradeable,
