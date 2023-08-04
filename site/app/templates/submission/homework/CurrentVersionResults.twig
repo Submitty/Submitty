@@ -10,7 +10,8 @@
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
             {% for file in files %}
-                {% if (file.relative_name|split('/'))|length == 1 %}
+                {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
+                {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                     <div class="flex-row">
                         <span>
                             {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)

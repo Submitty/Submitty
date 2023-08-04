@@ -1033,11 +1033,9 @@ class HomeworkView extends AbstractView {
             }
 
             $files = $version_instance->getFiles();
-
-            
-            $notebook_data = null;
             
             $param = array_merge($param, [
+                'is_notebook' => $autograding_config->isNotebookGradeable(),
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
