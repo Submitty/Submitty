@@ -430,7 +430,6 @@ class MiscController extends AbstractController {
                         continue;
                     }
                     $file_path = $file->getRealPath();
-                    $file_name = $file->getFilename();
                     $relative_path = substr($file_path, strlen($path) + 1);
                     if (
                         $this->core->getAccess()->canI(
