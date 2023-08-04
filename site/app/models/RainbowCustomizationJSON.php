@@ -198,7 +198,6 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->section->$sectionID = $label;
     }
 
-
     /**
      * Add a benchmark percent
      *
