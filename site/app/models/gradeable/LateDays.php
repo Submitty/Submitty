@@ -58,6 +58,7 @@ class LateDays extends AbstractModel {
                 $ldc
             );
             $this->late_day_info[$id] = $info;
+        }
         // Get all late day events (late day updates and graded gradeable submission dates)
         $late_day_events = $this->createLateDayEvents($graded_gradeables);
 

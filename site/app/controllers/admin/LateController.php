@@ -56,6 +56,8 @@ class LateController extends AbstractController {
                 $this->core->getQueries()->getAllUsers(),
                 $this->core->getConfig()->getDefaultStudentLateDays()
             )
+        );
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
