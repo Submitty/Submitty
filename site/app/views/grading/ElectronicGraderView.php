@@ -1437,7 +1437,6 @@ HTML;
         if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $student_grader = true;
         }
-
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
